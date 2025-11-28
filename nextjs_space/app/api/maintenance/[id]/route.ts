@@ -43,7 +43,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     }
 
     const body = await req.json();
-    const { titulo, descripcion, prioridad, estado, fechaProgramada, fechaCompletada, proveedorAsignado, costoEstimado, costoReal } = body;
+    const { titulo, descripcion, prioridad, estado, fechaProgramada, fechaCompletada, providerId, costoEstimado, costoReal } = body;
 
     const maintenanceRequest = await prisma.maintenanceRequest.update({
       where: { id: params.id },
@@ -54,7 +54,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         estado,
         fechaProgramada: fechaProgramada ? new Date(fechaProgramada) : null,
         fechaCompletada: fechaCompletada ? new Date(fechaCompletada) : null,
-        proveedorAsignado,
+        providerId,
         costoEstimado: costoEstimado ? parseFloat(costoEstimado) : null,
         costoReal: costoReal ? parseFloat(costoReal) : null,
       },

@@ -54,11 +54,70 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any>(null);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await fetch('/api/notifications?onlyUnread=true');
+      if (res.ok) {
+        const data = await res.json();
+        setNotifications(data);
+      }
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
+  };
+
+  const handleSearch = async (query: string) => {
+    setSearchQuery(query);
+    if (query.length < 2) {
+      setSearchResults(null);
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setSearchResults(data);
+      }
+    } catch (error) {
+      console.error('Error searching:', error);
+    }
+  };
+
+  const markAsRead = async (id: string) => {
+    try {
+      await fetch(`/api/notifications/${id}/read`, { method: 'PUT' });
+      fetchNotifications();
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      await fetch('/api/notifications/mark-all-read', { method: 'PUT' });
+      fetchNotifications();
+    } catch (error) {
+      console.error('Error marking all as read:', error);
+    }
+  };
 
   const handleSignOut = async () => {
     await signOut({ redirect: false });
     router.push('/login');
   };
+
+  const unreadCount = notifications.filter(n => !n.leida).length;
 
   return (
     <>
@@ -69,6 +128,118 @@ export function Sidebar() {
       >
         {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
+
+      {/* Top bar for notifications and search */}
+      <div className="lg:ml-64 fixed top-0 right-0 left-0 lg:left-64 z-30 bg-white border-b h-16 flex items-center justify-end px-6 gap-4">
+        {/* Search */}
+        <div className="relative">
+          <button
+            onClick={() => setShowSearch(!showSearch)}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <Search size={20} />
+          </button>
+          {showSearch && (
+            <div className="absolute right-0 top-12 w-96 bg-white rounded-lg shadow-lg border p-4 max-h-96 overflow-y-auto">
+              <Input
+                placeholder="Buscar..."
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                autoFocus
+              />
+              {searchResults && (
+                <div className="mt-4 space-y-2">
+                  {searchResults.buildings?.length > 0 && (
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500 mb-1">Edificios</p>
+                      {searchResults.buildings.map((item: any) => (
+                        <Link
+                          key={item.id}
+                          href={`/edificios/${item.id}`}
+                          onClick={() => setShowSearch(false)}
+                          className="block p-2 hover:bg-gray-50 rounded text-sm"
+                        >
+                          {item.nombre}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                  {searchResults.tenants?.length > 0 && (
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500 mb-1">Inquilinos</p>
+                      {searchResults.tenants.map((item: any) => (
+                        <Link
+                          key={item.id}
+                          href={`/inquilinos/${item.id}`}
+                          onClick={() => setShowSearch(false)}
+                          className="block p-2 hover:bg-gray-50 rounded text-sm"
+                        >
+                          {item.nombreCompleto}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Notifications */}
+        <div className="relative">
+          <button
+            onClick={() => setShowNotifications(!showNotifications)}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors relative"
+          >
+            <Bell size={20} />
+            {unreadCount > 0 && (
+              <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500">
+                {unreadCount}
+              </Badge>
+            )}
+          </button>
+          {showNotifications && (
+            <div className="absolute right-0 top-12 w-96 bg-white rounded-lg shadow-lg border max-h-96 overflow-y-auto">
+              <div className="p-4 border-b flex items-center justify-between">
+                <h3 className="font-semibold">Notificaciones</h3>
+                {unreadCount > 0 && (
+                  <button
+                    onClick={markAllAsRead}
+                    className="text-xs text-blue-600 hover:underline"
+                  >
+                    Marcar todas como leídas
+                  </button>
+                )}
+              </div>
+              <div className="divide-y">
+                {notifications.length === 0 ? (
+                  <div className="p-8 text-center text-gray-500">
+                    <Bell className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                    <p>No hay notificaciones nuevas</p>
+                  </div>
+                ) : (
+                  notifications.map((notif) => (
+                    <div
+                      key={notif.id}
+                      className={cn(
+                        'p-4 hover:bg-gray-50 cursor-pointer',
+                        !notif.leida && 'bg-blue-50'
+                      )}
+                      onClick={() => markAsRead(notif.id)}
+                    >
+                      <p className="font-medium text-sm">{notif.titulo}</p>
+                      <p className="text-xs text-gray-600 mt-1">{notif.mensaje}</p>
+                      <p className="text-xs text-gray-400 mt-2">
+                        {new Date(notif.createdAt).toLocaleDateString('es-ES')}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Overlay for mobile */}
       {isMobileMenuOpen && (

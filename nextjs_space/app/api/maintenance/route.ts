@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { unitId, titulo, descripcion, prioridad, estado, fechaProgramada, proveedorAsignado, costoEstimado } = body;
+    const { unitId, titulo, descripcion, prioridad, estado, fechaProgramada, providerId, costoEstimado } = body;
 
     if (!unitId || !titulo || !descripcion) {
       return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
         prioridad: prioridad || 'media',
         estado: estado || 'pendiente',
         fechaProgramada: fechaProgramada ? new Date(fechaProgramada) : null,
-        proveedorAsignado,
+        providerId,
         costoEstimado: costoEstimado ? parseFloat(costoEstimado) : null,
       },
     });

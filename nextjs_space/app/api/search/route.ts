@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import prisma from '@/lib/db';
+import { prisma } from '@/lib/db';
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -89,11 +89,11 @@ export async function GET(req: NextRequest) {
     ]);
 
     const results = {
-      buildings: buildings.map(b => ({ ...b, type: 'building' })),
-      units: units.map(u => ({ ...u, type: 'unit' })),
-      tenants: tenants.map(t => ({ ...t, type: 'tenant' })),
-      contracts: contracts.map(c => ({ ...c, type: 'contract' })),
-      providers: providers.map(p => ({ ...p, type: 'provider' })),
+      buildings: buildings.map((b: any) => ({ ...b, type: 'building' })),
+      units: units.map((u: any) => ({ ...u, type: 'unit' })),
+      tenants: tenants.map((t: any) => ({ ...t, type: 'tenant' })),
+      contracts: contracts.map((c: any) => ({ ...c, type: 'contract' })),
+      providers: providers.map((p: any) => ({ ...p, type: 'provider' })),
     };
 
     return NextResponse.json(results);
