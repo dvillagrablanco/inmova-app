@@ -16,9 +16,16 @@ import {
   LogOut,
   Menu,
   X,
+  Bell,
+  Search,
+  Folder,
+  UsersRound,
+  DollarSign,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -28,8 +35,20 @@ const navItems = [
   { name: 'Contratos', href: '/contratos', icon: FileText },
   { name: 'Pagos', href: '/pagos', icon: CreditCard },
   { name: 'Mantenimiento', href: '/mantenimiento', icon: Wrench },
+  { name: 'Documentos', href: '/documentos', icon: Folder },
+  { name: 'Proveedores', href: '/proveedores', icon: UsersRound },
+  { name: 'Gastos', href: '/gastos', icon: DollarSign },
   { name: 'Reportes', href: '/reportes', icon: FileBarChart },
 ];
+
+interface Notification {
+  id: string;
+  tipo: string;
+  titulo: string;
+  mensaje: string;
+  leida: boolean;
+  createdAt: string;
+}
 
 export function Sidebar() {
   const pathname = usePathname();

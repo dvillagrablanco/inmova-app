@@ -70,6 +70,36 @@ enum MaintenanceStatus {
   completado
 }
 
+enum DocumentType {
+  contrato
+  dni
+  nomina
+  certificado_energetico
+  ite
+  seguro
+  factura
+  otro
+}
+
+enum ExpenseCategory {
+  mantenimiento
+  impuestos
+  seguros
+  servicios
+  reparaciones
+  comunidad
+  otro
+}
+
+enum NotificationType {
+  pago_atrasado
+  contrato_vencimiento
+  mantenimiento_urgente
+  documento_vencer
+  unidad_vacante
+  info
+}
+
 model User {
   id            String   @id @default(cuid())
   email         String   @unique
@@ -93,6 +123,8 @@ model Building {
   updatedAt         DateTime     @updatedAt
 
   units             Unit[]
+  expenses          Expense[]
+  documents         Document[]
 
   @@map("buildings")
 }
@@ -112,6 +144,7 @@ model Tenant {
 
   units             Unit[]
   contracts         Contract[]
+  documents         Document[]
 
   @@map("tenants")
 }
@@ -134,6 +167,8 @@ model Unit {
   tenant            Tenant?    @relation(fields: [tenantId], references: [id], onDelete: SetNull)
   contracts         Contract[]
   maintenanceRequests MaintenanceRequest[]
+  expenses          Expense[]
+  documents         Document[]
 
   @@unique([buildingId, numero])
   @@map("units")
@@ -156,6 +191,7 @@ model Contract {
   unit              Unit           @relation(fields: [unitId], references: [id], onDelete: Cascade)
   tenant            Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   payments          Payment[]
+  documents         Document[]
 
   @@map("contracts")
 }
@@ -188,13 +224,89 @@ model MaintenanceRequest {
   fechaSolicitud    DateTime            @default(now())
   fechaProgramada   DateTime?
   fechaCompletada   DateTime?
-  proveedorAsignado String?
+  providerId        String?
   costoEstimado     Float?
   costoReal         Float?
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
 
   unit              Unit                @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  provider          Provider?           @relation(fields: [providerId], references: [id], onDelete: SetNull)
 
   @@map("maintenance_requests")
+}
+
+model Provider {
+  id                String              @id @default(cuid())
+  nombre            String
+  tipo              String
+  telefono          String
+  email             String?
+  direccion         String?
+  rating            Float?
+  notas             String?             @db.Text
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  maintenanceRequests MaintenanceRequest[]
+  expenses          Expense[]
+
+  @@map("providers")
+}
+
+model Expense {
+  id                String          @id @default(cuid())
+  buildingId        String?
+  unitId            String?
+  providerId        String?
+  concepto          String
+  categoria         ExpenseCategory
+  monto             Float
+  fecha             DateTime
+  facturaPdfPath    String?
+  notas             String?         @db.Text
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  building          Building?       @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  unit              Unit?           @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  provider          Provider?       @relation(fields: [providerId], references: [id], onDelete: SetNull)
+
+  @@map("expenses")
+}
+
+model Document {
+  id                String          @id @default(cuid())
+  nombre            String
+  tipo              DocumentType
+  cloudStoragePath  String
+  tenantId          String?
+  unitId            String?
+  buildingId        String?
+  contractId        String?
+  fechaSubida       DateTime        @default(now())
+  fechaVencimiento  DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  tenant            Tenant?         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  unit              Unit?           @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  building          Building?       @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  contract          Contract?       @relation(fields: [contractId], references: [id], onDelete: Cascade)
+
+  @@map("documents")
+}
+
+model Notification {
+  id                String            @id @default(cuid())
+  tipo              NotificationType
+  titulo            String
+  mensaje           String            @db.Text
+  leida             Boolean           @default(false)
+  entityId          String?
+  entityType        String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@map("notifications")
 }

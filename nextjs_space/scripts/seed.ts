@@ -7,12 +7,16 @@ async function main() {
   console.log('🌱 Iniciando seed de la base de datos...');
 
   // Limpiar base de datos
+  await prisma.notification.deleteMany();
+  await prisma.document.deleteMany();
+  await prisma.expense.deleteMany();
   await prisma.maintenanceRequest.deleteMany();
   await prisma.payment.deleteMany();
   await prisma.contract.deleteMany();
   await prisma.unit.deleteMany();
   await prisma.tenant.deleteMany();
   await prisma.building.deleteMany();
+  await prisma.provider.deleteMany();
   await prisma.user.deleteMany();
 
   console.log('✅ Base de datos limpiada');
@@ -613,7 +617,7 @@ async function main() {
       estado: 'en_progreso',
       fechaSolicitud: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000),
       fechaProgramada: new Date(now.getTime() + 1 * 24 * 60 * 60 * 1000),
-      proveedorAsignado: 'Fontanería Rápida SL',
+      
       costoEstimado: 250,
     },
   });
@@ -627,7 +631,7 @@ async function main() {
       estado: 'programado',
       fechaSolicitud: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000),
       fechaProgramada: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
-      proveedorAsignado: 'Pinturas y Reformas Madrid',
+      
       costoEstimado: 1200,
     },
   });
@@ -666,7 +670,7 @@ async function main() {
       fechaSolicitud: new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000),
       fechaProgramada: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
       fechaCompletada: new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000),
-      proveedorAsignado: 'Cerrajería 24h',
+      
       costoEstimado: 120,
       costoReal: 135,
     },
@@ -682,7 +686,7 @@ async function main() {
       fechaSolicitud: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000),
       fechaProgramada: new Date(now.getTime() - 20 * 24 * 60 * 60 * 1000),
       fechaCompletada: new Date(now.getTime() - 18 * 24 * 60 * 60 * 1000),
-      proveedorAsignado: 'Climatización Pro',
+      
       costoEstimado: 2500,
       costoReal: 2650,
     },
@@ -697,7 +701,7 @@ async function main() {
       estado: 'programado',
       fechaSolicitud: new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000),
       fechaProgramada: new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000),
-      proveedorAsignado: 'Electricidad Industrial BCN',
+      
       costoEstimado: 350,
     },
   });
@@ -716,6 +720,194 @@ async function main() {
 
   console.log('✅ Solicitudes de mantenimiento creadas');
 
+  // Crear proveedores
+  const provider1 = await prisma.provider.create({
+    data: {
+      nombre: 'Fontanería Rápida SL',
+      tipo: 'Fontanería',
+      telefono: '+34 910 123 456',
+      email: 'info@fontanerirapida.com',
+      direccion: 'Calle Mayor, 34, 28013 Madrid',
+      rating: 4.5,
+      notas: 'Servicio rápido y profesional',
+    },
+  });
+
+  const provider2 = await prisma.provider.create({
+    data: {
+      nombre: 'ElectroServicios García',
+      tipo: 'Electricidad',
+      telefono: '+34 932 456 789',
+      email: 'contacto@electrogarcia.com',
+      direccion: 'Avenida Diagonal, 567, 08029 Barcelona',
+      rating: 4.8,
+      notas: 'Electricista certificado, muy recomendable',
+    },
+  });
+
+  const provider3 = await prisma.provider.create({
+    data: {
+      nombre: 'Limpiezas del Sur',
+      tipo: 'Limpieza',
+      telefono: '+34 951 789 012',
+      email: 'info@limpiezasdelsur.com',
+      rating: 4.2,
+    },
+  });
+
+  const provider4 = await prisma.provider.create({
+    data: {
+      nombre: 'Reformas Integrales Madrid',
+      tipo: 'Reformas',
+      telefono: '+34 915 678 901',
+      email: 'reformas@integral.com',
+      direccion: 'Calle Alcalá, 123, 28009 Madrid',
+      rating: 4.6,
+    },
+  });
+
+  console.log('✅ Proveedores creados');
+
+  // Crear gastos
+  const expense1 = await prisma.expense.create({
+    data: {
+      buildingId: building1.id,
+      concepto: 'Reparación ascensor',
+      categoria: 'reparaciones',
+      monto: 1250.00,
+      fecha: new Date('2024-10-15'),
+      providerId: provider4.id,
+      notas: 'Reparación urgente del ascensor principal',
+    },
+  });
+
+  const expense2 = await prisma.expense.create({
+    data: {
+      buildingId: building1.id,
+      concepto: 'IBI 2024',
+      categoria: 'impuestos',
+      monto: 3200.00,
+      fecha: new Date('2024-09-01'),
+      notas: 'Impuesto sobre Bienes Inmuebles',
+    },
+  });
+
+  const expense3 = await prisma.expense.create({
+    data: {
+      buildingId: building2.id,
+      concepto: 'Seguro del edificio',
+      categoria: 'seguros',
+      monto: 2800.00,
+      fecha: new Date('2024-08-10'),
+      notas: 'Seguro anual multirriesgo',
+    },
+  });
+
+  const expense4 = await prisma.expense.create({
+    data: {
+      unitId: (await prisma.unit.findFirst({ where: { numero: '1A', buildingId: building1.id } }))?.id,
+      concepto: 'Reparación calefacción',
+      categoria: 'mantenimiento',
+      monto: 450.00,
+      fecha: new Date('2024-11-05'),
+      providerId: provider1.id,
+    },
+  });
+
+  const expense5 = await prisma.expense.create({
+    data: {
+      buildingId: building3.id,
+      concepto: 'Limpieza zonas comunes',
+      categoria: 'servicios',
+      monto: 680.00,
+      fecha: new Date('2024-11-01'),
+      providerId: provider3.id,
+      notas: 'Limpieza mensual de noviembre',
+    },
+  });
+
+  const expense6 = await prisma.expense.create({
+    data: {
+      buildingId: building2.id,
+      concepto: 'Cuota de comunidad',
+      categoria: 'comunidad',
+      monto: 1500.00,
+      fecha: new Date('2024-10-20'),
+    },
+  });
+
+  console.log('✅ Gastos creados');
+
+  // Actualizar maintenance requests con proveedores
+  const maintenanceRequests = await prisma.maintenanceRequest.findMany();
+  if (maintenanceRequests.length > 0) {
+    await prisma.maintenanceRequest.update({
+      where: { id: maintenanceRequests[0]?.id },
+      data: { providerId: provider1.id },
+    });
+    if (maintenanceRequests.length > 1) {
+      await prisma.maintenanceRequest.update({
+        where: { id: maintenanceRequests[1]?.id },
+        data: { providerId: provider2.id },
+      });
+    }
+  }
+
+  console.log('✅ Solicitudes de mantenimiento actualizadas con proveedores');
+
+  // Crear notificaciones
+  const notification1 = await prisma.notification.create({
+    data: {
+      tipo: 'pago_atrasado',
+      titulo: 'Pago atrasado - Unidad 2B',
+      mensaje: 'El pago del mes de noviembre de la unidad 2B está atrasado 15 días',
+      leida: false,
+      entityType: 'payment',
+    },
+  });
+
+  const notification2 = await prisma.notification.create({
+    data: {
+      tipo: 'contrato_vencimiento',
+      titulo: 'Contrato próximo a vencer',
+      mensaje: 'El contrato de la unidad 1A vence en 25 días',
+      leida: false,
+      entityType: 'contract',
+    },
+  });
+
+  const notification3 = await prisma.notification.create({
+    data: {
+      tipo: 'mantenimiento_urgente',
+      titulo: 'Mantenimiento urgente - Fuga de agua',
+      mensaje: 'Se reportó una fuga de agua en la unidad 3C que requiere atención inmediata',
+      leida: false,
+      entityType: 'maintenance',
+    },
+  });
+
+  const notification4 = await prisma.notification.create({
+    data: {
+      tipo: 'unidad_vacante',
+      titulo: 'Unidad vacante prolongada',
+      mensaje: 'La unidad Local 1 lleva 60 días vacante',
+      leida: true,
+      entityType: 'unit',
+    },
+  });
+
+  const notification5 = await prisma.notification.create({
+    data: {
+      tipo: 'info',
+      titulo: 'Actualización del sistema',
+      mensaje: 'El sistema Homming Vidaro ha sido actualizado con nuevas funcionalidades',
+      leida: false,
+      entityType: 'system',
+    },
+  });
+
+  console.log('✅ Notificaciones creadas');
+
   console.log('\n🎉 Seed completado exitosamente!');
   console.log('\n📊 Resumen:');
   console.log('  - Usuarios: 2');
@@ -725,6 +917,9 @@ async function main() {
   console.log('  - Contratos: 10');
   console.log('  - Pagos: 90+');
   console.log('  - Solicitudes de mantenimiento: 8');
+  console.log('  - Proveedores: 4');
+  console.log('  - Gastos: 6');
+  console.log('  - Notificaciones: 5');
 }
 
 main()
