@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { signOut } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import {
   LayoutDashboard,
   Building2,
@@ -25,29 +25,32 @@ import {
   Calendar,
   Settings,
   Upload,
+  Shield,
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { usePermissions } from '@/lib/hooks/usePermissions';
 
-const navItems = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Edificios', href: '/edificios', icon: Building2 },
-  { name: 'Unidades', href: '/unidades', icon: Home },
-  { name: 'Inquilinos', href: '/inquilinos', icon: Users },
-  { name: 'Candidatos', href: '/candidatos', icon: UserPlus },
-  { name: 'Contratos', href: '/contratos', icon: FileText },
-  { name: 'Pagos', href: '/pagos', icon: CreditCard },
-  { name: 'Calendario', href: '/calendario', icon: Calendar },
-  { name: 'Mantenimiento', href: '/mantenimiento', icon: Wrench },
-  { name: 'Mtto. Preventivo', href: '/mantenimiento-preventivo', icon: Calendar },
-  { name: 'Documentos', href: '/documentos', icon: Folder },
-  { name: 'Proveedores', href: '/proveedores', icon: UsersRound },
-  { name: 'Gastos', href: '/gastos', icon: DollarSign },
-  { name: 'Reportes Financieros', href: '/reportes', icon: FileBarChart },
-  { name: 'Importar Datos', href: '/admin/importar', icon: Upload },
-  { name: 'Configuración', href: '/admin/configuracion', icon: Settings },
+const allNavItems = [
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['administrador', 'gestor', 'operador'] },
+  { name: 'Edificios', href: '/edificios', icon: Building2, roles: ['administrador', 'gestor'] },
+  { name: 'Unidades', href: '/unidades', icon: Home, roles: ['administrador', 'gestor'] },
+  { name: 'Inquilinos', href: '/inquilinos', icon: Users, roles: ['administrador', 'gestor'] },
+  { name: 'Candidatos', href: '/candidatos', icon: UserPlus, roles: ['administrador', 'gestor'] },
+  { name: 'Contratos', href: '/contratos', icon: FileText, roles: ['administrador', 'gestor'] },
+  { name: 'Pagos', href: '/pagos', icon: CreditCard, roles: ['administrador', 'gestor'] },
+  { name: 'Calendario', href: '/calendario', icon: Calendar, roles: ['administrador', 'gestor', 'operador'] },
+  { name: 'Mantenimiento', href: '/mantenimiento', icon: Wrench, roles: ['administrador', 'gestor', 'operador'] },
+  { name: 'Mtto. Preventivo', href: '/mantenimiento-preventivo', icon: Calendar, roles: ['administrador', 'gestor', 'operador'] },
+  { name: 'Documentos', href: '/documentos', icon: Folder, roles: ['administrador', 'gestor'] },
+  { name: 'Proveedores', href: '/proveedores', icon: UsersRound, roles: ['administrador', 'gestor'] },
+  { name: 'Gastos', href: '/gastos', icon: DollarSign, roles: ['administrador', 'gestor'] },
+  { name: 'Reportes Financieros', href: '/reportes', icon: FileBarChart, roles: ['administrador', 'gestor'] },
+  { name: 'Importar Datos', href: '/admin/importar', icon: Upload, roles: ['administrador', 'gestor'] },
+  { name: 'Usuarios', href: '/admin/usuarios', icon: Shield, roles: ['administrador'] },
+  { name: 'Configuración', href: '/admin/configuracion', icon: Settings, roles: ['administrador'] },
 ];
 
 interface Notification {
@@ -62,12 +65,20 @@ interface Notification {
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { data: session } = useSession() || {};
+  const { role } = usePermissions();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any>(null);
+
+  // Filtrar items de navegación según rol
+  const navItems = useMemo(() => {
+    if (!role) return [];
+    return allNavItems.filter(item => item.roles.includes(role));
+  }, [role]);
 
   useEffect(() => {
     fetchNotifications();

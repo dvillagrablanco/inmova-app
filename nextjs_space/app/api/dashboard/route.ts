@@ -1,29 +1,48 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
+import { requireAuth } from '@/lib/permissions';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-    }
+    const user = await requireAuth();
+    const companyId = user.companyId;
 
-    // Get all data for calculations
-    const units = await prisma.unit.findMany();
+    // Get all data for calculations filtered by company
+    const buildings = await prisma.building.findMany({
+      where: { companyId },
+      include: { units: true },
+    });
+    
+    const units = buildings.flatMap(b => b.units);
+    
+    const contracts = await prisma.contract.findMany({
+      where: {
+        estado: 'activo',
+        unit: { building: { companyId } },
+      },
+      include: {
+        unit: { include: { building: true } },
+      },
+    });
+    
     const payments = await prisma.payment.findMany({
+      where: {
+        contract: {
+          unit: { building: { companyId } },
+        },
+      },
       include: {
         contract: true,
       },
     });
-    const contracts = await prisma.contract.findMany({
-      where: { estado: 'activo' },
-    });
+    
     const maintenanceRequests = await prisma.maintenanceRequest.findMany({
-      where: { estado: { in: ['pendiente', 'en_progreso', 'programado'] } },
+      where: {
+        estado: { in: ['pendiente', 'en_progreso', 'programado'] },
+        unit: { building: { companyId } },
+      },
     });
 
     // Calculate KPIs
@@ -188,8 +207,11 @@ export async function GET() {
       maintenanceRequests: maintenanceRequests.slice(0, 5),
       unidadesDisponibles,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching dashboard data:', error);
+    if (error.message === 'No autenticado') {
+      return NextResponse.json({ error: error.message }, { status: 401 });
+    }
     return NextResponse.json({ error: 'Error al obtener datos del dashboard' }, { status: 500 });
   }
 }

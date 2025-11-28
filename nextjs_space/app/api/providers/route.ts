@@ -1,19 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
+import { requireAuth, requirePermission, forbiddenResponse, badRequestResponse } from '@/lib/permissions';
 import { prisma } from '@/lib/db';
 
 export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-  }
-
-  const { searchParams } = new URL(req.url);
-  const tipo = searchParams.get('tipo');
-
   try {
-    const where: any = {};
+    const user = await requireAuth();
+    const { searchParams } = new URL(req.url);
+    const tipo = searchParams.get('tipo');
+
+    const where: any = { companyId: user.companyId };
     if (tipo) where.tipo = tipo;
 
     const providers = await prisma.provider.findMany({
@@ -30,28 +25,28 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.json(providers);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching providers:', error);
+    if (error.message === 'No autenticado') {
+      return NextResponse.json({ error: error.message }, { status: 401 });
+    }
     return NextResponse.json({ error: 'Error al obtener proveedores' }, { status: 500 });
   }
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-  }
-
   try {
+    const user = await requirePermission('create');
     const body = await req.json();
     const { nombre, tipo, telefono, email, direccion, rating, notas } = body;
 
     if (!nombre || !tipo || !telefono) {
-      return NextResponse.json({ error: 'Campos requeridos faltantes' }, { status: 400 });
+      return badRequestResponse('Campos requeridos faltantes');
     }
 
     const provider = await prisma.provider.create({
       data: {
+        companyId: user.companyId,
         nombre,
         tipo,
         telefono,
@@ -63,8 +58,14 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json(provider, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating provider:', error);
+    if (error.message?.includes('permiso')) {
+      return forbiddenResponse(error.message);
+    }
+    if (error.message === 'No autenticado') {
+      return NextResponse.json({ error: error.message }, { status: 401 });
+    }
     return NextResponse.json({ error: 'Error al crear proveedor' }, { status: 500 });
   }
 }

@@ -20,10 +20,15 @@ export const authOptions: NextAuthOptions = {
 
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
+          include: { company: true },
         });
 
         if (!user || !user?.password) {
           throw new Error('Usuario no encontrado');
+        }
+
+        if (!user.activo) {
+          throw new Error('Usuario inactivo. Contacte al administrador.');
         }
 
         const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
@@ -37,6 +42,8 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
           role: user.role,
+          companyId: user.companyId,
+          companyName: user.company.nombre,
         };
       },
     }),
@@ -46,6 +53,8 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = (user as any).role;
+        token.companyId = (user as any).companyId;
+        token.companyName = (user as any).companyName;
       }
       return token;
     },
@@ -53,6 +62,8 @@ export const authOptions: NextAuthOptions = {
       if (session?.user) {
         (session.user as any).id = token.id;
         (session.user as any).role = token.role;
+        (session.user as any).companyId = token.companyId;
+        (session.user as any).companyName = token.companyName;
       }
       return session;
     },

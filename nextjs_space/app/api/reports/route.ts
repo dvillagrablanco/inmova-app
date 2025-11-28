@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
+import { requireAuth, requirePermission, forbiddenResponse } from '@/lib/permissions';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,10 +21,14 @@ interface PropertyReport {
 
 export async function GET(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    const user = await requireAuth();
+    
+    // Verificar permiso de visualización de reportes
+    if (user.role === 'operador') {
+      return forbiddenResponse('No tienes permiso para ver reportes financieros');
     }
+    
+    const companyId = user.companyId;
 
     const { searchParams } = new URL(request.url);
     const tipo = searchParams.get('tipo') || 'global'; // global, por_propiedad, flujo_caja
@@ -36,8 +39,9 @@ export async function GET(request: Request) {
     const fechaInicio = new Date(now);
     fechaInicio.setMonth(fechaInicio.getMonth() - meses);
 
-    // Obtener todos los edificios con sus relaciones
+    // Obtener todos los edificios con sus relaciones filtrados por empresa
     const buildings = await prisma.building.findMany({
+      where: { companyId },
       include: {
         units: {
           include: {
@@ -201,8 +205,14 @@ export async function GET(request: Request) {
       },
       periodo: meses,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error al generar reportes:', error);
+    if (error.message === 'No autenticado') {
+      return NextResponse.json({ error: error.message }, { status: 401 });
+    }
+    if (error.message?.includes('permiso')) {
+      return forbiddenResponse(error.message);
+    }
     return NextResponse.json({ error: 'Error al generar reportes' }, { status: 500 });
   }
 }

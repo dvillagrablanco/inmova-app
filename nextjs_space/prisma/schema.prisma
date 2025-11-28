@@ -12,6 +12,7 @@ datasource db {
 enum UserRole {
   administrador
   gestor
+  operador
 }
 
 enum BuildingType {
@@ -149,9 +150,12 @@ model User {
   name          String
   password      String
   role          UserRole        @default(gestor)
+  companyId     String
+  activo        Boolean         @default(true)
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 
+  company       Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
   notifications Notification[]
 
   @@map("users")
@@ -159,6 +163,7 @@ model User {
 
 model Building {
   id                String       @id @default(cuid())
+  companyId         String
   nombre            String
   direccion         String
   tipo              BuildingType
@@ -180,6 +185,7 @@ model Building {
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
 
+  company           Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
   units             Unit[]
   expenses          Expense[]
   documents         Document[]
@@ -190,6 +196,7 @@ model Building {
 
 model Tenant {
   id                String            @id @default(cuid())
+  companyId         String
   nombreCompleto    String
   dni               String            @unique
   email             String            @unique
@@ -212,6 +219,7 @@ model Tenant {
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
 
+  company           Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
   units             Unit[]
   contracts         Contract[]
   documents         Document[]
@@ -336,6 +344,7 @@ model MaintenanceRequest {
 
 model Provider {
   id                String              @id @default(cuid())
+  companyId         String
   nombre            String
   tipo              String
   telefono          String
@@ -346,6 +355,7 @@ model Provider {
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
 
+  company           Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
   maintenanceRequests MaintenanceRequest[]
   maintenanceSchedules MaintenanceSchedule[]
   expenses          Expense[]
@@ -497,8 +507,14 @@ model Company {
   colorPrimario     String?          @default("#000000")
   colorSecundario   String?          @default("#FFFFFF")
   pieDocumento      String?          @db.Text
+  activo            Boolean          @default(true)
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
+
+  users             User[]
+  buildings         Building[]
+  tenants           Tenant[]
+  providers         Provider[]
 
   @@map("company")
 }

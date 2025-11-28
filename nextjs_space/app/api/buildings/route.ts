@@ -1,18 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
+import { requireAuth, getUserCompany, requirePermission, forbiddenResponse, badRequestResponse } from '@/lib/permissions';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-    }
+    const user = await requireAuth();
+    const companyId = user.companyId;
 
     const buildings = await prisma.building.findMany({
+      where: { companyId },
       include: {
         units: {
           include: {
@@ -44,28 +42,30 @@ export async function GET() {
     });
 
     return NextResponse.json(buildingsWithMetrics);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching buildings:', error);
+    if (error.message === 'No autenticado') {
+      return NextResponse.json({ error: error.message }, { status: 401 });
+    }
     return NextResponse.json({ error: 'Error al obtener edificios' }, { status: 500 });
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-    }
+    const user = await requirePermission('create');
+    const companyId = user.companyId;
 
     const body = await req.json();
     const { nombre, direccion, tipo, anoConstructor, numeroUnidades } = body;
 
     if (!nombre || !direccion || !tipo || !anoConstructor || !numeroUnidades) {
-      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
+      return badRequestResponse('Faltan campos requeridos');
     }
 
     const building = await prisma.building.create({
       data: {
+        companyId,
         nombre,
         direccion,
         tipo,
@@ -75,8 +75,14 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json(building, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating building:', error);
+    if (error.message?.includes('permiso')) {
+      return forbiddenResponse(error.message);
+    }
+    if (error.message === 'No autenticado') {
+      return NextResponse.json({ error: error.message }, { status: 401 });
+    }
     return NextResponse.json({ error: 'Error al crear edificio' }, { status: 500 });
   }
 }

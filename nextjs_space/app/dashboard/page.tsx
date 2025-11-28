@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
+import { Header } from '@/components/layout/header';
 import { KPICard } from '@/components/ui/kpi-card';
 import {
   TrendingUp,
@@ -90,7 +91,9 @@ export default function DashboardPage() {
   return (
     <div className="flex h-screen bg-gray-50">
       <Sidebar />
-      <main className="flex-1 ml-0 lg:ml-64 overflow-y-auto">
+      <div className="flex-1 ml-0 lg:ml-64 flex flex-col">
+        <Header />
+        <main className="flex-1 overflow-y-auto">
         <div className="max-w-7xl mx-auto p-6 lg:p-8">
           {/* Header */}
           <div className="mb-8">
@@ -365,6 +368,7 @@ export default function DashboardPage() {
           </div>
         </div>
       </main>
+      </div>
     </div>
   );
 }

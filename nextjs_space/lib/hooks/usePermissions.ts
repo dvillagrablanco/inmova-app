@@ -1,0 +1,72 @@
+import { useSession } from 'next-auth/react';
+import { UserRole } from '@prisma/client';
+
+type Permission = 'read' | 'create' | 'update' | 'delete' | 'manageUsers' | 'manageCompany' | 'viewReports';
+
+const PERMISSIONS = {
+  administrador: {
+    read: true,
+    create: true,
+    update: true,
+    delete: true,
+    manageUsers: true,
+    manageCompany: true,
+    viewReports: true,
+  },
+  gestor: {
+    read: true,
+    create: true,
+    update: true,
+    delete: true,
+    manageUsers: false,
+    manageCompany: false,
+    viewReports: true,
+  },
+  operador: {
+    read: true,
+    create: false,
+    update: true,
+    delete: false,
+    manageUsers: false,
+    manageCompany: false,
+    viewReports: false,
+  },
+} as const;
+
+export function usePermissions() {
+  const { data: session, status } = useSession() || {};
+  const role = (session?.user as any)?.role as UserRole | undefined;
+
+  const hasPermission = (permission: Permission): boolean => {
+    if (!role) return false;
+    return PERMISSIONS[role]?.[permission] ?? false;
+  };
+
+  const canRead = hasPermission('read');
+  const canCreate = hasPermission('create');
+  const canUpdate = hasPermission('update');
+  const canDelete = hasPermission('delete');
+  const canManageUsers = hasPermission('manageUsers');
+  const canManageCompany = hasPermission('manageCompany');
+  const canViewReports = hasPermission('viewReports');
+
+  const isAdmin = role === 'administrador';
+  const isGestor = role === 'gestor';
+  const isOperador = role === 'operador';
+
+  return {
+    role,
+    hasPermission,
+    canRead,
+    canCreate,
+    canUpdate,
+    canDelete,
+    canManageUsers,
+    canManageCompany,
+    canViewReports,
+    isAdmin,
+    isGestor,
+    isOperador,
+    isLoading: status === 'loading',
+  };
+}

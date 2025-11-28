@@ -6,7 +6,11 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Iniciando seed de la base de datos...');
 
-  // Limpiar base de datos
+  // Limpiar base de datos en orden correcto
+  await prisma.maintenanceSchedule.deleteMany();
+  await prisma.visit.deleteMany();
+  await prisma.candidate.deleteMany();
+  await prisma.message.deleteMany();
   await prisma.notification.deleteMany();
   await prisma.document.deleteMany();
   await prisma.expense.deleteMany();
@@ -18,404 +22,287 @@ async function main() {
   await prisma.building.deleteMany();
   await prisma.provider.deleteMany();
   await prisma.user.deleteMany();
+  await prisma.company.deleteMany();
 
   console.log('✅ Base de datos limpiada');
 
-  // Crear usuarios
-  const hashedAdminPassword = await bcrypt.hash('admin123', 10);
-  const hashedGestorPassword = await bcrypt.hash('gestor123', 10);
+  // ========================================
+  // CREAR EMPRESAS
+  // ========================================
+  const company1 = await prisma.company.create({
+    data: {
+      nombre: 'INMOVA',
+      cif: 'B12345678',
+      direccion: 'Calle de la Innovación, 25',
+      telefono: '+34 910 123 456',
+      email: 'info@inmova.com',
+      codigoPostal: '28001',
+      ciudad: 'Madrid',
+      pais: 'España',
+      colorPrimario: '#000000',
+      colorSecundario: '#FFFFFF',
+      activo: true,
+    },
+  });
 
-  const adminUser = await prisma.user.create({
+  const company2 = await prisma.company.create({
+    data: {
+      nombre: 'VIDARO INVERSIONES',
+      cif: 'B87654321',
+      direccion: 'Paseo de la Castellana, 120',
+      telefono: '+34 911 987 654',
+      email: 'contacto@vidaro.com',
+      codigoPostal: '28046',
+      ciudad: 'Madrid',
+      pais: 'España',
+      colorPrimario: '#1a56db',
+      colorSecundario: '#f0f9ff',
+      activo: true,
+    },
+  });
+
+  console.log('✅ Empresas creadas');
+
+  // ========================================
+  // CREAR USUARIOS - EMPRESA 1 (INMOVA)
+  // ========================================
+  const hashedPassword = await bcrypt.hash('admin123', 10);
+
+  const admin1 = await prisma.user.create({
     data: {
       email: 'admin@inmova.com',
-      password: hashedAdminPassword,
-      name: 'Administrador INMOVA',
+      password: hashedPassword,
+      name: 'Admin INMOVA',
       role: 'administrador',
+      companyId: company1.id,
+      activo: true,
     },
   });
 
-  const gestorUser = await prisma.user.create({
+  const gestor1 = await prisma.user.create({
     data: {
       email: 'gestor@inmova.com',
-      password: hashedGestorPassword,
+      password: hashedPassword,
       name: 'María García López',
       role: 'gestor',
+      companyId: company1.id,
+      activo: true,
     },
   });
 
-  console.log('✅ Usuarios creados');
+  const operador1 = await prisma.user.create({
+    data: {
+      email: 'operador@inmova.com',
+      password: hashedPassword,
+      name: 'Juan Martínez Ruiz',
+      role: 'operador',
+      companyId: company1.id,
+      activo: true,
+    },
+  });
 
-  // Contraseñas para inquilinos (para acceso al portal)
-  const hashedTenantPassword = await bcrypt.hash('inquilino123', 10);
+  // ========================================
+  // CREAR USUARIOS - EMPRESA 2 (VIDARO)
+  // ========================================
+  const admin2 = await prisma.user.create({
+    data: {
+      email: 'admin@vidaro.com',
+      password: hashedPassword,
+      name: 'Admin Vidaro',
+      role: 'administrador',
+      companyId: company2.id,
+      activo: true,
+    },
+  });
 
-  // Crear edificios
+  const gestor2 = await prisma.user.create({
+    data: {
+      email: 'gestor@vidaro.com',
+      password: hashedPassword,
+      name: 'Laura Fernández',
+      role: 'gestor',
+      companyId: company2.id,
+      activo: true,
+    },
+  });
+
+  console.log('✅ Usuarios creados (5 usuarios)');
+
+  // ========================================
+  // DATOS DE EMPRESA 1 - INMOVA
+  // ========================================
+
+  // Edificios INMOVA
   const building1 = await prisma.building.create({
     data: {
+      companyId: company1.id,
       nombre: 'Edificio Plaza Mayor',
       direccion: 'Calle Gran Vía, 45, 28013 Madrid',
       tipo: 'residencial',
       anoConstructor: 2018,
-      numeroUnidades: 12,
+      numeroUnidades: 6,
+      ascensor: true,
+      garaje: true,
+      gastosComunidad: 120,
+      ibiAnual: 800,
     },
   });
 
   const building2 = await prisma.building.create({
     data: {
+      companyId: company1.id,
       nombre: 'Centro Comercial Vista',
       direccion: 'Avenida Diagonal, 123, 08029 Barcelona',
       tipo: 'mixto',
       anoConstructor: 2015,
-      numeroUnidades: 8,
+      numeroUnidades: 4,
+      ascensor: true,
+      garaje: false,
     },
   });
 
-  const building3 = await prisma.building.create({
-    data: {
-      nombre: 'Torres del Mar',
-      direccion: 'Paseo Marítimo, 89, 29640 Málaga',
-      tipo: 'residencial',
-      anoConstructor: 2020,
-      numeroUnidades: 6,
-    },
-  });
+  // Inquilinos INMOVA
+  const hashedTenantPassword = await bcrypt.hash('inquilino123', 10);
 
-  console.log('✅ Edificios creados');
-
-  // Crear inquilinos
   const tenant1 = await prisma.tenant.create({
     data: {
+      companyId: company1.id,
       nombreCompleto: 'Carlos Rodríguez Pérez',
       dni: '12345678A',
       email: 'carlos.rodriguez@email.com',
       password: hashedTenantPassword,
       telefono: '+34 612 345 678',
       fechaNacimiento: new Date('1985-03-15'),
+      situacionLaboral: 'empleado',
+      ingresosMensuales: 3500,
       scoring: 85,
       nivelRiesgo: 'bajo',
-      notas: 'Inquilino ejemplar, siempre paga puntual - Acceso portal: inquilino123',
+      notas: 'Inquilino ejemplar',
     },
   });
 
   const tenant2 = await prisma.tenant.create({
     data: {
-      nombreCompleto: 'Ana María González',
-      dni: '23456789B',
-      email: 'ana.gonzalez@email.com',
+      companyId: company1.id,
+      nombreCompleto: 'Ana Martínez Silva',
+      dni: '87654321B',
+      email: 'ana.martinez@email.com',
       password: hashedTenantPassword,
       telefono: '+34 623 456 789',
       fechaNacimiento: new Date('1990-07-22'),
-      scoring: 70,
+      situacionLaboral: 'autonomo',
+      ingresosMensuales: 2800,
+      scoring: 72,
       nivelRiesgo: 'medio',
-      notas: 'Ocasionalmente con retrasos de 5-7 días - Acceso portal: inquilino123',
+      notas: 'Buen inquilino',
     },
   });
 
   const tenant3 = await prisma.tenant.create({
     data: {
-      nombreCompleto: 'David López Martínez',
-      dni: '34567890C',
-      email: 'david.lopez@email.com',
-      password: hashedTenantPassword,
+      companyId: company1.id,
+      nombreCompleto: 'Pedro López García',
+      dni: '11223344C',
+      email: 'pedro.lopez@email.com',
       telefono: '+34 634 567 890',
-      fechaNacimiento: new Date('1988-11-10'),
+      fechaNacimiento: new Date('1978-11-05'),
+      situacionLaboral: 'empleado',
+      ingresosMensuales: 4200,
       scoring: 90,
       nivelRiesgo: 'bajo',
-      notas: 'Acceso portal: inquilino123',
+      notas: 'Excelente historial',
     },
   });
 
-  const tenant4 = await prisma.tenant.create({
-    data: {
-      nombreCompleto: 'Laura Fernández Ruiz',
-      dni: '45678901D',
-      email: 'laura.fernandez@email.com',
-      telefono: '+34 645 678 901',
-      fechaNacimiento: new Date('1992-05-18'),
-      scoring: 60,
-      nivelRiesgo: 'medio',
-    },
-  });
-
-  const tenant5 = await prisma.tenant.create({
-    data: {
-      nombreCompleto: 'Miguel Sánchez Torres',
-      dni: '56789012E',
-      email: 'miguel.sanchez@email.com',
-      telefono: '+34 656 789 012',
-      fechaNacimiento: new Date('1983-09-25'),
-      scoring: 45,
-      nivelRiesgo: 'alto',
-      notas: 'Ha tenido varios retrasos significativos en pagos',
-    },
-  });
-
-  const tenant6 = await prisma.tenant.create({
-    data: {
-      nombreCompleto: 'Isabel Moreno García',
-      dni: '67890123F',
-      email: 'isabel.moreno@email.com',
-      telefono: '+34 667 890 123',
-      fechaNacimiento: new Date('1995-02-14'),
-      scoring: 75,
-      nivelRiesgo: 'bajo',
-    },
-  });
-
-  const tenant7 = await prisma.tenant.create({
-    data: {
-      nombreCompleto: 'Javier Romero Díaz',
-      dni: '78901234G',
-      email: 'javier.romero@email.com',
-      telefono: '+34 678 901 234',
-      fechaNacimiento: new Date('1987-12-03'),
-      scoring: 80,
-      nivelRiesgo: 'bajo',
-    },
-  });
-
-  const tenant8 = await prisma.tenant.create({
-    data: {
-      nombreCompleto: 'Comercial TechStart SL',
-      dni: 'B12345678',
-      email: 'info@techstart.com',
-      telefono: '+34 910 123 456',
-      fechaNacimiento: new Date('2015-01-01'),
-      scoring: 95,
-      nivelRiesgo: 'bajo',
-      notas: 'Empresa tecnológica con excelente historial',
-    },
-  });
-
-  console.log('✅ Inquilinos creados');
-
-  // Crear unidades
+  // Unidades INMOVA - Edificio 1
   const unit1 = await prisma.unit.create({
     data: {
-      numero: '1A',
       buildingId: building1.id,
+      numero: '1A',
       tipo: 'vivienda',
       estado: 'ocupada',
-      superficie: 85.5,
+      superficie: 85,
       habitaciones: 3,
       banos: 2,
+      planta: 1,
       rentaMensual: 1200,
       tenantId: tenant1.id,
+      aireAcondicionado: true,
+      calefaccion: true,
     },
   });
 
   const unit2 = await prisma.unit.create({
     data: {
-      numero: '2A',
       buildingId: building1.id,
+      numero: '2B',
       tipo: 'vivienda',
       estado: 'ocupada',
-      superficie: 75.0,
-      habitaciones: 2,
-      banos: 1,
-      rentaMensual: 950,
+      superficie: 95,
+      habitaciones: 3,
+      banos: 2,
+      planta: 2,
+      rentaMensual: 1350,
       tenantId: tenant2.id,
+      aireAcondicionado: true,
+      calefaccion: true,
+      terraza: true,
     },
   });
 
   const unit3 = await prisma.unit.create({
     data: {
-      numero: '3A',
       buildingId: building1.id,
+      numero: '3C',
       tipo: 'vivienda',
       estado: 'disponible',
-      superficie: 95.0,
-      habitaciones: 3,
-      banos: 2,
-      rentaMensual: 1350,
+      superficie: 78,
+      habitaciones: 2,
+      banos: 1,
+      planta: 3,
+      rentaMensual: 950,
+      aireAcondicionado: false,
+      calefaccion: true,
     },
   });
 
+  // Unidades INMOVA - Edificio 2
   const unit4 = await prisma.unit.create({
     data: {
-      numero: '1B',
-      buildingId: building1.id,
-      tipo: 'vivienda',
+      buildingId: building2.id,
+      numero: 'Local-1',
+      tipo: 'local',
       estado: 'ocupada',
-      superficie: 110.0,
-      habitaciones: 4,
-      banos: 2,
-      rentaMensual: 1500,
+      superficie: 120,
+      planta: 0,
+      rentaMensual: 2500,
       tenantId: tenant3.id,
     },
   });
 
   const unit5 = await prisma.unit.create({
     data: {
-      numero: 'GR-1',
-      buildingId: building1.id,
-      tipo: 'garaje',
-      estado: 'ocupada',
-      superficie: 15.0,
-      rentaMensual: 80,
-      tenantId: tenant1.id,
-    },
-  });
-
-  const unit6 = await prisma.unit.create({
-    data: {
-      numero: 'Local-1',
       buildingId: building2.id,
-      tipo: 'local',
-      estado: 'ocupada',
-      superficie: 120.0,
-      rentaMensual: 2500,
-      tenantId: tenant8.id,
-    },
-  });
-
-  const unit7 = await prisma.unit.create({
-    data: {
       numero: 'Local-2',
-      buildingId: building2.id,
       tipo: 'local',
       estado: 'disponible',
-      superficie: 85.0,
+      superficie: 80,
+      planta: 0,
       rentaMensual: 1800,
     },
   });
 
-  const unit8 = await prisma.unit.create({
-    data: {
-      numero: '1A',
-      buildingId: building2.id,
-      tipo: 'vivienda',
-      estado: 'ocupada',
-      superficie: 90.0,
-      habitaciones: 3,
-      banos: 2,
-      rentaMensual: 1100,
-      tenantId: tenant4.id,
-    },
-  });
+  console.log('✅ Edificios, inquilinos y unidades INMOVA creados');
 
-  const unit9 = await prisma.unit.create({
-    data: {
-      numero: '2A',
-      buildingId: building2.id,
-      tipo: 'vivienda',
-      estado: 'en_mantenimiento',
-      superficie: 88.0,
-      habitaciones: 3,
-      banos: 2,
-      rentaMensual: 1050,
-    },
-  });
-
-  const unit10 = await prisma.unit.create({
-    data: {
-      numero: 'AT-1',
-      buildingId: building3.id,
-      tipo: 'vivienda',
-      estado: 'ocupada',
-      superficie: 150.0,
-      habitaciones: 4,
-      banos: 3,
-      rentaMensual: 2200,
-      tenantId: tenant5.id,
-    },
-  });
-
-  const unit11 = await prisma.unit.create({
-    data: {
-      numero: 'AT-2',
-      buildingId: building3.id,
-      tipo: 'vivienda',
-      estado: 'ocupada',
-      superficie: 145.0,
-      habitaciones: 4,
-      banos: 3,
-      rentaMensual: 2100,
-      tenantId: tenant6.id,
-    },
-  });
-
-  const unit12 = await prisma.unit.create({
-    data: {
-      numero: 'AT-3',
-      buildingId: building3.id,
-      tipo: 'vivienda',
-      estado: 'disponible',
-      superficie: 140.0,
-      habitaciones: 3,
-      banos: 2,
-      rentaMensual: 1950,
-    },
-  });
-
-  const unit13 = await prisma.unit.create({
-    data: {
-      numero: 'PH',
-      buildingId: building3.id,
-      tipo: 'vivienda',
-      estado: 'ocupada',
-      superficie: 200.0,
-      habitaciones: 5,
-      banos: 4,
-      rentaMensual: 3500,
-      tenantId: tenant7.id,
-    },
-  });
-
-  const unit14 = await prisma.unit.create({
-    data: {
-      numero: 'GR-A',
-      buildingId: building3.id,
-      tipo: 'garaje',
-      estado: 'disponible',
-      superficie: 18.0,
-      rentaMensual: 100,
-    },
-  });
-
-  const unit15 = await prisma.unit.create({
-    data: {
-      numero: 'TR-1',
-      buildingId: building1.id,
-      tipo: 'trastero',
-      estado: 'ocupada',
-      superficie: 8.0,
-      rentaMensual: 50,
-      tenantId: tenant3.id,
-    },
-  });
-
-  console.log('✅ Unidades creadas');
-
-  // Crear contratos
-  const now = new Date();
-  const monthAgo = new Date(now);
-  monthAgo.setMonth(monthAgo.getMonth() - 1);
-  const twoMonthsAgo = new Date(now);
-  twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
-  const sixMonthsAgo = new Date(now);
-  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-  const oneYearAgo = new Date(now);
-  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-  
-  const in30Days = new Date(now);
-  in30Days.setDate(in30Days.getDate() + 30);
-  const in60Days = new Date(now);
-  in60Days.setDate(in60Days.getDate() + 60);
-  const in6Months = new Date(now);
-  in6Months.setMonth(in6Months.getMonth() + 6);
-  const in1Year = new Date(now);
-  in1Year.setFullYear(in1Year.getFullYear() + 1);
-  const in2Years = new Date(now);
-  in2Years.setFullYear(in2Years.getFullYear() + 2);
-
+  // Contratos INMOVA
   const contract1 = await prisma.contract.create({
     data: {
       unitId: unit1.id,
       tenantId: tenant1.id,
-      fechaInicio: oneYearAgo,
-      fechaFin: in1Year,
+      fechaInicio: new Date('2023-01-01'),
+      fechaFin: new Date('2025-12-31'),
       rentaMensual: 1200,
-      deposito: 2400,
+      deposito: 1200,
       estado: 'activo',
       tipo: 'residencial',
     },
@@ -425,10 +312,10 @@ async function main() {
     data: {
       unitId: unit2.id,
       tenantId: tenant2.id,
-      fechaInicio: sixMonthsAgo,
-      fechaFin: in6Months,
-      rentaMensual: 950,
-      deposito: 1900,
+      fechaInicio: new Date('2023-06-01'),
+      fechaFin: new Date('2024-05-31'),
+      rentaMensual: 1350,
+      deposito: 1350,
       estado: 'activo',
       tipo: 'residencial',
     },
@@ -438,598 +325,332 @@ async function main() {
     data: {
       unitId: unit4.id,
       tenantId: tenant3.id,
-      fechaInicio: oneYearAgo,
-      fechaFin: in60Days,
-      rentaMensual: 1500,
-      deposito: 3000,
-      estado: 'activo',
-      tipo: 'residencial',
-    },
-  });
-
-  const contract4 = await prisma.contract.create({
-    data: {
-      unitId: unit5.id,
-      tenantId: tenant1.id,
-      fechaInicio: oneYearAgo,
-      fechaFin: in1Year,
-      rentaMensual: 80,
-      deposito: 160,
-      estado: 'activo',
-      tipo: 'residencial',
-    },
-  });
-
-  const contract5 = await prisma.contract.create({
-    data: {
-      unitId: unit6.id,
-      tenantId: tenant8.id,
-      fechaInicio: twoMonthsAgo,
-      fechaFin: in2Years,
+      fechaInicio: new Date('2022-03-01'),
+      fechaFin: new Date('2027-02-28'),
       rentaMensual: 2500,
-      deposito: 7500,
+      deposito: 5000,
       estado: 'activo',
       tipo: 'comercial',
     },
   });
 
-  const contract6 = await prisma.contract.create({
+  // Pagos INMOVA
+  const now = new Date();
+  const payments = [];
+
+  // Últimos 6 meses de pagos para contrato 1
+  for (let i = 0; i < 6; i++) {
+    const periodo = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    payments.push({
+      contractId: contract1.id,
+      periodo: periodo.toISOString().slice(0, 7),
+      monto: 1200,
+      fechaVencimiento: new Date(periodo.getFullYear(), periodo.getMonth(), 5),
+      fechaPago: i > 1 ? new Date(periodo.getFullYear(), periodo.getMonth(), 3) : undefined,
+      estado: i === 0 ? 'pendiente' : i === 1 ? 'atrasado' : 'pagado',
+      nivelRiesgo: i === 0 ? 'bajo' : i === 1 ? 'alto' : 'bajo',
+    });
+  }
+
+  // Últimos 6 meses de pagos para contrato 2
+  for (let i = 0; i < 6; i++) {
+    const periodo = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    payments.push({
+      contractId: contract2.id,
+      periodo: periodo.toISOString().slice(0, 7),
+      monto: 1350,
+      fechaVencimiento: new Date(periodo.getFullYear(), periodo.getMonth(), 1),
+      fechaPago: i > 0 ? new Date(periodo.getFullYear(), periodo.getMonth(), 1) : undefined,
+      estado: i === 0 ? 'pendiente' : 'pagado',
+      nivelRiesgo: 'bajo',
+    });
+  }
+
+  await prisma.payment.createMany({ data: payments });
+
+  console.log('✅ Contratos y pagos INMOVA creados');
+
+  // Proveedores INMOVA
+  const provider1 = await prisma.provider.create({
     data: {
-      unitId: unit8.id,
-      tenantId: tenant4.id,
-      fechaInicio: sixMonthsAgo,
-      fechaFin: in30Days,
-      rentaMensual: 1100,
-      deposito: 2200,
-      estado: 'activo',
-      tipo: 'residencial',
+      companyId: company1.id,
+      nombre: 'Fontanería Rápida SL',
+      tipo: 'Fontanería',
+      telefono: '+34 910 111 222',
+      email: 'info@fontaneriarpida.com',
+      rating: 4.5,
     },
   });
 
-  const contract7 = await prisma.contract.create({
+  const provider2 = await prisma.provider.create({
     data: {
-      unitId: unit10.id,
-      tenantId: tenant5.id,
-      fechaInicio: monthAgo,
-      fechaFin: in1Year,
-      rentaMensual: 2200,
-      deposito: 4400,
-      estado: 'activo',
-      tipo: 'residencial',
+      companyId: company1.id,
+      nombre: 'Electricistas Madrid',
+      tipo: 'Electricidad',
+      telefono: '+34 911 222 333',
+      email: 'contacto@electricistasmadrid.com',
+      rating: 4.8,
     },
   });
 
-  const contract8 = await prisma.contract.create({
-    data: {
-      unitId: unit11.id,
-      tenantId: tenant6.id,
-      fechaInicio: sixMonthsAgo,
-      fechaFin: in6Months,
-      rentaMensual: 2100,
-      deposito: 4200,
-      estado: 'activo',
-      tipo: 'residencial',
-    },
-  });
-
-  const contract9 = await prisma.contract.create({
-    data: {
-      unitId: unit13.id,
-      tenantId: tenant7.id,
-      fechaInicio: oneYearAgo,
-      fechaFin: in1Year,
-      rentaMensual: 3500,
-      deposito: 7000,
-      estado: 'activo',
-      tipo: 'residencial',
-    },
-  });
-
-  const contract10 = await prisma.contract.create({
-    data: {
-      unitId: unit15.id,
-      tenantId: tenant3.id,
-      fechaInicio: oneYearAgo,
-      fechaFin: in60Days,
-      rentaMensual: 50,
-      deposito: 100,
-      estado: 'activo',
-      tipo: 'residencial',
-    },
-  });
-
-  console.log('✅ Contratos creados');
-
-  // Crear pagos
-  const createPaymentsForContract = async (
-    contractId: string,
-    rentaMensual: number,
-    startDate: Date,
-    paymentPattern: ('paid' | 'pending' | 'late')[]
-  ) => {
-    const payments = [];
-    for (let i = 0; i < paymentPattern.length; i++) {
-      const paymentDate = new Date(startDate);
-      paymentDate.setMonth(paymentDate.getMonth() + i);
-      
-      const dueDate = new Date(paymentDate);
-      dueDate.setDate(5);
-      
-      const pattern = paymentPattern[i];
-      let estado: 'pagado' | 'pendiente' | 'atrasado' = 'pendiente';
-      let fechaPago: Date | undefined = undefined;
-      let nivelRiesgo: 'bajo' | 'medio' | 'alto' = 'bajo';
-      
-      if (pattern === 'paid') {
-        estado = 'pagado';
-        fechaPago = new Date(dueDate);
-        fechaPago.setDate(fechaPago.getDate() + Math.floor(Math.random() * 5));
-      } else if (pattern === 'late') {
-        estado = 'atrasado';
-        const daysLate = Math.floor(Math.random() * 20) + 5;
-        if (daysLate > 15) nivelRiesgo = 'alto';
-        else if (daysLate > 7) nivelRiesgo = 'medio';
-      } else {
-        const today = new Date();
-        if (dueDate < today) {
-          estado = 'atrasado';
-          const daysLate = Math.floor((today.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
-          if (daysLate > 15) nivelRiesgo = 'alto';
-          else if (daysLate > 7) nivelRiesgo = 'medio';
-        }
-      }
-      
-      const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-      const periodo = `${monthNames[paymentDate.getMonth()]} ${paymentDate.getFullYear()}`;
-      
-      payments.push(
-        await prisma.payment.create({
-          data: {
-            contractId,
-            periodo,
-            monto: rentaMensual,
-            fechaVencimiento: dueDate,
-            fechaPago,
-            estado,
-            metodoPago: fechaPago ? (Math.random() > 0.5 ? 'Transferencia' : 'Domiciliación') : undefined,
-            nivelRiesgo,
-          },
-        })
-      );
-    }
-    return payments;
-  };
-
-  // Pagos para cada contrato
-  await createPaymentsForContract(contract1.id, 1200, oneYearAgo, ['paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid']);
-  await createPaymentsForContract(contract2.id, 950, sixMonthsAgo, ['paid', 'paid', 'late', 'paid', 'paid', 'pending', 'pending']);
-  await createPaymentsForContract(contract3.id, 1500, oneYearAgo, ['paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid']);
-  await createPaymentsForContract(contract4.id, 80, oneYearAgo, ['paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid']);
-  await createPaymentsForContract(contract5.id, 2500, twoMonthsAgo, ['paid', 'paid', 'pending']);
-  await createPaymentsForContract(contract6.id, 1100, sixMonthsAgo, ['paid', 'late', 'paid', 'late', 'paid', 'pending', 'pending']);
-  await createPaymentsForContract(contract7.id, 2200, monthAgo, ['paid', 'late']);
-  await createPaymentsForContract(contract8.id, 2100, sixMonthsAgo, ['paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'pending']);
-  await createPaymentsForContract(contract9.id, 3500, oneYearAgo, ['paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid']);
-  await createPaymentsForContract(contract10.id, 50, oneYearAgo, ['paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid', 'paid']);
-
-  console.log('✅ Pagos creados');
-
-  // Crear solicitudes de mantenimiento
-  await prisma.maintenanceRequest.create({
-    data: {
-      unitId: unit2.id,
-      titulo: 'Fuga de agua en baño',
-      descripcion: 'Se detecta fuga en la tubería del inodoro. Requiere atención urgente.',
-      prioridad: 'alta',
-      estado: 'en_progreso',
-      fechaSolicitud: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000),
-      fechaProgramada: new Date(now.getTime() + 1 * 24 * 60 * 60 * 1000),
-      
-      costoEstimado: 250,
-    },
-  });
-
-  await prisma.maintenanceRequest.create({
-    data: {
-      unitId: unit9.id,
-      titulo: 'Renovación de pintura interior',
-      descripcion: 'Pintura completa de la vivienda antes de nuevo inquilino.',
-      prioridad: 'media',
-      estado: 'programado',
-      fechaSolicitud: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000),
-      fechaProgramada: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
-      
-      costoEstimado: 1200,
-    },
-  });
-
+  // Solicitudes de mantenimiento INMOVA
   await prisma.maintenanceRequest.create({
     data: {
       unitId: unit1.id,
-      titulo: 'Revisión anual de caldera',
-      descripcion: 'Mantenimiento preventivo obligatorio de caldera de gas.',
-      prioridad: 'media',
-      estado: 'pendiente',
-      fechaSolicitud: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000),
-      costoEstimado: 80,
-    },
-  });
-
-  await prisma.maintenanceRequest.create({
-    data: {
-      unitId: unit10.id,
-      titulo: 'Reparación de persianas',
-      descripcion: 'Las persianas del dormitorio principal no suben correctamente.',
-      prioridad: 'baja',
-      estado: 'pendiente',
-      fechaSolicitud: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000),
+      titulo: 'Fuga de agua en baño',
+      descripcion: 'Se detecta fuga en grifo del baño principal',
+      prioridad: 'alta',
+      estado: 'en_progreso',
+      providerId: provider1.id,
       costoEstimado: 150,
     },
   });
 
   await prisma.maintenanceRequest.create({
     data: {
-      unitId: unit4.id,
-      titulo: 'Cambio de cerradura',
-      descripcion: 'Solicitud de cambio de cerradura de la puerta principal por seguridad.',
-      prioridad: 'alta',
-      estado: 'completado',
-      fechaSolicitud: new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000),
-      fechaProgramada: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
-      fechaCompletada: new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000),
-      
-      costoEstimado: 120,
-      costoReal: 135,
-    },
-  });
-
-  await prisma.maintenanceRequest.create({
-    data: {
-      unitId: unit13.id,
-      titulo: 'Instalación de aire acondicionado',
-      descripcion: 'Instalar dos splits en dormitorios principales.',
+      unitId: unit2.id,
+      titulo: 'Revisión instalación eléctrica',
+      descripcion: 'Chequeo general de cuadro eléctrico',
       prioridad: 'media',
-      estado: 'completado',
-      fechaSolicitud: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000),
-      fechaProgramada: new Date(now.getTime() - 20 * 24 * 60 * 60 * 1000),
-      fechaCompletada: new Date(now.getTime() - 18 * 24 * 60 * 60 * 1000),
-      
-      costoEstimado: 2500,
-      costoReal: 2650,
+      estado: 'pendiente',
+      providerId: provider2.id,
+      costoEstimado: 200,
     },
   });
 
-  await prisma.maintenanceRequest.create({
+  // Mantenimiento preventivo INMOVA
+  await prisma.maintenanceSchedule.create({
+    data: {
+      titulo: 'ITE (Inspección Técnica de Edificios)',
+      descripcion: 'Inspección obligatoria para edificios de más de 50 años',
+      tipo: 'Inspección',
+      buildingId: building1.id,
+      frecuencia: 'anual',
+      proximaFecha: new Date(now.getFullYear(), now.getMonth() + 2, 15),
+      diasAnticipacion: 30,
+      costoEstimado: 800,
+      activo: true,
+    },
+  });
+
+  await prisma.maintenanceSchedule.create({
+    data: {
+      titulo: 'Revisión de ascensores',
+      descripcion: 'Mantenimiento trimestral obligatorio',
+      tipo: 'Mantenimiento',
+      buildingId: building1.id,
+      frecuencia: 'trimestral',
+      proximaFecha: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 15),
+      providerId: provider1.id,
+      diasAnticipacion: 15,
+      costoEstimado: 300,
+      activo: true,
+    },
+  });
+
+  // Gastos INMOVA
+  await prisma.expense.create({
+    data: {
+      buildingId: building1.id,
+      concepto: 'IBI Anual 2024',
+      categoria: 'impuestos',
+      monto: 800,
+      fecha: new Date(now.getFullYear(), 0, 15),
+    },
+  });
+
+  await prisma.expense.create({
+    data: {
+      unitId: unit1.id,
+      providerId: provider1.id,
+      concepto: 'Reparación fontanería',
+      categoria: 'reparaciones',
+      monto: 145,
+      fecha: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 10),
+    },
+  });
+
+  // Notificaciones INMOVA
+  await prisma.notification.create({
+    data: {
+      userId: admin1.id,
+      tipo: 'pago_atrasado',
+      titulo: 'Pago Atrasado',
+      mensaje: `El inquilino ${tenant1.nombreCompleto} tiene un pago atrasado de 1200€`,
+      prioridad: 'alto',
+      leida: false,
+    },
+  });
+
+  await prisma.notification.create({
+    data: {
+      userId: gestor1.id,
+      tipo: 'mantenimiento_urgente',
+      titulo: 'Mantenimiento Urgente',
+      mensaje: 'Fuga de agua en unidad 1A - Edificio Plaza Mayor',
+      prioridad: 'alto',
+      leida: false,
+    },
+  });
+
+  console.log('✅ Proveedores, mantenimiento y notificaciones INMOVA creados');
+
+  // ========================================
+  // DATOS DE EMPRESA 2 - VIDARO
+  // ========================================
+
+  // Edificios VIDARO
+  const building3 = await prisma.building.create({
+    data: {
+      companyId: company2.id,
+      nombre: 'Residencial Los Olivos',
+      direccion: 'Calle de la Paz, 78, 28050 Madrid',
+      tipo: 'residencial',
+      anoConstructor: 2019,
+      numeroUnidades: 4,
+      ascensor: true,
+      piscina: true,
+      jardin: true,
+      gastosComunidad: 150,
+    },
+  });
+
+  // Inquilinos VIDARO
+  const tenant4 = await prisma.tenant.create({
+    data: {
+      companyId: company2.id,
+      nombreCompleto: 'Laura Sánchez Díaz',
+      dni: '22334455D',
+      email: 'laura.sanchez@email.com',
+      password: hashedTenantPassword,
+      telefono: '+34 645 678 901',
+      fechaNacimiento: new Date('1992-04-18'),
+      situacionLaboral: 'empleado',
+      ingresosMensuales: 3200,
+      scoring: 88,
+      nivelRiesgo: 'bajo',
+    },
+  });
+
+  // Unidades VIDARO
+  const unit6 = await prisma.unit.create({
+    data: {
+      buildingId: building3.id,
+      numero: '1A',
+      tipo: 'vivienda',
+      estado: 'ocupada',
+      superficie: 100,
+      habitaciones: 3,
+      banos: 2,
+      planta: 1,
+      rentaMensual: 1500,
+      tenantId: tenant4.id,
+      aireAcondicionado: true,
+      calefaccion: true,
+      terraza: true,
+    },
+  });
+
+  const unit7 = await prisma.unit.create({
+    data: {
+      buildingId: building3.id,
+      numero: '2A',
+      tipo: 'vivienda',
+      estado: 'disponible',
+      superficie: 90,
+      habitaciones: 2,
+      banos: 2,
+      planta: 2,
+      rentaMensual: 1300,
+      aireAcondicionado: true,
+      calefaccion: true,
+    },
+  });
+
+  // Contrato VIDARO
+  const contract4 = await prisma.contract.create({
     data: {
       unitId: unit6.id,
-      titulo: 'Revisión sistema eléctrico',
-      descripcion: 'Inspección general del sistema eléctrico del local comercial.',
-      prioridad: 'alta',
-      estado: 'programado',
-      fechaSolicitud: new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000),
-      fechaProgramada: new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000),
-      
-      costoEstimado: 350,
+      tenantId: tenant4.id,
+      fechaInicio: new Date('2024-01-01'),
+      fechaFin: new Date('2026-12-31'),
+      rentaMensual: 1500,
+      deposito: 1500,
+      estado: 'activo',
+      tipo: 'residencial',
     },
   });
 
-  await prisma.maintenanceRequest.create({
-    data: {
-      unitId: unit11.id,
-      titulo: 'Limpieza de canalones',
-      descripcion: 'Limpieza y revisión de canalones y desagües de terraza.',
-      prioridad: 'baja',
-      estado: 'pendiente',
-      fechaSolicitud: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
-      costoEstimado: 100,
-    },
-  });
+  // Pagos VIDARO
+  const paymentsVidaro = [];
+  for (let i = 0; i < 3; i++) {
+    const periodo = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    paymentsVidaro.push({
+      contractId: contract4.id,
+      periodo: periodo.toISOString().slice(0, 7),
+      monto: 1500,
+      fechaVencimiento: new Date(periodo.getFullYear(), periodo.getMonth(), 1),
+      fechaPago: i > 0 ? new Date(periodo.getFullYear(), periodo.getMonth(), 1) : undefined,
+      estado: i === 0 ? 'pendiente' : 'pagado',
+      nivelRiesgo: 'bajo',
+    });
+  }
+  await prisma.payment.createMany({ data: paymentsVidaro });
 
-  console.log('✅ Solicitudes de mantenimiento creadas');
-
-  // Crear proveedores
-  const provider1 = await prisma.provider.create({
-    data: {
-      nombre: 'Fontanería Rápida SL',
-      tipo: 'Fontanería',
-      telefono: '+34 910 123 456',
-      email: 'info@fontanerirapida.com',
-      direccion: 'Calle Mayor, 34, 28013 Madrid',
-      rating: 4.5,
-      notas: 'Servicio rápido y profesional',
-    },
-  });
-
-  const provider2 = await prisma.provider.create({
-    data: {
-      nombre: 'ElectroServicios García',
-      tipo: 'Electricidad',
-      telefono: '+34 932 456 789',
-      email: 'contacto@electrogarcia.com',
-      direccion: 'Avenida Diagonal, 567, 08029 Barcelona',
-      rating: 4.8,
-      notas: 'Electricista certificado, muy recomendable',
-    },
-  });
-
+  // Proveedores VIDARO
   const provider3 = await prisma.provider.create({
     data: {
-      nombre: 'Limpiezas del Sur',
-      tipo: 'Limpieza',
-      telefono: '+34 951 789 012',
-      email: 'info@limpiezasdelsur.com',
-      rating: 4.2,
+      companyId: company2.id,
+      nombre: 'Mantenimiento Integral',
+      tipo: 'Mantenimiento General',
+      telefono: '+34 912 333 444',
+      email: 'info@mantintegral.com',
+      rating: 4.7,
     },
   });
 
-  const provider4 = await prisma.provider.create({
+  // Notificaciones VIDARO
+  await prisma.notification.create({
     data: {
-      nombre: 'Reformas Integrales Madrid',
-      tipo: 'Reformas',
-      telefono: '+34 915 678 901',
-      email: 'reformas@integral.com',
-      direccion: 'Calle Alcalá, 123, 28009 Madrid',
-      rating: 4.6,
-    },
-  });
-
-  console.log('✅ Proveedores creados');
-
-  // Crear gastos
-  const expense1 = await prisma.expense.create({
-    data: {
-      buildingId: building1.id,
-      concepto: 'Reparación ascensor',
-      categoria: 'reparaciones',
-      monto: 1250.00,
-      fecha: new Date('2024-10-15'),
-      providerId: provider4.id,
-      notas: 'Reparación urgente del ascensor principal',
-    },
-  });
-
-  const expense2 = await prisma.expense.create({
-    data: {
-      buildingId: building1.id,
-      concepto: 'IBI 2024',
-      categoria: 'impuestos',
-      monto: 3200.00,
-      fecha: new Date('2024-09-01'),
-      notas: 'Impuesto sobre Bienes Inmuebles',
-    },
-  });
-
-  const expense3 = await prisma.expense.create({
-    data: {
-      buildingId: building2.id,
-      concepto: 'Seguro del edificio',
-      categoria: 'seguros',
-      monto: 2800.00,
-      fecha: new Date('2024-08-10'),
-      notas: 'Seguro anual multirriesgo',
-    },
-  });
-
-  const expense4 = await prisma.expense.create({
-    data: {
-      unitId: (await prisma.unit.findFirst({ where: { numero: '1A', buildingId: building1.id } }))?.id,
-      concepto: 'Reparación calefacción',
-      categoria: 'mantenimiento',
-      monto: 450.00,
-      fecha: new Date('2024-11-05'),
-      providerId: provider1.id,
-    },
-  });
-
-  const expense5 = await prisma.expense.create({
-    data: {
-      buildingId: building3.id,
-      concepto: 'Limpieza zonas comunes',
-      categoria: 'servicios',
-      monto: 680.00,
-      fecha: new Date('2024-11-01'),
-      providerId: provider3.id,
-      notas: 'Limpieza mensual de noviembre',
-    },
-  });
-
-  const expense6 = await prisma.expense.create({
-    data: {
-      buildingId: building2.id,
-      concepto: 'Cuota de comunidad',
-      categoria: 'comunidad',
-      monto: 1500.00,
-      fecha: new Date('2024-10-20'),
-    },
-  });
-
-  console.log('✅ Gastos creados');
-
-  // Actualizar maintenance requests con proveedores
-  const maintenanceRequests = await prisma.maintenanceRequest.findMany();
-  if (maintenanceRequests.length > 0) {
-    await prisma.maintenanceRequest.update({
-      where: { id: maintenanceRequests[0]?.id },
-      data: { providerId: provider1.id },
-    });
-    if (maintenanceRequests.length > 1) {
-      await prisma.maintenanceRequest.update({
-        where: { id: maintenanceRequests[1]?.id },
-        data: { providerId: provider2.id },
-      });
-    }
-  }
-
-  console.log('✅ Solicitudes de mantenimiento actualizadas con proveedores');
-
-  // Crear notificaciones
-  const notification1 = await prisma.notification.create({
-    data: {
-      tipo: 'pago_atrasado',
-      titulo: 'Pago atrasado - Unidad 2B',
-      mensaje: 'El pago del mes de noviembre de la unidad 2B está atrasado 15 días',
-      leida: false,
-      entityType: 'payment',
-    },
-  });
-
-  const notification2 = await prisma.notification.create({
-    data: {
-      tipo: 'contrato_vencimiento',
-      titulo: 'Contrato próximo a vencer',
-      mensaje: 'El contrato de la unidad 1A vence en 25 días',
-      leida: false,
-      entityType: 'contract',
-    },
-  });
-
-  const notification3 = await prisma.notification.create({
-    data: {
-      tipo: 'mantenimiento_urgente',
-      titulo: 'Mantenimiento urgente - Fuga de agua',
-      mensaje: 'Se reportó una fuga de agua en la unidad 3C que requiere atención inmediata',
-      leida: false,
-      entityType: 'maintenance',
-    },
-  });
-
-  const notification4 = await prisma.notification.create({
-    data: {
+      userId: admin2.id,
       tipo: 'unidad_vacante',
-      titulo: 'Unidad vacante prolongada',
-      mensaje: 'La unidad Local 1 lleva 60 días vacante',
-      leida: true,
-      entityType: 'unit',
-    },
-  });
-
-  const notification5 = await prisma.notification.create({
-    data: {
-      tipo: 'info',
-      titulo: 'Actualización del sistema',
-      mensaje: 'El sistema Homming Vidaro ha sido actualizado con nuevas funcionalidades',
+      titulo: 'Unidad Disponible',
+      mensaje: 'La unidad 2A en Residencial Los Olivos está disponible para alquiler',
+      prioridad: 'medio',
       leida: false,
-      entityType: 'system',
     },
   });
 
-  console.log('✅ Notificaciones creadas');
-
-  // Mantenimientos Preventivos Programados
-  console.log('\n🔧 Creando mantenimientos preventivos programados...');
-
-  const schedule1 = await prisma.maintenanceSchedule.create({
-    data: {
-      titulo: 'Inspección Técnica de Edificios (ITE)',
-      descripcion: 'Inspección técnica obligatoria del estado de conservación del edificio',
-      tipo: 'certificacion',
-      buildingId: building1.id,
-      frecuencia: 'anual',
-      proximaFecha: new Date(new Date().setMonth(new Date().getMonth() + 2)),
-      diasAnticipacion: 30,
-      activo: true,
-      providerId: provider1.id,
-      costoEstimado: 1200,
-      notas: 'Contactar con el técnico con al menos 45 días de anticipación',
-    },
-  });
-
-  const schedule2 = await prisma.maintenanceSchedule.create({
-    data: {
-      titulo: 'Revisión de Ascensores',
-      descripcion: 'Inspección y mantenimiento preventivo de los ascensores del edificio',
-      tipo: 'revision_tecnica',
-      buildingId: building2.id,
-      frecuencia: 'trimestral',
-      proximaFecha: new Date(new Date().setDate(new Date().getDate() + 15)),
-      diasAnticipacion: 7,
-      activo: true,
-      providerId: provider2.id,
-      costoEstimado: 350,
-      notas: 'Incluye lubricación y ajuste de puertas',
-    },
-  });
-
-  const schedule3 = await prisma.maintenanceSchedule.create({
-    data: {
-      titulo: 'Limpieza de Bajantes y Canalones',
-      descripcion: 'Limpieza preventiva para evitar obstrucciones y filtraciones',
-      tipo: 'limpieza',
-      buildingId: building1.id,
-      frecuencia: 'semestral',
-      proximaFecha: new Date(new Date().setMonth(new Date().getMonth() + 1)),
-      diasAnticipacion: 15,
-      activo: true,
-      providerId: provider3.id,
-      costoEstimado: 280,
-    },
-  });
-
-  const schedule4 = await prisma.maintenanceSchedule.create({
-    data: {
-      titulo: 'Revisión de Instalación Eléctrica',
-      descripcion: 'Inspección del cuadro eléctrico y sistemas de protección',
-      tipo: 'revision_tecnica',
-      unitId: unit1.id,
-      frecuencia: 'anual',
-      proximaFecha: new Date(new Date().setMonth(new Date().getMonth() + 4)),
-      diasAnticipacion: 20,
-      activo: true,
-      providerId: provider4.id,
-      costoEstimado: 180,
-    },
-  });
-
-  const schedule5 = await prisma.maintenanceSchedule.create({
-    data: {
-      titulo: 'Certificado de Eficiencia Energética',
-      descripcion: 'Renovación del certificado energético del edificio',
-      tipo: 'certificacion',
-      buildingId: building3.id,
-      frecuencia: 'anual',
-      proximaFecha: new Date(new Date().setMonth(new Date().getMonth() + 8)),
-      diasAnticipacion: 45,
-      activo: true,
-      costoEstimado: 450,
-      notas: 'El certificado actual vence en 9 meses',
-    },
-  });
-
-  const schedule6 = await prisma.maintenanceSchedule.create({
-    data: {
-      titulo: 'Mantenimiento de Sistema de Climatización',
-      descripcion: 'Limpieza de filtros y revisión general del sistema HVAC',
-      tipo: 'revision_tecnica',
-      buildingId: building2.id,
-      frecuencia: 'trimestral',
-      proximaFecha: new Date(new Date().setDate(new Date().getDate() + 5)),
-      diasAnticipacion: 3,
-      activo: true,
-      providerId: provider2.id,
-      costoEstimado: 220,
-    },
-  });
-
-  console.log('✅ Mantenimientos preventivos programados creados');
+  console.log('✅ Datos VIDARO creados');
 
   console.log('\n🎉 Seed completado exitosamente!');
-  console.log('\n📊 Resumen:');
-  console.log('  - Usuarios: 2');
-  console.log('  - Edificios: 3');
-  console.log('  - Unidades: 15');
-  console.log('  - Inquilinos: 8');
-  console.log('  - Contratos: 10');
-  console.log('  - Pagos: 90+');
-  console.log('  - Solicitudes de mantenimiento: 8');
-  console.log('  - Mantenimientos preventivos: 6');
-  console.log('  - Proveedores: 4');
-  console.log('  - Gastos: 6');
-  console.log('  - Notificaciones: 5');
+  console.log('\n📊 RESUMEN:');
+  console.log('   • 2 Empresas');
+  console.log('   • 5 Usuarios (3 INMOVA, 2 VIDARO)');
+  console.log('   • 3 Edificios (2 INMOVA, 1 VIDARO)');
+  console.log('   • 7 Unidades');
+  console.log('   • 4 Inquilinos');
+  console.log('   • 4 Contratos');
+  console.log('   • 15 Pagos');
+  console.log('   • 3 Proveedores');
+  console.log('   • 2 Solicitudes de mantenimiento');
+  console.log('   • 2 Mantenimientos preventivos');
+  console.log('   • 3 Notificaciones');
+  console.log('\n👥 CREDENCIALES DE ACCESO:');
+  console.log('\n   INMOVA:');
+  console.log('   • admin@inmova.com / admin123 (Administrador)');
+  console.log('   • gestor@inmova.com / admin123 (Gestor)');
+  console.log('   • operador@inmova.com / admin123 (Operador)');
+  console.log('\n   VIDARO INVERSIONES:');
+  console.log('   • admin@vidaro.com / admin123 (Administrador)');
+  console.log('   • gestor@vidaro.com / admin123 (Gestor)');
+  console.log('\n   Portal Inquilino:');
+  console.log('   • Cualquier inquilino / inquilino123');
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Error durante el seed:', e);
+    console.error('❌ Error en seed:', e);
     process.exit(1);
   })
   .finally(async () => {
