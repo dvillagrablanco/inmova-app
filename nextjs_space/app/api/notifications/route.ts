@@ -10,7 +10,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
 
-  const userId = (session.user as any).id;
+  const user = session.user as any;
+  const userId = user.id;
+  const companyId = user.companyId;
+
   const { searchParams } = new URL(req.url);
   const onlyUnread = searchParams.get('onlyUnread') === 'true';
   const generateAuto = searchParams.get('generate') === 'true';
@@ -18,14 +21,15 @@ export async function GET(req: NextRequest) {
   try {
     // Generar notificaciones automáticas si se solicita
     if (generateAuto) {
-      await generateAutomaticNotifications();
+      await generateAutomaticNotifications(companyId);
     }
 
-    // Filtrar por userId o notificaciones globales (userId null)
+    // Filtrar por companyId y (userId o notificaciones globales)
     const where: any = {
+      companyId: companyId,
       OR: [
         { userId: userId },
-        { userId: null }, // Notificaciones globales para todos
+        { userId: null }, // Notificaciones globales para todos en la empresa
       ],
     };
     
@@ -40,9 +44,10 @@ export async function GET(req: NextRequest) {
       take: 50,
     });
 
-    // Contar notificaciones no leídas del usuario
+    // Contar notificaciones no leídas del usuario en esta empresa
     const unreadCount = await prisma.notification.count({
       where: {
+        companyId: companyId,
         OR: [
           { userId: userId },
           { userId: null },
@@ -63,9 +68,11 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!session) {
+  if (!session || !session.user) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
+
+  const companyId = (session.user as any).companyId;
 
   try {
     const body = await req.json();
@@ -77,6 +84,7 @@ export async function POST(req: NextRequest) {
 
     const notification = await prisma.notification.create({
       data: {
+        companyId,
         tipo,
         titulo,
         mensaje,

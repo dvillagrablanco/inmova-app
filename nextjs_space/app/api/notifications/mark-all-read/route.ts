@@ -9,12 +9,15 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
 
-  const userId = (session.user as any).id;
+  const user = session.user as any;
+  const userId = user.id;
+  const companyId = user.companyId;
 
   try {
-    // Marcar como leídas solo las notificaciones del usuario o globales
+    // Marcar como leídas solo las notificaciones del usuario en su empresa
     await prisma.notification.updateMany({
       where: {
+        companyId: companyId,
         OR: [
           { userId: userId },
           { userId: null },

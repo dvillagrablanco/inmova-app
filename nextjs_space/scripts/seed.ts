@@ -473,6 +473,7 @@ async function main() {
   // Notificaciones INMOVA
   await prisma.notification.create({
     data: {
+      companyId: company1.id,
       userId: admin1.id,
       tipo: 'pago_atrasado',
       titulo: 'Pago Atrasado',
@@ -484,6 +485,7 @@ async function main() {
 
   await prisma.notification.create({
     data: {
+      companyId: company1.id,
       userId: gestor1.id,
       tipo: 'mantenimiento_urgente',
       titulo: 'Mantenimiento Urgente',
@@ -612,6 +614,7 @@ async function main() {
   // Notificaciones VIDARO
   await prisma.notification.create({
     data: {
+      companyId: company2.id,
       userId: admin2.id,
       tipo: 'unidad_vacante',
       titulo: 'Unidad Disponible',

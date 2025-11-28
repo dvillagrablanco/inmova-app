@@ -411,6 +411,7 @@ model Document {
 
 model Notification {
   id                String            @id @default(cuid())
+  companyId         String
   tipo              NotificationType
   titulo            String
   mensaje           String            @db.Text
@@ -423,8 +424,11 @@ model Notification {
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
 
+  company           Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
   user              User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([companyId, leida])
+  @@index([companyId, createdAt])
   @@map("notifications")
 }
 
@@ -520,6 +524,7 @@ model Company {
   providers         Provider[]
   tasks             Task[]
   auditLogs         AuditLog[]
+  notifications     Notification[]
 
   @@map("company")
 }

@@ -143,7 +143,8 @@ export default function NotificacionesPage() {
         tenant: '/inquilinos',
         contract: '/contratos',
         payment: '/pagos',
-        maintenance: '/mantenimiento',
+        maintenancerequest: '/mantenimiento',
+        maintenanceschedule: '/mantenimiento-preventivo',
         candidate: '/candidatos',
         expense: '/gastos',
         document: '/documentos',
@@ -151,7 +152,12 @@ export default function NotificacionesPage() {
 
       const baseRoute = routeMap[notification.entityType.toLowerCase()];
       if (baseRoute) {
-        router.push(`${baseRoute}/${notification.entityId}`);
+        // Para mantenimiento preventivo, no navegar a detalle, solo a la página principal
+        if (notification.entityType.toLowerCase() === 'maintenanceschedule') {
+          router.push(baseRoute);
+        } else {
+          router.push(`${baseRoute}/${notification.entityId}`);
+        }
       }
     }
   };
@@ -168,20 +174,30 @@ export default function NotificacionesPage() {
 
   const getNotificationIcon = (tipo: string) => {
     const icons: Record<string, any> = {
-      alerta: AlertTriangle,
-      recordatorio: Calendar,
-      informacion: Info,
-      urgente: AlertCircle,
+      pago_atrasado: AlertCircle,
+      contrato_vencimiento: Calendar,
+      mantenimiento_urgente: AlertTriangle,
+      mantenimiento_preventivo: Calendar,
+      documento_vencer: Info,
+      unidad_vacante: AlertTriangle,
+      inspeccion_programada: Calendar,
+      alerta_sistema: AlertCircle,
+      info: Info,
     };
     return icons[tipo.toLowerCase()] || Bell;
   };
 
   const getNotificationColor = (tipo: string) => {
     const colors: Record<string, string> = {
-      alerta: 'text-red-600 bg-red-50 dark:bg-red-950/20',
-      recordatorio: 'text-blue-600 bg-blue-50 dark:bg-blue-950/20',
-      informacion: 'text-gray-600 bg-gray-50 dark:bg-gray-950/20',
-      urgente: 'text-orange-600 bg-orange-50 dark:bg-orange-950/20',
+      pago_atrasado: 'text-red-600 bg-red-50 dark:bg-red-950/20',
+      contrato_vencimiento: 'text-orange-600 bg-orange-50 dark:bg-orange-950/20',
+      mantenimiento_urgente: 'text-red-600 bg-red-50 dark:bg-red-950/20',
+      mantenimiento_preventivo: 'text-blue-600 bg-blue-50 dark:bg-blue-950/20',
+      documento_vencer: 'text-amber-600 bg-amber-50 dark:bg-amber-950/20',
+      unidad_vacante: 'text-yellow-600 bg-yellow-50 dark:bg-yellow-950/20',
+      inspeccion_programada: 'text-blue-600 bg-blue-50 dark:bg-blue-950/20',
+      alerta_sistema: 'text-red-600 bg-red-50 dark:bg-red-950/20',
+      info: 'text-gray-600 bg-gray-50 dark:bg-gray-950/20',
     };
     return colors[tipo.toLowerCase()] || 'text-gray-600 bg-gray-50';
   };
