@@ -50,11 +50,29 @@ interface Payment {
   reciboPdfPath?: string;
 }
 
+interface SharedDocument {
+  id: string;
+  puedeDescargar: boolean;
+  visto: boolean;
+  createdAt: string;
+  document: {
+    id: string;
+    nombre: string;
+    tipo: string;
+    descripcion?: string;
+    fechaSubida: Date;
+    tenant?: { nombreCompleto: string };
+    unit?: { numero: string; building: { nombre: string } };
+    building?: { nombre: string };
+  };
+}
+
 export default function DocumentosPortalPage() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
   const [documents, setDocuments] = useState<Document[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [sharedDocuments, setSharedDocuments] = useState<SharedDocument[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTab, setSelectedTab] = useState('documentos');
@@ -87,6 +105,13 @@ export default function DocumentosPortalPage() {
       if (paymentsResponse.ok) {
         const paymentsData = await paymentsResponse.json();
         setPayments(paymentsData);
+      }
+
+      // Fetch documentos compartidos
+      const sharedResponse = await fetch('/api/portal-inquilino/documents/shared');
+      if (sharedResponse.ok) {
+        const sharedData = await sharedResponse.json();
+        setSharedDocuments(sharedData.shares || []);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -246,14 +271,18 @@ export default function DocumentosPortalPage() {
 
         {/* Tabs */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="documentos">
               <FileText className="h-4 w-4 mr-2" />
               Documentos ({filteredDocuments.length})
             </TabsTrigger>
+            <TabsTrigger value="compartidos">
+              <Eye className="h-4 w-4 mr-2" />
+              Compartidos ({sharedDocuments.length})
+            </TabsTrigger>
             <TabsTrigger value="recibos">
               <Receipt className="h-4 w-4 mr-2" />
-              Recibos de Pago ({filteredPayments.filter(p => p.estado === 'pagado').length})
+              Recibos ({filteredPayments.filter(p => p.estado === 'pagado').length})
             </TabsTrigger>
           </TabsList>
 
@@ -310,6 +339,78 @@ export default function DocumentosPortalPage() {
                       >
                         <Download className="h-4 w-4 mr-2" />
                         Descargar
+                      </Button>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Tab: Documentos Compartidos */}
+          <TabsContent value="compartidos" className="mt-6">
+            {sharedDocuments.length === 0 ? (
+              <Card className="p-12 text-center">
+                <Eye className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600">No hay documentos compartidos</p>
+              </Card>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {sharedDocuments.map((share) => {
+                  const doc = share.document;
+                  const isNew = !share.visto;
+
+                  return (
+                    <Card key={share.id} className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-5 w-5 text-primary" />
+                          {isNew && (
+                            <Badge variant="destructive" className="text-xs">
+                              Nuevo
+                            </Badge>
+                          )}
+                        </div>
+                        <Badge variant="outline">{doc.tipo}</Badge>
+                      </div>
+                      
+                      <h3 className="font-semibold mb-2 line-clamp-1">
+                        {doc.nombre}
+                      </h3>
+
+                      {doc.descripcion && (
+                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                          {doc.descripcion}
+                        </p>
+                      )}
+
+                      <div className="space-y-2 text-sm text-gray-600 mb-4">
+                        {doc.unit && (
+                          <div className="flex items-center gap-2">
+                            <Home className="h-4 w-4" />
+                            <span>{doc.unit.building.nombre} - Unidad {doc.unit.numero}</span>
+                          </div>
+                        )}
+                        {doc.building && !doc.unit && (
+                          <div className="flex items-center gap-2">
+                            <Home className="h-4 w-4" />
+                            <span>{doc.building.nombre}</span>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4" />
+                          <span>Compartido: {format(new Date(share.createdAt), 'dd MMM yyyy', { locale: es })}</span>
+                        </div>
+                      </div>
+
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => window.open(`/api/documents/${doc.id}/download`, '_blank')}
+                        disabled={!share.puedeDescargar}
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        {share.puedeDescargar ? 'Descargar' : 'Sin permiso de descarga'}
                       </Button>
                     </Card>
                   );

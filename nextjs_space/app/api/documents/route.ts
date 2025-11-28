@@ -15,6 +15,7 @@ export async function GET(req: NextRequest) {
   const unitId = searchParams.get('unitId');
   const buildingId = searchParams.get('buildingId');
   const contractId = searchParams.get('contractId');
+  const folderId = searchParams.get('folderId');
   const tipo = searchParams.get('tipo');
 
   try {
@@ -23,6 +24,7 @@ export async function GET(req: NextRequest) {
     if (unitId) where.unitId = unitId;
     if (buildingId) where.buildingId = buildingId;
     if (contractId) where.contractId = contractId;
+    if (folderId) where.folderId = folderId;
     if (tipo) where.tipo = tipo;
 
     const documents = await prisma.document.findMany({
@@ -32,6 +34,13 @@ export async function GET(req: NextRequest) {
         unit: { select: { numero: true } },
         building: { select: { nombre: true } },
         contract: { select: { id: true } },
+        folder: { select: { nombre: true, color: true } },
+        _count: {
+          select: {
+            versions: true,
+            shares: true,
+          },
+        },
       },
       orderBy: { fechaSubida: 'desc' },
     });
@@ -58,6 +67,9 @@ export async function POST(req: NextRequest) {
     const unitId = formData.get('unitId') as string | null;
     const buildingId = formData.get('buildingId') as string | null;
     const contractId = formData.get('contractId') as string | null;
+    const folderId = formData.get('folderId') as string | null;
+    const descripcion = formData.get('descripcion') as string | null;
+    const tags = formData.get('tags') as string | null;
     const fechaVencimiento = formData.get('fechaVencimiento') as string | null;
 
     if (!file || !nombre || !tipo) {
@@ -69,6 +81,9 @@ export async function POST(req: NextRequest) {
     const fileName = `documents/${Date.now()}-${file.name}`;
     const cloudStoragePath = await uploadFile(buffer, fileName);
 
+    // Parse tags
+    const tagsArray = tags ? JSON.parse(tags) : [];
+
     // Create document record
     const document = await prisma.document.create({
       data: {
@@ -79,6 +94,9 @@ export async function POST(req: NextRequest) {
         unitId: unitId || undefined,
         buildingId: buildingId || undefined,
         contractId: contractId || undefined,
+        folderId: folderId || undefined,
+        descripcion: descripcion || undefined,
+        tags: tagsArray,
         fechaVencimiento: fechaVencimiento ? new Date(fechaVencimiento) : undefined,
       },
       include: {
@@ -86,6 +104,19 @@ export async function POST(req: NextRequest) {
         unit: { select: { numero: true } },
         building: { select: { nombre: true } },
         contract: { select: { id: true } },
+        folder: { select: { nombre: true, color: true } },
+      },
+    });
+
+    // Create first version
+    await prisma.documentVersion.create({
+      data: {
+        documentId: document.id,
+        versionNumero: 1,
+        cloud_storage_path: cloudStoragePath,
+        tamano: file.size,
+        uploadedBy: session.user.id,
+        comentario: 'Versi\u00f3n inicial',
       },
     });
 

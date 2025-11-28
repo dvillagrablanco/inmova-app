@@ -229,6 +229,7 @@ model Tenant {
   messagesReceived  Message[]         @relation("MessageRecipient")
   messagesSent      Message[]         @relation("MessageSender")
   stripeCustomer    StripeCustomer?
+  documentShares    DocumentShare[]
 
   @@map("tenants")
 }
@@ -477,6 +478,10 @@ model Document {
   unitId            String?
   buildingId        String?
   contractId        String?
+  folderId          String?
+  versionActual     Int             @default(1)
+  tags              String[]        @default([])
+  descripcion       String?         @db.Text
   fechaSubida       DateTime        @default(now())
   fechaVencimiento  DateTime?
   createdAt         DateTime        @default(now())
@@ -486,7 +491,11 @@ model Document {
   unit              Unit?           @relation(fields: [unitId], references: [id], onDelete: Cascade)
   building          Building?       @relation(fields: [buildingId], references: [id], onDelete: Cascade)
   contract          Contract?       @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  folder            DocumentFolder? @relation("FolderDocuments", fields: [folderId], references: [id], onDelete: SetNull)
+  versions          DocumentVersion[]
+  shares            DocumentShare[]
 
+  @@index([folderId])
   @@map("documents")
 }
 
@@ -896,4 +905,90 @@ model EmailRecipient {
 
   @@index([campaignId])
   @@map("email_recipients")
+}
+
+model DocumentFolder {
+  id                String           @id @default(cuid())
+  companyId         String
+  nombre            String
+  descripcion       String?          @db.Text
+  parentFolderId    String?
+  color             String?          @default("#000000")
+  icono             String?          @default("Folder")
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  parentFolder      DocumentFolder?  @relation("FolderHierarchy", fields: [parentFolderId], references: [id], onDelete: Cascade)
+  subFolders        DocumentFolder[] @relation("FolderHierarchy")
+  documents         Document[]       @relation("FolderDocuments")
+
+  @@index([companyId])
+  @@index([parentFolderId])
+  @@map("document_folders")
+}
+
+model DocumentVersion {
+  id                String   @id @default(cuid())
+  documentId        String
+  versionNumero     Int
+  cloud_storage_path String
+  tamano            Int
+  uploadedBy        String
+  comentario        String?  @db.Text
+  createdAt         DateTime @default(now())
+
+  document          Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+  @@map("document_versions")
+}
+
+model DocumentTemplate {
+  id                String   @id @default(cuid())
+  companyId         String
+  nombre            String
+  descripcion       String?  @db.Text
+  tipo              String
+  contenido         String   @db.Text
+  variables         String[] @default([])
+  activo            Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([companyId])
+  @@map("document_templates")
+}
+
+model DocumentShare {
+  id                String   @id @default(cuid())
+  documentId        String
+  tenantId          String
+  compartidoPor     String
+  puedeDescargar    Boolean  @default(true)
+  puedeEditar       Boolean  @default(false)
+  notificado        Boolean  @default(false)
+  visto             Boolean  @default(false)
+  fechaVisto        DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  document          Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+  @@index([tenantId])
+  @@map("document_shares")
+}
+
+model DocumentTag {
+  id                String   @id @default(cuid())
+  companyId         String
+  nombre            String
+  color             String   @default("#000000")
+  documentos        String[] @default([])
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([companyId])
+  @@map("document_tags")
 }
