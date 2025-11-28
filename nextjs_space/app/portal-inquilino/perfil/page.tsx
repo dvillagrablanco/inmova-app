@@ -19,14 +19,12 @@ interface TenantData {
   email: string;
   telefono: string;
   dni: string;
-  cuentaBancaria?: string | null;
   direccionActual?: string | null;
-  profesion?: string | null;
-  empresaTrabajo?: string | null;
-  telefonoTrabajo?: string | null;
+  empresa?: string | null;
+  puesto?: string | null;
+  antiguedad?: number | null;
   ingresosMensuales?: number | null;
-  contactoEmergencia?: string | null;
-  telefonoEmergencia?: string | null;
+  notas?: string | null;
 }
 
 export default function PerfilInquilinoPage() {
@@ -217,9 +215,8 @@ export default function PerfilInquilinoPage() {
 
         {/* Tabs */}
         <Tabs defaultValue="personal" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="personal">Datos Personales</TabsTrigger>
-            <TabsTrigger value="contacto">Contacto</TabsTrigger>
             <TabsTrigger value="seguridad">Seguridad</TabsTrigger>
           </TabsList>
 
@@ -251,27 +248,28 @@ export default function PerfilInquilinoPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="profesion">Profesión</Label>
+                    <Label htmlFor="puesto">Puesto</Label>
                     <Input
-                      id="profesion"
-                      value={formData.profesion || ''}
-                      onChange={(e) => setFormData({ ...formData, profesion: e.target.value })}
+                      id="puesto"
+                      value={formData.puesto || ''}
+                      onChange={(e) => setFormData({ ...formData, puesto: e.target.value })}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="empresaTrabajo">Empresa</Label>
+                    <Label htmlFor="empresa">Empresa</Label>
                     <Input
-                      id="empresaTrabajo"
-                      value={formData.empresaTrabajo || ''}
-                      onChange={(e) => setFormData({ ...formData, empresaTrabajo: e.target.value })}
+                      id="empresa"
+                      value={formData.empresa || ''}
+                      onChange={(e) => setFormData({ ...formData, empresa: e.target.value })}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="telefonoTrabajo">Teléfono Trabajo</Label>
+                    <Label htmlFor="antiguedad">Antigüedad (años)</Label>
                     <Input
-                      id="telefonoTrabajo"
-                      value={formData.telefonoTrabajo || ''}
-                      onChange={(e) => setFormData({ ...formData, telefonoTrabajo: e.target.value })}
+                      id="antiguedad"
+                      type="number"
+                      value={formData.antiguedad || ''}
+                      onChange={(e) => setFormData({ ...formData, antiguedad: parseInt(e.target.value) || 0 })}
                     />
                   </div>
                   <div className="space-y-2">
@@ -292,11 +290,20 @@ export default function PerfilInquilinoPage() {
                     />
                   </div>
                   <div className="space-y-2 sm:col-span-2">
-                    <Label htmlFor="cuentaBancaria">Cuenta Bancaria (IBAN)</Label>
+                    <Label htmlFor="email">Email</Label>
                     <Input
-                      id="cuentaBancaria"
-                      value={formData.cuentaBancaria || ''}
-                      onChange={(e) => setFormData({ ...formData, cuentaBancaria: e.target.value })}
+                      id="email"
+                      type="email"
+                      value={formData.email || ''}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2 sm:col-span-2">
+                    <Label htmlFor="telefono">Teléfono</Label>
+                    <Input
+                      id="telefono"
+                      value={formData.telefono || ''}
+                      onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
                     />
                   </div>
                 </div>
@@ -308,63 +315,6 @@ export default function PerfilInquilinoPage() {
           </TabsContent>
 
           {/* Contacto */}
-          <TabsContent value="contacto">
-            <Card>
-              <CardHeader>
-                <CardTitle>Datos de Contacto</CardTitle>
-                <CardDescription>
-                  Actualiza tu información de contacto y emergencia
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email || ''}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="telefono">Teléfono</Label>
-                    <Input
-                      id="telefono"
-                      value={formData.telefono || ''}
-                      onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div className="rounded-lg border p-4">
-                  <h3 className="mb-4 font-semibold">Contacto de Emergencia</h3>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="contactoEmergencia">Nombre</Label>
-                      <Input
-                        id="contactoEmergencia"
-                        value={formData.contactoEmergencia || ''}
-                        onChange={(e) => setFormData({ ...formData, contactoEmergencia: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="telefonoEmergencia">Teléfono</Label>
-                      <Input
-                        id="telefonoEmergencia"
-                        value={formData.telefonoEmergencia || ''}
-                        onChange={(e) => setFormData({ ...formData, telefonoEmergencia: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <Button onClick={handleUpdateProfile} disabled={isSaving}>
-                  {isSaving ? 'Guardando...' : 'Guardar Cambios'}
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
 
           {/* Seguridad */}
           <TabsContent value="seguridad">

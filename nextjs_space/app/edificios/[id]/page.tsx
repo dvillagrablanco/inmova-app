@@ -524,7 +524,7 @@ export default function EdificioDetallePage() {
                   <PhotoGallery
                     entityType="building"
                     entityId={building.id}
-                    canUpdate={canUpdate}
+                    canEdit={canUpdate}
                   />
                 </CardContent>
               </Card>

@@ -62,10 +62,12 @@ export async function PATCH(request: Request) {
     const body = await request.json();
     const {
       nombreCompleto,
+      email,
       telefono,
       direccionActual,
       empresa,
       puesto,
+      antiguedad,
       ingresosMensuales,
     } = body;
 
@@ -73,10 +75,12 @@ export async function PATCH(request: Request) {
       where: { id: tenant.id },
       data: {
         nombreCompleto,
+        email,
         telefono,
         direccionActual,
         empresa,
         puesto,
+        antiguedad,
         ingresosMensuales,
       },
     });

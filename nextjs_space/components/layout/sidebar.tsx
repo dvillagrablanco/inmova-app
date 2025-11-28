@@ -26,6 +26,7 @@ import {
   Settings,
   Upload,
   Shield,
+  CheckSquare,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -43,6 +44,7 @@ const allNavItems = [
   { name: 'Pagos', href: '/pagos', icon: CreditCard, roles: ['administrador', 'gestor'] },
   { name: 'Calendario', href: '/calendario', icon: Calendar, roles: ['administrador', 'gestor', 'operador'] },
   { name: 'Mantenimiento', href: '/mantenimiento', icon: Wrench, roles: ['administrador', 'gestor', 'operador'] },
+  { name: 'Tareas', href: '/tareas', icon: CheckSquare, roles: ['administrador', 'gestor', 'operador'] },
   { name: 'Mtto. Preventivo', href: '/mantenimiento-preventivo', icon: Calendar, roles: ['administrador', 'gestor', 'operador'] },
   { name: 'Documentos', href: '/documentos', icon: Folder, roles: ['administrador', 'gestor'] },
   { name: 'Proveedores', href: '/proveedores', icon: UsersRound, roles: ['administrador', 'gestor'] },
