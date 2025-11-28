@@ -16,27 +16,19 @@ export async function calculateOccupancyMetrics(
       building: { companyId },
     },
     include: {
-      contracts: {
-        where: {
-          OR: [
-            {
-              AND: [
-                { fechaInicio: { lte: endDate } },
-                { fechaFin: { gte: startDate } },
-              ],
-            },
-            {
-              fechaInicio: { lte: endDate },
-              fechaFin: null,
-            },
-          ],
-        },
-      },
+      contracts: true,
     },
   });
 
   const totalUnits = units.length;
-  const occupiedUnits = units.filter((u: any) => u.contracts && u.contracts.length > 0).length;
+  const occupiedUnits = units.filter((u: any) => {
+    if (!u.contracts || u.contracts.length === 0) return false;
+    return u.contracts.some((c: any) => {
+      const inicio = new Date(c.fechaInicio);
+      const fin = c.fechaFin ? new Date(c.fechaFin) : null;
+      return inicio <= endDate && (!fin || fin >= startDate);
+    });
+  }).length;
   const occupancyRate = totalUnits > 0 ? (occupiedUnits / totalUnits) * 100 : 0;
 
   return {
@@ -263,7 +255,7 @@ export async function compareMultiPeriod(
   metric: 'revenue' | 'occupancy' | 'payments',
   periods: number = 3
 ) {
-  const comparisons = [];
+  const comparisons: Array<{ periodo: string; value: number; variation?: number }> = [];
   const now = new Date();
 
   for (let i = periods - 1; i >= 0; i--) {

@@ -160,6 +160,8 @@ model User {
   tasksAsignadas Task[]         @relation("TaskAssignedTo")
   tasksCreadas   Task[]         @relation("TaskCreatedBy")
   auditLogs     AuditLog[]
+  preferences    UserPreference?
+  securityEvents SecurityEvent[]
 
   @@map("users")
 }
@@ -1477,14 +1479,18 @@ enum LegalTemplateCategory {
 
 enum InspectionStatus {
   programada
+  en_progreso
   completada
   pendiente_accion
+  cancelada
 }
 
 enum InspectionType {
   entrada
   salida
   periodica
+  precompra
+  mantenimiento
   emergencia
 }
 
@@ -1888,4 +1894,84 @@ model EnergyAlert {
   @@index([tipo])
   @@index([resuelta])
   @@map("energy_alerts")
+}
+
+
+
+// ============================================
+// PAQUETE 15: MULTIIDIOMA (Solo metadata)
+// ============================================
+
+model UserPreference {
+  id                String       @id @default(cuid())
+  userId            String       @unique
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  language          String       @default("es") // "es", "en"
+  timezone          String       @default("Europe/Madrid")
+  dateFormat        String       @default("DD/MM/YYYY")
+  currency          String       @default("EUR")
+  theme             String       @default("light") // "light", "dark"
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@map("user_preferences")
+}
+
+// ============================================
+// PAQUETE 16: AUDITORÍA AVANZADA
+// ============================================
+
+enum AuditSeverity {
+  info
+  warning
+  error
+  critical
+}
+
+model AuditReport {
+  id                String         @id @default(cuid())
+  companyId         String
+  titulo            String
+  descripcion       String?        @db.Text
+  tipoReporte       String         // "accesos", "cambios", "errores", "seguridad"
+  fechaInicio       DateTime
+  fechaFin          DateTime
+  filtros           Json?          // Filtros aplicados al reporte
+  totalEventos      Int            @default(0)
+  eventosError      Int            @default(0)
+  eventosCriticos   Int            @default(0)
+  usuariosAfectados Int            @default(0)
+  generadoPor       String
+  reportPath        String?        // Si se exporta a PDF/Excel
+  createdAt         DateTime       @default(now())
+
+  @@index([companyId])
+  @@index([tipoReporte])
+  @@index([createdAt])
+  @@map("audit_reports")
+}
+
+model SecurityEvent {
+  id                String         @id @default(cuid())
+  companyId         String
+  tipo              String         // "login_failed", "access_denied", "suspicious_activity"
+  severidad         AuditSeverity  @default(warning)
+  userId            String?
+  user              User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  ipAddress         String?
+  userAgent         String?        @db.Text
+  descripcion       String         @db.Text
+  detalles          Json?
+  resuelta          Boolean        @default(false)
+  resolucionNota    String?        @db.Text
+  resueltoPor       String?
+  fechaResolucion   DateTime?
+  createdAt         DateTime       @default(now())
+
+  @@index([companyId])
+  @@index([tipo])
+  @@index([severidad])
+  @@index([resuelta])
+  @@index([createdAt])
+  @@map("security_events")
 }
