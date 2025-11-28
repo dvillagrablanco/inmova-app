@@ -13,13 +13,13 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
 
     const body = await request.json();
-    const { confirmada, asistio, feedback } = body;
+    const { confirmada, asistio, realizada, feedback } = body;
 
     const visit = await prisma.visit.update({
       where: { id: params.id },
       data: {
         confirmada,
-        asistio,
+        asistio: asistio ?? realizada,
         feedback,
       },
       include: {
@@ -40,6 +40,10 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     console.error('Error updating visit:', error);
     return NextResponse.json({ error: 'Error al actualizar visita' }, { status: 500 });
   }
+}
+
+export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+  return PUT(request, { params });
 }
 
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {

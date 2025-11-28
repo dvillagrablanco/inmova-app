@@ -17,6 +17,7 @@ import {
   Wrench,
   Home,
 } from 'lucide-react';
+import { AdvancedAnalytics } from './components/advanced-analytics';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import Link from 'next/link';
 
@@ -45,6 +46,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
   const [data, setData] = useState<DashboardData | null>(null);
+  const [analyticsData, setAnalyticsData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -59,6 +61,13 @@ export default function DashboardPage() {
         const response = await fetch('/api/dashboard');
         if (response.ok) {
           const dashboardData = await response.json();
+
+        // Fetch analytics data
+        const analyticsResponse = await fetch('/api/dashboard/analytics');
+        if (analyticsResponse.ok) {
+          const analytics = await analyticsResponse.json();
+          setAnalyticsData(analytics);
+        }
           setData(dashboardData);
         }
       } catch (error) {
@@ -367,6 +376,14 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
+          {/* Advanced Analytics Section */}
+          {analyticsData && analyticsData.monthlyData && (
+            <div className="mt-8">
+              <h2 className="mb-4 text-2xl font-bold">Analytics Avanzados</h2>
+              <AdvancedAnalytics monthlyData={analyticsData.monthlyData} />
+            </div>
+          )}
       </main>
       </div>
     </div>

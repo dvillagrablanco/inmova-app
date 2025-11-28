@@ -1,0 +1,92 @@
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
+
+export const dynamic = 'force-dynamic';
+
+export async function GET() {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const user = session.user as any;
+    const tenantEmail = user.email;
+
+    // Buscar inquilino por email
+    const tenant = await prisma.tenant.findFirst({
+      where: { email: tenantEmail },
+    });
+
+    if (!tenant) {
+      return NextResponse.json(
+        { error: 'Inquilino no encontrado' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(tenant);
+  } catch (error) {
+    console.error('Error fetching tenant profile:', error);
+    return NextResponse.json(
+      { error: 'Error al obtener perfil' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const user = session.user as any;
+    const tenantEmail = user.email;
+
+    // Buscar inquilino por email
+    const tenant = await prisma.tenant.findFirst({
+      where: { email: tenantEmail },
+    });
+
+    if (!tenant) {
+      return NextResponse.json(
+        { error: 'Inquilino no encontrado' },
+        { status: 404 }
+      );
+    }
+
+    const body = await request.json();
+    const {
+      nombreCompleto,
+      telefono,
+      direccionActual,
+      empresa,
+      puesto,
+      ingresosMensuales,
+    } = body;
+
+    const updatedTenant = await prisma.tenant.update({
+      where: { id: tenant.id },
+      data: {
+        nombreCompleto,
+        telefono,
+        direccionActual,
+        empresa,
+        puesto,
+        ingresosMensuales,
+      },
+    });
+
+    return NextResponse.json(updatedTenant);
+  } catch (error) {
+    console.error('Error updating tenant profile:', error);
+    return NextResponse.json(
+      { error: 'Error al actualizar perfil' },
+      { status: 500 }
+    );
+  }
+}

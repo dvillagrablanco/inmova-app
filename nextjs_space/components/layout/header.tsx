@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
+import { GlobalSearch } from '@/components/ui/global-search';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -62,7 +63,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-10 border-b bg-background shadow-sm">
-      <div className="flex h-14 items-center justify-between px-4 md:px-6">
+      <div className="flex h-14 items-center justify-between gap-4 px-4 md:px-6">
         {/* Empresa Info */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 rounded-lg bg-muted px-3 py-2">
@@ -72,6 +73,11 @@ export function Header() {
               <span className="text-xs text-muted-foreground">Gestión Inmobiliaria</span>
             </div>
           </div>
+        </div>
+
+        {/* Global Search */}
+        <div className="hidden flex-1 md:flex md:max-w-md">
+          <GlobalSearch />
         </div>
 
         {/* Right Side Actions */}
