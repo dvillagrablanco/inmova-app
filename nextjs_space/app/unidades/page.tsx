@@ -4,15 +4,62 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
-import { Home, Plus, Building2, User } from 'lucide-react';
-import Link from 'next/link';
+import { Header } from '@/components/layout/header';
+import { Home, Plus, Building2, User, ArrowLeft, MoreVertical, Eye, Search, Square, Maximize } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { usePermissions } from '@/lib/hooks/usePermissions';
+
+interface Unit {
+  id: string;
+  numero: string;
+  tipo: string;
+  estado: string;
+  superficie: number;
+  habitaciones?: number;
+  banos?: number;
+  rentaMensual: number;
+  building: {
+    nombre: string;
+  };
+  tenant?: {
+    nombreCompleto: string;
+  };
+}
 
 export default function UnidadesPage() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
-  const [units, setUnits] = useState<any[]>([]);
+  const { canCreate } = usePermissions();
+  const [units, setUnits] = useState<Unit[]>([]);
+  const [filteredUnits, setFilteredUnits] = useState<Unit[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [filter, setFilter] = useState({ estado: '', tipo: '' });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [estadoFilter, setEstadoFilter] = useState<string>('all');
+  const [tipoFilter, setTipoFilter] = useState<string>('all');
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -23,14 +70,11 @@ export default function UnidadesPage() {
   useEffect(() => {
     const fetchUnits = async () => {
       try {
-        const params = new URLSearchParams();
-        if (filter.estado) params.append('estado', filter.estado);
-        if (filter.tipo) params.append('tipo', filter.tipo);
-        
-        const response = await fetch(`/api/units?${params.toString()}`);
+        const response = await fetch('/api/units');
         if (response.ok) {
           const data = await response.json();
           setUnits(data);
+          setFilteredUnits(data);
         }
       } catch (error) {
         console.error('Error fetching units:', error);
@@ -42,130 +86,284 @@ export default function UnidadesPage() {
     if (status === 'authenticated') {
       fetchUnits();
     }
-  }, [status, filter]);
+  }, [status]);
+
+  useEffect(() => {
+    let filtered = units;
+
+    if (searchTerm) {
+      filtered = filtered.filter((unit) =>
+        unit.numero.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        unit.building.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        unit.tenant?.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (estadoFilter && estadoFilter !== 'all') {
+      filtered = filtered.filter((unit) => unit.estado === estadoFilter);
+    }
+
+    if (tipoFilter && tipoFilter !== 'all') {
+      filtered = filtered.filter((unit) => unit.tipo === tipoFilter);
+    }
+
+    setFilteredUnits(filtered);
+  }, [searchTerm, estadoFilter, tipoFilter, units]);
 
   if (status === 'loading' || isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   if (!session) return null;
 
-  const getEstadoBadgeColor = (estado: string) => {
-    switch (estado) {
-      case 'ocupada': return 'bg-green-100 text-green-800';
-      case 'disponible': return 'bg-blue-100 text-blue-800';
-      case 'en_mantenimiento': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+  const getEstadoBadge = (estado: string) => {
+    const badges: Record<string, { variant: any; label: string }> = {
+      ocupada: { variant: 'default', label: 'Ocupada' },
+      disponible: { variant: 'secondary', label: 'Disponible' },
+      en_mantenimiento: { variant: 'outline', label: 'En Mantenimiento' },
+    };
+    return badges[estado] || { variant: 'default', label: estado };
   };
 
+  const getTipoLabel = (tipo: string) => {
+    const tipos: Record<string, string> = {
+      vivienda: 'Vivienda',
+      local: 'Local',
+      garaje: 'Garaje',
+      trastero: 'Trastero',
+    };
+    return tipos[tipo] || tipo;
+  };
+
+  const unitsOcupadas = units.filter((u) => u.estado === 'ocupada').length;
+  const unitsDisponibles = units.filter((u) => u.estado === 'disponible').length;
+  const ocupacionRate = units.length > 0 ? Math.round((unitsOcupadas / units.length) * 100) : 0;
+
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen overflow-hidden bg-muted/30">
       <Sidebar />
-      <main className="flex-1 ml-0 lg:ml-64 overflow-y-auto">
-        <div className="max-w-7xl mx-auto p-6 lg:p-8">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Unidades</h1>
-              <p className="text-gray-600 mt-1">Gestiona todas las unidades</p>
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Header />
+        <main className="flex-1 overflow-y-auto">
+          <div className="container mx-auto p-6 space-y-6">
+            {/* Botón Volver y Breadcrumbs */}
+            <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push('/dashboard')}
+                className="gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Volver al Dashboard
+              </Button>
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink href="/dashboard">
+                      <Home className="h-4 w-4" />
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>Unidades</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
             </div>
-            <button
-              onClick={() => router.push('/unidades/nuevo')}
-              className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800"
-            >
-              <Plus size={20} />
-              Nueva Unidad
-            </button>
-          </div>
 
-          {/* Filters */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <select
-                value={filter.estado}
-                onChange={(e) => setFilter({ ...filter, estado: e.target.value })}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black"
-              >
-                <option value="">Todos los estados</option>
-                <option value="ocupada">Ocupada</option>
-                <option value="disponible">Disponible</option>
-                <option value="en_mantenimiento">En Mantenimiento</option>
-              </select>
-              <select
-                value={filter.tipo}
-                onChange={(e) => setFilter({ ...filter, tipo: e.target.value })}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black"
-              >
-                <option value="">Todos los tipos</option>
-                <option value="vivienda">Vivienda</option>
-                <option value="local">Local</option>
-                <option value="garaje">Garaje</option>
-                <option value="trastero">Trastero</option>
-              </select>
+            {/* Header Section */}
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Unidades</h1>
+                <p className="text-muted-foreground">
+                  Gestiona las unidades de tus propiedades
+                </p>
+              </div>
+              {canCreate && (
+                <Button onClick={() => router.push('/unidades/nuevo')}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Nueva Unidad
+                </Button>
+              )}
             </div>
-          </div>
 
-          {/* Units Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {units.map((unit) => (
-              <Link
-                key={unit?.id}
-                href={`/unidades/${unit?.id}`}
-                className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all group"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="p-3 bg-gray-100 rounded-lg group-hover:bg-black group-hover:text-white transition-colors">
-                    <Home size={24} />
+            {/* Search and Filters */}
+            <div className="grid gap-4 md:grid-cols-3">
+              <Card className="md:col-span-3">
+                <CardContent className="pt-6">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      placeholder="Buscar por número, edificio o inquilino..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${getEstadoBadgeColor(unit?.estado)}`}>
-                    {unit?.estado?.replace('_', ' ')}
-                  </span>
-                </div>
+                </CardContent>
+              </Card>
+              <Select value={estadoFilter} onValueChange={setEstadoFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todos los estados" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los estados</SelectItem>
+                  <SelectItem value="ocupada">Ocupada</SelectItem>
+                  <SelectItem value="disponible">Disponible</SelectItem>
+                  <SelectItem value="en_mantenimiento">En Mantenimiento</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={tipoFilter} onValueChange={setTipoFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todos los tipos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los tipos</SelectItem>
+                  <SelectItem value="vivienda">Vivienda</SelectItem>
+                  <SelectItem value="local">Local</SelectItem>
+                  <SelectItem value="garaje">Garaje</SelectItem>
+                  <SelectItem value="trastero">Trastero</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  {unit?.building?.nombre} - {unit?.numero}
-                </h3>
-
-                <div className="space-y-2 text-sm text-gray-600 mb-4">
-                  <div className="flex items-center gap-2">
-                    <Building2 size={16} />
-                    <span>{unit?.tipo}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span>{unit?.superficie}m²</span>
-                    {unit?.habitaciones && <span>• {unit.habitaciones} hab.</span>}
-                    {unit?.banos && <span>• {unit.banos} baños</span>}
-                  </div>
-                  {unit?.tenant && (
-                    <div className="flex items-center gap-2">
-                      <User size={16} />
-                      <span>{unit.tenant.nombreCompleto}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="pt-4 border-t border-gray-100">
-                  <p className="text-xs text-gray-500">Renta mensual</p>
-                  <p className="text-lg font-bold text-gray-900">
-                    €{unit?.rentaMensual?.toLocaleString('es-ES')}
+            {/* Stats Summary */}
+            <div className="grid gap-4 md:grid-cols-3">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Unidades</CardTitle>
+                  <Square className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{units.length}</div>
+                  <p className="text-xs text-muted-foreground">Registradas</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Unidades Ocupadas</CardTitle>
+                  <Home className="h-4 w-4 text-green-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-green-600">{unitsOcupadas}</div>
+                  <p className="text-xs text-muted-foreground">
+                    {ocupacionRate}% de ocupación
                   </p>
-                </div>
-              </Link>
-            ))}
-          </div>
-
-          {units.length === 0 && (
-            <div className="text-center py-12">
-              <Home size={48} className="mx-auto text-gray-300 mb-4" />
-              <p className="text-gray-500">No hay unidades registradas</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Disponibles</CardTitle>
+                  <Maximize className="h-4 w-4 text-blue-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-blue-600">{unitsDisponibles}</div>
+                  <p className="text-xs text-muted-foreground">Listas para alquilar</p>
+                </CardContent>
+              </Card>
             </div>
-          )}
-        </div>
-      </main>
+
+            {/* Units List */}
+            <div className="grid gap-4">
+              {filteredUnits.map((unit) => {
+                const estadoBadge = getEstadoBadge(unit.estado);
+
+                return (
+                  <Card key={unit.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="pt-6">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                        <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
+                          <div className="p-3 bg-primary/10 rounded-lg flex-shrink-0">
+                            <Home className="h-6 w-6 text-primary" />
+                          </div>
+                          <div className="flex-1 space-y-2 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h3 className="text-base sm:text-lg font-semibold break-words">
+                                {unit.building.nombre} - Unidad {unit.numero}
+                              </h3>
+                              <Badge variant={estadoBadge.variant}>{estadoBadge.label}</Badge>
+                            </div>
+                            <div className="grid gap-2 text-sm text-muted-foreground">
+                              <div className="flex items-center gap-2 min-w-0 flex-wrap">
+                                <Building2 className="h-4 w-4 flex-shrink-0" />
+                                <span>{getTipoLabel(unit.tipo)}</span>
+                                <span>•</span>
+                                <span>{unit.superficie}m²</span>
+                                {unit.habitaciones && (
+                                  <>
+                                    <span>•</span>
+                                    <span>{unit.habitaciones} hab.</span>
+                                  </>
+                                )}
+                                {unit.banos && (
+                                  <>
+                                    <span>•</span>
+                                    <span>{unit.banos} baños</span>
+                                  </>
+                                )}
+                              </div>
+                              {unit.tenant && (
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <User className="h-4 w-4 flex-shrink-0" />
+                                  <span className="truncate">{unit.tenant.nombreCompleto}</span>
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 bg-muted/50 p-2 rounded-md">
+                              <span className="text-xs text-muted-foreground">Renta mensual:</span>
+                              <span className="text-base font-bold text-green-600">
+                                €{unit.rentaMensual.toLocaleString('es-ES')}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="self-start">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => router.push(`/unidades/${unit.id}`)}>
+                              <Eye className="mr-2 h-4 w-4" />
+                              Ver Detalles
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+
+            {filteredUnits.length === 0 && (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Home className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No se encontraron unidades</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {searchTerm || estadoFilter !== 'all' || tipoFilter !== 'all'
+                      ? 'Intenta con otros criterios de búsqueda'
+                      : 'Comienza agregando tu primera unidad'}
+                  </p>
+                  {canCreate && !searchTerm && estadoFilter === 'all' && tipoFilter === 'all' && (
+                    <Button onClick={() => router.push('/unidades/nuevo')}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Nueva Unidad
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
