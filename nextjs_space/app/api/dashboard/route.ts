@@ -128,6 +128,45 @@ export async function GET() {
       take: 5,
     });
 
+    // Occupancy by unit type
+    const occupancyByType = await prisma.unit.groupBy({
+      by: ['tipo', 'estado'],
+      _count: true,
+    });
+
+    const unitTypeData: Record<string, { total: number; ocupadas: number }> = {};
+    occupancyByType.forEach((item) => {
+      if (!unitTypeData[item.tipo]) {
+        unitTypeData[item.tipo] = { total: 0, ocupadas: 0 };
+      }
+      unitTypeData[item.tipo].total += item._count;
+      if (item.estado === 'ocupada') {
+        unitTypeData[item.tipo].ocupadas += item._count;
+      }
+    });
+
+    const occupancyChartData = Object.entries(unitTypeData).map(([tipo, data]) => ({
+      name: tipo.charAt(0).toUpperCase() + tipo.slice(1),
+      ocupadas: data.ocupadas,
+      disponibles: data.total - data.ocupadas,
+      total: data.total,
+    }));
+
+    // Expenses by category
+    const expenses = await prisma.expense.findMany();
+    const expensesByCategory: Record<string, number> = {};
+    expenses.forEach((expense) => {
+      if (!expensesByCategory[expense.categoria]) {
+        expensesByCategory[expense.categoria] = 0;
+      }
+      expensesByCategory[expense.categoria] += expense.monto;
+    });
+
+    const expensesChartData = Object.entries(expensesByCategory).map(([categoria, monto]) => ({
+      name: categoria.charAt(0).toUpperCase() + categoria.slice(1).replace('_', ' '),
+      value: Math.round(monto * 100) / 100,
+    }));
+
     return NextResponse.json({
       kpis: {
         ingresosTotalesMensuales: Math.round(ingresosTotalesMensuales * 100) / 100,
@@ -139,6 +178,8 @@ export async function GET() {
         margenNeto: Math.round(margenNeto * 10) / 10,
       },
       monthlyIncome,
+      occupancyChartData,
+      expensesChartData,
       pagosPendientes: pagosPendientes.slice(0, 5).map((p) => ({
         ...p,
         contract: payments.find((pay) => pay.id === p.id)?.contract,

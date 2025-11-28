@@ -16,7 +16,7 @@ import {
   Wrench,
   Home,
 } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import Link from 'next/link';
 
 interface DashboardData {
@@ -30,11 +30,15 @@ interface DashboardData {
     margenNeto: number;
   };
   monthlyIncome: Array<{ mes: string; ingresos: number }>;
+  occupancyChartData: Array<{ name: string; ocupadas: number; disponibles: number; total: number }>;
+  expensesChartData: Array<{ name: string; value: number }>;
   pagosPendientes: any[];
   contractsExpiringSoon: any[];
   maintenanceRequests: any[];
   unidadesDisponibles: any[];
 }
+
+const COLORS = ['#000000', '#4B5563', '#9CA3AF', '#D1D5DB', '#E5E7EB'];
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -163,6 +167,67 @@ export default function DashboardPage() {
                 <Bar dataKey="ingresos" fill="#000000" name="Ingresos" />
               </BarChart>
             </ResponsiveContainer>
+          </div>
+
+          {/* Additional Charts Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            {/* Occupancy by Unit Type */}
+            {data.occupancyChartData && data.occupancyChartData.length > 0 && (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-6">Ocupación por Tipo de Unidad</h2>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={data.occupancyChartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" tickLine={false} tick={{ fontSize: 10 }} />
+                    <YAxis tickLine={false} tick={{ fontSize: 10 }} />
+                    <Tooltip wrapperStyle={{ fontSize: 11 }} />
+                    <Legend verticalAlign="top" wrapperStyle={{ fontSize: 11 }} />
+                    <Bar dataKey="ocupadas" fill="#000000" name="Ocupadas" stackId="a" />
+                    <Bar dataKey="disponibles" fill="#9CA3AF" name="Disponibles" stackId="a" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+
+            {/* Expenses by Category */}
+            {data.expensesChartData && data.expensesChartData.length > 0 && (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-6">Gastos por Categoría</h2>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={data.expensesChartData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {data.expensesChartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip wrapperStyle={{ fontSize: 11 }} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="mt-4 space-y-2">
+                  {data.expensesChartData.map((item, index) => (
+                    <div key={index} className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                        />
+                        <span>{item.name}</span>
+                      </div>
+                      <span className="font-semibold">€{item.value.toLocaleString('es-ES')}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Data Tables Grid */}

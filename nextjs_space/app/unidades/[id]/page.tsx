@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
-import { Home, ArrowLeft, Building2, User } from 'lucide-react';
+import { Home, ArrowLeft, Building2, User, Image as ImageIcon, Video, FileText } from 'lucide-react';
+import Image from 'next/image';
 
 export default function UnidadDetailPage() {
   const router = useRouter();
@@ -107,6 +108,77 @@ export default function UnidadDetailPage() {
               </div>
             </div>
           </div>
+
+          {/* Galería de Fotos y Multimedia */}
+          {(unit?.imagenes?.length > 0 || unit?.tourVirtual || unit?.planos?.length > 0) && (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <ImageIcon size={24} />
+                Galería y Multimedia
+              </h2>
+
+              {/* Fotos */}
+              {unit?.imagenes?.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold mb-3">Fotos de la Unidad</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {unit.imagenes.map((img: string, idx: number) => (
+                      <div key={idx} className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden group">
+                        <Image
+                          src={img}
+                          alt={`Foto ${idx + 1} de ${unit.numero}`}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-200"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Tour Virtual */}
+              {unit?.tourVirtual && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                    <Video size={20} />
+                    Tour Virtual
+                  </h3>
+                  <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                    <iframe
+                      src={unit.tourVirtual}
+                      className="w-full h-full"
+                      allowFullScreen
+                      title="Tour Virtual"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Planos */}
+              {unit?.planos?.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                    <FileText size={20} />
+                    Planos
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {unit.planos.map((plano: string, idx: number) => (
+                      <a
+                        key={idx}
+                        href={plano}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        <FileText className="text-gray-400" size={24} />
+                        <span className="text-sm font-medium">Plano {idx + 1}</span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {unit?.tenant && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
