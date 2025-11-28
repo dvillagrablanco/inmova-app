@@ -1,18 +1,45 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { Sidebar } from '@/components/layout/sidebar';
+import { Header } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { FileText, Upload, Download, Trash2, Filter, AlertCircle } from 'lucide-react';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import {
+  FileText,
+  Upload,
+  Download,
+  Trash2,
+  Filter,
+  AlertCircle,
+  AlertTriangle,
+  ArrowLeft,
+  Home,
+  File,
+  Calendar as CalendarIcon,
+  Building2,
+  User,
+  Search,
+} from 'lucide-react';
 import { toast } from 'sonner';
+import { usePermissions } from '@/lib/hooks/usePermissions';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 interface Document {
   id: string;
@@ -29,10 +56,12 @@ interface Document {
 export default function DocumentosPage() {
   const { data: session, status } = useSession() || {};
   const router = useRouter();
+  const { canCreate } = usePermissions();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [filterTipo, setFilterTipo] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState('');
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
 
   // Upload form state
@@ -178,225 +207,385 @@ export default function DocumentosPage() {
     return labels[tipo] || tipo;
   };
 
-  const filteredDocuments = documents.filter(doc => {
-    if (filterTipo === 'all') return true;
-    return doc.tipo === filterTipo;
-  });
+  // Filtrado de documentos
+  const filteredDocuments = useMemo(() => {
+    return documents.filter(doc => {
+      const matchesSearch = searchTerm === '' ||
+        doc.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doc.tenant?.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doc.unit?.numero.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doc.building?.nombre.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesTipo = filterTipo === 'all' || doc.tipo === filterTipo;
+
+      return matchesSearch && matchesTipo;
+    });
+  }, [documents, searchTerm, filterTipo]);
+
+  // Estadísticas
+  const stats = useMemo(() => {
+    const now = new Date();
+    const in30Days = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+    return {
+      total: documents.length,
+      vencidos: documents.filter(doc => doc.fechaVencimiento && new Date(doc.fechaVencimiento) < now).length,
+      porVencer: documents.filter(doc => doc.fechaVencimiento && new Date(doc.fechaVencimiento) >= now && new Date(doc.fechaVencimiento) <= in30Days).length,
+      sinVencimiento: documents.filter(doc => !doc.fechaVencimiento).length,
+    };
+  }, [documents]);
 
   if (status === 'loading' || loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4"></div>
-          <p>Cargando documentos...</p>
-        </div>
+      <div className="flex h-screen items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
 
-  return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Documentos</h1>
-          <p className="text-muted-foreground">Gestiona todos los documentos del sistema</p>
-        </div>
-        <Dialog open={openUploadDialog} onOpenChange={setOpenUploadDialog}>
-          <DialogTrigger asChild>
-            <Button>
-              <Upload className="w-4 h-4 mr-2" />
-              Subir Documento
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Subir Nuevo Documento</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleUpload} className="space-y-4">
-              <div>
-                <Label htmlFor="file">Archivo *</Label>
-                <Input
-                  id="file"
-                  type="file"
-                  required
-                  onChange={(e) => setUploadForm({ ...uploadForm, file: e.target.files?.[0] || null })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="nombre">Nombre del documento *</Label>
-                <Input
-                  id="nombre"
-                  value={uploadForm.nombre}
-                  onChange={(e) => setUploadForm({ ...uploadForm, nombre: e.target.value })}
-                  placeholder="Ej: Contrato Juan Pérez"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="tipo">Tipo de documento *</Label>
-                <Select
-                  value={uploadForm.tipo}
-                  onValueChange={(value) => setUploadForm({ ...uploadForm, tipo: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="contrato">Contrato</SelectItem>
-                    <SelectItem value="dni">DNI</SelectItem>
-                    <SelectItem value="nomina">Nómina</SelectItem>
-                    <SelectItem value="certificado_energetico">Certificado Energético</SelectItem>
-                    <SelectItem value="ite">ITE</SelectItem>
-                    <SelectItem value="seguro">Seguro</SelectItem>
-                    <SelectItem value="factura">Factura</SelectItem>
-                    <SelectItem value="otro">Otro</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="fechaVencimiento">Fecha de vencimiento (opcional)</Label>
-                <Input
-                  id="fechaVencimiento"
-                  type="date"
-                  value={uploadForm.fechaVencimiento}
-                  onChange={(e) => setUploadForm({ ...uploadForm, fechaVencimiento: e.target.value })}
-                />
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setOpenUploadDialog(false)}>
-                  Cancelar
-                </Button>
-                <Button type="submit" disabled={uploading}>
-                  {uploading ? 'Subiendo...' : 'Subir Documento'}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
+  if (!session) return null;
 
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="w-5 h-5" />
-            Filtros
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <Label>Tipo de documento</Label>
-              <Select value={filterTipo} onValueChange={setFilterTipo}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="contrato">Contrato</SelectItem>
-                  <SelectItem value="dni">DNI</SelectItem>
-                  <SelectItem value="nomina">Nómina</SelectItem>
-                  <SelectItem value="certificado_energetico">Certificado Energético</SelectItem>
-                  <SelectItem value="ite">ITE</SelectItem>
-                  <SelectItem value="seguro">Seguro</SelectItem>
-                  <SelectItem value="factura">Factura</SelectItem>
-                  <SelectItem value="otro">Otro</SelectItem>
-                </SelectContent>
-              </Select>
+  return (
+    <div className="flex h-screen overflow-hidden bg-muted/30">
+      <Sidebar />
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Header />
+        <main className="flex-1 overflow-y-auto">
+          <div className="container mx-auto p-6 space-y-6">
+            {/* Botón Volver y Breadcrumbs */}
+            <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push('/dashboard')}
+                className="gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Volver al Dashboard
+              </Button>
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink href="/dashboard">
+                      <Home className="h-4 w-4" />
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>Documentos</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
+            </div>
+
+            {/* Header Section */}
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Documentos</h1>
+                <p className="text-muted-foreground">
+                  Gestiona todos los documentos del sistema
+                </p>
+              </div>
+              {canCreate && (
+                <Dialog open={openUploadDialog} onOpenChange={setOpenUploadDialog}>
+                  <DialogTrigger asChild>
+                    <Button>
+                      <Upload className="mr-2 h-4 w-4" />
+                      Subir Documento
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Subir Nuevo Documento</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleUpload} className="space-y-4">
+                      <div>
+                        <Label htmlFor="file">Archivo *</Label>
+                        <Input
+                          id="file"
+                          type="file"
+                          required
+                          onChange={(e) => setUploadForm({ ...uploadForm, file: e.target.files?.[0] || null })}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="nombre">Nombre del documento *</Label>
+                        <Input
+                          id="nombre"
+                          value={uploadForm.nombre}
+                          onChange={(e) => setUploadForm({ ...uploadForm, nombre: e.target.value })}
+                          placeholder="Ej: Contrato Juan Pérez"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="tipo">Tipo de documento *</Label>
+                        <Select
+                          value={uploadForm.tipo}
+                          onValueChange={(value) => setUploadForm({ ...uploadForm, tipo: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="contrato">Contrato</SelectItem>
+                            <SelectItem value="dni">DNI</SelectItem>
+                            <SelectItem value="nomina">Nómina</SelectItem>
+                            <SelectItem value="certificado_energetico">Certificado Energético</SelectItem>
+                            <SelectItem value="ite">ITE</SelectItem>
+                            <SelectItem value="seguro">Seguro</SelectItem>
+                            <SelectItem value="factura">Factura</SelectItem>
+                            <SelectItem value="otro">Otro</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="fechaVencimiento">Fecha de vencimiento (opcional)</Label>
+                        <Input
+                          id="fechaVencimiento"
+                          type="date"
+                          value={uploadForm.fechaVencimiento}
+                          onChange={(e) => setUploadForm({ ...uploadForm, fechaVencimiento: e.target.value })}
+                        />
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <Button type="button" variant="outline" onClick={() => setOpenUploadDialog(false)}>
+                          Cancelar
+                        </Button>
+                        <Button type="submit" disabled={uploading}>
+                          {uploading ? 'Subiendo...' : 'Subir Documento'}
+                        </Button>
+                      </div>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+              )}
+            </div>
+
+            {/* Estadísticas */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Total
+                  </CardTitle>
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.total}</div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Vencidos
+                  </CardTitle>
+                  <AlertCircle className="h-4 w-4 text-red-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.vencidos}</div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Por Vencer
+                  </CardTitle>
+                  <AlertTriangle className="h-4 w-4 text-orange-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.porVencer}</div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Sin Vencimiento
+                  </CardTitle>
+                  <File className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.sinVencimiento}</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Búsqueda y Filtros */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Buscar Documentos</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Buscar por nombre, inquilino, edificio o unidad..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                  <Select value={filterTipo} onValueChange={setFilterTipo}>
+                    <SelectTrigger className="w-full sm:w-[200px]">
+                      <SelectValue placeholder="Tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos los tipos</SelectItem>
+                      <SelectItem value="contrato">Contrato</SelectItem>
+                      <SelectItem value="dni">DNI</SelectItem>
+                      <SelectItem value="nomina">Nómina</SelectItem>
+                      <SelectItem value="certificado_energetico">Certificado Energético</SelectItem>
+                      <SelectItem value="ite">ITE</SelectItem>
+                      <SelectItem value="seguro">Seguro</SelectItem>
+                      <SelectItem value="factura">Factura</SelectItem>
+                      <SelectItem value="otro">Otro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Lista de Documentos */}
+            <div className="space-y-4">
+              {filteredDocuments.length === 0 ? (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <FileText className="h-12 w-12 text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground text-center mb-2">
+                      {searchTerm || filterTipo !== 'all'
+                        ? 'No se encontraron documentos con los filtros aplicados'
+                        : 'No hay documentos almacenados'}
+                    </p>
+                    {canCreate && !searchTerm && filterTipo === 'all' && (
+                      <Button
+                        onClick={() => setOpenUploadDialog(true)}
+                        className="mt-4"
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        Subir Primer Documento
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              ) : (
+                filteredDocuments.map((doc) => {
+                  const now = new Date();
+                  const vencimiento = doc.fechaVencimiento ? new Date(doc.fechaVencimiento) : null;
+                  const isVencido = vencimiento && vencimiento < now;
+                  const isPorVencer = vencimiento && vencimiento >= now && vencimiento < new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+                  return (
+                    <Card key={doc.id} className="hover:shadow-lg transition-all duration-200">
+                      <CardContent className="p-4 sm:p-6">
+                        <div className="flex flex-col sm:flex-row gap-4">
+                          {/* Icono */}
+                          <div className="flex-shrink-0">
+                            <div className="p-3 bg-primary/10 rounded-lg">
+                              <FileText className="h-6 w-6 text-primary" />
+                            </div>
+                          </div>
+
+                          {/* Información Principal */}
+                          <div className="flex-1 space-y-3">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                              <h3 className="text-lg font-semibold break-words flex-1">
+                                {doc.nombre}
+                              </h3>
+                              <Badge className={getTipoBadgeColor(doc.tipo)}>
+                                {getTipoLabel(doc.tipo)}
+                              </Badge>
+                            </div>
+
+                            {/* Entidad relacionada */}
+                            {(doc.tenant || doc.unit || doc.building) && (
+                              <div className="bg-muted/50 rounded-lg p-3 space-y-1">
+                                {doc.tenant && (
+                                  <div className="flex items-center gap-2 text-sm">
+                                    <User className="h-4 w-4 text-primary" />
+                                    <span className="font-medium">Inquilino: {doc.tenant.nombreCompleto}</span>
+                                  </div>
+                                )}
+                                {doc.building && (
+                                  <div className="flex items-center gap-2 text-sm">
+                                    <Building2 className="h-4 w-4 text-primary" />
+                                    <span className="font-medium">Edificio: {doc.building.nombre}</span>
+                                  </div>
+                                )}
+                                {doc.unit && (
+                                  <div className="flex items-center gap-2 text-sm">
+                                    <Home className="h-4 w-4 text-primary" />
+                                    <span className="font-medium">Unidad: {doc.unit.numero}</span>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Fechas */}
+                            <div className="grid grid-cols-2 gap-3 text-sm">
+                              <div className="space-y-1">
+                                <div className="text-muted-foreground flex items-center gap-1">
+                                  <CalendarIcon className="h-3 w-3" />
+                                  Subido
+                                </div>
+                                <div className="font-medium">
+                                  {format(new Date(doc.fechaSubida), 'dd MMM yyyy', { locale: es })}
+                                </div>
+                              </div>
+                              <div className="space-y-1">
+                                <div className="text-muted-foreground flex items-center gap-1">
+                                  <CalendarIcon className="h-3 w-3" />
+                                  Vencimiento
+                                </div>
+                                {doc.fechaVencimiento ? (
+                                  <div className="flex items-center gap-1">
+                                    {isVencido && <AlertCircle className="h-3 w-3 text-red-500" />}
+                                    {isPorVencer && <AlertTriangle className="h-3 w-3 text-orange-500" />}
+                                    <span className={`font-medium ${isVencido ? 'text-red-500' : isPorVencer ? 'text-orange-500' : ''}`}>
+                                      {format(new Date(doc.fechaVencimiento), 'dd MMM yyyy', { locale: es })}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <span className="text-muted-foreground">Sin vencimiento</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Acciones */}
+                          <div className="flex sm:flex-col items-center gap-2 self-start">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDownload(doc.id)}
+                              className="w-full sm:w-auto"
+                            >
+                              <Download className="h-4 w-4 sm:mr-2" />
+                              <span className="hidden sm:inline">Descargar</span>
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDelete(doc.id)}
+                              className="w-full sm:w-auto"
+                            >
+                              <Trash2 className="h-4 w-4 sm:mr-2" />
+                              <span className="hidden sm:inline">Eliminar</span>
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })
+              )}
             </div>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Documents Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5" />
-            Documentos ({filteredDocuments.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {filteredDocuments.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <FileText className="w-12 h-12 mx-auto mb-2 opacity-50" />
-              <p>No hay documentos para mostrar</p>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nombre</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Entidad</TableHead>
-                  <TableHead>Fecha Subida</TableHead>
-                  <TableHead>Vencimiento</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredDocuments.map((doc) => {
-                  const isExpiringSoon = doc.fechaVencimiento && 
-                    new Date(doc.fechaVencimiento) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-                  
-                  return (
-                    <TableRow key={doc.id}>
-                      <TableCell className="font-medium">{doc.nombre}</TableCell>
-                      <TableCell>
-                        <Badge className={getTipoBadgeColor(doc.tipo)}>
-                          {getTipoLabel(doc.tipo)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {doc.tenant && <span>Inquilino: {doc.tenant.nombreCompleto}</span>}
-                        {doc.unit && <span>Unidad: {doc.unit.numero}</span>}
-                        {doc.building && <span>Edificio: {doc.building.nombre}</span>}
-                        {!doc.tenant && !doc.unit && !doc.building && <span className="text-muted-foreground">-</span>}
-                      </TableCell>
-                      <TableCell>
-                        {new Date(doc.fechaSubida).toLocaleDateString('es-ES')}
-                      </TableCell>
-                      <TableCell>
-                        {doc.fechaVencimiento ? (
-                          <div className="flex items-center gap-2">
-                            {isExpiringSoon && (
-                              <AlertCircle className="w-4 h-4 text-orange-500" />
-                            )}
-                            <span className={isExpiringSoon ? 'text-orange-500 font-medium' : ''}>
-                              {new Date(doc.fechaVencimiento).toLocaleDateString('es-ES')}
-                            </span>
-                          </div>
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDownload(doc.id)}
-                          >
-                            <Download className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleDelete(doc.id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+        </main>
+      </div>
     </div>
   );
 }

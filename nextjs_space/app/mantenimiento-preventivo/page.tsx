@@ -4,7 +4,17 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
-import { Calendar, Clock, Plus, Check, X, Building2, Home, AlertCircle, Edit, Trash2 } from 'lucide-react';
+import { Header } from '@/components/layout/header';
+import { Button } from '@/components/ui/button';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import { Calendar, Clock, Plus, Check, X, Building2, Home as HomeIcon, AlertCircle, Edit, Trash2, ArrowLeft } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 interface MaintenanceSchedule {
@@ -236,14 +246,43 @@ export default function MantenimientoPreventivoPage() {
   if (!session) return null;
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen overflow-hidden bg-muted/30">
       <Sidebar />
-      <main className="flex-1 ml-0 lg:ml-64 overflow-y-auto">
-        <div className="max-w-7xl mx-auto p-6 lg:p-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Mantenimiento Preventivo</h1>
-            <p className="text-gray-600 mt-1">Gestiona las programaciones de mantenimiento recurrente</p>
-          </div>
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Header />
+        <main className="flex-1 overflow-y-auto">
+          <div className="container mx-auto p-6 space-y-6">
+            {/* Botón Volver y Breadcrumbs */}
+            <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push('/dashboard')}
+                className="gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Volver al Dashboard
+              </Button>
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink href="/dashboard">
+                      <HomeIcon className="h-4 w-4" />
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>Mantenimiento Preventivo</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
+            </div>
+
+            {/* Header Section */}
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Mantenimiento Preventivo</h1>
+              <p className="text-muted-foreground">Gestiona las programaciones de mantenimiento recurrente</p>
+            </div>
 
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
             <div className="flex flex-col md:flex-row gap-4 items-end">
@@ -603,6 +642,7 @@ export default function MantenimientoPreventivoPage() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

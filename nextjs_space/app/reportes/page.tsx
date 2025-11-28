@@ -4,7 +4,17 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
+import { Header } from '@/components/layout/header';
 import { KPICard } from '@/components/ui/kpi-card';
+import { Button } from '@/components/ui/button';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import {
   TrendingUp,
   TrendingDown,
@@ -13,6 +23,8 @@ import {
   BarChart as BarChartIcon,
   Download,
   Calendar,
+  ArrowLeft,
+  Home,
 } from 'lucide-react';
 import {
   BarChart,
@@ -145,10 +157,7 @@ export default function ReportesPage() {
   if (status === 'loading' || isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando reportes...</p>
-        </div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -156,15 +165,43 @@ export default function ReportesPage() {
   if (!session) return null;
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen overflow-hidden bg-muted/30">
       <Sidebar />
-      <main className="flex-1 ml-0 lg:ml-64 overflow-y-auto">
-        <div className="max-w-7xl mx-auto p-6 lg:p-8">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Reportes Financieros</h1>
-            <p className="text-gray-600 mt-1">Análisis detallado de rentabilidad y flujo de caja</p>
-          </div>
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Header />
+        <main className="flex-1 overflow-y-auto">
+          <div className="container mx-auto p-6 space-y-6">
+            {/* Botón Volver y Breadcrumbs */}
+            <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push('/dashboard')}
+                className="gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Volver al Dashboard
+              </Button>
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink href="/dashboard">
+                      <Home className="h-4 w-4" />
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>Reportes</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
+            </div>
+
+            {/* Header Section */}
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Reportes Financieros</h1>
+              <p className="text-muted-foreground">Análisis detallado de rentabilidad y flujo de caja</p>
+            </div>
 
           {/* Controles */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
@@ -437,8 +474,9 @@ export default function ReportesPage() {
               </p>
             </div>
           )}
-        </div>
-      </main>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
