@@ -5,12 +5,13 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
-import { Home as HomeIcon, ArrowLeft, Save } from 'lucide-react';
+import { Wrench, Home, ArrowLeft, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -21,41 +22,40 @@ import {
 } from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
 
-interface Building {
+interface Unit {
   id: string;
-  nombre: string;
+  numero: string;
+  building: { nombre: string };
 }
 
-export default function NuevaUnidadPage() {
+export default function NuevaMantenimientoPage() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
   const [isLoading, setIsLoading] = useState(false);
-  const [buildings, setBuildings] = useState<Building[]>([]);
+  const [units, setUnits] = useState<Unit[]>([]);
   const [formData, setFormData] = useState({
-    numero: '',
-    edificioId: '',
-    tipo: 'apartamento',
-    superficie: '0',
-    habitaciones: '1',
-    banos: '1',
-    precio: '0',
+    unitId: '',
+    titulo: '',
+    descripcion: '',
+    prioridad: 'media',
+    tipo: 'general',
   });
 
   useEffect(() => {
-    const fetchBuildings = async () => {
+    const fetchUnits = async () => {
       try {
-        const response = await fetch('/api/buildings');
+        const response = await fetch('/api/units');
         if (response.ok) {
           const data = await response.json();
-          setBuildings(data);
+          setUnits(data);
         }
       } catch (error) {
-        console.error('Error fetching buildings:', error);
+        console.error('Error fetching units:', error);
       }
     };
 
     if (status === 'authenticated') {
-      fetchBuildings();
+      fetchUnits();
     }
   }, [status]);
 
@@ -64,37 +64,35 @@ export default function NuevaUnidadPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/units', {
+      const response = await fetch('/api/maintenance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          numero: formData.numero,
-          buildingId: formData.edificioId,
+          unitId: formData.unitId,
+          titulo: formData.titulo,
+          descripcion: formData.descripcion,
+          prioridad: formData.prioridad,
           tipo: formData.tipo,
-          superficie: parseFloat(formData.superficie),
-          habitaciones: parseInt(formData.habitaciones),
-          banos: parseInt(formData.banos),
-          precioAlquiler: parseFloat(formData.precio),
-          estado: 'disponible',
+          estado: 'pendiente',
         }),
       });
 
       if (response.ok) {
-        toast.success('Unidad creada correctamente');
-        router.push('/unidades');
+        toast.success('Solicitud de mantenimiento creada correctamente');
+        router.push('/mantenimiento');
       } else {
         const error = await response.json();
-        toast.error(error.error || 'Error al crear la unidad');
+        toast.error(error.error || 'Error al crear la solicitud');
       }
     } catch (error) {
       console.error('Error:', error);
-      toast.error('Error al crear la unidad');
+      toast.error('Error al crear la solicitud');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -123,26 +121,26 @@ export default function NuevaUnidadPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => router.push('/unidades')}
+                onClick={() => router.push('/mantenimiento')}
                 className="gap-2 shadow-sm"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Volver a Unidades
+                Volver a Mantenimiento
               </Button>
               <Breadcrumb>
                 <BreadcrumbList>
                   <BreadcrumbItem>
                     <BreadcrumbLink href="/dashboard">
-                      <HomeIcon className="h-4 w-4" />
+                      <Home className="h-4 w-4" />
                     </BreadcrumbLink>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
-                    <BreadcrumbLink href="/unidades">Unidades</BreadcrumbLink>
+                    <BreadcrumbLink href="/mantenimiento">Mantenimiento</BreadcrumbLink>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
-                    <BreadcrumbPage>Nueva Unidad</BreadcrumbPage>
+                    <BreadcrumbPage>Nueva Solicitud</BreadcrumbPage>
                   </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
@@ -150,60 +148,60 @@ export default function NuevaUnidadPage() {
 
             {/* Header Section */}
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Nueva Unidad</h1>
-              <p className="text-muted-foreground">Registra una nueva unidad en un edificio</p>
+              <h1 className="text-3xl font-bold tracking-tight">Nueva Solicitud de Mantenimiento</h1>
+              <p className="text-muted-foreground">Registra una nueva solicitud de mantenimiento</p>
             </div>
 
             {/* Formulario */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <HomeIcon className="h-5 w-5" />
-                  Información de la Unidad
+                  <Wrench className="h-5 w-5" />
+                  Información de la Solicitud
                 </CardTitle>
                 <CardDescription>
-                  Completa los datos básicos de la unidad
+                  Completa los datos de la solicitud de mantenimiento
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid gap-6 md:grid-cols-2">
-                    {/* Edificio */}
+                    {/* Unidad */}
                     <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="edificioId">Edificio *</Label>
+                      <Label htmlFor="unitId">Unidad Afectada *</Label>
                       <Select
-                        value={formData.edificioId}
-                        onValueChange={(value) => setFormData({ ...formData, edificioId: value })}
+                        value={formData.unitId}
+                        onValueChange={(value) => setFormData({ ...formData, unitId: value })}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecciona un edificio" />
+                          <SelectValue placeholder="Selecciona una unidad" />
                         </SelectTrigger>
                         <SelectContent>
-                          {buildings.map((building) => (
-                            <SelectItem key={building.id} value={building.id}>
-                              {building.nombre}
+                          {units.map((unit) => (
+                            <SelectItem key={unit.id} value={unit.id}>
+                              {unit.building.nombre} - {unit.numero}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
 
-                    {/* Número */}
-                    <div className="space-y-2">
-                      <Label htmlFor="numero">Número/Identificador *</Label>
+                    {/* Título */}
+                    <div className="space-y-2 md:col-span-2">
+                      <Label htmlFor="titulo">Título de la Solicitud *</Label>
                       <Input
-                        id="numero"
-                        name="numero"
-                        value={formData.numero}
+                        id="titulo"
+                        name="titulo"
+                        value={formData.titulo}
                         onChange={handleChange}
                         required
-                        placeholder="Ej: 101, A1, Planta 3"
+                        placeholder="Ej: Fuga de agua en baño"
                       />
                     </div>
 
                     {/* Tipo */}
                     <div className="space-y-2">
-                      <Label htmlFor="tipo">Tipo de Unidad *</Label>
+                      <Label htmlFor="tipo">Tipo de Mantenimiento *</Label>
                       <Select
                         value={formData.tipo}
                         onValueChange={(value) => setFormData({ ...formData, tipo: value })}
@@ -212,77 +210,54 @@ export default function NuevaUnidadPage() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="apartamento">Apartamento</SelectItem>
-                          <SelectItem value="local">Local Comercial</SelectItem>
-                          <SelectItem value="oficina">Oficina</SelectItem>
-                          <SelectItem value="estudio">Estudio</SelectItem>
-                          <SelectItem value="duplex">Dúplex</SelectItem>
+                          <SelectItem value="general">General</SelectItem>
+                          <SelectItem value="plomeria">Plomería</SelectItem>
+                          <SelectItem value="electricidad">Electricidad</SelectItem>
+                          <SelectItem value="pintura">Pintura</SelectItem>
+                          <SelectItem value="carpinteria">Carpintería</SelectItem>
+                          <SelectItem value="electrodomesticos">Electrodomésticos</SelectItem>
+                          <SelectItem value="limpieza">Limpieza</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
-                    {/* Superficie */}
+                    {/* Prioridad */}
                     <div className="space-y-2">
-                      <Label htmlFor="superficie">Superficie (m²) *</Label>
-                      <Input
-                        id="superficie"
-                        name="superficie"
-                        type="number"
-                        step="0.01"
-                        value={formData.superficie}
-                        onChange={handleChange}
-                        required
-                        min="0"
-                      />
+                      <Label htmlFor="prioridad">Prioridad *</Label>
+                      <Select
+                        value={formData.prioridad}
+                        onValueChange={(value) => setFormData({ ...formData, prioridad: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="baja">Baja</SelectItem>
+                          <SelectItem value="media">Media</SelectItem>
+                          <SelectItem value="alta">Alta</SelectItem>
+                          <SelectItem value="urgente">Urgente</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
 
-                    {/* Habitaciones */}
-                    <div className="space-y-2">
-                      <Label htmlFor="habitaciones">Habitaciones *</Label>
-                      <Input
-                        id="habitaciones"
-                        name="habitaciones"
-                        type="number"
-                        value={formData.habitaciones}
+                    {/* Descripción */}
+                    <div className="space-y-2 md:col-span-2">
+                      <Label htmlFor="descripcion">Descripción Detallada *</Label>
+                      <Textarea
+                        id="descripcion"
+                        name="descripcion"
+                        value={formData.descripcion}
                         onChange={handleChange}
                         required
-                        min="0"
-                      />
-                    </div>
-
-                    {/* Baños */}
-                    <div className="space-y-2">
-                      <Label htmlFor="banos">Baños *</Label>
-                      <Input
-                        id="banos"
-                        name="banos"
-                        type="number"
-                        value={formData.banos}
-                        onChange={handleChange}
-                        required
-                        min="0"
-                      />
-                    </div>
-
-                    {/* Precio */}
-                    <div className="space-y-2">
-                      <Label htmlFor="precio">Precio de Alquiler (€/mes) *</Label>
-                      <Input
-                        id="precio"
-                        name="precio"
-                        type="number"
-                        step="0.01"
-                        value={formData.precio}
-                        onChange={handleChange}
-                        required
-                        min="0"
+                        placeholder="Describe el problema de forma detallada..."
+                        rows={5}
                       />
                     </div>
                   </div>
 
                   {/* Botones */}
                   <div className="flex gap-3 pt-4">
-                    <Button type="submit" disabled={isLoading || !formData.edificioId}>
+                    <Button type="submit" disabled={isLoading || !formData.unitId}>
                       {isLoading ? (
                         <>
                           <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
@@ -291,14 +266,14 @@ export default function NuevaUnidadPage() {
                       ) : (
                         <>
                           <Save className="mr-2 h-4 w-4" />
-                          Crear Unidad
+                          Crear Solicitud
                         </>
                       )}
                     </Button>
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => router.push('/unidades')}
+                      onClick={() => router.push('/mantenimiento')}
                       disabled={isLoading}
                     >
                       Cancelar

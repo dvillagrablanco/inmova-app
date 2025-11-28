@@ -4,7 +4,12 @@
 
 /* Add top padding for pages with sidebar and top bar */
 .main-content {
-  @apply pt-20 lg:ml-64;
+  @apply pt-4 lg:ml-64;
+}
+
+/* Ensure content is not hidden behind header */
+main {
+  @apply relative z-0;
 }
 
 @layer base {

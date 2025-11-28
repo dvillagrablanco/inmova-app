@@ -90,12 +90,12 @@ export default function NuevoEdificioPage() {
         <main className="flex-1 overflow-y-auto">
           <div className="container mx-auto p-6 space-y-6">
             {/* Botón Volver y Breadcrumbs */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 pt-4">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => router.push('/edificios')}
-                className="gap-2"
+                className="gap-2 shadow-sm"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Volver a Edificios

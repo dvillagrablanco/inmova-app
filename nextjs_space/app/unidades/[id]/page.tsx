@@ -4,7 +4,17 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
+import { Header } from '@/components/layout/header';
 import { Home, ArrowLeft, Building2, User, Image as ImageIcon, Video, FileText } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import Image from 'next/image';
 
 export default function UnidadDetailPage() {
@@ -51,17 +61,41 @@ export default function UnidadDetailPage() {
   if (!session || !unit) return null;
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen overflow-hidden bg-muted/30">
       <Sidebar />
-      <main className="flex-1 ml-0 lg:ml-64 overflow-y-auto">
-        <div className="max-w-7xl mx-auto p-6 lg:p-8">
-          <button
-            onClick={() => router.back()}
-            className="flex items-center gap-2 text-gray-600 hover:text-black mb-6"
-          >
-            <ArrowLeft size={20} />
-            Volver
-          </button>
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Header />
+        <main className="flex-1 overflow-y-auto">
+          <div className="container mx-auto p-6 space-y-6">
+            {/* Botón Volver y Breadcrumbs */}
+            <div className="flex items-center gap-4 pt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push('/unidades')}
+                className="gap-2 shadow-sm"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Volver a Unidades
+              </Button>
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink href="/dashboard">
+                      <Home className="h-4 w-4" />
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbLink href="/unidades">Unidades</BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>Unidad {unit?.numero || 'Detalle'}</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
+            </div>
 
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 mb-6">
             <div className="flex items-start justify-between mb-6">
@@ -213,8 +247,9 @@ export default function UnidadDetailPage() {
               </div>
             </div>
           )}
-        </div>
-      </main>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

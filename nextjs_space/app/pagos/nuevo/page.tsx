@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
-import { Home as HomeIcon, ArrowLeft, Save } from 'lucide-react';
+import { CreditCard, Home, ArrowLeft, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -21,41 +21,42 @@ import {
 } from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
 
-interface Building {
+interface Contract {
   id: string;
-  nombre: string;
+  unit: { numero: string; building: { nombre: string } };
+  tenant: { nombre: string };
 }
 
-export default function NuevaUnidadPage() {
+export default function NuevoPagoPage() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
   const [isLoading, setIsLoading] = useState(false);
-  const [buildings, setBuildings] = useState<Building[]>([]);
+  const [contracts, setContracts] = useState<Contract[]>([]);
   const [formData, setFormData] = useState({
-    numero: '',
-    edificioId: '',
-    tipo: 'apartamento',
-    superficie: '0',
-    habitaciones: '1',
-    banos: '1',
-    precio: '0',
+    contractId: '',
+    periodo: '',
+    monto: '0',
+    fechaVencimiento: '',
+    fechaPago: '',
+    estado: 'pendiente',
+    metodoPago: 'transferencia',
   });
 
   useEffect(() => {
-    const fetchBuildings = async () => {
+    const fetchContracts = async () => {
       try {
-        const response = await fetch('/api/buildings');
+        const response = await fetch('/api/contracts');
         if (response.ok) {
           const data = await response.json();
-          setBuildings(data);
+          setContracts(data.filter((c: any) => c.estado === 'activo'));
         }
       } catch (error) {
-        console.error('Error fetching buildings:', error);
+        console.error('Error fetching contracts:', error);
       }
     };
 
     if (status === 'authenticated') {
-      fetchBuildings();
+      fetchContracts();
     }
   }, [status]);
 
@@ -64,31 +65,30 @@ export default function NuevaUnidadPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/units', {
+      const response = await fetch('/api/payments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          numero: formData.numero,
-          buildingId: formData.edificioId,
-          tipo: formData.tipo,
-          superficie: parseFloat(formData.superficie),
-          habitaciones: parseInt(formData.habitaciones),
-          banos: parseInt(formData.banos),
-          precioAlquiler: parseFloat(formData.precio),
-          estado: 'disponible',
+          contractId: formData.contractId,
+          periodo: formData.periodo,
+          monto: parseFloat(formData.monto),
+          fechaVencimiento: new Date(formData.fechaVencimiento).toISOString(),
+          fechaPago: formData.fechaPago ? new Date(formData.fechaPago).toISOString() : null,
+          estado: formData.estado,
+          metodoPago: formData.metodoPago,
         }),
       });
 
       if (response.ok) {
-        toast.success('Unidad creada correctamente');
-        router.push('/unidades');
+        toast.success('Pago registrado correctamente');
+        router.push('/pagos');
       } else {
         const error = await response.json();
-        toast.error(error.error || 'Error al crear la unidad');
+        toast.error(error.error || 'Error al registrar el pago');
       }
     } catch (error) {
       console.error('Error:', error);
-      toast.error('Error al crear la unidad');
+      toast.error('Error al registrar el pago');
     } finally {
       setIsLoading(false);
     }
@@ -123,26 +123,26 @@ export default function NuevaUnidadPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => router.push('/unidades')}
+                onClick={() => router.push('/pagos')}
                 className="gap-2 shadow-sm"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Volver a Unidades
+                Volver a Pagos
               </Button>
               <Breadcrumb>
                 <BreadcrumbList>
                   <BreadcrumbItem>
                     <BreadcrumbLink href="/dashboard">
-                      <HomeIcon className="h-4 w-4" />
+                      <Home className="h-4 w-4" />
                     </BreadcrumbLink>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
-                    <BreadcrumbLink href="/unidades">Unidades</BreadcrumbLink>
+                    <BreadcrumbLink href="/pagos">Pagos</BreadcrumbLink>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
-                    <BreadcrumbPage>Nueva Unidad</BreadcrumbPage>
+                    <BreadcrumbPage>Nuevo Pago</BreadcrumbPage>
                   </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
@@ -150,139 +150,138 @@ export default function NuevaUnidadPage() {
 
             {/* Header Section */}
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Nueva Unidad</h1>
-              <p className="text-muted-foreground">Registra una nueva unidad en un edificio</p>
+              <h1 className="text-3xl font-bold tracking-tight">Nuevo Pago</h1>
+              <p className="text-muted-foreground">Registra un nuevo pago o cuota de alquiler</p>
             </div>
 
             {/* Formulario */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <HomeIcon className="h-5 w-5" />
-                  Información de la Unidad
+                  <CreditCard className="h-5 w-5" />
+                  Información del Pago
                 </CardTitle>
                 <CardDescription>
-                  Completa los datos básicos de la unidad
+                  Completa los datos del pago o cuota de alquiler
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid gap-6 md:grid-cols-2">
-                    {/* Edificio */}
+                    {/* Contrato */}
                     <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="edificioId">Edificio *</Label>
+                      <Label htmlFor="contractId">Contrato *</Label>
                       <Select
-                        value={formData.edificioId}
-                        onValueChange={(value) => setFormData({ ...formData, edificioId: value })}
+                        value={formData.contractId}
+                        onValueChange={(value) => setFormData({ ...formData, contractId: value })}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecciona un edificio" />
+                          <SelectValue placeholder="Selecciona un contrato" />
                         </SelectTrigger>
                         <SelectContent>
-                          {buildings.map((building) => (
-                            <SelectItem key={building.id} value={building.id}>
-                              {building.nombre}
+                          {contracts.map((contract) => (
+                            <SelectItem key={contract.id} value={contract.id}>
+                              {contract.unit.building.nombre} - {contract.unit.numero} ({contract.tenant.nombre})
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
 
-                    {/* Número */}
+                    {/* Periodo */}
                     <div className="space-y-2">
-                      <Label htmlFor="numero">Número/Identificador *</Label>
+                      <Label htmlFor="periodo">Periodo *</Label>
                       <Input
-                        id="numero"
-                        name="numero"
-                        value={formData.numero}
+                        id="periodo"
+                        name="periodo"
+                        value={formData.periodo}
                         onChange={handleChange}
                         required
-                        placeholder="Ej: 101, A1, Planta 3"
+                        placeholder="Enero 2024"
                       />
                     </div>
 
-                    {/* Tipo */}
+                    {/* Monto */}
                     <div className="space-y-2">
-                      <Label htmlFor="tipo">Tipo de Unidad *</Label>
+                      <Label htmlFor="monto">Monto (€) *</Label>
+                      <Input
+                        id="monto"
+                        name="monto"
+                        type="number"
+                        step="0.01"
+                        value={formData.monto}
+                        onChange={handleChange}
+                        required
+                        min="0"
+                      />
+                    </div>
+
+                    {/* Fecha de Vencimiento */}
+                    <div className="space-y-2">
+                      <Label htmlFor="fechaVencimiento">Fecha de Vencimiento *</Label>
+                      <Input
+                        id="fechaVencimiento"
+                        name="fechaVencimiento"
+                        type="date"
+                        value={formData.fechaVencimiento}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+
+                    {/* Fecha de Pago */}
+                    <div className="space-y-2">
+                      <Label htmlFor="fechaPago">Fecha de Pago (opcional)</Label>
+                      <Input
+                        id="fechaPago"
+                        name="fechaPago"
+                        type="date"
+                        value={formData.fechaPago}
+                        onChange={handleChange}
+                      />
+                    </div>
+
+                    {/* Estado */}
+                    <div className="space-y-2">
+                      <Label htmlFor="estado">Estado *</Label>
                       <Select
-                        value={formData.tipo}
-                        onValueChange={(value) => setFormData({ ...formData, tipo: value })}
+                        value={formData.estado}
+                        onValueChange={(value) => setFormData({ ...formData, estado: value })}
                       >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="apartamento">Apartamento</SelectItem>
-                          <SelectItem value="local">Local Comercial</SelectItem>
-                          <SelectItem value="oficina">Oficina</SelectItem>
-                          <SelectItem value="estudio">Estudio</SelectItem>
-                          <SelectItem value="duplex">Dúplex</SelectItem>
+                          <SelectItem value="pendiente">Pendiente</SelectItem>
+                          <SelectItem value="pagado">Pagado</SelectItem>
+                          <SelectItem value="vencido">Vencido</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
-                    {/* Superficie */}
+                    {/* Método de Pago */}
                     <div className="space-y-2">
-                      <Label htmlFor="superficie">Superficie (m²) *</Label>
-                      <Input
-                        id="superficie"
-                        name="superficie"
-                        type="number"
-                        step="0.01"
-                        value={formData.superficie}
-                        onChange={handleChange}
-                        required
-                        min="0"
-                      />
-                    </div>
-
-                    {/* Habitaciones */}
-                    <div className="space-y-2">
-                      <Label htmlFor="habitaciones">Habitaciones *</Label>
-                      <Input
-                        id="habitaciones"
-                        name="habitaciones"
-                        type="number"
-                        value={formData.habitaciones}
-                        onChange={handleChange}
-                        required
-                        min="0"
-                      />
-                    </div>
-
-                    {/* Baños */}
-                    <div className="space-y-2">
-                      <Label htmlFor="banos">Baños *</Label>
-                      <Input
-                        id="banos"
-                        name="banos"
-                        type="number"
-                        value={formData.banos}
-                        onChange={handleChange}
-                        required
-                        min="0"
-                      />
-                    </div>
-
-                    {/* Precio */}
-                    <div className="space-y-2">
-                      <Label htmlFor="precio">Precio de Alquiler (€/mes) *</Label>
-                      <Input
-                        id="precio"
-                        name="precio"
-                        type="number"
-                        step="0.01"
-                        value={formData.precio}
-                        onChange={handleChange}
-                        required
-                        min="0"
-                      />
+                      <Label htmlFor="metodoPago">Método de Pago</Label>
+                      <Select
+                        value={formData.metodoPago}
+                        onValueChange={(value) => setFormData({ ...formData, metodoPago: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="transferencia">Transferencia</SelectItem>
+                          <SelectItem value="efectivo">Efectivo</SelectItem>
+                          <SelectItem value="tarjeta">Tarjeta</SelectItem>
+                          <SelectItem value="domiciliacion">Domiciliación</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 
                   {/* Botones */}
                   <div className="flex gap-3 pt-4">
-                    <Button type="submit" disabled={isLoading || !formData.edificioId}>
+                    <Button type="submit" disabled={isLoading || !formData.contractId}>
                       {isLoading ? (
                         <>
                           <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
@@ -291,14 +290,14 @@ export default function NuevaUnidadPage() {
                       ) : (
                         <>
                           <Save className="mr-2 h-4 w-4" />
-                          Crear Unidad
+                          Registrar Pago
                         </>
                       )}
                     </Button>
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => router.push('/unidades')}
+                      onClick={() => router.push('/pagos')}
                       disabled={isLoading}
                     >
                       Cancelar
