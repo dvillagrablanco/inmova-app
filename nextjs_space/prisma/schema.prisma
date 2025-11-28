@@ -1268,3 +1268,16 @@ model MaintenanceDiagnostic {
   @@index([equipoSistema])
   @@map("maintenance_diagnostics")
 }
+
+model PushSubscription {
+  id         String   @id @default(cuid())
+  userId     String
+  endpoint   String   @unique
+  keys       String   @db.Text
+  userAgent  String?  @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+  @@map("push_subscriptions")
+}

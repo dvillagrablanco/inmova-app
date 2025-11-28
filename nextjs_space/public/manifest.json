@@ -1,7 +1,7 @@
 {
   "name": "INMOVA - Innovación Inmobiliaria",
   "short_name": "INMOVA",
-  "description": "Sistema de gestión inmobiliaria profesional",
+  "description": "Sistema profesional de gestión inmobiliaria y property management",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -11,15 +11,54 @@
     {
       "src": "/vidaro-logo-icon.jpg",
       "sizes": "192x192",
-      "type": "image/jpeg"
+      "type": "image/jpeg",
+      "purpose": "any maskable"
     },
     {
       "src": "/vidaro-logo-icon.jpg",
       "sizes": "512x512",
-      "type": "image/jpeg"
+      "type": "image/jpeg",
+      "purpose": "any maskable"
     }
   ],
-  "permissions": [
-    "notifications"
-  ]
+  "categories": ["business", "productivity", "finance"],
+  "screenshots": [
+    {
+      "src": "/vidaro-logo-cover.jpg",
+      "sizes": "1280x720",
+      "type": "image/jpeg",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Ver el panel de control principal",
+      "url": "/dashboard",
+      "icons": [{ "src": "/vidaro-logo-icon.jpg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Pagos",
+      "short_name": "Pagos",
+      "description": "Gestionar pagos de rentas",
+      "url": "/pagos",
+      "icons": [{ "src": "/vidaro-logo-icon.jpg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Mantenimiento",
+      "short_name": "Mantenimiento",
+      "description": "Ver solicitudes de mantenimiento",
+      "url": "/mantenimiento",
+      "icons": [{ "src": "/vidaro-logo-icon.jpg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Notificaciones",
+      "short_name": "Notificaciones",
+      "description": "Ver notificaciones del sistema",
+      "url": "/notificaciones",
+      "icons": [{ "src": "/vidaro-logo-icon.jpg", "sizes": "192x192" }]
+    }
+  ],
+  "prefer_related_applications": false
 }

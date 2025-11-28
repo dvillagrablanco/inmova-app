@@ -32,11 +32,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import {
-  initializePushNotifications,
-  askUserPermission,
-  getUserNotificationPermission,
-} from '@/lib/push-notifications';
+import { PushNotificationManager } from '@/components/pwa/PushNotificationManager';
 
 interface NotificationPreferences {
   emailPagoAtrasado: boolean;
@@ -55,7 +51,6 @@ export default function NotificacionesConfigPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [pushEnabled, setPushEnabled] = useState(false);
   const [preferences, setPreferences] = useState<NotificationPreferences>({
     emailPagoAtrasado: true,
     emailContratoVencimiento: true,
@@ -73,14 +68,8 @@ export default function NotificacionesConfigPage() {
       router.push('/login');
     } else if (status === 'authenticated') {
       fetchPreferences();
-      checkPushPermission();
     }
   }, [status, router]);
-
-  const checkPushPermission = () => {
-    const permission = getUserNotificationPermission();
-    setPushEnabled(permission === 'granted');
-  };
 
   const fetchPreferences = async () => {
     try {
@@ -117,21 +106,7 @@ export default function NotificacionesConfigPage() {
     }
   };
 
-  const handleEnablePush = async () => {
-    try {
-      const permission = await askUserPermission();
-      if (permission === 'granted') {
-        await initializePushNotifications();
-        setPushEnabled(true);
-        toast.success('Notificaciones push habilitadas');
-      } else {
-        toast.error('Permiso denegado para notificaciones push');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error('Error al habilitar notificaciones push');
-    }
-  };
+
 
   if (status === 'loading' || isLoading) {
     return (
@@ -301,82 +276,73 @@ export default function NotificacionesConfigPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {!pushEnabled ? (
-                  <div className="text-center py-8">
-                    <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground mb-4">
-                      Las notificaciones push no están habilitadas
-                    </p>
-                    <Button onClick={handleEnablePush}>
-                      Habilitar Notificaciones Push
-                    </Button>
-                  </div>
-                ) : (
-                  <>
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="pushPagoAtrasado">
-                        Pagos atrasados
-                      </Label>
-                      <Switch
-                        id="pushPagoAtrasado"
-                        checked={preferences.pushPagoAtrasado}
-                        onCheckedChange={(checked) =>
-                          setPreferences({
-                            ...preferences,
-                            pushPagoAtrasado: checked,
-                          })
-                        }
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="pushContratoVencimiento">
-                        Vencimiento de contratos
-                      </Label>
-                      <Switch
-                        id="pushContratoVencimiento"
-                        checked={preferences.pushContratoVencimiento}
-                        onCheckedChange={(checked) =>
-                          setPreferences({
-                            ...preferences,
-                            pushContratoVencimiento: checked,
-                          })
-                        }
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="pushMantenimiento">
-                        Mantenimiento programado
-                      </Label>
-                      <Switch
-                        id="pushMantenimiento"
-                        checked={preferences.pushMantenimiento}
-                        onCheckedChange={(checked) =>
-                          setPreferences({
-                            ...preferences,
-                            pushMantenimiento: checked,
-                          })
-                        }
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="pushDocumento">
-                        Vencimiento de documentos
-                      </Label>
-                      <Switch
-                        id="pushDocumento"
-                        checked={preferences.pushDocumento}
-                        onCheckedChange={(checked) =>
-                          setPreferences({
-                            ...preferences,
-                            pushDocumento: checked,
-                          })
-                        }
-                      />
-                    </div>
-                  </>
-                )}
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="pushPagoAtrasado">
+                    Pagos atrasados
+                  </Label>
+                  <Switch
+                    id="pushPagoAtrasado"
+                    checked={preferences.pushPagoAtrasado}
+                    onCheckedChange={(checked) =>
+                      setPreferences({
+                        ...preferences,
+                        pushPagoAtrasado: checked,
+                      })
+                    }
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="pushContratoVencimiento">
+                    Vencimiento de contratos
+                  </Label>
+                  <Switch
+                    id="pushContratoVencimiento"
+                    checked={preferences.pushContratoVencimiento}
+                    onCheckedChange={(checked) =>
+                      setPreferences({
+                        ...preferences,
+                        pushContratoVencimiento: checked,
+                      })
+                    }
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="pushMantenimiento">
+                    Mantenimiento programado
+                  </Label>
+                  <Switch
+                    id="pushMantenimiento"
+                    checked={preferences.pushMantenimiento}
+                    onCheckedChange={(checked) =>
+                      setPreferences({
+                        ...preferences,
+                        pushMantenimiento: checked,
+                      })
+                    }
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="pushDocumento">
+                    Vencimiento de documentos
+                  </Label>
+                  <Switch
+                    id="pushDocumento"
+                    checked={preferences.pushDocumento}
+                    onCheckedChange={(checked) =>
+                      setPreferences({
+                        ...preferences,
+                        pushDocumento: checked,
+                      })
+                    }
+                  />
+                </div>
               </CardContent>
             </Card>
+          </div>
+
+          {/* Configuración de Notificaciones Push del Navegador */}
+          <div className="mt-6">
+            <PushNotificationManager />
           </div>
 
           {/* Botón Guardar */}
