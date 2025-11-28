@@ -1,0 +1,200 @@
+generator client {
+    provider = "prisma-client-js"
+    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+    output = "/home/ubuntu/homming_vidaro/nextjs_space/node_modules/.prisma/client"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  administrador
+  gestor
+}
+
+enum BuildingType {
+  residencial
+  mixto
+  comercial
+}
+
+enum UnitType {
+  vivienda
+  local
+  garaje
+  trastero
+}
+
+enum UnitStatus {
+  ocupada
+  disponible
+  en_mantenimiento
+}
+
+enum ContractStatus {
+  activo
+  vencido
+  cancelado
+}
+
+enum ContractType {
+  residencial
+  comercial
+  temporal
+}
+
+enum PaymentStatus {
+  pendiente
+  pagado
+  atrasado
+}
+
+enum RiskLevel {
+  bajo
+  medio
+  alto
+}
+
+enum MaintenancePriority {
+  alta
+  media
+  baja
+}
+
+enum MaintenanceStatus {
+  pendiente
+  en_progreso
+  programado
+  completado
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String
+  password      String
+  role          UserRole @default(gestor)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Building {
+  id                String       @id @default(cuid())
+  nombre            String
+  direccion         String
+  tipo              BuildingType
+  anoConstructor    Int
+  numeroUnidades    Int
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  units             Unit[]
+
+  @@map("buildings")
+}
+
+model Tenant {
+  id                String    @id @default(cuid())
+  nombreCompleto    String
+  dni               String    @unique
+  email             String    @unique
+  telefono          String
+  fechaNacimiento   DateTime
+  scoring           Int       @default(50)
+  nivelRiesgo       RiskLevel @default(medio)
+  notas             String?   @db.Text
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  units             Unit[]
+  contracts         Contract[]
+
+  @@map("tenants")
+}
+
+model Unit {
+  id                String     @id @default(cuid())
+  numero            String
+  buildingId        String
+  tipo              UnitType
+  estado            UnitStatus @default(disponible)
+  superficie        Float
+  habitaciones      Int?
+  banos             Int?
+  rentaMensual      Float
+  tenantId          String?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  building          Building   @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  tenant            Tenant?    @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  contracts         Contract[]
+  maintenanceRequests MaintenanceRequest[]
+
+  @@unique([buildingId, numero])
+  @@map("units")
+}
+
+model Contract {
+  id                String         @id @default(cuid())
+  unitId            String
+  tenantId          String
+  fechaInicio       DateTime
+  fechaFin          DateTime
+  rentaMensual      Float
+  deposito          Float
+  estado            ContractStatus @default(activo)
+  tipo              ContractType   @default(residencial)
+  contractPdfPath   String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  unit              Unit           @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  tenant            Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  payments          Payment[]
+
+  @@map("contracts")
+}
+
+model Payment {
+  id                String        @id @default(cuid())
+  contractId        String
+  periodo           String
+  monto             Float
+  fechaVencimiento  DateTime
+  fechaPago         DateTime?
+  estado            PaymentStatus @default(pendiente)
+  metodoPago        String?
+  nivelRiesgo       RiskLevel     @default(bajo)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  contract          Contract      @relation(fields: [contractId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+model MaintenanceRequest {
+  id                String              @id @default(cuid())
+  unitId            String
+  titulo            String
+  descripcion       String              @db.Text
+  prioridad         MaintenancePriority @default(media)
+  estado            MaintenanceStatus   @default(pendiente)
+  fechaSolicitud    DateTime            @default(now())
+  fechaProgramada   DateTime?
+  fechaCompletada   DateTime?
+  proveedorAsignado String?
+  costoEstimado     Float?
+  costoReal         Float?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  unit              Unit                @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@map("maintenance_requests")
+}
