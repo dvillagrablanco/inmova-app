@@ -5,11 +5,12 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
-import { CreditCard, Plus, Calendar, Euro, Home, ArrowLeft, CheckCircle, XCircle, Clock, Search } from 'lucide-react';
+import { CreditCard, Plus, Calendar, Euro, Home, ArrowLeft, CheckCircle, XCircle, Clock, Search, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -21,6 +22,7 @@ import {
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
+import PaymentsDashboard from './components/PaymentsDashboard';
 
 interface Payment {
   id: string;
@@ -52,7 +54,7 @@ export default function PagosPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'calendar' | 'stripe'>('list');
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -192,6 +194,15 @@ export default function PagosPage() {
                 >
                   <Calendar className="mr-2 h-4 w-4" />
                   Calendario
+                </Button>
+                <Button
+                  variant={viewMode === 'stripe' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('stripe')}
+                  className="flex-1 sm:flex-none"
+                >
+                  <TrendingUp className="mr-2 h-4 w-4" />
+                  Stripe
                 </Button>
               </div>
             </div>
@@ -418,6 +429,11 @@ export default function PagosPage() {
                   );
                 })}
               </div>
+            )}
+
+            {/* Stripe Dashboard */}
+            {viewMode === 'stripe' && (
+              <PaymentsDashboard />
             )}
 
             {filteredPayments.length === 0 && viewMode === 'list' && (

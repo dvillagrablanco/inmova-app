@@ -15,6 +15,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import SubscriptionManager from './components/SubscriptionManager';
 
 export default function ContratoDetailPage() {
   const router = useRouter();
@@ -189,6 +190,20 @@ export default function ContratoDetailPage() {
               </div>
             </div>
           )}
+
+          {/* Subscription Manager */}
+          <SubscriptionManager
+            contractId={contract.id}
+            subscription={contract.stripeSubscription}
+            rentaMensual={contract.rentaMensual}
+            onUpdate={() => {
+              // Refresh contract data
+              fetch(`/api/contracts/${params?.id}`)
+                .then(res => res.json())
+                .then(data => setContract(data))
+                .catch(err => console.error('Error refreshing contract:', err));
+            }}
+          />
           </div>
         </main>
       </div>

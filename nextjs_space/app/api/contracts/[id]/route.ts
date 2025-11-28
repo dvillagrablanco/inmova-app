@@ -24,6 +24,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
         payments: {
           orderBy: { fechaVencimiento: 'desc' },
         },
+        stripeSubscription: true,
       },
     });
 

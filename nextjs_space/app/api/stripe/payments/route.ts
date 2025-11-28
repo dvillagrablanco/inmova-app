@@ -6,29 +6,28 @@ import { prisma } from '@/lib/db';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    if (!session?.user || session.user.role === 'operador') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // Get tenant by email
-    const tenant = await prisma.tenant.findUnique({
-      where: { email: session.user.email! },
-    });
+    const companyId = session.user.companyId;
 
-    if (!tenant) {
-      return NextResponse.json({ error: 'Inquilino no encontrado' }, { status: 404 });
-    }
-
-    // Get all payments for this tenant's contracts
+    // Get all Stripe payments for this company
     const payments = await prisma.payment.findMany({
       where: {
         contract: {
-          tenantId: tenant.id,
+          tenant: {
+            companyId,
+          },
+        },
+        stripePaymentIntentId: {
+          not: null,
         },
       },
       include: {
         contract: {
           include: {
+            tenant: true,
             unit: {
               include: {
                 building: true,
@@ -38,13 +37,14 @@ export async function GET(request: NextRequest) {
         },
       },
       orderBy: {
-        fechaVencimiento: 'desc',
+        createdAt: 'desc',
       },
+      take: 100, // Limit to last 100 payments
     });
 
     return NextResponse.json({ payments });
   } catch (error: any) {
-    console.error('Error fetching tenant payments:', error);
+    console.error('Error fetching Stripe payments:', error);
     return NextResponse.json(
       { error: error.message || 'Error al cargar pagos' },
       { status: 500 }

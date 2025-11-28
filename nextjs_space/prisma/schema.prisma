@@ -228,6 +228,7 @@ model Tenant {
   documents         Document[]
   messagesReceived  Message[]         @relation("MessageRecipient")
   messagesSent      Message[]         @relation("MessageSender")
+  stripeCustomer    StripeCustomer?
 
   @@map("tenants")
 }
@@ -296,8 +297,18 @@ model Contract {
   tenant            Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   payments          Payment[]
   documents         Document[]
+  stripeSubscription StripeSubscription?
 
   @@map("contracts")
+}
+
+enum StripePaymentStatus {
+  pending
+  processing
+  succeeded
+  failed
+  canceled
+  refunded
 }
 
 model Payment {
@@ -311,12 +322,70 @@ model Payment {
   metodoPago        String?
   reciboPdfPath     String?
   nivelRiesgo       RiskLevel     @default(bajo)
+  
+  // Stripe integration fields
+  stripePaymentIntentId String?   @unique
+  stripePaymentStatus   StripePaymentStatus?
+  stripeClientSecret    String?
+  stripeFee             Float?
+  stripeNetAmount       Float?
+  
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
 
   contract          Contract      @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  stripeSubscription StripeSubscription? @relation(fields: [stripeSubscriptionId], references: [id], onDelete: SetNull)
+  stripeSubscriptionId String?
 
   @@map("payments")
+}
+
+model StripeSubscription {
+  id                    String   @id @default(cuid())
+  contractId            String   @unique
+  stripeSubscriptionId  String   @unique
+  stripeCustomerId      String
+  stripePriceId         String?
+  status                String   // active, canceled, past_due, etc.
+  currentPeriodStart    DateTime
+  currentPeriodEnd      DateTime
+  cancelAtPeriodEnd     Boolean  @default(false)
+  canceledAt            DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  contract              Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  payments              Payment[]
+
+  @@map("stripe_subscriptions")
+}
+
+model StripeCustomer {
+  id                String   @id @default(cuid())
+  tenantId          String   @unique
+  stripeCustomerId  String   @unique
+  email             String
+  name              String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("stripe_customers")
+}
+
+model StripeWebhookEvent {
+  id                String   @id @default(cuid())
+  stripeEventId     String   @unique
+  type              String
+  data              String   @db.Text
+  processed         Boolean  @default(false)
+  processingError   String?  @db.Text
+  createdAt         DateTime @default(now())
+  processedAt       DateTime?
+
+  @@map("stripe_webhook_events")
+  @@index([processed, createdAt])
 }
 
 model MaintenanceRequest {
