@@ -26,16 +26,17 @@ interface Payment {
   id: string;
   monto: number;
   estado: string;
-  fechaPago: string;
+  fechaPago: string | null;
   fechaVencimiento: string;
   metodoPago?: string;
-  contrato: {
-    inquilino: {
-      nombre: string;
+  periodo?: string;
+  contract: {
+    tenant: {
+      nombreCompleto: string;
     };
-    unidad: {
+    unit: {
       numero: string;
-      edificio: {
+      building: {
         nombre: string;
       };
     };
@@ -83,8 +84,8 @@ export default function PagosPage() {
   useEffect(() => {
     if (searchTerm) {
       const filtered = payments.filter((payment) =>
-        payment.contrato.inquilino.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        payment.contrato.unidad.edificio.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+        payment.contract.tenant.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        payment.contract.unit.building.nombre.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredPayments(filtered);
     } else {
@@ -167,10 +168,10 @@ export default function PagosPage() {
             </div>
 
             {/* Header Section */}
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight">Pagos</h1>
-                <p className="text-muted-foreground">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Pagos</h1>
+                <p className="text-sm sm:text-base text-muted-foreground">
                   Gestiona los pagos de alquileres
                 </p>
               </div>
@@ -179,6 +180,7 @@ export default function PagosPage() {
                   variant={viewMode === 'list' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setViewMode('list')}
+                  className="flex-1 sm:flex-none"
                 >
                   Lista
                 </Button>
@@ -186,6 +188,7 @@ export default function PagosPage() {
                   variant={viewMode === 'calendar' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setViewMode('calendar')}
+                  className="flex-1 sm:flex-none"
                 >
                   <Calendar className="mr-2 h-4 w-4" />
                   Calendario
@@ -353,31 +356,31 @@ export default function PagosPage() {
                   return (
                     <Card key={payment.id} className="hover:shadow-md transition-shadow">
                       <CardContent className="pt-6">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1 space-y-3">
-                            <div className="flex items-start justify-between">
-                              <div className="space-y-1">
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                          <div className="flex-1 space-y-3 min-w-0">
+                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                              <div className="space-y-2 min-w-0 flex-1">
                                 <div className="flex items-center gap-2 flex-wrap">
-                                  <h3 className="text-lg font-semibold">{payment.contrato.inquilino.nombre}</h3>
-                                  <Badge variant={estadoBadge.variant}>
-                                    <IconComponent className="h-3 w-3 mr-1" />
+                                  <h3 className="text-base sm:text-lg font-semibold break-words">{payment.contract.tenant.nombreCompleto}</h3>
+                                  <Badge variant={estadoBadge.variant} className="flex items-center gap-1">
+                                    <IconComponent className="h-3 w-3" />
                                     {estadoBadge.label}
                                   </Badge>
                                 </div>
-                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                  <Home className="h-4 w-4" />
-                                  <span>
-                                    {payment.contrato.unidad.edificio.nombre} - Unidad{' '}
-                                    {payment.contrato.unidad.numero}
+                                <div className="flex items-start gap-2 text-sm bg-muted/50 p-2 rounded-md">
+                                  <Home className="h-4 w-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
+                                  <span className="break-words">
+                                    {payment.contract.unit.building.nombre} - Unidad{' '}
+                                    {payment.contract.unit.numero}
                                   </span>
                                 </div>
                               </div>
-                              <div className="text-right">
-                                <p className="text-2xl font-bold text-green-600">€{payment.monto.toLocaleString()}</p>
+                              <div className="text-left sm:text-right">
+                                <p className="text-xl sm:text-2xl font-bold text-green-600">€{payment.monto.toLocaleString()}</p>
                               </div>
                             </div>
 
-                            <div className="grid gap-2 md:grid-cols-3">
+                            <div className="grid gap-3 sm:grid-cols-3">
                               <div className="space-y-1">
                                 <p className="text-xs text-muted-foreground">Fecha Vencimiento</p>
                                 <p className="text-sm font-medium">
@@ -404,6 +407,7 @@ export default function PagosPage() {
                               onClick={() => router.push(`/pagos/${payment.id}`)}
                               variant="outline"
                               size="sm"
+                              className="w-full sm:w-auto"
                             >
                               Ver Detalles
                             </Button>
