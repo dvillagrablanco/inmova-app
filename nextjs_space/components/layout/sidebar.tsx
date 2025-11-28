@@ -30,6 +30,8 @@ import {
   BarChart2,
   TrendingUp,
   Gavel,
+  Store,
+  Zap,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -58,6 +60,8 @@ const allNavItems = [
   { name: 'Contabilidad', href: '/contabilidad', icon: DollarSign, roles: ['administrador', 'gestor'] },
   { name: 'CRM', href: '/crm', icon: TrendingUp, roles: ['administrador', 'gestor'] },
   { name: 'Legal', href: '/legal', icon: Gavel, roles: ['administrador', 'gestor'] },
+  { name: 'Marketplace', href: '/marketplace', icon: Store, roles: ['administrador', 'gestor'] },
+  { name: 'Gestión de Energía', href: '/energia', icon: Zap, roles: ['administrador', 'gestor'] },
   { name: 'Importar Datos', href: '/admin/importar', icon: Upload, roles: ['administrador', 'gestor'] },
   { name: 'Usuarios', href: '/admin/usuarios', icon: Shield, roles: ['administrador'] },
   { name: 'Configuración', href: '/admin/configuracion', icon: Settings, roles: ['administrador'] },

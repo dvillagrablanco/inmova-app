@@ -193,6 +193,11 @@ model Building {
   expenses          Expense[]
   documents         Document[]
   maintenanceSchedules MaintenanceSchedule[]
+  serviceQuotes     ServiceQuote[]
+  serviceJobs       ServiceJob[]
+  energyReadings    EnergyReading[]
+  energyAlerts      EnergyAlert[]
+  insurancePolicies InsurancePolicy[]
 
   @@map("buildings")
 }
@@ -267,6 +272,10 @@ model Unit {
   expenses          Expense[]
   documents         Document[]
   candidates        Candidate[]
+  serviceQuotes     ServiceQuote[]
+  serviceJobs       ServiceJob[]
+  energyReadings    EnergyReading[]
+  energyAlerts      EnergyAlert[]
 
   @@unique([buildingId, numero])
   @@map("units")
@@ -435,6 +444,9 @@ model Provider {
   maintenanceRequests MaintenanceRequest[]
   maintenanceSchedules MaintenanceSchedule[]
   expenses          Expense[]
+  serviceQuotes     ServiceQuote[]
+  serviceJobs       ServiceJob[]
+  serviceReviews    ServiceReview[]
 
   @@map("providers")
 }
@@ -723,9 +735,11 @@ model AuditLog {
 
 enum ReportFrequency {
   diario
+  diaria
   semanal
   quincenal
   mensual
+  trimestral
 }
 
 enum ReportType {
@@ -1537,6 +1551,7 @@ model InsurancePolicy {
   id                String        @id @default(cuid())
   companyId         String
   buildingId        String?
+  building          Building?     @relation(fields: [buildingId], references: [id], onDelete: SetNull)
   tipoSeguro        String
   numeroPoliza      String        @unique
   aseguradora       String
@@ -1584,4 +1599,293 @@ model ComplianceAlert {
   @@index([estado])
   @@index([fechaLimite])
   @@map("compliance_alerts")
+}
+
+
+// ============================================
+// PAQUETE 11: MARKETPLACE DE SERVICIOS
+// ============================================
+
+enum QuoteStatus {
+  solicitada
+  en_revision
+  cotizada
+  aceptada
+  rechazada
+  expirada
+}
+
+enum JobStatus {
+  pendiente
+  en_progreso
+  completado
+  cancelado
+}
+
+model ServiceQuote {
+  id                String       @id @default(cuid())
+  companyId         String
+  providerId        String
+  provider          Provider     @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  buildingId        String?
+  building          Building?    @relation(fields: [buildingId], references: [id], onDelete: SetNull)
+  unitId            String?
+  unit              Unit?        @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  titulo            String
+  descripcion       String       @db.Text
+  servicioRequerido String
+  urgencia          String       @default("media")
+  fechaSolicitud    DateTime     @default(now())
+  fechaRespuesta    DateTime?
+  estado            QuoteStatus  @default(solicitada)
+  montoCotizado     Float?
+  tiempoEstimado    String?
+  notasProveedor    String?      @db.Text
+  validezCotizacion DateTime?
+  solicitadoPor     String
+  serviceJobs       ServiceJob[]
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@index([companyId])
+  @@index([providerId])
+  @@index([estado])
+  @@index([fechaSolicitud])
+  @@map("service_quotes")
+}
+
+model ServiceJob {
+  id                String       @id @default(cuid())
+  companyId         String
+  providerId        String
+  provider          Provider     @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  quoteId           String?
+  quote             ServiceQuote? @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  buildingId        String?
+  building          Building?    @relation(fields: [buildingId], references: [id], onDelete: SetNull)
+  unitId            String?
+  unit              Unit?        @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  titulo            String
+  descripcion       String       @db.Text
+  fechaInicio       DateTime
+  fechaFin          DateTime?
+  estado            JobStatus    @default(pendiente)
+  montoTotal        Float
+  montoPagado       Float        @default(0)
+  garantiaMeses     Int?
+  notasTrabajo      String?      @db.Text
+  resultadoTrabajo  String?      @db.Text
+  reviews           ServiceReview[]
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@index([companyId])
+  @@index([providerId])
+  @@index([estado])
+  @@index([fechaInicio])
+  @@map("service_jobs")
+}
+
+model ServiceReview {
+  id                String       @id @default(cuid())
+  companyId         String
+  jobId             String
+  job               ServiceJob   @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  providerId        String
+  provider          Provider     @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  calificacion      Int          // 1-5 estrellas
+  puntualidad       Int?         // 1-5
+  calidad           Int?         // 1-5
+  comunicacion      Int?         // 1-5
+  precioJusto       Int?         // 1-5
+  comentario        String?      @db.Text
+  recomendaria      Boolean      @default(true)
+  creadoPor         String
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@index([companyId])
+  @@index([jobId])
+  @@index([providerId])
+  @@index([calificacion])
+  @@map("service_reviews")
+}
+
+// ============================================
+// PAQUETE 12: BUSINESS INTELLIGENCE
+// ============================================
+
+enum WidgetType {
+  kpi
+  chart_line
+  chart_bar
+  chart_pie
+  table
+  heatmap
+}
+
+enum AlertSeverity {
+  info
+  warning
+  critical
+}
+
+model BiWidget {
+  id                String       @id @default(cuid())
+  companyId         String
+  nombre            String
+  descripcion       String?      @db.Text
+  tipo              WidgetType
+  dataSource        String       // Tipo de dato: "occupancy", "revenue", "payments", etc.
+  config            Json         // Configuración específica del widget
+  posicion          Int          @default(0)
+  activo            Boolean      @default(true)
+  creadoPor         String
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@index([companyId])
+  @@index([activo])
+  @@map("bi_widgets")
+}
+
+model BiReport {
+  id                String           @id @default(cuid())
+  companyId         String
+  nombre            String
+  descripcion       String?          @db.Text
+  tipo              String           // "financiero", "ocupacion", "mantenimiento"
+  frecuencia        ReportFrequency
+  filtros           Json             // Filtros configurables
+  columnas          Json             // Columnas a incluir
+  ultimaEjecucion   DateTime?
+  proximaEjecucion  DateTime?
+  activo            Boolean          @default(true)
+  emailDestinatarios String[]
+  creadoPor         String
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  @@index([companyId])
+  @@index([activo])
+  @@index([proximaEjecucion])
+  @@map("bi_reports")
+}
+
+model BiAlert {
+  id                String           @id @default(cuid())
+  companyId         String
+  nombre            String
+  descripcion       String           @db.Text
+  metrica           String           // "occupancy_rate", "payment_delay", etc.
+  condicion         String           // "less_than", "greater_than", "equals"
+  umbral            Float
+  severidad         AlertSeverity    @default(warning)
+  activa            Boolean          @default(true)
+  ultimaActivacion  DateTime?
+  vecesActivada     Int              @default(0)
+  emailNotificar    Boolean          @default(true)
+  destinatarios     String[]
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  @@index([companyId])
+  @@index([activa])
+  @@index([metrica])
+  @@map("bi_alerts")
+}
+
+model TenantSegment {
+  id                String       @id @default(cuid())
+  companyId         String
+  nombre            String
+  descripcion       String?      @db.Text
+  criterios         Json         // Criterios de segmentación
+  tenantIds         String[]     // IDs de inquilinos en este segmento
+  metricasPromedio  Json?        // Métricas promedio del segmento
+  totalInquilinos   Int          @default(0)
+  activo            Boolean      @default(true)
+  ultimaActualizacion DateTime   @default(now())
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@index([companyId])
+  @@index([activo])
+  @@map("tenant_segments")
+}
+
+// ============================================
+// PAQUETE 13: GESTIÓN DE ENERGÍA
+// ============================================
+
+enum EnergyType {
+  electricidad
+  agua
+  gas
+  calefaccion
+}
+
+enum AlertType {
+  consumo_alto
+  consumo_bajo
+  incremento_repentino
+  fuga_posible
+}
+
+model EnergyReading {
+  id                String       @id @default(cuid())
+  companyId         String
+  buildingId        String?
+  building          Building?    @relation(fields: [buildingId], references: [id], onDelete: SetNull)
+  unitId            String?
+  unit              Unit?        @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  tipo              EnergyType
+  lecturaAnterior   Float?
+  lecturaActual     Float
+  consumo           Float        // Diferencia entre lecturas
+  fechaLectura      DateTime
+  periodo           String       // "2024-01", formato año-mes
+  costo             Float?
+  registradoPor     String
+  notas             String?      @db.Text
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@index([companyId])
+  @@index([buildingId])
+  @@index([unitId])
+  @@index([tipo])
+  @@index([fechaLectura])
+  @@index([periodo])
+  @@map("energy_readings")
+}
+
+model EnergyAlert {
+  id                String       @id @default(cuid())
+  companyId         String
+  buildingId        String?
+  building          Building?    @relation(fields: [buildingId], references: [id], onDelete: SetNull)
+  unitId            String?
+  unit              Unit?        @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  tipo              EnergyType
+  tipoAlerta        AlertType
+  titulo            String
+  descripcion       String       @db.Text
+  consumoActual     Float
+  consumoPromedio   Float?
+  desviacionPorcentaje Float?
+  severidad         String       @default("media")
+  fechaDeteccion    DateTime     @default(now())
+  resuelta          Boolean      @default(false)
+  fechaResolucion   DateTime?
+  accionTomada      String?      @db.Text
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@index([companyId])
+  @@index([buildingId])
+  @@index([unitId])
+  @@index([tipo])
+  @@index([resuelta])
+  @@map("energy_alerts")
 }
