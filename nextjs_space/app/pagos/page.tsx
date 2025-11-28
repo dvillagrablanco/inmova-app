@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
-import { CreditCard, Plus, Calendar, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { CreditCard, Plus, Calendar, CheckCircle, XCircle, Clock, Download } from 'lucide-react';
+import { toast } from 'sonner';
+import { downloadReceipt } from '@/lib/pdf-utils';
 
 export default function PagosPage() {
   const router = useRouter();
@@ -65,6 +67,23 @@ export default function PagosPage() {
     }
   };
 
+  const handleDownloadReceipt = async (paymentId: string) => {
+    try {
+      toast.info('Generando recibo...');
+      const res = await fetch(`/api/payments/receipt/${paymentId}`);
+      if (res.ok) {
+        const data = await res.json();
+        downloadReceipt(data);
+        toast.success('Recibo descargado correctamente');
+      } else {
+        toast.error('Error al generar recibo');
+      }
+    } catch (error) {
+      console.error('Error al descargar recibo:', error);
+      toast.error('Error al descargar recibo');
+    }
+  };
+
   return (
     <div className="flex h-screen bg-gray-50">
       <Sidebar />
@@ -109,6 +128,7 @@ export default function PagosPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Monto</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vencimiento</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -137,6 +157,16 @@ export default function PagosPage() {
                           <Icon size={14} />
                           {payment?.estado}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <button
+                          onClick={() => handleDownloadReceipt(payment?.id)}
+                          className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-gray-700 hover:text-black"
+                          title="Descargar Recibo PDF"
+                        >
+                          <Download size={14} />
+                          Recibo
+                        </button>
                       </td>
                     </tr>
                   );

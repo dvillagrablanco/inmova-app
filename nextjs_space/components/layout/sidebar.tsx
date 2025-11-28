@@ -22,6 +22,9 @@ import {
   UsersRound,
   DollarSign,
   UserPlus,
+  Calendar,
+  Settings,
+  Upload,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
@@ -36,11 +39,14 @@ const navItems = [
   { name: 'Candidatos', href: '/candidatos', icon: UserPlus },
   { name: 'Contratos', href: '/contratos', icon: FileText },
   { name: 'Pagos', href: '/pagos', icon: CreditCard },
+  { name: 'Calendario', href: '/calendario', icon: Calendar },
   { name: 'Mantenimiento', href: '/mantenimiento', icon: Wrench },
   { name: 'Documentos', href: '/documentos', icon: Folder },
   { name: 'Proveedores', href: '/proveedores', icon: UsersRound },
   { name: 'Gastos', href: '/gastos', icon: DollarSign },
   { name: 'Reportes', href: '/reportes', icon: FileBarChart },
+  { name: 'Importar Datos', href: '/admin/importar', icon: Upload },
+  { name: 'Configuración', href: '/admin/configuracion', icon: Settings },
 ];
 
 interface Notification {

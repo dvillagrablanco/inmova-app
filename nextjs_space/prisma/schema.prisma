@@ -235,6 +235,8 @@ model Unit {
   balcon            Boolean    @default(false)
   amueblado         Boolean    @default(false)
   imagenes          String[]   @default([])
+  tourVirtual       String?
+  planos            String[]   @default([])
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 
@@ -289,6 +291,7 @@ model Payment {
   fechaPago         DateTime?
   estado            PaymentStatus @default(pendiente)
   metodoPago        String?
+  reciboPdfPath     String?
   nivelRiesgo       RiskLevel     @default(bajo)
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
@@ -468,16 +471,19 @@ model Template {
 
 model Company {
   id                String           @id @default(cuid())
-  nombre            String
-  cif               String
-  direccion         String
-  telefono          String
-  email             String
+  nombre            String           @default("INMOVA")
+  cif               String?
+  direccion         String?
+  telefono          String?
+  email             String?
   logoUrl           String?
   codigoPostal      String?
   ciudad            String?
   pais              String           @default("España")
   iban              String?
+  colorPrimario     String?          @default("#000000")
+  colorSecundario   String?          @default("#FFFFFF")
+  pieDocumento      String?          @db.Text
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
 

@@ -45,6 +45,9 @@ async function main() {
 
   console.log('✅ Usuarios creados');
 
+  // Contraseñas para inquilinos (para acceso al portal)
+  const hashedTenantPassword = await bcrypt.hash('inquilino123', 10);
+
   // Crear edificios
   const building1 = await prisma.building.create({
     data: {
@@ -84,11 +87,12 @@ async function main() {
       nombreCompleto: 'Carlos Rodríguez Pérez',
       dni: '12345678A',
       email: 'carlos.rodriguez@email.com',
+      password: hashedTenantPassword,
       telefono: '+34 612 345 678',
       fechaNacimiento: new Date('1985-03-15'),
       scoring: 85,
       nivelRiesgo: 'bajo',
-      notas: 'Inquilino ejemplar, siempre paga puntual',
+      notas: 'Inquilino ejemplar, siempre paga puntual - Acceso portal: inquilino123',
     },
   });
 
@@ -97,11 +101,12 @@ async function main() {
       nombreCompleto: 'Ana María González',
       dni: '23456789B',
       email: 'ana.gonzalez@email.com',
+      password: hashedTenantPassword,
       telefono: '+34 623 456 789',
       fechaNacimiento: new Date('1990-07-22'),
       scoring: 70,
       nivelRiesgo: 'medio',
-      notas: 'Ocasionalmente con retrasos de 5-7 días',
+      notas: 'Ocasionalmente con retrasos de 5-7 días - Acceso portal: inquilino123',
     },
   });
 
@@ -110,10 +115,12 @@ async function main() {
       nombreCompleto: 'David López Martínez',
       dni: '34567890C',
       email: 'david.lopez@email.com',
+      password: hashedTenantPassword,
       telefono: '+34 634 567 890',
       fechaNacimiento: new Date('1988-11-10'),
       scoring: 90,
       nivelRiesgo: 'bajo',
+      notas: 'Acceso portal: inquilino123',
     },
   });
 
