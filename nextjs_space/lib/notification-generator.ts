@@ -111,7 +111,13 @@ export async function generateAutomaticNotifications(companyId?: string) {
   const paymentWhere: any = {
     estado: 'atrasado',
   };
-  if (companyId) paymentWhere.companyId = companyId;
+  if (companyId) {
+    paymentWhere.contract = {
+      tenant: {
+        companyId,
+      },
+    };
+  }
 
   const latePayments = await prisma.payment.findMany({
     where: paymentWhere,

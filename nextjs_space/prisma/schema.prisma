@@ -1281,3 +1281,307 @@ model PushSubscription {
   @@index([userId])
   @@map("push_subscriptions")
 }
+
+// ============================================
+// PAQUETE 8: CONTABILIDAD
+// ============================================
+
+enum TransactionType {
+  ingreso
+  gasto
+}
+
+enum AccountingCategory {
+  ingreso_renta
+  ingreso_deposito
+  ingreso_otro
+  gasto_mantenimiento
+  gasto_impuesto
+  gasto_seguro
+  gasto_servicio
+  gasto_reparacion
+  gasto_comunidad
+  gasto_administracion
+  gasto_otro
+}
+
+model AccountingTransaction {
+  id                String              @id @default(cuid())
+  companyId         String
+  buildingId        String?
+  unitId            String?
+  tipo              TransactionType
+  categoria         AccountingCategory
+  concepto          String
+  monto             Float
+  fecha             DateTime
+  referencia        String?
+  paymentId         String?
+  expenseId         String?
+  documentoPath     String?
+  notas             String?             @db.Text
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([companyId])
+  @@index([buildingId])
+  @@index([tipo])
+  @@index([categoria])
+  @@index([fecha])
+  @@map("accounting_transactions")
+}
+
+model CashFlowStatement {
+  id                    String   @id @default(cuid())
+  companyId             String
+  periodo               String
+  fechaInicio           DateTime
+  fechaFin              DateTime
+  ingresosTotales       Float    @default(0)
+  gastosTotales         Float    @default(0)
+  flujoNeto             Float    @default(0)
+  saldoInicial          Float    @default(0)
+  saldoFinal            Float    @default(0)
+  ingresosRenta         Float    @default(0)
+  ingresosDeposito      Float    @default(0)
+  ingresosOtros         Float    @default(0)
+  gastosMantenimiento   Float    @default(0)
+  gastosImpuestos       Float    @default(0)
+  gastosSeguros         Float    @default(0)
+  gastosServicios       Float    @default(0)
+  gastosOtros           Float    @default(0)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([periodo])
+  @@map("cash_flow_statements")
+}
+
+// ============================================
+// PAQUETE 9: CRM
+// ============================================
+
+enum CrmLeadStatus {
+  nuevo
+  contactado
+  calificado
+  visitado
+  propuesta_enviada
+  negociacion
+  ganado
+  perdido
+}
+
+enum CrmLeadSource {
+  web
+  referido
+  llamada
+  email
+  redes_sociales
+  anuncio
+  otro
+}
+
+enum CrmActivityType {
+  llamada
+  email
+  reunion
+  visita
+  seguimiento
+  nota
+}
+
+model CrmLead {
+  id                String         @id @default(cuid())
+  companyId         String
+  nombreCompleto    String
+  email             String
+  telefono          String
+  unitId            String?
+  estado            CrmLeadStatus  @default(nuevo)
+  fuente            CrmLeadSource  @default(web)
+  scoring           Int            @default(0)
+  presupuesto       Float?
+  fechaMudanza      DateTime?
+  necesidades       String?        @db.Text
+  notas             String?        @db.Text
+  asignadoA         String?
+  ultimoContacto    DateTime?
+  proximoSeguimiento DateTime?
+  probabilidadCierre Float         @default(0)
+  valorEstimado     Float?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  activities        CrmActivity[]
+
+  @@index([companyId])
+  @@index([estado])
+  @@index([asignadoA])
+  @@index([scoring])
+  @@map("crm_leads")
+}
+
+model CrmActivity {
+  id                String          @id @default(cuid())
+  leadId            String
+  tipo              CrmActivityType
+  asunto            String
+  descripcion       String?         @db.Text
+  fecha             DateTime
+  duracion          Int?
+  resultado         String?         @db.Text
+  proximaAccion     String?         @db.Text
+  completada        Boolean         @default(false)
+  creadoPor         String
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  lead              CrmLead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId])
+  @@index([tipo])
+  @@index([fecha])
+  @@map("crm_activities")
+}
+
+// ============================================
+// PAQUETE 10: GESTIÓN LEGAL
+// ============================================
+
+enum LegalTemplateCategory {
+  contrato_arrendamiento
+  anexo_contrato
+  notificacion_inquilino
+  reclamacion
+  finalizacion_contrato
+  inspeccion
+  certificado
+  otro
+}
+
+enum InspectionStatus {
+  programada
+  completada
+  pendiente_accion
+}
+
+enum InspectionType {
+  entrada
+  salida
+  periodica
+  emergencia
+}
+
+enum PolicyStatus {
+  activa
+  por_renovar
+  vencida
+  cancelada
+}
+
+model LegalTemplate {
+  id                String                @id @default(cuid())
+  companyId         String
+  nombre            String
+  categoria         LegalTemplateCategory
+  descripcion       String?               @db.Text
+  contenido         String                @db.Text
+  variables         String[]              @default([])
+  jurisdiccion      String?
+  aplicableA        String[]              @default([])
+  activo            Boolean               @default(true)
+  ultimaRevision    DateTime?
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+
+  @@index([companyId])
+  @@index([categoria])
+  @@map("legal_templates")
+}
+
+model LegalInspection {
+  id                String            @id @default(cuid())
+  companyId         String
+  unitId            String?
+  buildingId        String?
+  contractId        String?
+  tenantId          String?
+  tipo              InspectionType
+  estado            InspectionStatus  @default(programada)
+  fechaProgramada   DateTime
+  fechaRealizada    DateTime?
+  inspector         String
+  checklist         String            @db.Text
+  observaciones     String?           @db.Text
+  fotosAntes        String[]          @default([])
+  fotosDespues      String[]          @default([])
+  daniosEncontrados String?           @db.Text
+  costoEstimadoDanos Float?
+  reportePdfPath    String?
+  firmaTenant       String?
+  firmaInspector    String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@index([companyId])
+  @@index([unitId])
+  @@index([tipo])
+  @@index([estado])
+  @@index([fechaProgramada])
+  @@map("legal_inspections")
+}
+
+model InsurancePolicy {
+  id                String        @id @default(cuid())
+  companyId         String
+  buildingId        String?
+  tipoSeguro        String
+  numeroPoliza      String        @unique
+  aseguradora       String
+  coberturas        String[]      @default([])
+  montoCobertura    Float
+  primaAnual        Float
+  deducible         Float?
+  fechaInicio       DateTime
+  fechaVencimiento  DateTime
+  fechaRenovacion   DateTime?
+  estado            PolicyStatus  @default(activa)
+  agente            String?
+  telefonoAgente    String?
+  emailAgente       String?
+  documentoPath     String?
+  notas             String?       @db.Text
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@index([companyId])
+  @@index([buildingId])
+  @@index([estado])
+  @@index([fechaVencimiento])
+  @@map("insurance_policies")
+}
+
+model ComplianceAlert {
+  id                String    @id @default(cuid())
+  companyId         String
+  tipo              String
+  titulo            String
+  descripcion       String    @db.Text
+  fechaLimite       DateTime
+  estado            String    @default("pendiente")
+  prioridad         String    @default("media")
+  entityId          String?
+  entityType        String?
+  accionRequerida   String?   @db.Text
+  completada        Boolean   @default(false)
+  fechaCompletada   DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([companyId])
+  @@index([estado])
+  @@index([fechaLimite])
+  @@map("compliance_alerts")
+}
