@@ -1,19 +1,82 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { Header } from '@/components/layout/header';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { UserPlus, Building2, Calendar } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { usePermissions } from '@/lib/hooks/usePermissions';
+import {
+  UserPlus,
+  Building2,
+  Calendar,
+  ArrowLeft,
+  Search,
+  MoreVertical,
+  Eye,
+  CalendarClock,
+  Phone,
+  Mail,
+  Briefcase,
+  DollarSign,
+  TrendingUp,
+  Users,
+  CheckCircle,
+  Clock,
+} from 'lucide-react';
+
+interface Candidate {
+  id: string;
+  nombreCompleto: string;
+  dni: string;
+  email: string;
+  telefono: string | null;
+  fechaNacimiento: string;
+  situacionLaboral: string | null;
+  ingresosMensuales: number | null;
+  scoring: number;
+  estado: string;
+  notas: string | null;
+  createdAt: string;
+  updatedAt: string;
+  unit: {
+    id: string;
+    numero: string;
+    building: {
+      id: string;
+      nombre: string;
+    };
+  } | null;
+  visits?: any[];
+}
 
 export default function CandidatosPage() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
-  const [candidates, setCandidates] = useState<any[]>([]);
+  const { canCreate } = usePermissions();
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [estadoFilter, setEstadoFilter] = useState<string>('all');
+  const [scoringFilter, setScoringFilter] = useState<string>('all');
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -41,11 +104,49 @@ export default function CandidatosPage() {
     }
   };
 
+  // Filtrado de candidatos
+  const filteredCandidates = useMemo(() => {
+    return candidates.filter((candidate) => {
+      // Filtro por búsqueda (nombre, email, DNI, edificio)
+      const matchesSearch =
+        searchTerm === '' ||
+        candidate.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        candidate.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        candidate.dni.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        candidate.unit?.building?.nombre.toLowerCase().includes(searchTerm.toLowerCase());
+
+      // Filtro por estado
+      const matchesEstado = estadoFilter === 'all' || candidate.estado === estadoFilter;
+
+      // Filtro por scoring
+      let matchesScoring = true;
+      if (scoringFilter === 'alto') {
+        matchesScoring = candidate.scoring >= 80;
+      } else if (scoringFilter === 'medio') {
+        matchesScoring = candidate.scoring >= 60 && candidate.scoring < 80;
+      } else if (scoringFilter === 'bajo') {
+        matchesScoring = candidate.scoring < 60;
+      }
+
+      return matchesSearch && matchesEstado && matchesScoring;
+    });
+  }, [candidates, searchTerm, estadoFilter, scoringFilter]);
+
+  // Cálculo de estadísticas
+  const stats = useMemo(() => {
+    return {
+      total: candidates.length,
+      nuevos: candidates.filter((c) => c.estado === 'nuevo').length,
+      enRevision: candidates.filter((c) => c.estado === 'en_revision').length,
+      aprobados: candidates.filter((c) => c.estado === 'aprobado').length,
+    };
+  }, [candidates]);
+
   if (status === 'loading' || loading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-500">Cargando...</p>
+          <p className="text-muted-foreground">Cargando candidatos...</p>
         </div>
       </div>
     );
@@ -55,153 +156,342 @@ export default function CandidatosPage() {
     return null;
   }
 
-  const getEstadoBadge = (estado: string) => {
-    const colors: Record<string, string> = {
-      nuevo: 'bg-blue-500',
-      en_revision: 'bg-yellow-500',
-      preseleccionado: 'bg-purple-500',
-      aprobado: 'bg-green-500',
-      rechazado: 'bg-red-500',
+  const getEstadoBadgeVariant = (estado: string) => {
+    const variants: Record<string, string> = {
+      nuevo: 'bg-blue-500 text-white hover:bg-blue-600',
+      en_revision: 'bg-yellow-500 text-white hover:bg-yellow-600',
+      preseleccionado: 'bg-purple-500 text-white hover:bg-purple-600',
+      aprobado: 'bg-green-500 text-white hover:bg-green-600',
+      rechazado: 'bg-red-500 text-white hover:bg-red-600',
     };
-    return colors[estado] || 'bg-gray-500';
+    return variants[estado] || 'bg-muted';
+  };
+
+  const getEstadoLabel = (estado: string) => {
+    const labels: Record<string, string> = {
+      nuevo: 'Nuevo',
+      en_revision: 'En Revisión',
+      preseleccionado: 'Preseleccionado',
+      aprobado: 'Aprobado',
+      rechazado: 'Rechazado',
+    };
+    return labels[estado] || estado;
   };
 
   const getScoringColor = (scoring: number) => {
-    if (scoring >= 80) return 'text-green-600';
-    if (scoring >= 60) return 'text-yellow-600';
-    if (scoring >= 40) return 'text-orange-600';
-    return 'text-red-600';
+    if (scoring >= 80) return 'text-green-600 font-bold';
+    if (scoring >= 60) return 'text-yellow-600 font-bold';
+    if (scoring >= 40) return 'text-orange-600 font-bold';
+    return 'text-red-600 font-bold';
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-muted/30">
       <Sidebar />
-      <main className="flex-1 overflow-y-auto main-content">
-        <div className="p-8">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">Candidatos</h1>
-                <p className="text-gray-500 mt-2">Gestión de candidatos a inquilinos</p>
-              </div>
-              <Button className="bg-black hover:bg-gray-800">
-                <UserPlus className="w-4 h-4 mr-2" />
-                Nuevo Candidato
-              </Button>
-            </div>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardDescription>Total Candidatos</CardDescription>
-                <CardTitle className="text-3xl">{candidates.length}</CardTitle>
-              </CardHeader>
-            </Card>
-            <Card>
-              <CardHeader className="pb-3">
-                <CardDescription>Nuevos</CardDescription>
-                <CardTitle className="text-3xl">
-                  {candidates.filter(c => c.estado === 'nuevo').length}
-                </CardTitle>
-              </CardHeader>
-            </Card>
-            <Card>
-              <CardHeader className="pb-3">
-                <CardDescription>En Revisión</CardDescription>
-                <CardTitle className="text-3xl">
-                  {candidates.filter(c => c.estado === 'en_revision').length}
-                </CardTitle>
-              </CardHeader>
-            </Card>
-            <Card>
-              <CardHeader className="pb-3">
-                <CardDescription>Aprobados</CardDescription>
-                <CardTitle className="text-3xl">
-                  {candidates.filter(c => c.estado === 'aprobado').length}
-                </CardTitle>
-              </CardHeader>
-            </Card>
-          </div>
-
-          {/* Lista de Candidatos */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Lista de Candidatos</CardTitle>
-              <CardDescription>
-                Candidatos registrados para unidades disponibles
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {candidates.length === 0 ? (
-                <div className="text-center py-12">
-                  <UserPlus className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500">No hay candidatos registrados</p>
-                  <Button className="mt-4">Registrar Primer Candidato</Button>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header />
+        <main className="flex-1 overflow-y-auto">
+          <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+            {/* Breadcrumbs y Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => router.push('/dashboard')}
+                    className="gap-2"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    Volver al Dashboard
+                  </Button>
                 </div>
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Candidatos</h1>
+                <p className="text-sm sm:text-base text-muted-foreground">
+                  Gestión de candidatos a inquilinos
+                </p>
+              </div>
+              {canCreate && (
+                <Button
+                  onClick={() => router.push('/candidatos/nuevo')}
+                  className="w-full sm:w-auto bg-primary hover:bg-primary/90"
+                >
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Nuevo Candidato
+                </Button>
+              )}
+            </div>
+
+            {/* Estadísticas */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Total Candidatos
+                  </CardTitle>
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.total}</div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Nuevos
+                  </CardTitle>
+                  <Clock className="h-4 w-4 text-blue-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.nuevos}</div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    En Revisión
+                  </CardTitle>
+                  <TrendingUp className="h-4 w-4 text-yellow-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.enRevision}</div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Aprobados
+                  </CardTitle>
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.aprobados}</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Búsqueda y Filtros */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Buscar Candidatos</CardTitle>
+                <CardDescription>
+                  Filtra candidatos por nombre, email, estado o puntuación
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Buscar por nombre, email, DNI o edificio..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                  <Select value={estadoFilter} onValueChange={setEstadoFilter}>
+                    <SelectTrigger className="w-full sm:w-[180px]">
+                      <SelectValue placeholder="Estado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos los estados</SelectItem>
+                      <SelectItem value="nuevo">Nuevo</SelectItem>
+                      <SelectItem value="en_revision">En Revisión</SelectItem>
+                      <SelectItem value="preseleccionado">Preseleccionado</SelectItem>
+                      <SelectItem value="aprobado">Aprobado</SelectItem>
+                      <SelectItem value="rechazado">Rechazado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={scoringFilter} onValueChange={setScoringFilter}>
+                    <SelectTrigger className="w-full sm:w-[180px]">
+                      <SelectValue placeholder="Puntuación" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas las puntuaciones</SelectItem>
+                      <SelectItem value="alto">Alta (80-100)</SelectItem>
+                      <SelectItem value="medio">Media (60-79)</SelectItem>
+                      <SelectItem value="bajo">Baja (&lt;60)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Lista de Candidatos */}
+            <div className="space-y-4">
+              {filteredCandidates.length === 0 ? (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <UserPlus className="h-12 w-12 text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground text-center mb-2">
+                      {searchTerm || estadoFilter !== 'all' || scoringFilter !== 'all'
+                        ? 'No se encontraron candidatos con los filtros aplicados'
+                        : 'No hay candidatos registrados'}
+                    </p>
+                    {canCreate && !searchTerm && estadoFilter === 'all' && scoringFilter === 'all' && (
+                      <Button
+                        onClick={() => router.push('/candidatos/nuevo')}
+                        className="mt-4"
+                      >
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        Registrar Primer Candidato
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
               ) : (
-                <div className="space-y-4">
-                  {candidates.map((candidate) => (
-                    <div
-                      key={candidate.id}
-                      className="border rounded-lg p-4 hover:shadow-md transition-shadow"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="font-semibold text-lg">
+                filteredCandidates.map((candidate) => (
+                  <Card
+                    key={candidate.id}
+                    className="hover:shadow-lg transition-all duration-200 cursor-pointer"
+                  >
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        {/* Avatar */}
+                        <Avatar className="h-12 w-12 sm:h-14 sm:w-14 flex-shrink-0">
+                          <AvatarFallback className="bg-primary/10 text-primary font-semibold text-lg">
+                            {getInitials(candidate.nombreCompleto)}
+                          </AvatarFallback>
+                        </Avatar>
+
+                        {/* Información Principal */}
+                        <div className="flex-1 space-y-3">
+                          {/* Nombre y Estado */}
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                            <h3 className="text-lg font-semibold break-words">
                               {candidate.nombreCompleto}
                             </h3>
-                            <Badge className={getEstadoBadge(candidate.estado)}>
-                              {candidate.estado.replace('_', ' ')}
+                            <Badge className={getEstadoBadgeVariant(candidate.estado)}>
+                              {getEstadoLabel(candidate.estado)}
                             </Badge>
                           </div>
-                          <div className="flex items-center gap-6 text-sm text-gray-600">
+
+                          {/* Información de Contacto */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-muted-foreground">
                             <div className="flex items-center gap-2">
-                              <Building2 className="w-4 h-4" />
-                              <span>
-                                {candidate.unit?.building?.nombre} - {candidate.unit?.numero}
-                              </span>
+                              <Mail className="h-4 w-4 flex-shrink-0" />
+                              <span className="truncate">{candidate.email}</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <Calendar className="w-4 h-4" />
-                              <span>
-                                {new Date(candidate.createdAt).toLocaleDateString('es-ES')}
-                              </span>
+                            {candidate.telefono && (
+                              <div className="flex items-center gap-2">
+                                <Phone className="h-4 w-4 flex-shrink-0" />
+                                <span>{candidate.telefono}</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Unidad y Fecha */}
+                          {candidate.unit && (
+                            <div className="bg-muted/50 rounded-lg p-3">
+                              <div className="flex items-center gap-2 text-sm">
+                                <Building2 className="h-4 w-4 flex-shrink-0 text-primary" />
+                                <span className="font-medium">
+                                  {candidate.unit.building.nombre} - Unidad {candidate.unit.numero}
+                                </span>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <span>Scoring:</span>
-                              <span className={`font-bold ${getScoringColor(candidate.scoring)}`}>
+                          )}
+
+                          {/* Información Adicional */}
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                            <div className="space-y-1">
+                              <div className="text-muted-foreground flex items-center gap-1">
+                                <TrendingUp className="h-3 w-3" />
+                                Scoring
+                              </div>
+                              <div className={getScoringColor(candidate.scoring)}>
                                 {candidate.scoring}/100
-                              </span>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <span>Visitas:</span>
-                              <span className="font-semibold">
-                                {candidate.visits?.length || 0}
-                              </span>
+                            {candidate.situacionLaboral && (
+                              <div className="space-y-1">
+                                <div className="text-muted-foreground flex items-center gap-1">
+                                  <Briefcase className="h-3 w-3" />
+                                  Empleo
+                                </div>
+                                <div className="font-medium truncate">
+                                  {candidate.situacionLaboral}
+                                </div>
+                              </div>
+                            )}
+                            {candidate.ingresosMensuales && (
+                              <div className="space-y-1">
+                                <div className="text-muted-foreground flex items-center gap-1">
+                                  <DollarSign className="h-3 w-3" />
+                                  Ingresos
+                                </div>
+                                <div className="font-medium">
+                                  €{candidate.ingresosMensuales.toLocaleString()}
+                                </div>
+                              </div>
+                            )}
+                            <div className="space-y-1">
+                              <div className="text-muted-foreground flex items-center gap-1">
+                                <Calendar className="h-3 w-3" />
+                                Registro
+                              </div>
+                              <div className="font-medium">
+                                {new Date(candidate.createdAt).toLocaleDateString('es-ES', {
+                                  day: '2-digit',
+                                  month: 'short',
+                                })}
+                              </div>
                             </div>
                           </div>
                         </div>
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
-                            Ver Detalles
+
+                        {/* Acciones */}
+                        <div className="flex sm:flex-col items-center gap-2 self-start">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => router.push(`/candidatos/${candidate.id}`)}
+                            className="w-full sm:w-auto"
+                          >
+                            <Eye className="h-4 w-4 sm:mr-2" />
+                            <span className="hidden sm:inline">Ver</span>
                           </Button>
-                          <Button size="sm" className="bg-black hover:bg-gray-800">
-                            Programar Visita
-                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => router.push(`/candidatos/${candidate.id}`)}
+                              >
+                                <Eye className="h-4 w-4 mr-2" />
+                                Ver Detalles
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <CalendarClock className="h-4 w-4 mr-2" />
+                                Programar Visita
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    </CardContent>
+                  </Card>
+                ))
               )}
-            </CardContent>
-          </Card>
-        </div>
-      </main>
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
