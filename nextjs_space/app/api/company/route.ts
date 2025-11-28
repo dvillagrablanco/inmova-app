@@ -1,100 +1,74 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { db } from '@/lib/db';
+import { prisma } from '@/lib/db';
 
-// GET /api/company - Obtener configuración de la empresa
+// GET - Obtener información de la empresa del usuario
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
+    if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // Buscar configuración existente
-    let company = await db.company.findFirst();
+    const user = session.user as any;
+    const companyId = user.companyId;
 
-    // Si no existe, crear una por defecto
+    const company = await prisma.company.findUnique({
+      where: { id: companyId },
+    });
+
     if (!company) {
-      company = await db.company.create({
-        data: {
-          nombre: 'INMOVA',
-          colorPrimario: '#000000',
-          colorSecundario: '#FFFFFF',
-        },
-      });
+      return NextResponse.json({ error: 'Empresa no encontrada' }, { status: 404 });
     }
 
     return NextResponse.json(company);
   } catch (error) {
-    console.error('Error al obtener configuración:', error);
+    console.error('Error fetching company:', error);
     return NextResponse.json(
-      { error: 'Error al obtener configuración' },
+      { error: 'Error al obtener la empresa' },
       { status: 500 }
     );
   }
 }
 
-// PUT /api/company - Actualizar configuración de la empresa
-export async function PUT(request: Request) {
+// PATCH - Actualizar información de la empresa (solo administradores)
+export async function PATCH(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
+    if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const data = await request.json();
-
-    // Buscar configuración existente
-    const existing = await db.company.findFirst();
-
-    let company;
-    if (existing) {
-      // Actualizar existente
-      company = await db.company.update({
-        where: { id: existing.id },
-        data: {
-          nombre: data.nombre,
-          cif: data.cif,
-          direccion: data.direccion,
-          telefono: data.telefono,
-          email: data.email,
-          logoUrl: data.logoUrl,
-          codigoPostal: data.codigoPostal,
-          ciudad: data.ciudad,
-          pais: data.pais,
-          iban: data.iban,
-          colorPrimario: data.colorPrimario,
-          colorSecundario: data.colorSecundario,
-          pieDocumento: data.pieDocumento,
-        },
-      });
-    } else {
-      // Crear nueva
-      company = await db.company.create({
-        data: {
-          nombre: data.nombre || 'INMOVA',
-          cif: data.cif,
-          direccion: data.direccion,
-          telefono: data.telefono,
-          email: data.email,
-          logoUrl: data.logoUrl,
-          codigoPostal: data.codigoPostal,
-          ciudad: data.ciudad,
-          pais: data.pais || 'España',
-          iban: data.iban,
-          colorPrimario: data.colorPrimario || '#000000',
-          colorSecundario: data.colorSecundario || '#FFFFFF',
-          pieDocumento: data.pieDocumento,
-        },
-      });
+    const user = session.user as any;
+    if (user.role !== 'administrador') {
+      return NextResponse.json(
+        { error: 'No tienes permisos para editar la empresa' },
+        { status: 403 }
+      );
     }
+
+    const companyId = user.companyId;
+    const body = await req.json();
+
+    const company = await prisma.company.update({
+      where: { id: companyId },
+      data: {
+        nombre: body.nombre,
+        cif: body.cif,
+        direccion: body.direccion,
+        telefono: body.telefono,
+        email: body.email,
+        ciudad: body.ciudad,
+        codigoPostal: body.codigoPostal,
+      },
+    });
 
     return NextResponse.json(company);
   } catch (error) {
-    console.error('Error al actualizar configuración:', error);
+    console.error('Error updating company:', error);
     return NextResponse.json(
-      { error: 'Error al actualizar configuración' },
+      { error: 'Error al actualizar la empresa' },
       { status: 500 }
     );
   }

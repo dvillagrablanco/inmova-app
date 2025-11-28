@@ -4,14 +4,54 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
-import { Users, Plus, Mail, Phone, AlertTriangle } from 'lucide-react';
+import { Header } from '@/components/layout/header';
+import { Users, Plus, Mail, Phone, Home, ArrowLeft, MoreVertical, Eye, Search, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { usePermissions } from '@/lib/hooks/usePermissions';
+
+interface Tenant {
+  id: string;
+  nombre: string;
+  email: string;
+  telefono: string;
+  dni: string;
+  estado: string;
+  fechaIngreso?: string;
+  unidad?: {
+    numero: string;
+    edificio: {
+      nombre: string;
+    };
+  };
+}
 
 export default function InquilinosPage() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
-  const [tenants, setTenants] = useState<any[]>([]);
+  const { canCreate } = usePermissions();
+  const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [filteredTenants, setFilteredTenants] = useState<Tenant[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -26,6 +66,7 @@ export default function InquilinosPage() {
         if (response.ok) {
           const data = await response.json();
           setTenants(data);
+          setFilteredTenants(data);
         }
       } catch (error) {
         console.error('Error fetching tenants:', error);
@@ -39,101 +80,236 @@ export default function InquilinosPage() {
     }
   }, [status]);
 
+  useEffect(() => {
+    if (searchTerm) {
+      const filtered = tenants.filter((tenant) =>
+        tenant.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        tenant.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        tenant.dni.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredTenants(filtered);
+    } else {
+      setFilteredTenants(tenants);
+    }
+  }, [searchTerm, tenants]);
+
   if (status === 'loading' || isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   if (!session) return null;
 
-  const getRiskBadgeColor = (risk: string) => {
-    switch (risk) {
-      case 'bajo': return 'bg-green-100 text-green-800';
-      case 'medio': return 'bg-yellow-100 text-yellow-800';
-      case 'alto': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+  const getEstadoBadge = (estado: string) => {
+    const badges: Record<string, { variant: any; label: string }> = {
+      activo: { variant: 'default', label: 'Activo' },
+      inactivo: { variant: 'secondary', label: 'Inactivo' },
+      moroso: { variant: 'destructive', label: 'Moroso' },
+      pendiente: { variant: 'outline', label: 'Pendiente' },
+    };
+    return badges[estado.toLowerCase()] || { variant: 'default', label: estado };
   };
 
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const activeTenants = tenants.filter((t) => t.estado.toLowerCase() === 'activo').length;
+  const morosoTenants = tenants.filter((t) => t.estado.toLowerCase() === 'moroso').length;
+
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen overflow-hidden bg-muted/30">
       <Sidebar />
-      <main className="flex-1 ml-0 lg:ml-64 overflow-y-auto">
-        <div className="max-w-7xl mx-auto p-6 lg:p-8">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Inquilinos</h1>
-              <p className="text-gray-600 mt-1">Gestiona todos los inquilinos</p>
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Header />
+        <main className="flex-1 overflow-y-auto">
+          <div className="container mx-auto p-6 space-y-6">
+            {/* Breadcrumbs y Botón Volver */}
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <Breadcrumb>
+                  <BreadcrumbList>
+                    <BreadcrumbItem>
+                      <BreadcrumbLink href="/dashboard">
+                        <Home className="h-4 w-4" />
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                      <BreadcrumbPage>Inquilinos</BreadcrumbPage>
+                    </BreadcrumbItem>
+                  </BreadcrumbList>
+                </Breadcrumb>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => router.push('/dashboard')}
+                    className="-ml-2"
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-1" />
+                    Volver
+                  </Button>
+                </div>
+              </div>
             </div>
-            <button
-              onClick={() => router.push('/inquilinos/nuevo')}
-              className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800"
-            >
-              <Plus size={20} />
-              Nuevo Inquilino
-            </button>
-          </div>
 
-          {/* Tenants Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {tenants.map((tenant) => (
-              <Link
-                key={tenant?.id}
-                href={`/inquilinos/${tenant?.id}`}
-                className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all group"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="p-3 bg-gray-100 rounded-lg group-hover:bg-black group-hover:text-white transition-colors">
-                    <Users size={24} />
-                  </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${getRiskBadgeColor(tenant?.nivelRiesgo)}`}>
-                    {tenant?.nivelRiesgo}
-                  </span>
-                </div>
-
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  {tenant?.nombreCompleto}
-                </h3>
-
-                <div className="space-y-2 text-sm text-gray-600 mb-4">
-                  <div className="flex items-center gap-2">
-                    <Mail size={16} />
-                    <span className="truncate">{tenant?.email}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Phone size={16} />
-                    <span>{tenant?.telefono}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span>DNI: {tenant?.dni}</span>
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-gray-100 grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs text-gray-500">Scoring</p>
-                    <p className="text-lg font-bold text-gray-900">{tenant?.scoring}/100</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Unidades</p>
-                    <p className="text-lg font-bold text-gray-900">{tenant?.units?.length || 0}</p>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-
-          {tenants.length === 0 && (
-            <div className="text-center py-12">
-              <Users size={48} className="mx-auto text-gray-300 mb-4" />
-              <p className="text-gray-500">No hay inquilinos registrados</p>
+            {/* Header Section */}
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Inquilinos</h1>
+                <p className="text-muted-foreground">
+                  Gestiona los inquilinos de tus propiedades
+                </p>
+              </div>
+              {canCreate && (
+                <Button onClick={() => router.push('/inquilinos/nuevo')}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Nuevo Inquilino
+                </Button>
+              )}
             </div>
-          )}
-        </div>
-      </main>
+
+            {/* Search Bar */}
+            <Card>
+              <CardContent className="pt-6">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar por nombre, email o DNI..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Stats Summary */}
+            <div className="grid gap-4 md:grid-cols-3">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Inquilinos</CardTitle>
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{tenants.length}</div>
+                  <p className="text-xs text-muted-foreground">Registrados</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Inquilinos Activos</CardTitle>
+                  <Users className="h-4 w-4 text-green-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-green-600">{activeTenants}</div>
+                  <p className="text-xs text-muted-foreground">
+                    {tenants.length > 0 ? Math.round((activeTenants / tenants.length) * 100) : 0}% del total
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Morosos</CardTitle>
+                  <AlertCircle className="h-4 w-4 text-red-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-red-600">{morosoTenants}</div>
+                  <p className="text-xs text-muted-foreground">Requieren atención</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Tenants List */}
+            <div className="grid gap-4">
+              {filteredTenants.map((tenant) => {
+                const estadoBadge = getEstadoBadge(tenant.estado);
+                return (
+                  <Card key={tenant.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="pt-6">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start gap-4 flex-1">
+                          <Avatar className="h-12 w-12">
+                            <AvatarFallback className="bg-primary text-primary-foreground">
+                              {getInitials(tenant.nombre)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 space-y-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h3 className="text-lg font-semibold">{tenant.nombre}</h3>
+                              <Badge variant={estadoBadge.variant}>{estadoBadge.label}</Badge>
+                            </div>
+                            <div className="grid gap-2 md:grid-cols-2 text-sm text-muted-foreground">
+                              <div className="flex items-center gap-2">
+                                <Mail className="h-4 w-4" />
+                                <span>{tenant.email}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Phone className="h-4 w-4" />
+                                <span>{tenant.telefono}</span>
+                              </div>
+                            </div>
+                            {tenant.unidad && (
+                              <div className="flex items-center gap-2 text-sm">
+                                <Home className="h-4 w-4 text-muted-foreground" />
+                                <span className="font-medium">
+                                  {tenant.unidad.edificio.nombre} - Unidad {tenant.unidad.numero}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => router.push(`/inquilinos/${tenant.id}`)}>
+                              <Eye className="mr-2 h-4 w-4" />
+                              Ver Detalles
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+
+            {filteredTenants.length === 0 && (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Users className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No se encontraron inquilinos</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {searchTerm
+                      ? 'Intenta con otros términos de búsqueda'
+                      : 'Comienza agregando tu primer inquilino'}
+                  </p>
+                  {canCreate && !searchTerm && (
+                    <Button onClick={() => router.push('/inquilinos/nuevo')}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Nuevo Inquilino
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

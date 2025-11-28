@@ -1,320 +1,358 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { Sidebar } from '@/components/layout/sidebar';
+import { Header } from '@/components/layout/header';
+import { Building2, Home, ArrowLeft, Save, Mail, Phone, Globe, MapPin, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import { usePermissions } from '@/lib/hooks/usePermissions';
 import { toast } from 'sonner';
-import { Save, Building2 } from 'lucide-react';
 
-interface CompanyConfig {
+interface Company {
   id: string;
   nombre: string;
-  cif: string | null;
-  direccion: string | null;
-  telefono: string | null;
-  email: string | null;
-  logoUrl: string | null;
-  codigoPostal: string | null;
-  ciudad: string | null;
-  pais: string;
-  iban: string | null;
-  colorPrimario: string | null;
-  colorSecundario: string | null;
-  pieDocumento: string | null;
+  cif: string;
+  direccion: string;
+  telefono: string;
+  email: string;
+  ciudad?: string;
+  codigoPostal?: string;
 }
 
 export default function ConfiguracionPage() {
-  const { data: session, status } = useSession() || {};
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [config, setConfig] = useState<CompanyConfig>({
-    id: '',
-    nombre: 'INMOVA',
+  const { data: session, status } = useSession() || {};
+  const { isAdmin } = usePermissions();
+  const [company, setCompany] = useState<Company | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [formData, setFormData] = useState({
+    nombre: '',
     cif: '',
     direccion: '',
     telefono: '',
     email: '',
-    logoUrl: '',
-    codigoPostal: '',
     ciudad: '',
-    pais: 'España',
-    iban: '',
-    colorPrimario: '#000000',
-    colorSecundario: '#FFFFFF',
-    pieDocumento: '',
+    codigoPostal: '',
   });
 
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');
-    } else if (status === 'authenticated') {
-      fetchConfig();
     }
   }, [status, router]);
 
-  const fetchConfig = async () => {
-    try {
-      const res = await fetch('/api/company');
-      if (res.ok) {
-        const data = await res.json();
-        setConfig(data);
+  useEffect(() => {
+    const fetchCompany = async () => {
+      try {
+        const response = await fetch('/api/company');
+        if (response.ok) {
+          const data = await response.json();
+          setCompany(data);
+          setFormData({
+            nombre: data.nombre || '',
+            cif: data.cif || '',
+            direccion: data.direccion || '',
+            telefono: data.telefono || '',
+            email: data.email || '',
+            sitioWeb: data.sitioWeb || '',
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching company:', error);
+        toast.error('Error al cargar la información de la empresa');
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('Error al cargar configuración:', error);
-      toast.error('Error al cargar configuración');
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  const handleSave = async () => {
-    setSaving(true);
+    if (status === 'authenticated') {
+      fetchCompany();
+    }
+  }, [status]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!isAdmin) {
+      toast.error('No tienes permisos para editar la configuración');
+      return;
+    }
+
+    setIsSaving(true);
+
     try {
-      const res = await fetch('/api/company', {
-        method: 'PUT',
+      const response = await fetch('/api/company', {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
+        body: JSON.stringify(formData),
       });
 
-      if (res.ok) {
-        toast.success('Configuración guardada correctamente');
+      if (response.ok) {
+        const updatedCompany = await response.json();
+        setCompany(updatedCompany);
+        toast.success('Configuración actualizada correctamente');
       } else {
-        toast.error('Error al guardar configuración');
+        const error = await response.json();
+        toast.error(error.error || 'Error al guardar los cambios');
       }
     } catch (error) {
-      console.error('Error al guardar:', error);
-      toast.error('Error al guardar configuración');
+      console.error('Error updating company:', error);
+      toast.error('Error al guardar los cambios');
     } finally {
-      setSaving(false);
+      setIsSaving(false);
     }
   };
 
-  const handleChange = (field: keyof CompanyConfig, value: string) => {
-    setConfig((prev) => ({ ...prev, [field]: value }));
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  if (loading) {
+  if (status === 'loading' || isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Cargando configuración...</p>
-        </div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
 
+  if (!session || !company) return null;
+
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Building2 className="h-8 w-8" />
-            Configuración de Empresa
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Personaliza la información de tu empresa para documentos y recibos
-          </p>
-        </div>
-        <Button onClick={handleSave} disabled={saving} size="lg">
-          <Save className="mr-2 h-4 w-4" />
-          {saving ? 'Guardando...' : 'Guardar Cambios'}
-        </Button>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Información Básica */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Información Básica</CardTitle>
-            <CardDescription>Datos generales de la empresa</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="nombre">Nombre de la Empresa *</Label>
-              <Input
-                id="nombre"
-                value={config.nombre}
-                onChange={(e) => handleChange('nombre', e.target.value)}
-                placeholder="INMOVA"
-              />
-            </div>
-            <div>
-              <Label htmlFor="cif">CIF/NIF</Label>
-              <Input
-                id="cif"
-                value={config.cif || ''}
-                onChange={(e) => handleChange('cif', e.target.value)}
-                placeholder="B12345678"
-              />
-            </div>
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={config.email || ''}
-                onChange={(e) => handleChange('email', e.target.value)}
-                placeholder="info@inmova.com"
-              />
-            </div>
-            <div>
-              <Label htmlFor="telefono">Teléfono</Label>
-              <Input
-                id="telefono"
-                value={config.telefono || ''}
-                onChange={(e) => handleChange('telefono', e.target.value)}
-                placeholder="+34 900 123 456"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Dirección */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Dirección</CardTitle>
-            <CardDescription>Ubicación de la empresa</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="direccion">Dirección Completa</Label>
-              <Input
-                id="direccion"
-                value={config.direccion || ''}
-                onChange={(e) => handleChange('direccion', e.target.value)}
-                placeholder="Calle Mayor 123"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="codigoPostal">Código Postal</Label>
-                <Input
-                  id="codigoPostal"
-                  value={config.codigoPostal || ''}
-                  onChange={(e) => handleChange('codigoPostal', e.target.value)}
-                  placeholder="28001"
-                />
-              </div>
-              <div>
-                <Label htmlFor="ciudad">Ciudad</Label>
-                <Input
-                  id="ciudad"
-                  value={config.ciudad || ''}
-                  onChange={(e) => handleChange('ciudad', e.target.value)}
-                  placeholder="Madrid"
-                />
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="pais">País</Label>
-              <Input
-                id="pais"
-                value={config.pais}
-                onChange={(e) => handleChange('pais', e.target.value)}
-                placeholder="España"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Información Bancaria */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Información Bancaria</CardTitle>
-            <CardDescription>Datos para recibos y pagos</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="iban">IBAN</Label>
-              <Input
-                id="iban"
-                value={config.iban || ''}
-                onChange={(e) => handleChange('iban', e.target.value)}
-                placeholder="ES00 0000 0000 0000 0000 0000"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Personalización */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Personalización Visual</CardTitle>
-            <CardDescription>Colores de marca para documentos</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="colorPrimario">Color Primario</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="colorPrimario"
-                    type="color"
-                    value={config.colorPrimario || '#000000'}
-                    onChange={(e) => handleChange('colorPrimario', e.target.value)}
-                    className="h-10 w-20"
-                  />
-                  <Input
-                    value={config.colorPrimario || '#000000'}
-                    onChange={(e) => handleChange('colorPrimario', e.target.value)}
-                    placeholder="#000000"
-                    className="flex-1"
-                  />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="colorSecundario">Color Secundario</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="colorSecundario"
-                    type="color"
-                    value={config.colorSecundario || '#FFFFFF'}
-                    onChange={(e) => handleChange('colorSecundario', e.target.value)}
-                    className="h-10 w-20"
-                  />
-                  <Input
-                    value={config.colorSecundario || '#FFFFFF'}
-                    onChange={(e) => handleChange('colorSecundario', e.target.value)}
-                    placeholder="#FFFFFF"
-                    className="flex-1"
-                  />
+    <div className="flex h-screen overflow-hidden bg-muted/30">
+      <Sidebar />
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Header />
+        <main className="flex-1 overflow-y-auto">
+          <div className="container mx-auto p-6 space-y-6">
+            {/* Breadcrumbs y Botón Volver */}
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <Breadcrumb>
+                  <BreadcrumbList>
+                    <BreadcrumbItem>
+                      <BreadcrumbLink href="/dashboard">
+                        <Home className="h-4 w-4" />
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                      <BreadcrumbPage>Configuración de Empresa</BreadcrumbPage>
+                    </BreadcrumbItem>
+                  </BreadcrumbList>
+                </Breadcrumb>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => router.push('/dashboard')}
+                    className="-ml-2"
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-1" />
+                    Volver
+                  </Button>
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Pie de Documento */}
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>Pie de Documentos</CardTitle>
-            <CardDescription>
-              Texto que aparecerá al final de recibos y contratos (opcional)
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Textarea
-              value={config.pieDocumento || ''}
-              onChange={(e) => handleChange('pieDocumento', e.target.value)}
-              placeholder="Ejemplo: Este documento es generado automáticamente por el sistema de gestión INMOVA. Para cualquier consulta, contacte con nosotros."
-              rows={4}
-            />
-          </CardContent>
-        </Card>
-      </div>
+            {/* Header Section */}
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Configuración de Empresa</h1>
+                <p className="text-muted-foreground">
+                  Gestiona la información de tu empresa
+                </p>
+              </div>
+            </div>
 
-      <div className="mt-6 flex justify-end">
-        <Button onClick={handleSave} disabled={saving} size="lg">
-          <Save className="mr-2 h-4 w-4" />
-          {saving ? 'Guardando...' : 'Guardar Cambios'}
-        </Button>
+            {/* Información Actual */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Building2 className="h-5 w-5" />
+                  Información de la Empresa
+                </CardTitle>
+                <CardDescription>
+                  {isAdmin
+                    ? 'Actualiza los datos de tu empresa. Estos datos se usarán en documentos y comunicaciones.'
+                    : 'Visualiza la información de tu empresa (solo administradores pueden editarla).'}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid gap-6 md:grid-cols-2">
+                    {/* Nombre */}
+                    <div className="space-y-2">
+                      <Label htmlFor="nombre">Nombre de la Empresa *</Label>
+                      <div className="relative">
+                        <Building2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          id="nombre"
+                          name="nombre"
+                          value={formData.nombre}
+                          onChange={handleChange}
+                          disabled={!isAdmin}
+                          required
+                          className="pl-10"
+                          placeholder="INMOVA S.L."
+                        />
+                      </div>
+                    </div>
+
+                    {/* CIF */}
+                    <div className="space-y-2">
+                      <Label htmlFor="cif">CIF / NIF *</Label>
+                      <div className="relative">
+                        <FileText className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          id="cif"
+                          name="cif"
+                          value={formData.cif}
+                          onChange={handleChange}
+                          disabled={!isAdmin}
+                          required
+                          className="pl-10"
+                          placeholder="B12345678"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Dirección */}
+                    <div className="space-y-2 md:col-span-2">
+                      <Label htmlFor="direccion">Dirección *</Label>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="direccion"
+                          name="direccion"
+                          value={formData.direccion}
+                          onChange={handleChange}
+                          disabled={!isAdmin}
+                          required
+                          className="pl-10"
+                          placeholder="Calle Gran Vía 1, 28013 Madrid"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Teléfono */}
+                    <div className="space-y-2">
+                      <Label htmlFor="telefono">Teléfono *</Label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          id="telefono"
+                          name="telefono"
+                          value={formData.telefono}
+                          onChange={handleChange}
+                          disabled={!isAdmin}
+                          required
+                          className="pl-10"
+                          placeholder="+34 912 345 678"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Email */}
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email *</Label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          id="email"
+                          name="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          disabled={!isAdmin}
+                          required
+                          className="pl-10"
+                          placeholder="info@inmova.com"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Sitio Web */}
+                    <div className="space-y-2 md:col-span-2">
+                      <Label htmlFor="sitioWeb">Sitio Web (opcional)</Label>
+                      <div className="relative">
+                        <Globe className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          id="sitioWeb"
+                          name="sitioWeb"
+                          value={formData.sitioWeb}
+                          onChange={handleChange}
+                          disabled={!isAdmin}
+                          className="pl-10"
+                          placeholder="https://www.inmova.com"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Botones */}
+                  {isAdmin && (
+                    <div className="flex gap-3 pt-4">
+                      <Button type="submit" disabled={isSaving}>
+                        {isSaving ? (
+                          <>
+                            <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
+                            Guardando...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="mr-2 h-4 w-4" />
+                            Guardar Cambios
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() =>
+                          setFormData({
+                            nombre: company.nombre || '',
+                            cif: company.cif || '',
+                            direccion: company.direccion || '',
+                            telefono: company.telefono || '',
+                            email: company.email || '',
+                            sitioWeb: company.sitioWeb || '',
+                          })
+                        }
+                        disabled={isSaving}
+                      >
+                        Cancelar
+                      </Button>
+                    </div>
+                  )}
+
+                  {!isAdmin && (
+                    <div className="flex items-center gap-2 rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800 dark:border-yellow-800 dark:bg-yellow-950/20 dark:text-yellow-200">
+                      <FileText className="h-4 w-4" />
+                      Solo los administradores pueden editar la configuración de la empresa.
+                    </div>
+                  )}
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+        </main>
       </div>
     </div>
   );

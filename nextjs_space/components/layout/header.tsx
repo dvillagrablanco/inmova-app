@@ -35,8 +35,8 @@ export function Header() {
   const roleBadge = getRoleBadge(userRole);
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-16 items-center justify-between px-6">
+    <header className="sticky top-0 z-30 border-b bg-background shadow-sm">
+      <div className="flex h-16 items-center justify-between px-4 md:px-6">
         {/* Empresa Info */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 rounded-lg bg-muted px-3 py-2">
@@ -49,16 +49,16 @@ export function Header() {
         </div>
 
         {/* Right Side Actions */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-3">
           {/* Notifications */}
           <Button
             variant="ghost"
             size="icon"
-            className="relative"
-            onClick={() => router.push('/dashboard')}
+            className="relative h-10 w-10"
+            onClick={() => router.push('/notificaciones')}
           >
             <Bell className="h-5 w-5" />
-            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
+            <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-semibold text-white">
               3
             </span>
           </Button>
@@ -66,13 +66,13 @@ export function Header() {
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-3 pl-2 pr-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                  <User className="h-5 w-5" />
+              <Button variant="ghost" className="flex items-center gap-2 pl-2 pr-3 h-10">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  <User className="h-4 w-4" />
                 </div>
-                <div className="flex flex-col items-start">
-                  <span className="text-sm font-medium">{userName}</span>
-                  <Badge variant={roleBadge.variant} className="text-[10px] h-4 px-1">
+                <div className="hidden md:flex flex-col items-start">
+                  <span className="text-sm font-medium leading-tight">{userName}</span>
+                  <Badge variant={roleBadge.variant} className="text-[9px] h-3.5 px-1.5 leading-none">
                     {roleBadge.label}
                   </Badge>
                 </div>

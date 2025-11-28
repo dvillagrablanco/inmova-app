@@ -4,16 +4,54 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
-import { CreditCard, Plus, Calendar, CheckCircle, XCircle, Clock, Download } from 'lucide-react';
-import { toast } from 'sonner';
-import { downloadReceipt } from '@/lib/pdf-utils';
+import { Header } from '@/components/layout/header';
+import { CreditCard, Plus, Calendar, Euro, Home, ArrowLeft, CheckCircle, XCircle, Clock, Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import { usePermissions } from '@/lib/hooks/usePermissions';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth } from 'date-fns';
+import { es } from 'date-fns/locale';
+
+interface Payment {
+  id: string;
+  monto: number;
+  estado: string;
+  fechaPago: string;
+  fechaVencimiento: string;
+  metodoPago?: string;
+  contrato: {
+    inquilino: {
+      nombre: string;
+    };
+    unidad: {
+      numero: string;
+      edificio: {
+        nombre: string;
+      };
+    };
+  };
+}
 
 export default function PagosPage() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
-  const [payments, setPayments] = useState<any[]>([]);
+  const { canCreate } = usePermissions();
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [filteredPayments, setFilteredPayments] = useState<Payment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [filter, setFilter] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -24,13 +62,11 @@ export default function PagosPage() {
   useEffect(() => {
     const fetchPayments = async () => {
       try {
-        const params = new URLSearchParams();
-        if (filter) params.append('estado', filter);
-        
-        const response = await fetch(`/api/payments?${params.toString()}`);
+        const response = await fetch('/api/payments');
         if (response.ok) {
           const data = await response.json();
           setPayments(data);
+          setFilteredPayments(data);
         }
       } catch (error) {
         console.error('Error fetching payments:', error);
@@ -42,12 +78,24 @@ export default function PagosPage() {
     if (status === 'authenticated') {
       fetchPayments();
     }
-  }, [status, filter]);
+  }, [status]);
+
+  useEffect(() => {
+    if (searchTerm) {
+      const filtered = payments.filter((payment) =>
+        payment.contrato.inquilino.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        payment.contrato.unidad.edificio.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredPayments(filtered);
+    } else {
+      setFilteredPayments(payments);
+    }
+  }, [searchTerm, payments]);
 
   if (status === 'loading' || isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -55,134 +103,337 @@ export default function PagosPage() {
   if (!session) return null;
 
   const getEstadoBadge = (estado: string) => {
-    switch (estado) {
-      case 'pagado':
-        return { color: 'bg-green-100 text-green-800', icon: CheckCircle };
-      case 'pendiente':
-        return { color: 'bg-blue-100 text-blue-800', icon: Clock };
-      case 'atrasado':
-        return { color: 'bg-red-100 text-red-800', icon: XCircle };
-      default:
-        return { color: 'bg-gray-100 text-gray-800', icon: Clock };
-    }
+    const badges: Record<string, { variant: any; label: string; icon: any }> = {
+      pagado: { variant: 'default', label: 'Pagado', icon: CheckCircle },
+      pendiente: { variant: 'outline', label: 'Pendiente', icon: Clock },
+      vencido: { variant: 'destructive', label: 'Vencido', icon: XCircle },
+    };
+    return badges[estado.toLowerCase()] || { variant: 'default', label: estado, icon: CreditCard };
   };
 
-  const handleDownloadReceipt = async (paymentId: string) => {
-    try {
-      toast.info('Generando recibo...');
-      const res = await fetch(`/api/payments/receipt/${paymentId}`);
-      if (res.ok) {
-        const data = await res.json();
-        downloadReceipt(data);
-        toast.success('Recibo descargado correctamente');
-      } else {
-        toast.error('Error al generar recibo');
-      }
-    } catch (error) {
-      console.error('Error al descargar recibo:', error);
-      toast.error('Error al descargar recibo');
-    }
+  const pagadosCount = payments.filter((p) => p.estado.toLowerCase() === 'pagado').length;
+  const pendientesCount = payments.filter((p) => p.estado.toLowerCase() === 'pendiente').length;
+  const vencidosCount = payments.filter((p) => p.estado.toLowerCase() === 'vencido').length;
+  const totalCobrado = payments
+    .filter((p) => p.estado.toLowerCase() === 'pagado')
+    .reduce((acc, p) => acc + p.monto, 0);
+  const totalPendiente = payments
+    .filter((p) => p.estado.toLowerCase() === 'pendiente')
+    .reduce((acc, p) => acc + p.monto, 0);
+
+  // Calendar logic
+  const monthStart = startOfMonth(currentDate);
+  const monthEnd = endOfMonth(currentDate);
+  const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
+
+  const getPaymentsForDay = (day: Date) => {
+    return payments.filter((payment) => {
+      const paymentDate = new Date(payment.fechaPago || payment.fechaVencimiento);
+      return isSameDay(paymentDate, day);
+    });
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen overflow-hidden bg-muted/30">
       <Sidebar />
-      <main className="flex-1 ml-0 lg:ml-64 overflow-y-auto">
-        <div className="max-w-7xl mx-auto p-6 lg:p-8">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Pagos</h1>
-              <p className="text-gray-600 mt-1">Gestiona todos los pagos</p>
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Header />
+        <main className="flex-1 overflow-y-auto">
+          <div className="container mx-auto p-6 space-y-6">
+            {/* Breadcrumbs y Botón Volver */}
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <Breadcrumb>
+                  <BreadcrumbList>
+                    <BreadcrumbItem>
+                      <BreadcrumbLink href="/dashboard">
+                        <Home className="h-4 w-4" />
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                      <BreadcrumbPage>Pagos</BreadcrumbPage>
+                    </BreadcrumbItem>
+                  </BreadcrumbList>
+                </Breadcrumb>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => router.push('/dashboard')}
+                    className="-ml-2"
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-1" />
+                    Volver
+                  </Button>
+                </div>
+              </div>
             </div>
-            <button
-              onClick={() => router.push('/pagos/nuevo')}
-              className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800"
-            >
-              <Plus size={20} />
-              Nuevo Pago
-            </button>
-          </div>
 
-          {/* Filters */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
-            <select
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black"
-            >
-              <option value="">Todos los estados</option>
-              <option value="pendiente">Pendiente</option>
-              <option value="pagado">Pagado</option>
-              <option value="atrasado">Atrasado</option>
-            </select>
-          </div>
+            {/* Header Section */}
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Pagos</h1>
+                <p className="text-muted-foreground">
+                  Gestiona los pagos de alquileres
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                >
+                  Lista
+                </Button>
+                <Button
+                  variant={viewMode === 'calendar' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('calendar')}
+                >
+                  <Calendar className="mr-2 h-4 w-4" />
+                  Calendario
+                </Button>
+              </div>
+            </div>
 
-          {/* Payments Table */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Periodo</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Inquilino</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Unidad</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Monto</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vencimiento</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {payments.slice(0, 50).map((payment) => {
-                  const badge = getEstadoBadge(payment?.estado);
-                  const Icon = badge.icon;
-                  return (
-                    <tr key={payment?.id} className="hover:bg-gray-50 cursor-pointer">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {payment?.periodo}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {payment?.contract?.tenant?.nombreCompleto}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {payment?.contract?.unit?.building?.nombre} - {payment?.contract?.unit?.numero}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        €{payment?.monto?.toLocaleString('es-ES')}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {new Date(payment?.fechaVencimiento).toLocaleDateString('es-ES')}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${badge.color}`}>
-                          <Icon size={14} />
-                          {payment?.estado}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <button
-                          onClick={() => handleDownloadReceipt(payment?.id)}
-                          className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-gray-700 hover:text-black"
-                          title="Descargar Recibo PDF"
+            {/* Search Bar */}
+            {viewMode === 'list' && (
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      placeholder="Buscar por inquilino o edificio..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Stats Summary */}
+            <div className="grid gap-4 md:grid-cols-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Pagados</CardTitle>
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-green-600">{pagadosCount}</div>
+                  <p className="text-xs text-muted-foreground">€{totalCobrado.toLocaleString()}</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Pendientes</CardTitle>
+                  <Clock className="h-4 w-4 text-yellow-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-yellow-600">{pendientesCount}</div>
+                  <p className="text-xs text-muted-foreground">€{totalPendiente.toLocaleString()}</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Vencidos</CardTitle>
+                  <XCircle className="h-4 w-4 text-red-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-red-600">{vencidosCount}</div>
+                  <p className="text-xs text-muted-foreground">Requieren acción</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total General</CardTitle>
+                  <Euro className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{payments.length}</div>
+                  <p className="text-xs text-muted-foreground">Registros</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Calendar View */}
+            {viewMode === 'calendar' && (
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>{format(currentDate, 'MMMM yyyy', { locale: es })}</CardTitle>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
+                      >
+                        Anterior
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentDate(new Date())}
+                      >
+                        Hoy
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
+                      >
+                        Siguiente
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-7 gap-2">
+                    {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((day) => (
+                      <div key={day} className="text-center text-sm font-semibold text-muted-foreground p-2">
+                        {day}
+                      </div>
+                    ))}
+                    {daysInMonth.map((day, index) => {
+                      const dayPayments = getPaymentsForDay(day);
+                      const hasPayments = dayPayments.length > 0;
+                      const isToday = isSameDay(day, new Date());
+
+                      return (
+                        <div
+                          key={index}
+                          className={`min-h-[80px] rounded-lg border p-2 transition-colors ${
+                            isToday ? 'border-primary bg-primary/5' : 'border-border'
+                          } ${
+                            hasPayments ? 'cursor-pointer hover:bg-muted' : ''
+                          }`}
                         >
-                          <Download size={14} />
-                          Recibo
-                        </button>
-                      </td>
-                    </tr>
+                          <div className={`text-sm font-medium ${isToday ? 'text-primary' : ''}`}>
+                            {format(day, 'd')}
+                          </div>
+                          {dayPayments.length > 0 && (
+                            <div className="mt-1 space-y-1">
+                              {dayPayments.slice(0, 2).map((payment) => {
+                                const badge = getEstadoBadge(payment.estado);
+                                return (
+                                  <div
+                                    key={payment.id}
+                                    className="text-xs p-1 rounded truncate"
+                                    style={{
+                                      backgroundColor:
+                                        payment.estado.toLowerCase() === 'pagado'
+                                          ? 'rgb(220, 252, 231)'
+                                          : payment.estado.toLowerCase() === 'vencido'
+                                          ? 'rgb(254, 226, 226)'
+                                          : 'rgb(254, 249, 195)',
+                                    }}
+                                  >
+                                    €{payment.monto}
+                                  </div>
+                                );
+                              })}
+                              {dayPayments.length > 2 && (
+                                <div className="text-xs text-muted-foreground">+{dayPayments.length - 2} más</div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* List View */}
+            {viewMode === 'list' && (
+              <div className="grid gap-4">
+                {filteredPayments.map((payment) => {
+                  const estadoBadge = getEstadoBadge(payment.estado);
+                  const IconComponent = estadoBadge.icon;
+
+                  return (
+                    <Card key={payment.id} className="hover:shadow-md transition-shadow">
+                      <CardContent className="pt-6">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 space-y-3">
+                            <div className="flex items-start justify-between">
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <h3 className="text-lg font-semibold">{payment.contrato.inquilino.nombre}</h3>
+                                  <Badge variant={estadoBadge.variant}>
+                                    <IconComponent className="h-3 w-3 mr-1" />
+                                    {estadoBadge.label}
+                                  </Badge>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                  <Home className="h-4 w-4" />
+                                  <span>
+                                    {payment.contrato.unidad.edificio.nombre} - Unidad{' '}
+                                    {payment.contrato.unidad.numero}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-2xl font-bold text-green-600">€{payment.monto.toLocaleString()}</p>
+                              </div>
+                            </div>
+
+                            <div className="grid gap-2 md:grid-cols-3">
+                              <div className="space-y-1">
+                                <p className="text-xs text-muted-foreground">Fecha Vencimiento</p>
+                                <p className="text-sm font-medium">
+                                  {format(new Date(payment.fechaVencimiento), 'dd MMM yyyy', { locale: es })}
+                                </p>
+                              </div>
+                              {payment.fechaPago && (
+                                <div className="space-y-1">
+                                  <p className="text-xs text-muted-foreground">Fecha Pago</p>
+                                  <p className="text-sm font-medium">
+                                    {format(new Date(payment.fechaPago), 'dd MMM yyyy', { locale: es })}
+                                  </p>
+                                </div>
+                              )}
+                              {payment.metodoPago && (
+                                <div className="space-y-1">
+                                  <p className="text-xs text-muted-foreground">Método</p>
+                                  <p className="text-sm font-medium capitalize">{payment.metodoPago}</p>
+                                </div>
+                              )}
+                            </div>
+
+                            <Button
+                              onClick={() => router.push(`/pagos/${payment.id}`)}
+                              variant="outline"
+                              size="sm"
+                            >
+                              Ver Detalles
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   );
                 })}
-              </tbody>
-            </table>
-          </div>
+              </div>
+            )}
 
-          {payments.length === 0 && (
-            <div className="text-center py-12">
-              <CreditCard size={48} className="mx-auto text-gray-300 mb-4" />
-              <p className="text-gray-500">No hay pagos registrados</p>
-            </div>
-          )}
-        </div>
-      </main>
+            {filteredPayments.length === 0 && viewMode === 'list' && (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <CreditCard className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No se encontraron pagos</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {searchTerm ? 'Intenta con otros términos de búsqueda' : 'No hay pagos registrados'}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

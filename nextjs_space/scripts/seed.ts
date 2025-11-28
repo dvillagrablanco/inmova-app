@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, PaymentStatus, RiskLevel } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -347,8 +347,8 @@ async function main() {
       monto: 1200,
       fechaVencimiento: new Date(periodo.getFullYear(), periodo.getMonth(), 5),
       fechaPago: i > 1 ? new Date(periodo.getFullYear(), periodo.getMonth(), 3) : undefined,
-      estado: i === 0 ? 'pendiente' : i === 1 ? 'atrasado' : 'pagado',
-      nivelRiesgo: i === 0 ? 'bajo' : i === 1 ? 'alto' : 'bajo',
+      estado: (i === 0 ? 'pendiente' : i === 1 ? 'atrasado' : 'pagado') as PaymentStatus,
+      nivelRiesgo: (i === 0 ? 'bajo' : i === 1 ? 'alto' : 'bajo') as RiskLevel,
     });
   }
 
@@ -361,8 +361,8 @@ async function main() {
       monto: 1350,
       fechaVencimiento: new Date(periodo.getFullYear(), periodo.getMonth(), 1),
       fechaPago: i > 0 ? new Date(periodo.getFullYear(), periodo.getMonth(), 1) : undefined,
-      estado: i === 0 ? 'pendiente' : 'pagado',
-      nivelRiesgo: 'bajo',
+      estado: (i === 0 ? 'pendiente' : 'pagado') as PaymentStatus,
+      nivelRiesgo: 'bajo' as RiskLevel,
     });
   }
 
@@ -591,8 +591,8 @@ async function main() {
       monto: 1500,
       fechaVencimiento: new Date(periodo.getFullYear(), periodo.getMonth(), 1),
       fechaPago: i > 0 ? new Date(periodo.getFullYear(), periodo.getMonth(), 1) : undefined,
-      estado: i === 0 ? 'pendiente' : 'pagado',
-      nivelRiesgo: 'bajo',
+      estado: (i === 0 ? 'pendiente' : 'pagado') as PaymentStatus,
+      nivelRiesgo: 'bajo' as RiskLevel,
     });
   }
   await prisma.payment.createMany({ data: paymentsVidaro });

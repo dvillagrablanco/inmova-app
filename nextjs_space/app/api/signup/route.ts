@@ -27,12 +27,27 @@ export async function POST(req: NextRequest) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Obtener la primera empresa disponible (o crear una por defecto)
+    let company = await prisma.company.findFirst();
+    if (!company) {
+      company = await prisma.company.create({
+        data: {
+          nombre: 'INMOVA',
+          cif: 'B12345678',
+          direccion: 'Madrid, España',
+          telefono: '+34 912 345 678',
+          email: 'info@inmova.com',
+        },
+      });
+    }
+
     const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
         name,
         role: role || 'gestor',
+        companyId: company.id,
       },
     });
 

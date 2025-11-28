@@ -12,6 +12,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const user = session.user as any;
+    const companyId = user.companyId;
+
+    if (!companyId) {
+      return NextResponse.json({ error: 'Usuario sin empresa asignada' }, { status: 400 });
+    }
+
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type');
 
@@ -48,6 +55,7 @@ export async function POST(request: Request) {
           try {
             await db.building.create({
               data: {
+                companyId,
                 nombre: row.nombre,
                 direccion: row.direccion,
                 tipo: row.tipo || 'residencial',
@@ -120,6 +128,7 @@ export async function POST(request: Request) {
           try {
             await db.tenant.create({
               data: {
+                companyId,
                 nombreCompleto: row.nombreCompleto,
                 dni: row.dni,
                 email: row.email,
