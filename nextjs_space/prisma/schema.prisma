@@ -95,8 +95,11 @@ enum NotificationType {
   pago_atrasado
   contrato_vencimiento
   mantenimiento_urgente
+  mantenimiento_preventivo
   documento_vencer
   unidad_vacante
+  inspeccion_programada
+  alerta_sistema
   info
 }
 
@@ -141,13 +144,15 @@ enum TemplateType {
 }
 
 model User {
-  id            String   @id @default(cuid())
-  email         String   @unique
+  id            String          @id @default(cuid())
+  email         String          @unique
   name          String
   password      String
-  role          UserRole @default(gestor)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  role          UserRole        @default(gestor)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  notifications Notification[]
 
   @@map("users")
 }
@@ -178,6 +183,7 @@ model Building {
   units             Unit[]
   expenses          Expense[]
   documents         Document[]
+  maintenanceSchedules MaintenanceSchedule[]
 
   @@map("buildings")
 }
@@ -244,6 +250,7 @@ model Unit {
   tenant            Tenant?    @relation(fields: [tenantId], references: [id], onDelete: SetNull)
   contracts         Contract[]
   maintenanceRequests MaintenanceRequest[]
+  maintenanceSchedules MaintenanceSchedule[]
   expenses          Expense[]
   documents         Document[]
   candidates        Candidate[]
@@ -340,6 +347,7 @@ model Provider {
   updatedAt         DateTime            @updatedAt
 
   maintenanceRequests MaintenanceRequest[]
+  maintenanceSchedules MaintenanceSchedule[]
   expenses          Expense[]
 
   @@map("providers")
@@ -394,10 +402,15 @@ model Notification {
   titulo            String
   mensaje           String            @db.Text
   leida             Boolean           @default(false)
+  prioridad         RiskLevel         @default(bajo)
+  fechaLimite       DateTime?
   entityId          String?
   entityType        String?
+  userId            String?
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
+
+  user              User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notifications")
 }
@@ -488,4 +501,36 @@ model Company {
   updatedAt         DateTime         @updatedAt
 
   @@map("company")
+}
+
+enum RecurrenceFrequency {
+  mensual
+  trimestral
+  semestral
+  anual
+}
+
+model MaintenanceSchedule {
+  id                String                @id @default(cuid())
+  titulo            String
+  descripcion       String                @db.Text
+  tipo              String
+  buildingId        String?
+  unitId            String?
+  frecuencia        RecurrenceFrequency
+  proximaFecha      DateTime
+  ultimaFecha       DateTime?
+  diasAnticipacion  Int                   @default(15)
+  activo            Boolean               @default(true)
+  providerId        String?
+  costoEstimado     Float?
+  notas             String?               @db.Text
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+
+  building          Building?             @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  unit              Unit?                 @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  provider          Provider?             @relation(fields: [providerId], references: [id], onDelete: SetNull)
+
+  @@map("maintenance_schedules")
 }

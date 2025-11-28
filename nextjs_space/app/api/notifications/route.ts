@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { generateAutomaticNotifications } from '@/lib/notification-generator';
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -11,18 +12,35 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = new URL(req.url);
   const onlyUnread = searchParams.get('onlyUnread') === 'true';
+  const generateAuto = searchParams.get('generate') === 'true';
 
   try {
+    // Generar notificaciones automáticas si se solicita
+    if (generateAuto) {
+      await generateAutomaticNotifications();
+    }
+
     const where: any = {};
     if (onlyUnread) where.leida = false;
 
     const notifications = await prisma.notification.findMany({
       where,
-      orderBy: { createdAt: 'desc' },
+      orderBy: [
+        { prioridad: 'desc' }, // Ordenar por prioridad primero (alto > medio > bajo)
+        { createdAt: 'desc' },
+      ],
       take: 50,
     });
 
-    return NextResponse.json(notifications);
+    // Contar notificaciones no leídas
+    const unreadCount = await prisma.notification.count({
+      where: { leida: false },
+    });
+
+    return NextResponse.json({
+      notifications,
+      unreadCount,
+    });
   } catch (error) {
     console.error('Error fetching notifications:', error);
     return NextResponse.json({ error: 'Error al obtener notificaciones' }, { status: 500 });
@@ -37,7 +55,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { tipo, titulo, mensaje, entityId, entityType } = body;
+    const { tipo, titulo, mensaje, prioridad, fechaLimite, entityId, entityType, userId } = body;
 
     if (!tipo || !titulo || !mensaje) {
       return NextResponse.json({ error: 'Campos requeridos faltantes' }, { status: 400 });
@@ -48,8 +66,11 @@ export async function POST(req: NextRequest) {
         tipo,
         titulo,
         mensaje,
+        prioridad: prioridad || 'bajo',
+        fechaLimite: fechaLimite ? new Date(fechaLimite) : null,
         entityId: entityId || null,
         entityType: entityType || null,
+        userId: userId || null,
       },
     });
 

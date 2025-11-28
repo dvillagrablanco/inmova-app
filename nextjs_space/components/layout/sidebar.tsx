@@ -41,10 +41,11 @@ const navItems = [
   { name: 'Pagos', href: '/pagos', icon: CreditCard },
   { name: 'Calendario', href: '/calendario', icon: Calendar },
   { name: 'Mantenimiento', href: '/mantenimiento', icon: Wrench },
+  { name: 'Mtto. Preventivo', href: '/mantenimiento-preventivo', icon: Calendar },
   { name: 'Documentos', href: '/documentos', icon: Folder },
   { name: 'Proveedores', href: '/proveedores', icon: UsersRound },
   { name: 'Gastos', href: '/gastos', icon: DollarSign },
-  { name: 'Reportes', href: '/reportes', icon: FileBarChart },
+  { name: 'Reportes Financieros', href: '/reportes', icon: FileBarChart },
   { name: 'Importar Datos', href: '/admin/importar', icon: Upload },
   { name: 'Configuración', href: '/admin/configuracion', icon: Settings },
 ];
@@ -74,10 +75,10 @@ export function Sidebar() {
 
   const fetchNotifications = async () => {
     try {
-      const res = await fetch('/api/notifications?onlyUnread=true');
+      const res = await fetch('/api/notifications?onlyUnread=true&generate=true');
       if (res.ok) {
         const data = await res.json();
-        setNotifications(data);
+        setNotifications(data.notifications || data);
       }
     } catch (error) {
       console.error('Error fetching notifications:', error);

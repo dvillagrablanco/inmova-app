@@ -915,6 +915,103 @@ async function main() {
 
   console.log('✅ Notificaciones creadas');
 
+  // Mantenimientos Preventivos Programados
+  console.log('\n🔧 Creando mantenimientos preventivos programados...');
+
+  const schedule1 = await prisma.maintenanceSchedule.create({
+    data: {
+      titulo: 'Inspección Técnica de Edificios (ITE)',
+      descripcion: 'Inspección técnica obligatoria del estado de conservación del edificio',
+      tipo: 'certificacion',
+      buildingId: building1.id,
+      frecuencia: 'anual',
+      proximaFecha: new Date(new Date().setMonth(new Date().getMonth() + 2)),
+      diasAnticipacion: 30,
+      activo: true,
+      providerId: provider1.id,
+      costoEstimado: 1200,
+      notas: 'Contactar con el técnico con al menos 45 días de anticipación',
+    },
+  });
+
+  const schedule2 = await prisma.maintenanceSchedule.create({
+    data: {
+      titulo: 'Revisión de Ascensores',
+      descripcion: 'Inspección y mantenimiento preventivo de los ascensores del edificio',
+      tipo: 'revision_tecnica',
+      buildingId: building2.id,
+      frecuencia: 'trimestral',
+      proximaFecha: new Date(new Date().setDate(new Date().getDate() + 15)),
+      diasAnticipacion: 7,
+      activo: true,
+      providerId: provider2.id,
+      costoEstimado: 350,
+      notas: 'Incluye lubricación y ajuste de puertas',
+    },
+  });
+
+  const schedule3 = await prisma.maintenanceSchedule.create({
+    data: {
+      titulo: 'Limpieza de Bajantes y Canalones',
+      descripcion: 'Limpieza preventiva para evitar obstrucciones y filtraciones',
+      tipo: 'limpieza',
+      buildingId: building1.id,
+      frecuencia: 'semestral',
+      proximaFecha: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+      diasAnticipacion: 15,
+      activo: true,
+      providerId: provider3.id,
+      costoEstimado: 280,
+    },
+  });
+
+  const schedule4 = await prisma.maintenanceSchedule.create({
+    data: {
+      titulo: 'Revisión de Instalación Eléctrica',
+      descripcion: 'Inspección del cuadro eléctrico y sistemas de protección',
+      tipo: 'revision_tecnica',
+      unitId: unit1.id,
+      frecuencia: 'anual',
+      proximaFecha: new Date(new Date().setMonth(new Date().getMonth() + 4)),
+      diasAnticipacion: 20,
+      activo: true,
+      providerId: provider4.id,
+      costoEstimado: 180,
+    },
+  });
+
+  const schedule5 = await prisma.maintenanceSchedule.create({
+    data: {
+      titulo: 'Certificado de Eficiencia Energética',
+      descripcion: 'Renovación del certificado energético del edificio',
+      tipo: 'certificacion',
+      buildingId: building3.id,
+      frecuencia: 'anual',
+      proximaFecha: new Date(new Date().setMonth(new Date().getMonth() + 8)),
+      diasAnticipacion: 45,
+      activo: true,
+      costoEstimado: 450,
+      notas: 'El certificado actual vence en 9 meses',
+    },
+  });
+
+  const schedule6 = await prisma.maintenanceSchedule.create({
+    data: {
+      titulo: 'Mantenimiento de Sistema de Climatización',
+      descripcion: 'Limpieza de filtros y revisión general del sistema HVAC',
+      tipo: 'revision_tecnica',
+      buildingId: building2.id,
+      frecuencia: 'trimestral',
+      proximaFecha: new Date(new Date().setDate(new Date().getDate() + 5)),
+      diasAnticipacion: 3,
+      activo: true,
+      providerId: provider2.id,
+      costoEstimado: 220,
+    },
+  });
+
+  console.log('✅ Mantenimientos preventivos programados creados');
+
   console.log('\n🎉 Seed completado exitosamente!');
   console.log('\n📊 Resumen:');
   console.log('  - Usuarios: 2');
@@ -924,6 +1021,7 @@ async function main() {
   console.log('  - Contratos: 10');
   console.log('  - Pagos: 90+');
   console.log('  - Solicitudes de mantenimiento: 8');
+  console.log('  - Mantenimientos preventivos: 6');
   console.log('  - Proveedores: 4');
   console.log('  - Gastos: 6');
   console.log('  - Notificaciones: 5');
