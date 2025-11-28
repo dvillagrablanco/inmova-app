@@ -23,6 +23,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import {
   UserPlus,
@@ -41,6 +49,7 @@ import {
   Users,
   CheckCircle,
   Clock,
+  Home,
 } from 'lucide-react';
 
 interface Candidate {
@@ -195,37 +204,49 @@ export default function CandidatosPage() {
   };
 
   return (
-    <div className="flex h-screen bg-muted/30">
+    <div className="flex h-screen overflow-hidden bg-muted/30">
       <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-hidden">
         <Header />
         <main className="flex-1 overflow-y-auto">
-          <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
-            {/* Breadcrumbs y Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => router.push('/dashboard')}
-                    className="gap-2"
-                  >
-                    <ArrowLeft className="h-4 w-4" />
-                    Volver al Dashboard
-                  </Button>
-                </div>
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Candidatos</h1>
-                <p className="text-sm sm:text-base text-muted-foreground">
+          <div className="container mx-auto p-6 space-y-6">
+            {/* Botón Volver y Breadcrumbs */}
+            <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push('/dashboard')}
+                className="gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Volver al Dashboard
+              </Button>
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink href="/dashboard">
+                      <Home className="h-4 w-4" />
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>Candidatos</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
+            </div>
+
+            {/* Header Section */}
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Candidatos</h1>
+                <p className="text-muted-foreground">
                   Gestión de candidatos a inquilinos
                 </p>
               </div>
               {canCreate && (
-                <Button
-                  onClick={() => router.push('/candidatos/nuevo')}
-                  className="w-full sm:w-auto bg-primary hover:bg-primary/90"
-                >
-                  <UserPlus className="h-4 w-4 mr-2" />
+                <Button onClick={() => router.push('/candidatos/nuevo')}>
+                  <UserPlus className="mr-2 h-4 w-4" />
                   Nuevo Candidato
                 </Button>
               )}
