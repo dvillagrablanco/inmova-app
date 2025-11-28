@@ -992,3 +992,134 @@ model DocumentTag {
   @@index([companyId])
   @@map("document_tags")
 }
+
+model AnalyticsSnapshot {
+  id                      String   @id @default(cuid())
+  companyId               String
+  fecha                   DateTime @default(now())
+  periodo                 String
+  totalUnidades           Int
+  unidadesOcupadas        Int
+  unidadesVacantes        Int
+  tasaOcupacion           Float
+  ingresosMensuales       Float
+  gastosMensuales         Float
+  ingresoNeto             Float
+  morosidad               Float
+  tasaMorosidad           Float
+  contratosPorVencer      Int
+  mantenimientoPendiente  Int
+  ticketPromedio          Float
+  createdAt               DateTime @default(now())
+
+  @@index([companyId])
+  @@index([fecha])
+  @@index([periodo])
+  @@map("analytics_snapshots")
+}
+
+model BuildingMetrics {
+  id                      String   @id @default(cuid())
+  buildingId              String
+  fecha                   DateTime @default(now())
+  periodo                 String
+  totalUnidades           Int
+  unidadesOcupadas        Int
+  tasaOcupacion           Float
+  ingresosReales          Float
+  ingresosPotenciales     Float
+  gastos                  Float
+  ingresoNeto             Float
+  roi                     Float
+  ticketPromedio          Float
+  diasPromedioVacancia    Int
+  satisfaccionInquilinos  Float?
+  createdAt               DateTime @default(now())
+
+  @@index([buildingId])
+  @@index([fecha])
+  @@index([periodo])
+  @@map("building_metrics")
+}
+
+model TenantBehavior {
+  id                      String   @id @default(cuid())
+  tenantId                String
+  fecha                   DateTime @default(now())
+  pagosATiempo            Int      @default(0)
+  pagosRetrasados         Int      @default(0)
+  promedioRetrasosDias    Float    @default(0)
+  ticketsMantenimiento    Int      @default(0)
+  scoreComportamiento     Int      @default(50)
+  riesgoMorosidad         String   @default("bajo")
+  probabilidadRenovacion  Float?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([fecha])
+  @@map("tenant_behaviors")
+}
+
+model PredictionModel {
+  id                String   @id @default(cuid())
+  companyId         String
+  tipo              String
+  nombre            String
+  descripcion       String?  @db.Text
+  parametros        String   @db.Text
+  precision         Float?
+  ultimoEntrenamiento DateTime?
+  activo            Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([tipo])
+  @@map("prediction_models")
+}
+
+model Prediction {
+  id                String   @id @default(cuid())
+  companyId         String
+  modelId           String?
+  tipo              String
+  entityId          String?
+  entityType        String?
+  periodo           String
+  valorPredicho     Float
+  confianza         Float
+  factores          String   @db.Text
+  fechaPrediccion   DateTime @default(now())
+  fechaObjetivo     DateTime
+  valorReal         Float?
+  createdAt         DateTime @default(now())
+
+  @@index([companyId])
+  @@index([tipo])
+  @@index([entityId])
+  @@index([fechaObjetivo])
+  @@map("predictions")
+}
+
+model Recommendation {
+  id                String   @id @default(cuid())
+  companyId         String
+  tipo              String
+  prioridad         String   @default("media")
+  titulo            String
+  descripcion       String   @db.Text
+  entityId          String?
+  entityType        String?
+  impactoEstimado   Float?
+  accionSugerida    String   @db.Text
+  aplicada          Boolean  @default(false)
+  fechaAplicacion   DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([tipo])
+  @@index([prioridad])
+  @@map("recommendations")
+}

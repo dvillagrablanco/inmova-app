@@ -27,6 +27,7 @@ import {
   Upload,
   Shield,
   CheckSquare,
+  BarChart2,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -50,6 +51,7 @@ const allNavItems = [
   { name: 'Proveedores', href: '/proveedores', icon: UsersRound, roles: ['administrador', 'gestor'] },
   { name: 'Gastos', href: '/gastos', icon: DollarSign, roles: ['administrador', 'gestor'] },
   { name: 'Reportes Financieros', href: '/reportes', icon: FileBarChart, roles: ['administrador', 'gestor'] },
+  { name: 'Analytics & Predicciones', href: '/analytics', icon: BarChart2, roles: ['administrador', 'gestor'] },
   { name: 'Importar Datos', href: '/admin/importar', icon: Upload, roles: ['administrador', 'gestor'] },
   { name: 'Usuarios', href: '/admin/usuarios', icon: Shield, roles: ['administrador'] },
   { name: 'Configuración', href: '/admin/configuracion', icon: Settings, roles: ['administrador'] },
