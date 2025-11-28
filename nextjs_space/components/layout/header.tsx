@@ -35,8 +35,8 @@ export function Header() {
   const roleBadge = getRoleBadge(userRole);
 
   return (
-    <header className="sticky top-0 z-30 border-b bg-background shadow-sm">
-      <div className="flex h-16 items-center justify-between px-4 md:px-6">
+    <header className="sticky top-0 z-10 border-b bg-background shadow-sm">
+      <div className="flex h-14 items-center justify-between px-4 md:px-6">
         {/* Empresa Info */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 rounded-lg bg-muted px-3 py-2">

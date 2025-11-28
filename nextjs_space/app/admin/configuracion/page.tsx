@@ -68,7 +68,8 @@ export default function ConfiguracionPage() {
             direccion: data.direccion || '',
             telefono: data.telefono || '',
             email: data.email || '',
-            sitioWeb: data.sitioWeb || '',
+            ciudad: data.ciudad || '',
+            codigoPostal: data.codigoPostal || '',
           });
         }
       } catch (error) {
@@ -141,34 +142,30 @@ export default function ConfiguracionPage() {
         <Header />
         <main className="flex-1 overflow-y-auto">
           <div className="container mx-auto p-6 space-y-6">
-            {/* Breadcrumbs y Botón Volver */}
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <Breadcrumb>
-                  <BreadcrumbList>
-                    <BreadcrumbItem>
-                      <BreadcrumbLink href="/dashboard">
-                        <Home className="h-4 w-4" />
-                      </BreadcrumbLink>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator />
-                    <BreadcrumbItem>
-                      <BreadcrumbPage>Configuración de Empresa</BreadcrumbPage>
-                    </BreadcrumbItem>
-                  </BreadcrumbList>
-                </Breadcrumb>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => router.push('/dashboard')}
-                    className="-ml-2"
-                  >
-                    <ArrowLeft className="h-4 w-4 mr-1" />
-                    Volver
-                  </Button>
-                </div>
-              </div>
+            {/* Botón Volver y Breadcrumbs */}
+            <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push('/dashboard')}
+                className="gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Volver al Dashboard
+              </Button>
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink href="/dashboard">
+                      <Home className="h-4 w-4" />
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>Configuración de Empresa</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
             </div>
 
             {/* Header Section */}
@@ -288,21 +285,34 @@ export default function ConfiguracionPage() {
                       </div>
                     </div>
 
-                    {/* Sitio Web */}
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="sitioWeb">Sitio Web (opcional)</Label>
+                    {/* Ciudad */}
+                    <div className="space-y-2">
+                      <Label htmlFor="ciudad">Ciudad</Label>
                       <div className="relative">
-                        <Globe className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
-                          id="sitioWeb"
-                          name="sitioWeb"
-                          value={formData.sitioWeb}
+                          id="ciudad"
+                          name="ciudad"
+                          value={formData.ciudad}
                           onChange={handleChange}
                           disabled={!isAdmin}
                           className="pl-10"
-                          placeholder="https://www.inmova.com"
+                          placeholder="Madrid"
                         />
                       </div>
+                    </div>
+
+                    {/* Código Postal */}
+                    <div className="space-y-2">
+                      <Label htmlFor="codigoPostal">Código Postal</Label>
+                      <Input
+                        id="codigoPostal"
+                        name="codigoPostal"
+                        value={formData.codigoPostal}
+                        onChange={handleChange}
+                        disabled={!isAdmin}
+                        placeholder="28013"
+                      />
                     </div>
                   </div>
 
@@ -332,7 +342,8 @@ export default function ConfiguracionPage() {
                             direccion: company.direccion || '',
                             telefono: company.telefono || '',
                             email: company.email || '',
-                            sitioWeb: company.sitioWeb || '',
+                            ciudad: company.ciudad || '',
+                            codigoPostal: company.codigoPostal || '',
                           })
                         }
                         disabled={isSaving}
