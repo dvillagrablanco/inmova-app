@@ -40,6 +40,8 @@ interface Notification {
   mensaje: string;
   leida: boolean;
   createdAt: string;
+  entityId?: string | null;
+  entityType?: string | null;
 }
 
 export default function NotificacionesPage() {
@@ -123,6 +125,33 @@ export default function NotificacionesPage() {
     } catch (error) {
       console.error('Error deleting notification:', error);
       toast.error('Error al eliminar');
+    }
+  };
+
+  const handleNotificationClick = async (notification: Notification) => {
+    // Marcar como leída si no lo está
+    if (!notification.leida) {
+      await markAsRead(notification.id);
+    }
+
+    // Navegar a la ubicación relacionada si existe
+    if (notification.entityType && notification.entityId) {
+      const routeMap: Record<string, string> = {
+        building: '/edificios',
+        unit: '/unidades',
+        tenant: '/inquilinos',
+        contract: '/contratos',
+        payment: '/pagos',
+        maintenance: '/mantenimiento',
+        candidate: '/candidatos',
+        expense: '/gastos',
+        document: '/documentos',
+      };
+
+      const baseRoute = routeMap[notification.entityType.toLowerCase()];
+      if (baseRoute) {
+        router.push(`${baseRoute}/${notification.entityId}`);
+      }
     }
   };
 
@@ -250,9 +279,10 @@ export default function NotificacionesPage() {
                     return (
                       <Card
                         key={notification.id}
-                        className={`transition-all ${
+                        className={`transition-all cursor-pointer hover:shadow-md ${
                           notification.leida ? 'opacity-60' : 'border-l-4 border-l-primary'
                         }`}
+                        onClick={() => handleNotificationClick(notification)}
                       >
                         <CardContent className="pt-6">
                           <div className="flex gap-4">
@@ -272,6 +302,11 @@ export default function NotificacionesPage() {
                                     <Badge variant="outline" className="text-xs capitalize">
                                       {notification.tipo}
                                     </Badge>
+                                    {notification.entityType && notification.entityId && (
+                                      <Badge variant="secondary" className="text-xs">
+                                        Click para ver
+                                      </Badge>
+                                    )}
                                   </div>
                                   <p className="text-sm text-muted-foreground mt-1">{notification.mensaje}</p>
                                   <p className="text-xs text-muted-foreground mt-2">
@@ -280,7 +315,7 @@ export default function NotificacionesPage() {
                                     })}
                                   </p>
                                 </div>
-                                <div className="flex gap-1">
+                                <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
                                   {!notification.leida && (
                                     <Button
                                       variant="ghost"

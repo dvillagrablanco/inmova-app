@@ -13,15 +13,41 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export function Header() {
   const { data: session } = useSession() || {};
   const router = useRouter();
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const user = session?.user as any;
   const companyName = user?.companyName || 'INMOVA';
   const userName = user?.name || 'Usuario';
   const userRole = user?.role || 'gestor';
+
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      if (session) {
+        try {
+          const res = await fetch('/api/notifications');
+          if (res.ok) {
+            const notifications = await res.json();
+            const count = notifications.filter((n: any) => !n.leida).length;
+            setUnreadCount(count);
+          }
+        } catch (error) {
+          console.error('Error fetching notifications:', error);
+        }
+      }
+    };
+
+    fetchUnreadCount();
+    
+    // Refrescar cada 30 segundos
+    const interval = setInterval(fetchUnreadCount, 30000);
+    
+    return () => clearInterval(interval);
+  }, [session]);
 
   const getRoleBadge = (role: string) => {
     const roles: Record<string, { label: string; variant: any }> = {
@@ -58,9 +84,11 @@ export function Header() {
             onClick={() => router.push('/notificaciones')}
           >
             <Bell className="h-5 w-5" />
-            <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-semibold text-white">
-              3
-            </span>
+            {unreadCount > 0 && (
+              <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-semibold text-white">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
           </Button>
 
           {/* User Menu */}
