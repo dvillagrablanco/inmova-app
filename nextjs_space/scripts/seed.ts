@@ -79,6 +79,19 @@ async function main() {
     },
   });
 
+  // Usuario de testing (requerido para validación automática)
+  const hashedTestPassword = await bcrypt.hash('johndoe123', 10);
+  const testUser = await prisma.user.create({
+    data: {
+      email: 'john@doe.com',
+      password: hashedTestPassword,
+      name: 'John Doe',
+      role: 'administrador',
+      companyId: company1.id,
+      activo: true,
+    },
+  });
+
   const gestor1 = await prisma.user.create({
     data: {
       email: 'gestor@inmova.com',
