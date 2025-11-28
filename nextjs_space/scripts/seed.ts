@@ -22,23 +22,23 @@ async function main() {
   console.log('✅ Base de datos limpiada');
 
   // Crear usuarios
-  const hashedPassword = await bcrypt.hash('johndoe123', 10);
   const hashedAdminPassword = await bcrypt.hash('admin123', 10);
+  const hashedGestorPassword = await bcrypt.hash('gestor123', 10);
 
   const adminUser = await prisma.user.create({
     data: {
-      email: 'john@doe.com',
-      password: hashedPassword,
-      name: 'John Doe',
+      email: 'admin@inmova.com',
+      password: hashedAdminPassword,
+      name: 'Administrador INMOVA',
       role: 'administrador',
     },
   });
 
   const gestorUser = await prisma.user.create({
     data: {
-      email: 'gestor@vidaro.com',
-      password: hashedAdminPassword,
-      name: 'María García',
+      email: 'gestor@inmova.com',
+      password: hashedGestorPassword,
+      name: 'María García López',
       role: 'gestor',
     },
   });
