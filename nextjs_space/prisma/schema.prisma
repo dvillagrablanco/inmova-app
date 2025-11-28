@@ -1123,3 +1123,148 @@ model Recommendation {
   @@index([prioridad])
   @@map("recommendations")
 }
+
+model MaintenanceInventory {
+  id                String   @id @default(cuid())
+  companyId         String
+  buildingId        String?
+  nombre            String
+  categoria         String
+  descripcion       String?  @db.Text
+  codigoSKU         String?
+  cantidad          Int      @default(0)
+  cantidadMinima    Int      @default(5)
+  unidadMedida      String   @default("unidad")
+  costoUnitario     Float    @default(0)
+  proveedor         String?
+  ubicacion         String?
+  fechaUltimaCompra DateTime?
+  notas             String?  @db.Text
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([buildingId])
+  @@index([categoria])
+  @@map("maintenance_inventory")
+}
+
+model MaintenanceHistory {
+  id                      String   @id @default(cuid())
+  maintenanceRequestId    String
+  unitId                  String?
+  buildingId              String?
+  equipoSistema           String
+  tipoProblema            String
+  descripcionProblema     String   @db.Text
+  solucionAplicada        String?  @db.Text
+  repuestosUsados         String?  @db.Text
+  costoReparacion         Float?
+  tiempoReparacion        Int?
+  proveedorId             String?
+  tecnicoAsignado         String?
+  fechaDeteccion          DateTime
+  fechaReparacion         DateTime?
+  proximoMantenimiento    DateTime?
+  createdAt               DateTime @default(now())
+
+  @@index([equipoSistema])
+  @@index([tipoProblema])
+  @@index([unitId])
+  @@index([buildingId])
+  @@index([fechaDeteccion])
+  @@map("maintenance_history")
+}
+
+model MaintenanceFailurePrediction {
+  id                String   @id @default(cuid())
+  companyId         String
+  equipoSistema     String
+  buildingId        String?
+  unitId            String?
+  probabilidadFalla Float
+  diasEstimados     Int
+  factoresRiesgo    String   @db.Text
+  recomendaciones   String   @db.Text
+  historialAnalizado Int     @default(0)
+  confianza         Float    @default(0.5)
+  estado            String   @default("activa")
+  fechaPrediccion   DateTime @default(now())
+  fechaObjetivo     DateTime
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([equipoSistema])
+  @@index([buildingId])
+  @@index([estado])
+  @@index([fechaObjetivo])
+  @@map("maintenance_failure_predictions")
+}
+
+model MaintenanceBudget {
+  id                String   @id @default(cuid())
+  companyId         String
+  buildingId        String?
+  periodo           String
+  presupuestoTotal  Float
+  gastadoCorrectivo Float    @default(0)
+  gastadoPreventivo Float    @default(0)
+  gastadoEmergencia Float    @default(0)
+  ahorroPreventivo  Float    @default(0)
+  numeroOrdenes     Int      @default(0)
+  fechaInicio       DateTime
+  fechaFin          DateTime
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([buildingId])
+  @@index([periodo])
+  @@map("maintenance_budgets")
+}
+
+model MaintenanceMetrics {
+  id                      String   @id @default(cuid())
+  companyId               String
+  buildingId              String?
+  periodo                 String
+  tiempoRespuestaPromedio Float
+  tiempoResolucionPromedio Float
+  tasaResolucionPrimera   Float
+  satisfaccionCliente     Float?
+  costosPreventivo        Float    @default(0)
+  costosCorrectivo        Float    @default(0)
+  costosEmergencia        Float    @default(0)
+  solicitudesCompletas    Int      @default(0)
+  solicitudesPendientes   Int      @default(0)
+  solicitudesAtrasadas    Int      @default(0)
+  disponibilidadEquipos   Float    @default(100)
+  createdAt               DateTime @default(now())
+
+  @@index([companyId])
+  @@index([buildingId])
+  @@index([periodo])
+  @@map("maintenance_metrics")
+}
+
+model MaintenanceDiagnostic {
+  id                String   @id @default(cuid())
+  maintenanceRequestId String
+  equipoSistema     String
+  sintomas          String   @db.Text
+  diagnostico       String   @db.Text
+  causaProbable     String   @db.Text
+  solucionSugerida  String   @db.Text
+  repuestosNecesarios String? @db.Text
+  costoEstimado     Float?
+  tiempoEstimado    Int?
+  prioridad         String   @default("media")
+  confianza         Float    @default(0.7)
+  creadoPor         String
+  createdAt         DateTime @default(now())
+
+  @@index([maintenanceRequestId])
+  @@index([equipoSistema])
+  @@map("maintenance_diagnostics")
+}

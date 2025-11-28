@@ -47,6 +47,7 @@ const allNavItems = [
   { name: 'Mantenimiento', href: '/mantenimiento', icon: Wrench, roles: ['administrador', 'gestor', 'operador'] },
   { name: 'Tareas', href: '/tareas', icon: CheckSquare, roles: ['administrador', 'gestor', 'operador'] },
   { name: 'Mtto. Preventivo', href: '/mantenimiento-preventivo', icon: Calendar, roles: ['administrador', 'gestor', 'operador'] },
+  { name: 'Mantenimiento Pro', href: '/mantenimiento-pro', icon: Wrench, roles: ['administrador', 'gestor'] },
   { name: 'Documentos', href: '/documentos', icon: Folder, roles: ['administrador', 'gestor'] },
   { name: 'Proveedores', href: '/proveedores', icon: UsersRound, roles: ['administrador', 'gestor'] },
   { name: 'Gastos', href: '/gastos', icon: DollarSign, roles: ['administrador', 'gestor'] },
