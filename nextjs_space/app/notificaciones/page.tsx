@@ -93,9 +93,17 @@ export default function NotificacionesPage() {
 
   const markAllAsRead = async () => {
     try {
-      const unreadIds = notifications.filter((n) => !n.leida).map((n) => n.id);
-      await Promise.all(unreadIds.map((id) => markAsRead(id)));
-      toast.success('Todas las notificaciones marcadas como leídas');
+      const response = await fetch('/api/notifications/mark-all-read', {
+        method: 'PUT',
+      });
+
+      if (response.ok) {
+        // Actualizar el estado local para marcar todas las notificaciones como leídas
+        setNotifications(notifications.map((n) => ({ ...n, leida: true })));
+        toast.success('Todas las notificaciones marcadas como leídas');
+      } else {
+        toast.error('Error al marcar todas como leídas');
+      }
     } catch (error) {
       console.error('Error marking all as read:', error);
       toast.error('Error al marcar todas como leídas');
