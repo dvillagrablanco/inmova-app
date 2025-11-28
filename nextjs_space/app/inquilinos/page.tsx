@@ -30,18 +30,21 @@ import { usePermissions } from '@/lib/hooks/usePermissions';
 
 interface Tenant {
   id: string;
-  nombre: string;
+  nombreCompleto: string;
   email: string;
   telefono: string;
   dni: string;
-  estado: string;
+  estado?: string;
   fechaIngreso?: string;
-  unidad?: {
+  units?: Array<{
     numero: string;
-    edificio: {
+    building: {
       nombre: string;
     };
-  };
+  }>;
+  contracts?: Array<{
+    estado: string;
+  }>;
 }
 
 export default function InquilinosPage() {
@@ -83,7 +86,7 @@ export default function InquilinosPage() {
   useEffect(() => {
     if (searchTerm) {
       const filtered = tenants.filter((tenant) =>
-        tenant.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        tenant.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase()) ||
         tenant.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         tenant.dni.toLowerCase().includes(searchTerm.toLowerCase())
       );
@@ -102,6 +105,15 @@ export default function InquilinosPage() {
   }
 
   if (!session) return null;
+
+  const getTenantEstado = (tenant: Tenant): string => {
+    // Si tiene contratos activos, está activo
+    if (tenant.contracts && tenant.contracts.some((c) => c.estado === 'activo')) {
+      return 'activo';
+    }
+    // Si no tiene contratos activos, está inactivo
+    return 'inactivo';
+  };
 
   const getEstadoBadge = (estado: string) => {
     const badges: Record<string, { variant: any; label: string }> = {
@@ -122,8 +134,8 @@ export default function InquilinosPage() {
       .slice(0, 2);
   };
 
-  const activeTenants = tenants.filter((t) => t.estado.toLowerCase() === 'activo').length;
-  const morosoTenants = tenants.filter((t) => t.estado.toLowerCase() === 'moroso').length;
+  const activeTenants = tenants.filter((t) => getTenantEstado(t) === 'activo').length;
+  const morosoTenants = 0; // Por ahora, sin lógica de morosidad
 
   return (
     <div className="flex h-screen overflow-hidden bg-muted/30">
@@ -228,7 +240,10 @@ export default function InquilinosPage() {
             {/* Tenants List */}
             <div className="grid gap-4">
               {filteredTenants.map((tenant) => {
-                const estadoBadge = getEstadoBadge(tenant.estado);
+                const estado = getTenantEstado(tenant);
+                const estadoBadge = getEstadoBadge(estado);
+                const primeraUnidad = tenant.units?.[0];
+                
                 return (
                   <Card key={tenant.id} className="hover:shadow-md transition-shadow">
                     <CardContent className="pt-6">
@@ -236,12 +251,12 @@ export default function InquilinosPage() {
                         <div className="flex items-start gap-4 flex-1">
                           <Avatar className="h-12 w-12">
                             <AvatarFallback className="bg-primary text-primary-foreground">
-                              {getInitials(tenant.nombre)}
+                              {getInitials(tenant.nombreCompleto)}
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1 space-y-2">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <h3 className="text-lg font-semibold">{tenant.nombre}</h3>
+                              <h3 className="text-lg font-semibold">{tenant.nombreCompleto}</h3>
                               <Badge variant={estadoBadge.variant}>{estadoBadge.label}</Badge>
                             </div>
                             <div className="grid gap-2 md:grid-cols-2 text-sm text-muted-foreground">
@@ -254,11 +269,11 @@ export default function InquilinosPage() {
                                 <span>{tenant.telefono}</span>
                               </div>
                             </div>
-                            {tenant.unidad && (
+                            {primeraUnidad && (
                               <div className="flex items-center gap-2 text-sm">
                                 <Home className="h-4 w-4 text-muted-foreground" />
                                 <span className="font-medium">
-                                  {tenant.unidad.edificio.nombre} - Unidad {tenant.unidad.numero}
+                                  {primeraUnidad.building.nombre} - Unidad {primeraUnidad.numero}
                                 </span>
                               </div>
                             )}
