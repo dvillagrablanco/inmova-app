@@ -100,6 +100,46 @@ enum NotificationType {
   info
 }
 
+enum SituacionLaboral {
+  empleado
+  autonomo
+  estudiante
+  jubilado
+  desempleado
+}
+
+enum EstadoCivil {
+  soltero
+  casado
+  divorciado
+  viudo
+}
+
+enum CandidateStatus {
+  nuevo
+  en_revision
+  preseleccionado
+  aprobado
+  rechazado
+}
+
+enum IncrementoType {
+  porcentaje
+  ipc
+  fijo
+}
+
+enum MessageStatus {
+  enviado
+  leido
+}
+
+enum TemplateType {
+  contrato
+  email
+  recibo
+}
+
 model User {
   id            String   @id @default(cuid())
   email         String   @unique
@@ -119,6 +159,19 @@ model Building {
   tipo              BuildingType
   anoConstructor    Int
   numeroUnidades    Int
+  estadoConservacion String?
+  certificadoEnergetico String?
+  ascensor          Boolean      @default(false)
+  garaje            Boolean      @default(false)
+  trastero          Boolean      @default(false)
+  piscina           Boolean      @default(false)
+  jardin            Boolean      @default(false)
+  gastosComunidad   Float?
+  ibiAnual          Float?
+  latitud           Float?
+  longitud          Float?
+  imagenes          String[]     @default([])
+  etiquetas         String[]     @default([])
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
 
@@ -130,21 +183,34 @@ model Building {
 }
 
 model Tenant {
-  id                String    @id @default(cuid())
+  id                String            @id @default(cuid())
   nombreCompleto    String
-  dni               String    @unique
-  email             String    @unique
+  dni               String            @unique
+  email             String            @unique
   telefono          String
   fechaNacimiento   DateTime
-  scoring           Int       @default(50)
-  nivelRiesgo       RiskLevel @default(medio)
-  notas             String?   @db.Text
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  nacionalidad      String?
+  estadoCivil       EstadoCivil?
+  numeroOcupantes   Int?
+  direccionActual   String?
+  situacionLaboral  SituacionLaboral?
+  empresa           String?
+  puesto            String?
+  antiguedad        Int?
+  ingresosMensuales Float?
+  ratioRentaIngresos Float?
+  scoring           Int               @default(50)
+  nivelRiesgo       RiskLevel         @default(medio)
+  password          String?
+  notas             String?           @db.Text
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 
   units             Unit[]
   contracts         Contract[]
   documents         Document[]
+  messagesReceived  Message[]         @relation("MessageRecipient")
+  messagesSent      Message[]         @relation("MessageSender")
 
   @@map("tenants")
 }
@@ -156,10 +222,19 @@ model Unit {
   tipo              UnitType
   estado            UnitStatus @default(disponible)
   superficie        Float
+  superficieUtil    Float?
   habitaciones      Int?
   banos             Int?
+  planta            Int?
+  orientacion       String?
   rentaMensual      Float
   tenantId          String?
+  aireAcondicionado Boolean    @default(false)
+  calefaccion       Boolean    @default(false)
+  terraza           Boolean    @default(false)
+  balcon            Boolean    @default(false)
+  amueblado         Boolean    @default(false)
+  imagenes          String[]   @default([])
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 
@@ -169,6 +244,7 @@ model Unit {
   maintenanceRequests MaintenanceRequest[]
   expenses          Expense[]
   documents         Document[]
+  candidates        Candidate[]
 
   @@unique([buildingId, numero])
   @@map("units")
@@ -181,7 +257,15 @@ model Contract {
   fechaInicio       DateTime
   fechaFin          DateTime
   rentaMensual      Float
+  diaPago           Int            @default(1)
   deposito          Float
+  mesesFianza       Int            @default(1)
+  renovacionAutomatica Boolean     @default(false)
+  incrementoType    IncrementoType @default(ipc)
+  incrementoValor   Float?
+  gastosIncluidos   String[]       @default([])
+  gastosExcluidos   String[]       @default([])
+  clausulasAdicionales String?     @db.Text
   estado            ContractStatus @default(activo)
   tipo              ContractType   @default(residencial)
   contractPdfPath   String?
@@ -227,6 +311,10 @@ model MaintenanceRequest {
   providerId        String?
   costoEstimado     Float?
   costoReal         Float?
+  fotosProblem      String[]            @default([])
+  fotosCompletado   String[]            @default([])
+  valoracion        Int?
+  comentarios       String?             @db.Text
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
 
@@ -309,4 +397,89 @@ model Notification {
   updatedAt         DateTime          @updatedAt
 
   @@map("notifications")
+}
+
+model Candidate {
+  id                String           @id @default(cuid())
+  unitId            String
+  nombreCompleto    String
+  dni               String
+  email             String
+  telefono          String
+  fechaNacimiento   DateTime
+  situacionLaboral  SituacionLaboral?
+  ingresosMensuales Float?
+  scoring           Int              @default(0)
+  estado            CandidateStatus  @default(nuevo)
+  documentos        String[]         @default([])
+  notas             String?          @db.Text
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  unit              Unit             @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  visits            Visit[]
+
+  @@map("candidates")
+}
+
+model Visit {
+  id                String           @id @default(cuid())
+  candidateId       String
+  fechaVisita       DateTime
+  confirmada        Boolean          @default(false)
+  asistio           Boolean?
+  feedback          String?          @db.Text
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  candidate         Candidate        @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  @@map("visits")
+}
+
+model Message {
+  id                String           @id @default(cuid())
+  senderId          String
+  recipientId       String
+  asunto            String
+  mensaje           String           @db.Text
+  estado            MessageStatus    @default(enviado)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  sender            Tenant           @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  recipient         Tenant           @relation("MessageRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+model Template {
+  id                String           @id @default(cuid())
+  nombre            String
+  tipo              TemplateType
+  contenido         String           @db.Text
+  variables         String[]         @default([])
+  activo            Boolean          @default(true)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  @@map("templates")
+}
+
+model Company {
+  id                String           @id @default(cuid())
+  nombre            String
+  cif               String
+  direccion         String
+  telefono          String
+  email             String
+  logoUrl           String?
+  codigoPostal      String?
+  ciudad            String?
+  pais              String           @default("España")
+  iban              String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  @@map("company")
 }

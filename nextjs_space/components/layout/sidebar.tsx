@@ -21,6 +21,7 @@ import {
   Folder,
   UsersRound,
   DollarSign,
+  UserPlus,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
@@ -32,6 +33,7 @@ const navItems = [
   { name: 'Edificios', href: '/edificios', icon: Building2 },
   { name: 'Unidades', href: '/unidades', icon: Home },
   { name: 'Inquilinos', href: '/inquilinos', icon: Users },
+  { name: 'Candidatos', href: '/candidatos', icon: UserPlus },
   { name: 'Contratos', href: '/contratos', icon: FileText },
   { name: 'Pagos', href: '/pagos', icon: CreditCard },
   { name: 'Mantenimiento', href: '/mantenimiento', icon: Wrench },
