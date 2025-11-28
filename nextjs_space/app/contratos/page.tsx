@@ -32,18 +32,19 @@ interface Contract {
   id: string;
   fechaInicio: string;
   fechaFin: string;
-  montoMensual: number;
+  rentaMensual: number;
   estado: string;
-  tipoContrato: string;
-  inquilino: {
-    nombre: string;
+  tipo: string;
+  tenant: {
+    nombreCompleto: string;
   };
-  unidad: {
+  unit: {
     numero: string;
-    edificio: {
+    building: {
       nombre: string;
     };
   };
+  diasHastaVencimiento?: number;
 }
 
 export default function ContratosPage() {
@@ -85,9 +86,9 @@ export default function ContratosPage() {
   useEffect(() => {
     if (searchTerm) {
       const filtered = contracts.filter((contract) =>
-        contract.inquilino.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        contract.unidad.edificio.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        contract.unidad.numero.toLowerCase().includes(searchTerm.toLowerCase())
+        contract.tenant.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contract.unit.building.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contract.unit.numero.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredContracts(filtered);
     } else {
@@ -128,7 +129,7 @@ export default function ContratosPage() {
   const finalizadosCount = contracts.filter((c) => c.estado.toLowerCase() === 'finalizado').length;
   const totalIngresos = contracts
     .filter((c) => c.estado.toLowerCase() === 'activo')
-    .reduce((acc, c) => acc + c.montoMensual, 0);
+    .reduce((acc, c) => acc + c.rentaMensual, 0);
 
   const getDaysUntilExpiry = (fechaFin: string) => {
     const today = new Date();
@@ -172,15 +173,15 @@ export default function ContratosPage() {
             </div>
 
             {/* Header Section */}
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight">Contratos</h1>
-                <p className="text-muted-foreground">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Contratos</h1>
+                <p className="text-sm sm:text-base text-muted-foreground">
                   Gestiona los contratos de arrendamiento
                 </p>
               </div>
               {canCreate && (
-                <Button onClick={() => router.push('/contratos/nuevo')}>
+                <Button onClick={() => router.push('/contratos/nuevo')} className="w-full sm:w-auto">
                   <Plus className="mr-2 h-4 w-4" />
                   Nuevo Contrato
                 </Button>
@@ -242,7 +243,7 @@ export default function ContratosPage() {
             <div className="grid gap-4">
               {filteredContracts.map((contract) => {
                 const estadoBadge = getEstadoBadge(contract.estado);
-                const tipoBadge = getTipoBadge(contract.tipoContrato);
+                const tipoBadge = getTipoBadge(contract.tipo);
                 const daysUntilExpiry = getDaysUntilExpiry(contract.fechaFin);
                 const isExpiringSoon = daysUntilExpiry > 0 && daysUntilExpiry <= 30;
                 const IconComponent = estadoBadge.icon;
@@ -250,30 +251,30 @@ export default function ContratosPage() {
                 return (
                   <Card key={contract.id} className="hover:shadow-md transition-shadow">
                     <CardContent className="pt-6">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                        <div className="flex-1 space-y-4 min-w-0">
                           {/* Header */}
                           <div className="flex items-start justify-between">
-                            <div className="space-y-2">
+                            <div className="space-y-2 min-w-0 flex-1">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <h3 className="text-lg font-semibold">{contract.inquilino.nombre}</h3>
-                                <Badge variant={estadoBadge.variant}>
-                                  <IconComponent className="h-3 w-3 mr-1" />
+                                <h3 className="text-base sm:text-lg font-semibold break-words">{contract.tenant.nombreCompleto}</h3>
+                                <Badge variant={estadoBadge.variant} className="flex items-center gap-1">
+                                  <IconComponent className="h-3 w-3" />
                                   {estadoBadge.label}
                                 </Badge>
                                 <Badge variant={tipoBadge.variant}>{tipoBadge.label}</Badge>
                               </div>
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Home className="h-4 w-4" />
-                                <span>
-                                  {contract.unidad.edificio.nombre} - Unidad {contract.unidad.numero}
+                              <div className="flex items-start gap-2 text-sm bg-muted/50 p-2 rounded-md">
+                                <Home className="h-4 w-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
+                                <span className="break-words">
+                                  {contract.unit.building.nombre} - Unidad {contract.unit.numero}
                                 </span>
                               </div>
                             </div>
                           </div>
 
                           {/* Detalles */}
-                          <div className="grid gap-4 md:grid-cols-3">
+                          <div className="grid gap-4 sm:grid-cols-3">
                             <div className="space-y-1">
                               <p className="text-xs text-muted-foreground">Fecha Inicio</p>
                               <p className="text-sm font-medium">
@@ -282,7 +283,7 @@ export default function ContratosPage() {
                             </div>
                             <div className="space-y-1">
                               <p className="text-xs text-muted-foreground">Fecha Fin</p>
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 flex-wrap">
                                 <p className="text-sm font-medium">
                                   {format(new Date(contract.fechaFin), 'dd MMM yyyy', { locale: es })}
                                 </p>
@@ -295,17 +296,17 @@ export default function ContratosPage() {
                             </div>
                             <div className="space-y-1">
                               <p className="text-xs text-muted-foreground">Monto Mensual</p>
-                              <p className="text-lg font-bold text-green-600">
-                                €{contract.montoMensual.toLocaleString()}
+                              <p className="text-base sm:text-lg font-bold text-green-600">
+                                €{contract.rentaMensual.toLocaleString()}
                               </p>
                             </div>
                           </div>
 
                           {/* Alertas */}
                           {isExpiringSoon && contract.estado.toLowerCase() === 'activo' && (
-                            <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
-                              <AlertTriangle className="h-4 w-4 text-red-600" />
-                              <p className="text-sm text-red-600 font-medium">
+                            <div className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
+                              <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+                              <p className="text-xs sm:text-sm text-red-600 font-medium">
                                 Vence en {daysUntilExpiry} días - Renovar pronto
                               </p>
                             </div>
@@ -315,14 +316,16 @@ export default function ContratosPage() {
                             onClick={() => router.push(`/contratos/${contract.id}`)}
                             variant="outline"
                             size="sm"
+                            className="w-full sm:w-auto"
                           >
+                            <Eye className="mr-2 h-4 w-4" />
                             Ver Detalles
                           </Button>
                         </div>
 
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
+                            <Button variant="ghost" size="icon" className="self-start">
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
