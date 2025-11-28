@@ -247,32 +247,32 @@ export default function InquilinosPage() {
                 return (
                   <Card key={tenant.id} className="hover:shadow-md transition-shadow">
                     <CardContent className="pt-6">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-start gap-4 flex-1">
-                          <Avatar className="h-12 w-12">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                        <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
+                          <Avatar className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0">
                             <AvatarFallback className="bg-primary text-primary-foreground">
                               {getInitials(tenant.nombreCompleto)}
                             </AvatarFallback>
                           </Avatar>
-                          <div className="flex-1 space-y-2">
+                          <div className="flex-1 space-y-2 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <h3 className="text-lg font-semibold">{tenant.nombreCompleto}</h3>
+                              <h3 className="text-base sm:text-lg font-semibold break-words">{tenant.nombreCompleto}</h3>
                               <Badge variant={estadoBadge.variant}>{estadoBadge.label}</Badge>
                             </div>
-                            <div className="grid gap-2 md:grid-cols-2 text-sm text-muted-foreground">
-                              <div className="flex items-center gap-2">
-                                <Mail className="h-4 w-4" />
-                                <span>{tenant.email}</span>
+                            <div className="grid gap-2 text-sm text-muted-foreground">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <Mail className="h-4 w-4 flex-shrink-0" />
+                                <span className="truncate">{tenant.email}</span>
                               </div>
-                              <div className="flex items-center gap-2">
-                                <Phone className="h-4 w-4" />
-                                <span>{tenant.telefono}</span>
+                              <div className="flex items-center gap-2 min-w-0">
+                                <Phone className="h-4 w-4 flex-shrink-0" />
+                                <span className="truncate">{tenant.telefono}</span>
                               </div>
                             </div>
                             {primeraUnidad && (
-                              <div className="flex items-center gap-2 text-sm">
-                                <Home className="h-4 w-4 text-muted-foreground" />
-                                <span className="font-medium">
+                              <div className="flex items-start gap-2 text-sm bg-muted/50 p-2 rounded-md">
+                                <Home className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                                <span className="font-medium break-words">
                                   {primeraUnidad.building.nombre} - Unidad {primeraUnidad.numero}
                                 </span>
                               </div>
@@ -281,7 +281,7 @@ export default function InquilinosPage() {
                         </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
+                            <Button variant="ghost" size="icon" className="self-start">
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
