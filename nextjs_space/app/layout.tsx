@@ -12,6 +12,7 @@ export const metadata: Metadata = {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',
   },
+  manifest: '/manifest.json',
   openGraph: {
     title: 'INMOVA - Gestión Inmobiliaria Innovadora',
     description: 'Sistema profesional de gestión de propiedades',

@@ -336,11 +336,14 @@ model MaintenanceRequest {
   fotosCompletado   String[]            @default([])
   valoracion        Int?
   comentarios       String?             @db.Text
+  requiereAprobacion Boolean            @default(false)
+  estadoAprobacion  ApprovalStatus?     @default(pendiente)
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
 
   unit              Unit                @relation(fields: [unitId], references: [id], onDelete: Cascade)
   provider          Provider?           @relation(fields: [providerId], references: [id], onDelete: SetNull)
+  approvals         Approval[]
 
   @@map("maintenance_requests")
 }
@@ -366,6 +369,12 @@ model Provider {
   @@map("providers")
 }
 
+enum ApprovalStatus {
+  pendiente
+  aprobado
+  rechazado
+}
+
 model Expense {
   id                String          @id @default(cuid())
   buildingId        String?
@@ -377,12 +386,15 @@ model Expense {
   fecha             DateTime
   facturaPdfPath    String?
   notas             String?         @db.Text
+  requiereAprobacion Boolean        @default(false)
+  estadoAprobacion  ApprovalStatus? @default(pendiente)
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
 
   building          Building?       @relation(fields: [buildingId], references: [id], onDelete: Cascade)
   unit              Unit?           @relation(fields: [unitId], references: [id], onDelete: Cascade)
   provider          Provider?       @relation(fields: [providerId], references: [id], onDelete: SetNull)
+  approvals         Approval[]
 
   @@map("expenses")
 }
@@ -629,4 +641,85 @@ model AuditLog {
   @@index([companyId, createdAt])
   @@index([userId, createdAt])
   @@index([entityType, entityId])
+}
+
+enum ReportFrequency {
+  diario
+  semanal
+  quincenal
+  mensual
+}
+
+enum ReportType {
+  morosidad
+  ocupacion
+  ingresos
+  gastos
+  mantenimiento
+  general
+}
+
+model ScheduledReport {
+  id                String          @id @default(cuid())
+  companyId         String
+  nombre            String
+  tipo              ReportType
+  frecuencia        ReportFrequency
+  destinatarios     String[]        @default([])
+  ultimoEnvio       DateTime?
+  proximoEnvio      DateTime
+  activo            Boolean         @default(true)
+  incluirPdf        Boolean         @default(true)
+  incluirCsv        Boolean         @default(true)
+  filtros           String?         @db.Text
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@map("scheduled_reports")
+}
+
+model NotificationPreference {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  emailPagoAtrasado     Boolean  @default(true)
+  emailContratoVencimiento Boolean @default(true)
+  emailMantenimiento    Boolean  @default(true)
+  emailDocumento        Boolean  @default(true)
+  pushPagoAtrasado      Boolean  @default(true)
+  pushContratoVencimiento Boolean @default(true)
+  pushMantenimiento     Boolean  @default(true)
+  pushDocumento         Boolean  @default(false)
+  frecuenciaResumen     String   @default("semanal")
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("notification_preferences")
+}
+
+enum ApprovalType {
+  gasto
+  mantenimiento
+}
+
+model Approval {
+  id                String         @id @default(cuid())
+  tipo              ApprovalType
+  entityId          String
+  expenseId         String?
+  maintenanceId     String?
+  solicitadoPor     String
+  revisadoPor       String?
+  estado            ApprovalStatus @default(pendiente)
+  monto             Float?
+  motivo            String?        @db.Text
+  comentarioRechazo String?        @db.Text
+  fechaSolicitud    DateTime       @default(now())
+  fechaRevision     DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  expense           Expense?            @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  maintenance       MaintenanceRequest? @relation(fields: [maintenanceId], references: [id], onDelete: Cascade)
+
+  @@map("approvals")
 }

@@ -18,6 +18,7 @@ import {
   Home,
 } from 'lucide-react';
 import { AdvancedAnalytics } from './components/advanced-analytics';
+import { PendingApprovals } from './components/pending-approvals';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import Link from 'next/link';
 
@@ -376,6 +377,13 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
+          {/* Pending Approvals Section (Solo Administradores) */}
+          {session?.user?.role === 'administrador' && (
+            <div className="mt-8">
+              <PendingApprovals />
+            </div>
+          )}
 
           {/* Advanced Analytics Section */}
           {analyticsData && analyticsData.monthlyData && (

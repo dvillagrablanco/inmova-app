@@ -1,0 +1,25 @@
+{
+  "name": "INMOVA - Innovación Inmobiliaria",
+  "short_name": "INMOVA",
+  "description": "Sistema de gestión inmobiliaria profesional",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/vidaro-logo-icon.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/vidaro-logo-icon.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ],
+  "permissions": [
+    "notifications"
+  ]
+}
