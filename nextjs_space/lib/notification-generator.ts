@@ -52,7 +52,11 @@ export async function generateAutomaticNotifications(companyId?: string) {
       gte: now,
     },
   };
-  if (companyId) contractWhere.companyId = companyId;
+  if (companyId) {
+    contractWhere.tenant = {
+      companyId,
+    };
+  }
 
   const expiringContracts = await prisma.contract.findMany({
     where: contractWhere,
