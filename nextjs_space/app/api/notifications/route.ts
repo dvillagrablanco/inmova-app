@@ -6,10 +6,11 @@ import { generateAutomaticNotifications } from '@/lib/notification-generator';
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!session) {
+  if (!session || !session.user) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
 
+  const userId = (session.user as any).id;
   const { searchParams } = new URL(req.url);
   const onlyUnread = searchParams.get('onlyUnread') === 'true';
   const generateAuto = searchParams.get('generate') === 'true';
@@ -20,7 +21,14 @@ export async function GET(req: NextRequest) {
       await generateAutomaticNotifications();
     }
 
-    const where: any = {};
+    // Filtrar por userId o notificaciones globales (userId null)
+    const where: any = {
+      OR: [
+        { userId: userId },
+        { userId: null }, // Notificaciones globales para todos
+      ],
+    };
+    
     if (onlyUnread) where.leida = false;
 
     const notifications = await prisma.notification.findMany({
@@ -32,9 +40,15 @@ export async function GET(req: NextRequest) {
       take: 50,
     });
 
-    // Contar notificaciones no leídas
+    // Contar notificaciones no leídas del usuario
     const unreadCount = await prisma.notification.count({
-      where: { leida: false },
+      where: {
+        OR: [
+          { userId: userId },
+          { userId: null },
+        ],
+        leida: false,
+      },
     });
 
     return NextResponse.json({

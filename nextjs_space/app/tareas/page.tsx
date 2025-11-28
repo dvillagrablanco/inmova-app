@@ -93,11 +93,20 @@ export default function TareasPage() {
   const [filterEstado, setFilterEstado] = useState<string>('all');
   const [filterPrioridad, setFilterPrioridad] = useState<string>('all');
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    titulo: string;
+    descripcion: string;
+    estado: 'pendiente' | 'en_progreso' | 'completada' | 'cancelada';
+    prioridad: 'baja' | 'media' | 'alta' | 'urgente';
+    fechaLimite: string;
+    fechaInicio: string;
+    asignadoA: string;
+    notas: string;
+  }>({
     titulo: '',
     descripcion: '',
-    estado: 'pendiente' as const,
-    prioridad: 'media' as const,
+    estado: 'pendiente',
+    prioridad: 'media',
     fechaLimite: '',
     fechaInicio: '',
     asignadoA: '',

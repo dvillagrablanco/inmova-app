@@ -66,10 +66,11 @@ export default function NotificacionesPage() {
       const response = await fetch('/api/notifications');
       if (response.ok) {
         const data = await response.json();
-        setNotifications(data);
+        setNotifications(data.notifications || []); // Maneja la respuesta correcta de la API
       }
     } catch (error) {
       console.error('Error fetching notifications:', error);
+      toast.error('Error al cargar notificaciones');
     } finally {
       setIsLoading(false);
     }

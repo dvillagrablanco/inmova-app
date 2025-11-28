@@ -32,9 +32,9 @@ export function Header() {
         try {
           const res = await fetch('/api/notifications');
           if (res.ok) {
-            const notifications = await res.json();
-            const count = notifications.filter((n: any) => !n.leida).length;
-            setUnreadCount(count);
+            const data = await res.json();
+            // La API ahora devuelve { notifications, unreadCount }
+            setUnreadCount(data.unreadCount || 0);
           }
         } catch (error) {
           console.error('Error fetching notifications:', error);

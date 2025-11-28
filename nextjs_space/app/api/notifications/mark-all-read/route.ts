@@ -5,13 +5,22 @@ import { prisma } from '@/lib/db';
 
 export async function PUT(req: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!session) {
+  if (!session || !session.user) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
 
+  const userId = (session.user as any).id;
+
   try {
+    // Marcar como leídas solo las notificaciones del usuario o globales
     await prisma.notification.updateMany({
-      where: { leida: false },
+      where: {
+        OR: [
+          { userId: userId },
+          { userId: null },
+        ],
+        leida: false,
+      },
       data: { leida: true },
     });
 
