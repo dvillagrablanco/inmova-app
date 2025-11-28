@@ -264,13 +264,13 @@ export function Sidebar() {
             <div className="relative w-full h-12">
               <Image
                 src="/vidaro-logo-cover.jpg"
-                alt="Vidaro Inversiones"
+                alt="INMOVA"
                 fill
                 className="object-contain"
                 priority
               />
             </div>
-            <p className="text-xs text-gray-400 mt-2 text-center">Homming Vidaro</p>
+            <p className="text-xs text-gray-400 mt-2 text-center">INMOVA</p>
           </div>
 
           {/* Navigation */}

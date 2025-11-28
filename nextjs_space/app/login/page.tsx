@@ -46,13 +46,13 @@ export default function LoginPage() {
           <div className="relative w-48 h-16 mx-auto mb-4">
             <Image
               src="/vidaro-logo-cover.jpg"
-              alt="Vidaro Inversiones"
+              alt="INMOVA"
               fill
               className="object-contain"
               priority
             />
           </div>
-          <h1 className="text-2xl font-bold text-white">Homming Vidaro</h1>
+          <h1 className="text-2xl font-bold text-white">INMOVA</h1>
           <p className="text-gray-400 text-sm mt-2">Sistema de Gestión Inmobiliaria</p>
         </div>
 
