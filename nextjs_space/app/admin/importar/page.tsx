@@ -1,11 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { Sidebar } from '@/components/layout/sidebar';
+import { Header } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
 import {
   Upload,
@@ -15,8 +25,9 @@ import {
   AlertCircle,
   CheckCircle2,
   Building2,
-  Home,
+  Home as HomeIcon,
   Users,
+  ArrowLeft,
 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
@@ -27,10 +38,21 @@ export default function ImportarPage() {
   const [clearing, setClearing] = useState(false);
   const [results, setResults] = useState<any>(null);
 
-  if (status === 'unauthenticated') {
-    router.push('/login');
-    return null;
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login');
+    }
+  }, [status, router]);
+
+  if (status === 'loading') {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
   }
+
+  if (!session) return null;
 
   const handleDownloadTemplate = async (type: string) => {
     try {
@@ -187,16 +209,48 @@ export default function ImportarPage() {
   );
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold flex items-center gap-2">
-          <FileSpreadsheet className="h-8 w-8" />
-          Importación y Exportación de Datos
-        </h1>
-        <p className="text-muted-foreground mt-2">
-          Gestiona tus datos de forma masiva mediante archivos CSV
-        </p>
-      </div>
+    <div className="flex h-screen overflow-hidden bg-muted/30">
+      <Sidebar />
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Header />
+        <main className="flex-1 overflow-y-auto">
+          <div className="container mx-auto p-6 space-y-6">
+            {/* Botón Volver y Breadcrumbs */}
+            <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push('/dashboard')}
+                className="gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Volver al Dashboard
+              </Button>
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink href="/dashboard">
+                      <HomeIcon className="h-4 w-4" />
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>Importación</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
+            </div>
+
+            {/* Header Section */}
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+                <FileSpreadsheet className="h-8 w-8" />
+                Importación y Exportación de Datos
+              </h1>
+              <p className="text-muted-foreground mt-2">
+                Gestiona tus datos de forma masiva mediante archivos CSV
+              </p>
+            </div>
 
       {/* Resultados de importación */}
       {results && (
@@ -260,7 +314,7 @@ export default function ImportarPage() {
               type="units"
               title="Unidades"
               description="Importar unidades o apartamentos"
-              icon={Home}
+              icon={HomeIcon}
             />
             <ImportCard
               type="tenants"
@@ -302,7 +356,7 @@ export default function ImportarPage() {
           <div className="grid gap-6 md:grid-cols-3">
             {[
               { type: 'buildings', label: 'Edificios', icon: Building2 },
-              { type: 'units', label: 'Unidades', icon: Home },
+              { type: 'units', label: 'Unidades', icon: HomeIcon },
               { type: 'tenants', label: 'Inquilinos', icon: Users },
             ].map((item) => (
               <Card key={item.type}>
@@ -347,6 +401,9 @@ export default function ImportarPage() {
           </div>
         </TabsContent>
       </Tabs>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
