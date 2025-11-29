@@ -206,6 +206,9 @@ model Building {
   // Prioridades Medias
   valoraciones      ValoracionPropiedad[]
   publicaciones     PublicacionPortal[]
+  
+  // Fase 1
+  calendarEvents    CalendarEvent[]
 
   @@map("buildings")
 }
@@ -250,6 +253,9 @@ model Tenant {
   
   // Prioridades Medias
   smsLogs           SMSLog[]
+  
+  // Fase 1
+  calendarEvents    CalendarEvent[]
 
   @@map("tenants")
 }
@@ -295,6 +301,9 @@ model Unit {
   // Prioridades Medias
   valoraciones      ValoracionPropiedad[]
   publicaciones     PublicacionPortal[]
+  
+  // Fase 1
+  calendarEvents    CalendarEvent[]
 
   @@unique([buildingId, numero])
   @@map("units")
@@ -329,6 +338,9 @@ model Contract {
   stripeSubscription StripeSubscription?
   morosidadPredicciones MorosidadPrediccion[]
   documentosFirma       DocumentoFirma[]
+  
+  // Fase 1
+  calendarEvents    CalendarEvent[]
 
   @@map("contracts")
 }
@@ -370,6 +382,9 @@ model Payment {
   bankTransactions  BankTransaction[]
   morosidadHistorial MorosidadHistorial[]
   conciliacionesManual ConciliacionManual[]
+  
+  // Fase 1
+  calendarEvents    CalendarEvent[]
 
   @@map("payments")
 }
@@ -447,6 +462,9 @@ model MaintenanceRequest {
   unit              Unit                @relation(fields: [unitId], references: [id], onDelete: Cascade)
   provider          Provider?           @relation(fields: [providerId], references: [id], onDelete: SetNull)
   approvals         Approval[]
+  
+  // Fase 1
+  calendarEvents    CalendarEvent[]
 
   @@map("maintenance_requests")
 }
@@ -597,6 +615,9 @@ model Visit {
   updatedAt         DateTime         @updatedAt
 
   candidate         Candidate        @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  
+  // Fase 1
+  calendarEvents    CalendarEvent[]
 
   @@map("visits")
 }
@@ -663,6 +684,9 @@ model Company {
   screenings        ScreeningCandidato[]
   smsTemplates      SMSTemplate[]
   smsLogs           SMSLog[]
+  
+  // Fase 1
+  calendarEvents    CalendarEvent[]
 
   @@map("company")
 }
@@ -1585,6 +1609,34 @@ model LegalInspection {
   @@index([estado])
   @@index([fechaProgramada])
   @@map("legal_inspections")
+}
+
+model Inspection {
+  id                String            @id @default(cuid())
+  companyId         String
+  unitId            String?
+  buildingId        String?
+  tipo              String            // "entrada", "salida", "rutinaria", "técnica"
+  estado            String            @default("programada") // "programada", "completada", "cancelada"
+  fechaProgramada   DateTime
+  fechaRealizada    DateTime?
+  inspector         String
+  descripcion       String?           @db.Text
+  observaciones     String?           @db.Text
+  fotos             String[]          @default([])
+  reportePdfPath    String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  // Fase 1
+  calendarEvents    CalendarEvent[]
+
+  @@index([companyId])
+  @@index([unitId])
+  @@index([buildingId])
+  @@index([estado])
+  @@index([fechaProgramada])
+  @@map("inspections")
 }
 
 model InsurancePolicy {
@@ -2822,4 +2874,113 @@ model SMSLog {
   @@index([fechaProgramada])
   @@index([fechaEnvio])
   @@map("sms_logs")
+}
+
+
+// ============================================
+// CALENDARIO UNIFICADO
+// ============================================
+
+enum CalendarEventType {
+  pago              // Pago de renta
+  vencimiento       // Vencimiento de contrato
+  visita            // Visita programada
+  mantenimiento     // Mantenimiento programado
+  inspeccion        // Inspección
+  reunion           // Reunión
+  recordatorio      // Recordatorio general
+  otro              // Otro tipo de evento
+  @@map("calendar_event_types")
+}
+
+enum CalendarEventPriority {
+  baja
+  media
+  alta
+  critica
+  @@map("calendar_event_priorities")
+}
+
+model CalendarEvent {
+  id                    String                  @id @default(cuid())
+  
+  // Empresa (multiempresa)
+  companyId             String
+  company               Company                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Información del evento
+  titulo                String
+  descripcion           String?                 @db.Text
+  tipo                  CalendarEventType
+  prioridad             CalendarEventPriority   @default(media)
+  
+  // Fechas
+  fechaInicio           DateTime
+  fechaFin              DateTime?
+  todoElDia             Boolean                 @default(false)
+  
+  // Ubicación
+  ubicacion             String?
+  
+  // Relaciones opcionales
+  buildingId            String?
+  building              Building?               @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  
+  unitId                String?
+  unit                  Unit?                   @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  
+  tenantId              String?
+  tenant                Tenant?                 @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  
+  contractId            String?
+  contract              Contract?               @relation(fields: [contractId], references: [id], onDelete: SetNull)
+  
+  paymentId             String?
+  payment               Payment?                @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  
+  maintenanceRequestId  String?
+  maintenanceRequest    MaintenanceRequest?     @relation(fields: [maintenanceRequestId], references: [id], onDelete: SetNull)
+  
+  visitId               String?
+  visit                 Visit?                  @relation(fields: [visitId], references: [id], onDelete: SetNull)
+  
+  inspectionId          String?
+  inspection            Inspection?             @relation(fields: [inspectionId], references: [id], onDelete: SetNull)
+  
+  // Recordatorios
+  recordatorioActivo    Boolean                 @default(false)
+  recordatorioMinutos   Int?                    // Minutos antes del evento
+  recordatorioEnviado   Boolean                 @default(false)
+  
+  // Estado
+  completado            Boolean                 @default(false)
+  cancelado             Boolean                 @default(false)
+  motivoCancelacion     String?
+  
+  // Recurrencia (para futuras mejoras)
+  esRecurrente          Boolean                 @default(false)
+  patronRecurrencia     String?                 // JSON con patrón de recurrencia
+  
+  // Participantes
+  participantes         Json?                   // Array de IDs de usuarios
+  
+  // Metadatos
+  color                 String?                 // Color personalizado en formato hex
+  notas                 String?                 @db.Text
+  
+  // Auditoría
+  creadoPor             String
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  
+  @@index([companyId])
+  @@index([tipo])
+  @@index([fechaInicio])
+  @@index([fechaFin])
+  @@index([buildingId])
+  @@index([unitId])
+  @@index([tenantId])
+  @@index([completado])
+  @@index([cancelado])
+  @@map("calendar_events")
 }
