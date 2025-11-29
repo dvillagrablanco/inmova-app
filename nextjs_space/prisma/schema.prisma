@@ -166,6 +166,8 @@ model User {
   documentosCreados    DocumentoFirma[]  @relation("DocumentosCreados")
   dashboardPreference  UserDashboardPreference?
   dashboardWidgets     DashboardWidget[]
+  searchHistory        SearchHistory[]
+  savedSearches        SavedSearch[]
 
   @@map("users")
 }
@@ -743,6 +745,12 @@ model Company {
   // Fase 5
   automaticReminders AutomaticReminder[]
   reviews            Review[]
+
+  // Fase 6
+  searchHistory      SearchHistory[]
+  savedSearches      SavedSearch[]
+  systemBackups      SystemBackup[]
+  performanceMetrics PerformanceMetric[]
 
   @@map("company")
 }
@@ -3994,3 +4002,107 @@ model Review {
   @@map("reviews")
 }
 
+
+
+// ============================================
+// PHASE 6: Advanced Search & Optimizations
+// ============================================
+
+model SearchHistory {
+  id          String   @id @default(cuid())
+  userId      String
+  companyId   String
+  
+  query       String   // Término de búsqueda
+  filters     Json?    // Filtros aplicados
+  resultCount Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([companyId])
+  @@index([createdAt])
+  @@map("search_history")
+}
+
+model SavedSearch {
+  id          String   @id @default(cuid())
+  userId      String
+  companyId   String
+  
+  nombre      String
+  query       String
+  filters     Json?
+  
+  activa      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([companyId])
+  @@map("saved_searches")
+}
+
+enum BackupType {
+  completo
+  incremental
+  manual
+}
+
+enum BackupStatus {
+  pendiente
+  en_progreso
+  completado
+  fallido
+}
+
+model SystemBackup {
+  id            String       @id @default(cuid())
+  companyId     String
+  
+  tipo          BackupType   @default(manual)
+  estado        BackupStatus @default(pendiente)
+  
+  registros     Int          @default(0)
+  tamano        String?      // Tamaño en MB
+  ubicacion     String?      // Cloud storage path o ruta local
+  
+  inicioPor     String
+  errorDetalle  String?      @db.Text
+  
+  createdAt     DateTime     @default(now())
+  completedAt   DateTime?
+  
+  company       Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([estado])
+  @@index([createdAt])
+  @@map("system_backups")
+}
+
+model PerformanceMetric {
+  id            String   @id @default(cuid())
+  companyId     String
+  
+  metricType    String   // 'page_load', 'api_response', 'query_time'
+  metricName    String   // Nombre específico de la métrica
+  value         Float    // Valor en ms o porcentaje
+  
+  metadata      Json?    // Detalles adicionales
+  
+  createdAt     DateTime @default(now())
+  
+  company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([metricType])
+  @@index([createdAt])
+  @@map("performance_metrics")
+}

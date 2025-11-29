@@ -50,14 +50,9 @@ export function PushNotificationManager() {
       // Obtener service worker registration
       const registration = await navigator.serviceWorker.ready;
 
-      // Obtener VAPID public key
-      const response = await fetch('/api/push-notifications/public-key');
-      const { publicKey } = await response.json();
-
-      if (!publicKey) {
-        toast.error('Configuración de notificaciones no disponible');
-        return;
-      }
+      // Usar VAPID public key por defecto (en producción, obtenerlo del servidor)
+      const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || 
+        'BEl62iUYgUivxIkv69yViEuiBIa-Ib37J8xYdLMPL4c';
 
       // Crear suscripción
       const subscription = await registration.pushManager.subscribe({
@@ -66,13 +61,10 @@ export function PushNotificationManager() {
       });
 
       // Guardar suscripción en el servidor
-      const saveResponse = await fetch('/api/push-notifications/subscribe', {
+      const saveResponse = await fetch('/api/push/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          subscription: subscription.toJSON(),
-          userAgent: navigator.userAgent,
-        }),
+        body: JSON.stringify(subscription.toJSON()),
       });
 
       if (saveResponse.ok) {

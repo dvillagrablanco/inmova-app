@@ -46,6 +46,7 @@ import {
   ClipboardList,
   Vote,
   Megaphone,
+  LineChart,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -88,6 +89,7 @@ const allNavItems = [
   { name: 'Gastos', href: '/gastos', icon: DollarSign, roles: ['administrador', 'gestor'] },
   { name: 'Reportes Financieros', href: '/reportes', icon: FileBarChart, roles: ['administrador', 'gestor'] },
   { name: 'Analytics & Predicciones', href: '/analytics', icon: BarChart2, roles: ['administrador', 'gestor'] },
+  { name: 'Business Intelligence', href: '/bi', icon: LineChart, roles: ['administrador', 'gestor'] },
   { name: 'Contabilidad', href: '/contabilidad', icon: DollarSign, roles: ['administrador', 'gestor'] },
   { name: 'CRM', href: '/crm', icon: TrendingUp, roles: ['administrador', 'gestor'] },
   { name: 'Legal', href: '/legal', icon: Gavel, roles: ['administrador', 'gestor'] },
