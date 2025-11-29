@@ -550,6 +550,67 @@ export const MODULOS_CATALOGO = [
     esCore: false,
     orden: 77
   },
+  // ========== NUEVOS M\u00d3DULOS ESTRAT\u00c9GICOS FASE 2 ==========
+  {
+    codigo: 'blockchain',
+    nombre: 'Blockchain y Tokenizaci\u00f3n',
+    descripcion: 'Tokenizaci\u00f3n de propiedades, inversi\u00f3n fraccionada, Smart Contracts, distribuci\u00f3n autom\u00e1tica de rentas y NFT de certificados',
+    categoria: 'avanzado',
+    icono: 'Link',
+    ruta: '/blockchain',
+    requiereModulos: ['edificios', 'unidades', 'contratos'],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 78
+  },
+  {
+    codigo: 'ai_assistant',
+    nombre: 'Asistente IA Conversacional',
+    descripcion: 'Chatbot GPT-4 con comandos de voz, automatizaci\u00f3n de tareas administrativas, integraci\u00f3n WhatsApp y an\u00e1lisis de sentimiento',
+    categoria: 'avanzado',
+    icono: 'Bot',
+    ruta: '/asistente-ia',
+    requiereModulos: ['usuarios', 'inquilinos'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 79
+  },
+  {
+    codigo: 'economia_circular',
+    nombre: 'Econom\u00eda Circular y Sostenibilidad Social',
+    descripcion: 'Marketplace de intercambio, huertos urbanos, gesti\u00f3n de residuos, reciclaje gamificado y certificaci\u00f3n de econom\u00eda circular',
+    categoria: 'comunidad',
+    icono: 'Recycle',
+    ruta: '/economia-circular',
+    requiereModulos: ['edificios', 'inquilinos'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 80
+  },
+  {
+    codigo: 'comunidad_social',
+    nombre: 'Plataforma de Comunidad Social',
+    descripcion: 'Red social interna, marketplace P2P de servicios, gamificaci\u00f3n, eventos comunitarios y programa de embajadores',
+    categoria: 'comunidad',
+    icono: 'Users',
+    ruta: '/comunidad-social',
+    requiereModulos: ['inquilinos', 'edificios'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 81
+  },
+  {
+    codigo: 'seguridad_compliance',
+    nombre: 'Seguridad y Compliance Avanzado',
+    descripcion: 'Verificaci\u00f3n biom\u00e9trica, cumplimiento GDPR automatizado, detecci\u00f3n de fraude con ML, auditor\u00edas de seguridad y SIEM',
+    categoria: 'administracion',
+    icono: 'Shield',
+    ruta: '/seguridad-compliance',
+    requiereModulos: ['usuarios', 'inquilinos'],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 82
+  },
 ];
 
 /**

@@ -164,31 +164,37 @@ export async function simularDatosMercado(
     where: { companyId, zona, periodo }
   });
   
-  const marketData = existing ? await prisma.marketData.update({
-    where: { id: existing.id },
-    update: {
-      precioPromedio,
-      precioMin,
-      precioMax,
-      muestras: { increment: 1 }
-    },
-    create: {
-      companyId,
-      zona,
-      codigoPostal: '28001',
-      precioPromedio,
-      precioMin,
-      precioMax,
-      diasPromedioAlquiler: 25,
-      tasaOcupacion: 92.5,
-      demanda: 'alta',
-      tipoPropiedad: 'piso',
-      numHabitaciones,
-      metrosCuadrados,
-      fuente: 'simulacion',
-      periodo
-    }
-  });
+  let marketData;
+  if (existing) {
+    marketData = await prisma.marketData.update({
+      where: { id: existing.id },
+      data: {
+        precioPromedio,
+        precioMin,
+        precioMax,
+        muestras: (existing.muestras || 0) + 1
+      }
+    });
+  } else {
+    marketData = await prisma.marketData.create({
+      data: {
+        companyId,
+        zona,
+        codigoPostal: '28001',
+        precioPromedio,
+        precioMin,
+        precioMax,
+        diasPromedioAlquiler: 25,
+        tasaOcupacion: 92.5,
+        demanda: 'alta',
+        tipoPropiedad: 'piso',
+        numHabitaciones,
+        metrosCuadrados,
+        fuente: 'simulacion',
+        periodo
+      }
+    });
+  }
 
   return marketData;
 }

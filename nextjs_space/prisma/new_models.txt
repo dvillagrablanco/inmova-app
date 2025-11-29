@@ -1,0 +1,834 @@
+// ============================================
+// MÓDULO: BLOCKCHAIN Y TOKENIZACIÓN
+// ============================================
+
+model PropertyToken {
+  id                String            @id @default(cuid())
+  companyId         String
+  company           Company           @relation("CompanyPropertyTokens", fields: [companyId], references: [id], onDelete: Cascade)
+  
+  unitId            String?
+  unit              Unit?             @relation("UnitPropertyTokens", fields: [unitId], references: [id], onDelete: SetNull)
+  
+  buildingId        String?
+  building          Building?         @relation("BuildingPropertyTokens", fields: [buildingId], references: [id], onDelete: SetNull)
+  
+  nombre            String
+  simbolo           String
+  tokenSymbol       String
+  
+  blockchain        String            @default("Polygon")
+  contractAddress   String?           @unique
+  tokenStandard     String            @default("ERC-20")
+  
+  totalSupply       Int
+  tokensPorPropiedad Int
+  precioPorToken    Float
+  
+  valorPropiedad    Float
+  valorActual       Float?
+  
+  holders           TokenHolder[]
+  transactions      TokenTransaction[]
+  
+  estado            String            @default("draft")
+  fechaEmision      DateTime?
+  fechaVencimiento  DateTime?
+  
+  rentaDistribuida  Float             @default(0)
+  ultimaDistribucion DateTime?
+  frecuenciaDistribucion String        @default("monthly")
+  
+  documentos        Json?
+  metadata          Json?
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@index([companyId, estado])
+  @@index([contractAddress])
+  @@map("property_tokens")
+}
+
+model TokenHolder {
+  id                String            @id @default(cuid())
+  tokenId           String
+  token             PropertyToken     @relation(fields: [tokenId], references: [id], onDelete: Cascade)
+  
+  tenantId          String?
+  tenant            Tenant?           @relation("TenantTokenHoldings", fields: [tenantId], references: [id], onDelete: SetNull)
+  
+  walletAddress     String
+  email             String?
+  nombre            String?
+  
+  cantidadTokens    Int
+  porcentajePropiedad Float
+  valorInvertido    Float
+  
+  rentasRecibidas   Float             @default(0)
+  ultimaRenta       DateTime?
+  
+  kycVerificado     Boolean           @default(false)
+  fechaKYC          DateTime?
+  
+  activo            Boolean           @default(true)
+  fechaAdquisicion  DateTime          @default(now())
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@index([tokenId, walletAddress])
+  @@map("token_holders")
+}
+
+model TokenTransaction {
+  id                String            @id @default(cuid())
+  tokenId           String
+  token             PropertyToken     @relation(fields: [tokenId], references: [id], onDelete: Cascade)
+  
+  tipo              String
+  
+  fromAddress       String?
+  toAddress         String?
+  
+  cantidadTokens    Int
+  precioUnitario    Float
+  montoTotal        Float
+  
+  txHash            String?           @unique
+  blockNumber       Int?
+  
+  estado            String            @default("pending")
+  
+  gasFee            Float?
+  
+  createdAt         DateTime          @default(now())
+  
+  @@index([tokenId, tipo])
+  @@index([txHash])
+  @@map("token_transactions")
+}
+
+model SmartContract {
+  id                String            @id @default(cuid())
+  companyId         String
+  company           Company           @relation("CompanySmartContracts", fields: [companyId], references: [id], onDelete: Cascade)
+  
+  nombre            String
+  descripcion       String?           @db.Text
+  tipo              String
+  
+  blockchain        String            @default("Polygon")
+  contractAddress   String            @unique
+  
+  abi               Json
+  bytecode          String?           @db.Text
+  
+  deployedBy        String?
+  deploymentTx      String?
+  deploymentDate    DateTime?
+  
+  estado            String            @default("active")
+  verificado        Boolean           @default(false)
+  
+  gasUsed           String?
+  
+  metadata          Json?
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@index([companyId, tipo])
+  @@map("smart_contracts")
+}
+
+model NFTCertificate {
+  id                String            @id @default(cuid())
+  companyId         String
+  company           Company           @relation("CompanyNFTCertificates", fields: [companyId], references: [id], onDelete: Cascade)
+  
+  tipo              String
+  
+  unitId            String?
+  unit              Unit?             @relation("UnitNFTCertificates", fields: [unitId], references: [id], onDelete: SetNull)
+  
+  buildingId        String?
+  building          Building?         @relation("BuildingNFTCertificates", fields: [buildingId], references: [id], onDelete: SetNull)
+  
+  titulo            String
+  descripcion       String?           @db.Text
+  
+  tokenId           String?           @unique
+  contractAddress   String?
+  
+  metadataUrl       String?
+  imageUrl          String?
+  
+  propietario       String?
+  walletAddress     String?
+  
+  mintedAt          DateTime?
+  txHash            String?
+  
+  atributos         Json?
+  
+  estado            String            @default("minted")
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@index([companyId, tipo])
+  @@map("nft_certificates")
+}
+
+// ============================================
+// MÓDULO: ASISTENTE IA CONVERSACIONAL
+// ============================================
+
+model AIConversation {
+  id                String            @id @default(cuid())
+  companyId         String
+  company           Company           @relation("CompanyAIConversations", fields: [companyId], references: [id], onDelete: Cascade)
+  
+  userId            String?
+  user              User?             @relation("UserAIConversations", fields: [userId], references: [id], onDelete: SetNull)
+  
+  tenantId          String?
+  tenant            Tenant?           @relation("TenantAIConversations", fields: [tenantId], references: [id], onDelete: SetNull)
+  
+  canal             String            @default("web")
+  idioma            String            @default("es")
+  
+  mensajes          AIMessage[]
+  comandos          AICommand[]
+  
+  contexto          Json?
+  memoria           Json?
+  
+  estado            String            @default("activa")
+  
+  sentimiento       String?
+  satisfaccion      Int?
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@index([companyId, estado])
+  @@map("ai_conversations")
+}
+
+model AIMessage {
+  id                String            @id @default(cuid())
+  conversationId    String
+  conversation      AIConversation    @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  
+  rol               String
+  contenido         String            @db.Text
+  
+  tokenUsados       Int?
+  modelo            String?           @default("gpt-4-turbo")
+  
+  funciones         Json?
+  
+  timestamp         DateTime          @default(now())
+  
+  @@index([conversationId])
+  @@map("ai_messages")
+}
+
+model AICommand {
+  id                String            @id @default(cuid())
+  conversationId    String
+  conversation      AIConversation    @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  
+  comando           String
+  parametros        Json?
+  
+  funcion           String
+  resultado         Json?
+  
+  exitoso           Boolean           @default(false)
+  error             String?           @db.Text
+  
+  ejecutadoPor      String?
+  
+  createdAt         DateTime          @default(now())
+  
+  @@index([conversationId])
+  @@map("ai_commands")
+}
+
+model VoiceInteraction {
+  id                String            @id @default(cuid())
+  companyId         String
+  company           Company           @relation("CompanyVoiceInteractions", fields: [companyId], references: [id], onDelete: Cascade)
+  
+  userId            String?
+  user              User?             @relation("UserVoiceInteractions", fields: [userId], references: [id], onDelete: SetNull)
+  
+  audioUrl          String?
+  duracion          Int?
+  
+  transcripcion     String?           @db.Text
+  idioma            String            @default("es")
+  
+  respuestaTexto    String?           @db.Text
+  respuestaAudio    String?
+  
+  comando           String?
+  exitoso           Boolean           @default(false)
+  
+  createdAt         DateTime          @default(now())
+  
+  @@index([companyId])
+  @@map("voice_interactions")
+}
+
+// ============================================
+// MÓDULO: ECONOMÍA CIRCULAR
+// ============================================
+
+model CircularMarketplace {
+  id                String            @id @default(cuid())
+  companyId         String
+  company           Company           @relation("CompanyCircularMarketplace", fields: [companyId], references: [id], onDelete: Cascade)
+  
+  items             CircularItem[]
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@map("circular_marketplaces")
+}
+
+model CircularItem {
+  id                String            @id @default(cuid())
+  marketplaceId     String
+  marketplace       CircularMarketplace @relation(fields: [marketplaceId], references: [id], onDelete: Cascade)
+  
+  tenantId          String?
+  tenant            Tenant?           @relation("TenantCircularItems", fields: [tenantId], references: [id], onDelete: SetNull)
+  
+  nombre            String
+  descripcion       String?           @db.Text
+  categoria         String
+  
+  estado            String            @default("disponible")
+  condicion         String?
+  
+  tipo              String            @default("intercambio")
+  
+  precioMoneda      Float?
+  precioPuntos      Int?
+  
+  fotos             String[]
+  ubicacion         String?
+  
+  interesados       String[]
+  
+  reservadoPor      String?
+  fechaReserva      DateTime?
+  
+  transaccionCompletada Boolean       @default(false)
+  fechaTransaccion  DateTime?
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@index([marketplaceId, estado])
+  @@map("circular_items")
+}
+
+model UrbanGarden {
+  id                String            @id @default(cuid())
+  companyId         String
+  company           Company           @relation("CompanyUrbanGardens", fields: [companyId], references: [id], onDelete: Cascade)
+  
+  buildingId        String
+  building          Building          @relation("BuildingUrbanGardens", fields: [buildingId], references: [id], onDelete: Cascade)
+  
+  nombre            String
+  descripcion       String?           @db.Text
+  ubicacion         String
+  
+  metrosCuadrados   Float
+  tipoCultivo       String            @default("organico")
+  
+  parcelas          GardenPlot[]
+  
+  fotos             String[]
+  reglas            Json?
+  
+  activo            Boolean           @default(true)
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@index([companyId, buildingId])
+  @@map("urban_gardens")
+}
+
+model GardenPlot {
+  id                String            @id @default(cuid())
+  gardenId          String
+  garden            UrbanGarden       @relation(fields: [gardenId], references: [id], onDelete: Cascade)
+  
+  numeroParcela     String
+  metrosCuadrados   Float
+  
+  tenantId          String?
+  tenant            Tenant?           @relation("TenantGardenPlots", fields: [tenantId], references: [id], onDelete: SetNull)
+  
+  reservadaDesde    DateTime?
+  reservadaHasta    DateTime?
+  
+  cultivos          Json?
+  calendaroSiembra  Json?
+  
+  estado            String            @default("disponible")
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@index([gardenId, estado])
+  @@map("garden_plots")
+}
+
+model RecyclingMetric {
+  id                String            @id @default(cuid())
+  companyId         String
+  company           Company           @relation("CompanyRecyclingMetrics", fields: [companyId], references: [id], onDelete: Cascade)
+  
+  buildingId        String?
+  building          Building?         @relation("BuildingRecyclingMetrics", fields: [buildingId], references: [id], onDelete: SetNull)
+  
+  periodo           String
+  
+  residuosGenerados Float
+  residuosReciclados Float
+  residuosOrganicos Float
+  tasaReciclaje     Float
+  
+  participantes     Int?
+  puntosOtorgados   Int?
+  
+  ahorrosCO2        Float?
+  
+  createdAt         DateTime          @default(now())
+  
+  @@index([companyId, periodo])
+  @@map("recycling_metrics")
+}
+
+// ============================================
+// MÓDULO: COMUNIDAD SOCIAL
+// ============================================
+
+model SocialPost {
+  id                String            @id @default(cuid())
+  companyId         String
+  company           Company           @relation("CompanySocialPosts", fields: [companyId], references: [id], onDelete: Cascade)
+  
+  authorId          String?
+  author            Tenant?           @relation("TenantSocialPosts", fields: [authorId], references: [id], onDelete: SetNull)
+  
+  buildingId        String?
+  building          Building?         @relation("BuildingSocialPosts", fields: [buildingId], references: [id], onDelete: SetNull)
+  
+  tipo              String            @default("post")
+  contenido         String            @db.Text
+  
+  multimedia        String[]
+  
+  likes             Int               @default(0)
+  likedBy           String[]
+  
+  comentarios       SocialComment[]
+  
+  hashtags          String[]
+  
+  visibilidad       String            @default("building")
+  
+  destacado         Boolean           @default(false)
+  moderado          Boolean           @default(false)
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@index([companyId, buildingId])
+  @@index([authorId])
+  @@map("social_posts")
+}
+
+model SocialComment {
+  id                String            @id @default(cuid())
+  postId            String
+  post              SocialPost        @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  authorId          String?
+  author            Tenant?           @relation("TenantSocialComments", fields: [authorId], references: [id], onDelete: SetNull)
+  
+  contenido         String            @db.Text
+  
+  likes             Int               @default(0)
+  
+  createdAt         DateTime          @default(now())
+  
+  @@index([postId])
+  @@map("social_comments")
+}
+
+model TenantReputation {
+  id                String            @id @default(cuid())
+  tenantId          String            @unique
+  tenant            Tenant            @relation("TenantReputation", fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  puntos            Int               @default(0)
+  nivel             String            @default("novato")
+  
+  badges            Badge[]
+  
+  serviciosOfrecidos Int             @default(0)
+  serviciosRecibidos Int             @default(0)
+  
+  valoracionPromedio Float?
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@map("tenant_reputations")
+}
+
+model Badge {
+  id                String            @id @default(cuid())
+  reputationId      String
+  reputation        TenantReputation  @relation(fields: [reputationId], references: [id], onDelete: Cascade)
+  
+  codigo            String
+  nombre            String
+  descripcion       String?           @db.Text
+  icono             String?
+  
+  obtenidoEn        DateTime          @default(now())
+  
+  @@index([reputationId])
+  @@map("badges")
+}
+
+model P2PService {
+  id                String            @id @default(cuid())
+  companyId         String
+  company           Company           @relation("CompanyP2PServices", fields: [companyId], references: [id], onDelete: Cascade)
+  
+  providerId        String
+  provider          Tenant            @relation("TenantP2PServices", fields: [providerId], references: [id], onDelete: Cascade)
+  
+  titulo            String
+  descripcion       String            @db.Text
+  categoria         String
+  
+  precio            Float
+  moneda            String            @default("EUR")
+  
+  duracion          Int?
+  unidadDuracion    String?
+  
+  disponibilidad    Json?
+  
+  fotos             String[]
+  
+  reservas          P2PBooking[]
+  
+  rating            Float?
+  numValoraciones   Int               @default(0)
+  
+  activo            Boolean           @default(true)
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@index([companyId, categoria])
+  @@index([providerId])
+  @@map("p2p_services")
+}
+
+model P2PBooking {
+  id                String            @id @default(cuid())
+  serviceId         String
+  service           P2PService        @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  
+  clientId          String
+  client            Tenant            @relation("TenantP2PBookings", fields: [clientId], references: [id], onDelete: Cascade)
+  
+  fechaReserva      DateTime
+  horaInicio        String?
+  horaFin           String?
+  
+  precio            Float
+  comision          Float
+  total             Float
+  
+  estado            String            @default("pendiente")
+  
+  pagado            Boolean           @default(false)
+  fechaPago         DateTime?
+  metodoPago        String?
+  
+  valoracion        Int?
+  comentario        String?           @db.Text
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@index([serviceId, estado])
+  @@index([clientId])
+  @@map("p2p_bookings")
+}
+
+model CommunityEvent {
+  id                String            @id @default(cuid())
+  companyId         String
+  company           Company           @relation("CompanyCommunityEvents", fields: [companyId], references: [id], onDelete: Cascade)
+  
+  buildingId        String?
+  building          Building?         @relation("BuildingCommunityEvents", fields: [buildingId], references: [id], onDelete: SetNull)
+  
+  titulo            String
+  descripcion       String?           @db.Text
+  categoria         String
+  
+  fecha             DateTime
+  horaInicio        String
+  horaFin           String?
+  
+  ubicacion         String
+  
+  capacidadMaxima   Int?
+  asistentesConfirmados String[]
+  asistentesLista   Int               @default(0)
+  
+  precio            Float?
+  requierePago      Boolean           @default(false)
+  
+  fotos             String[]
+  
+  estado            String            @default("programado")
+  
+  organizadoPor     String?
+  
+  valoraciones      Json?
+  ratingPromedio    Float?
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@index([companyId, estado])
+  @@map("community_events")
+}
+
+model Ambassador {
+  id                String            @id @default(cuid())
+  companyId         String
+  company           Company           @relation("CompanyAmbassadors", fields: [companyId], references: [id], onDelete: Cascade)
+  
+  tenantId          String            @unique
+  tenant            Tenant            @relation("TenantAmbassador", fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  buildingId        String?
+  building          Building?         @relation("BuildingAmbassadors", fields: [buildingId], references: [id], onDelete: SetNull)
+  
+  fechaNombramiento DateTime          @default(now())
+  
+  referidos         Int               @default(0)
+  referidosActivos  Int               @default(0)
+  
+  comisionGanada    Float             @default(0)
+  comisionPorReferido Float           @default(50)
+  
+  estado            String            @default("activo")
+  
+  capacitaciones    Json?
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@index([companyId, estado])
+  @@map("ambassadors")
+}
+
+// ============================================
+// MÓDULO: SEGURIDAD Y COMPLIANCE
+// ============================================
+
+model BiometricVerification {
+  id                String            @id @default(cuid())
+  companyId         String
+  company           Company           @relation("CompanyBiometricVerifications", fields: [companyId], references: [id], onDelete: Cascade)
+  
+  tenantId          String?
+  tenant            Tenant?           @relation("TenantBiometricVerifications", fields: [tenantId], references: [id], onDelete: SetNull)
+  
+  userId            String?
+  user              User?             @relation("UserBiometricVerifications", fields: [userId], references: [id], onDelete: SetNull)
+  
+  tipo              String
+  
+  resultado         String
+  confidence        Float?
+  
+  metadata          Json?
+  
+  documentoVerificado String?
+  proveedor         String?           @default("Veriff")
+  
+  ipAddress         String?
+  userAgent         String?           @db.Text
+  
+  createdAt         DateTime          @default(now())
+  
+  @@index([companyId, tipo])
+  @@map("biometric_verifications")
+}
+
+model GDPRConsent {
+  id                String            @id @default(cuid())
+  companyId         String
+  company           Company           @relation("CompanyGDPRConsents", fields: [companyId], references: [id], onDelete: Cascade)
+  
+  userId            String?
+  user              User?             @relation("UserGDPRConsents", fields: [userId], references: [id], onDelete: SetNull)
+  
+  tenantId          String?
+  tenant            Tenant?           @relation("TenantGDPRConsents", fields: [tenantId], references: [id], onDelete: SetNull)
+  
+  tipo              String
+  descripcion       String?           @db.Text
+  
+  consentido        Boolean
+  
+  version           String?
+  idioma            String            @default("es")
+  
+  fecha             DateTime          @default(now())
+  ipAddress         String
+  
+  evidencia         String?
+  
+  revocado          Boolean           @default(false)
+  fechaRevocacion   DateTime?
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@index([companyId, userId])
+  @@index([companyId, tenantId])
+  @@map("gdpr_consents")
+}
+
+model FraudAlert {
+  id                String            @id @default(cuid())
+  companyId         String
+  company           Company           @relation("CompanyFraudAlerts", fields: [companyId], references: [id], onDelete: Cascade)
+  
+  entityType        String
+  entityId          String
+  
+  tipo              String
+  
+  riesgo            String
+  score             Float
+  
+  razon             String            @db.Text
+  detalles          Json?
+  
+  factores          String[]
+  
+  revisado          Boolean           @default(false)
+  revisadoPor       String?
+  fechaRevision     DateTime?
+  
+  accionTomada      String?
+  notas             String?           @db.Text
+  
+  estado            String            @default("abierto")
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@index([companyId, estado])
+  @@index([entityType, entityId])
+  @@map("fraud_alerts")
+}
+
+model SecurityAudit {
+  id                String            @id @default(cuid())
+  companyId         String
+  company           Company           @relation("CompanySecurityAudits", fields: [companyId], references: [id], onDelete: Cascade)
+  
+  tipo              String
+  alcance           String?
+  
+  fechaInicio       DateTime
+  fechaFin          DateTime?
+  
+  auditor           String?
+  herramienta       String?
+  
+  vulnerabilidades  Json?
+  numCriticas       Int               @default(0)
+  numAltas          Int               @default(0)
+  numMedias         Int               @default(0)
+  numBajas          Int               @default(0)
+  
+  recomendaciones   Json?
+  
+  scoreSeguridad    Float?
+  
+  reporteUrl        String?
+  
+  estado            String            @default("en_progreso")
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@index([companyId, tipo])
+  @@map("security_audits")
+}
+
+model SecurityIncident {
+  id                String            @id @default(cuid())
+  companyId         String
+  company           Company           @relation("CompanySecurityIncidents", fields: [companyId], references: [id], onDelete: Cascade)
+  
+  tipo              String
+  severidad         String
+  
+  titulo            String
+  descripcion       String            @db.Text
+  
+  afectados         Json?
+  datosComprometidos Json?
+  
+  detectadoPor      String?
+  fechaDeteccion    DateTime          @default(now())
+  
+  fechaIncidente    DateTime?
+  
+  estado            String            @default("detectado")
+  
+  responsable       String?
+  fechaAsignacion   DateTime?
+  
+  accionesCorrectivas Json?
+  fechaResolucion   DateTime?
+  
+  notificadoGDPR    Boolean           @default(false)
+  fechaNotificacion DateTime?
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@index([companyId, estado])
+  @@map("security_incidents")
+}
