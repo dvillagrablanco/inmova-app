@@ -120,6 +120,7 @@ const gestionNavItems = [
   { name: 'Incidencias', href: '/incidencias', icon: AlertCircle, roles: ['administrador', 'gestor', 'operador'] },
   { name: 'Candidatos', href: '/candidatos', icon: UserPlus, roles: ['administrador', 'gestor'] },
   { name: 'Notificaciones', href: '/notificaciones', icon: Bell, roles: ['administrador', 'gestor', 'operador'] },
+  { name: 'OCR Documentos', href: '/ocr', icon: Eye, roles: ['administrador', 'gestor', 'operador'] },
 ];
 
 // Módulos avanzados
