@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/db';
+import { UserRole } from '@prisma/client';
 
 export async function POST(req: NextRequest) {
   try {
@@ -25,6 +26,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Validar que el role sea un valor válido del enum UserRole
+    const validRoles: UserRole[] = ['administrador', 'gestor', 'operador'];
+    const userRole: UserRole = role && validRoles.includes(role as UserRole) 
+      ? (role as UserRole) 
+      : 'gestor';
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Obtener la primera empresa disponible (o crear una por defecto)
@@ -46,7 +53,7 @@ export async function POST(req: NextRequest) {
         email,
         password: hashedPassword,
         name,
-        role: role || 'gestor',
+        role: userRole,
         companyId: company.id,
       },
     });

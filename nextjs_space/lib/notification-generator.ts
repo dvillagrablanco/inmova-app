@@ -233,7 +233,13 @@ export async function generateAutomaticNotifications(companyId?: string) {
       lte: thirtyDaysAgo,
     },
   };
-  if (companyId) unitWhere.companyId = companyId;
+  
+  // Filtrar por companyId a través de la relación building
+  if (companyId) {
+    unitWhere.building = {
+      companyId: companyId
+    };
+  }
 
   const vacantUnits = await prisma.unit.findMany({
     where: unitWhere,
@@ -285,7 +291,13 @@ export async function generateAutomaticNotifications(companyId?: string) {
       gte: now,
     },
   };
-  if (companyId) scheduleWhere.companyId = companyId;
+  
+  // Filtrar por companyId a través de la relación building
+  if (companyId) {
+    scheduleWhere.building = {
+      companyId: companyId
+    };
+  }
 
   const scheduledMaintenance = await prisma.maintenanceSchedule.findMany({
     where: scheduleWhere,
