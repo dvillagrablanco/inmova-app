@@ -214,6 +214,13 @@ model Building {
   commonSpaces      CommonSpace[]
   insurances        Insurance[]
 
+  // Fase 3
+  communityIncidents CommunityIncident[]
+  communityVotes     CommunityVote[]
+  communityAnnouncements CommunityAnnouncement[]
+  communityMeetings  CommunityMeeting[]
+  providerWorkOrders ProviderWorkOrder[]
+
   @@map("buildings")
 }
 
@@ -316,6 +323,11 @@ model Unit {
   // Fase 2
   insurances        Insurance[]
   energyCertificates EnergyCertificate[]
+
+  // Fase 3
+  communityIncidents CommunityIncident[]
+  providerWorkOrders ProviderWorkOrder[]
+  propertyGallery    PropertyGallery?
 
   @@unique([buildingId, numero])
   @@map("units")
@@ -477,6 +489,9 @@ model MaintenanceRequest {
   
   // Fase 1
   calendarEvents    CalendarEvent[]
+  
+  // Fase 3
+  workOrders        ProviderWorkOrder[]
 
   @@map("maintenance_requests")
 }
@@ -491,6 +506,12 @@ model Provider {
   direccion         String?
   rating            Float?
   notas             String?             @db.Text
+  
+  // Autenticación para Portal del Proveedor
+  password          String?             // Hash de la contraseña
+  activo            Boolean             @default(true)
+  ultimoAcceso      DateTime?
+  
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
 
@@ -501,6 +522,7 @@ model Provider {
   serviceQuotes     ServiceQuote[]
   serviceJobs       ServiceJob[]
   serviceReviews    ServiceReview[]
+  workOrders        ProviderWorkOrder[]
 
   @@map("providers")
 }
@@ -708,6 +730,14 @@ model Company {
   insurances        Insurance[]
   energyCertificates EnergyCertificate[]
 
+  // Fase 3
+  communityIncidents CommunityIncident[]
+  communityVotes     CommunityVote[]
+  communityAnnouncements CommunityAnnouncement[]
+  communityMeetings  CommunityMeeting[]
+  providerWorkOrders ProviderWorkOrder[]
+  propertyGalleries  PropertyGallery[]
+
   @@map("company")
 }
 
@@ -820,6 +850,7 @@ enum ReportFrequency {
   quincenal
   mensual
   trimestral
+  anual
 }
 
 enum ReportType {
@@ -1832,8 +1863,10 @@ enum WidgetType {
   chart_line
   chart_bar
   chart_pie
+  chart_area
   table
   heatmap
+  gauge
 }
 
 enum AlertSeverity {
@@ -3331,3 +3364,399 @@ model EnergyCertificate {
 // Utilizará las relaciones existentes de Building, Unit, Contract, Payment,
 // MaintenanceRequest, etc., pero con vistas y permisos específicos para propietarios.
 // Se agregarán campos adicionales a los modelos existentes si es necesario.
+
+// ==========================================
+// FASE 3: NUEVAS FUNCIONALIDADES
+// ==========================================
+
+// Sistema de Incidencias Vecinales
+enum IncidentType {
+  ruido
+  averia_comun
+  limpieza
+  seguridad
+  convivencia
+  mascota
+  parking
+  otro
+}
+
+enum IncidentStatus {
+  abierta
+  en_proceso
+  resuelta
+  cerrada
+  rechazada
+}
+
+enum IncidentPriority {
+  baja
+  media
+  alta
+  urgente
+}
+
+model CommunityIncident {
+  id                    String              @id @default(cuid())
+  companyId             String
+  buildingId            String
+  reportedBy            String              // ID del inquilino o usuario
+  reporterType          String              // 'tenant' o 'user'
+  
+  // Información de la incidencia
+  titulo                String
+  descripcion           String              @db.Text
+  tipo                  IncidentType
+  estado                IncidentStatus      @default(abierta)
+  prioridad             IncidentPriority    @default(media)
+  
+  // Ubicación específica
+  ubicacion             String?             // Ej: "Planta 3", "Parking B", etc.
+  unitId                String?
+  
+  // Evidencia
+  fotos                 String[]            // URLs de fotos
+  
+  // Seguimiento
+  asignadoA             String?             // ID de usuario o proveedor
+  fechaReporte          DateTime            @default(now())
+  fechaResolucion       DateTime?
+  
+  // Resolución
+  solucion              String?             @db.Text
+  costoEstimado         Float?
+  costoFinal            Float?
+  
+  // Visibilidad
+  visible               Boolean             @default(true)  // Si es visible para la comunidad
+  
+  // Auditoría
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  
+  company               Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  building              Building            @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  unit                  Unit?               @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  
+  @@index([companyId])
+  @@index([buildingId])
+  @@index([estado])
+  @@index([tipo])
+  @@index([prioridad])
+  @@map("community_incidents")
+}
+
+enum VoteType {
+  decision_comunidad
+  mejora
+  gasto
+  normativa
+  otro
+}
+
+enum VoteStatus {
+  activa
+  cerrada
+  cancelada
+}
+
+model CommunityVote {
+  id                    String              @id @default(cuid())
+  companyId             String
+  buildingId            String
+  
+  // Información de la votación
+  titulo                String
+  descripcion           String              @db.Text
+  tipo                  VoteType
+  estado                VoteStatus          @default(activa)
+  
+  // Opciones
+  opciones              Json                // Array de opciones {id, texto, votos: 0}
+  
+  // Configuración
+  requiereQuorum        Boolean             @default(true)
+  quorumRequerido       Float               @default(50)    // Porcentaje
+  fechaInicio           DateTime            @default(now())
+  fechaCierre           DateTime
+  
+  // Resultados
+  totalVotos            Int                 @default(0)
+  totalElegibles        Int                 @default(0)
+  opcionGanadora        String?
+  
+  // Auditoría
+  creadoPor             String              // ID del usuario
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  
+  company               Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  building              Building            @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  votos                 VoteRecord[]
+  
+  @@index([companyId])
+  @@index([buildingId])
+  @@index([estado])
+  @@index([fechaCierre])
+  @@map("community_votes")
+}
+
+model VoteRecord {
+  id                    String              @id @default(cuid())
+  voteId                String
+  tenantId              String
+  
+  opcionSeleccionada    String
+  comentario            String?             @db.Text
+  fechaVoto             DateTime            @default(now())
+  
+  vote                  CommunityVote       @relation(fields: [voteId], references: [id], onDelete: Cascade)
+  
+  @@unique([voteId, tenantId])
+  @@index([voteId])
+  @@map("vote_records")
+}
+
+model CommunityAnnouncement {
+  id                    String              @id @default(cuid())
+  companyId             String
+  buildingId            String
+  
+  // Contenido
+  titulo                String
+  contenido             String              @db.Text
+  tipo                  String              // 'informacion', 'aviso', 'evento', 'urgente'
+  
+  // Configuración
+  importante            Boolean             @default(false)
+  enviarNotificacion    Boolean             @default(false)
+  fechaPublicacion      DateTime            @default(now())
+  fechaExpiracion       DateTime?
+  
+  // Adjuntos
+  adjuntos              String[]            // URLs de archivos
+  
+  // Visibilidad
+  activo                Boolean             @default(true)
+  
+  // Auditoría
+  publicadoPor          String              // ID del usuario
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  
+  company               Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  building              Building            @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  
+  @@index([companyId])
+  @@index([buildingId])
+  @@index([activo])
+  @@index([fechaPublicacion])
+  @@map("community_announcements")
+}
+
+model CommunityMeeting {
+  id                    String              @id @default(cuid())
+  companyId             String
+  buildingId            String
+  
+  // Información de la reunión
+  titulo                String
+  tipo                  String              // 'ordinaria', 'extraordinaria', 'junta_propietarios'
+  fechaReunion          DateTime
+  ubicacion             String?
+  
+  // Contenido
+  ordenDel              String              @db.Text
+  acta                  String?             @db.Text
+  acuerdos              Json?               // Array de acuerdos tomados
+  asistentes            Json?               // Array de asistentes
+  
+  // Estado
+  estado                String              @default("programada") // programada, realizada, cancelada
+  
+  // Documentos
+  convocatoria          String?             // URL del documento
+  actaFirmada           String?             // URL del acta firmada
+  
+  // Auditoría
+  organizadoPor         String              // ID del usuario
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  
+  company               Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  building              Building            @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  
+  @@index([companyId])
+  @@index([buildingId])
+  @@index([fechaReunion])
+  @@index([estado])
+  @@map("community_meetings")
+}
+
+// Portal del Proveedor - Órdenes de Trabajo
+enum WorkOrderStatus {
+  asignada
+  aceptada
+  en_progreso
+  pausada
+  completada
+  cancelada
+  rechazada
+}
+
+model ProviderWorkOrder {
+  id                    String              @id @default(cuid())
+  companyId             String
+  providerId            String
+  maintenanceRequestId  String?
+  buildingId            String
+  unitId                String?
+  
+  // Información de la orden
+  titulo                String
+  descripcion           String              @db.Text
+  tipo                  String              // 'preventivo', 'correctivo', 'urgente'
+  estado                WorkOrderStatus     @default(asignada)
+  prioridad             String              @default("media")
+  
+  // Fechas
+  fechaAsignacion       DateTime            @default(now())
+  fechaEstimada         DateTime?
+  fechaInicio           DateTime?
+  fechaCompletado       DateTime?
+  
+  // Evidencia y seguimiento
+  fotosAntes            String[]
+  fotosDespues          String[]
+  materialesUsados      Json?               // [{nombre, cantidad, costo}]
+  horasTrabajadas       Float?
+  
+  // Costos
+  presupuestoInicial    Float?
+  costoMateriales       Float?
+  costoManoObra         Float?
+  costoTotal            Float?
+  
+  // Firma digital
+  firmadoPor            String?             // Nombre del firmante
+  firmaDigital          String?             // URL de la firma
+  fechaFirma            DateTime?
+  
+  // Valoración
+  valoracion            Int?                // 1-5
+  comentarios           String?             @db.Text
+  
+  // Auditoría
+  asignadoPor           String              // ID del usuario
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  
+  company               Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  provider              Provider            @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  maintenance           MaintenanceRequest? @relation(fields: [maintenanceRequestId], references: [id], onDelete: SetNull)
+  building              Building            @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  unit                  Unit?               @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  
+  @@index([companyId])
+  @@index([providerId])
+  @@index([buildingId])
+  @@index([estado])
+  @@index([fechaAsignacion])
+  @@map("provider_work_orders")
+}
+
+// Galería Multimedia
+enum GalleryItemType {
+  foto
+  video
+  tour_360
+  plano
+}
+
+enum RoomType {
+  exterior
+  salon
+  cocina
+  dormitorio_principal
+  dormitorio
+  bano_principal
+  bano
+  terraza
+  balcon
+  jardin
+  garaje
+  trastero
+  otro
+}
+
+model PropertyGallery {
+  id                    String              @id @default(cuid())
+  companyId             String
+  unitId                String              @unique
+  
+  // Configuración
+  portada               String?             // URL de la foto de portada
+  orden                 String[]            // IDs ordenados de los items
+  
+  // Tour virtual
+  urlTourVirtual        String?
+  embedCode             String?             @db.Text
+  
+  // Marca de agua
+  usarMarcaAgua         Boolean             @default(true)
+  
+  // Estadísticas
+  visitas               Int                 @default(0)
+  ultimaActualizacion   DateTime            @default(now())
+  
+  // Auditoría
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  
+  company               Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  unit                  Unit                @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  items                 GalleryItem[]
+  
+  @@index([companyId])
+  @@index([unitId])
+  @@map("property_galleries")
+}
+
+model GalleryItem {
+  id                    String              @id @default(cuid())
+  galleryId             String
+  
+  // Tipo y ubicación
+  tipo                  GalleryItemType
+  habitacion            RoomType
+  
+  // Contenido
+  url                   String
+  urlThumbnail          String?
+  titulo                String?
+  descripcion           String?             @db.Text
+  
+  // Metadata
+  orden                 Int                 @default(0)
+  destacada             Boolean             @default(false)
+  
+  // Video específico
+  duracion              Int?                // Segundos
+  
+  // 360 específico
+  tipo360               String?             // 'iframe', 'matterport', etc.
+  
+  // Auditoría
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  
+  gallery               PropertyGallery     @relation(fields: [galleryId], references: [id], onDelete: Cascade)
+  
+  @@index([galleryId])
+  @@index([tipo])
+  @@index([habitacion])
+  @@map("gallery_items")
+}
+
+// Business Intelligence Avanzado (usando modelos existentes)
+// Ver modelos BiWidget, BiReport y BiAlert en sección anterior

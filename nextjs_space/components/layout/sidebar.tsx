@@ -40,6 +40,9 @@ import {
   CalendarCheck,
   Leaf,
   UserCheck,
+  AlertTriangle,
+  Image as ImageIcon,
+  ClipboardList,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -62,6 +65,9 @@ const allNavItems = [
   { name: 'Seguros', href: '/seguros', icon: Shield, roles: ['administrador', 'gestor'] },
   { name: 'Certificaciones', href: '/certificaciones', icon: Leaf, roles: ['administrador', 'gestor'] },
   { name: 'Portal Propietario', href: '/portal-propietario', icon: UserCheck, roles: ['administrador', 'gestor'] },
+  { name: 'Incidencias', href: '/incidencias', icon: AlertTriangle, roles: ['administrador', 'gestor'] },
+  { name: 'Galer\u00edas', href: '/galerias', icon: ImageIcon, roles: ['administrador', 'gestor'] },
+  { name: '\u00d3rdenes de Trabajo', href: '/ordenes-trabajo', icon: ClipboardList, roles: ['administrador', 'gestor'] },
   { name: 'Mantenimiento', href: '/mantenimiento', icon: Wrench, roles: ['administrador', 'gestor', 'operador'] },
   { name: 'Analytics Mtto.', href: '/mantenimiento-pro', icon: FileBarChart, roles: ['administrador', 'gestor'] },
   { name: 'Tareas', href: '/tareas', icon: CheckSquare, roles: ['administrador', 'gestor', 'operador'] },
