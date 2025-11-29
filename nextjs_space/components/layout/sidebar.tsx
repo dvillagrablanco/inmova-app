@@ -43,6 +43,8 @@ import {
   AlertTriangle,
   Image as ImageIcon,
   ClipboardList,
+  Vote,
+  Megaphone,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -68,6 +70,9 @@ const allNavItems = [
   { name: 'Incidencias', href: '/incidencias', icon: AlertTriangle, roles: ['administrador', 'gestor'] },
   { name: 'Galer\u00edas', href: '/galerias', icon: ImageIcon, roles: ['administrador', 'gestor'] },
   { name: '\u00d3rdenes de Trabajo', href: '/ordenes-trabajo', icon: ClipboardList, roles: ['administrador', 'gestor'] },
+  { name: 'Votaciones', href: '/votaciones', icon: Vote, roles: ['administrador', 'gestor'] },
+  { name: 'Anuncios', href: '/anuncios', icon: Megaphone, roles: ['administrador', 'gestor'] },
+  { name: 'Reuniones', href: '/reuniones', icon: Users, roles: ['administrador', 'gestor'] },
   { name: 'Mantenimiento', href: '/mantenimiento', icon: Wrench, roles: ['administrador', 'gestor', 'operador'] },
   { name: 'Analytics Mtto.', href: '/mantenimiento-pro', icon: FileBarChart, roles: ['administrador', 'gestor'] },
   { name: 'Tareas', href: '/tareas', icon: CheckSquare, roles: ['administrador', 'gestor', 'operador'] },
