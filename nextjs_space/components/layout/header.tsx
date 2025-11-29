@@ -71,6 +71,50 @@ export function Header() {
     }
   };
 
+  const handleNotificationClick = async (notif: any) => {
+    // Marcar como leída
+    await markAsRead(notif.id);
+    
+    // Cerrar el dropdown
+    setShowNotifications(false);
+    
+    // Navegar según el tipo de notificación
+    if (notif.entityType && notif.entityId) {
+      switch (notif.entityType) {
+        case 'contract':
+        case 'contrato':
+          router.push(`/contratos/${notif.entityId}`);
+          break;
+        case 'payment':
+        case 'pago':
+          router.push(`/pagos`);
+          break;
+        case 'maintenance':
+        case 'mantenimiento':
+          router.push(`/mantenimiento/${notif.entityId}`);
+          break;
+        case 'tenant':
+        case 'inquilino':
+          router.push(`/inquilinos/${notif.entityId}`);
+          break;
+        case 'unit':
+        case 'unidad':
+          router.push(`/unidades/${notif.entityId}`);
+          break;
+        case 'building':
+        case 'edificio':
+          router.push(`/edificios/${notif.entityId}`);
+          break;
+        default:
+          // Si no hay entidad específica, ir a la página de notificaciones
+          router.push('/notificaciones');
+      }
+    } else {
+      // Si no hay entidad, ir a la página de notificaciones
+      router.push('/notificaciones');
+    }
+  };
+
   const markAllAsRead = async () => {
     try {
       await fetch('/api/notifications/mark-all-read', { method: 'PUT' });
@@ -174,7 +218,7 @@ export function Header() {
                             'p-4 hover:bg-gray-50 cursor-pointer transition-colors',
                             !notif.leida && 'bg-blue-50'
                           )}
-                          onClick={() => markAsRead(notif.id)}
+                          onClick={() => handleNotificationClick(notif)}
                         >
                           <p className="font-medium text-sm">{notif.titulo}</p>
                           <p className="text-xs text-gray-600 mt-1 line-clamp-2">{notif.mensaje}</p>

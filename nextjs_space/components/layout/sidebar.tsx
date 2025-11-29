@@ -48,6 +48,8 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/contratos': 'contratos',
   '/pagos': 'pagos',
   '/mantenimiento': 'mantenimiento',
+  '/calendario': 'calendario',
+  '/chat': 'chat',
   '/bi': 'bi',
   '/reportes': 'reportes',
   '/documentos': 'documentos',
@@ -56,6 +58,19 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/admin/usuarios': 'usuarios',
   '/admin/modulos': 'configuracion',
 };
+
+// Módulos core que siempre deben mostrarse (esCore: true)
+const CORE_MODULES = [
+  'dashboard',
+  'edificios',
+  'unidades',
+  'inquilinos',
+  'contratos',
+  'pagos',
+  'mantenimiento',
+  'calendario',
+  'chat',
+];
 
 // Navegación core - Funcionalidades principales
 const coreNavItems = [
@@ -171,6 +186,9 @@ export function Sidebar() {
       // Verificar si el módulo está activo
       const moduleCode = ROUTE_TO_MODULE[item.href];
       if (!moduleCode) return true; // Si no hay mapeo, mostrar por defecto
+      
+      // Los módulos core siempre se muestran (esCore: true)
+      if (CORE_MODULES.includes(moduleCode)) return true;
       
       return activeModules.includes(moduleCode);
     });

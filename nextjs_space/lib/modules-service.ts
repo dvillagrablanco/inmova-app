@@ -105,13 +105,13 @@ export const MODULOS_CATALOGO = [
     codigo: 'mantenimiento',
     nombre: 'Mantenimiento',
     descripcion: 'Solicitudes y seguimiento de mantenimiento',
-    categoria: 'gestion',
+    categoria: 'core',
     icono: 'Wrench',
     ruta: '/mantenimiento',
     requiereModulos: ['edificios'],
     tiersIncluido: ['basico', 'profesional', 'empresarial'],
-    esCore: false,
-    orden: 11
+    esCore: true,
+    orden: 7
   },
   {
     codigo: 'proveedores',
@@ -205,13 +205,13 @@ export const MODULOS_CATALOGO = [
     codigo: 'chat',
     nombre: 'Chat con Inquilinos',
     descripcion: 'Sistema de mensajería con inquilinos',
-    categoria: 'comunicacion',
+    categoria: 'core',
     icono: 'MessageSquare',
     ruta: '/chat',
     requiereModulos: ['inquilinos'],
-    tiersIncluido: ['profesional', 'empresarial'],
-    esCore: false,
-    orden: 31
+    tiersIncluido: ['basico', 'profesional', 'empresarial'],
+    esCore: true,
+    orden: 9
   },
   {
     codigo: 'sms',
@@ -279,13 +279,13 @@ export const MODULOS_CATALOGO = [
     codigo: 'calendario',
     nombre: 'Calendario Unificado',
     descripcion: 'Calendario con eventos y programaciones',
-    categoria: 'avanzado',
+    categoria: 'core',
     icono: 'Calendar',
     ruta: '/calendario',
     requiereModulos: [],
-    tiersIncluido: ['profesional', 'empresarial'],
-    esCore: false,
-    orden: 44
+    tiersIncluido: ['basico', 'profesional', 'empresarial'],
+    esCore: true,
+    orden: 8
   },
   {
     codigo: 'valoraciones',
