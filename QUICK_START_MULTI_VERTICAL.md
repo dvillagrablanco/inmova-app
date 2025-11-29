@@ -1,683 +1,996 @@
-# 🚀 QUICK START: IMPLEMENTAR INTERFACES MULTI-VERTICAL
+# ⚡ QUICK START GUIDE: INMOVA MULTI-VERTICAL
 
-## Guía Rápida para Desarrollar las Páginas Frontend
-
-Los modelos de datos ya están creados y migrados a la base de datos. Esta guía te muestra cómo crear las interfaces para cada vertical.
+## Guía de Inicio Rápido para los 7 Modelos de Negocio
 
 ---
 
-## 1️⃣ STR - ALQUILERES TURÍSTICOS
+## 🎯 INTRODUCCIÓN
 
-### Paso 1: Crear página de Listings
+INMOVA es la **única plataforma PropTech** que soporta **7 modelos de negocio inmobiliario** de forma nativa:
 
-```bash
-mkdir -p app/str/listings
+1. 🏠 **Alquiler Residencial Tradicional**
+2. 🏖️ **STR - Short Term Rentals** (Airbnb, Booking, Vrbo)
+3. 🔨 **House Flipping** (Compra → Reforma → Venta)
+4. 🏗️ **Construcción** (Obra nueva)
+5. 📐 **Servicios Profesionales** (Arquitectos, aparejadores)
+6. 🏘️ **Coliving / Media Estancia**
+7. 🏨 **Hoteles / Apart-Hotels**
+
+Esta guía te enseña a **activar y usar cada vertical en menos de 1 hora**.
+
+---
+
+## 📋 PREREQUISITOS
+
+✅ Cuenta INMOVA activa (Plan Profesional o superior)  
+✅ Rol: Administrador o Gestor  
+✅ 30 minutos de tiempo  
+
+---
+
+# 1️⃣ ALQUILER RESIDENCIAL TRADICIONAL
+
+## ⏱️ Tiempo Setup: 10 minutos
+
+### Paso 1: Crear Edificio
+
+```
+Ruta: Edificios > Nuevo Edificio
+
+Datos:
+- Nombre: Edificio Ejemplo
+- Dirección: Calle Mayor 1, Madrid
+- Unidades: 10
+- Tipo: Residencial
 ```
 
-```typescript
-// app/str/listings/page.tsx
-'use client';
+### Paso 2: Crear Unidad
 
-import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+```
+Ruta: Unidades > Nueva Unidad
 
-export default function STRListingsPage() {
-  const { data: session } = useSession();
-  const [listings, setListings] = useState([]);
-
-  useEffect(() => {
-    fetch('/api/str/listings')
-      .then(res => res.json())
-      .then(data => setListings(data));
-  }, []);
-
-  return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Anuncios Turísticos</h1>
-      
-      {/* KPIs */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Total Listings</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{listings.length}</div>
-          </CardContent>
-        </Card>
-        {/* Más KPIs... */}
-      </div>
-
-      {/* Lista de listings */}
-      <div className="grid grid-cols-3 gap-4">
-        {listings.map(listing => (
-          <Card key={listing.id}>
-            <CardHeader>
-              <CardTitle>{listing.titulo}</CardTitle>
-              <Badge>{listing.tipoPropiedad}</Badge>
-            </CardHeader>
-            <CardContent>
-              <p>Precio: €{listing.precioPorNoche}/noche</p>
-              <p>Ocupación: {listing.tasaOcupacion}%</p>
-              <p>Rating: {listing.ratingPromedio}/5</p>
-              <Button className="mt-4">Ver Detalles</Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
-  );
-}
+Datos:
+- Edificio: [Seleccionar]
+- Número: 1A
+- Superficie: 75 m²
+- Habitaciones: 2
+- Baños: 1
+- Renta: €800/mes
+- Estado: Disponible
 ```
 
-### Paso 2: Crear API Route
+### Paso 3: Alta Inquilino
 
-```typescript
-// app/api/str/listings/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
+```
+Ruta: Inquilinos > Nuevo Inquilino
 
-export async function GET(request: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.companyId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const listings = await prisma.sTRListing.findMany({
-    where: {
-      companyId: session.user.companyId
-    },
-    include: {
-      unit: { include: { building: true } },
-      bookings: true,
-      channels: true
-    }
-  });
-
-  return NextResponse.json(listings);
-}
-
-export async function POST(request: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.companyId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const data = await request.json();
-  
-  const listing = await prisma.sTRListing.create({
-    data: {
-      ...data,
-      companyId: session.user.companyId
-    }
-  });
-
-  return NextResponse.json(listing, { status: 201 });
-}
+Datos Mínimos:
+- Nombre: Juan Pérez
+- Email: juan@email.com
+- Teléfono: +34 600 123 456
+- DNI: 12345678A
 ```
 
-### Paso 3: Crear página de Bookings
+### Paso 4: Crear Contrato
 
-```typescript
-// app/str/bookings/page.tsx
-'use client';
+```
+Ruta: Contratos > Nuevo Contrato
 
-import { useState, useEffect } from 'react';
-import { Calendar } from '@/components/ui/calendar';
+1. Seleccionar Inquilino
+2. Seleccionar Unidad
+3. Fecha Inicio: 01/12/2024
+4. Duración: 12 meses
+5. Renta: €800/mes
+6. Generar PDF
+7. Enviar a Firma Digital
+```
 
-export default function STRBookingsPage() {
-  const [bookings, setBookings] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(new Date());
+### Paso 5: Configurar Pagos
 
-  useEffect(() => {
-    fetch('/api/str/bookings')
-      .then(res => res.json())
-      .then(data => setBookings(data));
-  }, []);
+**Opción A: Stripe (Automático)**
+```
+En Contrato:
+- ☑️ Activar Pagos Recurrentes
+- Día cobro: 1 de cada mes
+- Stripe cobra automáticamente
+```
 
-  return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Calendario de Reservas</h1>
-      
-      <div className="grid grid-cols-2 gap-6">
-        {/* Calendario */}
-        <div>
-          <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={setSelectedDate}
-          />
-        </div>
+**Opción B: Manual**
+```
+Sistema crea pagos mensuales
+Gestor registra manualmente al recibir
+```
 
-        {/* Lista de bookings del día seleccionado */}
-        <div>
-          <h2 className="text-xl font-bold mb-4">Reservas del día</h2>
-          {bookings
-            .filter(b => isSameDay(new Date(b.checkInDate), selectedDate))
-            .map(booking => (
-              <Card key={booking.id} className="mb-4">
-                <CardHeader>
-                  <CardTitle>{booking.guestNombre}</CardTitle>
-                  <Badge>{booking.canal}</Badge>
-                </CardHeader>
-                <CardContent>
-                  <p>Check-in: {formatDate(booking.checkInDate)}</p>
-                  <p>Check-out: {formatDate(booking.checkOutDate)}</p>
-                  <p>Huéspedes: {booking.numHuespedes}</p>
-                  <p>Total: €{booking.precioTotal}</p>
-                </CardContent>
-              </Card>
-            ))}
-        </div>
-      </div>
-    </div>
-  );
-}
+✅ **¡Listo!** Tu primer contrato residencial está activo.
+
+---
+
+# 2️⃣ STR - SHORT TERM RENTALS (AIRBNB)
+
+## ⏱️ Tiempo Setup: 15 minutos
+
+### Pre-requisito: Activar Módulos STR
+
+```
+Ruta: Administración > Módulos
+
+Activar:
+☑️ Anuncios STR
+☑️ Reservas STR  
+☑️ Channel Manager
+☑️ Pricing Dinámico
+```
+
+### Paso 1: Crear Propiedad STR
+
+```
+Ruta: Unidades > Nueva Unidad
+
+Datos Específicos STR:
+- Tipo: Apartamento Turístico
+- ☑️ Apto para STR
+- Precio Base Noche: €85
+- Mínimo Noches: 2
+- Máximo Huéspedes: 4
+- Check-in: 15:00
+- Check-out: 11:00
+```
+
+### Paso 2: Configurar Amenities
+
+```
+En Unidad:
+
+Amenities:
+☑️ WiFi
+☑️ AC
+☑️ Cocina equipada
+☑️ Lavadora
+☑️ Smart TV
+☑️ Parking (opcional)
+
+Normas Casa:
+☑️ No fumar
+☑️ No mascotas
+☑️ No fiestas
+```
+
+### Paso 3: Fotos y Tour Virtual
+
+**Fotos Obligatorias (mínimo 10)**:
+1. Exterior edificio
+2. Salón (3 ángulos)
+3. Cocina
+4. Habitación principal
+5. Habitación secundaria (si aplica)
+6. Baño
+7. Vistas
+8. Detalles
+
+```
+Ruta: Unidades > [ID] > Galería
+
+- Subir fotos alta resolución (>1080p)
+- Orden drag & drop
+- Foto principal: Salón mejor ángulo
+```
+
+### Paso 4: Crear Anuncio Multi-Portal
+
+```
+Ruta: STR > Anuncios > Nuevo
+
+1. Seleccionar Unidad
+2. IA genera título y descripción optimizados:
+   - Airbnb: 500 caracteres
+   - Booking: 800 caracteres
+   - Vrbo: 600 caracteres
+3. Revisar y editar
+4. ☑️ Publicar en:
+   ☑️ Airbnb
+   ☑️ Booking.com
+   ☑️ Vrbo
+```
+
+### Paso 5: Conectar Canales
+
+**Airbnb**:
+```
+1. Ir a STR > Channel Manager > Airbnb
+2. "Conectar Cuenta"
+3. Login Airbnb
+4. Autorizar INMOVA
+5. Seleccionar propiedades a sincronizar
+6. ✅ Sincronización cada 5 minutos
+```
+
+**Booking.com**:
+```
+1. STR > Channel Manager > Booking
+2. Ingresar Extranet ID
+3. Ingresar API Key
+4. Mapear propiedades
+5. ✅ Calendario sincronizado
+```
+
+### Paso 6: Pricing Dinámico IA
+
+```
+Ruta: STR > Pricing Dinámico
+
+1. Seleccionar propiedad
+2. Configurar:
+   - Precio Base: €85/noche
+   - Precio Mínimo: €60/noche
+   - Precio Máximo: €150/noche
+3. Factores IA:
+   ☑️ Eventos locales
+   ☑️ Ocupación competencia
+   ☑️ Estacionalidad
+   ☑️ Día semana
+4. ☑️ Activar Auto-Pricing
+```
+
+**Resultado**: IA ajusta precios diariamente para maximizar RevPAR.
+
+### Paso 7: Primera Reserva
+
+```
+Cuando llega reserva desde Airbnb:
+
+1. INMOVA recibe automáticamente
+2. Bloquea calendario en todos los canales
+3. Crea reserva en sistema
+4. Notifica gestor
+5. Gestión check-in/out:
+   - Email automático huésped 24h antes
+   - Instrucciones acceso
+   - Código cerradura inteligente (si configurado)
+```
+
+✅ **¡Listo!** Tu propiedad STR está operativa en todos los canales.
+
+**Métricas a Seguir**:
+- ADR (Average Daily Rate)
+- Ocupación %
+- RevPAR (Revenue Per Available Room)
+- Rating promedio
+- Tiempo respuesta
+
+---
+
+# 3️⃣ HOUSE FLIPPING
+
+## ⏱️ Tiempo Setup: 20 minutos
+
+### Pre-requisito: Activar Módulo
+
+```
+Administración > Módulos > Activar:
+☑️ House Flipping
+☑️ Gastos (si no activo)
+```
+
+### Paso 1: Crear Proyecto Flipping
+
+```
+Ruta: Flipping > Proyectos > Nuevo
+
+Datos Proyecto:
+- Nombre: Reforma Chamberí 45
+- Dirección: Calle Chamberí 45, Madrid
+- Tipo: Apartamento
+- Superficie: 80 m²
+
+Financiero:
+- Precio Compra: €120,000
+- Presupuesto Reforma: €40,000
+- Gastos Estimados: €10,000
+- TOTAL INVERSIÓN: €170,000
+
+- Precio Venta Objetivo: €230,000
+- ROI Objetivo: 35%
+
+Plazos:
+- Fecha Compra: 01/11/2024
+- Duración Reforma: 90 días
+- Fecha Venta Objetivo: 28/02/2025
+```
+
+### Paso 2: Definir Fases
+
+```
+Sistema crea automáticamente 5 fases:
+
+1. ✅ Compra (Completada)
+2. 🔄 Demolición (En curso)
+3. ⏳ Construcción (Pendiente)
+4. ⏳ Acabados (Pendiente)  
+5. ⏳ Venta (Pendiente)
+
+Para cada fase:
+- Presupuesto
+- Duración estimada
+- Tareas
+- Responsables
+```
+
+### Paso 3: Registrar Gastos
+
+```
+Ruta: Flipping > [Proyecto] > Gastos > Nuevo
+
+Ejemplo:
+- Fecha: 05/11/2024
+- Concepto: Demolición paredes
+- Categoría: Mano de Obra
+- Proveedor: Demoliciones Pro SL
+- Monto: €3,500
+- Fase: Demolición
+- Adjuntar: Factura PDF
+```
+
+**Categorías Auto**:
+- Compra
+- Licencias y Permisos
+- Mano de Obra
+- Materiales
+- Fontanería
+- Electricidad
+- Pintura
+- Suelos
+- Cocina y Baños
+- Gastos Financieros
+- Gestoría
+- Marketing Venta
+
+### Paso 4: Dashboard Proyecto (Tiempo Real)
+
+```
+Vista Proyecto muestra automáticamente:
+
+┌─────────────────────────────────┐
+│ PROYECTO: Chamberí 45           │
+├─────────────────────────────────┤
+│ Progreso: [████░░░░] 45%       │
+│                                 │
+│ FINANCIERO                      │
+│ Inversión Total:  €170,000      │
+│ Gastado:          €78,500       │
+│ Restante:         €91,500       │
+│ Desviación:       -€1,200 ✅    │
+│                                 │
+│ ROI PROYECTADO                  │
+│ Venta Estimada:   €230,000      │
+│ Beneficio:        €60,000       │
+│ ROI:              35.3%         │
+│                                 │
+│ TIMELINE                        │
+│ Día 35 de 90                    │
+│ On schedule ✅                   │
+└─────────────────────────────────┘
+```
+
+### Paso 5: Fotografía Progreso
+
+```
+Antes/Durante/Después:
+
+1. Subir fotos estado inicial
+2. Fotos progreso (semanal)
+3. Fotos finales
+4. Sistema crea galería comparativa
+5. Útil para:
+   - Seguimiento interno
+   - Marketing venta
+   - Portfolio casos éxito
+```
+
+### Paso 6: Cierre y Venta
+
+```
+Cuando proyecto completo:
+
+1. Cambiar fase a "Venta"
+2. Registrar:
+   - Precio Venta Real: €235,000
+   - Fecha Venta: 20/02/2025
+   - Comprador: [Datos]
+3. Sistema calcula automáticamente:
+   - ROI Real: 38.2%
+   - Duración Real: 85 días
+   - Desviación Presupuesto: -€2,300 ✅
+4. Proyecto pasa a "Completado"
+5. Datos alimentan estadísticas globales
+```
+
+✅ **¡Listo!** Proyecto flipping tracked end-to-end.
+
+**Reportes Disponibles**:
+- P&L por proyecto
+- ROI histórico
+- Time-to-flip promedio
+- Categorías gasto más altas
+- Proveedores mejores/peores
+
+---
+
+# 4️⃣ CONSTRUCCIÓN (OBRA NUEVA)
+
+## ⏱️ Tiempo Setup: 25 minutos
+
+### Pre-requisito
+
+```
+Administración > Módulos > Activar:
+☑️ Construcción
+☑️ Órdenes de Trabajo
+☑️ Inspecciones
+☑️ Proveedores
+```
+
+### Paso 1: Crear Proyecto Construcción
+
+```
+Ruta: Construcción > Proyectos > Nuevo
+
+Datos:
+- Nombre: Residencial Vista Mar
+- Ubicación: Avenida Costa 123, Málaga
+- Tipo: Residencial
+- Unidades: 24 viviendas
+- Promotor: Tu Empresa SL
+
+Financiero:
+- Presupuesto Total: €3,500,000
+- Financiación: €2,000,000 banco
+- Capital Propio: €1,500,000
+
+Plazos:
+- Inicio: 01/01/2025
+- Fin Previsto: 31/12/2025
+- Duración: 12 meses
+```
+
+### Paso 2: Configurar Fases Obra (9 Fases)
+
+```
+Sistema crea automáticamente:
+
+1. Estudios Previos (Mes 1)
+   - Estudio geotécnico
+   - Proyecto básico
+   - Licencias
+
+2. Demolición y Limpieza (Mes 1)
+
+3. Cimentación (Mes 2-3)
+
+4. Estructura (Mes 4-6)
+
+5. Cerramientos (Mes 7)
+
+6. Instalaciones (Mes 8-9)
+   - Fontanería
+   - Electricidad
+   - HVAC
+
+7. Acabados (Mes 10-11)
+   - Yeso
+   - Pintura
+   - Suelos
+
+8. Equipamiento (Mes 11-12)
+   - Cocinas
+   - Baños
+   - Carpintería
+
+9. Entrega (Mes 12)
+   - Limpieza final
+   - Inspecciones
+   - Llaves
+
+Cada fase:
+- Presupuesto asignado
+- Duración días
+- Dependencias (ej: Estructura requiere Cimentación)
+```
+
+### Paso 3: Gestionar Subcontratistas
+
+```
+Ruta: Proveedores > Nuevo Proveedor
+
+Ejemplo:
+- Nombre: Cimentaciones Sur SL
+- Especialidad: Cimentación
+- CIF: B12345678
+- Contacto: José Martínez
+- Teléfono: +34 600 111 222
+- Email: jose@cimentaciones.com
+
+Contrato:
+- Fase: Cimentación
+- Presupuesto: €280,000
+- Inicio: 01/02/2025
+- Fin: 31/03/2025
+- Forma Pago: 30% adelanto, 70% fin obra
+```
+
+### Paso 4: Órdenes de Trabajo
+
+```
+Cuando fase activa:
+
+Ruta: Órdenes Trabajo > Nueva
+
+- Proyecto: Vista Mar
+- Fase: Cimentación
+- Subcontratista: Cimentaciones Sur
+- Descripción: Excavación y pilotes
+- Fecha Inicio: 01/02/2025
+- Fecha Fin: 15/02/2025
+- Presupuesto: €140,000
+
+Estados:
+🟡 Asignada
+🟢 Aceptada
+🔵 En Progreso
+⚠️ Incidencia
+✅ Completada
+```
+
+### Paso 5: Inspecciones y Control Calidad
+
+```
+Ruta: Inspecciones > Nueva
+
+- Proyecto: Vista Mar
+- Fase: Estructura
+- Tipo: ITE (Inspección Técnica)
+- Fecha: 15/06/2025
+- Inspector: Aparejador Juan López
+
+Checklist:
+☑️ Vigas correctamente armadas
+☑️ Hormigón calidad especificada
+☑️ Resistencia según normativa
+☐ Defectos encontrados
+
+Resultado:
+✅ Aprobada
+❌ Rechazada (con motivos)
+⚠️ Aprobada con observaciones
+
+Adjuntar:
+- Fotos
+- Informe PDF
+- Certificados materiales
+```
+
+### Paso 6: Dashboard Obra
+
+```
+┌──────────────────────────────────────┐
+│ OBRA: Residencial Vista Mar          │
+├──────────────────────────────────────┤
+│ Estado: Fase 4/9 - Estructura        │
+│ Progreso: [████████░░░░] 45%        │
+│                                      │
+│ FINANCIERO                           │
+│ Presupuesto: €3,500,000              │
+│ Ejecutado:   €1,575,000 (45%)        │
+│ Pendiente:   €1,925,000              │
+│ Desviación:  +€25,000 (1.6%) ⚠️      │
+│                                      │
+│ PLAZOS                               │
+│ Días Transcurridos: 165/365          │
+│ Retraso: 5 días ⚠️                   │
+│ Fecha Fin Ajustada: 05/01/2026       │
+│                                      │
+│ ALERTAS                              │
+│ 🔴 Partida Estructura: +€25K         │
+│ 🟡 Proveedor Electricidad: Sin asig. │
+└──────────────────────────────────────┘
+```
+
+### Paso 7: Transición Post-Construcción
+
+```
+Cuando obra finaliza:
+
+1. Proyecto pasa a "Completado"
+2. Sistema pregunta:
+   "¿Crear unidades para gestión alquiler?"
+   
+3. Si SÍ:
+   - Crea automáticamente 24 unidades
+   - Asocia a nuevo edificio
+   - Importa datos construcción
+   - ¡Listo para alquilar!
+   
+4. Si NO:
+   - Proyecto archivado
+   - Datos históricos disponibles
+```
+
+✅ **¡Listo!** Obra gestionada end-to-end con visibilidad total.
+
+---
+
+# 5️⃣ SERVICIOS PROFESIONALES
+
+## ⏱️ Tiempo Setup: 15 minutos
+
+**Para**: Arquitectos, Aparejadores, Ingenieros, Consultores inmobiliarios
+
+### Pre-requisito
+
+```
+Administración > Módulos > Activar:
+☑️ Servicios Profesionales
+☑️ Reuniones
+☑️ Documentos
+```
+
+### Paso 1: Crear Proyecto Profesional
+
+```
+Ruta: Profesional > Proyectos > Nuevo
+
+Datos:
+- Tipo: Proyecto Básico Arquitectura
+- Cliente: Promotora ABC SL
+- Edificio: Residencial Centro (opcional)
+- Descripción: Proyecto básico 30 viviendas
+
+Financiero:
+- Honorarios: €45,000
+- Estructura Pago:
+  - 30% a la firma: €13,500
+  - 40% entrega básico: €18,000
+  - 30% licencia: €13,500
+
+Plazos:
+- Inicio: 01/12/2024
+- Entrega: 28/02/2025
+- Duración: 90 días
+```
+
+### Paso 2: Definir Entregables
+
+```
+En Proyecto:
+
+Entregables:
+1. Memoria Descriptiva
+   - Estado: En progreso
+   - Responsable: Arquitecto Senior
+   - Deadline: 15/12/2024
+   
+2. Planos Arquitectura
+   - Estado: Pendiente
+   - Responsable: Delineante
+   - Deadline: 31/12/2024
+   
+3. Mediciones y Presupuesto
+   - Estado: Pendiente
+   - Responsable: Aparejador
+   - Deadline: 15/01/2025
+   
+4. Estudio Seguridad y Salud
+   - Estado: Pendiente
+   - Coordinador SS
+   - Deadline: 31/01/2025
+```
+
+### Paso 3: Gestionar Reuniones
+
+```
+Ruta: Reuniones > Nueva
+
+- Proyecto: Proyecto Básico Residencial Centro
+- Tipo: Reunión Seguimiento
+- Fecha: 15/12/2024 10:00
+- Duración: 1h
+- Participantes:
+  - Cliente: Director Promotora ABC
+  - Nosotros: Arquitecto + Aparejador
+- Ubicación: Oficina cliente / Zoom
+
+Orden del día:
+1. Estado avance (15 min)
+2. Revisión planos preliminares (30 min)
+3. Cambios solicitados cliente (10 min)
+4. Próximos pasos (5 min)
+
+Durante reunión:
+- Tomar notas en plataforma
+- Marcar acuerdos/decisiones
+- Asignar tareas post-reunión
+
+Post-reunión:
+- Sistema genera acta automáticamente
+- Email a todos participantes
+- Tareas creadas en proyecto
+```
+
+### Paso 4: Gestión Documental
+
+```
+Ruta: Profesional > [Proyecto] > Documentos
+
+Estructura carpetas automática:
+
+📁 Proyecto Básico Residencial
+  ├─ 📁 01_Contrato
+  │   └─ Contrato_Honorarios.pdf
+  ├─ 📁 02_Documentación Cliente
+  │   ├─ Catastro.pdf
+  │   └─ Topográfico.dwg
+  ├─ 📁 03_Proyecto Básico
+  │   ├─ 📁 Memoria
+  │   ├─ 📁 Planos
+  │   │   ├─ PB_01_Situación.pdf
+  │   │   ├─ PB_02_Emplazamiento.pdf
+  │   │   └─ ...
+  │   ├─ 📁 Mediciones
+  │   └─ 📁 Estudio SS
+  ├─ 📁 04_Correspondencia
+  └─ 📁 05_Facturación
+
+Control versiones:
+- Memoria_v1.pdf
+- Memoria_v2.pdf (revisión cliente)
+- Memoria_v3_FINAL.pdf
+```
+
+### Paso 5: Facturación por Hitos
+
+```
+Cuando entregable completado:
+
+Ruta: Profesional > [Proyecto] > Facturación
+
+Ejemplo:
+- Hito: Entrega Proyecto Básico
+- Fecha: 28/02/2025
+- Monto: €18,000 (40%)
+- Generar Factura:
+  - Sistema crea PDF automático
+  - Incluye datos fiscales
+  - Logo profesional
+  - Envía email cliente
+  - Registra en contabilidad
+```
+
+✅ **¡Listo!** Gestión profesional de proyectos de servicios.
+
+---
+
+# 6️⃣ COLIVING / MEDIA ESTANCIA
+
+## ⏱️ Tiempo Setup: 15 minutos
+
+**Diferencia con Alquiler Tradicional**:
+- Contratos 1-12 meses (vs. 12+ meses)
+- Habitaciones individuales en piso compartido
+- Servicios incluidos (limpieza, wifi, suministros)
+- Comunidad y eventos
+- Facturación todo incluido
+
+### Setup Rápido
+
+```
+Ruta: Edificios > Nuevo
+
+Tipo: Coliving
+- Nombre: CoLive Madrid Centro
+- Dirección: Calle Atocha 45
+- Habitaciones: 15
+- Zonas Comunes:
+  ☑️ Cocina compartida (2)
+  ☑️ Salón
+  ☑️ Coworking
+  ☑️ Gym
+  ☑️ Terraza
+
+Renta:
+- Habitación individual: €650/mes
+- Habitación doble: €850/mes
+- Todo incluido:
+  ✅ WiFi fibra
+  ✅ Limpieza semanal zonas comunes
+  ✅ Suministros
+  ✅ Eventos mensuales
+```
+
+**Contratos**:
+- Duración flexible: 1-12 meses
+- Check-in/out cualquier día mes
+- Prorrateo días
+
+**Comunidad**:
+```
+Ruta: Comunidad Social
+
+- Feed interno residentes
+- Calendario eventos
+- Marketplace servicios P2P
+- Sistema matching roommates
 ```
 
 ---
 
-## 2️⃣ HOUSE FLIPPING
+# 7️⃣ HOTELES / APART-HOTELS
 
-### Paso 1: Crear página de Proyectos
+## ⏱️ Tiempo Setup: 20 minutos
 
-```typescript
-// app/flipping/projects/page.tsx
-'use client';
+**Similar a STR pero con diferencias**:
+- Gestión reception
+- Housekeeping diario
+- Room service
+- Multiple tarifas (standard, deluxe, suite)
+- Integraciones PMS (opcional)
 
-import { useState, useEffect } from 'react';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+### Setup
 
-export default function FlippingProjectsPage() {
-  const [projects, setProjects] = useState([]);
+```
+Ruta: Edificios > Nuevo
 
-  useEffect(() => {
-    fetch('/api/flipping/projects')
-      .then(res => res.json())
-      .then(data => setProjects(data));
-  }, []);
+Tipo: Hotel/Apart-Hotel
+- Nombre: Apart-Hotel Vista
+- Habitaciones: 40
 
-  const getStatusColor = (status) => {
-    const colors = {
-      PROSPECTO: 'bg-gray-500',
-      ANALISIS: 'bg-blue-500',
-      ADQUISICION: 'bg-yellow-500',
-      RENOVACION: 'bg-orange-500',
-      COMERCIALIZACION: 'bg-green-500',
-      VENDIDO: 'bg-green-700',
-      CANCELADO: 'bg-red-500'
-    };
-    return colors[status] || 'bg-gray-500';
-  };
+Tipos Habitación:
+1. Standard: €80/noche
+2. Deluxe: €120/noche
+3. Suite: €180/noche
 
-  return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Proyectos de Inversión</h1>
-
-      {/* Pipeline Kanban */}
-      <div className="grid grid-cols-7 gap-4">
-        {['PROSPECTO', 'ANALISIS', 'ADQUISICION', 'RENOVACION', 'COMERCIALIZACION', 'VENDIDO', 'CANCELADO'].map(status => (
-          <div key={status}>
-            <h3 className="font-bold mb-4">{status}</h3>
-            {projects
-              .filter(p => p.estado === status)
-              .map(project => (
-                <Card key={project.id} className="mb-4 p-4">
-                  <h4 className="font-semibold">{project.nombre}</h4>
-                  <p className="text-sm text-muted-foreground">{project.direccion}</p>
-                  
-                  <div className="mt-2">
-                    <p className="text-xs">Inversión: €{project.inversionTotal?.toLocaleString()}</p>
-                    {project.roiPorcentaje && (
-                      <Badge className={project.roiPorcentaje > 10 ? 'bg-green-500' : 'bg-yellow-500'}>
-                        ROI: {project.roiPorcentaje}%
-                      </Badge>
-                    )}
-                  </div>
-
-                  {/* Progress bar para renovación */}
-                  {status === 'RENOVACION' && (
-                    <Progress value={calculateProgress(project)} className="mt-2" />
-                  )}
-                </Card>
-              ))}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+Servicios:
+☑️ Desayuno (+€12)
+☑️ Parking (+€15/día)
+☑️ Early check-in (+€20)
+☑️ Late check-out (+€20)
 ```
 
-### Paso 2: Detalle de Proyecto
+**Channel Manager**:
+- Conectar Booking.com
+- Conectar Expedia
+- Precio base + extras
+- Restricciones (min nights, max stay)
 
-```typescript
-// app/flipping/projects/[id]/page.tsx
-'use client';
+---
 
-import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+## 🎯 CONSEJOS MULTI-VERTICAL
 
-export default function FlippingProjectDetailPage() {
-  const params = useParams();
-  const [project, setProject] = useState(null);
+### 1. Segregación Contable
 
-  useEffect(() => {
-    fetch(`/api/flipping/projects/${params.id}`)
-      .then(res => res.json())
-      .then(data => setProject(data));
-  }, [params.id]);
+```
+Ruta: Contabilidad > Centros de Coste
 
-  if (!project) return <div>Cargando...</div>;
+Crear:
+- CC001: Alquiler Residencial
+- CC002: STR/Airbnb
+- CC003: House Flipping
+- CC004: Construcción
+- CC005: Servicios Profesionales
 
-  return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">{project.nombre}</h1>
+Beneficio:
+- P&L separado por vertical
+- ROI individual
+- Identificar vertical más rentable
+```
 
-      {/* ROI Summary */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
-        <Card>
-          <CardHeader><CardTitle>Inversión Total</CardTitle></CardHeader>
-          <CardContent>€{project.inversionTotal?.toLocaleString()}</CardContent>
-        </Card>
-        <Card>
-          <CardHeader><CardTitle>Beneficio Neto</CardTitle></CardHeader>
-          <CardContent>€{project.beneficioNeto?.toLocaleString()}</CardContent>
-        </Card>
-        <Card>
-          <CardHeader><CardTitle>ROI</CardTitle></CardHeader>
-          <CardContent className="text-3xl font-bold text-green-600">
-            {project.roiPorcentaje}%
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader><CardTitle>Estado</CardTitle></CardHeader>
-          <CardContent><Badge>{project.estado}</Badge></CardContent>
-        </Card>
-      </div>
+### 2. Equipos Especializados
 
-      {/* Tabs */}
-      <Tabs defaultValue="renovations">
-        <TabsList>
-          <TabsTrigger value="renovations">Renovaciones</TabsTrigger>
-          <TabsTrigger value="expenses">Gastos</TabsTrigger>
-          <TabsTrigger value="timeline">Timeline</TabsTrigger>
-          <TabsTrigger value="gallery">Galería</TabsTrigger>
-        </TabsList>
+```
+Ejemplo empresa multi-vertical:
 
-        <TabsContent value="renovations">
-          {/* Lista de renovaciones */}
-          {project.renovations.map(reno => (
-            <Card key={reno.id} className="mb-4">
-              <CardHeader>
-                <CardTitle>{reno.categoria}</CardTitle>
-                <p>{reno.descripcion}</p>
-              </CardHeader>
-              <CardContent>
-                <div className="flex justify-between">
-                  <span>Presupuestado: €{reno.presupuestado}</span>
-                  <span>Real: €{reno.costoReal || 'Pendiente'}</span>
-                </div>
-                <Progress value={reno.porcentajeAvance} className="mt-2" />
-              </CardContent>
-            </Card>
-          ))}
-        </TabsContent>
+Equipo A: Alquiler Tradicional
+- 2 gestores
+- 1 operador
+- Edificios: 15
+- Unidades: 200
 
-        <TabsContent value="expenses">
-          {/* Lista de gastos */}
-          {project.expenses.map(expense => (
-            <div key={expense.id} className="flex justify-between border-b py-2">
-              <div>
-                <p className="font-semibold">{expense.concepto}</p>
-                <p className="text-sm text-muted-foreground">{expense.categoria}</p>
-              </div>
-              <p className="font-bold">€{expense.monto}</p>
-            </div>
-          ))}
-        </TabsContent>
+Equipo B: STR
+- 1 gestor especializado
+- 1 operador limpieza
+- Propiedades: 40
 
-        <TabsContent value="timeline">
-          {/* Timeline de hitos */}
-          {project.milestones.map(milestone => (
-            <div key={milestone.id} className="flex items-center gap-4 mb-4">
-              <div className={`w-4 h-4 rounded-full ${milestone.completado ? 'bg-green-500' : 'bg-gray-300'}`} />
-              <div>
-                <p className="font-semibold">{milestone.titulo}</p>
-                <p className="text-sm">Fecha: {formatDate(milestone.fechaPrevista)}</p>
-              </div>
-            </div>
-          ))}
-        </TabsContent>
+Equipo C: Flipping
+- 1 project manager
+- Red subcontratistas
+- Proyectos: 8 simultáneos
 
-        <TabsContent value="gallery">
-          {/* Before/After Gallery */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <h3 className="font-bold mb-2">Antes</h3>
-              {project.fotosAntes.map((foto, idx) => (
-                <img key={idx} src={foto} className="mb-2 rounded" />
-              ))}
-            </div>
-            <div>
-              <h3 className="font-bold mb-2">Después</h3>
-              {project.fotosDespues.map((foto, idx) => (
-                <img key={idx} src={foto} className="mb-2 rounded" />
-              ))}
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
-}
+Cada equipo ve solo su vertical en INMOVA
+```
+
+### 3. Reportes Consolidados
+
+```
+Ruta: BI > Reportes > Multi-Vertical
+
+Dashboard CEO:
+
+┌─────────────────────────────────┐
+│ INGRESOS POR VERTICAL (Nov 2024)│
+├─────────────────────────────────┤
+│ Residencial:   €125,000 (42%)   │
+│ STR:           €85,000  (28%)   │
+│ Flipping:      €60,000  (20%)   │
+│ Construcción:  €30,000  (10%)   │
+├─────────────────────────────────┤
+│ TOTAL:         €300,000         │
+│                                 │
+│ MARGEN EBITDA POR VERTICAL      │
+│ Residencial:   72%              │
+│ STR:           58%              │
+│ Flipping:      35%              │
+│ Construcción:  12%              │
+└─────────────────────────────────┘
+
+Insight: Priorizar crecimiento STR
 ```
 
 ---
 
-## 3️⃣ CONSTRUCCIÓN
+## ✅ CHECKLIST FINAL
 
-### Crear página de Proyectos de Construcción
+Verifica que has completado:
 
-```typescript
-// app/construction/projects/page.tsx
-'use client';
+**Alquiler Residencial**:
+- [ ] Edificio creado
+- [ ] Unidad creada
+- [ ] Inquilino registrado
+- [ ] Contrato activo
+- [ ] Pagos configurados
 
-import { useState, useEffect } from 'react';
-import { Badge } from '@/components/ui/badge';
+**STR**:
+- [ ] Módulos activados
+- [ ] Propiedad con amenities
+- [ ] Fotos profesionales (10+)
+- [ ] Anuncio publicado 3 portales
+- [ ] Pricing dinámico activo
 
-const CONSTRUCTION_PHASES = [
-  'PLANIFICACION', 'PERMISOS', 'CIMENTACION', 'ESTRUCTURA',
-  'CERRAMIENTOS', 'INSTALACIONES', 'ACABADOS', 'ENTREGA', 'GARANTIA'
-];
+**House Flipping**:
+- [ ] Proyecto creado
+- [ ] Fases definidas
+- [ ] Sistema gastos operativo
+- [ ] Dashboard monitoreado
 
-export default function ConstructionProjectsPage() {
-  const [projects, setProjects] = useState([]);
+**Construcción**:
+- [ ] Proyecto obra creado
+- [ ] 9 fases configuradas
+- [ ] Subcontratistas registrados
+- [ ] Sistema inspecciones activo
 
-  useEffect(() => {
-    fetch('/api/construction/projects')
-      .then(res => res.json())
-      .then(data => setProjects(data));
-  }, []);
-
-  return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Proyectos de Construcción</h1>
-
-      <div className="space-y-4">
-        {projects.map(project => (
-          <Card key={project.id}>
-            <CardHeader>
-              <div className="flex justify-between">
-                <div>
-                  <CardTitle>{project.nombre}</CardTitle>
-                  <p className="text-sm text-muted-foreground">{project.tipoProyecto}</p>
-                </div>
-                <Badge>{project.faseActual}</Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {/* Progress Bar de Fases */}
-              <div className="flex gap-2 mb-4">
-                {CONSTRUCTION_PHASES.map(phase => (
-                  <div
-                    key={phase}
-                    className={`h-2 flex-1 rounded ${
-                      CONSTRUCTION_PHASES.indexOf(phase) <= CONSTRUCTION_PHASES.indexOf(project.faseActual)
-                        ? 'bg-green-500'
-                        : 'bg-gray-200'
-                    }`}
-                  />
-                ))}
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Presupuesto</p>
-                  <p className="font-bold">€{project.presupuestoTotal.toLocaleString()}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Gastado</p>
-                  <p className="font-bold">€{project.gastosReales.toLocaleString()}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Avance</p>
-                  <p className="font-bold">{project.porcentajeAvance}%</p>
-                </div>
-              </div>
-
-              <div className="mt-4 flex gap-2">
-                {project.licenciaObra && <Badge>Licencia ✓</Badge>}
-                {project.certificadoFinal && <Badge>Certificado Final ✓</Badge>}
-                {project.habitabilidad && <Badge>Habitabilidad ✓</Badge>}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
-  );
-}
-```
+**Servicios Profesionales**:
+- [ ] Proyecto creado
+- [ ] Entregables definidos
+- [ ] Estructura documental
+- [ ] Facturación por hitos
 
 ---
 
-## 4️⃣ SERVICIOS PROFESIONALES
+## 🆘 SOPORTE
 
-### Crear página de Proyectos Profesionales
+¿Dudas configurando tu multi-vertical?
 
-```typescript
-// app/professional/projects/page.tsx
-'use client';
-
-import { useState, useEffect } from 'react';
-
-const PROJECT_TYPES = {
-  PROYECTO_BASICO: 'Proyecto Básico',
-  PROYECTO_EJECUCION: 'Proyecto de Ejecución',
-  DIRECCION_OBRA: 'Dirección de Obra',
-  CERTIFICACION_ENERGETICA: 'Certificación Energética',
-  INSPECCION_TECNICA: 'Inspección Técnica',
-  TASACION: 'Tasación',
-  CONSULTORIA: 'Consultoría'
-};
-
-export default function ProfessionalProjectsPage() {
-  const [projects, setProjects] = useState([]);
-
-  useEffect(() => {
-    fetch('/api/professional/projects')
-      .then(res => res.json())
-      .then(data => setProjects(data));
-  }, []);
-
-  return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Proyectos Profesionales</h1>
-
-      <div className="grid grid-cols-3 gap-4">
-        {projects.map(project => (
-          <Card key={project.id}>
-            <CardHeader>
-              <CardTitle>{project.titulo}</CardTitle>
-              <Badge>{PROJECT_TYPES[project.tipo]}</Badge>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div>
-                  <p className="text-sm text-muted-foreground">Cliente</p>
-                  <p className="font-semibold">{project.clienteNombre}</p>
-                </div>
-
-                <div>
-                  <p className="text-sm text-muted-foreground">Honorarios</p>
-                  <p className="font-bold text-lg">€{project.total.toLocaleString()}</p>
-                </div>
-
-                <div>
-                  <p className="text-sm text-muted-foreground">Estado</p>
-                  <Badge variant={project.estado === 'ENTREGADO' ? 'success' : 'default'}>
-                    {project.estado}
-                  </Badge>
-                </div>
-
-                <div>
-                  <p className="text-sm text-muted-foreground">Avance</p>
-                  <Progress value={project.porcentajeAvance} />
-                </div>
-
-                <div className="flex gap-2 mt-4">
-                  <Button size="sm">Ver Detalles</Button>
-                  <Button size="sm" variant="outline">Entregables</Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
-  );
-}
-```
+📧 Email: soporte@inmova.com  
+💬 Chat: Dentro de INMOVA (icono inferior derecha)  
+📞 Teléfono: +34 900 123 456 (Plan Empresarial+)  
+📚 Docs: [docs.inmova.com/multi-vertical](https://docs.inmova.com)  
 
 ---
 
-## 🔧 APIS COMUNES
+**🎉 ¡Felicidades!** Ahora dominas los 7 modelos de negocio de INMOVA.
 
-Todas las APIs siguen el mismo patrón:
-
-```typescript
-// app/api/[vertical]/[resource]/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
-
-export async function GET(request: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.companyId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const data = await prisma.[MODEL].findMany({
-    where: {
-      companyId: session.user.companyId
-    },
-    include: {
-      // Relations...
-    }
-  });
-
-  return NextResponse.json(data);
-}
-
-export async function POST(request: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.companyId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const body = await request.json();
-  
-  const record = await prisma.[MODEL].create({
-    data: {
-      ...body,
-      companyId: session.user.companyId
-    }
-  });
-
-  return NextResponse.json(record, { status: 201 });
-}
-```
+**Próximo paso**: Explora automatizaciones IA para maximizar eficiencia.
 
 ---
 
-## 📱 AGREGAR AL SIDEBAR
-
-```typescript
-// components/layout/sidebar.tsx
-
-// Agregar al array de navigation items:
-const navigationItems = [
-  // ... items existentes
-  
-  // STR
-  { name: 'Listings STR', href: '/str/listings', icon: Hotel, moduloCodigo: 'str_listings' },
-  { name: 'Bookings', href: '/str/bookings', icon: Calendar, moduloCodigo: 'str_bookings' },
-  { name: 'Channel Manager', href: '/str/channels', icon: Cloud, moduloCodigo: 'str_channels' },
-  
-  // House Flipping
-  { name: 'Proyectos Flipping', href: '/flipping/projects', icon: Hammer, moduloCodigo: 'flipping_projects' },
-  { name: 'ROI Calculator', href: '/flipping/roi', icon: Calculator, moduloCodigo: 'flipping_roi' },
-  
-  // Construction
-  { name: 'Construcción', href: '/construction/projects', icon: Building, moduloCodigo: 'construction' },
-  { name: 'Órdenes de Trabajo', href: '/construction/work-orders', icon: HardHat, moduloCodigo: 'construction_work' },
-  
-  // Professional
-  { name: 'Proyectos Pro', href: '/professional/projects', icon: Briefcase, moduloCodigo: 'professional' },
-  { name: 'Clientes', href: '/professional/clients', icon: Users, moduloCodigo: 'professional_clients' },
-];
-```
-
----
-
-## ✅ CHECKLIST DE IMPLEMENTACIÓN
-
-### STR Module
-- [ ] `/str/listings` - Lista y creación de listings
-- [ ] `/str/listings/[id]` - Detalle de listing
-- [ ] `/str/bookings` - Calendario de reservas
-- [ ] `/str/channels` - Gestión de canales
-- [ ] `/str/revenue` - Revenue management
-- [ ] `/api/str/listings/route.ts`
-- [ ] `/api/str/bookings/route.ts`
-- [ ] `/api/str/channels/route.ts`
-
-### House Flipping Module
-- [ ] `/flipping/projects` - Lista de proyectos
-- [ ] `/flipping/projects/[id]` - Detalle de proyecto
-- [ ] `/flipping/roi` - Calculadora ROI
-- [ ] `/api/flipping/projects/route.ts`
-- [ ] `/api/flipping/projects/[id]/route.ts`
-
-### Construction Module
-- [ ] `/construction/projects` - Lista de proyectos
-- [ ] `/construction/projects/[id]` - Detalle
-- [ ] `/construction/work-orders` - Órdenes de trabajo
-- [ ] `/construction/inspections` - Inspecciones
-- [ ] `/api/construction/projects/route.ts`
-
-### Professional Module
-- [ ] `/professional/projects` - Proyectos
-- [ ] `/professional/projects/[id]` - Detalle
-- [ ] `/professional/deliverables` - Entregables
-- [ ] `/api/professional/projects/route.ts`
-
----
-
-## 🎯 PRIORIDADES
-
-**Fase 1 (1-2 semanas):**
-1. ✅ STR Listings + Bookings (más demandado)
-2. ✅ House Flipping Projects + ROI
-
-**Fase 2 (1-2 semanas):**
-3. ✅ Construction Projects
-4. ✅ Professional Projects
-
-**Fase 3 (2-3 semanas):**
-5. Integraciones Airbnb/Booking
-6. Advanced features
-
----
-
-**¡Comienza con STR Listings! Es el vertical con mayor demanda.**
+**Documento elaborado por**: INMOVA Training Team  
+**Versión**: 1.0  
+**Fecha**: 29 Noviembre 2025  
+**Última actualización**: 29 Noviembre 2025
