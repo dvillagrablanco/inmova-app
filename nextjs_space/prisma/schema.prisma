@@ -759,6 +759,9 @@ model Company {
 
   // Sistema Modular
   companyModules     CompanyModule[]
+  
+  // White Label
+  branding           BrandingConfig?
 
   @@map("company")
 }
@@ -4202,4 +4205,62 @@ model ModuleDefinition {
   @@index([categoria])
   @@index([codigo])
   @@map("module_definitions")
+}
+// ============================================
+// SISTEMA DE PERSONALIZACIÓN WHITE LABEL
+// ============================================
+
+model BrandingConfig {
+  id                String   @id @default(cuid())
+  companyId         String   @unique
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Identidad
+  appName           String   @default("INMOVA")
+  appDescription    String?  @db.Text
+  tagline           String?
+  
+  // Logos y Assets
+  logoUrl           String?
+  logoSmallUrl      String?
+  faviconUrl        String?
+  ogImageUrl        String?
+  
+  // Paleta de Colores (CSS variables)
+  primaryColor      String   @default("#000000")
+  secondaryColor    String   @default("#FFFFFF")
+  accentColor       String?  @default("#6366f1")
+  backgroundColor   String   @default("#FFFFFF")
+  textColor         String   @default("#000000")
+  successColor      String   @default("#22c55e")
+  warningColor      String   @default("#f59e0b")
+  errorColor        String   @default("#ef4444")
+  
+  // Tipografía
+  fontFamily        String   @default("Inter, sans-serif")
+  headingFont       String?
+  
+  // UI Preferences
+  borderRadius      String   @default("0.5rem")
+  sidebarPosition   String   @default("left") // left, right
+  theme             String   @default("light") // light, dark, auto
+  
+  // Footer personalizado
+  footerText        String?  @db.Text
+  contactEmail      String?
+  contactPhone      String?
+  websiteUrl        String?
+  
+  // SEO
+  metaTitle         String?
+  metaDescription   String?  @db.Text
+  
+  // Estado
+  activo            Boolean  @default(true)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([companyId])
+  @@map("branding_configs")
 }

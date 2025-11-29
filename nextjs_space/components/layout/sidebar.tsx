@@ -4,6 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { signOut, useSession } from 'next-auth/react';
+import { useBranding } from '@/lib/hooks/useBranding';
 import {
   LayoutDashboard,
   Building2,
@@ -48,6 +49,7 @@ import {
   Megaphone,
   LineChart,
   Package,
+  Palette,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -103,6 +105,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/admin/importar': 'configuracion',
   '/admin/usuarios': 'usuarios',
   '/admin/configuracion': 'configuracion',
+  '/admin/personalizacion': 'configuracion', // Sistema White Label
   '/admin/modulos': 'configuracion', // Nueva p\u00e1gina de gesti\u00f3n de m\u00f3dulos
 };
 
@@ -153,6 +156,7 @@ const allNavItems = [
   { name: 'Importar Datos', href: '/admin/importar', icon: Upload, roles: ['administrador', 'gestor'] },
   { name: 'Usuarios', href: '/admin/usuarios', icon: Users, roles: ['administrador'] },
   { name: 'Configuración', href: '/admin/configuracion', icon: Settings, roles: ['administrador'] },
+  { name: 'Personalización', href: '/admin/personalizacion', icon: Palette, roles: ['administrador'] },
   { name: 'Módulos', href: '/admin/modulos', icon: Package, roles: ['administrador'] },
 ];
 
@@ -170,6 +174,7 @@ export function Sidebar() {
   const router = useRouter();
   const { data: session } = useSession() || {};
   const { role } = usePermissions();
+  const { appName, logo, logoSmall } = useBranding();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -417,14 +422,14 @@ export function Sidebar() {
           <div className="p-6 border-b border-gray-800">
             <div className="relative w-full h-12">
               <Image
-                src="/vidaro-logo-cover.jpg"
-                alt="INMOVA"
+                src={logo}
+                alt={appName}
                 fill
                 className="object-contain"
                 priority
               />
             </div>
-            <p className="text-xs text-gray-400 mt-2 text-center">INMOVA</p>
+            <p className="text-xs text-gray-400 mt-2 text-center">{appName}</p>
           </div>
 
           {/* Navigation */}

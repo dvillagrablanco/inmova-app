@@ -6,6 +6,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { ServiceWorkerRegister } from '@/components/pwa/ServiceWorkerRegister';
 import { InstallPrompt } from '@/components/pwa/InstallPrompt';
 import { I18nProvider } from '@/lib/i18n-context';
+import { BrandingProvider } from '@/components/BrandingProvider';
 import { useEffect, useState } from 'react';
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -21,19 +22,21 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <SessionProvider>
-      <I18nProvider>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <ServiceWorkerRegister />
-          {children}
-          <InstallPrompt />
-          <Toaster />
-        </ThemeProvider>
-      </I18nProvider>
+      <BrandingProvider>
+        <I18nProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <ServiceWorkerRegister />
+            {children}
+            <InstallPrompt />
+            <Toaster />
+          </ThemeProvider>
+        </I18nProvider>
+      </BrandingProvider>
     </SessionProvider>
   );
 }

@@ -15,14 +15,16 @@ import { Badge } from '@/components/ui/badge';
 import { GlobalSearch } from '@/components/ui/global-search';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useBranding } from '@/lib/hooks/useBranding';
 
 export function Header() {
   const { data: session } = useSession() || {};
   const router = useRouter();
   const [unreadCount, setUnreadCount] = useState(0);
+  const { appName } = useBranding();
 
   const user = session?.user as any;
-  const companyName = user?.companyName || 'INMOVA';
+  const companyName = user?.companyName || appName;
   const userName = user?.name || 'Usuario';
   const userRole = user?.role || 'gestor';
 
