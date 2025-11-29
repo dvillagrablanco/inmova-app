@@ -705,6 +705,11 @@ model Company {
   colorSecundario   String?          @default("#FFFFFF")
   pieDocumento      String?          @db.Text
   activo            Boolean          @default(true)
+  
+  // Suscripción (Sistema Modular)
+  subscriptionPlanId String?
+  subscriptionPlan   SubscriptionPlan? @relation(fields: [subscriptionPlanId], references: [id])
+  
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
 
@@ -751,6 +756,9 @@ model Company {
   savedSearches      SavedSearch[]
   systemBackups      SystemBackup[]
   performanceMetrics PerformanceMetric[]
+
+  // Sistema Modular
+  companyModules     CompanyModule[]
 
   @@map("company")
 }
@@ -4105,4 +4113,93 @@ model PerformanceMetric {
   @@index([metricType])
   @@index([createdAt])
   @@map("performance_metrics")
+}
+
+
+// ============================================
+// MODULAR SYSTEM - Para comercialización
+// ============================================
+
+enum SubscriptionTier {
+  basico
+  profesional
+  empresarial
+  personalizado
+}
+
+model SubscriptionPlan {
+  id               String           @id @default(cuid())
+  nombre           String           // "Plan Básico", "Plan Profesional", etc.
+  tier             SubscriptionTier
+  descripcion      String           @db.Text
+  precioMensual    Float
+  maxUsuarios      Int              @default(5)
+  maxPropiedades   Int              @default(10)
+  
+  // Módulos incluidos (JSON array de códigos de módulos)
+  modulosIncluidos Json             // ["edificios", "inquilinos", "pagos", ...]
+  
+  activo           Boolean          @default(true)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  
+  companies        Company[]
+
+  @@map("subscription_plans")
+}
+
+model CompanyModule {
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Código del módulo (ej: "edificios", "mantenimiento", "crm")
+  moduloCodigo String
+  
+  // Control de activación
+  activo      Boolean  @default(true)
+  
+  // Configuración específica del módulo para esta empresa
+  configuracion Json?
+  
+  // Límites específicos
+  limiteUso   Int?     // Ej: máximo de edificios, usuarios, etc.
+  
+  // Auditoría
+  activadoPor String?
+  activadoEn  DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([companyId, moduloCodigo])
+  @@index([companyId])
+  @@index([moduloCodigo])
+  @@map("company_modules")
+}
+
+model ModuleDefinition {
+  id              String   @id @default(cuid())
+  codigo          String   @unique // "edificios", "inquilinos", etc.
+  nombre          String   // "Gestión de Edificios"
+  descripcion     String   @db.Text
+  categoria       String   // "core", "gestion", "financiero", "comunicacion", "avanzado"
+  icono           String?  // Nombre del icono de Lucide
+  ruta            String   // "/edificios"
+  
+  // Requisitos
+  requiereModulos String[] @default([]) // Módulos prerequisitos
+  
+  // Disponibilidad por tier
+  tiersIncluido   SubscriptionTier[]
+  
+  // Configuración
+  esCore          Boolean  @default(false) // Módulos esenciales siempre activos
+  orden           Int      @default(0)     // Orden de visualización
+  
+  activo          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([categoria])
+  @@index([codigo])
+  @@map("module_definitions")
 }

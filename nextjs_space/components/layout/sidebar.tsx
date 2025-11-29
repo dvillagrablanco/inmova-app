@@ -47,6 +47,7 @@ import {
   Vote,
   Megaphone,
   LineChart,
+  Package,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -54,7 +55,59 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 
+// Mapeo de rutas a c\u00f3digos de m\u00f3dulos para sistema modular
+const ROUTE_TO_MODULE: Record<string, string> = {
+  '/': 'dashboard',
+  '/dashboard': 'dashboard',
+  '/edificios': 'edificios',
+  '/unidades': 'unidades',
+  '/inquilinos': 'inquilinos',
+  '/candidatos': 'inquilinos', // Parte del m\u00f3dulo de inquilinos
+  '/contratos': 'contratos',
+  '/pagos': 'pagos',
+  '/calendario': 'calendario',
+  '/firma-digital': 'contratos', // Relacionado con contratos
+  '/open-banking': 'pagos', // Relacionado con pagos
+  '/reservas': 'reservas',
+  '/seguros': 'edificios', // Relacionado con edificios
+  '/certificaciones': 'energia',
+  '/portal-propietario': 'portal_propietario',
+  '/incidencias': 'incidencias',
+  '/galerias': 'galerias',
+  '/ordenes-trabajo': 'proveedores', // Relacionado con proveedores
+  '/votaciones': 'votaciones',
+  '/anuncios': 'anuncios',
+  '/reuniones': 'reuniones',
+  '/recordatorios': 'notificaciones',
+  '/reviews': 'inquilinos', // Relacionado con inquilinos
+  '/mantenimiento': 'mantenimiento',
+  '/mantenimiento-pro': 'mantenimiento_pro',
+  '/tareas': 'dashboard', // Parte del core
+  '/valoraciones': 'valoraciones',
+  '/publicaciones': 'publicaciones',
+  '/screening': 'screening',
+  '/sms': 'sms',
+  '/documentos': 'documentos',
+  '/proveedores': 'proveedores',
+  '/gastos': 'gastos',
+  '/reportes': 'reportes',
+  '/analytics': 'analytics',
+  '/bi': 'bi',
+  '/contabilidad': 'contabilidad',
+  '/crm': 'crm',
+  '/legal': 'legal',
+  '/marketplace': 'marketplace',
+  '/energia': 'energia',
+  '/inspecciones': 'mantenimiento',
+  '/auditoria': 'auditoria',
+  '/admin/importar': 'configuracion',
+  '/admin/usuarios': 'usuarios',
+  '/admin/configuracion': 'configuracion',
+  '/admin/modulos': 'configuracion', // Nueva p\u00e1gina de gesti\u00f3n de m\u00f3dulos
+};
+
 const allNavItems = [
+  { name: 'Inicio', href: '/', icon: Home, roles: ['administrador', 'gestor', 'operador'], isHome: true },
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['administrador', 'gestor', 'operador'] },
   { name: 'Edificios', href: '/edificios', icon: Building2, roles: ['administrador', 'gestor'] },
   { name: 'Unidades', href: '/unidades', icon: Home, roles: ['administrador', 'gestor'] },
@@ -100,6 +153,7 @@ const allNavItems = [
   { name: 'Importar Datos', href: '/admin/importar', icon: Upload, roles: ['administrador', 'gestor'] },
   { name: 'Usuarios', href: '/admin/usuarios', icon: Users, roles: ['administrador'] },
   { name: 'Configuración', href: '/admin/configuracion', icon: Settings, roles: ['administrador'] },
+  { name: 'Módulos', href: '/admin/modulos', icon: Package, roles: ['administrador'] },
 ];
 
 interface Notification {
@@ -122,12 +176,45 @@ export function Sidebar() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any>(null);
+  const [activeModules, setActiveModules] = useState<string[]>([]);
+  const [modulesLoaded, setModulesLoaded] = useState(false);
 
-  // Filtrar items de navegación según rol
+  // Cargar m\u00f3dulos activos de la empresa
+  useEffect(() => {
+    async function loadActiveModules() {
+      try {
+        const res = await fetch('/api/modules/active');
+        if (res.ok) {
+          const data = await res.json();
+          setActiveModules(data.activeModules || []);
+        }
+      } catch (error) {
+        console.error('Error loading active modules:', error);
+      } finally {
+        setModulesLoaded(true);
+      }
+    }
+    loadActiveModules();
+  }, []);
+
+  // Filtrar items de navegaci\u00f3n seg\u00fan rol y m\u00f3dulos activos
   const navItems = useMemo(() => {
-    if (!role) return [];
-    return allNavItems.filter(item => item.roles.includes(role));
-  }, [role]);
+    if (!role || !modulesLoaded) return [];
+    
+    return allNavItems.filter(item => {
+      // Verificar permisos de rol
+      if (!item.roles.includes(role)) return false;
+      
+      // Bot\u00f3n Home siempre visible
+      if ((item as any).isHome) return true;
+      
+      // Verificar si el m\u00f3dulo est\u00e1 activo
+      const moduleCode = ROUTE_TO_MODULE[item.href];
+      if (!moduleCode) return true; // Si no hay mapeo, mostrar por defecto
+      
+      return activeModules.includes(moduleCode);
+    });
+  }, [role, activeModules, modulesLoaded]);
 
   useEffect(() => {
     fetchNotifications();
