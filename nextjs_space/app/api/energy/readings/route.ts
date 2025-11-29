@@ -5,6 +5,9 @@ import { prisma } from '@/lib/db';
 import { detectAbnormalConsumption } from '@/lib/energy-service';
 import { format } from 'date-fns';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 // GET /api/energy/readings - Obtener lecturas de energía
 export async function GET(req: NextRequest) {
   try {
