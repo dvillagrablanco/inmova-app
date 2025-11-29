@@ -1,0 +1,155 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
+import { checkRoomAvailability } from '@/lib/room-rental-service';
+
+/**
+ * GET /api/room-rental/rooms/[id]
+ * Obtiene una habitación específica con detalles completos
+ */
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.companyId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const room = await prisma.room.findUnique({
+      where: {
+        id: params.id,
+        companyId: session.user.companyId,
+      },
+      include: {
+        unit: {
+          include: {
+            building: true,
+          },
+        },
+        contracts: {
+          include: {
+            tenant: true,
+            payments: true,
+          },
+          orderBy: {
+            fechaInicio: 'desc',
+          },
+        },
+      },
+    });
+
+    if (!room) {
+      return NextResponse.json({ error: 'Habitación no encontrada' }, { status: 404 });
+    }
+
+    return NextResponse.json(room);
+  } catch (error: any) {
+    console.error('Error fetching room:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+/**
+ * PATCH /api/room-rental/rooms/[id]
+ * Actualiza una habitación
+ */
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.companyId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const data = await request.json();
+
+    const room = await prisma.room.update({
+      where: {
+        id: params.id,
+        companyId: session.user.companyId,
+      },
+      data: {
+        nombre: data.nombre,
+        superficie: data.superficie ? parseFloat(data.superficie) : undefined,
+        tipoHabitacion: data.tipoHabitacion,
+        bajoPrivado: data.bajoPrivado,
+        balcon: data.balcon,
+        escritorio: data.escritorio,
+        armarioEmpotrado: data.armarioEmpotrado,
+        aireAcondicionado: data.aireAcondicionado,
+        calefaccion: data.calefaccion,
+        amueblada: data.amueblada,
+        cama: data.cama,
+        mesaNoche: data.mesaNoche,
+        cajonera: data.cajonera,
+        estanteria: data.estanteria,
+        silla: data.silla,
+        precioPorMes: data.precioPorMes ? parseFloat(data.precioPorMes) : undefined,
+        precioPorSemana: data.precioPorSemana ? parseFloat(data.precioPorSemana) : undefined,
+        estado: data.estado,
+        imagenes: data.imagenes,
+        descripcion: data.descripcion,
+      },
+      include: {
+        unit: {
+          include: {
+            building: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json(room);
+  } catch (error: any) {
+    console.error('Error updating room:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+/**
+ * DELETE /api/room-rental/rooms/[id]
+ * Elimina una habitación (solo si no tiene contratos activos)
+ */
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.companyId || session.user.role !== 'administrador') {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    // Verificar si tiene contratos activos
+    const activeContracts = await prisma.roomContract.count({
+      where: {
+        roomId: params.id,
+        estado: 'activo',
+      },
+    });
+
+    if (activeContracts > 0) {
+      return NextResponse.json(
+        { error: 'No se puede eliminar una habitación con contratos activos' },
+        { status: 400 }
+      );
+    }
+
+    await prisma.room.delete({
+      where: {
+        id: params.id,
+        companyId: session.user.companyId,
+      },
+    });
+
+    return NextResponse.json({ message: 'Habitación eliminada correctamente' });
+  } catch (error: any) {
+    console.error('Error deleting room:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}

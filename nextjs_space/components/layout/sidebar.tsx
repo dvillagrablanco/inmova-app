@@ -116,6 +116,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/flipping/projects': 'flipping_projects',
   '/construction/projects': 'construction_projects',
   '/professional/projects': 'professional_projects',
+  '/room-rental': 'room_rental',
 };
 
 const allNavItems = [
@@ -174,6 +175,7 @@ const allNavItems = [
   { name: 'House Flipping', href: '/flipping/projects', icon: TrendingUp, roles: ['administrador', 'gestor'] },
   { name: 'Construcción', href: '/construction/projects', icon: HardHat, roles: ['administrador', 'gestor'] },
   { name: 'Servicios Profesionales', href: '/professional/projects', icon: Briefcase, roles: ['administrador', 'gestor'] },
+  { name: 'Alquiler Habitaciones', href: '/room-rental', icon: Home, roles: ['administrador', 'gestor'] },
 ];
 
 interface Notification {

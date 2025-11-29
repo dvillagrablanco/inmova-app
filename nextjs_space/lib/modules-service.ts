@@ -687,6 +687,18 @@ export const MODULOS_CATALOGO = [
     esCore: false,
     orden: 88
   },
+  {
+    codigo: 'room_rental',
+    nombre: 'Alquiler por Habitaciones',
+    descripcion: 'Gestión completa de coliving y alquiler por habitaciones: prorrateo de suministros, normas de convivencia, calendario de limpieza',
+    categoria: 'gestion',
+    icono: 'Home',
+    ruta: '/room-rental',
+    requiereModulos: ['unidades', 'inquilinos', 'contratos'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 89
+  },
 ];
 
 /**

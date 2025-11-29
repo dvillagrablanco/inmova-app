@@ -92,6 +92,27 @@ enum ExpenseCategory {
   otro
 }
 
+enum RoomStatus {
+  disponible
+  ocupada
+  mantenimiento
+  reservada
+}
+
+enum RoomContractStatus {
+  activo
+  vencido
+  cancelado
+  pendiente
+}
+
+enum RoomPaymentMethod {
+  transferencia
+  efectivo
+  tarjeta
+  domiciliacion
+}
+
 enum NotificationType {
   pago_atrasado
   contrato_vencimiento
@@ -324,6 +345,9 @@ model Tenant {
   
   biometricVerifications BiometricVerification[] @relation("TenantBiometricVerifications")
   gdprConsents        GDPRConsent[]        @relation("TenantGDPRConsents")
+  
+  // Room Rental Module
+  roomContracts       RoomContract[]
 
   @@map("tenants")
 }
@@ -397,6 +421,11 @@ model Unit {
   
   strListings        STRListing[]    @relation
   flippingProjects   FlippingProject[] @relation
+  
+  // Room Rental Module
+  rooms              Room[]
+  roomSharedSpaces   RoomSharedSpace[]
+  
   @@unique([buildingId, numero])
   @@map("units")
 }
@@ -882,6 +911,12 @@ model Company {
   flippingProjects   FlippingProject[]      @relation
   constructionProjects ConstructionProject[] @relation
   professionalProjects ProfessionalProject[] @relation
+  
+  // Room Rental Module
+  rooms              Room[]
+  roomContracts      RoomContract[]
+  roomPayments       RoomPayment[]
+  roomSharedSpaces   RoomSharedSpace[]
 
   @@map("company")
 }
@@ -6475,4 +6510,180 @@ model ProfessionalMeeting {
   project           ProfessionalProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@map("professional_meetings")
+}
+
+// ========================================
+// ROOM RENTAL MODULE - Alquiler por Habitaciones
+// ========================================
+
+model Room {
+  id                String        @id @default(cuid())
+  companyId         String
+  unitId            String
+  
+  // Identificación
+  numero            String
+  nombre            String?
+  
+  // Características
+  superficie        Float
+  tipoHabitacion    String        // individual, doble, suite, estudio
+  bajoPrivado       Boolean       @default(false)
+  balcon            Boolean       @default(false)
+  escritorio        Boolean       @default(false)
+  armarioEmpotrado  Boolean       @default(false)
+  aireAcondicionado Boolean       @default(false)
+  calefaccion       Boolean       @default(false)
+  
+  // Mobiliario
+  amueblada         Boolean       @default(true)
+  cama              String?       // individual, doble, queen, king
+  mesaNoche         Boolean       @default(false)
+  cajonera          Boolean       @default(false)
+  estanteria        Boolean       @default(false)
+  silla             Boolean       @default(false)
+  
+  // Precios y disponibilidad
+  precioPorMes      Float
+  precioPorSemana   Float?
+  estado            RoomStatus    @default(disponible)
+  
+  // Multimedia
+  imagenes          String[]      @default([])
+  descripcion       String?       @db.Text
+  
+  // Metadata
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  
+  // Relaciones
+  company           Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  unit              Unit          @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  contracts         RoomContract[]
+  
+  @@unique([unitId, numero])
+  @@map("rooms")
+}
+
+model RoomContract {
+  id                String              @id @default(cuid())
+  companyId         String
+  roomId            String
+  tenantId          String
+  
+  // Fechas
+  fechaInicio       DateTime
+  fechaFin          DateTime
+  
+  // Condiciones económicas
+  rentaMensual      Float
+  diaPago           Int                 @default(1)
+  deposito          Float               @default(0)
+  gastosIncluidos   String[]            @default([]) // luz, agua, gas, internet, limpieza
+  
+  // Normas específicas de la habitación
+  normasConvivencia String?             @db.Text
+  horariosVisitas   String?
+  permiteMascotas   Boolean             @default(false)
+  permiteFumar      Boolean             @default(false)
+  
+  // Limpieza de espacios comunes
+  frecuenciaLimpieza String?           // semanal, quincenal, mensual
+  rotacionLimpieza  Json?               // {semana1: "tenant1", semana2: "tenant2"}
+  
+  // Estado y documentación
+  estado            RoomContractStatus  @default(activo)
+  documentoURL      String?
+  firmadoFecha      DateTime?
+  
+  // Metadata
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  // Relaciones
+  company           Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  room              Room                @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  tenant            Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  payments          RoomPayment[]
+  
+  @@map("room_contracts")
+}
+
+model RoomPayment {
+  id                String              @id @default(cuid())
+  companyId         String
+  contractId        String
+  
+  // Conceptos
+  concepto          String              @default("Renta mensual")
+  mes               DateTime
+  monto             Float
+  
+  // Desglose de gastos (prorrateo)
+  montoProrrateoLuz     Float?
+  montoProrrateoAgua    Float?
+  montoProrrateoGas     Float?
+  montoProrrateoInternet Float?
+  montoProrrateoLimpieza Float?
+  
+  // Estado del pago
+  estado            PaymentStatus       @default(pendiente)
+  fechaVencimiento  DateTime
+  fechaPago         DateTime?
+  metodoPago        RoomPaymentMethod?
+  
+  // Metadata
+  notas             String?             @db.Text
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  // Relaciones
+  company           Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  contract          RoomContract        @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  
+  @@map("room_payments")
+}
+
+model RoomSharedSpace {
+  id                String        @id @default(cuid())
+  companyId         String
+  unitId            String
+  
+  // Identificación
+  nombre            String        // Cocina, Sala, Baño 1, Baño 2, Terraza
+  tipo              String        // cocina, salon, bano, terraza, lavanderia, estudio
+  
+  // Características
+  superficie        Float?
+  
+  // Equipamiento (cocina)
+  nevera            Boolean       @default(false)
+  horno             Boolean       @default(false)
+  microondas        Boolean       @default(false)
+  lavadora          Boolean       @default(false)
+  secadora          Boolean       @default(false)
+  lavavajillas      Boolean       @default(false)
+  
+  // Equipamiento (sala)
+  television        Boolean       @default(false)
+  sofa              Boolean       @default(false)
+  mesaComedor       Boolean       @default(false)
+  
+  // Normas de uso
+  normasUso         String?       @db.Text
+  horarioAcceso     String?       // 24h, 8:00-22:00, etc
+  capacidadMaxima   Int?
+  
+  // Multimedia
+  imagenes          String[]      @default([])
+  
+  // Metadata
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  
+  // Relaciones
+  company           Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  unit              Unit          @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  
+  @@map("room_shared_spaces")
 }
