@@ -35,6 +35,8 @@ import {
   Store,
   Zap,
   ClipboardCheck,
+  PenTool,
+  Landmark,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -51,6 +53,8 @@ const allNavItems = [
   { name: 'Contratos', href: '/contratos', icon: FileText, roles: ['administrador', 'gestor'] },
   { name: 'Pagos', href: '/pagos', icon: CreditCard, roles: ['administrador', 'gestor'] },
   { name: 'Calendario', href: '/calendario', icon: Calendar, roles: ['administrador', 'gestor', 'operador'] },
+  { name: 'Firma Digital', href: '/firma-digital', icon: PenTool, roles: ['administrador', 'gestor'] },
+  { name: 'Open Banking', href: '/open-banking', icon: Landmark, roles: ['administrador', 'gestor'] },
   { name: 'Mantenimiento', href: '/mantenimiento', icon: Wrench, roles: ['administrador', 'gestor', 'operador'] },
   { name: 'Analytics Mtto.', href: '/mantenimiento-pro', icon: FileBarChart, roles: ['administrador', 'gestor'] },
   { name: 'Tareas', href: '/tareas', icon: CheckSquare, roles: ['administrador', 'gestor', 'operador'] },

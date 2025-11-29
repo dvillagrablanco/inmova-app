@@ -579,6 +579,7 @@ export default function CalendarioPage() {
           <Card>
             <CardContent className="p-4">
               <div style={{ height: 'calc(100vh - 450px)', minHeight: '500px' }}>
+                {/* @ts-ignore */}
                 <Calendar
                   localizer={localizer}
                   events={eventosCalendario}
