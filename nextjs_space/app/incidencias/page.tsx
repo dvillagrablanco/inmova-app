@@ -189,7 +189,8 @@ export default function IncidenciasPage() {
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
-        <main className="flex-1 overflow-y-auto bg-muted/30 p-6">
+        <main className="flex-1 overflow-y-auto bg-muted/30 p-4 sm:p-6 lg:p-8">
+           <div className="max-w-7xl mx-auto">
           {/* Breadcrumbs */}
           <div className="mb-6">
             <Button
@@ -511,6 +512,7 @@ export default function IncidenciasPage() {
               ))
             )}
           </div>
+           </div>
         </main>
       </div>
     </div>

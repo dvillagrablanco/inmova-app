@@ -304,10 +304,12 @@ export default function VotacionesPage() {
         <Sidebar />
         <div className="flex-1 flex flex-col overflow-hidden">
           <Header />
-          <main className="flex-1 overflow-y-auto bg-muted/30 p-6">
+          <main className="flex-1 overflow-y-auto bg-muted/30 p-4 sm:p-6 lg:p-8">
+           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-center h-full">
               <p>Cargando votaciones...</p>
             </div>
+           </div>
           </main>
         </div>
       </div>
@@ -319,7 +321,8 @@ export default function VotacionesPage() {
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
-        <main className="flex-1 overflow-y-auto bg-muted/30 p-6">
+        <main className="flex-1 overflow-y-auto bg-muted/30 p-4 sm:p-6 lg:p-8">
+           <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-4">
@@ -859,6 +862,7 @@ export default function VotacionesPage() {
               )}
             </DialogContent>
           </Dialog>
+           </div>
         </main>
       </div>
     </div>

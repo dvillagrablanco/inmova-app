@@ -66,7 +66,8 @@ export default function OrdenesTrabajoPage() {
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
-        <main className="flex-1 overflow-y-auto bg-muted/30 p-6">
+        <main className="flex-1 overflow-y-auto bg-muted/30 p-4 sm:p-6 lg:p-8">
+           <div className="max-w-7xl mx-auto">
           <div className="mb-6">
             <Button variant="ghost" onClick={() => router.push('/dashboard')} className="mb-4">
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -164,6 +165,7 @@ export default function OrdenesTrabajoPage() {
               ))
             )}
           </div>
+           </div>
         </main>
       </div>
     </div>

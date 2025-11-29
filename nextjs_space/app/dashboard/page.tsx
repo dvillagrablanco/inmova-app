@@ -103,8 +103,8 @@ export default function DashboardPage() {
       <Sidebar />
       <div className="flex-1 ml-0 lg:ml-64 flex flex-col">
         <Header />
-        <main className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
@@ -376,7 +376,6 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
-        </div>
 
           {/* Pending Approvals Section (Solo Administradores) */}
           {session?.user?.role === 'administrador' && (
@@ -392,7 +391,8 @@ export default function DashboardPage() {
               <AdvancedAnalytics monthlyData={analyticsData.monthlyData} />
             </div>
           )}
-      </main>
+          </div>
+        </main>
       </div>
     </div>
   );

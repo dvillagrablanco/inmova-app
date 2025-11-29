@@ -33,7 +33,8 @@ export default function AIAssistantPage() {
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header />
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto">
           <div className="mb-6 flex items-center justify-between">
             <div>
               <Breadcrumb>
@@ -74,6 +75,7 @@ export default function AIAssistantPage() {
               <CardContent><Badge>PRÓXIMAMENTE</Badge><p className="text-sm text-muted-foreground mt-2">Integración con Twilio WhatsApp API</p></CardContent>
             </Card>
           </div>
+                  </div>
         </main>
       </div>
     </div>
