@@ -1,9 +1,14 @@
+
+// ==========================================
+// SISTEMA DE PARAMETRIZACIÓN MULTI-VERTICAL
+// ==========================================
+
 model CompanyBusinessModel {
   id                String        @id @default(cuid())
   companyId         String
   businessModel     BusinessModel
   activo            Boolean       @default(true)
-  configuracion     Json?         // Configuración específica del modelo
+  configuracion     Json?
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
 
@@ -17,70 +22,37 @@ model CompanyBusinessModel {
 // MÓDULO: SHORT-TERM RENTAL (STR) / TURÍSTICO
 // ==========================================
 
-enum ChannelType {
-  AIRBNB
-  BOOKING
-  VRBO
-  HOMEAWAY
-  WEB_PROPIA
-  EXPEDIA
-  TRIPADVISOR
-  OTROS
-}
-
-enum BookingStatus {
-  PENDIENTE
-  CONFIRMADA
-  CHECK_IN
-  CHECK_OUT
-  CANCELADA
-  NO_SHOW
-}
-
-enum SeasonType {
-  ALTA
-  MEDIA
-  BAJA
-  ESPECIAL
-}
-
 model STRListing {
   id                String        @id @default(cuid())
   companyId         String
   unitId            String
   titulo            String
   descripcion       String        @db.Text
-  tipoPropiedad     String        // Apartment, House, Villa, Studio
+  tipoPropiedad     String
   capacidadMaxima   Int
   numDormitorios    Int
   numCamas          Int
   numBanos          Int
   
-  // Amenities
   amenities         String[]      @default([])
   reglasHospedaje   String[]      @default([])
   
-  // Pricing base
   precioPorNoche    Float
   precioSemana      Float?
   precioMes         Float?
   
-  // Fees adicionales
   tarifaLimpieza    Float         @default(0)
   depositoSeguridad Float         @default(0)
   comisionPlataforma Float        @default(0)
   
-  // Settings
   checkInTime       String        @default("15:00")
   checkOutTime      String        @default("11:00")
   cancelacionFlexible Boolean     @default(true)
   reservaInstantanea Boolean      @default(false)
   
-  // Multi-canal
   sincronizarCanales Boolean      @default(true)
   canalPrincipal    ChannelType?
   
-  // Stats
   totalReservas     Int           @default(0)
   ratingPromedio    Float?
   totalReviews      Int           @default(0)
@@ -107,21 +79,18 @@ model STRBooking {
   companyId         String
   listingId         String
   canal             ChannelType
-  reservaExternaId  String?       // ID de la plataforma externa
+  reservaExternaId  String?
   
-  // Guest info
   guestNombre       String
   guestEmail        String
   guestTelefono     String?
   guestPais         String?
   numHuespedes      Int
   
-  // Dates
   checkInDate       DateTime
   checkOutDate      DateTime
   numNoches         Int
   
-  // Pricing
   precioTotal       Float
   tarifaNocturna    Float
   tarifaLimpieza    Float         @default(0)
@@ -129,12 +98,10 @@ model STRBooking {
   comisionCanal     Float         @default(0)
   ingresoNeto       Float
   
-  // Payment
   metodoPago        String?
   estadoPago        String        @default("pendiente")
   pagado            Boolean       @default(false)
   
-  // Status
   estado            BookingStatus @default(PENDIENTE)
   confirmadaEn      DateTime?
   checkInRealizado  DateTime?
@@ -142,7 +109,6 @@ model STRBooking {
   canceladaEn       DateTime?
   motivoCancelacion String?
   
-  // Extra
   notasEspeciales   String?       @db.Text
   requiereLimpieza  Boolean       @default(true)
   limpiezaRealizada Boolean       @default(false)
@@ -165,7 +131,6 @@ model STRCalendar {
   minimoNoches      Int           @default(1)
   notas             String?
   
-  // Sync info
   sincronizado      Boolean       @default(false)
   ultimaSync        DateTime?
 
@@ -181,18 +146,15 @@ model STRChannelSync {
   listingId         String
   canal             ChannelType
   
-  // Conexión
   activo            Boolean       @default(true)
   url               String?
   apiKey            String?
-  externalId        String?       // ID en la plataforma externa
+  externalId        String?
   
-  // Sync settings
   sincronizarPrecio Boolean       @default(true)
   sincronizarCalendario Boolean   @default(true)
   sincronizarReservas Boolean     @default(true)
   
-  // Stats
   ultimaSync        DateTime?
   proximaSync       DateTime?
   estadoSync        String        @default("pendiente")
@@ -214,19 +176,16 @@ model STRReview {
   bookingId         String?
   canal             ChannelType
   
-  // Review data
   guestNombre       String
-  rating            Int           // 1-5
+  rating            Int
   comentario        String        @db.Text
   fecha             DateTime
   
-  // Subcategorías
   ratingLimpieza    Int?
   ratingComunicacion Int?
   ratingUbicacion   Int?
   ratingPrecio      Int?
   
-  // Respuesta
   respuesta         String?       @db.Text
   respondidoEn      DateTime?
   
@@ -241,7 +200,7 @@ model STRSeasonPricing {
   id                String        @id @default(cuid())
   listingId         String
   temporada         SeasonType
-  nombre            String        // "Verano 2024", "Navidad", etc.
+  nombre            String
   
   fechaInicio       DateTime      @db.Date
   fechaFin          DateTime      @db.Date
@@ -262,75 +221,44 @@ model STRSeasonPricing {
 // MÓDULO: HOUSE FLIPPING / INVERSIÓN
 // ==========================================
 
-enum ProjectStatus {
-  PROSPECTO
-  ANALISIS
-  ADQUISICION
-  RENOVACION
-  COMERCIALIZACION
-  VENDIDO
-  CANCELADO
-}
-
-enum RenovationCategory {
-  ESTRUCTURAL
-  FONTANERIA
-  ELECTRICIDAD
-  PINTURA
-  SUELOS
-  COCINA
-  BANOS
-  EXTERIORES
-  OTROS
-}
-
 model FlippingProject {
   id                String        @id @default(cuid())
   companyId         String
   unitId            String?
   buildingId        String?
   
-  // Identificación
   nombre            String
   direccion         String
   descripcion       String?       @db.Text
   
-  // Datos de adquisición
   precioCompra      Float
-  gastosCompra      Float         @default(0) // Notaría, impuestos, etc.
+  gastosCompra      Float         @default(0)
   fechaCompra       DateTime?
   
-  // Datos de renovación
   presupuestoRenovacion Float
   gastosRealesRenovacion Float    @default(0)
   
-  // Datos de venta
   precioVentaEstimado Float
   precioVentaReal   Float?
   gastosVenta       Float         @default(0)
   fechaVenta        DateTime?
   
-  // Financiación
   financiado        Boolean       @default(false)
   montoFinanciacion Float?
   interesAnual      Float?
   
-  // Timeline
   fechaInicioObra   DateTime?
   fechaFinObra      DateTime?
-  duracionEstimada  Int?          // días
+  duracionEstimada  Int?
   duracionReal      Int?
   
-  // ROI Calculado
   inversionTotal    Float?
   beneficioNeto     Float?
   roiPorcentaje     Float?
   
-  // Status
   estado            ProjectStatus @default(PROSPECTO)
   prioridad         String        @default("media")
   
-  // Multimedia
   fotosAntes        String[]      @default([])
   fotosDespues      String[]      @default([])
   documentos        String[]      @default([])
@@ -356,19 +284,15 @@ model FlippingRenovation {
   categoria         RenovationCategory
   descripcion       String
   
-  // Coste
   presupuestado     Float
   costoReal         Float?
   
-  // Proveedor
   proveedorNombre   String?
   proveedorId       String?
   
-  // Timeline
   fechaInicio       DateTime?
   fechaFin          DateTime?
   
-  // Status
   completado        Boolean       @default(false)
   porcentajeAvance  Int           @default(0)
   
@@ -392,7 +316,7 @@ model FlippingExpense {
   fecha             DateTime
   
   proveedor         String?
-  factura           String?       // URL del documento
+  factura           String?
   
   createdAt         DateTime      @default(now())
 
@@ -421,65 +345,44 @@ model FlippingMilestone {
 // MÓDULO: CONSTRUCCIÓN Y PROMOCIÓN
 // ==========================================
 
-enum ConstructionPhase {
-  PLANIFICACION
-  PERMISOS
-  CIMENTACION
-  ESTRUCTURA
-  CERRAMIENTOS
-  INSTALACIONES
-  ACABADOS
-  ENTREGA
-  GARANTIA
-}
-
 model ConstructionProject {
   id                String        @id @default(cuid())
   companyId         String
   buildingId        String?
   
-  // Identificación
   nombre            String
   descripcion       String        @db.Text
-  tipoProyecto      String        // "Obra Nueva", "Rehabilitación", "Ampliación"
+  tipoProyecto      String
   
-  // Ubicación
   direccion         String
   parcela           String?
   referenciaCatastral String?
   
-  // Características
   numViviendas      Int?
   metrosConstruidos Float?
   numPlantas        Int?
   
-  // Presupuesto
   presupuestoTotal  Float
   gastosReales      Float         @default(0)
   desviacionPresupuesto Float?
   
-  // Timeline
   fechaInicio       DateTime
   fechaFinPrevista  DateTime
   fechaFinReal      DateTime?
   duracionMeses     Int
   
-  // Fase actual
   faseActual        ConstructionPhase @default(PLANIFICACION)
   porcentajeAvance  Int           @default(0)
   
-  // Permisos y certificaciones
   licenciaObra      Boolean       @default(false)
   certificadoFinal  Boolean       @default(false)
   habitabilidad     Boolean       @default(false)
   
-  // Documentación
   planos            String[]      @default([])
   permisos          String[]      @default([])
   certificaciones   String[]      @default([])
   fotosProgreso     String[]      @default([])
   
-  // Equipo
   arquitecto        String?
   aparejador        String?
   constructor       String?
@@ -505,24 +408,19 @@ model ConstructionWorkOrder {
   titulo            String
   descripcion       String        @db.Text
   
-  // Proveedor/Subcontratista
   subcontratista    String
   telefono          String?
   email             String?
   
-  // Presupuesto
   presupuesto       Float
   costoReal         Float?
   
-  // Timeline
   fechaInicio       DateTime
   fechaFin          DateTime
   
-  // Status
   estado            String        @default("pendiente")
   porcentajeAvance  Int           @default(0)
   
-  // Certificación
   certificadoCalidad Boolean      @default(false)
   inspeccionada     Boolean       @default(false)
   
@@ -542,14 +440,13 @@ model ConstructionInspection {
   projectId         String
   fase              ConstructionPhase
   
-  tipo              String        // "Técnica", "Seguridad", "Calidad"
+  tipo              String
   inspector         String
   fecha             DateTime
   
-  resultado         String        // "Aprobada", "Con Observaciones", "Rechazada"
+  resultado         String
   observaciones     String?       @db.Text
   
-  // Defectos encontrados
   defectosEncontrados Int         @default(0)
   defectosCorregidos Int          @default(0)
   
@@ -568,13 +465,12 @@ model ConstructionSupplier {
   projectId         String
   
   nombre            String
-  tipoSuministro    String        // "Materiales", "Maquinaria", "Servicios"
+  tipoSuministro    String
   
   contacto          String?
   telefono          String?
   email             String?
   
-  // Pedido
   descripcion       String        @db.Text
   presupuesto       Float
   fechaEntrega      DateTime
@@ -594,63 +490,35 @@ model ConstructionSupplier {
 // MÓDULO: SERVICIOS PROFESIONALES
 // ==========================================
 
-enum ProjectType {
-  PROYECTO_BASICO
-  PROYECTO_EJECUCION
-  DIRECCION_OBRA
-  CERTIFICACION_ENERGETICA
-  INSPECCION_TECNICA
-  TASACION
-  CONSULTORIA
-}
-
-enum ProjectProfessionalStatus {
-  PROPUESTA
-  ACEPTADO
-  EN_CURSO
-  REVISION
-  ENTREGADO
-  CERRADO
-  CANCELADO
-}
-
 model ProfessionalProject {
   id                String        @id @default(cuid())
   companyId         String
   
-  // Cliente
   clienteNombre     String
   clienteEmail      String
   clienteTelefono   String?
   
-  // Proyecto
   tipo              ProjectType
   titulo            String
   descripcion       String        @db.Text
   
-  // Ubicación
   direccion         String
   municipio         String?
   provincia         String?
   
-  // Presupuesto
   honorarios        Float
   gastos            Float         @default(0)
   total             Float
   
-  // Timeline
   fechaInicio       DateTime
   fechaEntrega      DateTime
   
-  // Estado
   estado            ProjectProfessionalStatus @default(PROPUESTA)
   porcentajeAvance  Int           @default(0)
   
-  // Equipo
   responsable       String
   colaboradores     String[]      @default([])
   
-  // Documentación
   planos            String[]      @default([])
   informes          String[]      @default([])
   certificados      String[]      @default([])
@@ -693,7 +561,7 @@ model ProfessionalMeeting {
   
   titulo            String
   fecha             DateTime
-  duracion          Int           // minutos
+  duracion          Int
   
   ubicacion         String?
   online            Boolean       @default(false)

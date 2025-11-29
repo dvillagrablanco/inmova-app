@@ -1,3 +1,17 @@
+// ==========================================
+// SISTEMA DE PARAMETRIZACIÓN MULTI-VERTICAL
+// ==========================================
+
+enum BusinessModel {
+  RESIDENCIAL_LARGA      // Alquileres tradicionales (actual)
+  TURISTICO_STR          // Short-Term Rental (Airbnb, Booking)
+  COLIVING_MEDIA         // Media estancia / Coliving
+  HOTEL_APARTHOT         // Hoteles y Apart-hotels
+  HOUSE_FLIPPING         // Inversión y renovación
+  CONSTRUCCION           // Constructores y promotores
+  SERVICIOS_PROF         // Arquitectos, aparejadores
+}
+
 model CompanyBusinessModel {
   id                String        @id @default(cuid())
   companyId         String
