@@ -175,7 +175,14 @@ export async function generateAutomaticNotifications(companyId?: string) {
     estado: { in: ['pendiente', 'en_progreso'] },
     prioridad: 'alta',
   };
-  if (companyId) maintenanceWhere.companyId = companyId;
+  
+  if (companyId) {
+    maintenanceWhere.unit = {
+      building: {
+        companyId,
+      },
+    };
+  }
 
   const urgentMaintenance = await prisma.maintenanceRequest.findMany({
     where: maintenanceWhere,

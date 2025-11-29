@@ -32,6 +32,7 @@ import {
   Gavel,
   Store,
   Zap,
+  ClipboardCheck,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -62,8 +63,10 @@ const allNavItems = [
   { name: 'Legal', href: '/legal', icon: Gavel, roles: ['administrador', 'gestor'] },
   { name: 'Marketplace', href: '/marketplace', icon: Store, roles: ['administrador', 'gestor'] },
   { name: 'Gestión de Energía', href: '/energia', icon: Zap, roles: ['administrador', 'gestor'] },
+  { name: 'Inspecciones', href: '/inspecciones', icon: ClipboardCheck, roles: ['administrador', 'gestor'] },
+  { name: 'Auditoría y Seguridad', href: '/auditoria', icon: Shield, roles: ['administrador'] },
   { name: 'Importar Datos', href: '/admin/importar', icon: Upload, roles: ['administrador', 'gestor'] },
-  { name: 'Usuarios', href: '/admin/usuarios', icon: Shield, roles: ['administrador'] },
+  { name: 'Usuarios', href: '/admin/usuarios', icon: Users, roles: ['administrador'] },
   { name: 'Configuración', href: '/admin/configuracion', icon: Settings, roles: ['administrador'] },
 ];
 
