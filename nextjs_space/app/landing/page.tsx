@@ -81,7 +81,7 @@ export default function LandingPage() {
               <p className="text-xl text-gray-600 leading-relaxed">
                 <span className="font-semibold text-indigo-600">88 módulos profesionales.</span>{' '}
                 <span className="font-semibold text-violet-600">7 verticales de negocio.</span>{' '}
-                Blockchain, IA GPT-4, y tecnologías punta. Gestiona alquileres, flipping, construcción y más desde una sola plataforma.
+                Blockchain + IA GPT-4 + Room Rental con prorrateo automático. Gestiona alquileres tradicionales, coliving, STR turístico, flipping, construcción y servicios profesionales desde una sola plataforma.
               </p>
               
               <div className="flex flex-wrap gap-4">
@@ -117,54 +117,53 @@ export default function LandingPage() {
             </div>
             
             <div className="relative">
-              <div className="relative aspect-square bg-gradient-to-br from-indigo-500 via-violet-500 to-pink-500 rounded-3xl p-1 shadow-2xl">
-                <div className="w-full h-full bg-white rounded-3xl p-8 flex items-center justify-center">
-                  <Building2 className="h-40 w-40 text-indigo-600" />
+              <div className="space-y-6">
+                {/* Main Visual */}
+                <div className="relative aspect-square bg-gradient-to-br from-indigo-500 via-violet-500 to-pink-500 rounded-3xl p-1 shadow-2xl">
+                  <div className="w-full h-full bg-white rounded-3xl p-8 flex items-center justify-center">
+                    <Building2 className="h-40 w-40 text-indigo-600" />
+                  </div>
+                </div>
+                
+                {/* Stats Cards Grid - Better positioned */}
+                <div className="grid grid-cols-3 gap-4">
+                  <Card className="shadow-xl border-2 border-green-200 bg-white">
+                    <CardContent className="p-4">
+                      <div className="text-center">
+                        <div className="p-2 bg-green-100 rounded-lg inline-block mb-2">
+                          <TrendingUp className="h-5 w-5 text-green-600" />
+                        </div>
+                        <div className="text-xs text-gray-600">ROI Promedio</div>
+                        <div className="text-lg font-bold text-green-600">+45%</div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="shadow-xl border-2 border-blue-200 bg-white">
+                    <CardContent className="p-4">
+                      <div className="text-center">
+                        <div className="p-2 bg-blue-100 rounded-lg inline-block mb-2">
+                          <Users className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div className="text-xs text-gray-600">Propiedades</div>
+                        <div className="text-lg font-bold text-blue-600">10,000+</div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="shadow-xl border-2 border-violet-200 bg-white">
+                    <CardContent className="p-4">
+                      <div className="text-center">
+                        <div className="p-2 bg-violet-100 rounded-lg inline-block mb-2">
+                          <Star className="h-5 w-5 text-violet-600" />
+                        </div>
+                        <div className="text-xs text-gray-600">Valoración</div>
+                        <div className="text-lg font-bold text-violet-600">4.9/5</div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
               </div>
-              
-              {/* Floating Stats Cards */}
-              <Card className="absolute -left-6 top-12 w-52 shadow-2xl border-2 border-green-200 bg-white/95 backdrop-blur-sm">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-green-100 rounded-lg">
-                      <TrendingUp className="h-5 w-5 text-green-600" />
-                    </div>
-                    <div>
-                      <div className="text-xs text-gray-600">ROI Promedio</div>
-                      <div className="text-lg font-bold text-green-600">+45%</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="absolute -right-6 top-1/3 w-56 shadow-2xl border-2 border-blue-200 bg-white/95 backdrop-blur-sm">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <Users className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <div className="text-xs text-gray-600">Propiedades</div>
-                      <div className="text-lg font-bold text-blue-600">10,000+</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="absolute -left-4 bottom-12 w-48 shadow-2xl border-2 border-violet-200 bg-white/95 backdrop-blur-sm">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-violet-100 rounded-lg">
-                      <Star className="h-5 w-5 text-violet-600" />
-                    </div>
-                    <div>
-                      <div className="text-xs text-gray-600">Valoración</div>
-                      <div className="text-lg font-bold text-violet-600">4.9/5</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
           </div>
         </div>
@@ -225,19 +224,22 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { icon: Building2, title: 'Gestión de Propiedades', desc: 'Edificios, unidades, contratos', gradient: 'from-blue-500 to-cyan-500' },
-              { icon: Home, title: 'Alquiler por Habitaciones', desc: 'Coliving con prorrateo automático', gradient: 'from-teal-500 to-green-600' },
-              { icon: Users, title: 'Portal Inquilinos', desc: 'App móvil + portal web', gradient: 'from-purple-500 to-pink-500' },
-              { icon: CreditCard, title: 'Pagos Stripe', desc: 'Cobros automáticos recurrentes', gradient: 'from-green-500 to-emerald-500' },
-              { icon: Hammer, title: 'Mantenimiento Pro', desc: 'IA predictiva + calendario', gradient: 'from-orange-500 to-red-500' },
-              { icon: Bot, title: 'Asistente IA GPT-4', desc: 'Chat + comandos de voz', gradient: 'from-violet-500 to-indigo-500' },
-              { icon: LinkIcon, title: 'Blockchain', desc: 'Tokenización de propiedades', gradient: 'from-cyan-500 to-blue-500' },
-              { icon: BarChart3, title: 'Business Intelligence', desc: 'Dashboards avanzados', gradient: 'from-pink-500 to-rose-500' },
-              { icon: Shield, title: 'Seguridad Biométrica', desc: 'GDPR + detección fraude ML', gradient: 'from-red-500 to-orange-500' },
-              { icon: Calendar, title: 'Calendario Unificado', desc: 'Todos los eventos en uno', gradient: 'from-teal-500 to-green-500' },
-              { icon: FileText, title: 'Firma Digital', desc: 'Signaturit integrado', gradient: 'from-amber-500 to-yellow-500' },
-              { icon: Cloud, title: 'Open Banking', desc: 'Verificación de ingresos', gradient: 'from-sky-500 to-blue-500' },
-              { icon: Leaf, title: 'ESG Sostenibilidad', desc: 'Huella carbono + certificaciones', gradient: 'from-lime-500 to-green-500' },
+              { icon: Building2, title: 'Gestión de Propiedades', desc: 'Edificios, unidades, contratos y pagos completos', gradient: 'from-blue-500 to-cyan-500' },
+              { icon: Home, title: 'Alquiler por Habitaciones', desc: 'Coliving con prorrateo de suministros, normas de convivencia y calendario de limpieza', gradient: 'from-teal-500 to-green-600' },
+              { icon: Users, title: 'Portal Inquilinos/Propietarios', desc: 'App móvil PWA + chat integrado + firma digital', gradient: 'from-purple-500 to-pink-500' },
+              { icon: CreditCard, title: 'Pagos Stripe', desc: 'Cobros automáticos + suscripciones + portal de pago', gradient: 'from-green-500 to-emerald-500' },
+              { icon: Hammer, title: 'Mantenimiento Pro', desc: 'IA predictiva + calendario + gestión proveedores', gradient: 'from-orange-500 to-red-500' },
+              { icon: Bot, title: 'Asistente IA GPT-4', desc: 'Chat conversacional + comandos de voz + análisis sentiment', gradient: 'from-violet-500 to-indigo-500' },
+              { icon: LinkIcon, title: 'Blockchain & NFTs', desc: 'Tokenización ERC-20 + certificados NFT + distribución renta', gradient: 'from-cyan-500 to-blue-500' },
+              { icon: BarChart3, title: 'Business Intelligence', desc: 'Dashboards avanzados + forecasting + exportación', gradient: 'from-pink-500 to-rose-500' },
+              { icon: Shield, title: 'Seguridad & Compliance', desc: 'Biometría + GDPR + detección fraude ML + auditorías', gradient: 'from-red-500 to-orange-500' },
+              { icon: Calendar, title: 'Calendario Unificado', desc: 'Todos los eventos: pagos, mantenimientos, visitas', gradient: 'from-teal-500 to-green-500' },
+              { icon: FileText, title: 'Firma Digital', desc: 'Signaturit/DocuSign integrado + múltiples firmantes', gradient: 'from-amber-500 to-yellow-500' },
+              { icon: Cloud, title: 'Open Banking', desc: 'Verificación ingresos + conciliación bancaria automática', gradient: 'from-sky-500 to-blue-500' },
+              { icon: Leaf, title: 'ESG Sostenibilidad', desc: 'Huella carbono + certificaciones LEED/BREEAM + economía circular', gradient: 'from-lime-500 to-green-500' },
+              { icon: Hotel, title: 'STR Channel Manager', desc: 'Sincronización Airbnb, Booking + pricing dinámico', gradient: 'from-orange-500 to-amber-500' },
+              { icon: TrendingUp, title: 'House Flipping', desc: 'ROI automático + timeline + gestión renovaciones', gradient: 'from-green-500 to-teal-500' },
+              { icon: Recycle, title: 'Economía Circular', desc: 'Marketplace intercambio + huertos urbanos + reciclaje', gradient: 'from-emerald-500 to-green-500' },
             ].map((feature, i) => (
               <Card key={i} className="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border-2 hover:border-transparent relative overflow-hidden">
                 <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-5 transition-opacity`} />
