@@ -611,6 +611,82 @@ export const MODULOS_CATALOGO = [
     esCore: false,
     orden: 82
   },
+
+  // ============================================
+  // MÓDULOS MULTI-VERTICAL (FASE 3)
+  // ============================================
+  {
+    codigo: 'str_listings',
+    nombre: 'Anuncios Turísticos STR',
+    descripcion: 'Gestión de propiedades en plataformas como Airbnb, Booking, VRBO con sincronización multi-canal',
+    categoria: 'gestion',
+    icono: 'Hotel',
+    ruta: '/str/listings',
+    requiereModulos: ['unidades', 'edificios'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 83
+  },
+  {
+    codigo: 'str_bookings',
+    nombre: 'Reservas STR',
+    descripcion: 'Calendario y gestión de reservas de alquiler turístico de corta estancia',
+    categoria: 'gestion',
+    icono: 'Calendar',
+    ruta: '/str/bookings',
+    requiereModulos: ['str_listings'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 84
+  },
+  {
+    codigo: 'str_channels',
+    nombre: 'Channel Manager',
+    descripcion: 'Sincronización automática con Airbnb, Booking, VRBO y otras plataformas OTA',
+    categoria: 'gestion',
+    icono: 'Cloud',
+    ruta: '/str/channels',
+    requiereModulos: ['str_listings'],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 85
+  },
+  {
+    codigo: 'flipping_projects',
+    nombre: 'Proyectos House Flipping',
+    descripcion: 'Pipeline de inversión, renovación y reventa con cálculo automático de ROI',
+    categoria: 'gestion',
+    icono: 'Hammer',
+    ruta: '/flipping/projects',
+    requiereModulos: ['edificios', 'unidades'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 86
+  },
+  {
+    codigo: 'construction_projects',
+    nombre: 'Proyectos de Construcción',
+    descripcion: 'Gestión de obra nueva, promoción, subcontratistas y certificaciones',
+    categoria: 'gestion',
+    icono: 'Building2',
+    ruta: '/construction/projects',
+    requiereModulos: ['edificios'],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 87
+  },
+  {
+    codigo: 'professional_projects',
+    nombre: 'Servicios Profesionales',
+    descripcion: 'Portfolio para arquitectos, aparejadores: proyectos, entregables, reuniones',
+    categoria: 'gestion',
+    icono: 'Briefcase',
+    ruta: '/professional/projects',
+    requiereModulos: ['usuarios'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 88
+  },
 ];
 
 /**
