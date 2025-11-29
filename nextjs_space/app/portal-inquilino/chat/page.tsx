@@ -33,7 +33,7 @@ interface Message {
 }
 
 export default function TenantChatPage() {
-  const { data: session, status } = useSession() || {};
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
@@ -54,10 +54,10 @@ export default function TenantChatPage() {
   }, [status, router]);
 
   useEffect(() => {
-    if (session?.user) {
+    if (status === 'authenticated' && session?.user) {
       loadConversations();
     }
-  }, [session]);
+  }, [status]);
 
   useEffect(() => {
     if (selectedConversation) {
@@ -75,10 +75,11 @@ export default function TenantChatPage() {
       const response = await fetch('/api/portal-inquilino/chat/conversations');
       if (!response.ok) throw new Error('Error al cargar conversaciones');
       const data = await response.json();
-      setConversations(data.conversations || []);
+      setConversations(Array.isArray(data.conversations) ? data.conversations : []);
     } catch (error) {
       console.error('Error loading conversations:', error);
       toast.error('Error al cargar conversaciones');
+      setConversations([]);
     } finally {
       setLoading(false);
     }
@@ -91,9 +92,10 @@ export default function TenantChatPage() {
       );
       if (!response.ok) throw new Error('Error al cargar mensajes');
       const data = await response.json();
-      setMessages(data.messages || []);
+      setMessages(Array.isArray(data.messages) ? data.messages : []);
     } catch (error) {
       console.error('Error loading messages:', error);
+      setMessages([]);
     }
   };
 

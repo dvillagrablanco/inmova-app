@@ -87,7 +87,7 @@ interface Stats {
 }
 
 export default function EnergiaPage() {
-  const { data: session, status } = useSession() || {};
+  const { data: session, status } = useSession();
   const router = useRouter();
   const { canCreate } = usePermissions();
 
@@ -145,12 +145,12 @@ export default function EnergiaPage() {
           unitsRes.json(),
         ]);
 
-      setReadings(readingsData);
-      setAlerts(alertsData);
-      setStats(statsData);
-      setTrends(trendsData);
-      setBuildings(buildingsData);
-      setUnits(unitsData);
+      setReadings(Array.isArray(readingsData) ? readingsData : []);
+      setAlerts(Array.isArray(alertsData) ? alertsData : []);
+      setStats(statsData || null);
+      setTrends(Array.isArray(trendsData) ? trendsData : []);
+      setBuildings(Array.isArray(buildingsData) ? buildingsData : []);
+      setUnits(Array.isArray(unitsData) ? unitsData : []);
     } catch (error) {
       console.error('Error fetching data:', error);
       toast.error('Error al cargar los datos');
