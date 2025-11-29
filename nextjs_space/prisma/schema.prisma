@@ -202,6 +202,10 @@ model Building {
   energyReadings    EnergyReading[]
   energyAlerts      EnergyAlert[]
   insurancePolicies InsurancePolicy[]
+  
+  // Prioridades Medias
+  valoraciones      ValoracionPropiedad[]
+  publicaciones     PublicacionPortal[]
 
   @@map("buildings")
 }
@@ -243,6 +247,9 @@ model Tenant {
   morosidadPredicciones MorosidadPrediccion[]
   morosidadHistorial    MorosidadHistorial[]
   documentosFirma       DocumentoFirma[]
+  
+  // Prioridades Medias
+  smsLogs           SMSLog[]
 
   @@map("tenants")
 }
@@ -284,6 +291,10 @@ model Unit {
   serviceJobs       ServiceJob[]
   energyReadings    EnergyReading[]
   energyAlerts      EnergyAlert[]
+  
+  // Prioridades Medias
+  valoraciones      ValoracionPropiedad[]
+  publicaciones     PublicacionPortal[]
 
   @@unique([buildingId, numero])
   @@map("units")
@@ -568,6 +579,9 @@ model Candidate {
 
   unit              Unit             @relation(fields: [unitId], references: [id], onDelete: Cascade)
   visits            Visit[]
+  
+  // Prioridades Medias
+  screening         ScreeningCandidato?
 
   @@map("candidates")
 }
@@ -642,6 +656,13 @@ model Company {
   tasks             Task[]
   auditLogs         AuditLog[]
   notifications     Notification[]
+  
+  // Prioridades Medias
+  valoraciones      ValoracionPropiedad[]
+  publicaciones     PublicacionPortal[]
+  screenings        ScreeningCandidato[]
+  smsTemplates      SMSTemplate[]
+  smsLogs           SMSLog[]
 
   @@map("company")
 }
@@ -2422,4 +2443,383 @@ model ConciliacionManual {
   @@index([companyId])
   @@index([transactionId])
   @@map("conciliaciones_manuales")
+}
+
+
+// ============================================================
+// PAQUETES PRIORIDAD MEDIA: Valoración, Publicaciones, Screening, SMS
+// ============================================================
+
+enum ValoracionMetodo {
+  comparables
+  renta
+  coste
+  mixto
+}
+
+enum ValoracionFinalidad {
+  venta
+  alquiler
+  seguro
+  hipoteca
+}
+
+enum PortalTipo {
+  idealista
+  fotocasa
+  habitaclia
+  pisos_com
+  yaencontre
+  custom
+}
+
+enum PublicacionEstado {
+  borrador
+  activa
+  pausada
+  expirada
+  eliminada
+}
+
+enum ScreeningEstado {
+  pendiente
+  en_revision
+  verificado
+  aprobado
+  rechazado
+}
+
+enum SMSEstado {
+  programado
+  enviado
+  fallido
+  cancelado
+}
+
+enum SMSTipo {
+  recordatorio_pago
+  confirmacion_visita
+  mantenimiento
+  bienvenida
+  alerta
+  personalizado
+}
+
+// Valoración Automática de Propiedades
+model ValoracionPropiedad {
+  id                    String              @id @default(cuid())
+  companyId             String
+  company               Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Propiedad valorada
+  unitId                String?
+  unit                  Unit?               @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  buildingId            String?
+  building              Building?           @relation(fields: [buildingId], references: [id], onDelete: SetNull)
+  
+  // Datos básicos
+  direccion             String
+  municipio             String
+  provincia             String
+  codigoPostal          String?
+  
+  // Características
+  metrosCuadrados       Float
+  habitaciones          Int?
+  banos                 Int?
+  garajes               Int?
+  trasteros             Int?
+  ascensor              Boolean             @default(false)
+  terraza               Boolean             @default(false)
+  jardin                Boolean             @default(false)
+  piscina               Boolean             @default(false)
+  anosConstruccion      Int?
+  estadoConservacion    String?             // excelente, bueno, aceptable, reformar
+  orientacion           String?             // norte, sur, este, oeste
+  eficienciaEnergetica  String?             // A, B, C, D, E, F, G
+  
+  // Valoración
+  metodo                ValoracionMetodo
+  finalidad             ValoracionFinalidad
+  valorEstimado         Float               // Valor estimado en EUR
+  valorMinimo           Float               // Rango inferior
+  valorMaximo           Float               // Rango superior
+  precioM2              Float               // Precio por m²
+  confianzaValoracion   Float               // 0-100%
+  
+  // Comparables utilizados
+  numComparables        Int                 @default(0)
+  comparablesData       Json?               // Array de propiedades comparables
+  
+  // Análisis
+  factoresPositivos     Json?               // Array de strings
+  factoresNegativos     Json?               // Array de strings
+  recomendacionPrecio   String?             @db.Text
+  
+  // Datos de mercado
+  precioMedioZona       Float?
+  demandaZona           String?             // alta, media, baja
+  diasPromedioVenta     Int?                // Días promedio de venta en la zona
+  
+  // Auditoría
+  generadoPor           String
+  fechaValoracion       DateTime            @default(now())
+  validoHasta           DateTime?           // Las valoraciones caducan (ej: 6 meses)
+  notas                 String?             @db.Text
+  
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  @@index([companyId])
+  @@index([unitId])
+  @@index([buildingId])
+  @@index([municipio])
+  @@index([fechaValoracion])
+  @@index([finalidad])
+  @@map("valoraciones_propiedades")
+}
+
+// Publicaciones Multi-plataforma
+model PublicacionPortal {
+  id                    String              @id @default(cuid())
+  companyId             String
+  company               Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Propiedad publicada
+  unitId                String
+  unit                  Unit                @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  buildingId            String?
+  building              Building?           @relation(fields: [buildingId], references: [id], onDelete: SetNull)
+  
+  // Datos de publicación
+  titulo                String
+  descripcion           String              @db.Text
+  descripcionCorta      String?             @db.Text
+  
+  // Portales
+  portales              Json                // Array de portales: [{nombre: "idealista", activo: true, idExterno: "123", url: "..."}]
+  
+  // Contenido multimedia
+  fotosUrls             Json                // Array de URLs de fotos
+  videoUrl              String?
+  tourVirtualUrl        String?
+  
+  // Precios y condiciones
+  precioVenta           Float?
+  precioAlquiler        Float?
+  gastosIncluidos       Boolean             @default(false)
+  fianza                Float?
+  condicionesEspeciales String?             @db.Text
+  
+  // Características destacadas
+  caracteristicas       Json                // Array de características para destacar
+  
+  // SEO y Marketing
+  palabrasClave         Json?               // Array de keywords
+  destacada             Boolean             @default(false)
+  urgente               Boolean             @default(false)
+  
+  // Estado y control
+  estado                PublicacionEstado   @default(borrador)
+  fechaPublicacion      DateTime?
+  fechaExpiracion       DateTime?
+  
+  // Estadísticas (simuladas)
+  vistas                Int                 @default(0)
+  contactos             Int                 @default(0)
+  favoritos             Int                 @default(0)
+  
+  // Auditoría
+  creadoPor             String
+  ultimaActualizacion   String?
+  
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  @@index([companyId])
+  @@index([unitId])
+  @@index([estado])
+  @@index([fechaPublicacion])
+  @@map("publicaciones_portales")
+}
+
+// Screening Avanzado de Candidatos
+model ScreeningCandidato {
+  id                    String              @id @default(cuid())
+  companyId             String
+  company               Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Candidato
+  candidateId           String              @unique
+  candidate             Candidate           @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  
+  // Estado general
+  estado                ScreeningEstado     @default(pendiente)
+  scoringTotal          Float               @default(0) // 0-100
+  
+  // Verificación Identidad (20 puntos)
+  dniVerificado         Boolean             @default(false)
+  dniComentarios        String?             @db.Text
+  dniPuntos             Float               @default(0)
+  
+  // Verificación Laboral (25 puntos)
+  contratoTrabajoVerificado Boolean         @default(false)
+  nominasVerificadas    Boolean             @default(false)
+  mesesNominas          Int                 @default(0)
+  empresaContactada     Boolean             @default(false)
+  laboralComentarios    String?             @db.Text
+  laboralPuntos         Float               @default(0)
+  
+  // Verificación Económica (25 puntos)
+  ingresosVerificados   Boolean             @default(false)
+  ratioIngresosRenta    Float?              // ratio ingresos/renta
+  cuentaBancariaVerificada Boolean          @default(false)
+  ahorrosVerificados    Boolean             @default(false)
+  economicaComentarios  String?             @db.Text
+  economicaPuntos       Float               @default(0)
+  
+  // Referencias (15 puntos)
+  referenciasPersonales Int                 @default(0)
+  referenciasLaborales  Int                 @default(0)
+  referenciasPrevias    Int                 @default(0)
+  referenciasContactadas Int                @default(0)
+  referenciasPositivas  Int                 @default(0)
+  referenciasComentarios String?            @db.Text
+  referenciasPuntos     Float               @default(0)
+  
+  // Antecedentes (15 puntos - puntos negativos)
+  ficherosMorosidad     Boolean             @default(false)  // ASNEF, RAI, etc (manual)
+  impagosAnteriores     Boolean             @default(false)
+  demandasPrevias       Boolean             @default(false)
+  antecedentesComentarios String?           @db.Text
+  antecedentesPuntos    Float               @default(15) // Empiezan con 15, se restan
+  
+  // Documentación aportada
+  documentosRequeridos  Json                // Array de documentos: {nombre, recibido, verificado, fecha}
+  documentosCompletos   Boolean             @default(false)
+  
+  // Flags de riesgo
+  flagsRiesgo           Json?               // Array de alertas: [{tipo, descripcion, severidad}]
+  nivelRiesgoGlobal     RiskLevel           @default(medio)
+  
+  // Entrevista y visita
+  entrevistaRealizada   Boolean             @default(false)
+  visitaRealizada       Boolean             @default(false)
+  impresionGeneral      String?             @db.Text
+  
+  // Decisión final
+  aprobado              Boolean?            // null = pendiente, true/false = decidido
+  motivoRechazo         String?             @db.Text
+  condicionesEspeciales String?             @db.Text
+  
+  // Auditoría
+  revisadoPor           String?
+  fechaRevision         DateTime?
+  fechaDecision         DateTime?
+  notas                 String?             @db.Text
+  
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  @@index([companyId])
+  @@index([candidateId])
+  @@index([estado])
+  @@index([scoringTotal])
+  @@index([nivelRiesgoGlobal])
+  @@map("screening_candidatos")
+}
+
+// Plantillas de SMS
+model SMSTemplate {
+  id                    String              @id @default(cuid())
+  companyId             String
+  company               Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Identificación
+  nombre                String
+  descripcion           String?             @db.Text
+  tipo                  SMSTipo
+  
+  // Contenido
+  mensaje               String              @db.Text  // Máx 160 caracteres (recomendado)
+  variables             Json?               // Array de variables disponibles: {nombre, descripcion, ejemplo}
+  
+  // Configuración
+  activa                Boolean             @default(true)
+  envioAutomatico       Boolean             @default(false)
+  
+  // Trigger automático
+  eventoTrigger         String?             // "pago_vencimiento_3dias", "visita_confirmada", etc
+  anticipacionDias      Int?                // Días de anticipación para el envío
+  horaEnvio             String?             // HH:MM formato 24h
+  
+  // Estadísticas (simuladas)
+  vecesUsada            Int                 @default(0)
+  ultimoEnvio           DateTime?
+  
+  // Auditoría
+  creadoPor             String
+  ultimaModificacion    String?
+  
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  
+  smsLogs               SMSLog[]
+
+  @@index([companyId])
+  @@index([tipo])
+  @@index([activa])
+  @@map("sms_templates")
+}
+
+// Logs de SMS (enviados/programados)
+model SMSLog {
+  id                    String              @id @default(cuid())
+  companyId             String
+  company               Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Plantilla usada
+  templateId            String?
+  template              SMSTemplate?        @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  
+  // Destinatario
+  tenantId              String?
+  tenant                Tenant?             @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  telefono              String
+  nombreDestinatario    String
+  
+  // Contenido
+  mensaje               String              @db.Text
+  tipo                  SMSTipo
+  
+  // Estado
+  estado                SMSEstado           @default(programado)
+  fechaProgramada       DateTime?
+  fechaEnvio            DateTime?
+  
+  // Información del envío (simulado)
+  proveedorSMS          String?             // "Twilio", "MessageBird", etc
+  idExterno             String?             // ID del proveedor
+  costeEstimado         Float?              // Coste en EUR
+  
+  // Respuesta/Error
+  exitoso               Boolean?
+  mensajeError          String?             @db.Text
+  
+  // Contexto
+  relacionadoCon        String?             // Tipo de entidad: "payment", "visit", "maintenance"
+  relacionadoId         String?             // ID de la entidad relacionada
+  
+  // Auditoría
+  enviadoPor            String
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  @@index([companyId])
+  @@index([templateId])
+  @@index([tenantId])
+  @@index([estado])
+  @@index([fechaProgramada])
+  @@index([fechaEnvio])
+  @@map("sms_logs")
 }
