@@ -30,6 +30,25 @@ import {
   MessageSquare,
   Folder,
   BarChart2,
+  Package,
+  Euro,
+  ClipboardList,
+  UserCheck,
+  HeadphonesIcon,
+  Bell,
+  AlertCircle,
+  FileSignature,
+  ShoppingCart,
+  CalendarCheck,
+  Users2,
+  MessageCircle,
+  CheckSquare,
+  Eye,
+  Shield,
+  Megaphone,
+  Vote,
+  Award,
+  UserPlus,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -54,6 +73,13 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/reportes': 'reportes',
   '/documentos': 'documentos',
   '/room-rental': 'room_rental',
+  '/proveedores': 'proveedores',
+  '/gastos': 'gastos',
+  '/tareas': 'tareas',
+  '/candidatos': 'candidatos',
+  '/crm': 'crm',
+  '/notificaciones': 'notificaciones',
+  '/incidencias': 'incidencias',
   '/admin/configuracion': 'configuracion',
   '/admin/usuarios': 'usuarios',
   '/admin/modulos': 'configuracion',
@@ -86,6 +112,16 @@ const coreNavItems = [
   { name: 'Chat', href: '/chat', icon: MessageSquare, roles: ['administrador', 'gestor'] },
 ];
 
+// Módulos de Gestión Operativa
+const gestionNavItems = [
+  { name: 'Proveedores', href: '/proveedores', icon: Package, roles: ['administrador', 'gestor'] },
+  { name: 'Gastos', href: '/gastos', icon: Euro, roles: ['administrador', 'gestor'] },
+  { name: 'Tareas', href: '/tareas', icon: CheckSquare, roles: ['administrador', 'gestor', 'operador'] },
+  { name: 'Incidencias', href: '/incidencias', icon: AlertCircle, roles: ['administrador', 'gestor', 'operador'] },
+  { name: 'Candidatos', href: '/candidatos', icon: UserPlus, roles: ['administrador', 'gestor'] },
+  { name: 'Notificaciones', href: '/notificaciones', icon: Bell, roles: ['administrador', 'gestor', 'operador'] },
+];
+
 // Módulos avanzados
 const advancedNavItems = [
   { name: 'Business Intelligence', href: '/bi', icon: FileBarChart, roles: ['administrador', 'gestor'] },
@@ -93,6 +129,7 @@ const advancedNavItems = [
   { name: 'Reportes', href: '/reportes', icon: FileBarChart, roles: ['administrador', 'gestor'] },
   { name: 'Documentos', href: '/documentos', icon: Folder, roles: ['administrador', 'gestor'] },
   { name: 'Room Rental', href: '/room-rental', icon: Home, roles: ['administrador', 'gestor'] },
+  { name: 'CRM', href: '/crm', icon: HeadphonesIcon, roles: ['administrador', 'gestor'] },
 ];
 
 // Módulos Multi-Vertical
@@ -126,6 +163,7 @@ export function Sidebar() {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     favorites: true,
     core: true,
+    gestion: true,
     advanced: false,
     multivertical: false,
     admin: false,
@@ -205,12 +243,13 @@ export function Sidebar() {
   };
 
   const filteredCoreItems = filterItems(coreNavItems);
+  const filteredGestionItems = filterItems(gestionNavItems);
   const filteredAdvancedItems = filterItems(advancedNavItems);
   const filteredMultiVerticalItems = filterItems(multiVerticalItems);
   const filteredAdminItems = filterItems(adminNavItems);
 
   // Obtener items favoritos
-  const allItems = [...coreNavItems, ...advancedNavItems, ...multiVerticalItems, ...adminNavItems];
+  const allItems = [...coreNavItems, ...gestionNavItems, ...advancedNavItems, ...multiVerticalItems, ...adminNavItems];
   const favoriteItems = allItems.filter(item => 
     favorites.includes(item.href) && 
     filterItems([item]).length > 0 // Solo mostrar si el item es accesible
@@ -371,6 +410,26 @@ export function Sidebar() {
               </div>
             )}
 
+            {/* Gestión Operativa Section */}
+            {filteredGestionItems.length > 0 && (
+              <div className="mb-4">
+                <button
+                  onClick={() => toggleSection('gestion')}
+                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
+                >
+                  <span>Gestión Operativa</span>
+                  {expandedSections.gestion ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                </button>
+                {expandedSections.gestion && (
+                  <div className="space-y-1 mt-1">
+                    {filteredGestionItems.map((item) => (
+                      <NavItem key={item.href} item={item} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Advanced Section */}
             {filteredAdvancedItems.length > 0 && (
               <div className="mb-4">
@@ -434,6 +493,7 @@ export function Sidebar() {
             {/* No results message */}
             {searchQuery && 
              filteredCoreItems.length === 0 && 
+             filteredGestionItems.length === 0 &&
              filteredAdvancedItems.length === 0 && 
              filteredMultiVerticalItems.length === 0 && 
              filteredAdminItems.length === 0 && (
