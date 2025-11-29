@@ -50,6 +50,8 @@ import {
   LineChart,
   Package,
   Palette,
+  HardHat,
+  Briefcase,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -106,7 +108,14 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/admin/usuarios': 'usuarios',
   '/admin/configuracion': 'configuracion',
   '/admin/personalizacion': 'configuracion', // Sistema White Label
-  '/admin/modulos': 'configuracion', // Nueva p\u00e1gina de gesti\u00f3n de m\u00f3dulos
+  '/admin/modulos': 'configuracion', // Nueva página de gestión de módulos
+  // Nuevos módulos Multi-Vertical
+  '/str/listings': 'str_listings',
+  '/str/bookings': 'str_bookings',
+  '/str/channels': 'str_channels',
+  '/flipping/projects': 'flipping_projects',
+  '/construction/projects': 'construction_projects',
+  '/professional/projects': 'professional_projects',
 };
 
 const allNavItems = [
@@ -158,6 +167,13 @@ const allNavItems = [
   { name: 'Configuración', href: '/admin/configuracion', icon: Settings, roles: ['administrador'] },
   { name: 'Personalización', href: '/admin/personalizacion', icon: Palette, roles: ['administrador'] },
   { name: 'Módulos', href: '/admin/modulos', icon: Package, roles: ['administrador'] },
+  // Nuevos módulos Multi-Vertical
+  { name: 'Anuncios STR', href: '/str/listings', icon: Home, roles: ['administrador', 'gestor'] },
+  { name: 'Reservas STR', href: '/str/bookings', icon: CalendarCheck, roles: ['administrador', 'gestor'] },
+  { name: 'Canales STR', href: '/str/channels', icon: Share2, roles: ['administrador', 'gestor'] },
+  { name: 'House Flipping', href: '/flipping/projects', icon: TrendingUp, roles: ['administrador', 'gestor'] },
+  { name: 'Construcción', href: '/construction/projects', icon: HardHat, roles: ['administrador', 'gestor'] },
+  { name: 'Servicios Profesionales', href: '/professional/projects', icon: Briefcase, roles: ['administrador', 'gestor'] },
 ];
 
 interface Notification {
