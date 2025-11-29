@@ -119,7 +119,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
 };
 
 const allNavItems = [
-  { name: 'Inicio', href: '/', icon: Home, roles: ['administrador', 'gestor', 'operador'], isHome: true },
+  { name: 'Inicio', href: '/home', icon: Home, roles: ['administrador', 'gestor', 'operador'], isHome: true },
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['administrador', 'gestor', 'operador'] },
   { name: 'Edificios', href: '/edificios', icon: Building2, roles: ['administrador', 'gestor'] },
   { name: 'Unidades', href: '/unidades', icon: Home, roles: ['administrador', 'gestor'] },
