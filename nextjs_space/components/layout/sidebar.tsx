@@ -80,9 +80,35 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/crm': 'crm',
   '/notificaciones': 'notificaciones',
   '/incidencias': 'incidencias',
+  '/ocr': 'ocr',
   '/admin/configuracion': 'configuracion',
   '/admin/usuarios': 'usuarios',
   '/admin/modulos': 'configuracion',
+  '/analytics': 'analytics',
+  '/str/listings': 'str_listings',
+  '/str/bookings': 'str_bookings',
+  '/str/channels': 'str_channels',
+  '/flipping/projects': 'flipping_projects',
+  '/construction/projects': 'construction_projects',
+  '/professional/projects': 'professional_projects',
+  '/anuncios': 'anuncios',
+  '/votaciones': 'votaciones',
+  '/reuniones': 'reuniones',
+  '/reservas': 'reservas',
+  '/valoraciones': 'valoraciones',
+  '/publicaciones': 'publicaciones',
+  '/screening': 'screening',
+  '/galerias': 'galerias',
+  '/certificaciones': 'certificaciones',
+  '/seguros': 'seguros',
+  '/inspecciones': 'inspecciones',
+  '/visitas': 'visitas',
+  '/ordenes-trabajo': 'ordenes_trabajo',
+  '/firma-digital': 'firma_digital',
+  '/legal': 'legal',
+  '/open-banking': 'open_banking',
+  '/marketplace': 'marketplace',
+  '/sms': 'sms',
 };
 
 // Módulos core que siempre deben mostrarse (esCore: true)
@@ -96,6 +122,37 @@ const CORE_MODULES = [
   'mantenimiento',
   'calendario',
   'chat',
+  'proveedores',
+  'gastos',
+  'tareas',
+  'candidatos',
+  'notificaciones',
+  'incidencias',
+  'ocr',
+  'documentos',
+  'reportes',
+  'bi',
+  'analytics',
+  'crm',
+  'anuncios',
+  'votaciones',
+  'reuniones',
+  'reservas',
+  'valoraciones',
+  'publicaciones',
+  'screening',
+  'galerias',
+  'certificaciones',
+  'seguros',
+  'inspecciones',
+  'visitas',
+  'ordenes_trabajo',
+  'firma_digital',
+  'legal',
+  'open_banking',
+  'marketplace',
+  'sms',
+  'room_rental',
 ];
 
 // Navegación core - Funcionalidades principales
@@ -143,6 +200,36 @@ const multiVerticalItems = [
   { name: 'Servicios Profesionales', href: '/professional/projects', icon: Briefcase, roles: ['administrador', 'gestor'] },
 ];
 
+// Módulos de Comunidad
+const comunidadItems = [
+  { name: 'Anuncios', href: '/anuncios', icon: Megaphone, roles: ['administrador', 'gestor'] },
+  { name: 'Votaciones', href: '/votaciones', icon: Vote, roles: ['administrador', 'gestor'] },
+  { name: 'Reuniones', href: '/reuniones', icon: Users2, roles: ['administrador', 'gestor'] },
+  { name: 'Reservas Espacios', href: '/reservas', icon: CalendarCheck, roles: ['administrador', 'gestor', 'operador'] },
+];
+
+// Módulos Propiedades Avanzado
+const propiedadesAvanzadoItems = [
+  { name: 'Valoraciones', href: '/valoraciones', icon: Award, roles: ['administrador', 'gestor'] },
+  { name: 'Publicaciones', href: '/publicaciones', icon: Megaphone, roles: ['administrador', 'gestor'] },
+  { name: 'Screening', href: '/screening', icon: UserCheck, roles: ['administrador', 'gestor'] },
+  { name: 'Galerías', href: '/galerias', icon: Folder, roles: ['administrador', 'gestor'] },
+  { name: 'Certificaciones', href: '/certificaciones', icon: Award, roles: ['administrador', 'gestor'] },
+  { name: 'Seguros', href: '/seguros', icon: Shield, roles: ['administrador', 'gestor'] },
+  { name: 'Inspecciones', href: '/inspecciones', icon: ClipboardList, roles: ['administrador', 'gestor'] },
+  { name: 'Visitas', href: '/visitas', icon: CalendarCheck, roles: ['administrador', 'gestor'] },
+];
+
+// Módulos Servicios Profesionales
+const serviciosProfesionalesItems = [
+  { name: 'Órdenes Trabajo', href: '/ordenes-trabajo', icon: ClipboardList, roles: ['administrador', 'gestor'] },
+  { name: 'Firma Digital', href: '/firma-digital', icon: FileSignature, roles: ['administrador', 'gestor'] },
+  { name: 'Legal', href: '/legal', icon: Shield, roles: ['administrador', 'gestor'] },
+  { name: 'Open Banking', href: '/open-banking', icon: CreditCard, roles: ['administrador', 'gestor'] },
+  { name: 'Marketplace', href: '/marketplace', icon: ShoppingCart, roles: ['administrador', 'gestor'] },
+  { name: 'SMS', href: '/sms', icon: MessageCircle, roles: ['administrador', 'gestor'] },
+];
+
 // Admin
 const adminNavItems = [
   { name: 'Configuración', href: '/admin/configuracion', icon: Settings, roles: ['administrador'] },
@@ -167,6 +254,9 @@ export function Sidebar() {
     gestion: true,
     advanced: false,
     multivertical: false,
+    comunidad: false,
+    propiedadesAvanzado: false,
+    serviciosProfesionales: false,
     admin: false,
   });
 
@@ -247,10 +337,22 @@ export function Sidebar() {
   const filteredGestionItems = filterItems(gestionNavItems);
   const filteredAdvancedItems = filterItems(advancedNavItems);
   const filteredMultiVerticalItems = filterItems(multiVerticalItems);
+  const filteredComunidadItems = filterItems(comunidadItems);
+  const filteredPropiedadesAvanzadoItems = filterItems(propiedadesAvanzadoItems);
+  const filteredServiciosProfesionalesItems = filterItems(serviciosProfesionalesItems);
   const filteredAdminItems = filterItems(adminNavItems);
 
   // Obtener items favoritos
-  const allItems = [...coreNavItems, ...gestionNavItems, ...advancedNavItems, ...multiVerticalItems, ...adminNavItems];
+  const allItems = [
+    ...coreNavItems, 
+    ...gestionNavItems, 
+    ...advancedNavItems, 
+    ...multiVerticalItems, 
+    ...comunidadItems,
+    ...propiedadesAvanzadoItems,
+    ...serviciosProfesionalesItems,
+    ...adminNavItems
+  ];
   const favoriteItems = allItems.filter(item => 
     favorites.includes(item.href) && 
     filterItems([item]).length > 0 // Solo mostrar si el item es accesible
@@ -471,6 +573,66 @@ export function Sidebar() {
               </div>
             )}
 
+            {/* Comunidad Section */}
+            {filteredComunidadItems.length > 0 && (
+              <div className="mb-4">
+                <button
+                  onClick={() => toggleSection('comunidad')}
+                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
+                >
+                  <span>Comunidad</span>
+                  {expandedSections.comunidad ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                </button>
+                {expandedSections.comunidad && (
+                  <div className="space-y-1 mt-1">
+                    {filteredComunidadItems.map((item) => (
+                      <NavItem key={item.href} item={item} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Propiedades Avanzado Section */}
+            {filteredPropiedadesAvanzadoItems.length > 0 && (
+              <div className="mb-4">
+                <button
+                  onClick={() => toggleSection('propiedadesAvanzado')}
+                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
+                >
+                  <span>Propiedades Avanzado</span>
+                  {expandedSections.propiedadesAvanzado ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                </button>
+                {expandedSections.propiedadesAvanzado && (
+                  <div className="space-y-1 mt-1">
+                    {filteredPropiedadesAvanzadoItems.map((item) => (
+                      <NavItem key={item.href} item={item} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Servicios Profesionales Section */}
+            {filteredServiciosProfesionalesItems.length > 0 && (
+              <div className="mb-4">
+                <button
+                  onClick={() => toggleSection('serviciosProfesionales')}
+                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
+                >
+                  <span>Servicios Profesionales</span>
+                  {expandedSections.serviciosProfesionales ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                </button>
+                {expandedSections.serviciosProfesionales && (
+                  <div className="space-y-1 mt-1">
+                    {filteredServiciosProfesionalesItems.map((item) => (
+                      <NavItem key={item.href} item={item} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Admin Section */}
             {filteredAdminItems.length > 0 && (
               <div className="mb-4">
@@ -497,6 +659,9 @@ export function Sidebar() {
              filteredGestionItems.length === 0 &&
              filteredAdvancedItems.length === 0 && 
              filteredMultiVerticalItems.length === 0 && 
+             filteredComunidadItems.length === 0 &&
+             filteredPropiedadesAvanzadoItems.length === 0 &&
+             filteredServiciosProfesionalesItems.length === 0 &&
              filteredAdminItems.length === 0 && (
               <div className="text-center py-8 text-gray-400">
                 <p className="text-sm">No se encontraron páginas</p>
