@@ -9,6 +9,9 @@ import {
 } from '@/lib/energy-service';
 import { format } from 'date-fns';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 // GET /api/energy/stats - Obtener estadísticas de energía
 export async function GET(req: NextRequest) {
   try {
