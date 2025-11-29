@@ -164,6 +164,8 @@ model User {
   securityEvents SecurityEvent[]
   chatbotConversations ChatbotConversation[]
   documentosCreados    DocumentoFirma[]  @relation("DocumentosCreados")
+  dashboardPreference  UserDashboardPreference?
+  dashboardWidgets     DashboardWidget[]
 
   @@map("users")
 }
@@ -737,6 +739,10 @@ model Company {
   communityMeetings  CommunityMeeting[]
   providerWorkOrders ProviderWorkOrder[]
   propertyGalleries  PropertyGallery[]
+
+  // Fase 5
+  automaticReminders AutomaticReminder[]
+  reviews            Review[]
 
   @@map("company")
 }
@@ -3760,3 +3766,231 @@ model GalleryItem {
 
 // Business Intelligence Avanzado (usando modelos existentes)
 // Ver modelos BiWidget, BiReport y BiAlert en sección anterior
+// ==========================================
+// FASE 5: MEJORAS INCREMENTALES (Nov 2024)
+// ==========================================
+
+// 1. Dashboard Personalizable por Usuario
+enum WidgetSize {
+  small
+  medium
+  large
+  full
+}
+
+enum WidgetRefreshRate {
+  manual
+  realtime
+  every_5min
+  every_15min
+  every_hour
+  daily
+}
+
+model UserDashboardPreference {
+  id                String              @id @default(cuid())
+  userId            String              @unique
+  
+  // Configuración general
+  layout            String              @default("grid")  // grid, list, custom
+  theme             String              @default("light") // light, dark, auto
+  defaultView       String              @default("overview") // overview, financial, maintenance
+  
+  // Widgets activos (orden)
+  activeWidgets     String[]            // Array de IDs de widgets
+  widgetPositions   Json?               // Posiciones personalizadas {widgetId: {x, y, w, h}}
+  
+  // Filtros predeterminados
+  defaultFilters    Json?               // Filtros guardados por vista
+  
+  // Auditoría
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  widgets           DashboardWidget[]
+  
+  @@map("user_dashboard_preferences")
+}
+
+model DashboardWidget {
+  id                String              @id @default(cuid())
+  userId            String
+  preferenceId      String
+  
+  // Configuración del widget
+  widgetType        String              // kpi, chart, table, calendar, alerts
+  title             String
+  size              WidgetSize          @default(medium)
+  refreshRate       WidgetRefreshRate   @default(every_15min)
+  
+  // Configuración específica
+  dataSource        String?             // payments, maintenance, contracts, etc
+  filters           Json?               // Filtros específicos del widget
+  chartType         String?             // line, bar, pie, doughnut
+  columns           String[]            @default([])
+  
+  // UI
+  position          Json?               // {x, y, w, h}
+  color             String?
+  icon              String?
+  
+  // Estado
+  enabled           Boolean             @default(true)
+  lastRefresh       DateTime?
+  
+  // Auditoría
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  preference        UserDashboardPreference @relation(fields: [preferenceId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([preferenceId])
+  @@map("dashboard_widgets")
+}
+
+// 2. Sistema de Recordatorios Automáticos
+enum ReminderType {
+  pago_vencimiento
+  contrato_expiracion
+  mantenimiento_programado
+  inspeccion_pendiente
+  documento_vencimiento
+  renovacion_seguro
+  certificacion_expiracion
+  reunion_proxima
+  custom
+}
+
+enum ReminderChannel {
+  email
+  sms
+  notification
+  all
+}
+
+enum ReminderFrequency {
+  once
+  daily
+  weekly
+  monthly
+}
+
+model AutomaticReminder {
+  id                String              @id @default(cuid())
+  companyId         String
+  
+  // Configuración
+  nombre            String
+  descripcion       String?             @db.Text
+  tipo              ReminderType
+  channel           ReminderChannel     @default(email)
+  frequency         ReminderFrequency   @default(once)
+  
+  // Timing
+  diasAnticipacion  Int                 @default(7)  // Días antes del evento
+  horaEnvio         String              @default("09:00")
+  
+  // Destinatarios
+  enviarA           String[]            // user IDs, tenant IDs, or "all"
+  
+  // Condiciones
+  conditions        Json?               // Condiciones para activar
+  entityType        String?             // payment, contract, maintenance, etc
+  
+  // Plantilla
+  tituloPlantilla   String
+  mensajePlantilla  String              @db.Text
+  variables         String[]            @default([])
+  
+  // Estado
+  activo            Boolean             @default(true)
+  ultimoEnvio       DateTime?
+  proximoEnvio      DateTime?
+  totalEnviados     Int                 @default(0)
+  
+  // Auditoría
+  creadoPor         String
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  company           Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  @@index([companyId])
+  @@index([tipo])
+  @@index([activo])
+  @@index([proximoEnvio])
+  @@map("automatic_reminders")
+}
+
+// 3. Sistema de Calificaciones y Reviews
+enum ReviewEntityType {
+  proveedor
+  propiedad_unidad
+  inquilino
+  propietario
+}
+
+enum ReviewStatus {
+  pendiente
+  publicada
+  rechazada
+  reportada
+}
+
+model Review {
+  id                String              @id @default(cuid())
+  companyId         String
+  
+  // Entidad evaluada
+  entityType        ReviewEntityType
+  entityId          String              // ID del proveedor, unidad, inquilino, etc
+  
+  // Evaluador
+  reviewerId        String              // User ID o Tenant ID
+  reviewerType      String              // user, tenant, owner
+  reviewerName      String
+  
+  // Calificación
+  rating            Int                 // 1-5 estrellas
+  titulo            String
+  comentario        String              @db.Text
+  aspectos          Json?               // {limpieza: 5, puntualidad: 4, ...}
+  
+  // Respuesta (si aplica)
+  respuesta         String?             @db.Text
+  respondidoPor     String?
+  fechaRespuesta    DateTime?
+  
+  // Verificación
+  verificado        Boolean             @default(false)
+  contratoId        String?             // Si está vinculado a un contrato
+  ordenTrabajoId    String?             // Si está vinculado a una orden
+  
+  // Moderación
+  estado            ReviewStatus        @default(pendiente)
+  moderadoPor       String?
+  fechaModeracion   DateTime?
+  motivoRechazo     String?
+  
+  // Utilidad
+  likes             Int                 @default(0)
+  dislikes          Int                 @default(0)
+  reportes          Int                 @default(0)
+  
+  // Auditoría
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  company           Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  @@index([companyId])
+  @@index([entityType, entityId])
+  @@index([reviewerId])
+  @@index([rating])
+  @@index([estado])
+  @@map("reviews")
+}
+
