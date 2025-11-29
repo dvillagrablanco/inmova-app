@@ -37,6 +37,9 @@ import {
   ClipboardCheck,
   PenTool,
   Landmark,
+  CalendarCheck,
+  Leaf,
+  UserCheck,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -55,6 +58,10 @@ const allNavItems = [
   { name: 'Calendario', href: '/calendario', icon: Calendar, roles: ['administrador', 'gestor', 'operador'] },
   { name: 'Firma Digital', href: '/firma-digital', icon: PenTool, roles: ['administrador', 'gestor'] },
   { name: 'Open Banking', href: '/open-banking', icon: Landmark, roles: ['administrador', 'gestor'] },
+  { name: 'Reservas', href: '/reservas', icon: CalendarCheck, roles: ['administrador', 'gestor'] },
+  { name: 'Seguros', href: '/seguros', icon: Shield, roles: ['administrador', 'gestor'] },
+  { name: 'Certificaciones', href: '/certificaciones', icon: Leaf, roles: ['administrador', 'gestor'] },
+  { name: 'Portal Propietario', href: '/portal-propietario', icon: UserCheck, roles: ['administrador', 'gestor'] },
   { name: 'Mantenimiento', href: '/mantenimiento', icon: Wrench, roles: ['administrador', 'gestor', 'operador'] },
   { name: 'Analytics Mtto.', href: '/mantenimiento-pro', icon: FileBarChart, roles: ['administrador', 'gestor'] },
   { name: 'Tareas', href: '/tareas', icon: CheckSquare, roles: ['administrador', 'gestor', 'operador'] },

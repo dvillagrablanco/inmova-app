@@ -1,0 +1,169 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
+
+// GET /api/espacios-comunes/[id] - Obtener espacio común por ID
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.companyId) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
+
+    const espacio = await prisma.commonSpace.findFirst({
+      where: {
+        id: params.id,
+        companyId: session.user.companyId,
+      },
+      include: {
+        building: {
+          select: {
+            id: true,
+            nombre: true,
+            direccion: true,
+          },
+        },
+        reservations: {
+          where: {
+            estado: {
+              in: ['pendiente', 'confirmada'],
+            },
+          },
+          include: {
+            tenant: {
+              select: {
+                nombreCompleto: true,
+                email: true,
+                telefono: true,
+              },
+            },
+          },
+          orderBy: {
+            fechaReserva: 'asc',
+          },
+          take: 10,
+        },
+      },
+    });
+
+    if (!espacio) {
+      return NextResponse.json(
+        { error: 'Espacio común no encontrado' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(espacio);
+  } catch (error) {
+    console.error('Error fetching espacio común:', error);
+    return NextResponse.json(
+      { error: 'Error al obtener espacio común' },
+      { status: 500 }
+    );
+  }
+}
+
+// PATCH /api/espacios-comunes/[id] - Actualizar espacio común
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.companyId) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
+
+    // Validar rol
+    if (session.user.role === 'operador') {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
+    }
+
+    const body = await request.json();
+
+    // Verificar que el espacio pertenece a la empresa del usuario
+    const espacioExistente = await prisma.commonSpace.findFirst({
+      where: {
+        id: params.id,
+        companyId: session.user.companyId,
+      },
+    });
+
+    if (!espacioExistente) {
+      return NextResponse.json(
+        { error: 'Espacio común no encontrado' },
+        { status: 404 }
+      );
+    }
+
+    const espacio = await prisma.commonSpace.update({
+      where: { id: params.id },
+      data: body,
+      include: {
+        building: {
+          select: {
+            nombre: true,
+            direccion: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json(espacio);
+  } catch (error) {
+    console.error('Error updating espacio común:', error);
+    return NextResponse.json(
+      { error: 'Error al actualizar espacio común' },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE /api/espacios-comunes/[id] - Eliminar espacio común
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.companyId) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
+
+    // Validar rol
+    if (session.user.role !== 'administrador') {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
+    }
+
+    // Verificar que el espacio pertenece a la empresa del usuario
+    const espacioExistente = await prisma.commonSpace.findFirst({
+      where: {
+        id: params.id,
+        companyId: session.user.companyId,
+      },
+    });
+
+    if (!espacioExistente) {
+      return NextResponse.json(
+        { error: 'Espacio común no encontrado' },
+        { status: 404 }
+      );
+    }
+
+    await prisma.commonSpace.delete({
+      where: { id: params.id },
+    });
+
+    return NextResponse.json({ message: 'Espacio común eliminado exitosamente' });
+  } catch (error) {
+    console.error('Error deleting espacio común:', error);
+    return NextResponse.json(
+      { error: 'Error al eliminar espacio común' },
+      { status: 500 }
+    );
+  }
+}

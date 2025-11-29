@@ -209,6 +209,10 @@ model Building {
   
   // Fase 1
   calendarEvents    CalendarEvent[]
+  
+  // Fase 2
+  commonSpaces      CommonSpace[]
+  insurances        Insurance[]
 
   @@map("buildings")
 }
@@ -256,6 +260,10 @@ model Tenant {
   
   // Fase 1
   calendarEvents    CalendarEvent[]
+  bankConnections   BankConnection[]
+  
+  // Fase 2
+  spaceReservations SpaceReservation[]
 
   @@map("tenants")
 }
@@ -304,6 +312,10 @@ model Unit {
   
   // Fase 1
   calendarEvents    CalendarEvent[]
+  
+  // Fase 2
+  insurances        Insurance[]
+  energyCertificates EnergyCertificate[]
 
   @@unique([buildingId, numero])
   @@map("units")
@@ -687,6 +699,14 @@ model Company {
   
   // Fase 1
   calendarEvents    CalendarEvent[]
+  documentosFirma   DocumentoFirma[]
+  bankConnections   BankConnection[]
+
+  // Fase 2
+  commonSpaces      CommonSpace[]
+  spaceReservations SpaceReservation[]
+  insurances        Insurance[]
+  energyCertificates EnergyCertificate[]
 
   @@map("company")
 }
@@ -2243,6 +2263,7 @@ enum SignerStatus {
 model DocumentoFirma {
   id                String           @id @default(cuid())
   companyId         String
+  company           Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
   titulo            String
   descripcion       String?          @db.Text
   tipoDocumento     String           // "contrato", "adenda", "finiquito", "acta", "otro"
@@ -2367,6 +2388,10 @@ enum TransactionStatus {
 model BankConnection {
   id                String               @id @default(cuid())
   companyId         String
+  company           Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  tenantId          String?
+  tenant            Tenant?              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   
   // Proveedor (Plaid, Tink, Yapily)
   proveedor         String               // "plaid", "tink", "yapily"
@@ -2397,6 +2422,7 @@ model BankConnection {
   desconectadaEn    DateTime?
 
   @@index([companyId])
+  @@index([tenantId])
   @@index([estado])
   @@index([proveedorItemId])
   @@map("bank_connections")
@@ -2984,3 +3010,324 @@ model CalendarEvent {
   @@index([cancelado])
   @@map("calendar_events")
 }
+
+
+// ==========================================
+// FASE 2: NUEVOS MODELOS
+// ==========================================
+
+// ==========================================
+// RESERVA DE ESPACIOS COMUNES
+// ==========================================
+
+enum CommonSpaceType {
+  salon_fiestas
+  gimnasio
+  piscina
+  sala_reuniones
+  zona_bbq
+  cancha_deportiva
+  lavanderia
+  terraza
+  otro
+  @@map("common_space_types")
+}
+
+enum ReservationStatus {
+  pendiente
+  confirmada
+  cancelada
+  completada
+  @@map("reservation_statuses")
+}
+
+model CommonSpace {
+  id                    String                  @id @default(cuid())
+  
+  // Empresa y Edificio
+  companyId             String
+  company               Company                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  buildingId            String
+  building              Building                @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  
+  // Información del espacio
+  nombre                String
+  descripcion           String?                 @db.Text
+  tipo                  CommonSpaceType
+  capacidadMaxima       Int?
+  
+  // Configuración de reservas
+  requierePago          Boolean                 @default(false)
+  costoPorHora          Float?
+  horaApertura          String?                 // Formato "HH:mm"
+  horaCierre            String?                 // Formato "HH:mm"
+  duracionMaximaHoras   Int                     @default(4)
+  anticipacionDias      Int                     @default(30)
+  
+  // Reglas
+  reglas                String?                 @db.Text
+  activo                Boolean                 @default(true)
+  
+  // Relaciones
+  reservations          SpaceReservation[]
+  
+  // Auditoría
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  
+  @@index([companyId])
+  @@index([buildingId])
+  @@index([tipo])
+  @@index([activo])
+  @@map("common_spaces")
+}
+
+model SpaceReservation {
+  id                    String                  @id @default(cuid())
+  
+  // Empresa
+  companyId             String
+  company               Company                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Espacio y Inquilino
+  spaceId               String
+  space                 CommonSpace             @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  
+  tenantId              String
+  tenant                Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  // Fechas y horario
+  fechaReserva          DateTime
+  horaInicio            String                  // Formato "HH:mm"
+  horaFin               String                  // Formato "HH:mm"
+  
+  // Estado y pago
+  estado                ReservationStatus       @default(pendiente)
+  monto                 Float?
+  pagado                Boolean                 @default(false)
+  
+  // Detalles
+  numeroPersonas        Int?
+  proposito             String?                 @db.Text
+  observaciones         String?                 @db.Text
+  
+  // Cancelación
+  motivoCancelacion     String?
+  fechaCancelacion      DateTime?
+  
+  // Auditoría
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  
+  @@index([companyId])
+  @@index([spaceId])
+  @@index([tenantId])
+  @@index([fechaReserva])
+  @@index([estado])
+  @@map("space_reservations")
+}
+
+// ==========================================
+// GESTIÓN DE SEGUROS
+// ==========================================
+
+enum InsuranceType {
+  incendio
+  robo
+  responsabilidad_civil
+  vida
+  hogar
+  comunidad
+  impago_alquiler
+  otro
+  @@map("insurance_types")
+}
+
+enum InsuranceStatus {
+  activa
+  vencida
+  cancelada
+  pendiente_renovacion
+  @@map("insurance_statuses")
+}
+
+enum ClaimStatus {
+  abierto
+  en_proceso
+  aprobado
+  rechazado
+  cerrado
+  @@map("claim_statuses")
+}
+
+model Insurance {
+  id                    String                  @id @default(cuid())
+  
+  // Empresa
+  companyId             String
+  company               Company                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Asociación (opcional: edificio o unidad específica)
+  buildingId            String?
+  building              Building?               @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  
+  unitId                String?
+  unit                  Unit?                   @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  
+  // Información de la póliza
+  numeroPoliza          String
+  tipo                  InsuranceType
+  aseguradora           String
+  nombreAsegurado       String
+  
+  // Contacto aseguradora
+  telefonoAseguradora   String?
+  emailAseguradora      String?
+  contactoAgente        String?
+  
+  // Coberturas
+  cobertura             String?                 @db.Text
+  sumaAsegurada         Float?
+  franquicia            Float?
+  
+  // Fechas y costos
+  fechaInicio           DateTime
+  fechaVencimiento      DateTime
+  primaMensual          Float?
+  primaAnual            Float?
+  
+  // Estado
+  estado                InsuranceStatus         @default(activa)
+  renovacionAutomatica  Boolean                 @default(false)
+  
+  // Documentos
+  urlDocumento          String?
+  
+  // Relaciones
+  claims                InsuranceClaim[]
+  
+  // Notas
+  notas                 String?                 @db.Text
+  
+  // Auditoría
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  
+  @@unique([companyId, numeroPoliza])
+  @@index([companyId])
+  @@index([buildingId])
+  @@index([unitId])
+  @@index([tipo])
+  @@index([estado])
+  @@index([fechaVencimiento])
+  @@map("insurances")
+}
+
+model InsuranceClaim {
+  id                    String                  @id @default(cuid())
+  
+  // Póliza asociada
+  insuranceId           String
+  insurance             Insurance               @relation(fields: [insuranceId], references: [id], onDelete: Cascade)
+  
+  // Información del reclamo
+  numeroReclamo         String?
+  fechaSiniestro        DateTime
+  descripcion           String                  @db.Text
+  montoReclamado        Float?
+  montoAprobado         Float?
+  
+  // Estado
+  estado                ClaimStatus             @default(abierto)
+  
+  // Seguimiento
+  fechaApertura         DateTime                @default(now())
+  fechaCierre           DateTime?
+  documentosAdjuntos    Json?                   // Array de URLs
+  
+  // Notas
+  notas                 String?                 @db.Text
+  
+  // Auditoría
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  
+  @@index([insuranceId])
+  @@index([estado])
+  @@index([fechaSiniestro])
+  @@map("insurance_claims")
+}
+
+// ==========================================
+// CERTIFICACIONES ENERGÉTICAS
+// ==========================================
+
+enum EnergyRating {
+  A
+  B
+  C
+  D
+  E
+  F
+  G
+  @@map("energy_ratings")
+}
+
+model EnergyCertificate {
+  id                    String                  @id @default(cuid())
+  
+  // Empresa y Unidad
+  companyId             String
+  company               Company                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  unitId                String
+  unit                  Unit                    @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  
+  // Información del certificado
+  numeroCertificado     String?
+  calificacion          EnergyRating
+  consumoEnergetico     Float?                  // kWh/m²/año
+  emisionesCO2          Float?                  // kg CO2/m²/año
+  
+  // Técnico certificador
+  nombreTecnico         String
+  numeroColegiadoTecnico String?
+  empresaCertificadora  String?
+  
+  // Fechas
+  fechaEmision          DateTime
+  fechaVencimiento      DateTime                // Típicamente 10 años
+  
+  // Estado
+  vigente               Boolean                 @default(true)
+  
+  // Recomendaciones
+  recomendaciones       String?                 @db.Text
+  ahorroEstimado        Float?                  // Ahorro anual estimado en EUR
+  
+  // Documentos
+  urlCertificado        String?
+  
+  // Notas
+  notas                 String?                 @db.Text
+  
+  // Auditoría
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  
+  @@index([companyId])
+  @@index([unitId])
+  @@index([calificacion])
+  @@index([vigente])
+  @@index([fechaVencimiento])
+  @@map("energy_certificates")
+}
+
+// ==========================================
+// PORTAL DEL PROPIETARIO
+// ==========================================
+// Nota: El Portal del Propietario no requiere modelos nuevos específicos.
+// Utilizará las relaciones existentes de Building, Unit, Contract, Payment,
+// MaintenanceRequest, etc., pero con vistas y permisos específicos para propietarios.
+// Se agregarán campos adicionales a los modelos existentes si es necesario.
