@@ -20,10 +20,22 @@ import {
   Settings,
   ChevronDown,
   ChevronRight,
+  Search,
+  Star,
+  Hotel,
+  TrendingUp,
+  HardHat,
+  Briefcase,
+  Calendar,
+  MessageSquare,
+  Folder,
+  BarChart2,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { usePermissions } from '@/lib/hooks/usePermissions';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 // Mapeo de rutas a códigos de módulos para sistema modular
 const ROUTE_TO_MODULE: Record<string, string> = {
@@ -45,7 +57,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/admin/modulos': 'configuracion',
 };
 
-// Navegación core - siempre visible
+// Navegación core - Funcionalidades principales
 const coreNavItems = [
   { name: 'Inicio', href: '/home', icon: Home, roles: ['administrador', 'gestor', 'operador'] },
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['administrador', 'gestor', 'operador'] },
@@ -55,14 +67,27 @@ const coreNavItems = [
   { name: 'Contratos', href: '/contratos', icon: FileText, roles: ['administrador', 'gestor'] },
   { name: 'Pagos', href: '/pagos', icon: CreditCard, roles: ['administrador', 'gestor'] },
   { name: 'Mantenimiento', href: '/mantenimiento', icon: Wrench, roles: ['administrador', 'gestor', 'operador'] },
+  { name: 'Calendario', href: '/calendario', icon: Calendar, roles: ['administrador', 'gestor'] },
+  { name: 'Chat', href: '/chat', icon: MessageSquare, roles: ['administrador', 'gestor'] },
 ];
 
 // Módulos avanzados
 const advancedNavItems = [
   { name: 'Business Intelligence', href: '/bi', icon: FileBarChart, roles: ['administrador', 'gestor'] },
+  { name: 'Analytics', href: '/analytics', icon: BarChart2, roles: ['administrador', 'gestor'] },
   { name: 'Reportes', href: '/reportes', icon: FileBarChart, roles: ['administrador', 'gestor'] },
-  { name: 'Documentos', href: '/documentos', icon: FileText, roles: ['administrador', 'gestor'] },
+  { name: 'Documentos', href: '/documentos', icon: Folder, roles: ['administrador', 'gestor'] },
   { name: 'Room Rental', href: '/room-rental', icon: Home, roles: ['administrador', 'gestor'] },
+];
+
+// Módulos Multi-Vertical
+const multiVerticalItems = [
+  { name: 'Anuncios STR', href: '/str/listings', icon: Hotel, roles: ['administrador', 'gestor'] },
+  { name: 'Reservas STR', href: '/str/bookings', icon: Calendar, roles: ['administrador', 'gestor'] },
+  { name: 'Canales STR', href: '/str/channels', icon: BarChart2, roles: ['administrador', 'gestor'] },
+  { name: 'House Flipping', href: '/flipping/projects', icon: TrendingUp, roles: ['administrador', 'gestor'] },
+  { name: 'Construcción', href: '/construction/projects', icon: HardHat, roles: ['administrador', 'gestor'] },
+  { name: 'Servicios Profesionales', href: '/professional/projects', icon: Briefcase, roles: ['administrador', 'gestor'] },
 ];
 
 // Admin
@@ -81,9 +106,13 @@ export function Sidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeModules, setActiveModules] = useState<string[]>([]);
   const [modulesLoaded, setModulesLoaded] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [favorites, setFavorites] = useState<string[]>([]);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    favorites: true,
     core: true,
     advanced: false,
+    multivertical: false,
     admin: false,
   });
 
@@ -105,11 +134,37 @@ export function Sidebar() {
     loadActiveModules();
   }, []);
 
+  // Cargar favoritos desde localStorage
+  useEffect(() => {
+    const storedFavorites = localStorage.getItem('sidebar_favorites');
+    if (storedFavorites) {
+      try {
+        setFavorites(JSON.parse(storedFavorites));
+      } catch (error) {
+        console.error('Error loading favorites:', error);
+      }
+    }
+  }, []);
+
+  // Guardar favoritos en localStorage
+  const saveFavorites = (newFavorites: string[]) => {
+    setFavorites(newFavorites);
+    localStorage.setItem('sidebar_favorites', JSON.stringify(newFavorites));
+  };
+
+  // Toggle favorito
+  const toggleFavorite = (href: string) => {
+    const newFavorites = favorites.includes(href)
+      ? favorites.filter(f => f !== href)
+      : [...favorites, href];
+    saveFavorites(newFavorites);
+  };
+
   // Filtrar items según rol y módulos activos
   const filterItems = (items: any[]) => {
     if (!role || !modulesLoaded) return [];
     
-    return items.filter(item => {
+    let filtered = items.filter(item => {
       // Verificar permisos de rol
       if (!item.roles.includes(role)) return false;
       
@@ -119,11 +174,29 @@ export function Sidebar() {
       
       return activeModules.includes(moduleCode);
     });
+
+    // Aplicar búsqueda
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(item =>
+        item.name.toLowerCase().includes(query)
+      );
+    }
+
+    return filtered;
   };
 
   const filteredCoreItems = filterItems(coreNavItems);
   const filteredAdvancedItems = filterItems(advancedNavItems);
+  const filteredMultiVerticalItems = filterItems(multiVerticalItems);
   const filteredAdminItems = filterItems(adminNavItems);
+
+  // Obtener items favoritos
+  const allItems = [...coreNavItems, ...advancedNavItems, ...multiVerticalItems, ...adminNavItems];
+  const favoriteItems = allItems.filter(item => 
+    favorites.includes(item.href) && 
+    filterItems([item]).length > 0 // Solo mostrar si el item es accesible
+  );
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -132,6 +205,45 @@ export function Sidebar() {
   const handleSignOut = async () => {
     await signOut({ redirect: false });
     router.push('/login');
+  };
+
+  // Componente reutilizable para nav items con favoritos
+  const NavItem = ({ item, showFavoriteButton = true }: { item: any; showFavoriteButton?: boolean }) => {
+    const isActive = pathname?.startsWith(item.href) ?? false;
+    const isFavorite = favorites.includes(item.href);
+
+    return (
+      <div className="relative group">
+        <Link
+          href={item.href}
+          onClick={() => setIsMobileMenuOpen(false)}
+          className={cn(
+            'flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 text-sm',
+            isActive
+              ? 'bg-white text-black font-medium'
+              : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+          )}
+        >
+          <item.icon size={18} />
+          <span className="flex-1">{item.name}</span>
+        </Link>
+        {showFavoriteButton && (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              toggleFavorite(item.href);
+            }}
+            className={cn(
+              'absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity',
+              isFavorite ? 'text-yellow-400' : 'text-gray-400 hover:text-yellow-400'
+            )}
+            title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+          >
+            <Star size={14} fill={isFavorite ? 'currentColor' : 'none'} />
+          </button>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -174,8 +286,53 @@ export function Sidebar() {
             <p className="text-xs text-gray-400 mt-2 text-center">{appName}</p>
           </div>
 
+          {/* Search Bar */}
+          <div className="p-4 border-b border-gray-800">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+              <Input
+                type="text"
+                placeholder="Buscar página..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 bg-gray-800 border-gray-700 text-white placeholder:text-gray-500 focus:border-gray-600"
+              />
+            </div>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="text-xs text-gray-400 hover:text-white mt-2 transition-colors"
+              >
+                Limpiar búsqueda
+              </button>
+            )}
+          </div>
+
           {/* Navigation */}
           <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+            {/* Favorites Section */}
+            {favoriteItems.length > 0 && !searchQuery && (
+              <div className="mb-4">
+                <button
+                  onClick={() => toggleSection('favorites')}
+                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <Star size={14} fill="currentColor" className="text-yellow-400" />
+                    <span>Favoritos</span>
+                  </div>
+                  {expandedSections.favorites ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                </button>
+                {expandedSections.favorites && (
+                  <div className="space-y-1 mt-1">
+                    {favoriteItems.map((item) => (
+                      <NavItem key={item.href} item={item} showFavoriteButton={false} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Core Section */}
             {filteredCoreItems.length > 0 && (
               <div className="mb-4">
@@ -188,25 +345,9 @@ export function Sidebar() {
                 </button>
                 {expandedSections.core && (
                   <div className="space-y-1 mt-1">
-                    {filteredCoreItems.map((item) => {
-                      const isActive = pathname?.startsWith(item.href) ?? false;
-                      return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className={cn(
-                            'flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 text-sm',
-                            isActive
-                              ? 'bg-white text-black font-medium'
-                              : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                          )}
-                        >
-                          <item.icon size={18} />
-                          <span>{item.name}</span>
-                        </Link>
-                      );
-                    })}
+                    {filteredCoreItems.map((item) => (
+                      <NavItem key={item.href} item={item} />
+                    ))}
                   </div>
                 )}
               </div>
@@ -224,25 +365,29 @@ export function Sidebar() {
                 </button>
                 {expandedSections.advanced && (
                   <div className="space-y-1 mt-1">
-                    {filteredAdvancedItems.map((item) => {
-                      const isActive = pathname?.startsWith(item.href) ?? false;
-                      return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className={cn(
-                            'flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 text-sm',
-                            isActive
-                              ? 'bg-white text-black font-medium'
-                              : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                          )}
-                        >
-                          <item.icon size={18} />
-                          <span>{item.name}</span>
-                        </Link>
-                      );
-                    })}
+                    {filteredAdvancedItems.map((item) => (
+                      <NavItem key={item.href} item={item} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Multi-Vertical Section */}
+            {filteredMultiVerticalItems.length > 0 && (
+              <div className="mb-4">
+                <button
+                  onClick={() => toggleSection('multivertical')}
+                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
+                >
+                  <span>Multi-Vertical</span>
+                  {expandedSections.multivertical ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                </button>
+                {expandedSections.multivertical && (
+                  <div className="space-y-1 mt-1">
+                    {filteredMultiVerticalItems.map((item) => (
+                      <NavItem key={item.href} item={item} />
+                    ))}
                   </div>
                 )}
               </div>
@@ -260,27 +405,23 @@ export function Sidebar() {
                 </button>
                 {expandedSections.admin && (
                   <div className="space-y-1 mt-1">
-                    {filteredAdminItems.map((item) => {
-                      const isActive = pathname?.startsWith(item.href) ?? false;
-                      return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className={cn(
-                            'flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 text-sm',
-                            isActive
-                              ? 'bg-white text-black font-medium'
-                              : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                          )}
-                        >
-                          <item.icon size={18} />
-                          <span>{item.name}</span>
-                        </Link>
-                      );
-                    })}
+                    {filteredAdminItems.map((item) => (
+                      <NavItem key={item.href} item={item} />
+                    ))}
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* No results message */}
+            {searchQuery && 
+             filteredCoreItems.length === 0 && 
+             filteredAdvancedItems.length === 0 && 
+             filteredMultiVerticalItems.length === 0 && 
+             filteredAdminItems.length === 0 && (
+              <div className="text-center py-8 text-gray-400">
+                <p className="text-sm">No se encontraron páginas</p>
+                <p className="text-xs mt-1">Intenta con otro término</p>
               </div>
             )}
           </nav>
