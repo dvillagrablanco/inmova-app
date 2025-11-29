@@ -292,14 +292,14 @@ export default function MantenimientoProPage() {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Mantenimiento Pro</BreadcrumbPage>
+                  <BreadcrumbPage>Analytics de Mantenimiento</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
 
             <div className="mt-4 flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold">Mantenimiento Profesional</h1>
+                <h1 className="text-3xl font-bold">Analytics de Mantenimiento</h1>
                 <p className="text-muted-foreground mt-1">
                   Gestión avanzada con predicciones, inventario y métricas
                 </p>
