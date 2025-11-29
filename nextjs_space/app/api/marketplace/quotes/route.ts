@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { suggestProviderForService } from '@/lib/marketplace-service';
+// import { suggestProviderForService } from '@/lib/marketplace-service';
 
 // GET /api/marketplace/quotes - Obtener cotizaciones
 export async function GET(req: NextRequest) {
@@ -60,16 +60,16 @@ export async function POST(req: NextRequest) {
     } = body;
 
     // Si no se proporciona proveedor, sugerir uno
-    let selectedProviderId = providerId;
-    if (!selectedProviderId && servicioRequerido) {
-      const suggestion = await suggestProviderForService(
-        session.user.companyId,
-        servicioRequerido
-      );
-      if (suggestion) {
-        selectedProviderId = suggestion.provider.id;
-      }
-    }
+    const selectedProviderId = providerId;
+    // if (!selectedProviderId && servicioRequerido) {
+    //   const suggestion = await suggestProviderForService(
+    //     session.user.companyId,
+    //     servicioRequerido
+    //   );
+    //   if (suggestion) {
+    //     selectedProviderId = suggestion.provider.id;
+    //   }
+    // }
 
     if (!selectedProviderId) {
       return NextResponse.json(

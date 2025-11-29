@@ -485,6 +485,71 @@ export const MODULOS_CATALOGO = [
     esCore: false,
     orden: 72
   },
+  
+  // ========================================
+  // NUEVOS MÓDULOS ESTRATÉGICOS 🚀
+  // ========================================
+  
+  {
+    codigo: 'esg',
+    nombre: 'ESG y Sostenibilidad',
+    descripcion: 'Gestión de huella de carbono, planes de descarbonización, certificaciones ESG y reportes de sostenibilidad conforme CSRD',
+    categoria: 'avanzado',
+    icono: 'Leaf',
+    ruta: '/esg',
+    requiereModulos: ['edificios', 'energia'],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 73
+  },
+  {
+    codigo: 'marketplace',
+    nombre: 'Marketplace de Servicios',
+    descripcion: 'Plataforma B2C para que inquilinos contraten servicios verificados (limpieza, reparaciones, internet, seguros) con programa de fidelización',
+    categoria: 'avanzado',
+    icono: 'ShoppingBag',
+    ruta: '/marketplace-servicios',
+    requiereModulos: ['inquilinos'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 74
+  },
+  {
+    codigo: 'tours_virtuales',
+    nombre: 'Tours Virtuales AR/VR',
+    descripcion: 'Tours 360° inmersivos, visualización AR de reformas, decoración virtual y medición de engagement para maximizar conversiones',
+    categoria: 'avanzado',
+    icono: 'View',
+    ruta: '/tours-virtuales',
+    requiereModulos: ['unidades', 'galerias'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 75
+  },
+  {
+    codigo: 'pricing_dinamico',
+    nombre: 'Pricing Dinámico IA',
+    descripcion: 'Optimización automática de precios con IA basada en análisis de mercado, estacionalidad, eventos y demanda en tiempo real',
+    categoria: 'avanzado',
+    icono: 'TrendingUp',
+    ruta: '/pricing-dinamico',
+    requiereModulos: ['unidades', 'contratos'],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 76
+  },
+  {
+    codigo: 'iot',
+    nombre: 'Edificios Inteligentes IoT',
+    descripcion: 'Integración con dispositivos IoT (termostatos, sensores, cerraduras), automatizaciones inteligentes y monitoreo en tiempo real',
+    categoria: 'avanzado',
+    icono: 'Wifi',
+    ruta: '/edificios-inteligentes',
+    requiereModulos: ['edificios', 'unidades'],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 77
+  },
 ];
 
 /**

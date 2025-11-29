@@ -1,167 +1,198 @@
-import { prisma } from './db';
-import { QuoteStatus, JobStatus } from '@prisma/client';
-
 /**
- * PAQUETE 11: MARKETPLACE DE SERVICIOS - SERVICE LAYER
+ * Servicio de Marketplace de Servicios
+ * Gestión de servicios para inquilinos, reservas y programa de fidelización
  */
 
-// Calcular estadísticas de un proveedor
-export async function calculateProviderStats(providerId: string) {
-  const [totalJobs, completedJobs, reviews] = await Promise.all([
-    prisma.serviceJob.count({ where: { providerId } }),
-    prisma.serviceJob.count({ where: { providerId, estado: 'completado' } }),
-    prisma.serviceReview.findMany({ where: { providerId } }),
-  ]);
+import { prisma } from './db';
 
-  const avgRating = reviews.length > 0
-    ? reviews.reduce((sum, r) => sum + r.calificacion, 0) / reviews.length
-    : 0;
-
-  const avgPuntualidad = reviews.length > 0 && reviews.some(r => r.puntualidad)
-    ? reviews.reduce((sum, r) => sum + (r.puntualidad || 0), 0) / reviews.filter(r => r.puntualidad).length
-    : 0;
-
-  const avgCalidad = reviews.length > 0 && reviews.some(r => r.calidad)
-    ? reviews.reduce((sum, r) => sum + (r.calidad || 0), 0) / reviews.filter(r => r.calidad).length
-    : 0;
-
-  const recommendationRate = reviews.length > 0
-    ? (reviews.filter(r => r.recomendaria).length / reviews.length) * 100
-    : 0;
+/**
+ * Calcula el precio total de una reserva con comisión
+ */
+export function calcularPrecioReserva(
+  precioBase: number,
+  comisionPorcentaje: number,
+  duracion?: number
+): { precioBase: number; comision: number; precioTotal: number } {
+  const comision = precioBase * (comisionPorcentaje / 100);
+  const precioTotal = precioBase + comision;
 
   return {
-    totalJobs,
-    completedJobs,
-    totalReviews: reviews.length,
-    avgRating: parseFloat(avgRating.toFixed(1)),
-    avgPuntualidad: parseFloat(avgPuntualidad.toFixed(1)),
-    avgCalidad: parseFloat(avgCalidad.toFixed(1)),
-    recommendationRate: parseFloat(recommendationRate.toFixed(1)),
+    precioBase,
+    comision,
+    precioTotal
   };
 }
 
-// Obtener mejores proveedores por calificación
-export async function getTopProviders(companyId: string, limit: number = 5) {
-  const providers = await prisma.provider.findMany({
-    where: { companyId },
-    include: {
-      serviceReviews: true,
-      serviceJobs: { where: { estado: 'completado' } },
-    },
-  });
+/**
+ * Calcula puntos de fidelización por una reserva
+ */
+export function calcularPuntosFidelizacion(
+  precioTotal: number,
+  nivelActual: string
+): number {
+  const multiplicadores: Record<string, number> = {
+    bronce: 1,
+    plata: 1.5,
+    oro: 2,
+    platino: 3
+  };
 
-  const providersWithStats = await Promise.all(
-    providers.map(async (provider) => {
-      const stats = await calculateProviderStats(provider.id);
-      return { ...provider, stats };
-    })
-  );
+  const puntosBase = Math.floor(precioTotal / 10); // 1 punto por cada 10€
+  const multiplicador = multiplicadores[nivelActual] || 1;
 
-  return providersWithStats
-    .filter(p => p.stats.totalReviews > 0)
-    .sort((a, b) => b.stats.avgRating - a.stats.avgRating)
-    .slice(0, limit);
+  return Math.floor(puntosBase * multiplicador);
 }
 
-// Sugerir proveedor basado en tipo de servicio
-export async function suggestProviderForService(
+/**
+ * Determina el nivel de fidelización basado en puntos
+ */
+export function determinarNivelFidelizacion(puntos: number): string {
+  if (puntos >= 5000) return 'platino';
+  if (puntos >= 2000) return 'oro';
+  if (puntos >= 500) return 'plata';
+  return 'bronce';
+}
+
+/**
+ * Calcula el descuento actual basado en nivel
+ */
+export function calcularDescuentoPorNivel(nivel: string): number {
+  const descuentos: Record<string, number> = {
+    bronce: 0,
+    plata: 5,
+    oro: 10,
+    platino: 15
+  };
+
+  return descuentos[nivel] || 0;
+}
+
+/**
+ * Actualiza el programa de fidelización tras una reserva
+ */
+export async function actualizarFidelizacion(
+  tenantId: string,
   companyId: string,
-  servicioTipo: string
+  precioTotal: number
 ) {
-  // Buscar proveedores del tipo requerido
-  const providers = await prisma.provider.findMany({
-    where: {
-      companyId,
-      tipo: { contains: servicioTipo, mode: 'insensitive' },
-    },
-    include: {
-      serviceReviews: true,
-      serviceJobs: { where: { estado: 'completado' } },
-    },
+  // Buscar o crear registro de fidelización
+  let loyalty = await prisma.marketplaceLoyalty.findUnique({
+    where: { tenantId }
   });
 
-  if (providers.length === 0) return null;
+  if (!loyalty) {
+    loyalty = await prisma.marketplaceLoyalty.create({
+      data: {
+        tenantId,
+        companyId,
+        puntos: 0,
+        nivel: 'bronce'
+      }
+    });
+  }
 
-  // Calcular score para cada proveedor
-  const providersWithScores = await Promise.all(
-    providers.map(async (provider) => {
-      const stats = await calculateProviderStats(provider.id);
-      
-      // Score basado en: rating (40%), trabajos completados (30%), tasa de recomendación (30%)
-      const score =
-        (stats.avgRating / 5) * 40 +
-        Math.min(stats.completedJobs / 10, 1) * 30 +
-        (stats.recommendationRate / 100) * 30;
+  // Calcular puntos ganados
+  const puntosGanados = calcularPuntosFidelizacion(precioTotal, loyalty.nivel);
+  const nuevosPuntos = loyalty.puntos + puntosGanados;
+  const nuevoNivel = determinarNivelFidelizacion(nuevosPuntos);
+  const nuevoDescuento = calcularDescuentoPorNivel(nuevoNivel);
 
-      return { provider, stats, score };
-    })
-  );
+  // Cashback (2% del total)
+  const cashback = precioTotal * 0.02;
 
-  // Retornar el mejor proveedor
-  const bestProvider = providersWithScores.sort((a, b) => b.score - a.score)[0];
-  return bestProvider;
-}
-
-// Actualizar rating de proveedor basado en reviews
-export async function updateProviderRating(providerId: string) {
-  const reviews = await prisma.serviceReview.findMany({
-    where: { providerId },
+  // Actualizar
+  const updated = await prisma.marketplaceLoyalty.update({
+    where: { tenantId },
+    data: {
+      puntos: nuevosPuntos,
+      nivel: nuevoNivel,
+      descuentoActual: nuevoDescuento,
+      cashbackAcumulado: { increment: cashback },
+      puntosGanados: { increment: puntosGanados },
+      serviciosUsados: { increment: 1 },
+      ultimaActividad: new Date()
+    }
   });
-
-  if (reviews.length === 0) return;
-
-  const avgRating =
-    reviews.reduce((sum, r) => sum + r.calificacion, 0) / reviews.length;
-
-  await prisma.provider.update({
-    where: { id: providerId },
-    data: { rating: parseFloat(avgRating.toFixed(1)) },
-  });
-}
-
-// Verificar cotizaciones expiradas y actualizar estado
-export async function checkExpiredQuotes(companyId: string) {
-  const now = new Date();
-  
-  const expiredQuotes = await prisma.serviceQuote.updateMany({
-    where: {
-      companyId,
-      estado: 'cotizada',
-      validezCotizacion: { lt: now },
-    },
-    data: { estado: 'expirada' },
-  });
-
-  return expiredQuotes.count;
-}
-
-// Obtener estadísticas del marketplace
-export async function getMarketplaceStats(companyId: string) {
-  const [totalQuotes, pendingQuotes, activeJobs, completedJobs, totalReviews] =
-    await Promise.all([
-      prisma.serviceQuote.count({ where: { companyId } }),
-      prisma.serviceQuote.count({
-        where: { companyId, estado: { in: ['solicitada', 'en_revision'] } },
-      }),
-      prisma.serviceJob.count({
-        where: { companyId, estado: { in: ['pendiente', 'en_progreso'] } },
-      }),
-      prisma.serviceJob.count({ where: { companyId, estado: 'completado' } }),
-      prisma.serviceReview.count({ where: { companyId } }),
-    ]);
-
-  const reviews = await prisma.serviceReview.findMany({ where: { companyId } });
-  const avgRating =
-    reviews.length > 0
-      ? reviews.reduce((sum, r) => sum + r.calificacion, 0) / reviews.length
-      : 0;
 
   return {
-    totalQuotes,
-    pendingQuotes,
-    activeJobs,
-    completedJobs,
-    totalReviews,
-    avgRating: parseFloat(avgRating.toFixed(1)),
+    puntosGanados,
+    puntosTotal: updated.puntos,
+    nivel: updated.nivel,
+    descuento: updated.descuentoActual,
+    cashback,
+    cambioNivel: nuevoNivel !== loyalty.nivel
   };
+}
+
+/**
+ * Obtiene servicios recomendados para un inquilino
+ */
+export async function obtenerServiciosRecomendados(
+  companyId: string,
+  tenantId: string,
+  categoria?: string
+) {
+  // Obtener historial de reservas del inquilino
+  const reservasPrevias = await prisma.marketplaceBooking.findMany({
+    where: {
+      tenantId,
+      estado: 'completada'
+    },
+    include: {
+      service: true
+    },
+    take: 10
+  });
+
+  const categoriasUsadas = [...new Set(reservasPrevias.map(r => r.service.categoria))];
+
+  // Buscar servicios populares en esas categorías
+  const servicios = await prisma.marketplaceService.findMany({
+    where: {
+      companyId,
+      activo: true,
+      disponible: true,
+      categoria: categoria || { in: categoriasUsadas.length > 0 ? categoriasUsadas : undefined }
+    },
+    orderBy: [
+      { destacado: 'desc' },
+      { rating: 'desc' },
+      { totalReviews: 'desc' }
+    ],
+    take: 6
+  });
+
+  return servicios;
+}
+
+/**
+ * Procesa el pago de una reserva de marketplace
+ */
+export async function procesarPagoReserva(
+  bookingId: string,
+  stripePaymentId: string,
+  metodoPago: string
+) {
+  const booking = await prisma.marketplaceBooking.update({
+    where: { id: bookingId },
+    data: {
+      pagado: true,
+      stripePaymentId,
+      metodoPago,
+      estado: 'confirmada'
+    },
+    include: {
+      service: true,
+      tenant: true
+    }
+  });
+
+  // Actualizar fidelización
+  await actualizarFidelizacion(
+    booking.tenantId,
+    booking.companyId,
+    booking.precioTotal
+  );
+
+  return booking;
 }

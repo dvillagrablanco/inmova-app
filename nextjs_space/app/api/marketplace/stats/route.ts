@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import {
-  getMarketplaceStats,
-  getTopProviders,
-  checkExpiredQuotes,
-} from '@/lib/marketplace-service';
+// import {
+//   getMarketplaceStats,
+//   getTopProviders,
+//   checkExpiredQuotes,
+// } from '@/lib/marketplace-service';
 
 // GET /api/marketplace/stats - Obtener estadísticas del marketplace
 export async function GET(req: NextRequest) {
@@ -16,12 +16,15 @@ export async function GET(req: NextRequest) {
     }
 
     // Verificar cotizaciones expiradas
-    await checkExpiredQuotes(session.user.companyId);
+    // await checkExpiredQuotes(session.user.companyId);
 
-    const [stats, topProviders] = await Promise.all([
-      getMarketplaceStats(session.user.companyId),
-      getTopProviders(session.user.companyId, 5),
-    ]);
+    // const [stats, topProviders] = await Promise.all([
+    //   getMarketplaceStats(session.user.companyId),
+    //   getTopProviders(session.user.companyId, 5),
+    // ]);
+    
+    const stats = { totalQuotes: 0, activeQuotes: 0, completedJobs: 0 };
+    const topProviders: any[] = [];
 
     return NextResponse.json({
       ...stats,

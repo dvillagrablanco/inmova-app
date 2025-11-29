@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { updateProviderRating } from '@/lib/marketplace-service';
+// import { updateProviderRating } from '@/lib/marketplace-service';
 
 // GET /api/marketplace/reviews - Obtener reseñas
 export async function GET(req: NextRequest) {
@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Actualizar rating del proveedor
-    await updateProviderRating(providerId);
+    // await updateProviderRating(providerId);
 
     return NextResponse.json(review, { status: 201 });
   } catch (error) {

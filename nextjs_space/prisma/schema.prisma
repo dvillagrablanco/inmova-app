@@ -225,6 +225,13 @@ model Building {
   communityMeetings  CommunityMeeting[]
   providerWorkOrders ProviderWorkOrder[]
 
+  // Nuevos Módulos Estratégicos
+  iotDevices         IoTDevice[]     @relation("BuildingIoTDevices")
+  virtualTours       VirtualTour[]   @relation("BuildingVirtualTours")
+  carbonFootprints   CarbonFootprint[] @relation("BuildingCarbonFootprints")
+  decarbonizationPlans DecarbonizationPlan[] @relation("BuildingDecarbonizationPlans")
+  esgCertifications  ESGCertification[] @relation("BuildingESGCertifications")
+
   @@map("buildings")
 }
 
@@ -275,6 +282,10 @@ model Tenant {
   
   // Fase 2
   spaceReservations SpaceReservation[]
+
+  // Nuevos Módulos Estratégicos
+  marketplaceBookings MarketplaceBooking[] @relation("TenantMarketplaceBookings")
+  marketplaceLoyalty  MarketplaceLoyalty?  @relation("TenantMarketplaceLoyalty")
 
   @@map("tenants")
 }
@@ -332,6 +343,14 @@ model Unit {
   communityIncidents CommunityIncident[]
   providerWorkOrders ProviderWorkOrder[]
   propertyGallery    PropertyGallery?
+
+  // Nuevos Módulos Estratégicos
+  iotDevices         IoTDevice[]     @relation("UnitIoTDevices")
+  virtualTours       VirtualTour[]   @relation("UnitVirtualTours")
+  arVisualizations   ARVisualization[] @relation("UnitARVisualizations")
+  marketplaceBookings MarketplaceBooking[] @relation("UnitMarketplaceBookings")
+  pricingAnalysis    PricingAnalysis[] @relation("UnitPricingAnalysis")
+  pricingStrategies  PricingStrategy[] @relation("UnitPricingStrategies")
 
   @@unique([buildingId, numero])
   @@map("units")
@@ -527,6 +546,9 @@ model Provider {
   serviceJobs       ServiceJob[]
   serviceReviews    ServiceReview[]
   workOrders        ProviderWorkOrder[]
+
+  // Nuevos Módulos Estratégicos
+  marketplaceServices MarketplaceService[] @relation("ProviderMarketplaceServices")
 
   @@map("providers")
 }
@@ -762,6 +784,28 @@ model Company {
   
   // White Label
   branding           BrandingConfig?
+
+  // Nuevos Módulos Estratégicos (IoT, AR/VR, Marketplace, Pricing IA, ESG)
+  iotDevices         IoTDevice[]     @relation("CompanyIoTDevices")
+  iotAutomations     IoTAutomation[] @relation("CompanyIoTAutomations")
+  iotAlerts          IoTAlert[]      @relation("CompanyIoTAlerts")
+  
+  virtualTours       VirtualTour[]   @relation("CompanyVirtualTours")
+  arVisualizations   ARVisualization[] @relation("CompanyARVisualizations")
+  
+  marketplaceServices MarketplaceService[] @relation("CompanyMarketplaceServices")
+  marketplaceBookings MarketplaceBooking[] @relation("CompanyMarketplaceBookings")
+  marketplaceLoyalty  MarketplaceLoyalty[] @relation("CompanyMarketplaceLoyalty")
+  
+  pricingAnalysis    PricingAnalysis[] @relation("CompanyPricingAnalysis")
+  marketData         MarketData[]      @relation("CompanyMarketData")
+  pricingStrategies  PricingStrategy[] @relation("CompanyPricingStrategies")
+  
+  carbonFootprints   CarbonFootprint[]     @relation("CompanyCarbonFootprints")
+  decarbonizationPlans DecarbonizationPlan[] @relation("CompanyDecarbonizationPlans")
+  esgCertifications  ESGCertification[]    @relation("CompanyESGCertifications")
+  esgReports         ESGReport[]           @relation("CompanyESGReports")
+  greenProviders     GreenProvider[]       @relation("CompanyGreenProviders")
 
   @@map("company")
 }
@@ -4263,4 +4307,588 @@ model BrandingConfig {
   
   @@index([companyId])
   @@map("branding_configs")
+}
+
+// ============================================
+// MÓDULO: IoT Y EDIFICIOS INTELIGENTES 🏢🔌
+// ============================================
+
+model IoTDevice {
+  id                String         @id @default(cuid())
+  companyId         String
+  company           Company        @relation("CompanyIoTDevices", fields: [companyId], references: [id], onDelete: Cascade)
+  buildingId        String?
+  building          Building?      @relation("BuildingIoTDevices", fields: [buildingId], references: [id], onDelete: SetNull)
+  unitId            String?
+  unit              Unit?          @relation("UnitIoTDevices", fields: [unitId], references: [id], onDelete: SetNull)
+  
+  nombre            String
+  tipo              String         // 'thermostat', 'lock', 'sensor', 'camera', 'light', 'hvac'
+  marca             String?
+  modelo            String?
+  numeroSerie       String?
+  protocolo         String?        // 'wifi', 'zigbee', 'zwave', 'mqtt', 'ble'
+  ubicacion         String?
+  
+  estado            String         @default("activo")
+  conectado         Boolean        @default(false)
+  ultimaConexion    DateTime?
+  bateria           Int?
+  
+  configuracion     Json?
+  umbrales          Json?
+  endpoint          String?
+  apiKey            String?
+  
+  instaladoPor      String?
+  fechaInstalacion  DateTime?
+  ultimoMantenimiento DateTime?
+  
+  readings          IoTReading[]
+  automations       IoTAutomation[]
+  alerts            IoTAlert[]
+  
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  
+  @@index([companyId])
+  @@index([buildingId])
+  @@map("iot_devices")
+}
+
+model IoTReading {
+  id                String         @id @default(cuid())
+  deviceId          String
+  device            IoTDevice      @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  
+  metrica           String
+  valor             Float
+  unidad            String
+  timestamp         DateTime       @default(now())
+  
+  @@index([deviceId, timestamp])
+  @@map("iot_readings")
+}
+
+model IoTAutomation {
+  id                String         @id @default(cuid())
+  companyId         String
+  company           Company        @relation("CompanyIoTAutomations", fields: [companyId], references: [id], onDelete: Cascade)
+  deviceId          String
+  device            IoTDevice      @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  
+  nombre            String
+  descripcion       String?
+  tipo              String
+  condiciones       Json
+  acciones          Json
+  
+  activa            Boolean        @default(true)
+  ultimaEjecucion   DateTime?
+  vecesEjecutada    Int            @default(0)
+  creadoPor         String?
+  
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  
+  @@index([companyId])
+  @@map("iot_automations")
+}
+
+model IoTAlert {
+  id                String         @id @default(cuid())
+  companyId         String
+  company           Company        @relation("CompanyIoTAlerts", fields: [companyId], references: [id], onDelete: Cascade)
+  deviceId          String
+  device            IoTDevice      @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  
+  tipo              String
+  titulo            String
+  mensaje           String         @db.Text
+  severidad         String         @default("media")
+  
+  estado            String         @default("activa")
+  reconocidaPor     String?
+  fechaReconocida   DateTime?
+  fechaResuelta     DateTime?
+  metadata          Json?
+  
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  
+  @@index([companyId, estado])
+  @@map("iot_alerts")
+}
+
+// ============================================
+// MÓDULO: AR/VR TOURS VIRTUALES 🥽✨
+// ============================================
+
+model VirtualTour {
+  id                String         @id @default(cuid())
+  companyId         String
+  company           Company        @relation("CompanyVirtualTours", fields: [companyId], references: [id], onDelete: Cascade)
+  unitId            String?
+  unit              Unit?          @relation("UnitVirtualTours", fields: [unitId], references: [id], onDelete: SetNull)
+  buildingId        String?
+  building          Building?      @relation("BuildingVirtualTours", fields: [buildingId], references: [id], onDelete: SetNull)
+  
+  titulo            String
+  descripcion       String?        @db.Text
+  tipo              String
+  
+  urlPrincipal      String         @db.Text
+  urlThumbnail      String?
+  embedCode         String?        @db.Text
+  
+  escenas           Json?
+  hotspots          Json?
+  
+  vistas            Int            @default(0)
+  tiempoPromedio    Int?
+  compartido        Int            @default(0)
+  
+  estado            String         @default("borrador")
+  publico           Boolean        @default(false)
+  
+  creadoPor         String?
+  plataforma        String?
+  
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  
+  @@index([companyId, estado])
+  @@map("virtual_tours")
+}
+
+model ARVisualization {
+  id                String         @id @default(cuid())
+  companyId         String
+  company           Company        @relation("CompanyARVisualizations", fields: [companyId], references: [id], onDelete: Cascade)
+  unitId            String
+  unit              Unit           @relation("UnitARVisualizations", fields: [unitId], references: [id], onDelete: Cascade)
+  
+  nombre            String
+  descripcion       String?        @db.Text
+  tipo              String
+  
+  escenaBefore      Json?
+  escenaAfter       Json
+  elementos         Json?
+  
+  costoEstimado     Float?
+  tiempoEstimado    Int?
+  
+  estado            String         @default("borrador")
+  compartidaCon     Json?
+  creadoPor         String?
+  
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  
+  @@index([companyId])
+  @@map("ar_visualizations")
+}
+
+// ============================================
+// MÓDULO: MARKETPLACE DE SERVICIOS 🛍️🏠
+// ============================================
+
+model MarketplaceService {
+  id                String                  @id @default(cuid())
+  companyId         String
+  company           Company                 @relation("CompanyMarketplaceServices", fields: [companyId], references: [id], onDelete: Cascade)
+  providerId        String?
+  provider          Provider?               @relation("ProviderMarketplaceServices", fields: [providerId], references: [id], onDelete: SetNull)
+  
+  nombre            String
+  descripcion       String                  @db.Text
+  categoria         String
+  subcategoria      String?
+  
+  tipoPrecio        String
+  precio            Float?
+  unidad            String?
+  comisionPorcentaje Float                  @default(10)
+  
+  disponible        Boolean                 @default(true)
+  horarios          Json?
+  
+  duracionEstimada  Int?
+  requisitos        Json?
+  incluye           Json?
+  noIncluye         Json?
+  
+  rating            Float?
+  totalReviews      Int                     @default(0)
+  imagenes          Json?
+  
+  destacado         Boolean                 @default(false)
+  activo            Boolean                 @default(true)
+  
+  reservas          MarketplaceBooking[]
+  
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  
+  @@index([companyId, categoria, activo])
+  @@map("marketplace_services")
+}
+
+model MarketplaceBooking {
+  id                String                  @id @default(cuid())
+  companyId         String
+  company           Company                 @relation("CompanyMarketplaceBookings", fields: [companyId], references: [id], onDelete: Cascade)
+  serviceId         String
+  service           MarketplaceService      @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  tenantId          String
+  tenant            Tenant                  @relation("TenantMarketplaceBookings", fields: [tenantId], references: [id], onDelete: Cascade)
+  unitId            String?
+  unit              Unit?                   @relation("UnitMarketplaceBookings", fields: [unitId], references: [id], onDelete: SetNull)
+  
+  fechaSolicitud    DateTime                @default(now())
+  fechaServicio     DateTime
+  horaInicio        String?
+  horaFin           String?
+  
+  precioBase        Float
+  comision          Float
+  precioTotal       Float
+  
+  estado            String                  @default("pendiente")
+  motivoCancelacion String?                 @db.Text
+  
+  pagado            Boolean                 @default(false)
+  metodoPago        String?
+  stripePaymentId   String?
+  
+  rating            Int?
+  comentario        String?                 @db.Text
+  fechaRating       DateTime?
+  
+  notasCliente      String?                 @db.Text
+  notasInternas     String?                 @db.Text
+  
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  
+  @@index([companyId, tenantId, estado])
+  @@map("marketplace_bookings")
+}
+
+model MarketplaceLoyalty {
+  id                String         @id @default(cuid())
+  companyId         String
+  company           Company        @relation("CompanyMarketplaceLoyalty", fields: [companyId], references: [id], onDelete: Cascade)
+  tenantId          String         @unique
+  tenant            Tenant         @relation("TenantMarketplaceLoyalty", fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  puntos            Int            @default(0)
+  nivel             String         @default("bronce")
+  
+  descuentoActual   Float          @default(0)
+  cashbackAcumulado Float          @default(0)
+  
+  puntosGanados     Int            @default(0)
+  puntosCanjeados   Int            @default(0)
+  serviciosUsados   Int            @default(0)
+  ultimaActividad   DateTime?
+  
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  
+  @@map("marketplace_loyalty")
+}
+
+// ============================================
+// MÓDULO: PRICING DINÁMICO CON IA 🤖💰
+// ============================================
+
+model PricingAnalysis {
+  id                String         @id @default(cuid())
+  companyId         String
+  company           Company        @relation("CompanyPricingAnalysis", fields: [companyId], references: [id], onDelete: Cascade)
+  unitId            String
+  unit              Unit           @relation("UnitPricingAnalysis", fields: [unitId], references: [id], onDelete: Cascade)
+  
+  precioActual      Float
+  precioSugerido    Float
+  precioMinimo      Float
+  precioMaximo      Float
+  
+  precioMercado     Float?
+  competidores      Json?
+  
+  factores          Json
+  estacionalidad    Json?
+  eventosCercanos   Json?
+  
+  probabilidadAlquiler Int
+  diasHastaAlquiler Int?
+  demandaEstimada   String?
+  
+  estrategia        String?
+  recomendacion     String         @db.Text
+  
+  aplicado          Boolean        @default(false)
+  fechaAplicacion   DateTime?
+  resultadoReal     String?
+  validoHasta       DateTime
+  
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  
+  @@index([companyId, unitId, createdAt])
+  @@map("pricing_analysis")
+}
+
+model MarketData {
+  id                String         @id @default(cuid())
+  companyId         String
+  company           Company        @relation("CompanyMarketData", fields: [companyId], references: [id], onDelete: Cascade)
+  
+  zona              String
+  codigoPostal      String?
+  
+  precioPromedio    Float
+  precioMin         Float
+  precioMax         Float
+  
+  diasPromedioAlquiler Int?
+  tasaOcupacion     Float?
+  demanda           String
+  
+  tipoPropiedad     String?
+  numHabitaciones   Int?
+  metrosCuadrados   Int?
+  
+  fuente            String?
+  muestras          Int            @default(1)
+  periodo           String
+  
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  
+  @@index([companyId, zona, periodo])
+  @@map("market_data")
+}
+
+model PricingStrategy {
+  id                String         @id @default(cuid())
+  companyId         String
+  company           Company        @relation("CompanyPricingStrategies", fields: [companyId], references: [id], onDelete: Cascade)
+  unitId            String?
+  unit              Unit?          @relation("UnitPricingStrategies", fields: [unitId], references: [id], onDelete: SetNull)
+  
+  nombre            String
+  descripcion       String?        @db.Text
+  tipo              String
+  
+  ajusteAutomatico  Boolean        @default(false)
+  limitePorcentaje  Float          @default(10)
+  frecuencia        String         @default("semanal")
+  
+  reglas            Json
+  restricciones     Json?
+  
+  activa            Boolean        @default(true)
+  ultimaEjecucion   DateTime?
+  vecesAplicada     Int            @default(0)
+  
+  incrementoIngresos Float?
+  reduccionVacancia  Float?
+  creadoPor         String?
+  
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  
+  @@index([companyId, activa])
+  @@map("pricing_strategies")
+}
+
+// ============================================
+// MÓDULO: ESG Y SOSTENIBILIDAD 🌱📊
+// ============================================
+
+model CarbonFootprint {
+  id                String         @id @default(cuid())
+  companyId         String
+  company           Company        @relation("CompanyCarbonFootprints", fields: [companyId], references: [id], onDelete: Cascade)
+  buildingId        String?
+  building          Building?      @relation("BuildingCarbonFootprints", fields: [buildingId], references: [id], onDelete: SetNull)
+  
+  periodo           String
+  fechaInicio       DateTime
+  fechaFin          DateTime
+  
+  scope1            Float          @default(0)
+  scope2            Float          @default(0)
+  scope3            Float          @default(0)
+  total             Float
+  
+  desglose          Json
+  
+  periodoAnterior   Float?
+  variacion         Float?
+  
+  intensidadPorM2   Float?
+  intensidadPorPersona Float?
+  
+  metodologia       String
+  verificado        Boolean        @default(false)
+  verificadoPor     String?
+  calculadoPor      String?
+  
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  
+  @@index([companyId, periodo])
+  @@map("carbon_footprints")
+}
+
+model DecarbonizationPlan {
+  id                String         @id @default(cuid())
+  companyId         String
+  company           Company        @relation("CompanyDecarbonizationPlans", fields: [companyId], references: [id], onDelete: Cascade)
+  buildingId        String?
+  building          Building?      @relation("BuildingDecarbonizationPlans", fields: [buildingId], references: [id], onDelete: SetNull)
+  
+  nombre            String
+  descripcion       String?        @db.Text
+  
+  emisionesActuales Float
+  objetivoReduccion Float
+  emisionesObjetivo Float
+  añoObjetivo       Int
+  
+  actuaciones       Json
+  presupuestoTotal  Float
+  
+  estado            String         @default("planificado")
+  avance            Float          @default(0)
+  
+  ahorroAnualEstimado Float?
+  periodoRetorno    Int?
+  
+  subvencionesDisponibles Json?
+  subvencionesObtenidas   Float    @default(0)
+  
+  creadoPor         String?
+  aprobadoPor       String?
+  fechaAprobacion   DateTime?
+  
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  
+  @@index([companyId, estado])
+  @@map("decarbonization_plans")
+}
+
+model ESGCertification {
+  id                String         @id @default(cuid())
+  companyId         String
+  company           Company        @relation("CompanyESGCertifications", fields: [companyId], references: [id], onDelete: Cascade)
+  buildingId        String?
+  building          Building?      @relation("BuildingESGCertifications", fields: [buildingId], references: [id], onDelete: SetNull)
+  
+  nombre            String
+  tipo              String
+  nivel             String?
+  
+  estado            String         @default("en_proceso")
+  progreso          Int            @default(0)
+  
+  fechaSolicitud    DateTime?
+  fechaObtencion    DateTime?
+  fechaExpiracion   DateTime?
+  fechaRenovacion   DateTime?
+  
+  requisitos        Json
+  puntajeObtenido   Int?
+  puntajeMaximo     Int?
+  
+  documentos        Json?
+  certificado       String?
+  
+  costoSolicitud    Float?
+  costoMantenimiento Float?
+  
+  auditor           String?
+  proximaAuditoria  DateTime?
+  creadoPor         String?
+  
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  
+  @@index([companyId, tipo, estado])
+  @@map("esg_certifications")
+}
+
+model ESGReport {
+  id                String         @id @default(cuid())
+  companyId         String
+  company           Company        @relation("CompanyESGReports", fields: [companyId], references: [id], onDelete: Cascade)
+  
+  periodo           String
+  añoFiscal         Int
+  trimestre         Int?
+  
+  datosAmbientales  Json
+  datosSociales     Json
+  datosGobernanza   Json
+  
+  emisionesTotales  Float
+  consumoEnergia    Float
+  energiaRenovable  Float
+  aguaConsumida     Float
+  residuosGenerados Float
+  residuosReciclados Float
+  
+  normativa         String?
+  cumple            Boolean        @default(false)
+  
+  formato           String         @default("GRI")
+  idioma            String         @default("es")
+  
+  estado            String         @default("borrador")
+  archivoUrl        String?
+  
+  generadoPor       String?
+  revisadoPor       String?
+  aprobadoPor       String?
+  fechaPublicacion  DateTime?
+  
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  
+  @@index([companyId, periodo])
+  @@map("esg_reports")
+}
+
+model GreenProvider {
+  id                String         @id @default(cuid())
+  companyId         String
+  company           Company        @relation("CompanyGreenProviders", fields: [companyId], references: [id], onDelete: Cascade)
+  
+  nombre            String
+  tipo              String
+  categoria         String?
+  
+  email             String?
+  telefono          String?
+  web               String?
+  direccion         String?
+  
+  certificaciones   Json?
+  oferta            Json
+  
+  ratingESG         Float?
+  verificado        Boolean        @default(false)
+  activo            Boolean        @default(true)
+  
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  
+  @@index([companyId, tipo])
+  @@map("green_providers")
 }
