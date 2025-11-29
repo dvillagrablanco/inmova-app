@@ -7,6 +7,16 @@ import { prisma } from './db';
  * Permisos por rol
  */
 export const PERMISSIONS = {
+  super_admin: {
+    read: true,
+    create: true,
+    update: true,
+    delete: true,
+    manageUsers: true,
+    manageCompany: true,
+    viewReports: true,
+    manageClients: true, // Gestión de empresas/clientes
+  },
   administrador: {
     read: true,
     create: true,

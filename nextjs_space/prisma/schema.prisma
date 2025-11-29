@@ -10,6 +10,7 @@ datasource db {
 }
 
 enum UserRole {
+  super_admin
   administrador
   gestor
   operador
@@ -801,6 +802,19 @@ model Company {
   colorSecundario   String?          @default("#FFFFFF")
   pieDocumento      String?          @db.Text
   activo            Boolean          @default(true)
+  
+  // Gestión de Clientes (Multi-tenant)
+  dominioPersonalizado String?      @unique // ej: cliente.inmova.com
+  estadoCliente      String?          @default("activo") // activo, suspendido, prueba
+  contactoPrincipal  String?         // Nombre del contacto principal
+  emailContacto      String?         // Email del contacto
+  telefonoContacto   String?         // Teléfono del contacto
+  notasAdmin         String?          @db.Text // Notas internas del super-admin
+  
+  // Límites de uso según plan
+  maxUsuarios        Int?             @default(5)
+  maxPropiedades     Int?             @default(10)
+  maxEdificios       Int?             @default(5)
   
   // Suscripción (Sistema Modular)
   subscriptionPlanId String?

@@ -1,9 +1,19 @@
 import { useSession } from 'next-auth/react';
 import { UserRole } from '@prisma/client';
 
-type Permission = 'read' | 'create' | 'update' | 'delete' | 'manageUsers' | 'manageCompany' | 'viewReports';
+type Permission = 'read' | 'create' | 'update' | 'delete' | 'manageUsers' | 'manageCompany' | 'viewReports' | 'manageClients';
 
 const PERMISSIONS = {
+  super_admin: {
+    read: true,
+    create: true,
+    update: true,
+    delete: true,
+    manageUsers: true,
+    manageCompany: true,
+    viewReports: true,
+    manageClients: true,
+  },
   administrador: {
     read: true,
     create: true,
@@ -12,6 +22,7 @@ const PERMISSIONS = {
     manageUsers: true,
     manageCompany: true,
     viewReports: true,
+    manageClients: false,
   },
   gestor: {
     read: true,
@@ -21,6 +32,7 @@ const PERMISSIONS = {
     manageUsers: false,
     manageCompany: false,
     viewReports: true,
+    manageClients: false,
   },
   operador: {
     read: true,
@@ -30,6 +42,7 @@ const PERMISSIONS = {
     manageUsers: false,
     manageCompany: false,
     viewReports: false,
+    manageClients: false,
   },
 } as const;
 
@@ -50,6 +63,9 @@ export function usePermissions() {
   const canManageCompany = hasPermission('manageCompany');
   const canViewReports = hasPermission('viewReports');
 
+  const canManageClients = hasPermission('manageClients');
+
+  const isSuperAdmin = role === 'super_admin';
   const isAdmin = role === 'administrador';
   const isGestor = role === 'gestor';
   const isOperador = role === 'operador';
@@ -64,6 +80,8 @@ export function usePermissions() {
     canManageUsers,
     canManageCompany,
     canViewReports,
+    canManageClients,
+    isSuperAdmin,
     isAdmin,
     isGestor,
     isOperador,

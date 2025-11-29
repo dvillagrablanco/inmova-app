@@ -3,6 +3,9 @@ import { NextResponse } from 'next/server';
 
 // Rutas que requieren permisos específicos
 const ROLE_PERMISSIONS = {
+  super_admin: [
+    '*', // Super admin tiene acceso a todo
+  ],
   administrador: [
     '/dashboard',
     '/edificios',
@@ -57,6 +60,11 @@ export default withAuth(
     }
 
     const userRole = token.role as keyof typeof ROLE_PERMISSIONS;
+
+    // Super admin tiene acceso a todo
+    if (userRole === 'super_admin') {
+      return NextResponse.next();
+    }
 
     // Verificar si el usuario tiene permisos para la ruta
     const allowedRoutes = ROLE_PERMISSIONS[userRole] || [];

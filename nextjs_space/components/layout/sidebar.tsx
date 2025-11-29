@@ -81,6 +81,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/notificaciones': 'notificaciones',
   '/incidencias': 'incidencias',
   '/ocr': 'ocr',
+  '/admin/clientes': 'gestion_clientes',
   '/admin/configuracion': 'configuracion',
   '/admin/usuarios': 'usuarios',
   '/admin/modulos': 'configuracion',
@@ -153,6 +154,7 @@ const CORE_MODULES = [
   'marketplace',
   'sms',
   'room_rental',
+  'gestion_clientes',
 ];
 
 // Navegación core - Funcionalidades principales
@@ -232,6 +234,7 @@ const serviciosProfesionalesItems = [
 
 // Admin
 const adminNavItems = [
+  { name: 'Gestión de Clientes', href: '/admin/clientes', icon: Building2, roles: ['super_admin'] },
   { name: 'Configuración', href: '/admin/configuracion', icon: Settings, roles: ['administrador'] },
   { name: 'Usuarios', href: '/admin/usuarios', icon: Users, roles: ['administrador'] },
   { name: 'Módulos', href: '/admin/modulos', icon: Settings, roles: ['administrador'] },
