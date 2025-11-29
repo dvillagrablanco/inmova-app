@@ -69,8 +69,10 @@ export default function HomePage() {
         // Fetch active modules
         const modulesResponse = await fetch('/api/modules/active');
         if (modulesResponse.ok) {
-          const modules = await modulesResponse.json();
-          setActiveModules(modules);
+          const data = await modulesResponse.json();
+          // El API devuelve { activeModules: [...] }, extraemos el array
+          const modulesArray = data.activeModules || data || [];
+          setActiveModules(Array.isArray(modulesArray) ? modulesArray : []);
         }
 
         // Fetch basic stats
@@ -86,6 +88,8 @@ export default function HomePage() {
         }
       } catch (error) {
         console.error('Error fetching data:', error);
+        // En caso de error, asegurarse de que activeModules sea un array vacío
+        setActiveModules([]);
       } finally {
         setIsLoading(false);
       }
