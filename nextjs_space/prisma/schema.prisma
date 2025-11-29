@@ -162,6 +162,8 @@ model User {
   auditLogs     AuditLog[]
   preferences    UserPreference?
   securityEvents SecurityEvent[]
+  chatbotConversations ChatbotConversation[]
+  documentosCreados    DocumentoFirma[]  @relation("DocumentosCreados")
 
   @@map("users")
 }
@@ -237,6 +239,10 @@ model Tenant {
   messagesSent      Message[]         @relation("MessageSender")
   stripeCustomer    StripeCustomer?
   documentShares    DocumentShare[]
+  chatbotConversations ChatbotConversation[]
+  morosidadPredicciones MorosidadPrediccion[]
+  morosidadHistorial    MorosidadHistorial[]
+  documentosFirma       DocumentoFirma[]
 
   @@map("tenants")
 }
@@ -310,6 +316,8 @@ model Contract {
   payments          Payment[]
   documents         Document[]
   stripeSubscription StripeSubscription?
+  morosidadPredicciones MorosidadPrediccion[]
+  documentosFirma       DocumentoFirma[]
 
   @@map("contracts")
 }
@@ -348,6 +356,9 @@ model Payment {
   contract          Contract      @relation(fields: [contractId], references: [id], onDelete: Cascade)
   stripeSubscription StripeSubscription? @relation(fields: [stripeSubscriptionId], references: [id], onDelete: SetNull)
   stripeSubscriptionId String?
+  bankTransactions  BankTransaction[]
+  morosidadHistorial MorosidadHistorial[]
+  conciliacionesManual ConciliacionManual[]
 
   @@map("payments")
 }
@@ -479,6 +490,8 @@ model Expense {
   unit              Unit?           @relation(fields: [unitId], references: [id], onDelete: Cascade)
   provider          Provider?       @relation(fields: [providerId], references: [id], onDelete: SetNull)
   approvals         Approval[]
+  bankTransactions  BankTransaction[]
+  conciliacionesManual ConciliacionManual[]
 
   @@map("expenses")
 }
@@ -1974,4 +1987,439 @@ model SecurityEvent {
   @@index([resuelta])
   @@index([createdAt])
   @@map("security_events")
+}
+
+// ============================================
+// ALTA PRIORIDAD 1: CHATBOT GPT-4
+// ============================================
+
+enum ChatbotConversationStatus {
+  activa
+  resuelta
+  escalada  // Escalado a humano
+}
+
+model ChatbotConversation {
+  id                String                    @id @default(cuid())
+  companyId         String
+  tenantId          String?
+  tenant            Tenant?                   @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  userId            String?                   // Si fue escalado a un agente humano
+  user              User?                     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  sessionId         String                    @unique  // ID de sesión único para tracking
+  idioma            String                    @default("es")  // es, en, ca, eu, gl
+  estado            ChatbotConversationStatus @default(activa)
+  tema              String?                   // "pagos", "mantenimiento", "contrato", "general"
+  satisfaccion      Int?                      // 1-5 rating al finalizar
+  comentarios       String?                   @db.Text
+  escaladoMotivo    String?                   @db.Text
+  contexto          Json?                     // Contexto de la conversación para el bot
+  messages          ChatbotMessage[]
+  createdAt         DateTime                  @default(now())
+  updatedAt         DateTime                  @updatedAt
+  cerradaEn         DateTime?
+
+  @@index([companyId])
+  @@index([tenantId])
+  @@index([sessionId])
+  @@index([estado])
+  @@index([createdAt])
+  @@map("chatbot_conversations")
+}
+
+model ChatbotMessage {
+  id                String               @id @default(cuid())
+  conversationId    String
+  conversation      ChatbotConversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderType        String               // "tenant", "bot", "agent" (humano)
+  mensaje           String               @db.Text
+  metadata          Json?                // Datos adicionales (intención detectada, entidades, etc.)
+  confidence        Float?               // Confianza del bot en su respuesta (0-1)
+  tokens            Int?                 // Tokens consumidos en esta interacción
+  createdAt         DateTime             @default(now())
+
+  @@index([conversationId])
+  @@index([senderType])
+  @@index([createdAt])
+  @@map("chatbot_messages")
+}
+
+model ChatbotAction {
+  id                String       @id @default(cuid())
+  companyId         String
+  sessionId         String       // Relacionado a ChatbotConversation
+  tenantId          String?
+  accion            String       // "solicitar_mantenimiento", "descargar_documento", "ver_pagos"
+  parametros        Json?        // Parámetros de la acción ejecutada
+  resultado         String?      // "exito", "error"
+  errorDetalle      String?      @db.Text
+  createdAt         DateTime     @default(now())
+
+  @@index([companyId])
+  @@index([sessionId])
+  @@index([tenantId])
+  @@index([accion])
+  @@map("chatbot_actions")
+}
+
+// ============================================
+// ALTA PRIORIDAD 2: PREDICCIÓN DE MOROSIDAD
+// ============================================
+
+enum MorosidadRiesgo {
+  bajo      // 0-25%
+  medio     // 26-50%
+  alto      // 51-75%
+  critico   // 76-100%
+}
+
+model MorosidadPrediccion {
+  id                    String           @id @default(cuid())
+  companyId             String
+  tenantId              String
+  tenant                Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contractId            String?
+  contract              Contract?        @relation(fields: [contractId], references: [id], onDelete: SetNull)
+  probabilidadImpago    Float            // 0-100
+  nivelRiesgo           MorosidadRiesgo
+  scoring               Int              // 0-1000 (similar a credit score)
+  
+  // Factores de riesgo analizados
+  factoresRiesgo        Json             // Array de factores identificados
+  variablesAnalizadas   Int              @default(40) // Cantidad de variables en el análisis
+  
+  // Predicciones por período
+  prediccion30Dias      Float            // Probabilidad a 30 días
+  prediccion60Dias      Float            // Probabilidad a 60 días
+  prediccion90Dias      Float            // Probabilidad a 90 días
+  
+  // Recomendaciones
+  recomendaciones       Json             // Acciones preventivas sugeridas
+  accionPrioritaria     String?          @db.Text
+  
+  // Métricas del inquilino
+  pagosATiempo          Int              @default(0)
+  pagosAtrasados        Int              @default(0)
+  diasPromedioRetraso   Float?
+  montoPendiente        Float?
+  ratioIngresoRenta     Float?           // Ingreso mensual / Renta mensual
+  
+  // Modelo ML
+  modeloVersion         String           @default("xgboost_v1")
+  confianzaModelo       Float?           // 0-1
+  ultimoEntrenamiento   DateTime?
+  
+  // Acciones tomadas
+  alertaGenerada        Boolean          @default(false)
+  fechaAlerta           DateTime?
+  accionesTomadas       String?          @db.Text
+  
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+  validaHasta           DateTime         // Predicción válida hasta esta fecha (30 días)
+
+  @@index([companyId])
+  @@index([tenantId])
+  @@index([contractId])
+  @@index([nivelRiesgo])
+  @@index([probabilidadImpago])
+  @@index([validaHasta])
+  @@map("morosidad_predicciones")
+}
+
+model MorosidadHistorial {
+  id                String       @id @default(cuid())
+  companyId         String
+  tenantId          String
+  tenant            Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  paymentId         String?
+  payment           Payment?     @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  evento            String       // "pago_atrasado", "pago_recuperado", "plan_pago_acordado"
+  diasRetraso       Int?
+  montoAfectado     Float?
+  accionTomada      String?      @db.Text
+  notas             String?      @db.Text
+  createdAt         DateTime     @default(now())
+
+  @@index([companyId])
+  @@index([tenantId])
+  @@index([evento])
+  @@index([createdAt])
+  @@map("morosidad_historial")
+}
+
+// ============================================
+// ALTA PRIORIDAD 3: FIRMA DIGITAL (SIGNATURIT)
+// ============================================
+
+enum SignatureStatus {
+  pendiente     // Enviado pero no firmado
+  firmado       // Firmado por todas las partes
+  rechazado     // Rechazado por algún firmante
+  cancelado     // Cancelado por el administrador
+  expirado      // Expiró el plazo
+}
+
+enum SignerStatus {
+  pendiente
+  visto
+  firmado
+  rechazado
+}
+
+model DocumentoFirma {
+  id                String           @id @default(cuid())
+  companyId         String
+  titulo            String
+  descripcion       String?          @db.Text
+  tipoDocumento     String           // "contrato", "adenda", "finiquito", "acta", "otro"
+  
+  // Relaciones
+  contractId        String?
+  contract          Contract?        @relation(fields: [contractId], references: [id], onDelete: SetNull)
+  tenantId          String?
+  tenant            Tenant?          @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  
+  // Signaturit Integration
+  signaturitId      String?          @unique  // ID del documento en Signaturit
+  estado            SignatureStatus  @default(pendiente)
+  urlDocumento      String?          @db.Text  // URL del documento original
+  urlFirmado        String?          @db.Text  // URL del documento firmado
+  
+  // Firmantes
+  firmantes         Firmante[]
+  
+  // Configuración
+  requiereOrden     Boolean          @default(false)  // Firma secuencial
+  diasExpiracion    Int              @default(30)
+  fechaExpiracion   DateTime
+  recordatorios     Boolean          @default(true)
+  diasRecordatorio  Int              @default(3)      // Enviar recordatorio cada X días
+  
+  // Timestamps
+  creadoPor         String
+  createdBy         User?            @relation("DocumentosCreados", fields: [creadoPor], references: [id], onDelete: SetNull)
+  createdAt         DateTime         @default(now())
+  enviadoEn         DateTime?
+  completadoEn      DateTime?
+  canceladoEn       DateTime?
+  canceladoPor      String?
+  motivoCancelacion String?          @db.Text
+  
+  // Metadata
+  metadata          Json?            // Datos adicionales de Signaturit
+  certificado       String?          @db.Text  // Certificado de firma digital
+  
+  @@index([companyId])
+  @@index([estado])
+  @@index([contractId])
+  @@index([tenantId])
+  @@index([signaturitId])
+  @@index([fechaExpiracion])
+  @@map("documentos_firma")
+}
+
+model Firmante {
+  id                String           @id @default(cuid())
+  documentoId       String
+  documento         DocumentoFirma   @relation(fields: [documentoId], references: [id], onDelete: Cascade)
+  
+  // Datos del firmante
+  nombre            String
+  email             String
+  telefono          String?
+  rol               String           // "inquilino", "propietario", "fiador", "testigo"
+  orden             Int              @default(1)  // Para firma secuencial
+  
+  // Signaturit
+  signaturitId      String?          // ID del firmante en Signaturit
+  estado            SignerStatus     @default(pendiente)
+  
+  // Timestamps
+  enviadoEn         DateTime?
+  vistoEn           DateTime?
+  firmadoEn         DateTime?
+  rechazadoEn       DateTime?
+  motivoRechazo     String?          @db.Text
+  
+  // Recordatorios
+  recordatoriosEnviados Int          @default(0)
+  ultimoRecordatorio    DateTime?
+  
+  // Metadata
+  ipFirma           String?
+  geolocalizacion   String?
+  dispositivo       String?
+
+  @@index([documentoId])
+  @@index([email])
+  @@index([estado])
+  @@map("firmantes")
+}
+
+model SignatureWebhook {
+  id                String       @id @default(cuid())
+  signaturitId      String       // ID del evento en Signaturit
+  tipo              String       // "document_completed", "signature_completed", etc.
+  documentoId       String?
+  payload           Json         // Payload completo del webhook
+  procesado         Boolean      @default(false)
+  errorProceso      String?      @db.Text
+  createdAt         DateTime     @default(now())
+  procesadoEn       DateTime?
+
+  @@index([signaturitId])
+  @@index([tipo])
+  @@index([procesado])
+  @@map("signature_webhooks")
+}
+
+// ============================================
+// ALTA PRIORIDAD 4: OPEN BANKING
+// ============================================
+
+enum BankConnectionStatus {
+  conectado
+  desconectado
+  error
+  renovacion_requerida
+}
+
+enum TransactionStatus {
+  pendiente_revision
+  conciliado
+  descartado
+}
+
+model BankConnection {
+  id                String               @id @default(cuid())
+  companyId         String
+  
+  // Proveedor (Plaid, Tink, Yapily)
+  proveedor         String               // "plaid", "tink", "yapily"
+  proveedorItemId   String?              @unique  // ID del item en el proveedor
+  accessToken       String?              // Token encriptado
+  
+  // Datos del banco
+  nombreBanco       String
+  tipoCuenta        String               // "corriente", "ahorro", "credito"
+  ultimosDigitos    String?              // Últimos 4 dígitos
+  moneda            String               @default("EUR")
+  
+  // Estado
+  estado            BankConnectionStatus @default(conectado)
+  ultimaSync        DateTime?
+  proximaSync       DateTime?
+  errorDetalle      String?              @db.Text
+  
+  // Transacciones
+  transactions      BankTransaction[]
+  
+  // Configuración
+  autoReconciliar   Boolean              @default(true)
+  notificarErrores  Boolean              @default(true)
+  
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  desconectadaEn    DateTime?
+
+  @@index([companyId])
+  @@index([estado])
+  @@index([proveedorItemId])
+  @@map("bank_connections")
+}
+
+model BankTransaction {
+  id                String              @id @default(cuid())
+  companyId         String
+  connectionId      String
+  connection        BankConnection      @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  
+  // Datos de la transacción del banco
+  proveedorTxId     String              @unique  // ID de la transacción en el proveedor
+  fecha             DateTime
+  fechaContable     DateTime?
+  descripcion       String
+  monto             Float
+  moneda            String              @default("EUR")
+  categoria         String?             // Categoría del banco
+  subcategoria      String?
+  
+  // Datos adicionales
+  beneficiario      String?
+  referencia        String?
+  tipoTransaccion   String?             // "transfer", "card_payment", "direct_debit"
+  
+  // Conciliación
+  estado            TransactionStatus   @default(pendiente_revision)
+  paymentId         String?
+  payment           Payment?            @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  expenseId         String?
+  expense           Expense?            @relation(fields: [expenseId], references: [id], onDelete: SetNull)
+  
+  // Matching automático
+  matchScore        Float?              // 0-100, score de coincidencia
+  matchSuggestions  Json?               // Sugerencias de matching
+  
+  // Auditoría
+  conciliadoPor     String?
+  conciliadoEn      DateTime?
+  notasConciliacion String?             @db.Text
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([companyId])
+  @@index([connectionId])
+  @@index([estado])
+  @@index([fecha])
+  @@index([proveedorTxId])
+  @@map("bank_transactions")
+}
+
+model ReconciliationRule {
+  id                String       @id @default(cuid())
+  companyId         String
+  nombre            String
+  descripcion       String?      @db.Text
+  activa            Boolean      @default(true)
+  prioridad         Int          @default(1)  // Orden de ejecución
+  
+  // Condiciones (JSON con reglas)
+  condiciones       Json         // { "monto": { "operator": "equals", "value": 850 }, "descripcion": { "contains": "ALQUILER" } }
+  
+  // Acción
+  accionTipo        String       // "auto_match_payment", "auto_match_expense", "mark_as_reviewed"
+  accionConfig      Json?        // Configuración de la acción
+  
+  // Estadísticas
+  vecesAplicada     Int          @default(0)
+  ultimaAplicacion  DateTime?
+  
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@index([companyId])
+  @@index([activa])
+  @@index([prioridad])
+  @@map("reconciliation_rules")
+}
+
+model ConciliacionManual {
+  id                String       @id @default(cuid())
+  companyId         String
+  transactionId     String       @unique  // ID de BankTransaction
+  paymentId         String?
+  payment           Payment?     @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  expenseId         String?
+  expense           Expense?     @relation(fields: [expenseId], references: [id], onDelete: SetNull)
+  diferenciaMonto   Float?       // Si hay diferencia con el pago/gasto esperado
+  motivoDiferencia  String?      @db.Text
+  notas             String?      @db.Text
+  conciliadoPor     String
+  createdAt         DateTime     @default(now())
+
+  @@index([companyId])
+  @@index([transactionId])
+  @@map("conciliaciones_manuales")
 }

@@ -15,6 +15,8 @@ import {
   CheckCircle,
   Clock,
   XCircle,
+  Bot,
+  Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -185,6 +187,34 @@ export default function PortalInquilinoDashboardPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Chatbot AI - Quick Access */}
+        <Card className="mb-6 bg-gradient-to-r from-primary/10 to-purple-500/10 border-primary/20">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center justify-center w-14 h-14 bg-primary/20 rounded-full">
+                  <Bot className="h-8 w-8 text-primary" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="text-lg font-bold">Asistente Virtual IA</h3>
+                    <Sparkles className="h-4 w-4 text-yellow-500" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Disponible 24/7 • Respuestas instant\u00e1neas • Ayuda con pagos, mantenimiento y m\u00e1s
+                  </p>
+                </div>
+              </div>
+              <Link href="/portal-inquilino/chatbot">
+                <Button size="lg" className="gap-2">
+                  <Bot className="h-5 w-5" />
+                  Abrir Chat
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Contratos */}
