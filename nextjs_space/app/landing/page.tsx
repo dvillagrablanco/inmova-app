@@ -226,6 +226,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               { icon: Building2, title: 'Gestión de Propiedades', desc: 'Edificios, unidades, contratos', gradient: 'from-blue-500 to-cyan-500' },
+              { icon: Home, title: 'Alquiler por Habitaciones', desc: 'Coliving con prorrateo automático', gradient: 'from-teal-500 to-green-600' },
               { icon: Users, title: 'Portal Inquilinos', desc: 'App móvil + portal web', gradient: 'from-purple-500 to-pink-500' },
               { icon: CreditCard, title: 'Pagos Stripe', desc: 'Cobros automáticos recurrentes', gradient: 'from-green-500 to-emerald-500' },
               { icon: Hammer, title: 'Mantenimiento Pro', desc: 'IA predictiva + calendario', gradient: 'from-orange-500 to-red-500' },

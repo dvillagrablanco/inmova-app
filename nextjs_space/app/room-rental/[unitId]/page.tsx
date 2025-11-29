@@ -131,25 +131,13 @@ export default function UnitRoomsPage() {
                 <p className="text-gray-600">Gestiona las habitaciones de esta unidad</p>
               </div>
               <div className="space-x-2">
-                <Dialog open={showProrationDialog} onOpenChange={setShowProrationDialog}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline">
-                      <Calculator className="mr-2 h-4 w-4" />
-                      Prorratear Suministros
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Prorrateo de Suministros</DialogTitle>
-                      <DialogDescription>
-                        Distribuirá los costos de suministros entre todas las habitaciones ocupadas
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="text-center py-8 text-gray-600">
-                      Funcionalidad disponible en contratos activos
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                <Button 
+                  variant="outline"
+                  onClick={() => router.push(`/room-rental/${unitId}/proration`)}
+                >
+                  <Calculator className="mr-2 h-4 w-4" />
+                  Prorratear Suministros
+                </Button>
 
                 <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
                   <DialogTrigger asChild>
