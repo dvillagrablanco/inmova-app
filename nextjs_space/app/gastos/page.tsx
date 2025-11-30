@@ -25,6 +25,9 @@ import { toast } from 'sonner';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { LoadingState } from '@/components/ui/loading-state';
+import { EmptyState } from '@/components/ui/empty-state';
+import { FilterChips } from '@/components/ui/filter-chips';
 
 interface Expense {
   id: string;
@@ -48,6 +51,7 @@ export default function GastosPage() {
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [filterCategoria, setFilterCategoria] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeFilters, setActiveFilters] = useState<Array<{ id: string; label: string; value: string }>>([]);
   const [form, setForm] = useState({
     concepto: '',
     categoria: 'otro',
@@ -208,6 +212,41 @@ export default function GastosPage() {
     return colors[categoria] || 'bg-muted';
   };
 
+  // Actualizar filtros activos
+  useEffect(() => {
+    const filters: Array<{ id: string; label: string; value: string }> = [];
+    
+    if (searchTerm) {
+      filters.push({ id: 'search', label: 'Búsqueda', value: searchTerm });
+    }
+    if (filterCategoria !== 'all') {
+      const categoriaLabels: Record<string, string> = {
+        'mantenimiento': 'Mantenimiento',
+        'servicios': 'Servicios',
+        'impuestos': 'Impuestos',
+        'seguros': 'Seguros',
+        'renovacion': 'Renovación',
+        'otro': 'Otro',
+      };
+      filters.push({ id: 'categoria', label: 'Categoría', value: categoriaLabels[filterCategoria] || filterCategoria });
+    }
+    
+    setActiveFilters(filters);
+  }, [searchTerm, filterCategoria]);
+
+  const clearFilter = (id: string) => {
+    if (id === 'search') {
+      setSearchTerm('');
+    } else if (id === 'categoria') {
+      setFilterCategoria('all');
+    }
+  };
+
+  const clearAllFilters = () => {
+    setSearchTerm('');
+    setFilterCategoria('all');
+  };
+
   // Filtrado de gastos
   const filteredExpenses = useMemo(() => {
     return expenses.filter(expense => {
@@ -241,8 +280,14 @@ export default function GastosPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="flex h-screen overflow-hidden bg-gradient-bg">
+        <Sidebar />
+        <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
+          <Header />
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <LoadingState message="Cargando gastos..." />
+          </main>
+        </div>
       </div>
     );
   }
@@ -542,28 +587,35 @@ export default function GastosPage() {
               </CardContent>
             </Card>
 
+            {/* Filter Chips */}
+            <FilterChips filters={activeFilters} onRemove={clearFilter} onClearAll={clearAllFilters} />
+
             {/* Lista de Gastos */}
             <div className="space-y-4">
               {filteredExpenses.length === 0 ? (
-                <Card>
-                  <CardContent className="flex flex-col items-center justify-center py-12">
-                    <DollarSign className="h-12 w-12 text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground text-center mb-2">
-                      {searchTerm || filterCategoria !== 'all'
-                        ? 'No se encontraron gastos con los filtros aplicados'
-                        : 'No hay gastos registrados'}
-                    </p>
-                    {canCreate && !searchTerm && filterCategoria === 'all' && (
-                      <Button
-                        onClick={() => setOpenDialog(true)}
-                        className="mt-4"
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Registrar Primer Gasto
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
+                searchTerm || filterCategoria !== 'all' ? (
+                  <EmptyState
+                    icon={<Search className="h-16 w-16 text-gray-400" />}
+                    title="No se encontraron resultados"
+                    description="Intenta ajustar los filtros de búsqueda"
+                    action={{
+                      label: "Limpiar filtros",
+                      onClick: clearAllFilters,
+                      icon: <Search className="h-4 w-4" />
+                    }}
+                  />
+                ) : (
+                  <EmptyState
+                    icon={<DollarSign className="h-16 w-16 text-gray-400" />}
+                    title="No hay gastos registrados"
+                    description="Comienza registrando tu primer gasto para un mejor control financiero"
+                    action={canCreate ? {
+                      label: "Crear Primer Gasto",
+                      onClick: () => setOpenDialog(true),
+                      icon: <Plus className="h-4 w-4" />
+                    } : undefined}
+                  />
+                )
               ) : (
                 filteredExpenses.map((expense) => (
                   <Card key={expense.id} className="hover:shadow-lg transition-all duration-200">

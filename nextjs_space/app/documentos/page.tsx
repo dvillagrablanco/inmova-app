@@ -41,6 +41,9 @@ import { toast } from 'sonner';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { LoadingState } from '@/components/ui/loading-state';
+import { EmptyState } from '@/components/ui/empty-state';
+import { FilterChips } from '@/components/ui/filter-chips';
 
 interface Document {
   id: string;
@@ -63,6 +66,7 @@ export default function DocumentosPage() {
   const [uploading, setUploading] = useState(false);
   const [filterTipo, setFilterTipo] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeFilters, setActiveFilters] = useState<Array<{ id: string; label: string; value: string }>>([]);
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
   const [openDetailDialog, setOpenDetailDialog] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
@@ -210,6 +214,43 @@ export default function DocumentosPage() {
     return labels[tipo] || tipo;
   };
 
+  // Actualizar filtros activos
+  useEffect(() => {
+    const filters: Array<{ id: string; label: string; value: string }> = [];
+    
+    if (searchTerm) {
+      filters.push({ id: 'search', label: 'Búsqueda', value: searchTerm });
+    }
+    if (filterTipo !== 'all') {
+      const tipoLabels: Record<string, string> = {
+        'contrato': 'Contrato',
+        'documento_identidad': 'Documento de Identidad',
+        'recibo': 'Recibo',
+        'certificado': 'Certificado',
+        'inspeccion': 'Inspección',
+        'seguro': 'Seguro',
+        'factura': 'Factura',
+        'otro': 'Otro',
+      };
+      filters.push({ id: 'tipo', label: 'Tipo', value: tipoLabels[filterTipo] || filterTipo });
+    }
+    
+    setActiveFilters(filters);
+  }, [searchTerm, filterTipo]);
+
+  const clearFilter = (id: string) => {
+    if (id === 'search') {
+      setSearchTerm('');
+    } else if (id === 'tipo') {
+      setFilterTipo('all');
+    }
+  };
+
+  const clearAllFilters = () => {
+    setSearchTerm('');
+    setFilterTipo('all');
+  };
+
   // Filtrado de documentos
   const filteredDocuments = useMemo(() => {
     return documents.filter(doc => {
@@ -240,8 +281,14 @@ export default function DocumentosPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="flex h-screen overflow-hidden bg-gradient-bg">
+        <Sidebar />
+        <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
+          <Header />
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <LoadingState message="Cargando documentos..." />
+          </main>
+        </div>
       </div>
     );
   }
@@ -452,28 +499,35 @@ export default function DocumentosPage() {
               </CardContent>
             </Card>
 
+            {/* Filter Chips */}
+            <FilterChips filters={activeFilters} onRemove={clearFilter} onClearAll={clearAllFilters} />
+
             {/* Lista de Documentos */}
             <div className="space-y-4">
               {filteredDocuments.length === 0 ? (
-                <Card>
-                  <CardContent className="flex flex-col items-center justify-center py-12">
-                    <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground text-center mb-2">
-                      {searchTerm || filterTipo !== 'all'
-                        ? 'No se encontraron documentos con los filtros aplicados'
-                        : 'No hay documentos almacenados'}
-                    </p>
-                    {canCreate && !searchTerm && filterTipo === 'all' && (
-                      <Button
-                        onClick={() => setOpenUploadDialog(true)}
-                        className="mt-4"
-                      >
-                        <Upload className="h-4 w-4 mr-2" />
-                        Subir Primer Documento
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
+                searchTerm || filterTipo !== 'all' ? (
+                  <EmptyState
+                    icon={<Search className="h-16 w-16 text-gray-400" />}
+                    title="No se encontraron resultados"
+                    description="Intenta ajustar los filtros de búsqueda"
+                    action={{
+                      label: "Limpiar filtros",
+                      onClick: clearAllFilters,
+                      icon: <Search className="h-4 w-4" />
+                    }}
+                  />
+                ) : (
+                  <EmptyState
+                    icon={<FileText className="h-16 w-16 text-gray-400" />}
+                    title="No hay documentos almacenados"
+                    description="Comienza subiendo tu primer documento para organizarlos mejor"
+                    action={canCreate ? {
+                      label: "Subir Primer Documento",
+                      onClick: () => setOpenUploadDialog(true),
+                      icon: <Upload className="h-4 w-4" />
+                    } : undefined}
+                  />
+                )
               ) : (
                 filteredDocuments.map((doc) => {
                   const now = new Date();
