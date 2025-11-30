@@ -826,6 +826,9 @@ model Company {
   subscriptionPlanId String?
   subscriptionPlan   SubscriptionPlan? @relation(fields: [subscriptionPlanId], references: [id])
   
+  // Sistema de tags para organización
+  tags              String[]         @default([])
+  
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
 
