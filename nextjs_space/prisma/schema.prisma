@@ -196,6 +196,9 @@ model User {
   voiceInteractions    VoiceInteraction[] @relation("UserVoiceInteractions")
   biometricVerifications BiometricVerification[] @relation("UserBiometricVerifications")
   gdprConsents         GDPRConsent[] @relation("UserGDPRConsents")
+  
+  // Multi-empresa
+  companyAccess        UserCompanyAccess[]
 
   @@map("users")
 }
@@ -931,6 +934,9 @@ model Company {
   roomContracts      RoomContract[]
   roomPayments       RoomPayment[]
   roomSharedSpaces   RoomSharedSpace[]
+  
+  // Multi-empresa
+  userAccess         UserCompanyAccess[]
 
   @@map("company")
 }
@@ -6700,4 +6706,37 @@ model RoomSharedSpace {
   unit              Unit          @relation(fields: [unitId], references: [id], onDelete: Cascade)
   
   @@map("room_shared_spaces")
+}
+
+// ============================================
+// SISTEMA MULTI-EMPRESA POR USUARIO
+// ============================================
+
+model UserCompanyAccess {
+  id          String   @id @default(cuid())
+  userId      String
+  companyId   String
+  
+  // Permisos específicos en esta empresa
+  roleInCompany UserRole @default(gestor)
+  
+  // Estado del acceso
+  activo      Boolean  @default(true)
+  
+  // Auditoría
+  grantedBy   String?  // ID del usuario que otorgó el acceso
+  grantedAt   DateTime @default(now())
+  lastAccess  DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relaciones
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, companyId])
+  @@index([userId])
+  @@index([companyId])
+  @@map("user_company_access")
 }
