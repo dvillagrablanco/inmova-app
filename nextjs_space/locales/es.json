@@ -51,7 +51,17 @@
     "inactive": "Inactivo",
     "pending": "Pendiente",
     "completed": "Completado",
-    "cancelled": "Cancelado"
+    "cancelled": "Cancelado",
+    "yes": "Sí",
+    "no": "No",
+    "confirm": "Confirmar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "import": "Importar",
+    "download": "Descargar",
+    "upload": "Subir",
+    "close": "Cerrar",
+    "refresh": "Actualizar"
   },
   "dashboard": {
     "welcome": "Bienvenido",
@@ -61,7 +71,9 @@
     "occupancyRate": "Tasa de Ocupación",
     "monthlyRevenue": "Ingresos Mensuales",
     "alerts": "Alertas",
-    "recentActivity": "Actividad Reciente"
+    "recentActivity": "Actividad Reciente",
+    "quickAccess": "Acceso Rápido",
+    "kpis": "Indicadores Clave"
   },
   "buildings": {
     "title": "Edificios",
@@ -69,7 +81,10 @@
     "buildingName": "Nombre del Edificio",
     "address": "Dirección",
     "units": "Unidades",
-    "occupiedUnits": "Unidades Ocupadas"
+    "occupiedUnits": "Unidades Ocupadas",
+    "totalFloors": "Total Pisos",
+    "buildingType": "Tipo de Edificio",
+    "yearBuilt": "Año de Construcción"
   },
   "tenants": {
     "title": "Inquilinos",
@@ -77,7 +92,9 @@
     "fullName": "Nombre Completo",
     "email": "Correo Electrónico",
     "phone": "Teléfono",
-    "unit": "Unidad"
+    "unit": "Unidad",
+    "moveInDate": "Fecha de Entrada",
+    "status": "Estado"
   },
   "payments": {
     "title": "Pagos",
@@ -87,6 +104,53 @@
     "paymentDate": "Fecha de Pago",
     "status": "Estado",
     "paid": "Pagado",
-    "overdue": "Vencido"
+    "overdue": "Vencido",
+    "method": "Método",
+    "reference": "Referencia"
+  },
+  "contracts": {
+    "title": "Contratos",
+    "newContract": "Nuevo Contrato",
+    "startDate": "Fecha de Inicio",
+    "endDate": "Fecha de Fin",
+    "monthlyRent": "Renta Mensual",
+    "deposit": "Depósito",
+    "tenant": "Inquilino",
+    "unit": "Unidad"
+  },
+  "maintenance": {
+    "title": "Mantenimiento",
+    "newRequest": "Nueva Solicitud",
+    "priority": "Prioridad",
+    "status": "Estado",
+    "description": "Descripción",
+    "assigned": "Asignado a",
+    "dueDate": "Fecha de Vencimiento"
+  },
+  "roomRental": {
+    "title": "Alquiler por Habitaciones",
+    "rooms": "Habitaciones",
+    "proration": "Prorrateo de Gastos",
+    "cleaningSchedule": "Calendario de Limpieza",
+    "colivingRules": "Normas de Convivencia"
+  },
+  "auth": {
+    "login": "Iniciar Sesión",
+    "logout": "Cerrar Sesión",
+    "register": "Registrarse",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "rememberMe": "Recuérdame",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar Contraseña"
+  },
+  "errors": {
+    "required": "Este campo es obligatorio",
+    "invalidEmail": "Correo electrónico inválido",
+    "passwordMismatch": "Las contraseñas no coinciden",
+    "serverError": "Error del servidor",
+    "notFound": "No encontrado",
+    "unauthorized": "No autorizado",
+    "forbidden": "Prohibido"
   }
 }

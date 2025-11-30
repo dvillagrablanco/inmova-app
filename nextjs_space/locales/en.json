@@ -51,7 +51,17 @@
     "inactive": "Inactive",
     "pending": "Pending",
     "completed": "Completed",
-    "cancelled": "Cancelled"
+    "cancelled": "Cancelled",
+    "yes": "Yes",
+    "no": "No",
+    "confirm": "Confirm",
+    "filter": "Filter",
+    "export": "Export",
+    "import": "Import",
+    "download": "Download",
+    "upload": "Upload",
+    "close": "Close",
+    "refresh": "Refresh"
   },
   "dashboard": {
     "welcome": "Welcome",
@@ -61,7 +71,9 @@
     "occupancyRate": "Occupancy Rate",
     "monthlyRevenue": "Monthly Revenue",
     "alerts": "Alerts",
-    "recentActivity": "Recent Activity"
+    "recentActivity": "Recent Activity",
+    "quickAccess": "Quick Access",
+    "kpis": "Key Indicators"
   },
   "buildings": {
     "title": "Buildings",
@@ -69,7 +81,10 @@
     "buildingName": "Building Name",
     "address": "Address",
     "units": "Units",
-    "occupiedUnits": "Occupied Units"
+    "occupiedUnits": "Occupied Units",
+    "totalFloors": "Total Floors",
+    "buildingType": "Building Type",
+    "yearBuilt": "Year Built"
   },
   "tenants": {
     "title": "Tenants",
@@ -77,7 +92,9 @@
     "fullName": "Full Name",
     "email": "Email",
     "phone": "Phone",
-    "unit": "Unit"
+    "unit": "Unit",
+    "moveInDate": "Move-in Date",
+    "status": "Status"
   },
   "payments": {
     "title": "Payments",
@@ -87,6 +104,53 @@
     "paymentDate": "Payment Date",
     "status": "Status",
     "paid": "Paid",
-    "overdue": "Overdue"
+    "overdue": "Overdue",
+    "method": "Method",
+    "reference": "Reference"
+  },
+  "contracts": {
+    "title": "Contracts",
+    "newContract": "New Contract",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "monthlyRent": "Monthly Rent",
+    "deposit": "Deposit",
+    "tenant": "Tenant",
+    "unit": "Unit"
+  },
+  "maintenance": {
+    "title": "Maintenance",
+    "newRequest": "New Request",
+    "priority": "Priority",
+    "status": "Status",
+    "description": "Description",
+    "assigned": "Assigned to",
+    "dueDate": "Due Date"
+  },
+  "roomRental": {
+    "title": "Room Rental",
+    "rooms": "Rooms",
+    "proration": "Expense Proration",
+    "cleaningSchedule": "Cleaning Schedule",
+    "colivingRules": "Coliving Rules"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "forgotPassword": "Forgot Password?",
+    "rememberMe": "Remember Me",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password"
+  },
+  "errors": {
+    "required": "This field is required",
+    "invalidEmail": "Invalid email",
+    "passwordMismatch": "Passwords don't match",
+    "serverError": "Server error",
+    "notFound": "Not found",
+    "unauthorized": "Unauthorized",
+    "forbidden": "Forbidden"
   }
 }

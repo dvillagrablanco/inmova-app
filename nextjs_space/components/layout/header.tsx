@@ -17,6 +17,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useBranding } from '@/lib/hooks/useBranding';
 import { cn } from '@/lib/utils';
+import { LanguageSelector } from '@/components/LanguageSelector';
 
 interface Notification {
   id: string;
@@ -261,6 +262,9 @@ export function Header() {
               </>
             )}
           </div>
+
+          {/* Language Selector */}
+          <LanguageSelector />
 
           {/* User Menu */}
           <DropdownMenu>
