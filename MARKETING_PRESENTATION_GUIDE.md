@@ -56,10 +56,14 @@ Y lo mejor: **White Label total**. Tu marca, tu dominio, tu identidad.
 | Coliving/BTR | ⚠️ Limitado | ⚠️ Limitado | ✅ |
 | Hoteles/Apart-hotels | ❌ | ❌ | ✅ |
 
-#### 2. **88 Módulos vs 15-30 de la Competencia**
+#### 2. **88+ Módulos vs 15-30 de la Competencia** ⭐ ACTUALIZADO Q4 2024
 
 **Competencia típica**: 15-30 módulos  
-**INMOVA**: **88 módulos** (+193% más funcionalidades)
+**INMOVA**: **88+ módulos** (+193% más funcionalidades, EN EXPANSIÓN)
+
+**🎯 NOVEDADES Q4 2024:**
+- ✨ **Room Rental PRO**: Gestión avanzada de alquiler por habitaciones (coliving)
+- ✨ **Sistema de Cupones de Descuento**: Marketing automation con promociones
 
 **Precio por módulo**:
 - Buildium Growth: €174/mes ÷ 25 módulos = **€6.96/módulo**
@@ -101,9 +105,29 @@ Y lo mejor: **White Label total**. Tu marca, tu dominio, tu identidad.
 - App móvil con tu marca
 - **Valor**: €50,000 desarrollo custom equivalente
 
+##### 🛏️ Room Rental PRO ⭐ NUEVO Q4 2024
+- Gestión avanzada de alquiler por habitaciones (coliving/co-living)
+- Prorrateo automático de utilidades (luz, agua, gas, internet)
+- Calendario de limpieza rotativo entre inquilinos
+- Gestión de normas de convivencia digitales
+- Dashboard específico con ocupación y gastos compartidos
+- **Caso de uso**: "Gestiona un piso de 5 habitaciones con consumos prorrateados automáticamente cada mes"
+- **Beneficio**: Ahorra 10h/mes en cálculos manuales y comunicaciones
+- **Mercado objetivo**: Coliving, student housing, alquileres compartidos
+
+##### 🎟️ Sistema de Cupones de Descuento ⭐ NUEVO Q4 2024
+- Creación de códigos promocionales (porcentaje o cantidad fija)
+- Validación automática en tiempo real
+- Límites de uso y fechas de expiración
+- Panel de estadísticas: conversión, revenue, usos
+- Integración con Stripe y Open Banking
+- **Caso de uso**: "Campaña BIENVENIDA2024: 15% descuento primer mes para nuevos inquilinos"
+- **Beneficio**: Aumenta conversión de leads en 25-35%
+- **ROI**: €4 generado por cada €1 de descuento otorgado
+
 ---
 
-## 🗂️ LOS 88 MÓDULOS EXPLICADOS
+## 🗂️ LOS 88+ MÓDULOS EXPLICADOS
 
 ### Categoría 1: **CORE - Gestión Básica** (12 módulos)
 

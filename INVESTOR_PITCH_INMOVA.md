@@ -31,12 +31,13 @@ INMOVA consolida todo en una plataforma:
 │  💼 Servicios Profesionales                      │
 │                                                │
 ├────────────────────────────────────────────────┤
-│         88 MÓDULOS INTEGRADOS                   │
+│         88+ MÓDULOS INTEGRADOS (EN EXPANSIÓN)   │
 │                                                │
-│  🤖 IA Predictiva   🔗 Blockchain   🌐 IoT      │
-│  💁‍♂️ CRM            📊 Analytics     💳 Pagos    │
-│  ✍️ Firma Digital  📧 Email/SMS     📅 Calendario │
-│  ... y 79 módulos más                           │
+│  🛏️ Room Rental PRO*  🎟️ Cupones Descuento*    │
+│  🤖 IA Predictiva     🔗 Blockchain   🌐 IoT    │
+│  💁‍♂️ CRM              📊 Analytics     💳 Pagos  │
+│  ✍️ Firma Digital    📧 Email/SMS     📅 Calendar│
+│  ... y 78 módulos más  (* NUEVO Q4 2024)        │
 └────────────────────────────────────────────────┘
 ```
 
@@ -136,7 +137,10 @@ INMOVA consolida todo en una plataforma:
 │  • Blockchain: Tokenización, NFTs, smart contracts     │
 │  • IoT: Edificios inteligentes, sensores, automat.     │
 │  • ESG: Huella carbono, certificaciones                 │
+│  • Room Rental PRO*: Prorrateo automático utilidades   │
+│  • Cupones Descuento*: Marketing automation integrado  │
 │  • Competencia: Ninguna tiene esto                      │
+│  (*Nuevos Q4 2024 - Diferenciadores únicos mercado)     │
 │                                                          │
 │  #3: PRECIO DISRUPTIVO                                    │
 │  ---------------------------------------------------     │

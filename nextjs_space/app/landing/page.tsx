@@ -482,7 +482,8 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               { icon: Building2, title: 'Gestión de Propiedades', desc: 'Edificios, unidades, contratos y pagos completos', gradient: 'from-blue-500 to-cyan-500' },
-              { icon: Home, title: 'Alquiler por Habitaciones', desc: 'Coliving con prorrateo de suministros, normas de convivencia y calendario de limpieza', gradient: 'from-teal-500 to-green-600' },
+              { icon: Home, title: 'Alquiler por Habitaciones', desc: 'Coliving completo: prorrateo automático de utilidades (luz, agua, gas), gestión de habitaciones individuales, calendario de limpieza rotativo', gradient: 'from-teal-500 to-green-600', featured: true },
+              { icon: Wallet, title: 'Cupones de Descuento', desc: 'Sistema completo de cupones con validación, límites de uso, fechas de expiración, aplicación automática y estadísticas', gradient: 'from-fuchsia-500 to-pink-600', featured: true },
               { icon: Users, title: 'Portal Inquilinos/Propietarios', desc: 'App móvil PWA + chat integrado + firma digital', gradient: 'from-purple-500 to-pink-500' },
               { icon: CreditCard, title: 'Pagos Stripe', desc: 'Cobros automáticos + suscripciones + portal de pago', gradient: 'from-green-500 to-emerald-500' },
               { icon: Hammer, title: 'Mantenimiento Pro', desc: 'IA predictiva + calendario + gestión proveedores', gradient: 'from-orange-500 to-red-500' },
@@ -497,9 +498,17 @@ export default function LandingPage() {
               { icon: Hotel, title: 'STR Channel Manager', desc: 'Sincronización Airbnb, Booking + pricing dinámico', gradient: 'from-orange-500 to-amber-500' },
               { icon: TrendingUp, title: 'House Flipping', desc: 'ROI automático + timeline + gestión renovaciones', gradient: 'from-green-500 to-teal-500' },
               { icon: Recycle, title: 'Economía Circular', desc: 'Marketplace intercambio + huertos urbanos + reciclaje', gradient: 'from-emerald-500 to-green-500' },
-            ].map((feature, i) => (
-              <Card key={i} className="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border-2 hover:border-transparent relative overflow-hidden">
+            ].map((feature: any, i: number) => (
+              <Card key={i} className={`group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border-2 hover:border-transparent relative overflow-hidden ${feature.featured ? 'border-indigo-300 shadow-lg' : ''}`}>
                 <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-5 transition-opacity`} />
+                {feature.featured && (
+                  <div className="absolute top-2 right-2 z-10">
+                    <Badge className="bg-gradient-to-r from-indigo-500 to-violet-500 text-white border-0 text-xs">
+                      <Sparkles className="h-3 w-3 mr-1" />
+                      Nuevo
+                    </Badge>
+                  </div>
+                )}
                 <CardHeader>
                   <div className={`p-3 bg-gradient-to-br ${feature.gradient} rounded-xl w-fit mb-3 group-hover:scale-110 transition-transform`}>
                     <feature.icon className="h-6 w-6 text-white" />
