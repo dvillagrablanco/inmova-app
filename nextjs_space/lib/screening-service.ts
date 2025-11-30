@@ -358,19 +358,22 @@ function determinarNivelRiesgo(
   const flagsAlta = flags.filter(f => f.severidad === 'alta').length;
   const flagsMedia = flags.filter(f => f.severidad === 'media').length;
   
-  // Si hay flags de alta severidad, riesgo alto
-  if (flagsAlta >= 2) return 'alto';
+  // Clasificación de 4 niveles (D -> A):
+  // D (crítico): scoring < 40 o 3+ flags alta
+  // C (alto): scoring 40-59 o 2 flags alta
+  // B (medio): scoring 60-79 o 1 flag alta o 3+ flags media
+  // A (bajo): scoring 80+ y flags bajos
   
-  // Si scoring es bajo, riesgo alto
-  if (scoringTotal < 50) return 'alto';
+  // Nivel D - Crítico (muy riesgoso, no recomendado)
+  if (flagsAlta >= 3 || scoringTotal < 40) return 'critico';
   
-  // Si hay 1 flag alta o muchos medios, riesgo medio
-  if (flagsAlta === 1 || flagsMedia >= 3) return 'medio';
+  // Nivel C - Alto (riesgo significativo)
+  if (flagsAlta >= 2 || scoringTotal < 60) return 'alto';
   
-  // Si scoring es medio-bajo, riesgo medio
-  if (scoringTotal < 70) return 'medio';
+  // Nivel B - Medio (riesgo moderado, revisar)
+  if (flagsAlta === 1 || flagsMedia >= 3 || scoringTotal < 80) return 'medio';
   
-  // En otro caso, riesgo bajo
+  // Nivel A - Bajo (excelente candidato)
   return 'bajo';
 }
 

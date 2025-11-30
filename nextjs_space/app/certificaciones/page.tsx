@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { Home, ArrowLeft, Leaf, Plus, Search, Calendar, TrendingUp, AlertCircle, Euro } from 'lucide-react';
+import { Home, ArrowLeft, Leaf, Plus, Search, Calendar, TrendingUp, AlertCircle, Euro, Edit } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -26,10 +26,26 @@ export default function CertificacionesPage() {
   const [units, setUnits] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [openNew, setOpenNew] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCert, setSelectedCert] = useState<any>(null);
 
   const [newCert, setNewCert] = useState({
     unitId: '',
+    numeroCertificado: '',
+    calificacion: 'C',
+    consumoEnergetico: '',
+    emisionesCO2: '',
+    nombreTecnico: '',
+    numeroColegiadoTecnico: '',
+    empresaCertificadora: '',
+    fechaEmision: '',
+    fechaVencimiento: '',
+    recomendaciones: '',
+    ahorroEstimado: '',
+  });
+
+  const [editCert, setEditCert] = useState({
     numeroCertificado: '',
     calificacion: 'C',
     consumoEnergetico: '',
@@ -89,6 +105,52 @@ export default function CertificacionesPage() {
     } catch (error) {
       console.error('Error:', error);
       toast.error('Error al crear certificado');
+    }
+  };
+
+  const handleOpenEdit = (cert: any) => {
+    setSelectedCert(cert);
+    setEditCert({
+      numeroCertificado: cert.numeroCertificado || '',
+      calificacion: cert.calificacion || 'C',
+      consumoEnergetico: cert.consumoEnergetico?.toString() || '',
+      emisionesCO2: cert.emisionesCO2?.toString() || '',
+      nombreTecnico: cert.nombreTecnico || '',
+      numeroColegiadoTecnico: cert.numeroColegiadoTecnico || '',
+      empresaCertificadora: cert.empresaCertificadora || '',
+      fechaEmision: cert.fechaEmision ? format(new Date(cert.fechaEmision), 'yyyy-MM-dd') : '',
+      fechaVencimiento: cert.fechaVencimiento ? format(new Date(cert.fechaVencimiento), 'yyyy-MM-dd') : '',
+      recomendaciones: cert.recomendaciones || '',
+      ahorroEstimado: cert.ahorroEstimado?.toString() || '',
+    });
+    setOpenEdit(true);
+  };
+
+  const handleUpdate = async () => {
+    if (!selectedCert) return;
+    try {
+      const response = await fetch(`/api/certificaciones/${selectedCert.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...editCert,
+          consumoEnergetico: editCert.consumoEnergetico ? parseFloat(editCert.consumoEnergetico) : null,
+          emisionesCO2: editCert.emisionesCO2 ? parseFloat(editCert.emisionesCO2) : null,
+          ahorroEstimado: editCert.ahorroEstimado ? parseFloat(editCert.ahorroEstimado) : null,
+          fechaEmision: editCert.fechaEmision ? new Date(editCert.fechaEmision) : undefined,
+          fechaVencimiento: editCert.fechaVencimiento ? new Date(editCert.fechaVencimiento) : undefined,
+        }),
+      });
+      if (response.ok) {
+        toast.success('Certificado actualizado exitosamente');
+        setOpenEdit(false);
+        fetchData();
+      } else {
+        toast.error('Error al actualizar certificado');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Error al actualizar certificado');
     }
   };
 
@@ -222,6 +284,9 @@ export default function CertificacionesPage() {
                         <CardDescription>Técnico: {cert.nombreTecnico}</CardDescription>
                       </div>
                       <div className="flex gap-2 items-center">
+                        <Button variant="outline" size="sm" onClick={() => handleOpenEdit(cert)}>
+                          <Edit className="h-4 w-4 mr-2" />Editar
+                        </Button>
                         <Badge className={getCalificacionColor(cert.calificacion)}>{cert.calificacion}</Badge>
                         <Badge variant={cert.vigente ? 'default' : 'secondary'}>
                           {cert.vigente ? 'Vigente' : 'Vencido'}
@@ -308,6 +373,50 @@ export default function CertificacionesPage() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpenNew(false)}>Cancelar</Button>
             <Button onClick={handleCreate} disabled={!newCert.unitId || !newCert.nombreTecnico || !newCert.fechaEmision || !newCert.fechaVencimiento}>Crear</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={openEdit} onOpenChange={setOpenEdit}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar Certificado</DialogTitle>
+            <DialogDescription>Actualiza los datos del certificado energético</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div><Label>Número Certificado</Label><Input value={editCert.numeroCertificado} onChange={(e) => setEditCert({ ...editCert, numeroCertificado: e.target.value })} /></div>
+              <div>
+                <Label>Calificación *</Label>
+                <Select value={editCert.calificacion} onValueChange={(v) => setEditCert({ ...editCert, calificacion: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {['A', 'B', 'C', 'D', 'E', 'F', 'G'].map((c) => (
+                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div><Label>Consumo (kWh/m²/año)</Label><Input type="number" step="0.01" value={editCert.consumoEnergetico} onChange={(e) => setEditCert({ ...editCert, consumoEnergetico: e.target.value })} /></div>
+              <div><Label>Emisiones CO₂ (kg/m²/año)</Label><Input type="number" step="0.01" value={editCert.emisionesCO2} onChange={(e) => setEditCert({ ...editCert, emisionesCO2: e.target.value })} /></div>
+            </div>
+            <div><Label>Nombre Técnico *</Label><Input value={editCert.nombreTecnico} onChange={(e) => setEditCert({ ...editCert, nombreTecnico: e.target.value })} /></div>
+            <div className="grid grid-cols-2 gap-4">
+              <div><Label>Número Colegiado</Label><Input value={editCert.numeroColegiadoTecnico} onChange={(e) => setEditCert({ ...editCert, numeroColegiadoTecnico: e.target.value })} /></div>
+              <div><Label>Empresa Certificadora</Label><Input value={editCert.empresaCertificadora} onChange={(e) => setEditCert({ ...editCert, empresaCertificadora: e.target.value })} /></div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div><Label>Fecha Emisión *</Label><Input type="date" value={editCert.fechaEmision} onChange={(e) => setEditCert({ ...editCert, fechaEmision: e.target.value })} /></div>
+              <div><Label>Fecha Vencimiento *</Label><Input type="date" value={editCert.fechaVencimiento} onChange={(e) => setEditCert({ ...editCert, fechaVencimiento: e.target.value })} /></div>
+            </div>
+            <div><Label>Recomendaciones</Label><Textarea value={editCert.recomendaciones} onChange={(e) => setEditCert({ ...editCert, recomendaciones: e.target.value })} rows={3} /></div>
+            <div><Label>Ahorro Estimado (€/año)</Label><Input type="number" step="0.01" value={editCert.ahorroEstimado} onChange={(e) => setEditCert({ ...editCert, ahorroEstimado: e.target.value })} /></div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpenEdit(false)}>Cancelar</Button>
+            <Button onClick={handleUpdate} disabled={!editCert.nombreTecnico || !editCert.fechaEmision || !editCert.fechaVencimiento}>Guardar Cambios</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

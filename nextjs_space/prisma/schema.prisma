@@ -57,6 +57,7 @@ enum RiskLevel {
   bajo
   medio
   alto
+  critico
 }
 
 enum MaintenancePriority {
