@@ -30,7 +30,9 @@ import {
   TrendingUp,
   Calendar,
   MessageSquare,
-  AlertCircle
+  AlertCircle,
+  Edit,
+  Trash2
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -77,8 +79,10 @@ export default function VotacionesPage() {
   const [buildings, setBuildings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [openNewDialog, setOpenNewDialog] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
   const [openDetailDialog, setOpenDetailDialog] = useState(false);
   const [selectedVotacion, setSelectedVotacion] = useState<DetalleVotacion | null>(null);
+  const [editingVotacion, setEditingVotacion] = useState<Votacion | null>(null);
   const [filterEstado, setFilterEstado] = useState<string>('todas');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -246,6 +250,99 @@ export default function VotacionesPage() {
     }
   };
 
+  const handleEditVotacion = (votacion: Votacion) => {
+    setEditingVotacion(votacion);
+    setFormData({
+      buildingId: votacion.building.id,
+      titulo: votacion.titulo,
+      descripcion: votacion.descripcion,
+      tipo: votacion.tipo,
+      opciones: votacion.opciones,
+      fechaCierre: format(new Date(votacion.fechaCierre), "yyyy-MM-dd'T'HH:mm"),
+      quorumRequerido: votacion.quorumRequerido,
+      totalVotantes: votacion.totalVotantes,
+    });
+    setOpenEditDialog(true);
+  };
+
+  const handleUpdateVotacion = async () => {
+    if (!editingVotacion) return;
+
+    try {
+      if (!formData.buildingId || !formData.titulo || !formData.descripcion) {
+        toast.error('Por favor completa los campos requeridos');
+        return;
+      }
+
+      const opcionesValidas = formData.opciones.filter((o) => o.trim() !== '');
+      if (opcionesValidas.length < 2) {
+        toast.error('Debes proporcionar al menos 2 opciones');
+        return;
+      }
+
+      const res = await fetch(`/api/votaciones/${editingVotacion.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          buildingId: formData.buildingId,
+          titulo: formData.titulo,
+          descripcion: formData.descripcion,
+          tipo: formData.tipo,
+          opciones: opcionesValidas,
+          fechaCierre: formData.fechaCierre,
+          quorumRequerido: formData.quorumRequerido,
+          totalVotantes: formData.totalVotantes,
+        }),
+      });
+
+      if (res.ok) {
+        toast.success('Votación actualizada correctamente');
+        setOpenEditDialog(false);
+        setEditingVotacion(null);
+        resetForm();
+        loadVotaciones();
+      } else {
+        toast.error('Error al actualizar votación');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Error al actualizar votación');
+    }
+  };
+
+  const handleDeleteVotacion = async (votacionId: string) => {
+    if (!confirm('¿Estás seguro de cancelar esta votación?')) return;
+
+    try {
+      const res = await fetch(`/api/votaciones/${votacionId}`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        toast.success('Votación cancelada correctamente');
+        loadVotaciones();
+      } else {
+        toast.error('Error al cancelar votación');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Error al cancelar votación');
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      buildingId: '',
+      titulo: '',
+      descripcion: '',
+      tipo: 'decision_comunidad',
+      opciones: ['', ''],
+      fechaCierre: '',
+      quorumRequerido: 50,
+      totalVotantes: 0,
+    });
+  };
+
   const addOpcion = () => {
     setFormData({ ...formData, opciones: [...formData.opciones, ''] });
   };
@@ -359,7 +456,8 @@ export default function VotacionesPage() {
                 </p>
               </div>
               {isAdmin && (
-                <Dialog open={openNewDialog} onOpenChange={setOpenNewDialog}>
+                <>
+                  <Dialog open={openNewDialog} onOpenChange={setOpenNewDialog}>
                   <DialogTrigger asChild>
                     <Button className="gap-2">
                       <Plus className="h-4 w-4" />
@@ -538,6 +636,195 @@ export default function VotacionesPage() {
                     </div>
                   </DialogContent>
                 </Dialog>
+
+                {/* Dialog de Edición */}
+                <Dialog 
+                  open={openEditDialog} 
+                  onOpenChange={(open) => {
+                    setOpenEditDialog(open);
+                    if (!open) {
+                      setEditingVotacion(null);
+                      resetForm();
+                    }
+                  }}
+                >
+                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Editar Votación</DialogTitle>
+                      <DialogDescription>
+                        Modifica los detalles de la votación
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-building">Edificio *</Label>
+                        <Select
+                          value={formData.buildingId}
+                          onValueChange={(value) =>
+                            setFormData({ ...formData, buildingId: value })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar edificio" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {buildings.map((building) => (
+                              <SelectItem key={building.id} value={building.id}>
+                                {building.nombre}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-titulo">Título *</Label>
+                        <Input
+                          id="edit-titulo"
+                          value={formData.titulo}
+                          onChange={(e) =>
+                            setFormData({ ...formData, titulo: e.target.value })
+                          }
+                          placeholder="Ej: Renovación del ascensor"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-descripcion">Descripción *</Label>
+                        <Textarea
+                          id="edit-descripcion"
+                          value={formData.descripcion}
+                          onChange={(e) =>
+                            setFormData({ ...formData, descripcion: e.target.value })
+                          }
+                          placeholder="Describe la propuesta..."
+                          rows={4}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-tipo">Tipo de Votación</Label>
+                        <Select
+                          value={formData.tipo}
+                          onValueChange={(value) =>
+                            setFormData({ ...formData, tipo: value })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="decision_comunidad">
+                              Decisión de Comunidad
+                            </SelectItem>
+                            <SelectItem value="mejora">Mejora</SelectItem>
+                            <SelectItem value="gasto">Gasto</SelectItem>
+                            <SelectItem value="normativa">Normativa</SelectItem>
+                            <SelectItem value="otro">Otro</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <Separator />
+
+                      <div className="space-y-2">
+                        <Label>Opciones de Votación *</Label>
+                        {formData.opciones.map((opcion, index) => (
+                          <div key={index} className="flex gap-2">
+                            <Input
+                              value={opcion}
+                              onChange={(e) => updateOpcion(index, e.target.value)}
+                              placeholder={`Opción ${index + 1}`}
+                            />
+                            {formData.opciones.length > 2 && (
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => removeOpcion(index)}
+                              >
+                                <XCircle className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        ))}
+                        <Button
+                          variant="outline"
+                          onClick={addOpcion}
+                          className="w-full"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Agregar Opción
+                        </Button>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="edit-fechaCierre">Fecha de Cierre *</Label>
+                          <Input
+                            id="edit-fechaCierre"
+                            type="datetime-local"
+                            value={formData.fechaCierre}
+                            onChange={(e) =>
+                              setFormData({ ...formData, fechaCierre: e.target.value })
+                            }
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="edit-quorum">Quórum Requerido (%)</Label>
+                          <Input
+                            id="edit-quorum"
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={formData.quorumRequerido}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                quorumRequerido: parseInt(e.target.value) || 0,
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-totalVotantes">
+                          Total de Votantes (0 = sin límite)
+                        </Label>
+                        <Input
+                          id="edit-totalVotantes"
+                          type="number"
+                          min="0"
+                          value={formData.totalVotantes}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              totalVotantes: parseInt(e.target.value) || 0,
+                            })
+                          }
+                          placeholder="Ej: 50 (número de propietarios)"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setOpenEditDialog(false);
+                          setEditingVotacion(null);
+                          resetForm();
+                        }}
+                      >
+                        Cancelar
+                      </Button>
+                      <Button onClick={handleUpdateVotacion}>Actualizar Votación</Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                </>
               )}
             </div>
           </div>
@@ -711,29 +998,53 @@ export default function VotacionesPage() {
                           </div>
                         )}
 
-                        <div className="flex items-center gap-2 pt-2">
-                          <Button
-                            variant="outline"
-                            onClick={() => handleViewDetail(votacion.id)}
-                            className="flex-1"
-                          >
-                            Ver Resultados
-                          </Button>
-                          {votacion.estado === 'activa' && !isAdmin && (
+                        <div className="flex flex-col gap-2 pt-2">
+                          <div className="flex items-center gap-2">
                             <Button
+                              variant="outline"
                               onClick={() => handleViewDetail(votacion.id)}
                               className="flex-1"
                             >
-                              Votar Ahora
+                              Ver Resultados
                             </Button>
-                          )}
+                            {votacion.estado === 'activa' && !isAdmin && (
+                              <Button
+                                onClick={() => handleViewDetail(votacion.id)}
+                                className="flex-1"
+                              >
+                                Votar Ahora
+                              </Button>
+                            )}
+                            {votacion.estado === 'activa' && isAdmin && (
+                              <Button
+                                variant="destructive"
+                                onClick={() => handleCerrarVotacion(votacion.id)}
+                              >
+                                Cerrar Votación
+                              </Button>
+                            )}
+                          </div>
                           {votacion.estado === 'activa' && isAdmin && (
-                            <Button
-                              variant="destructive"
-                              onClick={() => handleCerrarVotacion(votacion.id)}
-                            >
-                              Cerrar Votación
-                            </Button>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleEditVotacion(votacion)}
+                                className="flex-1"
+                              >
+                                <Edit className="h-4 w-4 mr-2" />
+                                Editar
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDeleteVotacion(votacion.id)}
+                                className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Cancelar
+                              </Button>
+                            </div>
                           )}
                         </div>
                       </div>

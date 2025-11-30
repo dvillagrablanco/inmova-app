@@ -38,6 +38,8 @@ export default function ReunionesPage() {
   const [buildings, setBuildings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [editingReunion, setEditingReunion] = useState<Reunion | null>(null);
   const [formData, setFormData] = useState({
     buildingId: '',
     titulo: '',
@@ -103,6 +105,75 @@ export default function ReunionesPage() {
     }
   };
 
+  const handleEdit = (reunion: Reunion) => {
+    setEditingReunion(reunion);
+    setFormData({
+      buildingId: reunion.building.id,
+      titulo: reunion.titulo,
+      descripcion: reunion.descripcion,
+      fecha: format(new Date(reunion.fecha), "yyyy-MM-dd'T'HH:mm"),
+      lugar: reunion.lugar,
+      ordenDia: reunion.ordenDia.length > 0 ? reunion.ordenDia : [{ titulo: '' }],
+      asistentes: reunion.asistentes.length > 0 ? reunion.asistentes : [{ nombre: '' }],
+    });
+    setOpenEditDialog(true);
+  };
+
+  const handleUpdate = async () => {
+    if (!editingReunion) return;
+    try {
+      if (!formData.buildingId || !formData.titulo || !formData.fecha) {
+        toast.error('Por favor completa los campos requeridos');
+        return;
+      }
+
+      const res = await fetch(`/api/reuniones/${editingReunion.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (res.ok) {
+        toast.success('Reunión actualizada correctamente');
+        setOpenEditDialog(false);
+        setEditingReunion(null);
+        resetForm();
+        loadData();
+      } else {
+        toast.error('Error al actualizar reunión');
+      }
+    } catch (error) {
+      toast.error('Error al actualizar reunión');
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('¿Estás seguro de eliminar esta reunión?')) return;
+    try {
+      const res = await fetch(`/api/reuniones/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        toast.success('Reunión eliminada correctamente');
+        loadData();
+      } else {
+        toast.error('Error al eliminar reunión');
+      }
+    } catch (error) {
+      toast.error('Error al eliminar reunión');
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      buildingId: '',
+      titulo: '',
+      descripcion: '',
+      fecha: '',
+      lugar: '',
+      ordenDia: [{ titulo: '' }],
+      asistentes: [{ nombre: '' }],
+    });
+  };
+
   if (loading) return <div className="flex h-screen"><Sidebar /><div className="flex-1"><Header /><main className="p-6">Cargando...</main></div></div>;
 
   return (
@@ -165,6 +236,52 @@ export default function ReunionesPage() {
                   </div>
                 </DialogContent>
               </Dialog>
+              
+              {/* Dialog de Edición */}
+              <Dialog open={openEditDialog} onOpenChange={(open) => {
+                setOpenEditDialog(open);
+                if (!open) {
+                  setEditingReunion(null);
+                  resetForm();
+                }
+              }}>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Editar Reunión</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label>Edificio *</Label>
+                      <Select value={formData.buildingId} onValueChange={(value) => setFormData({ ...formData, buildingId: value })}>
+                        <SelectTrigger><SelectValue placeholder="Seleccionar edificio" /></SelectTrigger>
+                        <SelectContent>
+                          {buildings.map((b) => (<SelectItem key={b.id} value={b.id}>{b.nombre}</SelectItem>))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Título *</Label>
+                      <Input value={formData.titulo} onChange={(e) => setFormData({ ...formData, titulo: e.target.value })} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Descripción *</Label>
+                      <Textarea value={formData.descripcion} onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })} rows={3} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Fecha y Hora *</Label>
+                      <Input type="datetime-local" value={formData.fecha} onChange={(e) => setFormData({ ...formData, fecha: e.target.value })} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Lugar *</Label>
+                      <Input value={formData.lugar} onChange={(e) => setFormData({ ...formData, lugar: e.target.value })} />
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => { setOpenEditDialog(false); setEditingReunion(null); resetForm(); }}>Cancelar</Button>
+                    <Button onClick={handleUpdate}>Actualizar Reunión</Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
 
@@ -209,12 +326,18 @@ export default function ReunionesPage() {
                         </div>
                         <div className="text-muted-foreground">{reunion.building.nombre}</div>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         {!reunion.actaGenerada && new Date(reunion.fecha) < new Date() && (
                           <Button variant="default" size="sm" onClick={() => handleGenerarActa(reunion.id)} className="gap-2">
                             <FileText className="h-4 w-4" />Generar Acta
                           </Button>
                         )}
+                        <Button variant="outline" size="sm" onClick={() => handleEdit(reunion)} className="gap-2">
+                          <Edit className="h-4 w-4" />Editar
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => handleDelete(reunion.id)} className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50">
+                          <Trash2 className="h-4 w-4" />Eliminar
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
