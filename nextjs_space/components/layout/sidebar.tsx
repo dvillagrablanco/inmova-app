@@ -449,10 +449,10 @@ export function Sidebar() {
       {/* Mobile menu button */}
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="lg:hidden fixed top-4 left-4 z-[70] p-2 bg-black text-white rounded-lg shadow-lg hover:bg-gray-800 active:bg-gray-700 transition-colors"
+        className="lg:hidden fixed top-4 left-4 z-[70] p-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-xl shadow-2xl shadow-indigo-500/50 hover:shadow-indigo-500/80 hover:scale-105 active:scale-95 transition-all duration-200 backdrop-blur-sm border border-white/20"
         aria-label={isMobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
       >
-        {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        {isMobileMenuOpen ? <X size={26} /> : <Menu size={26} />}
       </button>
 
       {/* Overlay for mobile */}
