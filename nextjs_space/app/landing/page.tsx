@@ -487,21 +487,30 @@ export default function LandingPage() {
 
           {/* Video Container */}
           <div className="max-w-5xl mx-auto">
-            <div className="relative aspect-video bg-gradient-to-br from-indigo-600 to-violet-600 rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20 flex items-center justify-center">
-              {/* Placeholder until video is uploaded */}
-              <div className="text-center px-6">
-                <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/20 mb-4 animate-pulse">
-                  <Play className="h-10 w-10 text-white" />
+            <div className="relative aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20">
+              <video 
+                controls 
+                className="w-full h-full object-contain"
+                poster="/inmova-logo-cover.jpg"
+              >
+                <source src="/videos/inmova-demo.mp4" type="video/mp4" />
+                {/* Fallback placeholder if video doesn't load */}
+                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-indigo-600 to-violet-600">
+                  <div className="text-center px-6">
+                    <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/20 mb-4 animate-pulse">
+                      <Play className="h-10 w-10 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-white mb-2">Video Demo</h3>
+                    <p className="text-white/90 mb-6">Descubre todas las funcionalidades de INMOVA</p>
+                    <Link href="/register">
+                      <Button size="lg" className="bg-white text-indigo-600 hover:bg-white/90 shadow-xl">
+                        <Rocket className="h-5 w-5 mr-2" />
+                        Solicita una Demo Personalizada
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-2">Video Demo Próximamente</h3>
-                <p className="text-white/90 mb-6">Descubre todas las funcionalidades de INMOVA</p>
-                <Link href="/register">
-                  <Button size="lg" className="bg-white text-indigo-600 hover:bg-white/90 shadow-xl">
-                    <Rocket className="h-5 w-5 mr-2" />
-                    Solicita una Demo Personalizada
-                  </Button>
-                </Link>
-              </div>
+              </video>
             </div>
 
             {/* Video Stats */}
