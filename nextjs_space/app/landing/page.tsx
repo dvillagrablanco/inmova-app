@@ -488,20 +488,46 @@ export default function LandingPage() {
           {/* Video Container */}
           <div className="max-w-5xl mx-auto">
             <div className="relative aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20">
-              <video 
-                controls 
-                className="w-full h-full object-contain"
-                poster="/inmova-logo-cover.jpg"
-              >
-                <source src="/videos/inmova-demo.mp4" type="video/mp4" />
-                {/* Fallback placeholder if video doesn't load */}
+              {process.env.NEXT_PUBLIC_VIDEO_URL ? (
+                // Si hay una URL externa configurada, usar iframe o video según el tipo
+                process.env.NEXT_PUBLIC_VIDEO_URL.includes('youtube.com') || 
+                process.env.NEXT_PUBLIC_VIDEO_URL.includes('youtu.be') ||
+                process.env.NEXT_PUBLIC_VIDEO_URL.includes('vimeo.com') ? (
+                  <iframe
+                    src={process.env.NEXT_PUBLIC_VIDEO_URL}
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title="INMOVA Demo Video"
+                  />
+                ) : (
+                  <video 
+                    controls 
+                    className="w-full h-full object-contain"
+                    poster="/inmova-logo-cover.jpg"
+                  >
+                    <source src={process.env.NEXT_PUBLIC_VIDEO_URL} type="video/mp4" />
+                  </video>
+                )
+              ) : (
+                // Si no hay URL configurada, mostrar el fallback con instrucciones mejoradas
                 <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-indigo-600 to-violet-600">
-                  <div className="text-center px-6">
+                  <div className="text-center px-6 max-w-2xl">
                     <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/20 mb-4 animate-pulse">
                       <Play className="h-10 w-10 text-white" />
                     </div>
-                    <h3 className="text-2xl font-bold text-white mb-2">Video Demo</h3>
-                    <p className="text-white/90 mb-6">Descubre todas las funcionalidades de INMOVA</p>
+                    <h3 className="text-2xl font-bold text-white mb-3">Video Demo Disponible</h3>
+                    <p className="text-white/90 mb-4">
+                      Para mostrar el video de 90 segundos, configura la variable de entorno:
+                    </p>
+                    <div className="bg-black/30 rounded-lg p-4 mb-4 text-left">
+                      <code className="text-green-300 text-sm">NEXT_PUBLIC_VIDEO_URL=</code>
+                      <div className="text-white/70 text-sm mt-2 space-y-1">
+                        <div>• YouTube: https://www.youtube.com/embed/VIDEO_ID</div>
+                        <div>• Vimeo: https://player.vimeo.com/video/VIDEO_ID</div>
+                        <div>• MP4 directo: https://cdn.com/video.mp4</div>
+                      </div>
+                    </div>
                     <Link href="/register">
                       <Button size="lg" className="bg-white text-indigo-600 hover:bg-white/90 shadow-xl">
                         <Rocket className="h-5 w-5 mr-2" />
@@ -510,7 +536,7 @@ export default function LandingPage() {
                     </Link>
                   </div>
                 </div>
-              </video>
+              )}
             </div>
 
             {/* Video Stats */}
