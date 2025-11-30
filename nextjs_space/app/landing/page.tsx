@@ -71,17 +71,15 @@ export default function LandingPage() {
               </div>
               
               <h1 className="text-5xl md:text-7xl font-extrabold leading-tight">
-                La Plataforma{' '}
                 <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600 bg-clip-text text-transparent animate-gradient">
-                  Todo-en-Uno
+                  Elimina la Fragmentación
                 </span>{' '}
-                para Gestión Inmobiliaria
+                <br />
+                Una Plataforma, 7 Modelos de Negocio
               </h1>
               
               <p className="text-xl text-gray-600 leading-relaxed">
-                <span className="font-semibold text-indigo-600">88 módulos profesionales.</span>{' '}
-                <span className="font-semibold text-violet-600">7 verticales de negocio.</span>{' '}
-                Blockchain + IA GPT-4 + Room Rental con prorrateo automático. Gestiona alquileres tradicionales, coliving, STR turístico, flipping, construcción y servicios profesionales desde una sola plataforma.
+                Las gestoras operan con <span className="font-semibold text-red-600">5-8 plataformas desconectadas</span>, gastando 2.000-5.000€/mes. INMOVA elimina la fragmentación: <span className="font-semibold text-indigo-600">88 módulos profesionales.</span> <span className="font-semibold text-violet-600">7 verticales de negocio.</span> Blockchain + IA GPT-4 + IoT + Room Rental con prorrateo automático. Gestiona alquileres, coliving, STR turístico con Channel Manager nativo, flipping, construcción y servicios profesionales. <span className="font-bold text-green-600">Ahorra 70%, aumenta ROI 25%.</span>
               </p>
               
               <div className="flex flex-wrap gap-4">
@@ -179,29 +177,211 @@ export default function LandingPage() {
                 <Building2 className="h-6 w-6 mr-2 group-hover:animate-bounce" />
               </div>
               <div className="text-5xl font-black mb-2 bg-gradient-to-r from-yellow-300 to-amber-300 bg-clip-text text-transparent">10,000+</div>
-              <div className="text-white/90 font-medium">Unidades Gestionadas</div>
+              <div className="text-white/90 font-medium">Propiedades Gestionadas</div>
             </div>
             <div className="group hover:scale-105 transition-transform">
               <div className="flex items-center justify-center mb-3">
                 <Users className="h-6 w-6 mr-2 group-hover:animate-bounce" />
               </div>
               <div className="text-5xl font-black mb-2 bg-gradient-to-r from-green-300 to-emerald-300 bg-clip-text text-transparent">500+</div>
-              <div className="text-white/90 font-medium">Empresas Inmobiliarias</div>
+              <div className="text-white/90 font-medium">Gestoras Inmobiliarias</div>
             </div>
             <div className="group hover:scale-105 transition-transform">
               <div className="flex items-center justify-center mb-3">
-                <DollarSign className="h-6 w-6 mr-2 group-hover:animate-bounce" />
+                <TrendingDown className="h-6 w-6 mr-2 group-hover:animate-bounce" />
               </div>
-              <div className="text-5xl font-black mb-2 bg-gradient-to-r from-blue-300 to-cyan-300 bg-clip-text text-transparent">€50M+</div>
-              <div className="text-white/90 font-medium">Ingresos Procesados</div>
+              <div className="text-5xl font-black mb-2 bg-gradient-to-r from-blue-300 to-cyan-300 bg-clip-text text-transparent">-70%</div>
+              <div className="text-white/90 font-medium">Reducción Costes Software</div>
             </div>
             <div className="group hover:scale-105 transition-transform">
               <div className="flex items-center justify-center mb-3">
-                <Star className="h-6 w-6 mr-2 group-hover:animate-bounce" />
+                <TrendingUp className="h-6 w-6 mr-2 group-hover:animate-bounce" />
               </div>
-              <div className="text-5xl font-black mb-2 bg-gradient-to-r from-pink-300 to-rose-300 bg-clip-text text-transparent">4.9/5</div>
-              <div className="text-white/90 font-medium">Satisfacción Cliente</div>
+              <div className="text-5xl font-black mb-2 bg-gradient-to-r from-pink-300 to-rose-300 bg-clip-text text-transparent">+25%</div>
+              <div className="text-white/90 font-medium">Aumento ROI Promedio</div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* COMPETITIVE ADVANTAGE SECTION */}
+      <section id="comparativa" className="py-24 px-4 bg-gradient-to-br from-slate-50 via-white to-indigo-50">
+        <div className="container mx-auto">
+          <div className="text-center mb-16">
+            <Badge className="mb-4 bg-gradient-to-r from-amber-100 to-orange-100 text-amber-700 border-amber-200 px-4 py-2">
+              <Target className="h-4 w-4 mr-1 inline" />
+              Ventaja Competitiva
+            </Badge>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+              Por Qué Elegir INMOVA vs la Competencia
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              <strong className="text-indigo-600">Reduce tu software un 70%.</strong> Aumenta el ROI un 25%. €3.32/módulo vs €6.96 de Buildium.
+            </p>
+          </div>
+
+          {/* Comparison Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            {/* INMOVA vs Homming */}
+            <Card className="group hover:shadow-2xl transition-all border-2 hover:border-indigo-500">
+              <CardHeader>
+                <div className="p-3 bg-gradient-to-br from-red-500 to-pink-500 rounded-xl w-fit mb-3">
+                  <X className="h-6 w-6 text-white" />
+                </div>
+                <CardTitle className="text-lg">vs Homming</CardTitle>
+                <CardDescription className="text-sm font-semibold text-gray-500">Mono-Vertical Residencial</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="flex items-start gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                  <p className="text-sm"><strong>Multi-Vertical:</strong> 7 modelos vs 1</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                  <p className="text-sm"><strong>STR Nativo:</strong> Channel Manager integrado</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                  <p className="text-sm"><strong>White Label Total:</strong> Tu propia app</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* INMOVA vs Rentger */}
+            <Card className="group hover:shadow-2xl transition-all border-2 hover:border-violet-500">
+              <CardHeader>
+                <div className="p-3 bg-gradient-to-br from-violet-500 to-purple-500 rounded-xl w-fit mb-3">
+                  <TrendingDown className="h-6 w-6 text-white" />
+                </div>
+                <CardTitle className="text-lg">vs Rentger</CardTitle>
+                <CardDescription className="text-sm font-semibold text-gray-500">Gestión Administrativa</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="flex items-start gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                  <p className="text-sm"><strong>Fiscalidad + IA:</strong> AEAT + IoT + Blockchain</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                  <p className="text-sm"><strong>House Flipping:</strong> ROI automático en tiempo real</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                  <p className="text-sm"><strong>Innovación:</strong> Inversión optimizada, no solo gestión</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* INMOVA vs Nester */}
+            <Card className="group hover:shadow-2xl transition-all border-2 hover:border-cyan-500">
+              <CardHeader>
+                <div className="p-3 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-xl w-fit mb-3">
+                  <Zap className="h-6 w-6 text-white" />
+                </div>
+                <CardTitle className="text-lg">vs Nester</CardTitle>
+                <CardDescription className="text-sm font-semibold text-gray-500">Automatización Carteras</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="flex items-start gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                  <p className="text-sm"><strong>IoT Físico:</strong> Sensores + cerraduras + automatización real</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                  <p className="text-sm"><strong>Tokenización:</strong> Web3 + distribución renta automática</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                  <p className="text-sm"><strong>BI Predictivo:</strong> Roles CFO + Director Regional</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* INMOVA vs Buildium/AppFolio */}
+            <Card className="group hover:shadow-2xl transition-all border-2 hover:border-amber-500">
+              <CardHeader>
+                <div className="p-3 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl w-fit mb-3">
+                  <Globe className="h-6 w-6 text-white" />
+                </div>
+                <CardTitle className="text-lg">vs Buildium/AppFolio</CardTitle>
+                <CardDescription className="text-sm font-semibold text-gray-500">Gigantes USA</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="flex items-start gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                  <p className="text-sm"><strong>Precio/Valor:</strong> €3.32/módulo vs €6.96/módulo</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                  <p className="text-sm"><strong>Fiscal España:</strong> Modelo 347, 100, LAU, RGPD nativo</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                  <p className="text-sm"><strong>Tecnología:</strong> IA GPT-4 + Blockchain vs código legacy</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Key Metrics */}
+          <div className="grid md:grid-cols-3 gap-6 mt-12">
+            <Card className="text-center bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200">
+              <CardHeader>
+                <div className="p-3 bg-green-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2">
+                  <TrendingDown className="h-8 w-8 text-white" />
+                </div>
+                <CardTitle className="text-3xl font-black text-green-600">-70%</CardTitle>
+                <CardDescription className="text-gray-700 font-semibold">
+                  Reducción de Costes de Software
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600">De 2.000-5.000€/mes con 5-8 herramientas a una sola plataforma unificada</p>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200">
+              <CardHeader>
+                <div className="p-3 bg-blue-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2">
+                  <TrendingUp className="h-8 w-8 text-white" />
+                </div>
+                <CardTitle className="text-3xl font-black text-blue-600">+25%</CardTitle>
+                <CardDescription className="text-gray-700 font-semibold">
+                  Incremento de ROI Inmobiliario
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600">Optimización automatizada + pricing dinámico + mantenimiento predictivo</p>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center bg-gradient-to-br from-violet-50 to-purple-50 border-2 border-violet-200">
+              <CardHeader>
+                <div className="p-3 bg-violet-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2">
+                  <DollarSign className="h-8 w-8 text-white" />
+                </div>
+                <CardTitle className="text-3xl font-black text-violet-600">€3.32</CardTitle>
+                <CardDescription className="text-gray-700 font-semibold">
+                  Coste por Módulo
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600">vs €6.96 de Buildium. 88 módulos incluidos en todos los planes</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="text-center mt-12">
+            <p className="text-sm text-gray-500 italic mb-6">
+              *Datos basados en análisis de mercado PropTech 2024-2025
+            </p>
+            <Link href="/register">
+              <Button size="lg" className="gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-xl">
+                <Award className="h-5 w-5" />
+                Prueba INMOVA Gratis 30 Días
+                <ArrowRight className="h-5 w-5" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -450,87 +630,159 @@ export default function LandingPage() {
       </section>
 
       {/* PRICING */}
-      <section id="pricing" className="py-20 px-4">
+      <section id="pricing" className="py-20 px-4 bg-gradient-to-br from-white via-indigo-50 to-violet-50">
         <div className="container mx-auto">
           <div className="text-center mb-16">
-            <Badge className="mb-4">Precios</Badge>
-            <h2 className="text-4xl font-bold mb-4">Planes para Cada Necesidad</h2>
-            <p className="text-xl text-muted-foreground">Comienza gratis, escala cuando lo necesites</p>
+            <Badge className="mb-4 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-green-200 px-4 py-2">
+              <DollarSign className="h-4 w-4 mr-1 inline" />
+              Mejor Precio/Valor del Mercado
+            </Badge>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+              Planes para Cada Necesidad
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              <strong className="text-indigo-600">€3.32 por módulo</strong> vs €6.96 de Buildium. Ahorra hasta un 70% consolidando 5-8 herramientas en una sola.
+            </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-4 gap-6 max-w-7xl mx-auto">
             {[
               {
-                name: 'Básico',
-                price: '€29',
+                name: 'Starter',
+                price: '€89',
                 period: '/mes',
+                modules: '30 módulos',
+                properties: 'Hasta 25 propiedades',
+                costPerModule: '€2.97/módulo',
                 features: [
-                  'Hasta 50 propiedades',
-                  'Módulos core',
-                  '3 usuarios',
-                  'Soporte email',
-                  'Integraciones básicas'
-                ]
+                  '30 módulos básicos',
+                  'Hasta 25 propiedades',
+                  'Gestión residencial + coliving',
+                  '5 usuarios',
+                  'Soporte email 48h',
+                  'Dashboard BI básico'
+                ],
+                cta: 'Ideal para emprendedores'
               },
               {
                 name: 'Profesional',
-                price: '€79',
+                price: '€199',
                 period: '/mes',
+                modules: '60 módulos',
+                properties: '26-200 propiedades',
+                costPerModule: '€3.32/módulo',
                 popular: true,
                 features: [
-                  'Hasta 500 propiedades',
-                  '70+ módulos',
-                  '10 usuarios',
-                  'Soporte prioritario',
-                  'White Label básico',
-                  'IA + Blockchain'
-                ]
+                  '60 módulos profesionales',
+                  '26-200 propiedades',
+                  'Todos los verticales (STR, Flipping, etc.)',
+                  'Stripe + CRM + Firma Digital',
+                  'Mantenimiento Predictivo IA',
+                  'Soporte chat 24h',
+                  'White Label básico'
+                ],
+                cta: 'Gestoras en crecimiento'
               },
               {
                 name: 'Empresarial',
-                price: 'Custom',
-                period: '',
+                price: '€499',
+                period: '/mes',
+                modules: '88 módulos',
+                properties: '201-1000 propiedades',
+                costPerModule: '€5.67/módulo',
+                features: [
+                  'TODOS los 88 módulos',
+                  '201-1000 propiedades',
+                  '7 verticales completos',
+                  'Blockchain + Tokenización Web3',
+                  'IoT + Edificios Inteligentes',
+                  'IA GPT-4 completa',
+                  'White Label TOTAL (App propia)',
+                  'Soporte teléfono + Account Manager'
+                ],
+                cta: 'Empresas consolidadas'
+              },
+              {
+                name: 'Enterprise+',
+                price: '€1,999+',
+                period: '/mes',
+                modules: '88+ módulos',
+                properties: '+1000 propiedades',
+                costPerModule: 'Personalizado',
                 features: [
                   'Propiedades ilimitadas',
-                  'TODOS los 88 módulos',
-                  'Usuarios ilimitados',
-                  'Soporte 24/7',
-                  'White Label completo',
-                  'Todas las integraciones',
-                  'Servidor dedicado'
-                ]
+                  'Todos los módulos + Custom',
+                  'Infraestructura dedicada',
+                  'SLA 99.95%',
+                  'Desarrollos a medida',
+                  'Integraciones ERP (SAP, Sage)',
+                  'Multi-región + Multi-moneda',
+                  'Account Manager dedicado 24/7'
+                ],
+                cta: 'Grandes corporaciones'
               }
             ].map((plan, i) => (
-              <Card key={i} className={plan.popular ? 'border-primary border-2 shadow-lg' : ''}>
+              <Card key={i} className={`group hover:shadow-2xl transition-all ${plan.popular ? 'border-indigo-500 border-2 shadow-xl relative' : 'hover:border-indigo-300 border-2'}`}>
                 {plan.popular && (
-                  <div className="bg-primary text-white text-center py-2 rounded-t-lg text-sm font-medium">
-                    Más Popular
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg">
+                    ⭐ Más Popular
                   </div>
                 )}
-                <CardHeader>
-                  <CardTitle>{plan.name}</CardTitle>
-                  <div className="mt-4">
-                    <span className="text-4xl font-bold">{plan.price}</span>
-                    <span className="text-muted-foreground">{plan.period}</span>
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-xl mb-2">{plan.name}</CardTitle>
+                  <div className="space-y-1">
+                    <div>
+                      <span className="text-4xl font-black bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">{plan.price}</span>
+                      <span className="text-gray-500 text-sm">{plan.period}</span>
+                    </div>
+                    <div className="text-xs text-gray-500 font-semibold">{plan.costPerModule}</div>
                   </div>
+                  <Badge variant="secondary" className="mt-3 w-fit text-xs">{plan.modules}</Badge>
+                  <div className="text-sm text-indigo-600 font-semibold mt-2">{plan.properties}</div>
                 </CardHeader>
                 <CardContent>
-                  <ul className="space-y-3 mb-6">
+                  <div className="mb-4 p-3 bg-indigo-50 rounded-lg">
+                    <p className="text-xs text-gray-700 font-semibold text-center">{plan.cta}</p>
+                  </div>
+                  <ul className="space-y-2.5 mb-6">
                     {plan.features.map((feature, j) => (
                       <li key={j} className="flex items-start gap-2 text-sm">
-                        <CheckCircle className="h-5 w-5 text-green-500 shrink-0" />
-                        {feature}
+                        <CheckCircle className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                        <span className="text-gray-700">{feature}</span>
                       </li>
                     ))}
                   </ul>
                   <Link href="/register" className="w-full">
-                    <Button className="w-full" variant={plan.popular ? 'default' : 'outline'}>
-                      Comenzar Ahora
+                    <Button 
+                      className={`w-full ${plan.popular ? 'bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700' : ''}`}
+                      variant={plan.popular ? 'default' : 'outline'}
+                    >
+                      {plan.popular ? '🚀 Comenzar Ahora' : 'Comenzar Ahora'}
                     </Button>
                   </Link>
                 </CardContent>
               </Card>
             ))}
+          </div>
+
+          <div className="text-center mt-12 space-y-4">
+            <p className="text-sm text-gray-600">
+              💳 <strong>30 días de prueba gratis.</strong> Sin tarjeta de crédito. Cancela cuando quieras.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-700">
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">LAUNCH2025</Badge>
+                <span>50% dto. 1er mes</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">ANNUAL30</Badge>
+                <span>30% dto. pago anual</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="bg-violet-50 text-violet-700 border-violet-200">REFIERE100</Badge>
+                <span>€100 para ti y tu referido</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
