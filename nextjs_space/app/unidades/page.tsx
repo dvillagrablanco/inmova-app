@@ -462,7 +462,7 @@ export default function UnidadesPage() {
             {filteredUnits.length === 0 && (
               (searchTerm || estadoFilter !== 'all' || tipoFilter !== 'all') ? (
                 <EmptyState
-                  icon={Search}
+                  icon={<Search className="h-16 w-16 text-gray-400" />}
                   title="No se encontraron resultados"
                   description="No hay unidades que coincidan con los filtros aplicados"
                   action={{
@@ -472,13 +472,13 @@ export default function UnidadesPage() {
                 />
               ) : (
                 <EmptyState
-                  icon={Home}
+                  icon={<Home className="h-16 w-16 text-gray-400" />}
                   title="No hay unidades registradas"
                   description="Comienza agregando tu primera unidad al edificio"
                   action={canCreate ? {
                     label: 'Crear Primera Unidad',
                     onClick: () => router.push('/unidades/nuevo'),
-                    icon: Plus
+                    icon: <Plus className="h-4 w-4" />
                   } : undefined}
                 />
               )

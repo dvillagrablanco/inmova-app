@@ -527,7 +527,7 @@ export default function PagosPage() {
             {filteredPayments.length === 0 && viewMode === 'list' && (
               searchTerm ? (
                 <EmptyState
-                  icon={Search}
+                  icon={<Search className="h-16 w-16 text-gray-400" />}
                   title="No se encontraron resultados"
                   description={`No hay pagos que coincidan con "${searchTerm}"`}
                   action={{
@@ -537,7 +537,7 @@ export default function PagosPage() {
                 />
               ) : (
                 <EmptyState
-                  icon={CreditCard}
+                  icon={<CreditCard className="h-16 w-16 text-gray-400" />}
                   title="No hay pagos registrados"
                   description="Los pagos aparecerán aquí cuando se registren contratos"
                 />

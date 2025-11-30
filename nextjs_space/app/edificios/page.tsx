@@ -314,20 +314,20 @@ export default function EdificiosPage() {
 
             {filteredBuildings.length === 0 && !searchTerm && (
               <EmptyState
-                icon={Building2}
+                icon={<Building2 className="h-16 w-16 text-gray-400" />}
                 title="No hay edificios todavía"
                 description="Comienza creando tu primer edificio para gestionar unidades, inquilinos y contratos de manera eficiente."
                 action={canCreate ? {
                   label: 'Crear Primer Edificio',
                   onClick: () => router.push('/edificios/nuevo'),
-                  icon: Plus
+                  icon: <Plus className="h-4 w-4" />
                 } : undefined}
               />
             )}
             
             {filteredBuildings.length === 0 && searchTerm && (
               <EmptyState
-                icon={Search}
+                icon={<Search className="h-16 w-16 text-gray-400" />}
                 title="No se encontraron resultados"
                 description={`No encontramos edificios que coincidan con "${searchTerm}". Intenta con otros términos de búsqueda.`}
                 action={{

@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
 import { KPICard } from '@/components/ui/kpi-card';
+import { ContextualHelp } from '@/components/ui/contextual-help';
 import {
   TrendingUp,
   Building2,
@@ -398,6 +399,35 @@ export default function DashboardPage() {
             </div>
           )}
           </div>
+          
+          {/* Contextual Help */}
+          <ContextualHelp
+            title="Dashboard"
+            resources={[
+              {
+                title: 'Introducción al Dashboard',
+                description: 'Aprende a interpretar los KPIs principales',
+                type: 'tutorial',
+                link: '/landing/modulos'
+              },
+              {
+                title: 'Personalizar vistas',
+                description: 'Configura tu dashboard a medida',
+                type: 'doc'
+              },
+              {
+                title: 'Análisis financiero',
+                description: 'Guía completa de reportes financieros',
+                type: 'video'
+              }
+            ]}
+            quickTips={[
+              'Haz clic en cualquier KPI para ver más detalles y análisis histórico',
+              'Usa los filtros de fecha para comparar períodos diferentes',
+              'Los datos se actualizan automáticamente cada 5 minutos',
+              'Puedes exportar cualquier gráfico haciendo clic derecho sobre él'
+            ]}
+          />
         </main>
       </div>
     </div>

@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
+import { OnboardingTour } from '@/components/OnboardingTour';
+import { QuickAccessMenu } from '@/components/ui/quick-access-menu';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +15,7 @@ import {
   CheckCircle, Star, ArrowRight, Play, Hotel, Hammer, Briefcase,
   Cloud, Calendar, MessageSquare, FileText, CreditCard, BarChart3,
   Lock, Globe, Smartphone, Award, Target, Rocket, Home,
-  Link as LinkIcon, Recycle, Phone, Mail, MapPin, Sparkles
+  Link as LinkIcon, Recycle, Phone, Mail, MapPin, Sparkles, HelpCircle
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -56,6 +58,15 @@ export default function HomePage() {
   const [activeModules, setActiveModules] = useState<string[]>([]);
   const [stats, setStats] = useState<HomeStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // Check if user has seen onboarding
+  useEffect(() => {
+    const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
+    if (!hasSeenOnboarding && session) {
+      setShowOnboarding(true);
+    }
+  }, [session]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -118,11 +129,18 @@ export default function HomePage() {
   // Filtrar módulos activos que tenemos información
   const availableModules = activeModules.filter(code => MODULE_INFO[code]).slice(0, 12);
 
+  const handleOnboardingComplete = () => {
+    localStorage.setItem('hasSeenOnboarding', 'true');
+    setShowOnboarding(false);
+  };
+
   return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      <Sidebar />
-      <div className="flex-1 flex flex-col ml-0 lg:ml-64">
-        <Header />
+    <>
+      {showOnboarding && <OnboardingTour onComplete={handleOnboardingComplete} />}
+      <div className="flex h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+        <Sidebar />
+        <div className="flex-1 flex flex-col ml-0 lg:ml-64">
+          <Header />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto space-y-8">
             {/* Welcome Section */}
@@ -270,8 +288,12 @@ export default function HomePage() {
               </CardContent>
             </Card>
           </div>
+          
+          {/* Quick Access Menu */}
+          <QuickAccessMenu />
         </main>
       </div>
     </div>
+    </>
   );
 }

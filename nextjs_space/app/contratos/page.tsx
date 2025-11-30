@@ -425,7 +425,7 @@ export default function ContratosPage() {
             {filteredContracts.length === 0 && (
               searchTerm ? (
                 <EmptyState
-                  icon={Search}
+                  icon={<Search className="h-16 w-16 text-gray-400" />}
                   title="No se encontraron resultados"
                   description={`No hay contratos que coincidan con "${searchTerm}"`}
                   action={{
@@ -435,13 +435,13 @@ export default function ContratosPage() {
                 />
               ) : (
                 <EmptyState
-                  icon={FileText}
+                  icon={<FileText className="h-16 w-16 text-gray-400" />}
                   title="No hay contratos registrados"
                   description="Comienza creando tu primer contrato de arrendamiento"
                   action={canCreate ? {
                     label: 'Crear Primer Contrato',
                     onClick: () => router.push('/contratos/nuevo'),
-                    icon: Plus
+                    icon: <Plus className="h-4 w-4" />
                   } : undefined}
                 />
               )
