@@ -26,6 +26,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { usePermissions } from '@/lib/hooks/usePermissions';
+import { Skeleton } from '@/components/ui/skeleton';
+import { SkeletonList } from '@/components/ui/skeleton-card';
+import { EmptyState } from '@/components/ui/empty-state';
 
 interface Building {
   id: string;
@@ -93,8 +96,17 @@ export default function EdificiosPage() {
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="flex h-screen bg-gradient-bg">
+        <Sidebar />
+        <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
+          <Header />
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <div className="max-w-7xl mx-auto">
+              <Skeleton className="h-8 w-48 mb-6" />
+              <SkeletonList count={6} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" />
+            </div>
+          </main>
+        </div>
       </div>
     );
   }
@@ -300,24 +312,29 @@ export default function EdificiosPage() {
               })}
             </div>
 
-            {filteredBuildings.length === 0 && (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <Building2 className="h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No se encontraron edificios</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {searchTerm
-                      ? 'Intenta con otros términos de búsqueda'
-                      : 'Comienza agregando tu primer edificio'}
-                  </p>
-                  {canCreate && !searchTerm && (
-                    <Button onClick={() => router.push('/edificios/nuevo')}>
-                      <Plus className="mr-2 h-4 w-4" />
-                      Nuevo Edificio
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
+            {filteredBuildings.length === 0 && !searchTerm && (
+              <EmptyState
+                icon={Building2}
+                title="No hay edificios todavía"
+                description="Comienza creando tu primer edificio para gestionar unidades, inquilinos y contratos de manera eficiente."
+                action={canCreate ? {
+                  label: 'Crear Primer Edificio',
+                  onClick: () => router.push('/edificios/nuevo'),
+                  icon: Plus
+                } : undefined}
+              />
+            )}
+            
+            {filteredBuildings.length === 0 && searchTerm && (
+              <EmptyState
+                icon={Search}
+                title="No se encontraron resultados"
+                description={`No encontramos edificios que coincidan con "${searchTerm}". Intenta con otros términos de búsqueda.`}
+                action={{
+                  label: 'Limpiar búsqueda',
+                  onClick: () => setSearchTerm('')
+                }}
+              />
             )}
           </div>
         </main>

@@ -27,6 +27,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { usePermissions } from '@/lib/hooks/usePermissions';
+import { Skeleton } from '@/components/ui/skeleton';
+import { SkeletonList } from '@/components/ui/skeleton-card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { FilterChips } from '@/components/ui/filter-chips';
+import { ButtonWithLoading } from '@/components/ui/button-with-loading';
 
 interface Tenant {
   id: string;
@@ -96,10 +101,41 @@ export default function InquilinosPage() {
     }
   }, [searchTerm, tenants]);
 
+  const [activeFilters, setActiveFilters] = useState<Array<{id: string; label: string; value: string}>>([]);
+
+  // Update active filters when search term changes
+  useEffect(() => {
+    const filters = [];
+    if (searchTerm) {
+      filters.push({ id: 'search', label: 'Búsqueda', value: searchTerm });
+    }
+    setActiveFilters(filters);
+  }, [searchTerm]);
+
+  const clearFilter = (filterId: string) => {
+    if (filterId === 'search') {
+      setSearchTerm('');
+    }
+  };
+
+  const clearAllFilters = () => {
+    setSearchTerm('');
+  };
+
   if (status === 'loading' || isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="flex h-screen bg-gradient-bg">
+        <Sidebar />
+        <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
+          <Header />
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <div className="max-w-7xl mx-auto">
+              <Skeleton className="h-8 w-48 mb-6" />
+              <Skeleton className="h-10 w-full max-w-md mb-6" />
+              <SkeletonList count={5} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" />
+            </div>
+          </main>
+        </div>
       </div>
     );
   }
@@ -200,6 +236,13 @@ export default function InquilinosPage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Active Filters */}
+            <FilterChips
+              filters={activeFilters}
+              onRemove={clearFilter}
+              onClearAll={clearAllFilters}
+            />
 
             {/* Stats Summary */}
             <div className="grid gap-4 md:grid-cols-3">
