@@ -39,7 +39,7 @@ export default function LandingPage() {
               <a href="#features" className="text-sm font-medium text-gray-700 hover:text-indigo-600 transition-colors">Características</a>
               <a href="#vertical" className="text-sm font-medium text-gray-700 hover:text-indigo-600 transition-colors">Verticales</a>
               <a href="#pricing" className="text-sm font-medium text-gray-700 hover:text-indigo-600 transition-colors">Precios</a>
-              <a href="#comparativa" className="text-sm font-medium text-gray-700 hover:text-indigo-600 transition-colors">Comparativa</a>
+              <a href="#integraciones" className="text-sm font-medium text-gray-700 hover:text-indigo-600 transition-colors">Integraciones</a>
               <Link href="/login">
                 <Button variant="ghost" className="hover:bg-indigo-50">Iniciar Sesión</Button>
               </Link>
@@ -529,54 +529,88 @@ export default function LandingPage() {
       </section>
 
       {/* COMPARATIVA SECTION */}
-      <section id="comparativa" className="py-20 px-4">
+      <section id="comparativa" className="py-20 px-4 bg-white">
         <div className="container mx-auto">
           <div className="text-center mb-16">
-            <Badge className="mb-4">Comparativa</Badge>
-            <h2 className="text-4xl font-bold mb-4">INMOVA vs Competencia</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Por qué somos la mejor opción del mercado
+            <Badge className="mb-4 bg-gradient-to-r from-amber-100 to-orange-100 text-amber-700 border-amber-200 px-4 py-2">
+              <Target className="h-4 w-4 mr-1 inline" />
+              Comparativa Completa
+            </Badge>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+              INMOVA vs Competencia Principal
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Análisis detallado frente a Homming, Rentger, Nester y Buildium/AppFolio
             </p>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left p-4">Característica</th>
+          <div className="overflow-x-auto shadow-2xl rounded-2xl border-2">
+            <table className="w-full bg-white">
+              <thead className="bg-gradient-to-r from-indigo-50 to-violet-50">
+                <tr className="border-b-2">
+                  <th className="text-left p-4 font-bold text-gray-700">Característica</th>
                   <th className="p-4">
-                    <div className="font-bold text-primary">INMOVA</div>
+                    <div className="font-bold text-indigo-600 text-lg">INMOVA</div>
+                    <div className="text-xs text-gray-500">Multi-Vertical</div>
                   </th>
                   <th className="p-4">
-                    <div className="text-muted-foreground">Homming</div>
+                    <div className="text-gray-600">Homming</div>
+                    <div className="text-xs text-gray-400">Mono-Vertical</div>
                   </th>
                   <th className="p-4">
-                    <div className="text-muted-foreground">Otros</div>
+                    <div className="text-gray-600">Rentger</div>
+                    <div className="text-xs text-gray-400">Admin</div>
+                  </th>
+                  <th className="p-4">
+                    <div className="text-gray-600">Nester</div>
+                    <div className="text-xs text-gray-400">Automatización</div>
+                  </th>
+                  <th className="p-4">
+                    <div className="text-gray-600">Buildium</div>
+                    <div className="text-xs text-gray-400">USA</div>
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {[
-                  { feature: 'Total Módulos', inmova: '88', homming: '10-15', otros: '10-20' },
-                  { feature: 'Multi-Vertical', inmova: '7 modelos', homming: '1-2', otros: '1-2' },
-                  { feature: 'Blockchain', inmova: '✓', homming: '✗', otros: '✗' },
-                  { feature: 'IA GPT-4', inmova: '✓', homming: '✗', otros: '✗' },
-                  { feature: 'STR + Residencial', inmova: '✓', homming: '✗', otros: '✗' },
-                  { feature: 'House Flipping', inmova: '✓ ROI Auto', homming: '✗', otros: '✗' },
-                  { feature: 'White Label', inmova: '✓ Completo', homming: '⚠️ Limitado', otros: '⚠️' },
-                  { feature: 'ESG/Sostenibilidad', inmova: '✓', homming: '✗', otros: '✗' },
+                  { feature: 'Total Módulos', inmova: '88', homming: '10-15', rentger: '15-20', nester: '12-18', buildium: '20-25' },
+                  { feature: 'Verticales de Negocio', inmova: '7', homming: '1', rentger: '1-2', nester: '1-2', buildium: '2-3' },
+                  { feature: 'Blockchain & NFTs', inmova: '✓', homming: '✗', rentger: '✗', nester: '✗', buildium: '✗' },
+                  { feature: 'IA GPT-4 Nativa', inmova: '✓', homming: '✗', rentger: '✗', nester: '✗', buildium: '✗' },
+                  { feature: 'STR + Residencial', inmova: '✓', homming: '✗', rentger: '⚠️', nester: '⚠️', buildium: '✓' },
+                  { feature: 'House Flipping', inmova: '✓ ROI Auto', homming: '✗', rentger: '✗', nester: '✗', buildium: '✗' },
+                  { feature: 'Room Rental / Coliving', inmova: '✓', homming: '✗', rentger: '✗', nester: '✗', buildium: '⚠️' },
+                  { feature: 'White Label Completo', inmova: '✓', homming: '⚠️', rentger: '✗', nester: '✗', buildium: '⚠️' },
+                  { feature: 'IoT & Smart Buildings', inmova: '✓', homming: '✗', rentger: '✗', nester: '⚠️', buildium: '✗' },
+                  { feature: 'ESG & Sostenibilidad', inmova: '✓', homming: '✗', rentger: '✗', nester: '✗', buildium: '✗' },
+                  { feature: 'Precio/Módulo (€)', inmova: '€3.32', homming: '€5-7', rentger: '€6-8', nester: '€5-9', buildium: '€6.96' },
+                  { feature: 'Fiscalidad España', inmova: '✓ AEAT', homming: '✓', rentger: '✓', nester: '✓', buildium: '✗' },
                 ].map((row, i) => (
-                  <tr key={i} className="border-b hover:bg-muted/50">
-                    <td className="p-4 font-medium">{row.feature}</td>
+                  <tr key={i} className="border-b hover:bg-indigo-50/50 transition-colors">
+                    <td className="p-4 font-semibold text-gray-700">{row.feature}</td>
                     <td className="p-4 text-center">
-                      <Badge className="bg-green-500">{row.inmova}</Badge>
+                      <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-md">{row.inmova}</Badge>
                     </td>
-                    <td className="p-4 text-center text-muted-foreground">{row.homming}</td>
-                    <td className="p-4 text-center text-muted-foreground">{row.otros}</td>
+                    <td className="p-4 text-center text-gray-600 text-sm">{row.homming}</td>
+                    <td className="p-4 text-center text-gray-600 text-sm">{row.rentger}</td>
+                    <td className="p-4 text-center text-gray-600 text-sm">{row.nester}</td>
+                    <td className="p-4 text-center text-gray-600 text-sm">{row.buildium}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+
+          <div className="mt-12 text-center">
+            <p className="text-sm text-gray-500 italic mb-6">
+              ✓ = Incluido | ⚠️ = Limitado | ✗ = No disponible. Datos actualizados a Enero 2026.
+            </p>
+            <Link href="/register">
+              <Button size="lg" className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-xl">
+                <CheckCircle className="h-5 w-5 mr-2" />
+                Prueba INMOVA Gratis 30 Días
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -801,15 +835,208 @@ export default function LandingPage() {
                 Comenzar Gratis 30 Días
               </Button>
             </Link>
-            <a href="mailto:ventas@inmova.com?subject=Consulta%20sobre%20INMOVA">
+            <Link href="/landing/contacto">
               <Button size="lg" variant="outline" className="gap-2 bg-transparent text-white border-white hover:bg-white/10">
                 <Phone className="h-5 w-5" />
                 Hablar con Ventas
               </Button>
-            </a>
+            </Link>
           </div>
         </div>
       </section>
+      {/* INTEGRACIONES SECTION */}
+      <section id="integraciones" className="py-20 px-4 bg-gradient-to-br from-slate-50 to-indigo-50">
+        <div className="container mx-auto">
+          <div className="text-center mb-16">
+            <Badge className="mb-4 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 border-purple-200 px-4 py-2">
+              <LinkIcon className="h-4 w-4 mr-1 inline" />
+              Integraciones
+            </Badge>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+              Conecta con tus Herramientas Favoritas
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              INMOVA se integra perfectamente con las principales plataformas del sector inmobiliario y financiero
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {/* Integraciones Financieras */}
+            <Card className="group hover:shadow-2xl transition-all border-2">
+              <CardHeader>
+                <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl w-fit mb-3">
+                  <CreditCard className="h-6 w-6 text-white" />
+                </div>
+                <CardTitle className="text-lg">Pagos y Finanzas</CardTitle>
+                <CardDescription>Procesa pagos de forma segura</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <strong>Stripe:</strong> Pagos recurrentes y one-time
+                  </li>
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <strong>Open Banking:</strong> Verificación de ingresos
+                  </li>
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <strong>Zucchetti:</strong> Integración ERP/contabilidad
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Integraciones Portales */}
+            <Card className="group hover:shadow-2xl transition-all border-2">
+              <CardHeader>
+                <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl w-fit mb-3">
+                  <Globe className="h-6 w-6 text-white" />
+                </div>
+                <CardTitle className="text-lg">Portales Inmobiliarios</CardTitle>
+                <CardDescription>Publicación automática</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <strong>Idealista:</strong> Sincronización automática
+                  </li>
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <strong>Fotocasa:</strong> Anuncios optimizados
+                  </li>
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <strong>Habitaclia:</strong> Multi-publicación
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Integraciones STR */}
+            <Card className="group hover:shadow-2xl transition-all border-2">
+              <CardHeader>
+                <div className="p-3 bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl w-fit mb-3">
+                  <Hotel className="h-6 w-6 text-white" />
+                </div>
+                <CardTitle className="text-lg">Short-Term Rental</CardTitle>
+                <CardDescription>Channel Manager nativo</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <strong>Airbnb:</strong> Sincronización calendario
+                  </li>
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <strong>Booking.com:</strong> Gestión reservas
+                  </li>
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <strong>VRBO:</strong> Pricing dinámico
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Integraciones Comunicación */}
+            <Card className="group hover:shadow-2xl transition-all border-2">
+              <CardHeader>
+                <div className="p-3 bg-gradient-to-br from-violet-500 to-purple-500 rounded-xl w-fit mb-3">
+                  <MessageSquare className="h-6 w-6 text-white" />
+                </div>
+                <CardTitle className="text-lg">Comunicación</CardTitle>
+                <CardDescription>Centraliza conversaciones</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <strong>WhatsApp:</strong> Chat integrado
+                  </li>
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <strong>Email:</strong> Notificaciones automáticas
+                  </li>
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <strong>SMS:</strong> Recordatorios y alertas
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Integraciones Documentación */}
+            <Card className="group hover:shadow-2xl transition-all border-2">
+              <CardHeader>
+                <div className="p-3 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl w-fit mb-3">
+                  <FileText className="h-6 w-6 text-white" />
+                </div>
+                <CardTitle className="text-lg">Firma y Documentos</CardTitle>
+                <CardDescription>Digitaliza procesos</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <strong>DocuSign:</strong> Firma electrónica
+                  </li>
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <strong>Signaturit:</strong> Certificados legales
+                  </li>
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <strong>AWS S3:</strong> Almacenamiento cloud
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Integraciones IoT */}
+            <Card className="group hover:shadow-2xl transition-all border-2">
+              <CardHeader>
+                <div className="p-3 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-xl w-fit mb-3">
+                  <Zap className="h-6 w-6 text-white" />
+                </div>
+                <CardTitle className="text-lg">IoT y Smart Home</CardTitle>
+                <CardDescription>Edificios inteligentes</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <strong>Cerraduras:</strong> Nuki, Tedee, Salto
+                  </li>
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <strong>Sensores:</strong> Temperatura, humedad
+                  </li>
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <strong>Domótica:</strong> Control remoto
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="text-center mt-12">
+            <p className="text-gray-600 mb-6">
+              ¿Necesitas una integración específica? Nuestro equipo puede desarrollar integraciones personalizadas
+            </p>
+            <Link href="/landing/contacto">
+              <Button size="lg" className="bg-gradient-to-r from-indigo-600 to-violet-600">
+                Solicitar Integración
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
 
       {/* FOOTER */}
       <footer className="bg-gray-900 text-white py-12 px-4">
@@ -825,43 +1052,44 @@ export default function LandingPage() {
               </p>
               <div className="flex gap-3">
                 <a href="https://twitter.com/inmova" target="_blank" rel="noopener noreferrer">
-                  <Button size="sm" variant="ghost" className="text-white">Twitter</Button>
+                  <Button size="sm" variant="ghost" className="text-white hover:text-indigo-400">Twitter</Button>
                 </a>
                 <a href="https://linkedin.com/company/inmova" target="_blank" rel="noopener noreferrer">
-                  <Button size="sm" variant="ghost" className="text-white">LinkedIn</Button>
+                  <Button size="sm" variant="ghost" className="text-white hover:text-indigo-400">LinkedIn</Button>
                 </a>
               </div>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Producto</h4>
               <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="#features">Características</a></li>
-                <li><a href="#pricing">Precios</a></li>
-                <li><a href="#comparativa">Comparativa</a></li>
-                <li><a>Integraciones</a></li>
+                <li><a href="#features" className="hover:text-white transition-colors">Características</a></li>
+                <li><a href="#pricing" className="hover:text-white transition-colors">Precios</a></li>
+                <li><Link href="/landing/demo" className="hover:text-white transition-colors">Ver Demo</Link></li>
+                <li><a href="#integraciones" className="hover:text-white transition-colors">Integraciones</a></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Empresa</h4>
               <ul className="space-y-2 text-sm text-gray-400">
-                <li><a>Sobre Nosotros</a></li>
-                <li><a>Blog</a></li>
-                <li><a>Casos de Éxito</a></li>
-                <li><a>Contacto</a></li>
+                <li><Link href="/landing/sobre-nosotros" className="hover:text-white transition-colors">Sobre Nosotros</Link></li>
+                <li><Link href="/landing/blog" className="hover:text-white transition-colors">Blog</Link></li>
+                <li><Link href="/landing/casos-exito" className="hover:text-white transition-colors">Casos de Éxito</Link></li>
+                <li><Link href="/landing/contacto" className="hover:text-white transition-colors">Contacto</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Legal</h4>
               <ul className="space-y-2 text-sm text-gray-400">
-                <li><a>Privacidad</a></li>
-                <li><a>Términos</a></li>
-                <li><a>GDPR</a></li>
-                <li><a>Cookies</a></li>
+                <li><Link href="/landing/legal/privacidad" className="hover:text-white transition-colors">Privacidad</Link></li>
+                <li><Link href="/landing/legal/terminos" className="hover:text-white transition-colors">Términos</Link></li>
+                <li><Link href="/landing/legal/gdpr" className="hover:text-white transition-colors">GDPR</Link></li>
+                <li><Link href="/landing/legal/cookies" className="hover:text-white transition-colors">Cookies</Link></li>
               </ul>
             </div>
           </div>
           <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-400">
-            <p>© 2025 INMOVA. Todos los derechos reservados. Powered by Vidaro Inversiones.</p>
+            <p>© 2026 INMOVA. Todos los derechos reservados.</p>
+            <p className="mt-2">Powered by <span className="text-indigo-400 font-semibold">Enxames Investments SL</span></p>
           </div>
         </div>
       </footer>
