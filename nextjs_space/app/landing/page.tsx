@@ -23,8 +23,8 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      {/* NAVIGATION */}
-      <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-gray-200/50 z-50 shadow-sm">
+      {/* NAVIGATION - Menú superior siempre visible */}
+      <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-200/50 z-[100] shadow-md">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
@@ -191,49 +191,93 @@ export default function LandingPage() {
               </div>
             </div>
             
+            {/* VIDEO DEMO HERO - Reemplaza el icono enorme */}
             <div className="relative">
               <div className="space-y-6">
-                {/* Main Visual */}
-                <div className="relative aspect-square bg-gradient-to-br from-indigo-500 via-violet-500 to-pink-500 rounded-3xl p-1 shadow-2xl">
-                  <div className="w-full h-full bg-white rounded-3xl p-8 flex items-center justify-center">
-                    <Building2 className="h-40 w-40 text-indigo-600" />
+                {/* Video Container Principal */}
+                <div className="relative aspect-video bg-gradient-to-br from-indigo-500 via-violet-500 to-pink-500 rounded-3xl p-1 shadow-2xl hover:shadow-3xl transition-shadow duration-300">
+                  <div className="w-full h-full bg-black rounded-3xl overflow-hidden">
+                    {process.env.NEXT_PUBLIC_VIDEO_URL ? (
+                      // Si hay una URL externa configurada, usar iframe o video según el tipo
+                      process.env.NEXT_PUBLIC_VIDEO_URL.includes('youtube.com') || 
+                      process.env.NEXT_PUBLIC_VIDEO_URL.includes('youtu.be') ||
+                      process.env.NEXT_PUBLIC_VIDEO_URL.includes('vimeo.com') ||
+                      process.env.NEXT_PUBLIC_VIDEO_URL.includes('drive.google.com') ? (
+                        <iframe
+                          src={process.env.NEXT_PUBLIC_VIDEO_URL}
+                          className="w-full h-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          title="INMOVA Demo Video - 90 segundos"
+                        />
+                      ) : (
+                        <video 
+                          controls 
+                          className="w-full h-full object-contain"
+                          poster="/inmova-logo-cover.jpg"
+                        >
+                          <source src={process.env.NEXT_PUBLIC_VIDEO_URL} type="video/mp4" />
+                        </video>
+                      )
+                    ) : (
+                      // Si no hay URL configurada, mostrar placeholder atractivo
+                      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-indigo-600 to-violet-600">
+                        <div className="text-center px-6">
+                          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/20 mb-4 animate-pulse">
+                            <Play className="h-10 w-10 text-white" />
+                          </div>
+                          <h3 className="text-xl font-bold text-white mb-2">Demo Video 90s</h3>
+                          <p className="text-white/90 text-sm">
+                            Descubre INMOVA en acción
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Badge flotante sobre el video */}
+                  <div className="absolute -top-3 -right-3 z-20">
+                    <Badge className="bg-gradient-to-r from-amber-400 to-orange-400 text-white border-0 shadow-lg px-3 py-1.5 text-xs font-bold">
+                      <Play className="h-3 w-3 mr-1 inline animate-pulse" />
+                      90 SEGUNDOS
+                    </Badge>
                   </div>
                 </div>
                 
-                {/* Stats Cards Grid - Better positioned */}
+                {/* Stats Cards Grid - Debajo del video */}
                 <div className="grid grid-cols-3 gap-4">
-                  <Card className="shadow-xl border-2 border-green-200 bg-white">
+                  <Card className="shadow-xl border-2 border-green-200 bg-white hover:shadow-2xl transition-shadow">
                     <CardContent className="p-4">
                       <div className="text-center">
                         <div className="p-2 bg-green-100 rounded-lg inline-block mb-2">
                           <TrendingUp className="h-5 w-5 text-green-600" />
                         </div>
-                        <div className="text-xs text-gray-600">ROI Promedio</div>
-                        <div className="text-lg font-bold text-green-600">+45%</div>
+                        <div className="text-xs text-gray-600">Ahorro</div>
+                        <div className="text-lg font-bold text-green-600">70%</div>
                       </div>
                     </CardContent>
                   </Card>
                   
-                  <Card className="shadow-xl border-2 border-blue-200 bg-white">
+                  <Card className="shadow-xl border-2 border-blue-200 bg-white hover:shadow-2xl transition-shadow">
                     <CardContent className="p-4">
                       <div className="text-center">
                         <div className="p-2 bg-blue-100 rounded-lg inline-block mb-2">
                           <Users className="h-5 w-5 text-blue-600" />
                         </div>
-                        <div className="text-xs text-gray-600">Propiedades</div>
-                        <div className="text-lg font-bold text-blue-600">10,000+</div>
+                        <div className="text-xs text-gray-600">Empresas</div>
+                        <div className="text-lg font-bold text-blue-600">500+</div>
                       </div>
                     </CardContent>
                   </Card>
                   
-                  <Card className="shadow-xl border-2 border-violet-200 bg-white">
+                  <Card className="shadow-xl border-2 border-violet-200 bg-white hover:shadow-2xl transition-shadow">
                     <CardContent className="p-4">
                       <div className="text-center">
                         <div className="p-2 bg-violet-100 rounded-lg inline-block mb-2">
                           <Star className="h-5 w-5 text-violet-600" />
                         </div>
-                        <div className="text-xs text-gray-600">Valoración</div>
-                        <div className="text-lg font-bold text-violet-600">4.9/5</div>
+                        <div className="text-xs text-gray-600">ROI</div>
+                        <div className="text-lg font-bold text-violet-600">+45%</div>
                       </div>
                     </CardContent>
                   </Card>
@@ -459,109 +503,6 @@ export default function LandingPage() {
                 <ArrowRight className="h-5 w-5" />
               </Button>
             </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* VIDEO DEMO SECTION */}
-      <section id="video-demo" className="py-24 px-4 bg-gradient-to-br from-gray-900 via-indigo-900 to-violet-900 relative overflow-hidden">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-500 rounded-full blur-3xl animate-pulse delay-1000" />
-        </div>
-
-        <div className="container mx-auto relative z-10">
-          <div className="text-center mb-12">
-            <Badge className="mb-4 bg-gradient-to-r from-amber-100 to-orange-100 text-amber-700 border-amber-200 px-4 py-2">
-              <Play className="h-4 w-4 mr-1 inline animate-pulse" />
-              Demo en Vivo 90 Segundos
-            </Badge>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
-              Mira INMOVA en Acción
-            </h2>
-            <p className="text-xl text-white/90 max-w-3xl mx-auto">
-              Descubre cómo INMOVA elimina la fragmentación y revoluciona la gestión inmobiliaria en menos de 2 minutos
-            </p>
-          </div>
-
-          {/* Video Container */}
-          <div className="max-w-5xl mx-auto">
-            <div className="relative aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20">
-              {process.env.NEXT_PUBLIC_VIDEO_URL ? (
-                // Si hay una URL externa configurada, usar iframe o video según el tipo
-                process.env.NEXT_PUBLIC_VIDEO_URL.includes('youtube.com') || 
-                process.env.NEXT_PUBLIC_VIDEO_URL.includes('youtu.be') ||
-                process.env.NEXT_PUBLIC_VIDEO_URL.includes('vimeo.com') ||
-                process.env.NEXT_PUBLIC_VIDEO_URL.includes('drive.google.com') ? (
-                  <iframe
-                    src={process.env.NEXT_PUBLIC_VIDEO_URL}
-                    className="w-full h-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; compute-pressure 'none'"
-                    allowFullScreen
-                    title="INMOVA Demo Video"
-                  />
-                ) : (
-                  <video 
-                    controls 
-                    className="w-full h-full object-contain"
-                    poster="/inmova-logo-cover.jpg"
-                  >
-                    <source src={process.env.NEXT_PUBLIC_VIDEO_URL} type="video/mp4" />
-                  </video>
-                )
-              ) : (
-                // Si no hay URL configurada, mostrar el fallback con instrucciones mejoradas
-                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-indigo-600 to-violet-600">
-                  <div className="text-center px-6 max-w-2xl">
-                    <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/20 mb-4 animate-pulse">
-                      <Play className="h-10 w-10 text-white" />
-                    </div>
-                    <h3 className="text-2xl font-bold text-white mb-3">Video Demo Disponible</h3>
-                    <p className="text-white/90 mb-4">
-                      Para mostrar el video de 90 segundos, configura la variable de entorno:
-                    </p>
-                    <div className="bg-black/30 rounded-lg p-4 mb-4 text-left">
-                      <code className="text-green-300 text-sm">NEXT_PUBLIC_VIDEO_URL=</code>
-                      <div className="text-white/70 text-sm mt-2 space-y-1">
-                        <div>• YouTube: https://www.youtube.com/embed/VIDEO_ID</div>
-                        <div>• Vimeo: https://player.vimeo.com/video/VIDEO_ID</div>
-                        <div>• Google Drive: https://drive.google.com/file/d/FILE_ID/preview</div>
-                        <div>• MP4 directo: https://cdn.com/video.mp4</div>
-                      </div>
-                    </div>
-                    <Link href="/register">
-                      <Button size="lg" className="bg-white text-indigo-600 hover:bg-white/90 shadow-xl">
-                        <Rocket className="h-5 w-5 mr-2" />
-                        Solicita una Demo Personalizada
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Video Stats */}
-            <div className="grid md:grid-cols-3 gap-6 mt-12">
-              <Card className="bg-white/10 backdrop-blur-md border-white/20 text-white">
-                <CardContent className="p-6 text-center">
-                  <div className="text-4xl font-bold mb-2 bg-gradient-to-r from-yellow-300 to-amber-300 bg-clip-text text-transparent">90s</div>
-                  <div className="text-white/90">Duración del Video</div>
-                </CardContent>
-              </Card>
-              <Card className="bg-white/10 backdrop-blur-md border-white/20 text-white">
-                <CardContent className="p-6 text-center">
-                  <div className="text-4xl font-bold mb-2 bg-gradient-to-r from-green-300 to-emerald-300 bg-clip-text text-transparent">88</div>
-                  <div className="text-white/90">Módulos Mostrados</div>
-                </CardContent>
-              </Card>
-              <Card className="bg-white/10 backdrop-blur-md border-white/20 text-white">
-                <CardContent className="p-6 text-center">
-                  <div className="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-300 to-cyan-300 bg-clip-text text-transparent">7</div>
-                  <div className="text-white/90">Verticales Cubiertos</div>
-                </CardContent>
-              </Card>
-            </div>
           </div>
         </div>
       </section>
