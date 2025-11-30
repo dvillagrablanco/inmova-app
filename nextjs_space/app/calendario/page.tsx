@@ -56,6 +56,7 @@ import { toast } from 'sonner';
 import { format as formatDate } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { startOfMonth, endOfMonth, addMonths, subMonths } from 'date-fns';
+import { LoadingState } from '@/components/ui/loading-state';
 
 // Configurar moment en español
 moment.locale('es');
@@ -376,10 +377,13 @@ export default function CalendarioPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-center">
-          <RefreshCw className="mx-auto h-8 w-8 animate-spin text-primary" />
-          <p className="mt-2 text-sm text-muted-foreground">Cargando calendario...</p>
+      <div className="flex h-screen overflow-hidden bg-muted/30">
+        <Sidebar />
+        <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
+          <Header />
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <LoadingState message="Cargando calendario..." />
+          </main>
         </div>
       </div>
     );

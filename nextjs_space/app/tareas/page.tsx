@@ -49,6 +49,9 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { usePermissions } from '@/lib/hooks/usePermissions';
+import { LoadingState } from '@/components/ui/loading-state';
+import { EmptyState } from '@/components/ui/empty-state';
+import { FilterChips } from '@/components/ui/filter-chips';
 
 interface Task {
   id: string;
@@ -302,9 +305,13 @@ export default function TareasPage() {
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="mb-4 text-lg">Cargando...</div>
+      <div className="flex h-screen overflow-hidden bg-muted/30">
+        <Sidebar />
+        <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
+          <Header />
+          <main className="flex-1 overflow-y-auto p-4 md:p-6">
+            <LoadingState message="Cargando tareas..." />
+          </main>
         </div>
       </div>
     );
@@ -406,46 +413,84 @@ export default function TareasPage() {
           </div>
 
           {/* Filtros */}
-          <div className="mb-6 grid gap-4 sm:grid-cols-3">
-            <Input
-              placeholder="Buscar tareas..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+          <div className="mb-6 space-y-4">
+            <div className="grid gap-4 sm:grid-cols-3">
+              <Input
+                placeholder="Buscar tareas..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <Select value={filterEstado} onValueChange={setFilterEstado}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filtrar por estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los estados</SelectItem>
+                  <SelectItem value="pendiente">Pendiente</SelectItem>
+                  <SelectItem value="en_progreso">En Progreso</SelectItem>
+                  <SelectItem value="completada">Completada</SelectItem>
+                  <SelectItem value="cancelada">Cancelada</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={filterPrioridad} onValueChange={setFilterPrioridad}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filtrar por prioridad" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas las prioridades</SelectItem>
+                  <SelectItem value="baja">Baja</SelectItem>
+                  <SelectItem value="media">Media</SelectItem>
+                  <SelectItem value="alta">Alta</SelectItem>
+                  <SelectItem value="urgente">Urgente</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {/* Filter Chips */}
+            <FilterChips
+              filters={[
+                ...(searchTerm ? [{
+                  id: 'search',
+                  label: 'Búsqueda',
+                  value: searchTerm
+                }] : []),
+                ...(filterEstado !== 'all' ? [{
+                  id: 'estado',
+                  label: 'Estado',
+                  value: filterEstado
+                }] : []),
+                ...(filterPrioridad !== 'all' ? [{
+                  id: 'prioridad',
+                  label: 'Prioridad',
+                  value: filterPrioridad
+                }] : [])
+              ]}
+              onRemove={(id) => {
+                if (id === 'search') setSearchTerm('');
+                else if (id === 'estado') setFilterEstado('all');
+                else if (id === 'prioridad') setFilterPrioridad('all');
+              }}
+              onClearAll={() => {
+                setSearchTerm('');
+                setFilterEstado('all');
+                setFilterPrioridad('all');
+              }}
             />
-            <Select value={filterEstado} onValueChange={setFilterEstado}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filtrar por estado" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los estados</SelectItem>
-                <SelectItem value="pendiente">Pendiente</SelectItem>
-                <SelectItem value="en_progreso">En Progreso</SelectItem>
-                <SelectItem value="completada">Completada</SelectItem>
-                <SelectItem value="cancelada">Cancelada</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={filterPrioridad} onValueChange={setFilterPrioridad}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filtrar por prioridad" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas las prioridades</SelectItem>
-                <SelectItem value="baja">Baja</SelectItem>
-                <SelectItem value="media">Media</SelectItem>
-                <SelectItem value="alta">Alta</SelectItem>
-                <SelectItem value="urgente">Urgente</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           {/* Lista de Tareas */}
           <div className="space-y-4">
             {filteredTasks.length === 0 ? (
-              <Card>
-                <CardContent className="p-6 text-center text-muted-foreground">
-                  No hay tareas que mostrar
-                </CardContent>
-              </Card>
+              <EmptyState
+                icon={<CheckCircle2 className="h-12 w-12" />}
+                title={searchTerm || filterEstado !== 'all' || filterPrioridad !== 'all' ? 'No se encontraron tareas' : 'No hay tareas registradas'}
+                description={searchTerm || filterEstado !== 'all' || filterPrioridad !== 'all' ? 'No se encontraron tareas con los filtros aplicados. Intenta ajustar tu búsqueda.' : 'Comienza creando tu primera tarea para organizar el trabajo del equipo.'}
+                action={canCreate && !searchTerm && filterEstado === 'all' && filterPrioridad === 'all' ? {
+                  label: 'Crear Primera Tarea',
+                  onClick: () => handleOpenDialog(),
+                  icon: <Plus className="h-4 w-4" />
+                } : undefined}
+              />
             ) : (
               filteredTasks.map((task) => (
                 <Card key={task.id} className="overflow-hidden">

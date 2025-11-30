@@ -22,6 +22,8 @@ import {
 import { Users, Plus, Phone, Mail, Star, ArrowLeft, Home, Search, Briefcase, TrendingUp, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePermissions } from '@/lib/hooks/usePermissions';
+import { LoadingState } from '@/components/ui/loading-state';
+import { EmptyState } from '@/components/ui/empty-state';
 
 interface Provider {
   id: string;
@@ -214,8 +216,14 @@ export default function ProveedoresPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="flex h-screen overflow-hidden bg-muted/30">
+        <Sidebar />
+        <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
+          <Header />
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <LoadingState message="Cargando proveedores..." />
+          </main>
+        </div>
       </div>
     );
   }
@@ -513,25 +521,16 @@ export default function ProveedoresPage() {
             {/* Lista de Proveedores */}
             <div className="space-y-4">
               {filteredProviders.length === 0 ? (
-                <Card>
-                  <CardContent className="flex flex-col items-center justify-center py-12">
-                    <Users className="h-12 w-12 text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground text-center mb-2">
-                      {searchTerm
-                        ? 'No se encontraron proveedores con los filtros aplicados'
-                        : 'No hay proveedores registrados'}
-                    </p>
-                    {canCreate && !searchTerm && (
-                      <Button
-                        onClick={() => setOpenDialog(true)}
-                        className="mt-4"
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Registrar Primer Proveedor
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
+                <EmptyState
+                  icon={<Users className="h-12 w-12" />}
+                  title={searchTerm ? 'No se encontraron proveedores' : 'No hay proveedores registrados'}
+                  description={searchTerm ? 'No se encontraron proveedores con los filtros aplicados. Intenta ajustar tu búsqueda.' : 'Comienza registrando tu primer proveedor de servicios para gestionar el mantenimiento.'}
+                  action={canCreate && !searchTerm ? {
+                    label: 'Registrar Primer Proveedor',
+                    onClick: () => setOpenDialog(true),
+                    icon: <Plus className="h-4 w-4" />
+                  } : undefined}
+                />
               ) : (
                 filteredProviders.map((provider) => (
                   <Card key={provider.id} className="hover:shadow-lg transition-all duration-200">

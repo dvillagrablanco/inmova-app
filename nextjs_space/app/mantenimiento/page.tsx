@@ -55,6 +55,9 @@ import {
   Home as HomeIcon,
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { LoadingState } from '@/components/ui/loading-state';
+import { EmptyState } from '@/components/ui/empty-state';
+import { FilterChips } from '@/components/ui/filter-chips';
 
 interface MaintenanceRequest {
   id: string;
@@ -419,8 +422,14 @@ export default function MantenimientoPage() {
   // ========== RENDER PRINCIPAL ==========
   if (status === 'loading' || isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="flex h-screen overflow-hidden bg-muted/30">
+        <Sidebar />
+        <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
+          <Header />
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <LoadingState message="Cargando mantenimiento..." />
+          </main>
+        </div>
       </div>
     );
   }
@@ -596,31 +605,53 @@ export default function MantenimientoPage() {
                         </SelectContent>
                       </Select>
                     </div>
+
+                    {/* Filter Chips */}
+                    <FilterChips
+                      filters={[
+                        ...(searchTerm ? [{
+                          id: 'search',
+                          label: 'Búsqueda',
+                          value: searchTerm
+                        }] : []),
+                        ...(estadoFilter !== 'all' ? [{
+                          id: 'estado',
+                          label: 'Estado',
+                          value: getEstadoLabel(estadoFilter)
+                        }] : []),
+                        ...(prioridadFilter !== 'all' ? [{
+                          id: 'prioridad',
+                          label: 'Prioridad',
+                          value: getPrioridadLabel(prioridadFilter)
+                        }] : [])
+                      ]}
+                      onRemove={(id) => {
+                        if (id === 'search') setSearchTerm('');
+                        else if (id === 'estado') setEstadoFilter('all');
+                        else if (id === 'prioridad') setPrioridadFilter('all');
+                      }}
+                      onClearAll={() => {
+                        setSearchTerm('');
+                        setEstadoFilter('all');
+                        setPrioridadFilter('all');
+                      }}
+                    />
                   </CardContent>
                 </Card>
 
                 {/* Lista de Solicitudes */}
                 <div className="space-y-4">
                   {filteredRequests.length === 0 ? (
-                    <Card>
-                      <CardContent className="flex flex-col items-center justify-center py-12">
-                        <Wrench className="h-12 w-12 text-muted-foreground mb-4" />
-                        <p className="text-muted-foreground text-center mb-2">
-                          {searchTerm || estadoFilter !== 'all' || prioridadFilter !== 'all'
-                            ? 'No se encontraron solicitudes con los filtros aplicados'
-                            : 'No hay solicitudes de mantenimiento'}
-                        </p>
-                        {canCreate && !searchTerm && estadoFilter === 'all' && prioridadFilter === 'all' && (
-                          <Button
-                            onClick={() => router.push('/mantenimiento/nuevo')}
-                            className="mt-4"
-                          >
-                            <Plus className="h-4 w-4 mr-2" />
-                            Crear Primera Solicitud
-                          </Button>
-                        )}
-                      </CardContent>
-                    </Card>
+                    <EmptyState
+                      icon={<Wrench className="h-12 w-12" />}
+                      title={searchTerm || estadoFilter !== 'all' || prioridadFilter !== 'all' ? 'No se encontraron solicitudes' : 'No hay solicitudes de mantenimiento'}
+                      description={searchTerm || estadoFilter !== 'all' || prioridadFilter !== 'all' ? 'No se encontraron solicitudes con los filtros aplicados. Intenta ajustar tu búsqueda.' : 'Comienza creando tu primera solicitud de mantenimiento correctivo para gestionar incidencias.'}
+                      action={canCreate && !searchTerm && estadoFilter === 'all' && prioridadFilter === 'all' ? {
+                        label: 'Crear Primera Solicitud',
+                        onClick: () => router.push('/mantenimiento/nuevo'),
+                        icon: <Plus className="h-4 w-4" />
+                      } : undefined}
+                    />
                   ) : (
                     filteredRequests.map((request) => (
                       <Card
@@ -837,28 +868,19 @@ export default function MantenimientoPage() {
                 {/* Lista de Programaciones */}
                 <div className="space-y-4">
                   {filteredSchedules.length === 0 ? (
-                    <Card>
-                      <CardContent className="flex flex-col items-center justify-center py-12">
-                        <CalendarIcon className="h-12 w-12 text-muted-foreground mb-4" />
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                          No hay mantenimientos programados
-                        </h3>
-                        <p className="text-muted-foreground mb-4">
-                          Comienza creando tu primera programación de mantenimiento preventivo
-                        </p>
-                        {canCreate && (
-                          <Button
-                            onClick={() => {
-                              resetForm();
-                              setShowModal(true);
-                            }}
-                          >
-                            <Plus className="h-4 w-4 mr-2" />
-                            Crear Primer Mantenimiento
-                          </Button>
-                        )}
-                      </CardContent>
-                    </Card>
+                    <EmptyState
+                      icon={<CalendarIcon className="h-12 w-12" />}
+                      title="No hay mantenimientos programados"
+                      description="Comienza creando tu primera programación de mantenimiento preventivo para mantener tus propiedades en óptimas condiciones."
+                      action={canCreate ? {
+                        label: 'Crear Primer Mantenimiento',
+                        onClick: () => {
+                          resetForm();
+                          setShowModal(true);
+                        },
+                        icon: <Plus className="h-4 w-4" />
+                      } : undefined}
+                    />
                   ) : (
                     filteredSchedules.map((schedule) => {
                       const daysUntil = getDaysUntil(schedule.proximaFecha);

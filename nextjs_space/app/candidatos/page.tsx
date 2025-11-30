@@ -51,6 +51,9 @@ import {
   Clock,
   Home,
 } from 'lucide-react';
+import { LoadingState } from '@/components/ui/loading-state';
+import { EmptyState } from '@/components/ui/empty-state';
+import { FilterChips } from '@/components/ui/filter-chips';
 
 interface Candidate {
   id: string;
@@ -153,9 +156,13 @@ export default function CandidatosPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-center">
-          <p className="text-muted-foreground">Cargando candidatos...</p>
+      <div className="flex h-screen overflow-hidden bg-muted/30">
+        <Sidebar />
+        <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
+          <Header />
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <LoadingState message="Cargando candidatos..." />
+          </main>
         </div>
       </div>
     );
@@ -347,31 +354,53 @@ export default function CandidatosPage() {
                     </SelectContent>
                   </Select>
                 </div>
+
+                {/* Filter Chips */}
+                <FilterChips
+                  filters={[
+                    ...(searchTerm ? [{
+                      id: 'search',
+                      label: 'Búsqueda',
+                      value: searchTerm
+                    }] : []),
+                    ...(estadoFilter !== 'all' ? [{
+                      id: 'estado',
+                      label: 'Estado',
+                      value: getEstadoLabel(estadoFilter)
+                    }] : []),
+                    ...(scoringFilter !== 'all' ? [{
+                      id: 'scoring',
+                      label: 'Puntuación',
+                      value: scoringFilter === 'alto' ? 'Alta (80-100)' : scoringFilter === 'medio' ? 'Media (60-79)' : 'Baja (<60)'
+                    }] : [])
+                  ]}
+                  onRemove={(id) => {
+                    if (id === 'search') setSearchTerm('');
+                    else if (id === 'estado') setEstadoFilter('all');
+                    else if (id === 'scoring') setScoringFilter('all');
+                  }}
+                  onClearAll={() => {
+                    setSearchTerm('');
+                    setEstadoFilter('all');
+                    setScoringFilter('all');
+                  }}
+                />
               </CardContent>
             </Card>
 
             {/* Lista de Candidatos */}
             <div className="space-y-4">
               {filteredCandidates.length === 0 ? (
-                <Card>
-                  <CardContent className="flex flex-col items-center justify-center py-12">
-                    <UserPlus className="h-12 w-12 text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground text-center mb-2">
-                      {searchTerm || estadoFilter !== 'all' || scoringFilter !== 'all'
-                        ? 'No se encontraron candidatos con los filtros aplicados'
-                        : 'No hay candidatos registrados'}
-                    </p>
-                    {canCreate && !searchTerm && estadoFilter === 'all' && scoringFilter === 'all' && (
-                      <Button
-                        onClick={() => router.push('/candidatos/nuevo')}
-                        className="mt-4"
-                      >
-                        <UserPlus className="h-4 w-4 mr-2" />
-                        Registrar Primer Candidato
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
+                <EmptyState
+                  icon={<UserPlus className="h-12 w-12" />}
+                  title={searchTerm || estadoFilter !== 'all' || scoringFilter !== 'all' ? 'No se encontraron candidatos' : 'No hay candidatos registrados'}
+                  description={searchTerm || estadoFilter !== 'all' || scoringFilter !== 'all' ? 'No se encontraron candidatos con los filtros aplicados. Intenta ajustar tu búsqueda.' : 'Comienza registrando tu primer candidato a inquilino para gestionar el proceso de selección.'}
+                  action={canCreate && !searchTerm && estadoFilter === 'all' && scoringFilter === 'all' ? {
+                    label: 'Registrar Primer Candidato',
+                    onClick: () => router.push('/candidatos/nuevo'),
+                    icon: <UserPlus className="h-4 w-4" />
+                  } : undefined}
+                />
               ) : (
                 filteredCandidates.map((candidate) => (
                   <Card
