@@ -12,8 +12,15 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Building2, Users, TrendingUp, Plus, Search, Eye, Edit, Trash2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { 
+  Building2, Users, TrendingUp, Plus, Search, Eye, Trash2, AlertCircle, CheckCircle2,
+  LogIn, Copy, ExternalLink, MoreVertical, Filter, Download, RefreshCw, Power, PowerOff,
+  Check, X, Settings
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -55,6 +62,16 @@ export default function ClientesAdminPage() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [creating, setCreating] = useState(false);
   
+  // Nuevos estados para filtros y selección múltiple
+  const [selectedCompanies, setSelectedCompanies] = useState<Set<string>>(new Set());
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [planFilter, setPlanFilter] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<string>('createdAt');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+  const [showBulkActions, setShowBulkActions] = useState(false);
+  const [bulkActionLoading, setBulkActionLoading] = useState(false);
+  
   const [newCompany, setNewCompany] = useState({
     nombre: '',
     email: '',
@@ -83,22 +100,57 @@ export default function ClientesAdminPage() {
     }
   }, [status, session]);
 
-  // Filtrar empresas por búsqueda
+  // Filtrar, ordenar y buscar empresas
   useEffect(() => {
+    let filtered = [...companies];
+
+    // Aplicar búsqueda
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      const filtered = companies.filter(
+      filtered = filtered.filter(
         c =>
           c.nombre.toLowerCase().includes(query) ||
           c.emailContacto?.toLowerCase().includes(query) ||
           c.contactoPrincipal?.toLowerCase().includes(query) ||
           c.dominioPersonalizado?.toLowerCase().includes(query)
       );
-      setFilteredCompanies(filtered);
-    } else {
-      setFilteredCompanies(companies);
     }
-  }, [searchQuery, companies]);
+
+    // Aplicar filtro de estado
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(c => c.estadoCliente === statusFilter);
+    }
+
+    // Aplicar filtro de plan
+    if (planFilter !== 'all') {
+      filtered = filtered.filter(c => c.subscriptionPlan?.id === planFilter);
+    }
+
+    // Aplicar ordenamiento
+    filtered.sort((a, b) => {
+      let comparison = 0;
+      
+      switch (sortBy) {
+        case 'nombre':
+          comparison = a.nombre.localeCompare(b.nombre);
+          break;
+        case 'usuarios':
+          comparison = a._count.users - b._count.users;
+          break;
+        case 'edificios':
+          comparison = a._count.buildings - b._count.buildings;
+          break;
+        case 'createdAt':
+        default:
+          comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          break;
+      }
+      
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+
+    setFilteredCompanies(filtered);
+  }, [searchQuery, companies, statusFilter, planFilter, sortBy, sortOrder]);
 
   const loadData = async () => {
     try {
@@ -215,6 +267,154 @@ export default function ClientesAdminPage() {
         return 'text-pink-600';
       default:
         return 'text-gray-600';
+    }
+  };
+
+  // Función para "Login como" empresa
+  const handleImpersonate = async (companyId: string, companyName: string) => {
+    if (!confirm(`¿Deseas acceder al dashboard de "${companyName}"?\n\nEstarás navegando como esta empresa.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/admin/impersonate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ companyId }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        toast.success(data.message);
+        
+        // Redirigir al dashboard con el contexto de la empresa
+        // Nota: En un sistema real, aquí se actualizaría la sesión
+        router.push(`/dashboard?impersonating=${companyId}`);
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Error al iniciar impersonation');
+      }
+    } catch (error) {
+      console.error('Error impersonating:', error);
+      toast.error('Error al iniciar impersonation');
+    }
+  };
+
+  // Función para copiar ID de empresa
+  const handleCopyId = (id: string) => {
+    navigator.clipboard.writeText(id);
+    toast.success('ID copiado al portapapeles');
+  };
+
+  // Función para alternar selección de empresa
+  const toggleCompanySelection = (companyId: string) => {
+    const newSelection = new Set(selectedCompanies);
+    if (newSelection.has(companyId)) {
+      newSelection.delete(companyId);
+    } else {
+      newSelection.add(companyId);
+    }
+    setSelectedCompanies(newSelection);
+  };
+
+  // Función para seleccionar/deseleccionar todas
+  const toggleSelectAll = () => {
+    if (selectedCompanies.size === filteredCompanies.length) {
+      setSelectedCompanies(new Set());
+    } else {
+      setSelectedCompanies(new Set(filteredCompanies.map(c => c.id)));
+    }
+  };
+
+  // Función para operaciones en lote
+  const handleBulkAction = async (action: string, params?: any) => {
+    if (selectedCompanies.size === 0) {
+      toast.error('No hay empresas seleccionadas');
+      return;
+    }
+
+    const companyIds = Array.from(selectedCompanies);
+    
+    if (!confirm(`¿Estás seguro de aplicar esta acción a ${companyIds.length} empresa(s)?`)) {
+      return;
+    }
+
+    try {
+      setBulkActionLoading(true);
+      
+      const response = await fetch('/api/admin/companies/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action,
+          companyIds,
+          ...params,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        toast.success(data.message);
+        setSelectedCompanies(new Set());
+        setShowBulkActions(false);
+        loadData();
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Error en operación en lote');
+      }
+    } catch (error) {
+      console.error('Error en bulk action:', error);
+      toast.error('Error en operación en lote');
+    } finally {
+      setBulkActionLoading(false);
+    }
+  };
+
+  // Función para exportar datos
+  const handleExport = () => {
+    const csvData = filteredCompanies.map(c => ({
+      ID: c.id,
+      Nombre: c.nombre,
+      Estado: c.estadoCliente,
+      Contacto: c.contactoPrincipal || '',
+      Email: c.emailContacto || '',
+      Usuarios: c._count.users,
+      Edificios: c._count.buildings,
+      Inquilinos: c._count.tenants,
+      Plan: c.subscriptionPlan?.nombre || 'Sin plan',
+      Creada: format(new Date(c.createdAt), 'dd/MM/yyyy'),
+    }));
+
+    const headers = Object.keys(csvData[0]).join(',');
+    const rows = csvData.map(row => Object.values(row).join(','));
+    const csv = [headers, ...rows].join('\n');
+    
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `empresas_${format(new Date(), 'yyyyMMdd')}.csv`;
+    link.click();
+    
+    toast.success('Datos exportados correctamente');
+  };
+
+  // Función para toggle rápido de activación
+  const handleQuickToggleActive = async (companyId: string, currentState: boolean, nombre: string) => {
+    try {
+      const response = await fetch(`/api/admin/companies/${companyId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activo: !currentState }),
+      });
+
+      if (response.ok) {
+        toast.success(`Empresa "${nombre}" ${!currentState ? 'activada' : 'desactivada'}`);
+        loadData();
+      } else {
+        toast.error('Error al cambiar estado');
+      }
+    } catch (error) {
+      toast.error('Error al cambiar estado');
     }
   };
 
