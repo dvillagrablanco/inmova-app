@@ -62,12 +62,20 @@ export default function ContabilidadPage() {
   const [ratiosData, setRatiosData] = useState<any>(null);
   const [zucchettiStatus, setZucchettiStatus] = useState<any>(null);
   const [contaSimpleStatus, setContaSimpleStatus] = useState<any>(null);
+  const [sageStatus, setSageStatus] = useState<any>(null);
+  const [holdedStatus, setHoldedStatus] = useState<any>(null);
+  const [a3Status, setA3Status] = useState<any>(null);
+  const [alegraStatus, setAlegraStatus] = useState<any>(null);
 
   useEffect(() => {
     if (session?.user?.companyId) {
       loadFinancialData();
       loadZucchettiStatus();
       loadContaSimpleStatus();
+      loadSageStatus();
+      loadHoldedStatus();
+      loadA3Status();
+      loadAlegraStatus();
     }
   }, [session, periodo]);
 
@@ -92,6 +100,54 @@ export default function ContabilidadPage() {
       }
     } catch (error) {
       console.error('Error al cargar estado de ContaSimple:', error);
+    }
+  };
+
+  const loadSageStatus = async () => {
+    try {
+      const res = await fetch('/api/accounting/sage/status');
+      if (res.ok) {
+        const data = await res.json();
+        setSageStatus(data);
+      }
+    } catch (error) {
+      console.error('Error al cargar estado de Sage:', error);
+    }
+  };
+
+  const loadHoldedStatus = async () => {
+    try {
+      const res = await fetch('/api/accounting/holded/status');
+      if (res.ok) {
+        const data = await res.json();
+        setHoldedStatus(data);
+      }
+    } catch (error) {
+      console.error('Error al cargar estado de Holded:', error);
+    }
+  };
+
+  const loadA3Status = async () => {
+    try {
+      const res = await fetch('/api/accounting/a3/status');
+      if (res.ok) {
+        const data = await res.json();
+        setA3Status(data);
+      }
+    } catch (error) {
+      console.error('Error al cargar estado de A3:', error);
+    }
+  };
+
+  const loadAlegraStatus = async () => {
+    try {
+      const res = await fetch('/api/accounting/alegra/status');
+      if (res.ok) {
+        const data = await res.json();
+        setAlegraStatus(data);
+      }
+    } catch (error) {
+      console.error('Error al cargar estado de Alegra:', error);
     }
   };
 
@@ -220,6 +276,76 @@ export default function ContabilidadPage() {
     }
   };
 
+  // Funciones genéricas para los nuevos sistemas
+  const handleSyncCustomersSystem = async (system: string) => {
+    try {
+      setLoading(true);
+      toast.info(`Sincronizando clientes con ${system.toUpperCase()}...`);
+      
+      const res = await fetch(`/api/accounting/${system}/sync-customers`, {
+        method: 'POST',
+      });
+      
+      if (!res.ok) {
+        throw new Error('Error al sincronizar');
+      }
+      
+      const data = await res.json();
+      toast.success(data.message || 'Clientes sincronizados exitosamente');
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error(`Error al sincronizar clientes con ${system.toUpperCase()}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateInvoiceSystem = async (system: string) => {
+    try {
+      setLoading(true);
+      toast.info(`Creando facturas en ${system.toUpperCase()}...`);
+      
+      const res = await fetch(`/api/accounting/${system}/create-invoice`, {
+        method: 'POST',
+      });
+      
+      if (!res.ok) {
+        throw new Error('Error al crear facturas');
+      }
+      
+      const data = await res.json();
+      toast.success(data.message || 'Facturas creadas exitosamente');
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error(`Error al crear facturas en ${system.toUpperCase()}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegisterPaymentsSystem = async (system: string) => {
+    try {
+      setLoading(true);
+      toast.info(`Registrando pagos en ${system.toUpperCase()}...`);
+      
+      const res = await fetch(`/api/accounting/${system}/register-payment`, {
+        method: 'POST',
+      });
+      
+      if (!res.ok) {
+        throw new Error('Error al registrar pagos');
+      }
+      
+      const data = await res.json();
+      toast.success(data.message || 'Pagos registrados exitosamente');
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error(`Error al registrar pagos en ${system.toUpperCase()}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!session) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -238,7 +364,7 @@ export default function ContabilidadPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="ml-0 lg:ml-64 container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard Financiero</h1>
@@ -524,6 +650,330 @@ export default function ContabilidadPage() {
                         <p className="text-xs text-green-700 dark:text-green-300 mt-2">
                           Para activar la integración real, configura las variables de entorno
                           CONTASIMPLE_CLIENT_ID, CONTASIMPLE_CLIENT_SECRET y CONTASIMPLE_API_KEY
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Sage Integration */}
+              <div className="border rounded-lg p-6 space-y-4">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-3">
+                      <h3 className="text-lg font-semibold">Sage</h3>
+                      {sageStatus?.integrated ? (
+                        <Badge variant="default">✓ Activa</Badge>
+                      ) : (
+                        <Badge variant="secondary">Demo</Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {sageStatus?.description || 'Líder mundial en software de contabilidad'}
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() => loadSageStatus()}
+                    variant="ghost"
+                    size="sm"
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {sageStatus && (
+                  <div className="space-y-3">
+                    <div className="text-sm">
+                      <strong>Funcionalidades disponibles:</strong>
+                      <ul className="mt-2 space-y-1 list-disc list-inside text-muted-foreground">
+                        {sageStatus.features?.map((feature: string, idx: number) => (
+                          <li key={idx}>{feature}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        onClick={() => handleSyncCustomersSystem('sage')}
+                        variant="outline"
+                        size="sm"
+                        disabled={loading}
+                      >
+                        <Building2 className="h-4 w-4 mr-2" />
+                        Sincronizar Clientes
+                      </Button>
+                      <Button
+                        onClick={() => handleCreateInvoiceSystem('sage')}
+                        variant="outline"
+                        size="sm"
+                        disabled={loading}
+                      >
+                        <Receipt className="h-4 w-4 mr-2" />
+                        Crear Facturas
+                      </Button>
+                      <Button
+                        onClick={() => handleRegisterPaymentsSystem('sage')}
+                        variant="outline"
+                        size="sm"
+                        disabled={loading}
+                      >
+                        <CreditCard className="h-4 w-4 mr-2" />
+                        Registrar Pagos
+                      </Button>
+                    </div>
+
+                    {!sageStatus.integrated && (
+                      <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-md p-4">
+                        <p className="text-sm text-amber-800 dark:text-amber-200">
+                          <strong>Modo Demo:</strong> Esta integración está en modo demostración.
+                        </p>
+                        <p className="text-xs text-amber-700 dark:text-amber-300 mt-2">
+                          Para activar la integración real, configura las variables de entorno
+                          SAGE_CLIENT_ID y SAGE_CLIENT_SECRET
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Holded Integration */}
+              <div className="border rounded-lg p-6 space-y-4">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-3">
+                      <h3 className="text-lg font-semibold">Holded</h3>
+                      {holdedStatus?.integrated ? (
+                        <Badge variant="default">✓ Activa</Badge>
+                      ) : (
+                        <Badge variant="secondary">Demo</Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {holdedStatus?.description || 'Software de gestión empresarial todo-en-uno'}
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() => loadHoldedStatus()}
+                    variant="ghost"
+                    size="sm"
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {holdedStatus && (
+                  <div className="space-y-3">
+                    <div className="text-sm">
+                      <strong>Funcionalidades disponibles:</strong>
+                      <ul className="mt-2 space-y-1 list-disc list-inside text-muted-foreground">
+                        {holdedStatus.features?.map((feature: string, idx: number) => (
+                          <li key={idx}>{feature}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        onClick={() => handleSyncCustomersSystem('holded')}
+                        variant="outline"
+                        size="sm"
+                        disabled={loading}
+                      >
+                        <Building2 className="h-4 w-4 mr-2" />
+                        Sincronizar Clientes
+                      </Button>
+                      <Button
+                        onClick={() => handleCreateInvoiceSystem('holded')}
+                        variant="outline"
+                        size="sm"
+                        disabled={loading}
+                      >
+                        <Receipt className="h-4 w-4 mr-2" />
+                        Crear Facturas
+                      </Button>
+                      <Button
+                        onClick={() => handleRegisterPaymentsSystem('holded')}
+                        variant="outline"
+                        size="sm"
+                        disabled={loading}
+                      >
+                        <CreditCard className="h-4 w-4 mr-2" />
+                        Registrar Pagos
+                      </Button>
+                    </div>
+
+                    {!holdedStatus.integrated && (
+                      <div className="bg-purple-50 dark:bg-purple-950 border border-purple-200 dark:border-purple-800 rounded-md p-4">
+                        <p className="text-sm text-purple-800 dark:text-purple-200">
+                          <strong>Modo Demo:</strong> Esta integración está en modo demostración.
+                        </p>
+                        <p className="text-xs text-purple-700 dark:text-purple-300 mt-2">
+                          Para activar la integración real, configura la variable de entorno
+                          HOLDED_API_KEY
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* A3 Integration */}
+              <div className="border rounded-lg p-6 space-y-4">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-3">
+                      <h3 className="text-lg font-semibold">A3 Software</h3>
+                      {a3Status?.integrated ? (
+                        <Badge variant="default">✓ Activa</Badge>
+                      ) : (
+                        <Badge variant="secondary">Demo</Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {a3Status?.description || 'ERP líder en España para pymes'}
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() => loadA3Status()}
+                    variant="ghost"
+                    size="sm"
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {a3Status && (
+                  <div className="space-y-3">
+                    <div className="text-sm">
+                      <strong>Funcionalidades disponibles:</strong>
+                      <ul className="mt-2 space-y-1 list-disc list-inside text-muted-foreground">
+                        {a3Status.features?.map((feature: string, idx: number) => (
+                          <li key={idx}>{feature}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        onClick={() => handleSyncCustomersSystem('a3')}
+                        variant="outline"
+                        size="sm"
+                        disabled={loading}
+                      >
+                        <Building2 className="h-4 w-4 mr-2" />
+                        Sincronizar Clientes
+                      </Button>
+                      <Button
+                        onClick={() => handleCreateInvoiceSystem('a3')}
+                        variant="outline"
+                        size="sm"
+                        disabled={loading}
+                      >
+                        <Receipt className="h-4 w-4 mr-2" />
+                        Crear Facturas
+                      </Button>
+                      <Button
+                        onClick={() => handleRegisterPaymentsSystem('a3')}
+                        variant="outline"
+                        size="sm"
+                        disabled={loading}
+                      >
+                        <CreditCard className="h-4 w-4 mr-2" />
+                        Registrar Pagos
+                      </Button>
+                    </div>
+
+                    {!a3Status.integrated && (
+                      <div className="bg-indigo-50 dark:bg-indigo-950 border border-indigo-200 dark:border-indigo-800 rounded-md p-4">
+                        <p className="text-sm text-indigo-800 dark:text-indigo-200">
+                          <strong>Modo Demo:</strong> Esta integración está en modo demostración.
+                        </p>
+                        <p className="text-xs text-indigo-700 dark:text-indigo-300 mt-2">
+                          Para activar la integración real, configura las variables de entorno
+                          A3_API_URL, A3_CLIENT_ID y A3_CLIENT_SECRET
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Alegra Integration */}
+              <div className="border rounded-lg p-6 space-y-4">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-3">
+                      <h3 className="text-lg font-semibold">Alegra</h3>
+                      {alegraStatus?.integrated ? (
+                        <Badge variant="default">✓ Activa</Badge>
+                      ) : (
+                        <Badge variant="secondary">Demo</Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {alegraStatus?.description || 'Facturación líder en Latinoamérica'}
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() => loadAlegraStatus()}
+                    variant="ghost"
+                    size="sm"
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {alegraStatus && (
+                  <div className="space-y-3">
+                    <div className="text-sm">
+                      <strong>Funcionalidades disponibles:</strong>
+                      <ul className="mt-2 space-y-1 list-disc list-inside text-muted-foreground">
+                        {alegraStatus.features?.map((feature: string, idx: number) => (
+                          <li key={idx}>{feature}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        onClick={() => handleSyncCustomersSystem('alegra')}
+                        variant="outline"
+                        size="sm"
+                        disabled={loading}
+                      >
+                        <Building2 className="h-4 w-4 mr-2" />
+                        Sincronizar Clientes
+                      </Button>
+                      <Button
+                        onClick={() => handleCreateInvoiceSystem('alegra')}
+                        variant="outline"
+                        size="sm"
+                        disabled={loading}
+                      >
+                        <Receipt className="h-4 w-4 mr-2" />
+                        Crear Facturas
+                      </Button>
+                      <Button
+                        onClick={() => handleRegisterPaymentsSystem('alegra')}
+                        variant="outline"
+                        size="sm"
+                        disabled={loading}
+                      >
+                        <CreditCard className="h-4 w-4 mr-2" />
+                        Registrar Pagos
+                      </Button>
+                    </div>
+
+                    {!alegraStatus.integrated && (
+                      <div className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-md p-4">
+                        <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                          <strong>Modo Demo:</strong> Esta integración está en modo demostración.
+                        </p>
+                        <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-2">
+                          Para activar la integración real, configura las variables de entorno
+                          ALEGRA_API_TOKEN y ALEGRA_COMPANY_EMAIL
                         </p>
                       </div>
                     )}
