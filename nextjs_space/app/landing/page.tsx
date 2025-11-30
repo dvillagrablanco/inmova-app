@@ -497,7 +497,7 @@ export default function LandingPage() {
                   <iframe
                     src={process.env.NEXT_PUBLIC_VIDEO_URL}
                     className="w-full h-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; compute-pressure 'none'"
                     allowFullScreen
                     title="INMOVA Demo Video"
                   />
