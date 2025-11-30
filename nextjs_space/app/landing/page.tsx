@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { LandingChatbot } from '@/components/LandingChatbot';
 import { 
   Building2, Users, TrendingUp, Zap, Shield, Bot, Leaf, Wallet, 
   CheckCircle, Star, ArrowRight, Play, Hotel, Hammer, Briefcase,
@@ -1169,6 +1170,9 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* Chatbot y WhatsApp flotantes */}
+      <LandingChatbot />
     </div>
   );
 }
