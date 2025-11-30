@@ -6,17 +6,19 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { 
   Building2, Users, TrendingUp, Zap, Shield, Bot, Leaf, Wallet, 
   CheckCircle, Star, ArrowRight, Play, Hotel, Hammer, Briefcase,
   Cloud, Calendar, MessageSquare, FileText, CreditCard, BarChart3,
   Lock, Globe, Smartphone, Award, Target, Rocket, ChevronDown,
   Link as LinkIcon, Recycle, Phone, Mail, MapPin, Sparkles, 
-  TrendingDown, DollarSign, Home, X
+  TrendingDown, DollarSign, Home, X, Menu
 } from 'lucide-react';
 
 export default function LandingPage() {
   const [activeTab, setActiveTab] = useState('todos');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -30,11 +32,13 @@ export default function LandingPage() {
                 <div className="absolute -top-1 -right-1 h-3 w-3 bg-gradient-to-r from-pink-500 to-violet-500 rounded-full animate-pulse" />
               </div>
               <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">INMOVA</span>
-              <Badge variant="secondary" className="ml-2 bg-gradient-to-r from-indigo-500 to-violet-500 text-white border-0">
+              <Badge variant="secondary" className="ml-2 bg-gradient-to-r from-indigo-500 to-violet-500 text-white border-0 hidden sm:inline-flex">
                 <Sparkles className="h-3 w-3 mr-1" />
                 PropTech
               </Badge>
             </div>
+            
+            {/* Desktop Menu */}
             <div className="hidden md:flex items-center gap-6">
               <a href="#features" className="text-sm font-medium text-gray-700 hover:text-indigo-600 transition-colors">Características</a>
               <a href="#vertical" className="text-sm font-medium text-gray-700 hover:text-indigo-600 transition-colors">Verticales</a>
@@ -48,6 +52,78 @@ export default function LandingPage() {
                   Comenzar Gratis
                 </Button>
               </Link>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
+              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="text-gray-700 hover:text-indigo-600 hover:bg-indigo-50"
+                  >
+                    <Menu className="h-6 w-6" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+                  <SheetHeader>
+                    <SheetTitle className="flex items-center gap-2">
+                      <Building2 className="h-6 w-6 text-indigo-600" />
+                      <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                        INMOVA
+                      </span>
+                    </SheetTitle>
+                  </SheetHeader>
+                  <div className="flex flex-col gap-4 mt-8">
+                    <a 
+                      href="#features" 
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="text-lg font-medium text-gray-700 hover:text-indigo-600 transition-colors py-2 px-4 hover:bg-indigo-50 rounded-lg"
+                    >
+                      Características
+                    </a>
+                    <a 
+                      href="#vertical" 
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="text-lg font-medium text-gray-700 hover:text-indigo-600 transition-colors py-2 px-4 hover:bg-indigo-50 rounded-lg"
+                    >
+                      Verticales
+                    </a>
+                    <a 
+                      href="#pricing" 
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="text-lg font-medium text-gray-700 hover:text-indigo-600 transition-colors py-2 px-4 hover:bg-indigo-50 rounded-lg"
+                    >
+                      Precios
+                    </a>
+                    <a 
+                      href="#integraciones" 
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="text-lg font-medium text-gray-700 hover:text-indigo-600 transition-colors py-2 px-4 hover:bg-indigo-50 rounded-lg"
+                    >
+                      Integraciones
+                    </a>
+                    <div className="border-t border-gray-200 mt-4 pt-4 space-y-3">
+                      <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                        <Button 
+                          variant="outline" 
+                          className="w-full border-indigo-600 text-indigo-600 hover:bg-indigo-50"
+                        >
+                          Iniciar Sesión
+                        </Button>
+                      </Link>
+                      <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
+                        <Button 
+                          className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white shadow-lg shadow-indigo-500/50"
+                        >
+                          Comenzar Gratis
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
           </div>
         </div>
