@@ -20,7 +20,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { DollarSign, Plus, TrendingUp, ArrowLeft, Home, Search, Euro, Calendar as CalendarIcon, Building2, Tag } from 'lucide-react';
+import { DollarSign, Plus, TrendingUp, ArrowLeft, Home, Search, Euro, Calendar as CalendarIcon, Building2, Tag, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { format } from 'date-fns';
@@ -44,6 +44,8 @@ export default function GastosPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [filterCategoria, setFilterCategoria] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [form, setForm] = useState({
@@ -51,6 +53,13 @@ export default function GastosPage() {
     categoria: 'otro',
     monto: '',
     fecha: new Date().toISOString().split('T')[0],
+    notas: '',
+  });
+  const [editForm, setEditForm] = useState({
+    concepto: '',
+    categoria: 'otro',
+    monto: '',
+    fecha: '',
     notas: '',
   });
 
@@ -106,6 +115,68 @@ export default function GastosPage() {
     } catch (error) {
       console.error('Error creating expense:', error);
       toast.error('Error al registrar gasto');
+    }
+  };
+
+  const handleOpenEdit = (expense: Expense) => {
+    setEditingExpense(expense);
+    setEditForm({
+      concepto: expense.concepto || '',
+      categoria: expense.categoria || 'otro',
+      monto: expense.monto?.toString() || '',
+      fecha: expense.fecha ? new Date(expense.fecha).toISOString().split('T')[0] : '',
+      notas: (expense as any).notas || '',
+    });
+    setOpenEditDialog(true);
+  };
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingExpense || !editForm.concepto || !editForm.categoria || !editForm.monto || !editForm.fecha) {
+      toast.error('Por favor completa todos los campos requeridos');
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/expenses/${editingExpense.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editForm),
+      });
+
+      if (res.ok) {
+        toast.success('Gasto actualizado exitosamente');
+        setOpenEditDialog(false);
+        setEditingExpense(null);
+        fetchExpenses();
+      } else {
+        toast.error('Error al actualizar gasto');
+      }
+    } catch (error) {
+      console.error('Error updating expense:', error);
+      toast.error('Error al actualizar gasto');
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('¿Estás seguro de que deseas eliminar este gasto?')) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/expenses/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        toast.success('Gasto eliminado exitosamente');
+        fetchExpenses();
+      } else {
+        toast.error('Error al eliminar gasto');
+      }
+    } catch (error) {
+      console.error('Error deleting expense:', error);
+      toast.error('Error al eliminar gasto');
     }
   };
 
@@ -306,6 +377,84 @@ export default function GastosPage() {
               )}
             </div>
 
+            {/* Diálogo de Edición */}
+            <Dialog open={openEditDialog} onOpenChange={setOpenEditDialog}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Editar Gasto</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleUpdate} className="space-y-4">
+                  <div>
+                    <Label htmlFor="edit-concepto">Concepto *</Label>
+                    <Input
+                      id="edit-concepto"
+                      value={editForm.concepto}
+                      onChange={(e) => setEditForm({ ...editForm, concepto: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-categoria">Categoría *</Label>
+                    <Select
+                      value={editForm.categoria}
+                      onValueChange={(value) => setEditForm({ ...editForm, categoria: value })}
+                    >
+                      <SelectTrigger id="edit-categoria">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="mantenimiento">Mantenimiento</SelectItem>
+                        <SelectItem value="servicios">Servicios</SelectItem>
+                        <SelectItem value="impuestos">Impuestos</SelectItem>
+                        <SelectItem value="seguros">Seguros</SelectItem>
+                        <SelectItem value="personal">Personal</SelectItem>
+                        <SelectItem value="marketing">Marketing</SelectItem>
+                        <SelectItem value="legal">Legal</SelectItem>
+                        <SelectItem value="otro">Otro</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-monto">Monto (€) *</Label>
+                    <Input
+                      id="edit-monto"
+                      type="number"
+                      step="0.01"
+                      value={editForm.monto}
+                      onChange={(e) => setEditForm({ ...editForm, monto: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-fecha">Fecha *</Label>
+                    <Input
+                      id="edit-fecha"
+                      type="date"
+                      value={editForm.fecha}
+                      onChange={(e) => setEditForm({ ...editForm, fecha: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-notas">Notas</Label>
+                    <Input
+                      id="edit-notas"
+                      value={editForm.notas}
+                      onChange={(e) => setEditForm({ ...editForm, notas: e.target.value })}
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button type="button" variant="outline" onClick={() => setOpenEditDialog(false)}>
+                      Cancelar
+                    </Button>
+                    <Button type="submit">
+                      Guardar Cambios
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+
             {/* Estadísticas */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <Card>
@@ -482,6 +631,27 @@ export default function GastosPage() {
                                 €{expense.monto.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
                               </div>
                             </div>
+                          </div>
+
+                          {/* Acciones */}
+                          <div className="flex gap-2 pt-3 border-t">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleOpenEdit(expense)}
+                              className="flex-1"
+                            >
+                              <Edit className="h-4 w-4 mr-2" />
+                              Editar
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDelete(expense.id)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
                         </div>
                       </div>

@@ -35,6 +35,7 @@ import {
   Building2,
   User,
   Search,
+  Eye,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePermissions } from '@/lib/hooks/usePermissions';
@@ -63,6 +64,8 @@ export default function DocumentosPage() {
   const [filterTipo, setFilterTipo] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
+  const [openDetailDialog, setOpenDetailDialog] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
 
   // Upload form state
   const [uploadForm, setUploadForm] = useState({
@@ -560,6 +563,18 @@ export default function DocumentosPage() {
                             <Button
                               variant="outline"
                               size="sm"
+                              onClick={() => {
+                                setSelectedDocument(doc);
+                                setOpenDetailDialog(true);
+                              }}
+                              className="w-full sm:w-auto"
+                            >
+                              <Eye className="h-4 w-4 sm:mr-2" />
+                              <span className="hidden sm:inline">Ver</span>
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
                               onClick={() => handleDownload(doc.id)}
                               className="w-full sm:w-auto"
                             >
@@ -586,6 +601,89 @@ export default function DocumentosPage() {
           </div>
         </main>
       </div>
+
+      {/* Diálogo de Detalles */}
+      {selectedDocument && (
+        <Dialog open={openDetailDialog} onOpenChange={setOpenDetailDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Detalles del Documento</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Nombre</Label>
+                  <p className="font-medium mt-1">{selectedDocument.nombre}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Tipo</Label>
+                  <p className="font-medium mt-1">{selectedDocument.tipo}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Fecha de Subida</Label>
+                  <p className="font-medium mt-1">
+                    {format(new Date(selectedDocument.fechaSubida), 'dd MMMM yyyy HH:mm', { locale: es })}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Fecha de Vencimiento</Label>
+                  <p className="font-medium mt-1">
+                    {selectedDocument.fechaVencimiento
+                      ? format(new Date(selectedDocument.fechaVencimiento), 'dd MMMM yyyy', { locale: es })
+                      : 'Sin vencimiento'}
+                  </p>
+                </div>
+              </div>
+
+              {(selectedDocument.tenant || selectedDocument.unit || selectedDocument.building) && (
+                <div className="border-t pt-4">
+                  <Label className="text-muted-foreground mb-2 block">Entidades Relacionadas</Label>
+                  <div className="space-y-2">
+                    {selectedDocument.tenant && (
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-primary" />
+                        <span className="font-medium">Inquilino: {selectedDocument.tenant.nombreCompleto}</span>
+                      </div>
+                    )}
+                    {selectedDocument.building && (
+                      <div className="flex items-center gap-2">
+                        <Building2 className="h-4 w-4 text-primary" />
+                        <span className="font-medium">Edificio: {selectedDocument.building.nombre}</span>
+                      </div>
+                    )}
+                    {selectedDocument.unit && (
+                      <div className="flex items-center gap-2">
+                        <Home className="h-4 w-4 text-primary" />
+                        <span className="font-medium">Unidad: {selectedDocument.unit.numero}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="border-t pt-4 flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => handleDownload(selectedDocument.id)}
+                  className="flex-1"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Descargar
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setOpenDetailDialog(false);
+                    setSelectedDocument(null);
+                  }}
+                >
+                  Cerrar
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

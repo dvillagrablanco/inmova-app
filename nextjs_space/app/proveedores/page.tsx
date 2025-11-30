@@ -19,7 +19,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Users, Plus, Phone, Mail, Star, ArrowLeft, Home, Search, Briefcase, TrendingUp } from 'lucide-react';
+import { Users, Plus, Phone, Mail, Star, ArrowLeft, Home, Search, Briefcase, TrendingUp, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 
@@ -43,6 +43,8 @@ export default function ProveedoresPage() {
   const [providers, setProviders] = useState<Provider[]>([]);
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [editingProvider, setEditingProvider] = useState<Provider | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [form, setForm] = useState({
     nombre: '',
@@ -52,6 +54,16 @@ export default function ProveedoresPage() {
     direccion: '',
     rating: '',
     notas: '',
+  });
+  const [editForm, setEditForm] = useState({
+    nombre: '',
+    tipo: '',
+    telefono: '',
+    email: '',
+    direccion: '',
+    rating: '',
+    notas: '',
+    activo: true,
   });
 
   useEffect(() => {
@@ -109,6 +121,74 @@ export default function ProveedoresPage() {
     } catch (error) {
       console.error('Error creating provider:', error);
       toast.error('Error al crear proveedor');
+    }
+  };
+
+  const handleOpenEdit = (provider: Provider) => {
+    setEditingProvider(provider);
+    setEditForm({
+      nombre: provider.nombre || '',
+      tipo: provider.tipo || '',
+      telefono: provider.telefono || '',
+      email: provider.email || '',
+      direccion: (provider as any).direccion || '',
+      rating: provider.rating?.toString() || '',
+      notas: (provider as any).notas || '',
+      activo: (provider as any).activo !== false,
+    });
+    setOpenEditDialog(true);
+  };
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingProvider || !editForm.nombre || !editForm.tipo || !editForm.telefono) {
+      toast.error('Por favor completa todos los campos requeridos');
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/providers/${editingProvider.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...editForm,
+          rating: editForm.rating ? parseFloat(editForm.rating) : null,
+        }),
+      });
+
+      if (res.ok) {
+        toast.success('Proveedor actualizado exitosamente');
+        setOpenEditDialog(false);
+        setEditingProvider(null);
+        fetchProviders();
+      } else {
+        toast.error('Error al actualizar proveedor');
+      }
+    } catch (error) {
+      console.error('Error updating provider:', error);
+      toast.error('Error al actualizar proveedor');
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('¿Estás seguro de que deseas eliminar este proveedor?')) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/providers/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        toast.success('Proveedor eliminado exitosamente');
+        fetchProviders();
+      } else {
+        toast.error('Error al eliminar proveedor');
+      }
+    } catch (error) {
+      console.error('Error deleting provider:', error);
+      toast.error('Error al eliminar proveedor');
     }
   };
 
@@ -276,6 +356,91 @@ export default function ProveedoresPage() {
               )}
             </div>
 
+            {/* Diálogo de Edición */}
+            <Dialog open={openEditDialog} onOpenChange={setOpenEditDialog}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Editar Proveedor</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleUpdate} className="space-y-4">
+                  <div>
+                    <Label htmlFor="edit-nombre">Nombre *</Label>
+                    <Input
+                      id="edit-nombre"
+                      value={editForm.nombre}
+                      onChange={(e) => setEditForm({ ...editForm, nombre: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-tipo">Tipo de servicio *</Label>
+                    <Input
+                      id="edit-tipo"
+                      value={editForm.tipo}
+                      onChange={(e) => setEditForm({ ...editForm, tipo: e.target.value })}
+                      placeholder="Ej: Fontanería, Electricidad, Limpieza..."
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-telefono">Teléfono *</Label>
+                    <Input
+                      id="edit-telefono"
+                      type="tel"
+                      value={editForm.telefono}
+                      onChange={(e) => setEditForm({ ...editForm, telefono: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-email">Email</Label>
+                    <Input
+                      id="edit-email"
+                      type="email"
+                      value={editForm.email}
+                      onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-direccion">Dirección</Label>
+                    <Input
+                      id="edit-direccion"
+                      value={editForm.direccion}
+                      onChange={(e) => setEditForm({ ...editForm, direccion: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-rating">Valoración (1-5)</Label>
+                    <Input
+                      id="edit-rating"
+                      type="number"
+                      min="1"
+                      max="5"
+                      step="0.5"
+                      value={editForm.rating}
+                      onChange={(e) => setEditForm({ ...editForm, rating: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-notas">Notas</Label>
+                    <Input
+                      id="edit-notas"
+                      value={editForm.notas}
+                      onChange={(e) => setEditForm({ ...editForm, notas: e.target.value })}
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button type="button" variant="outline" onClick={() => setOpenEditDialog(false)}>
+                      Cancelar
+                    </Button>
+                    <Button type="submit">
+                      Guardar Cambios
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+
             {/* Estadísticas */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <Card>
@@ -427,6 +592,27 @@ export default function ProveedoresPage() {
                                 </div>
                               </div>
                             )}
+                          </div>
+
+                          {/* Acciones */}
+                          <div className="flex gap-2 pt-3 border-t">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleOpenEdit(provider)}
+                              className="flex-1"
+                            >
+                              <Edit className="h-4 w-4 mr-2" />
+                              Editar
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDelete(provider.id)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
                         </div>
                       </div>
