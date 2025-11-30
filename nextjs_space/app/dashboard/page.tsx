@@ -41,7 +41,7 @@ interface DashboardData {
   unidadesDisponibles: any[];
 }
 
-const COLORS = ['#000000', '#4B5563', '#9CA3AF', '#D1D5DB', '#E5E7EB'];
+const COLORS = ['#4F46E5', '#7C3AED', '#EC4899', '#8B5CF6', '#A78BFA']; // Indigo, Violet, Pink gradients
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -85,21 +85,27 @@ export default function DashboardPage() {
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex h-screen bg-gradient-bg items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600 font-medium">Cargando dashboard...</p>
         </div>
       </div>
     );
   }
 
-  if (!session || !data) {
-    return null;
+  if (!session || !data || !data.kpis) {
+    return (
+      <div className="flex h-screen bg-gradient-bg items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">No hay datos disponibles</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gradient-bg">
       <Sidebar />
       <div className="flex-1 ml-0 lg:ml-64 flex flex-col">
         <Header />

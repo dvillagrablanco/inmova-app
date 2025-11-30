@@ -145,7 +145,7 @@ export default function AdminChatPage() {
   if (status === 'loading' || loading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
       </div>
     );
   }
@@ -288,7 +288,7 @@ export default function AdminChatPage() {
                             <div
                               className={`max-w-[70%] rounded-lg p-3 ${
                                 msg.senderType === 'user'
-                                  ? 'bg-black text-white'
+                                  ? 'gradient-primary text-white'
                                   : 'bg-gray-100 text-gray-900'
                               }`}
                             >
@@ -329,7 +329,7 @@ export default function AdminChatPage() {
                           <Button
                             onClick={sendMessage}
                             disabled={sending || !newMessage.trim()}
-                            className="bg-black hover:bg-gray-800"
+                            className="gradient-primary hover:opacity-90 shadow-primary"
                           >
                             <Send className="w-4 h-4" />
                           </Button>

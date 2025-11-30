@@ -33,7 +33,7 @@ interface BIData {
   tendencias: any;
 }
 
-const COLORS = ['#000000', '#3f3f3f', '#7f7f7f', '#bfbfbf', '#e0e0e0'];
+const COLORS = ['#4F46E5', '#7C3AED', '#EC4899', '#8B5CF6', '#A78BFA']; // Indigo, Violet, Pink gradients
 
 export default function BIPage() {
   const { data: session, status } = useSession();

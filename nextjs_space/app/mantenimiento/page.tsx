@@ -1173,7 +1173,7 @@ export default function MantenimientoPage() {
               <div className="flex gap-3 pt-4">
                 <button
                   type="submit"
-                  className="flex-1 px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
+                  className="flex-1 px-6 py-3 gradient-primary text-white rounded-lg hover:opacity-90 transition-all shadow-primary font-medium"
                 >
                   {editingId ? 'Actualizar' : 'Crear'} Mantenimiento
                 </button>

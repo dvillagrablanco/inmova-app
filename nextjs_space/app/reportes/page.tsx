@@ -236,7 +236,7 @@ export default function ReportesPage() {
               <div className="flex items-end">
                 <button
                   onClick={exportToCSV}
-                  className="w-full px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
+                  className="w-full px-4 py-2 gradient-primary text-white rounded-lg hover:opacity-90 transition-all shadow-primary flex items-center justify-center gap-2"
                 >
                   <Download size={20} />
                   Exportar CSV

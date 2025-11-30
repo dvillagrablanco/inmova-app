@@ -173,7 +173,7 @@ export default function IncidenciasPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Cargando...</p>
         </div>
       </div>
@@ -225,7 +225,7 @@ export default function IncidenciasPage() {
             {canCreate && (
               <Dialog open={openDialog} onOpenChange={setOpenDialog}>
                 <DialogTrigger asChild>
-                  <Button className="bg-black hover:bg-gray-800">
+                  <Button className="gradient-primary hover:opacity-90 shadow-primary">
                     <Plus className="w-4 h-4 mr-2" />
                     Nueva Incidencia
                   </Button>
@@ -341,7 +341,7 @@ export default function IncidenciasPage() {
                     <Button
                       onClick={handleCreate}
                       disabled={!formData.buildingId || !formData.titulo || !formData.descripcion}
-                      className="bg-black hover:bg-gray-800"
+                      className="gradient-primary hover:opacity-90 shadow-primary"
                     >
                       Crear Incidencia
                     </Button>

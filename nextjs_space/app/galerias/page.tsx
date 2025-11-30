@@ -137,7 +137,7 @@ export default function GaleriasPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Cargando...</p>
         </div>
       </div>
@@ -189,7 +189,7 @@ export default function GaleriasPage() {
             {canCreate && (
               <Dialog open={openDialog} onOpenChange={setOpenDialog}>
                 <DialogTrigger asChild>
-                  <Button className="bg-black hover:bg-gray-800">
+                  <Button className="gradient-primary hover:opacity-90 shadow-primary">
                     <Plus className="w-4 h-4 mr-2" />
                     Nueva Galería
                   </Button>
@@ -251,7 +251,7 @@ export default function GaleriasPage() {
                     <Button
                       onClick={handleCreate}
                       disabled={!formData.unitId}
-                      className="bg-black hover:bg-gray-800"
+                      className="gradient-primary hover:opacity-90 shadow-primary"
                     >
                       Crear Galería
                     </Button>
@@ -309,7 +309,7 @@ export default function GaleriasPage() {
                   <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-500 mb-4">No hay galerías creadas</p>
                   {canCreate && (
-                    <Button onClick={() => setOpenDialog(true)} className="bg-black hover:bg-gray-800">
+                    <Button onClick={() => setOpenDialog(true)} className="gradient-primary hover:opacity-90 shadow-primary">
                       <Plus className="w-4 h-4 mr-2" />
                       Crear Primera Galería
                     </Button>
