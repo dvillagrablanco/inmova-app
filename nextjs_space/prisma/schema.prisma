@@ -941,6 +941,9 @@ model Company {
   // Redes Sociales
   socialMediaAccounts SocialMediaAccount[]
   socialMediaPosts    SocialMediaPost[]
+  
+  // Cupones de descuento
+  discountCoupons     DiscountCoupon[]
 
   @@map("company")
 }
@@ -6824,5 +6827,86 @@ model SocialMediaPost {
   @@index([accountId])
   @@index([estado])
   @@map("social_media_posts")
+}
+
+
+// ============================================
+// SISTEMA DE CUPONES DE DESCUENTO
+// ============================================
+
+enum CouponType {
+  PERCENTAGE  // Porcentaje de descuento
+  FIXED       // Cantidad fija
+}
+
+enum CouponStatus {
+  activo
+  inactivo
+  agotado
+  expirado
+}
+
+model DiscountCoupon {
+  id                String        @id @default(cuid())
+  companyId         String
+  codigo            String        // Código del cupón (ej: "VERANO2024")
+  tipo              CouponType
+  valor             Float         // Porcentaje o monto fijo según tipo
+  descripcion       String?       @db.Text
+  
+  // Límites
+  usosMaximos       Int?          // Número máximo de usos totales
+  usosActuales      Int           @default(0)
+  usosPorUsuario    Int           @default(1) // Usos permitidos por usuario
+  montoMinimo       Float?        // Monto mínimo de compra para aplicar
+  
+  // Vigencia
+  fechaInicio       DateTime
+  fechaExpiracion   DateTime
+  
+  // Restricciones
+  aplicaATodos      Boolean       @default(true)
+  unidadesPermitidas String[]     @default([])  // IDs de unidades específicas
+  planesPermitidos  String[]      @default([])  // IDs de planes de suscripción
+  
+  // Estado
+  estado            CouponStatus  @default(activo)
+  activo            Boolean       @default(true)
+  
+  // Metadata
+  creadoPor         String
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  
+  company           Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  usos              CouponUsage[]
+  
+  @@unique([companyId, codigo])
+  @@index([companyId])
+  @@index([codigo])
+  @@index([estado])
+  @@map("discount_coupons")
+}
+
+model CouponUsage {
+  id                String          @id @default(cuid())
+  couponId          String
+  userId            String?         // Usuario que usó el cupón
+  tenantId          String?         // Inquilino que usó el cupón
+  contractId        String?         // Contrato asociado
+  paymentId         String?         // Pago asociado
+  
+  montoOriginal     Float
+  montoDescuento    Float
+  montoFinal        Float
+  
+  aplicadoEn        DateTime        @default(now())
+  
+  coupon            DiscountCoupon  @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  
+  @@index([couponId])
+  @@index([userId])
+  @@index([tenantId])
+  @@map("coupon_usages")
 }
 
