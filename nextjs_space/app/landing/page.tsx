@@ -67,7 +67,7 @@ export default function LandingPage() {
                     <Menu className="h-6 w-6" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+                <SheetContent side="right" className="w-[300px] sm:w-[400px] bg-white">
                   <SheetHeader>
                     <SheetTitle className="flex items-center gap-2">
                       <Building2 className="h-6 w-6 text-indigo-600" />
@@ -526,7 +526,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               { icon: Building2, title: 'Gestión de Propiedades', desc: 'Edificios, unidades, contratos y pagos completos', gradient: 'from-blue-500 to-cyan-500' },
-              { icon: Home, title: 'Alquiler por Habitaciones', desc: 'Coliving completo: prorrateo automático de utilidades (luz, agua, gas), gestión de habitaciones individuales, calendario de limpieza rotativo', gradient: 'from-teal-500 to-green-600', featured: true },
+              { icon: Home, title: 'Alquiler por Habitaciones', desc: 'Coliving completo: prorrateo automático de utilidades (luz, agua, gas), gestión de habitaciones individuales, calendario de limpieza rotativo', gradient: 'from-teal-500 to-green-600' },
               { icon: Wallet, title: 'Cupones de Descuento', desc: 'Sistema completo de cupones con validación, límites de uso, fechas de expiración, aplicación automática y estadísticas', gradient: 'from-fuchsia-500 to-pink-600', featured: true },
               { icon: Users, title: 'Portal Inquilinos/Propietarios', desc: 'App móvil PWA + chat integrado + firma digital', gradient: 'from-purple-500 to-pink-500' },
               { icon: CreditCard, title: 'Pagos Stripe', desc: 'Cobros automáticos + suscripciones + portal de pago', gradient: 'from-green-500 to-emerald-500' },
@@ -621,10 +621,10 @@ export default function LandingPage() {
                 features: ['Portfolio', 'Entregables', 'CRM']
               },
               {
-                icon: Users,
-                title: 'Coliving/Media Estancia',
-                desc: 'Alquileres flexibles',
-                features: ['Comunidad', 'Espacios compartidos', 'Eventos']
+                icon: Home,
+                title: 'Alquiler por Habitaciones',
+                desc: 'Coliving y gestión de habitaciones individuales',
+                features: ['Prorrateo automático', 'Calendario limpieza', 'Gestión individual']
               },
               {
                 icon: Hotel,
@@ -654,258 +654,6 @@ export default function LandingPage() {
                 </CardContent>
               </Card>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ROOM RENTAL / COLIVING DESTACADO */}
-      <section id="room-rental" className="py-24 px-4 bg-gradient-to-br from-teal-50 via-emerald-50 to-green-50 relative overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
-          <div className="absolute top-10 left-10 w-72 h-72 bg-teal-400 rounded-full blur-3xl" />
-          <div className="absolute bottom-10 right-10 w-96 h-96 bg-green-400 rounded-full blur-3xl" />
-        </div>
-
-        <div className="container mx-auto relative z-10">
-          <div className="text-center mb-16">
-            <Badge className="mb-4 bg-gradient-to-r from-teal-500 to-green-600 text-white border-0 px-4 py-2 text-base">
-              <Home className="h-5 w-5 mr-2 inline" />
-              Modelo Innovador de Negocio
-            </Badge>
-            <h2 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-teal-600 to-green-700 bg-clip-text text-transparent">
-              Alquiler por Habitaciones & Coliving
-            </h2>
-            <p className="text-xl text-gray-700 max-w-4xl mx-auto leading-relaxed">
-              <strong className="text-teal-600">Revoluciona la gestión de coliving y alquiler de habitaciones</strong> con prorrateo automático de utilidades, gestión inteligente de espacios compartidos y calendario de limpieza rotativo. El modelo de negocio más rentable del sector inmobiliario, ahora completamente automatizado.
-            </p>
-          </div>
-
-          <div className="grid lg:grid-cols-2 gap-12 items-start mb-12">
-            {/* Left Column - Key Features */}
-            <div className="space-y-6">
-              <Card className="border-2 border-teal-200 shadow-xl bg-white/80 backdrop-blur-sm hover:shadow-2xl transition-all">
-                <CardHeader>
-                  <div className="flex items-center gap-3">
-                    <div className="p-3 bg-gradient-to-br from-teal-500 to-green-600 rounded-xl">
-                      <DollarSign className="h-8 w-8 text-white" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-2xl text-teal-700">Prorrateo Automático de Utilidades</CardTitle>
-                      <CardDescription className="text-base">Olvídate de cálculos manuales</CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <CheckCircle className="h-6 w-6 text-green-600 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-semibold text-gray-800">División inteligente de costes</p>
-                      <p className="text-sm text-gray-600">Luz, agua, gas, internet, limpieza - todo calculado automáticamente según ocupación y consumo</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <CheckCircle className="h-6 w-6 text-green-600 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-semibold text-gray-800">Facturación por inquilino</p>
-                      <p className="text-sm text-gray-600">Cada residente recibe su desglose personalizado con conceptos claros</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <CheckCircle className="h-6 w-6 text-green-600 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-semibold text-gray-800">Ajustes proporcionales</p>
-                      <p className="text-sm text-gray-600">Entrada/salida mid-mes calculada automáticamente con precisión al día</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-2 border-emerald-200 shadow-xl bg-white/80 backdrop-blur-sm hover:shadow-2xl transition-all">
-                <CardHeader>
-                  <div className="flex items-center gap-3">
-                    <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl">
-                      <Calendar className="h-8 w-8 text-white" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-2xl text-emerald-700">Calendario de Limpieza Rotativo</CardTitle>
-                      <CardDescription className="text-base">Espacios compartidos siempre impecables</CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <CheckCircle className="h-6 w-6 text-green-600 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-semibold text-gray-800">Turnos automáticos equitativos</p>
-                      <p className="text-sm text-gray-600">Sistema de rotación justo para cocina, baños y áreas comunes</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <CheckCircle className="h-6 w-6 text-green-600 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-semibold text-gray-800">Notificaciones y recordatorios</p>
-                      <p className="text-sm text-gray-600">Alertas push y email para cada inquilino en su turno asignado</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <CheckCircle className="h-6 w-6 text-green-600 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-semibold text-gray-800">Servicio de limpieza profesional opcional</p>
-                      <p className="text-sm text-gray-600">Integra proveedores externos con facturación automática prorrateada</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-2 border-green-200 shadow-xl bg-white/80 backdrop-blur-sm hover:shadow-2xl transition-all">
-                <CardHeader>
-                  <div className="flex items-center gap-3">
-                    <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl">
-                      <Users className="h-8 w-8 text-white" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-2xl text-green-700">Gestión de Habitaciones Individuales</CardTitle>
-                      <CardDescription className="text-base">Control total de cada espacio</CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <CheckCircle className="h-6 w-6 text-green-600 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-semibold text-gray-800">Contratos independientes por habitación</p>
-                      <p className="text-sm text-gray-600">Renovación flexible sin afectar a otros residentes</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <CheckCircle className="h-6 w-6 text-green-600 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-semibold text-gray-800">Precios diferenciados</p>
-                      <p className="text-sm text-gray-600">Cada habitación puede tener precio y condiciones únicas</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <CheckCircle className="h-6 w-6 text-green-600 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-semibold text-gray-800">Portal del inquilino individualizado</p>
-                      <p className="text-sm text-gray-600">Cada residente accede solo a su información y áreas comunes</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Right Column - Benefits & Use Cases */}
-            <div className="space-y-6">
-              <Card className="border-2 border-teal-300 shadow-2xl bg-gradient-to-br from-white to-teal-50">
-                <CardHeader className="bg-gradient-to-r from-teal-600 to-green-600 text-white rounded-t-lg">
-                  <CardTitle className="text-2xl flex items-center gap-2">
-                    <TrendingUp className="h-6 w-6" />
-                    Rentabilidad Máxima
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-6 space-y-4">
-                  <div className="bg-white rounded-xl p-6 shadow-md border border-teal-100">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-gray-700 font-semibold">ROI promedio coliving</span>
-                      <span className="text-3xl font-black text-green-600">+35%</span>
-                    </div>
-                    <p className="text-sm text-gray-600">vs alquiler tradicional completo</p>
-                  </div>
-                  <div className="bg-white rounded-xl p-6 shadow-md border border-teal-100">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-gray-700 font-semibold">Ocupación promedio</span>
-                      <span className="text-3xl font-black text-teal-600">92%</span>
-                    </div>
-                    <p className="text-sm text-gray-600">Mayor demanda que alquiler completo</p>
-                  </div>
-                  <div className="bg-white rounded-xl p-6 shadow-md border border-teal-100">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-gray-700 font-semibold">Reducción costes gestión</span>
-                      <span className="text-3xl font-black text-emerald-600">-60%</span>
-                    </div>
-                    <p className="text-sm text-gray-600">Automatización total de procesos</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-2 border-emerald-300 shadow-xl bg-white">
-                <CardHeader>
-                  <CardTitle className="text-2xl text-emerald-700 flex items-center gap-2">
-                    <Target className="h-6 w-6" />
-                    Casos de Uso Ideales
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="p-4 bg-gradient-to-r from-teal-50 to-emerald-50 rounded-lg border border-teal-200">
-                    <h4 className="font-bold text-teal-700 mb-2 flex items-center gap-2">
-                      <Building2 className="h-5 w-5" />
-                      Coliving Urbano
-                    </h4>
-                    <p className="text-sm text-gray-700">Jóvenes profesionales en ciudades grandes. 4-8 habitaciones por piso. Espacios compartidos premium.</p>
-                  </div>
-                  <div className="p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border border-emerald-200">
-                    <h4 className="font-bold text-emerald-700 mb-2 flex items-center gap-2">
-                      <Users className="h-5 w-5" />
-                      Residencias Estudiantes
-                    </h4>
-                    <p className="text-sm text-gray-700">Campus universitarios. Contratos anuales renovables. Gestión de depósitos individuales.</p>
-                  </div>
-                  <div className="p-4 bg-gradient-to-r from-green-50 to-teal-50 rounded-lg border border-green-200">
-                    <h4 className="font-bold text-green-700 mb-2 flex items-center gap-2">
-                      <Hotel className="h-5 w-5" />
-                      Media Estancia
-                    </h4>
-                    <p className="text-sm text-gray-700">Nómadas digitales. Flexibilidad 1-6 meses. Servicios incluidos. All-inclusive con utilidades.</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-2 border-green-300 shadow-xl bg-gradient-to-br from-green-500 to-teal-600 text-white">
-                <CardContent className="pt-6 text-center">
-                  <Sparkles className="h-12 w-12 mx-auto mb-4 animate-pulse" />
-                  <h3 className="text-2xl font-bold mb-3">¿Listo para Maximizar tu ROI?</h3>
-                  <p className="mb-6 text-white/90">Comienza a gestionar coliving y room rental con INMOVA hoy mismo</p>
-                  <Link href="/register">
-                    <Button size="lg" className="bg-white text-green-600 hover:bg-gray-100 shadow-xl text-lg px-8 py-6">
-                      <Rocket className="h-5 w-5 mr-2" />
-                      Activa Room Rental Ahora
-                      <ArrowRight className="h-5 w-5 ml-2" />
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
-          {/* Additional Info */}
-          <div className="bg-white rounded-2xl shadow-2xl border-2 border-teal-200 p-8 max-w-5xl mx-auto">
-            <div className="flex items-start gap-4 mb-6">
-              <div className="p-3 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl shrink-0">
-                <Sparkles className="h-8 w-8 text-white" />
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Funcionalidades Adicionales Exclusivas</h3>
-                <p className="text-gray-600">INMOVA es la única plataforma que integra todo lo que necesitas para coliving profesional</p>
-              </div>
-            </div>
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="text-center p-4 bg-gradient-to-br from-teal-50 to-emerald-50 rounded-xl">
-                <MessageSquare className="h-10 w-10 mx-auto mb-3 text-teal-600" />
-                <h4 className="font-bold text-gray-800 mb-2">Chat Grupal Integrado</h4>
-                <p className="text-sm text-gray-600">Comunicación entre residentes y gestor en tiempo real</p>
-              </div>
-              <div className="text-center p-4 bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl">
-                <Calendar className="h-10 w-10 mx-auto mb-3 text-emerald-600" />
-                <h4 className="font-bold text-gray-800 mb-2">Reserva Espacios Comunes</h4>
-                <p className="text-sm text-gray-600">Cocina, salón, terraza - sistema de turnos automático</p>
-              </div>
-              <div className="text-center p-4 bg-gradient-to-br from-green-50 to-teal-50 rounded-xl">
-                <Award className="h-10 w-10 mx-auto mb-3 text-green-600" />
-                <h4 className="font-bold text-gray-800 mb-2">Sistema de Valoraciones</h4>
-                <p className="text-sm text-gray-600">Reputación de inquilinos y gestor para transparencia</p>
-              </div>
-            </div>
           </div>
         </div>
       </section>
