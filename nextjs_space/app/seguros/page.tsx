@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
-import { Home, ArrowLeft, Shield, AlertTriangle, CheckCircle, Plus, Search, Phone, Mail, Euro, Calendar } from 'lucide-react';
+import { Home, ArrowLeft, Shield, AlertTriangle, CheckCircle, Plus, Search, Phone, Mail, Euro, Calendar, Upload, FileText, Download, Trash2, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -27,6 +27,9 @@ export default function SegurosPage() {
   const [loading, setLoading] = useState(true);
   const [openNew, setOpenNew] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedSeguro, setSelectedSeguro] = useState<any>(null);
+  const [openDocuments, setOpenDocuments] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const [newSeguro, setNewSeguro] = useState({
     numeroPoliza: '',
@@ -67,6 +70,72 @@ export default function SegurosPage() {
       toast.error('Error al cargar datos');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedSeguro) return;
+
+    try {
+      setUploading(true);
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch(`/api/seguros/${selectedSeguro.id}/documents`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        toast.success('Documento subido exitosamente');
+        // Refresh seguros list
+        fetchData();
+        // Update selected seguro
+        const updatedSeguros = await fetch('/api/seguros');
+        if (updatedSeguros.ok) {
+          const data = await updatedSeguros.json();
+          const updated = data.find((s: any) => s.id === selectedSeguro.id);
+          if (updated) setSelectedSeguro(updated);
+        }
+      } else {
+        toast.error('Error al subir el documento');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Error al subir el documento');
+    } finally {
+      setUploading(false);
+      // Reset file input
+      e.target.value = '';
+    }
+  };
+
+  const handleDeleteDocument = async (documentUrl: string) => {
+    if (!selectedSeguro || !confirm('¿Estás seguro de que deseas eliminar este documento?')) return;
+
+    try {
+      const response = await fetch(
+        `/api/seguros/${selectedSeguro.id}/documents?url=${encodeURIComponent(documentUrl)}`,
+        { method: 'DELETE' }
+      );
+
+      if (response.ok) {
+        toast.success('Documento eliminado exitosamente');
+        fetchData();
+        // Update selected seguro
+        const updatedSeguros = await fetch('/api/seguros');
+        if (updatedSeguros.ok) {
+          const data = await updatedSeguros.json();
+          const updated = data.find((s: any) => s.id === selectedSeguro.id);
+          if (updated) setSelectedSeguro(updated);
+        }
+      } else {
+        toast.error('Error al eliminar el documento');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Error al eliminar el documento');
     }
   };
 
@@ -247,6 +316,19 @@ export default function SegurosPage() {
                         {seguro.unit && <span> - Unidad {seguro.unit.numero}</span>}
                       </div>
                     )}
+                    <div className="mt-3 flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedSeguro(seguro);
+                          setOpenDocuments(true);
+                        }}
+                      >
+                        <FileText className="h-4 w-4 mr-2" />
+                        Documentos ({(seguro.documentosAdjuntos as any)?.length || 0})
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -294,6 +376,107 @@ export default function SegurosPage() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpenNew(false)}>Cancelar</Button>
             <Button onClick={handleCreate} disabled={!newSeguro.numeroPoliza || !newSeguro.aseguradora || !newSeguro.nombreAsegurado || !newSeguro.fechaInicio || !newSeguro.fechaVencimiento}>Crear</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog para gestionar documentos */}
+      <Dialog open={openDocuments} onOpenChange={setOpenDocuments}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Gestión de Documentos</DialogTitle>
+            <DialogDescription>
+              {selectedSeguro?.aseguradora} - Póliza {selectedSeguro?.numeroPoliza}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {/* Upload section */}
+            <div className="border-2 border-dashed rounded-lg p-4">
+              <Label htmlFor="file-upload" className="cursor-pointer block">
+                <div className="flex flex-col items-center justify-center text-center">
+                  {uploading ? (
+                    <>
+                      <Loader2 className="h-10 w-10 animate-spin text-primary mb-2" />
+                      <p className="text-sm text-muted-foreground">Subiendo documento...</p>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-10 w-10 text-muted-foreground mb-2" />
+                      <p className="text-sm font-medium">Haz clic para subir un documento</p>
+                      <p className="text-xs text-muted-foreground">PDF, DOC, DOCX, JPG, PNG (máx. 10MB)</p>
+                    </>
+                  )}
+                </div>
+                <Input
+                  id="file-upload"
+                  type="file"
+                  className="hidden"
+                  onChange={handleFileUpload}
+                  disabled={uploading}
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                />
+              </Label>
+            </div>
+
+            {/* Documents list */}
+            <div>
+              <h4 className="text-sm font-medium mb-3">Documentos Adjuntos</h4>
+              {(selectedSeguro?.documentosAdjuntos as any)?.length > 0 ? (
+                <div className="space-y-2">
+                  {((selectedSeguro?.documentosAdjuntos as any) || []).map((doc: any, index: number) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <FileText className="h-5 w-5 text-primary flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium truncate">{doc.filename}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(doc.uploadedAt).toLocaleDateString('es-ES', {
+                              day: '2-digit',
+                              month: 'short',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                            {doc.size && ` • ${(doc.size / 1024).toFixed(0)} KB`}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => window.open(doc.url, '_blank')}
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDeleteDocument(doc.url)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <FileText className="h-12 w-12 mx-auto mb-2 opacity-20" />
+                  <p className="text-sm">No hay documentos adjuntos</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpenDocuments(false)}>
+              Cerrar
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

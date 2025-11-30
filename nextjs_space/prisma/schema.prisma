@@ -454,11 +454,13 @@ model Contract {
   estado            ContractStatus @default(activo)
   tipo              ContractType   @default(residencial)
   contractPdfPath   String?
+  legalTemplateId   String?
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
 
   unit              Unit           @relation(fields: [unitId], references: [id], onDelete: Cascade)
   tenant            Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  legalTemplate     LegalTemplate? @relation(fields: [legalTemplateId], references: [id], onDelete: SetNull)
   payments          Payment[]
   documents         Document[]
   stripeSubscription StripeSubscription?
@@ -1832,6 +1834,8 @@ model LegalTemplate {
   ultimaRevision    DateTime?
   createdAt         DateTime              @default(now())
   updatedAt         DateTime              @updatedAt
+  
+  contracts         Contract[]
 
   @@index([companyId])
   @@index([categoria])
@@ -3444,6 +3448,7 @@ model Insurance {
   
   // Documentos
   urlDocumento          String?
+  documentosAdjuntos    Json?                   // Array de {filename, url, uploadedAt}
   
   // Relaciones
   claims                InsuranceClaim[]

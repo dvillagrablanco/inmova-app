@@ -428,10 +428,11 @@ export function Sidebar() {
           <button
             onClick={(e) => {
               e.preventDefault();
+              e.stopPropagation();
               toggleFavorite(item.href);
             }}
             className={cn(
-              'absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity',
+              'absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-10',
               isFavorite ? 'text-yellow-400' : 'text-gray-400 hover:text-yellow-400'
             )}
             title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
@@ -448,7 +449,8 @@ export function Sidebar() {
       {/* Mobile menu button */}
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="lg:hidden fixed top-4 left-4 z-[60] p-2 bg-black text-white rounded-lg shadow-lg"
+        className="lg:hidden fixed top-4 left-4 z-[70] p-2 bg-black text-white rounded-lg shadow-lg hover:bg-gray-800 active:bg-gray-700 transition-colors"
+        aria-label={isMobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
       >
         {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
@@ -456,17 +458,19 @@ export function Sidebar() {
       {/* Overlay for mobile */}
       {isMobileMenuOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/50 z-[45]"
+          className="lg:hidden fixed inset-0 bg-black/60 z-[55]"
           onClick={() => setIsMobileMenuOpen(false)}
+          aria-hidden="true"
         />
       )}
 
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed top-0 left-0 z-[50] h-screen w-64 bg-black text-white transition-transform duration-300',
+          'fixed top-0 left-0 z-[60] h-screen w-64 bg-black text-white transition-transform duration-300 ease-in-out overflow-hidden',
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
+        aria-label="Navegación principal"
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
