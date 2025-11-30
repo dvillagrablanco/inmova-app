@@ -263,6 +263,36 @@ export function Sidebar() {
     admin: false,
   });
 
+  // Cargar estado expandido desde localStorage
+  useEffect(() => {
+    const storedExpanded = localStorage.getItem('sidebar_expanded_sections');
+    if (storedExpanded) {
+      try {
+        setExpandedSections(JSON.parse(storedExpanded));
+      } catch (error) {
+        console.error('Error loading expanded sections:', error);
+      }
+    }
+  }, []);
+
+  // Persistir posición de scroll
+  useEffect(() => {
+    const sidebar = document.querySelector('[data-sidebar-nav]');
+    if (sidebar) {
+      const savedScroll = localStorage.getItem('sidebar_scroll_position');
+      if (savedScroll) {
+        sidebar.scrollTop = parseInt(savedScroll, 10);
+      }
+
+      const handleScroll = () => {
+        localStorage.setItem('sidebar_scroll_position', sidebar.scrollTop.toString());
+      };
+
+      sidebar.addEventListener('scroll', handleScroll);
+      return () => sidebar.removeEventListener('scroll', handleScroll);
+    }
+  }, []);
+
   // Cargar módulos activos de la empresa
   useEffect(() => {
     async function loadActiveModules() {
@@ -362,7 +392,11 @@ export function Sidebar() {
   );
 
   const toggleSection = (section: string) => {
-    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+    setExpandedSections(prev => {
+      const newState = { ...prev, [section]: !prev[section] };
+      localStorage.setItem('sidebar_expanded_sections', JSON.stringify(newState));
+      return newState;
+    });
   };
 
   const handleSignOut = async () => {
@@ -472,7 +506,7 @@ export function Sidebar() {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+          <nav className="flex-1 p-4 space-y-1 overflow-y-auto" data-sidebar-nav>
             {/* Favorites Section */}
             {favoriteItems.length > 0 && !searchQuery && (
               <div className="mb-4">

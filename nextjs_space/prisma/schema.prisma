@@ -937,6 +937,10 @@ model Company {
   
   // Multi-empresa
   userAccess         UserCompanyAccess[]
+  
+  // Redes Sociales
+  socialMediaAccounts SocialMediaAccount[]
+  socialMediaPosts    SocialMediaPost[]
 
   @@map("company")
 }
@@ -6740,3 +6744,85 @@ model UserCompanyAccess {
   @@index([companyId])
   @@map("user_company_access")
 }
+// ============================================
+// INTEGRACIÓN REDES SOCIALES
+// ============================================
+
+enum SocialMediaPlatform {
+  FACEBOOK
+  INSTAGRAM
+  TWITTER
+  LINKEDIN
+  WHATSAPP_BUSINESS
+  TIKTOK
+}
+
+enum SocialPostStatus {
+  borrador
+  programado
+  publicado
+  error
+}
+
+model SocialMediaAccount {
+  id                String               @id @default(cuid())
+  companyId         String
+  platform          SocialMediaPlatform
+  accountName       String
+  accountId         String               // ID de la cuenta en la plataforma
+  accessToken       String?              @db.Text
+  refreshToken      String?              @db.Text
+  tokenExpiry       DateTime?
+  pageId            String?              // Para Facebook Pages
+  businessAccountId String?              // Para WhatsApp Business
+  activo            Boolean              @default(true)
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  company           Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  posts             SocialMediaPost[]
+
+  @@unique([companyId, platform, accountId])
+  @@index([companyId])
+  @@map("social_media_accounts")
+}
+
+model SocialMediaPost {
+  id                String               @id @default(cuid())
+  companyId         String
+  accountId         String
+  estado            SocialPostStatus     @default(borrador)
+  
+  // Contenido
+  mensaje           String               @db.Text
+  imagenesUrls      String[]             @default([])
+  videoUrl          String?
+  enlace            String?
+  
+  // Programación
+  fechaProgramada   DateTime?
+  fechaPublicacion  DateTime?
+  
+  // Resultados
+  postId            String?              // ID del post en la plataforma
+  likes             Int                  @default(0)
+  comentarios       Int                  @default(0)
+  compartidos       Int                  @default(0)
+  alcance           Int                  @default(0)
+  impresiones       Int                  @default(0)
+  
+  // Metadata
+  creadoPor         String
+  errorMessage      String?              @db.Text
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  company           Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  account           SocialMediaAccount   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([accountId])
+  @@index([estado])
+  @@map("social_media_posts")
+}
+
