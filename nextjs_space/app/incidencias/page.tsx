@@ -25,6 +25,8 @@ import {
   Search,
   AlertTriangle,
   MessageSquare,
+  Edit,
+  Trash2,
 } from 'lucide-react';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 
@@ -58,6 +60,8 @@ export default function IncidenciasPage() {
   const [buildings, setBuildings] = useState<Building[]>([]);
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [editingIncidencia, setEditingIncidencia] = useState<Incidencia | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterEstado, setFilterEstado] = useState('todas');
   const [filterPrioridad, setFilterPrioridad] = useState('todas');
@@ -145,6 +149,65 @@ export default function IncidenciasPage() {
     } catch (error) {
       console.error('Error:', error);
       toast.error('Error al actualizar estado');
+    }
+  };
+
+  const handleEdit = (incidencia: Incidencia) => {
+    setEditingIncidencia(incidencia);
+    setFormData({
+      buildingId: incidencia.building ? (incidencia as any).buildingId || '' : '',
+      titulo: incidencia.titulo,
+      descripcion: incidencia.descripcion,
+      tipo: incidencia.tipo,
+      prioridad: incidencia.prioridad,
+      ubicacion: incidencia.ubicacion || '',
+    });
+    setOpenEditDialog(true);
+  };
+
+  const handleUpdate = async () => {
+    if (!editingIncidencia) return;
+    try {
+      const res = await fetch(`/api/incidencias/${editingIncidencia.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) throw new Error('Error al actualizar incidencia');
+
+      toast.success('Incidencia actualizada exitosamente');
+      setOpenEditDialog(false);
+      setEditingIncidencia(null);
+      fetchData();
+      setFormData({
+        buildingId: '',
+        titulo: '',
+        descripcion: '',
+        tipo: 'otro',
+        prioridad: 'media',
+        ubicacion: '',
+      });
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Error al actualizar incidencia');
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('¿Estás seguro de eliminar esta incidencia?')) return;
+    try {
+      const res = await fetch(`/api/incidencias/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) throw new Error('Error al eliminar');
+
+      toast.success('Incidencia eliminada exitosamente');
+      fetchData();
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Error al eliminar incidencia');
     }
   };
 
@@ -349,6 +412,140 @@ export default function IncidenciasPage() {
                 </DialogContent>
               </Dialog>
             )}
+            
+            {/* Dialog de Edición */}
+            <Dialog open={openEditDialog} onOpenChange={(open) => {
+                setOpenEditDialog(open);
+                if (!open) {
+                  setEditingIncidencia(null);
+                  setFormData({
+                    buildingId: '',
+                    titulo: '',
+                    descripcion: '',
+                    tipo: 'otro',
+                    prioridad: 'media',
+                    ubicacion: '',
+                  });
+                }
+              }}>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Editar Incidencia</DialogTitle>
+                    <DialogDescription>
+                      Modifica los detalles de la incidencia
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div>
+                      <Label>Edificio *</Label>
+                      <Select
+                        value={formData.buildingId}
+                        onValueChange={(value) =>
+                          setFormData((prev) => ({ ...prev, buildingId: value }))
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona edificio" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {buildings.map((b) => (
+                            <SelectItem key={b.id} value={b.id}>
+                              {b.nombre}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Título *</Label>
+                      <Input
+                        value={formData.titulo}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, titulo: e.target.value }))
+                        }
+                        placeholder="Ej: Fuga de agua en planta 3"
+                      />
+                    </div>
+                    <div>
+                      <Label>Descripción *</Label>
+                      <Textarea
+                        value={formData.descripcion}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, descripcion: e.target.value }))
+                        }
+                        rows={3}
+                        placeholder="Describe la situación..."
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Tipo</Label>
+                        <Select
+                          value={formData.tipo}
+                          onValueChange={(value) =>
+                            setFormData((prev) => ({ ...prev, tipo: value }))
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="ruido">Ruido</SelectItem>
+                            <SelectItem value="averia_comun">Avería Común</SelectItem>
+                            <SelectItem value="limpieza">Limpieza</SelectItem>
+                            <SelectItem value="seguridad">Seguridad</SelectItem>
+                            <SelectItem value="convivencia">Convivencia</SelectItem>
+                            <SelectItem value="mascota">Mascota</SelectItem>
+                            <SelectItem value="parking">Parking</SelectItem>
+                            <SelectItem value="otro">Otro</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>Prioridad</Label>
+                        <Select
+                          value={formData.prioridad}
+                          onValueChange={(value) =>
+                            setFormData((prev) => ({ ...prev, prioridad: value }))
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="baja">Baja</SelectItem>
+                            <SelectItem value="media">Media</SelectItem>
+                            <SelectItem value="alta">Alta</SelectItem>
+                            <SelectItem value="urgente">Urgente</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Ubicación Específica</Label>
+                      <Input
+                        value={formData.ubicacion}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, ubicacion: e.target.value }))
+                        }
+                        placeholder="Ej: Planta 3, Parking B"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => setOpenEditDialog(false)}>
+                      Cancelar
+                    </Button>
+                    <Button
+                      onClick={handleUpdate}
+                      disabled={!formData.buildingId || !formData.titulo || !formData.descripcion}
+                      className="gradient-primary hover:opacity-90 shadow-primary"
+                    >
+                      Actualizar Incidencia
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
           </div>
 
           {/* KPIs */}
@@ -486,7 +683,7 @@ export default function IncidenciasPage() {
                           </Badge>
                         </div>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         {inc.estado === 'abierta' && (
                           <Button
                             size="sm"
@@ -505,6 +702,21 @@ export default function IncidenciasPage() {
                             Resolver
                           </Button>
                         )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEdit(inc)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDelete(inc.id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   </CardContent>

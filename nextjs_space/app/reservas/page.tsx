@@ -30,6 +30,8 @@ import {
   MapPin,
   Users,
   Euro,
+  Edit,
+  Trash2,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -46,6 +48,8 @@ export default function ReservasPage() {
 
   const [openNewSpace, setOpenNewSpace] = useState(false);
   const [openNewReservation, setOpenNewReservation] = useState(false);
+  const [openEditReservation, setOpenEditReservation] = useState(false);
+  const [editingReservation, setEditingReservation] = useState<any>(null);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [estadoFilter, setEstadoFilter] = useState('all');
@@ -176,6 +180,65 @@ export default function ReservasPage() {
     } catch (error) {
       console.error('Error:', error);
       toast.error('Error al cancelar reserva');
+    }
+  };
+
+  const handleEditReservation = (reserva: any) => {
+    setEditingReservation(reserva);
+    setNewReservation({
+      spaceId: reserva.space.id,
+      tenantId: reserva.tenant?.id || '',
+      fechaReserva: format(new Date(reserva.fechaReserva), 'yyyy-MM-dd'),
+      horaInicio: reserva.horaInicio || '',
+      horaFin: reserva.horaFin || '',
+      numeroPersonas: reserva.numeroPersonas?.toString() || '',
+      proposito: reserva.proposito || '',
+      observaciones: reserva.observaciones || '',
+    });
+    setOpenEditReservation(true);
+  };
+
+  const handleUpdateReservation = async () => {
+    if (!editingReservation) return;
+    try {
+      const response = await fetch(`/api/reservas/${editingReservation.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...newReservation,
+          numeroPersonas: newReservation.numeroPersonas ? parseInt(newReservation.numeroPersonas) : null,
+        }),
+      });
+      if (response.ok) {
+        toast.success('Reserva actualizada exitosamente');
+        setOpenEditReservation(false);
+        setEditingReservation(null);
+        fetchData();
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Error al actualizar reserva');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Error al actualizar reserva');
+    }
+  };
+
+  const handleDeleteReservation = async (id: string) => {
+    if (!confirm('¿Estás seguro de eliminar esta reserva?')) return;
+    try {
+      const response = await fetch(`/api/reservas/${id}`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        toast.success('Reserva eliminada exitosamente');
+        fetchData();
+      } else {
+        toast.error('Error al eliminar reserva');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Error al eliminar reserva');
     }
   };
 
