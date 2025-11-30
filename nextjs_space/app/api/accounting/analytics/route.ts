@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { getCenterOfCostsReport } from '@/lib/accounting-service';
+import { getAnalyticalAccounting } from '@/lib/accounting-service';
+import { startOfMonth, endOfMonth, subMonths, parse } from 'date-fns';
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,20 +18,26 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const periodo = searchParams.get('periodo') || new Date().toISOString().slice(0, 7);
 
-    const costCenters = await getCenterOfCostsReport(
+    // Parsear período (formato YYYY-MM)
+    const [year, month] = periodo.split('-').map(Number);
+    const fechaInicio = startOfMonth(new Date(year, month - 1));
+    const fechaFin = endOfMonth(new Date(year, month - 1));
+
+    const analyticalData = await getAnalyticalAccounting(
       session.user.companyId,
-      periodo
+      fechaInicio,
+      fechaFin
     );
 
     return NextResponse.json({
       success: true,
-      data: costCenters,
+      data: analyticalData,
       periodo,
     });
   } catch (error) {
-    console.error('Error al obtener centros de coste:', error);
+    console.error('Error al obtener contabilidad analítica:', error);
     return NextResponse.json(
-      { error: 'Error al obtener centros de coste' },
+      { error: 'Error al obtener contabilidad analítica' },
       { status: 500 }
     );
   }
