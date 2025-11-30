@@ -60,7 +60,7 @@ export default function PagosPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'list' | 'calendar' | 'stripe'>('list');
-  const [activeFilters, setActiveFilters] = useState<Array<{ label: string; value: string; key: string }>>([]);
+  const [activeFilters, setActiveFilters] = useState<Array<{ id: string; label: string; value: string }>>([]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -103,21 +103,21 @@ export default function PagosPage() {
 
   // Actualizar filtros activos
   useEffect(() => {
-    const filters: Array<{ label: string; value: string; key: string }> = [];
+    const filters: Array<{ id: string; label: string; value: string }> = [];
     
     if (searchTerm) {
       filters.push({
+        id: 'search',
         label: 'Búsqueda',
-        value: searchTerm,
-        key: 'search'
+        value: searchTerm
       });
     }
     
     setActiveFilters(filters);
   }, [searchTerm]);
 
-  const clearFilter = (key: string) => {
-    if (key === 'search') {
+  const clearFilter = (id: string) => {
+    if (id === 'search') {
       setSearchTerm('');
     }
   };

@@ -65,7 +65,7 @@ export default function UnidadesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [estadoFilter, setEstadoFilter] = useState<string>('all');
   const [tipoFilter, setTipoFilter] = useState<string>('all');
-  const [activeFilters, setActiveFilters] = useState<Array<{ label: string; value: string; key: string }>>([]);
+  const [activeFilters, setActiveFilters] = useState<Array<{ id: string; label: string; value: string }>>([]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -118,13 +118,13 @@ export default function UnidadesPage() {
 
   // Actualizar filtros activos
   useEffect(() => {
-    const filters: Array<{ label: string; value: string; key: string }> = [];
+    const filters: Array<{ id: string; label: string; value: string }> = [];
     
     if (searchTerm) {
       filters.push({
+        id: 'search',
         label: 'Búsqueda',
-        value: searchTerm,
-        key: 'search'
+        value: searchTerm
       });
     }
     
@@ -135,9 +135,9 @@ export default function UnidadesPage() {
         'mantenimiento': 'En Mantenimiento'
       };
       filters.push({
+        id: 'estado',
         label: 'Estado',
-        value: estadoLabels[estadoFilter] || estadoFilter,
-        key: 'estado'
+        value: estadoLabels[estadoFilter] || estadoFilter
       });
     }
     
@@ -149,21 +149,21 @@ export default function UnidadesPage() {
         'estudio': 'Estudio'
       };
       filters.push({
+        id: 'tipo',
         label: 'Tipo',
-        value: tipoLabels[tipoFilter] || tipoFilter,
-        key: 'tipo'
+        value: tipoLabels[tipoFilter] || tipoFilter
       });
     }
     
     setActiveFilters(filters);
   }, [searchTerm, estadoFilter, tipoFilter]);
 
-  const clearFilter = (key: string) => {
-    if (key === 'search') {
+  const clearFilter = (id: string) => {
+    if (id === 'search') {
       setSearchTerm('');
-    } else if (key === 'estado') {
+    } else if (id === 'estado') {
       setEstadoFilter('all');
-    } else if (key === 'tipo') {
+    } else if (id === 'tipo') {
       setTipoFilter('all');
     }
   };
