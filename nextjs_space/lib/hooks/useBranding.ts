@@ -19,8 +19,8 @@ export function useBranding() {
     tagline: branding?.tagline || '',
     
     // Logos
-    logo: branding?.logoUrl || '/vidaro-logo-icon.jpg',
-    logoSmall: branding?.logoSmallUrl || '/vidaro-logo-icon.jpg',
+    logo: branding?.logoUrl || '/inmova-logo-icon.jpg',
+    logoSmall: branding?.logoSmallUrl || '/inmova-logo-icon.jpg',
     favicon: branding?.faviconUrl || '/favicon.svg',
     ogImage: branding?.ogImageUrl || '/og-image.png',
     

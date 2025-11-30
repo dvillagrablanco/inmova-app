@@ -10,8 +10,8 @@ const STATIC_ASSETS = [
   '/login',
   '/offline',
   '/manifest.json',
-  '/vidaro-logo-icon.jpg',
-  '/vidaro-logo-cover.jpg',
+  '/inmova-logo-icon.jpg',
+  '/inmova-logo-cover.jpg',
 ];
 
 // Instalación del Service Worker
@@ -172,15 +172,15 @@ self.addEventListener('push', (event) => {
 
   const options = {
     body: notificationData.body || 'Tienes una nueva notificación',
-    icon: '/vidaro-logo-icon.jpg',
-    badge: '/vidaro-logo-icon.jpg',
+    icon: '/inmova-logo-icon.jpg',
+    badge: '/inmova-logo-icon.jpg',
     vibrate: [200, 100, 200],
     tag: notificationData.tag || 'inmova-notification',
     data: notificationData.data || {},
     requireInteraction: notificationData.requireInteraction || false,
     actions: notificationData.actions || [
-      { action: 'open', title: 'Ver', icon: '/vidaro-logo-icon.jpg' },
-      { action: 'close', title: 'Cerrar', icon: '/vidaro-logo-icon.jpg' },
+      { action: 'open', title: 'Ver', icon: '/inmova-logo-icon.jpg' },
+      { action: 'close', title: 'Cerrar', icon: '/inmova-logo-icon.jpg' },
     ],
   };
 

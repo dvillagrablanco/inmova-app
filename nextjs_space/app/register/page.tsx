@@ -94,7 +94,7 @@ export default function RegisterPage() {
         <div className="text-center mb-8 animate-fade-in">
           <div className="relative w-48 h-16 mx-auto mb-4">
             <Image
-              src="/vidaro-logo-cover.jpg"
+              src="/inmova-logo-cover.jpg"
               alt="INMOVA"
               fill
               className="object-contain"
