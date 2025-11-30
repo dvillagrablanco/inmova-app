@@ -7,6 +7,8 @@ import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
 import { FileText, Home, ArrowLeft, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ButtonWithLoading } from '@/components/ui/button-with-loading';
+import { InfoTooltip } from '@/components/ui/info-tooltip';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -245,7 +247,10 @@ export default function NuevoContratoPage() {
 
                     {/* Renta Mensual */}
                     <div className="space-y-2">
-                      <Label htmlFor="rentaMensual">Renta Mensual (€) *</Label>
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="rentaMensual">Renta Mensual (€) *</Label>
+                        <InfoTooltip content="Monto mensual que el inquilino debe pagar. Este valor se usará para generar automáticamente los pagos recurrentes." />
+                      </div>
                       <Input
                         id="rentaMensual"
                         name="rentaMensual"
@@ -260,7 +265,10 @@ export default function NuevoContratoPage() {
 
                     {/* Depósito */}
                     <div className="space-y-2">
-                      <Label htmlFor="deposito">Depósito (€) *</Label>
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="deposito">Depósito (€) *</Label>
+                        <InfoTooltip content="Cantidad de dinero que se retiene como garantía. Típicamente equivale a 1-2 meses de renta." />
+                      </div>
                       <Input
                         id="deposito"
                         name="deposito"
@@ -302,19 +310,15 @@ export default function NuevoContratoPage() {
 
                   {/* Botones */}
                   <div className="flex gap-3 pt-4">
-                    <Button type="submit" disabled={isLoading || !formData.unitId || !formData.tenantId}>
-                      {isLoading ? (
-                        <>
-                          <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
-                          Guardando...
-                        </>
-                      ) : (
-                        <>
-                          <Save className="mr-2 h-4 w-4" />
-                          Crear Contrato
-                        </>
-                      )}
-                    </Button>
+                    <ButtonWithLoading
+                      type="submit"
+                      isLoading={isLoading}
+                      disabled={!formData.unitId || !formData.tenantId}
+                      loadingText="Guardando..."
+                      icon={Save}
+                    >
+                      Crear Contrato
+                    </ButtonWithLoading>
                     <Button
                       type="button"
                       variant="outline"

@@ -27,6 +27,11 @@ import {
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { LoadingState } from '@/components/ui/loading-state';
+import { SkeletonList, SkeletonCard } from '@/components/ui/skeleton-card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { FilterChips } from '@/components/ui/filter-chips';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface Contract {
   id: string;
@@ -55,6 +60,7 @@ export default function ContratosPage() {
   const [filteredContracts, setFilteredContracts] = useState<Contract[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeFilters, setActiveFilters] = useState<Array<{ label: string; value: string; key: string }>>([]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -96,10 +102,76 @@ export default function ContratosPage() {
     }
   }, [searchTerm, contracts]);
 
+  // Actualizar filtros activos
+  useEffect(() => {
+    const filters: Array<{ label: string; value: string; key: string }> = [];
+    
+    if (searchTerm) {
+      filters.push({
+        label: 'Búsqueda',
+        value: searchTerm,
+        key: 'search'
+      });
+    }
+    
+    setActiveFilters(filters);
+  }, [searchTerm]);
+
+  const clearFilter = (key: string) => {
+    if (key === 'search') {
+      setSearchTerm('');
+    }
+  };
+
+  const clearAllFilters = () => {
+    setSearchTerm('');
+  };
+
   if (status === 'loading' || isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="flex h-screen overflow-hidden bg-gradient-bg">
+        <Sidebar />
+        <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
+          <Header />
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <div className="max-w-7xl mx-auto space-y-6">
+              {/* Skeleton for breadcrumbs */}
+              <div className="flex items-center gap-4">
+                <Skeleton className="h-10 w-40" />
+                <Skeleton className="h-6 w-48" />
+              </div>
+
+              {/* Skeleton for header */}
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <Skeleton className="h-8 w-48" />
+                  <Skeleton className="h-4 w-64" />
+                </div>
+                <Skeleton className="h-10 w-40" />
+              </div>
+
+              {/* Skeleton for search bar */}
+              <SkeletonCard showHeader={false} />
+
+              {/* Skeleton for stats */}
+              <div className="grid gap-4 md:grid-cols-3">
+                <SkeletonCard showHeader={true} linesCount={1} />
+                <SkeletonCard showHeader={true} linesCount={1} />
+                <SkeletonCard showHeader={true} linesCount={1} />
+              </div>
+
+              {/* Skeleton for contracts list */}
+              <SkeletonList count={3} />
+              
+              {/* Loading message */}
+              <LoadingState 
+                message="Cargando contratos..." 
+                submessage="Obteniendo información de contratos y alertas"
+                size="sm"
+              />
+            </div>
+          </main>
+        </div>
       </div>
     );
   }
@@ -202,6 +274,13 @@ export default function ContratosPage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Active Filters */}
+            <FilterChips
+              filters={activeFilters}
+              onRemove={clearFilter}
+              onClearAll={clearAllFilters}
+            />
 
             {/* Stats Summary */}
             <div className="grid gap-4 md:grid-cols-3">
@@ -344,23 +423,28 @@ export default function ContratosPage() {
             </div>
 
             {filteredContracts.length === 0 && (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No se encontraron contratos</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {searchTerm
-                      ? 'Intenta con otros términos de búsqueda'
-                      : 'Comienza creando tu primer contrato'}
-                  </p>
-                  {canCreate && !searchTerm && (
-                    <Button onClick={() => router.push('/contratos/nuevo')}>
-                      <Plus className="mr-2 h-4 w-4" />
-                      Nuevo Contrato
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
+              searchTerm ? (
+                <EmptyState
+                  icon={Search}
+                  title="No se encontraron resultados"
+                  description={`No hay contratos que coincidan con "${searchTerm}"`}
+                  action={{
+                    label: 'Limpiar búsqueda',
+                    onClick: () => setSearchTerm('')
+                  }}
+                />
+              ) : (
+                <EmptyState
+                  icon={FileText}
+                  title="No hay contratos registrados"
+                  description="Comienza creando tu primer contrato de arrendamiento"
+                  action={canCreate ? {
+                    label: 'Crear Primer Contrato',
+                    onClick: () => router.push('/contratos/nuevo'),
+                    icon: Plus
+                  } : undefined}
+                />
+              )
             )}
           </div>
         </main>

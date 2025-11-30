@@ -32,6 +32,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { usePermissions } from '@/lib/hooks/usePermissions';
+import { LoadingState } from '@/components/ui/loading-state';
+import { SkeletonList, SkeletonCard } from '@/components/ui/skeleton-card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { FilterChips } from '@/components/ui/filter-chips';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface Unit {
   id: string;
@@ -60,6 +65,7 @@ export default function UnidadesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [estadoFilter, setEstadoFilter] = useState<string>('all');
   const [tipoFilter, setTipoFilter] = useState<string>('all');
+  const [activeFilters, setActiveFilters] = useState<Array<{ label: string; value: string; key: string }>>([]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -110,10 +116,114 @@ export default function UnidadesPage() {
     setFilteredUnits(filtered);
   }, [searchTerm, estadoFilter, tipoFilter, units]);
 
+  // Actualizar filtros activos
+  useEffect(() => {
+    const filters: Array<{ label: string; value: string; key: string }> = [];
+    
+    if (searchTerm) {
+      filters.push({
+        label: 'Búsqueda',
+        value: searchTerm,
+        key: 'search'
+      });
+    }
+    
+    if (estadoFilter && estadoFilter !== 'all') {
+      const estadoLabels: Record<string, string> = {
+        'disponible': 'Disponible',
+        'ocupada': 'Ocupada',
+        'mantenimiento': 'En Mantenimiento'
+      };
+      filters.push({
+        label: 'Estado',
+        value: estadoLabels[estadoFilter] || estadoFilter,
+        key: 'estado'
+      });
+    }
+    
+    if (tipoFilter && tipoFilter !== 'all') {
+      const tipoLabels: Record<string, string> = {
+        'vivienda': 'Vivienda',
+        'local': 'Local',
+        'oficina': 'Oficina',
+        'estudio': 'Estudio'
+      };
+      filters.push({
+        label: 'Tipo',
+        value: tipoLabels[tipoFilter] || tipoFilter,
+        key: 'tipo'
+      });
+    }
+    
+    setActiveFilters(filters);
+  }, [searchTerm, estadoFilter, tipoFilter]);
+
+  const clearFilter = (key: string) => {
+    if (key === 'search') {
+      setSearchTerm('');
+    } else if (key === 'estado') {
+      setEstadoFilter('all');
+    } else if (key === 'tipo') {
+      setTipoFilter('all');
+    }
+  };
+
+  const clearAllFilters = () => {
+    setSearchTerm('');
+    setEstadoFilter('all');
+    setTipoFilter('all');
+  };
+
   if (status === 'loading' || isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="flex h-screen overflow-hidden bg-gradient-bg">
+        <Sidebar />
+        <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
+          <Header />
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <div className="max-w-7xl mx-auto space-y-6">
+              {/* Skeleton for breadcrumbs */}
+              <div className="flex items-center gap-4">
+                <Skeleton className="h-10 w-40" />
+                <Skeleton className="h-6 w-48" />
+              </div>
+
+              {/* Skeleton for header */}
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <Skeleton className="h-8 w-48" />
+                  <Skeleton className="h-4 w-64" />
+                </div>
+                <Skeleton className="h-10 w-40" />
+              </div>
+
+              {/* Skeleton for search/filters */}
+              <div className="grid gap-4 md:grid-cols-3">
+                <SkeletonCard showHeader={false} linesCount={1} />
+                <SkeletonCard showHeader={false} linesCount={1} />
+                <SkeletonCard showHeader={false} linesCount={1} />
+              </div>
+
+              {/* Skeleton for stats */}
+              <div className="grid gap-4 md:grid-cols-4">
+                <SkeletonCard showHeader={true} linesCount={1} />
+                <SkeletonCard showHeader={true} linesCount={1} />
+                <SkeletonCard showHeader={true} linesCount={1} />
+                <SkeletonCard showHeader={true} linesCount={1} />
+              </div>
+
+              {/* Skeleton for units list */}
+              <SkeletonList count={4} />
+              
+              {/* Loading message */}
+              <LoadingState 
+                message="Cargando unidades..." 
+                submessage="Obteniendo información de propiedades y ocupación"
+                size="sm"
+              />
+            </div>
+          </main>
+        </div>
       </div>
     );
   }
@@ -232,6 +342,13 @@ export default function UnidadesPage() {
               </Select>
             </div>
 
+            {/* Active Filters */}
+            <FilterChips
+              filters={activeFilters}
+              onRemove={clearFilter}
+              onClearAll={clearAllFilters}
+            />
+
             {/* Stats Summary */}
             <div className="grid gap-4 md:grid-cols-3">
               <Card>
@@ -343,23 +460,28 @@ export default function UnidadesPage() {
             </div>
 
             {filteredUnits.length === 0 && (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <Home className="h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No se encontraron unidades</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {searchTerm || estadoFilter !== 'all' || tipoFilter !== 'all'
-                      ? 'Intenta con otros criterios de búsqueda'
-                      : 'Comienza agregando tu primera unidad'}
-                  </p>
-                  {canCreate && !searchTerm && estadoFilter === 'all' && tipoFilter === 'all' && (
-                    <Button onClick={() => router.push('/unidades/nuevo')}>
-                      <Plus className="mr-2 h-4 w-4" />
-                      Nueva Unidad
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
+              (searchTerm || estadoFilter !== 'all' || tipoFilter !== 'all') ? (
+                <EmptyState
+                  icon={Search}
+                  title="No se encontraron resultados"
+                  description="No hay unidades que coincidan con los filtros aplicados"
+                  action={{
+                    label: 'Limpiar filtros',
+                    onClick: clearAllFilters
+                  }}
+                />
+              ) : (
+                <EmptyState
+                  icon={Home}
+                  title="No hay unidades registradas"
+                  description="Comienza agregando tu primera unidad al edificio"
+                  action={canCreate ? {
+                    label: 'Crear Primera Unidad',
+                    onClick: () => router.push('/unidades/nuevo'),
+                    icon: Plus
+                  } : undefined}
+                />
+              )
             )}
           </div>
         </main>
