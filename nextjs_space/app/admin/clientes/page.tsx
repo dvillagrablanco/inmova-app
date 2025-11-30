@@ -664,21 +664,59 @@ export default function ClientesAdminPage() {
                           </CardDescription>
                         </div>
                         <div className="flex gap-2">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                <MoreVertical className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => router.push(`/admin/clientes/${company.id}`)}>
+                                <Eye className="w-4 h-4 mr-2" />
+                                Ver y Editar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleCopyId(company.id)}>
+                                <Copy className="w-4 h-4 mr-2" />
+                                Copiar ID
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleImpersonate(company.id, company.nombre)}>
+                                <LogIn className="w-4 h-4 mr-2" />
+                                Login como...
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => handleQuickToggleActive(company.id, company.estadoCliente === 'activo', company.nombre)}
+                                className={company.estadoCliente === 'activo' ? 'text-yellow-600' : 'text-green-600'}
+                              >
+                                {company.estadoCliente === 'activo' ? (
+                                  <>
+                                    <PowerOff className="w-4 h-4 mr-2" />
+                                    Desactivar
+                                  </>
+                                ) : (
+                                  <>
+                                    <Power className="w-4 h-4 mr-2" />
+                                    Activar
+                                  </>
+                                )}
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => handleDeleteCompany(company.id, company.nombre)}
+                                className="text-red-600"
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Eliminar
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                           <Button
-                            variant="outline"
+                            variant="default"
                             size="sm"
                             onClick={() => router.push(`/admin/clientes/${company.id}`)}
                           >
-                            <Eye className="w-4 h-4 mr-1" />
-                            Ver Detalle
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDeleteCompany(company.id, company.nombre)}
-                            className="text-red-500 hover:bg-red-50"
-                          >
-                            <Trash2 className="w-4 h-4" />
+                            <Settings className="w-4 h-4 mr-1" />
+                            Editar
                           </Button>
                         </div>
                       </div>

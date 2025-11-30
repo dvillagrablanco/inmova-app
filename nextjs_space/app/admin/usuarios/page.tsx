@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
-import { Plus, Edit, Trash2, Shield, CheckCircle, XCircle, ArrowLeft, Home, Users as UsersIcon } from 'lucide-react';
+import { Plus, Edit, Trash2, Shield, CheckCircle, XCircle, ArrowLeft, Home, Users as UsersIcon, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DataTable } from '@/components/ui/data-table';
@@ -45,7 +45,8 @@ interface User {
   role: string;
   activo: boolean;
   createdAt: string;
-  company: {
+  company?: {
+    id: string;
     nombre: string;
   };
 }
@@ -55,6 +56,7 @@ export default function UsersPage() {
   const { data: session, status } = useSession() || {};
   const { isAdmin } = usePermissions();
   const [users, setUsers] = useState<User[]>([]);
+  const [companies, setCompanies] = useState<Array<{ id: string; nombre: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -63,6 +65,7 @@ export default function UsersPage() {
     name: '',
     password: '',
     role: 'gestor',
+    companyId: '',
   });
 
   useEffect(() => {
@@ -71,16 +74,16 @@ export default function UsersPage() {
       return;
     }
 
-    if (status === 'authenticated' && !isAdmin) {
-      router.push('/dashboard');
-      toast.error('No tienes permisos para acceder a esta página');
-      return;
-    }
-
     if (status === 'authenticated') {
+      const userRole = (session?.user as any)?.role;
+      if (userRole !== 'administrador' && userRole !== 'super_admin') {
+        router.push('/dashboard');
+        toast.error('No tienes permisos para acceder a esta página');
+        return;
+      }
       fetchUsers();
     }
-  }, [status, isAdmin, router]);
+  }, [status, session, router]);
 
   const fetchUsers = async () => {
     try {
@@ -98,6 +101,25 @@ export default function UsersPage() {
       setLoading(false);
     }
   };
+
+  const fetchCompanies = async () => {
+    try {
+      const res = await fetch('/api/admin/companies');
+      if (res.ok) {
+        const data = await res.json();
+        setCompanies(data.map((c: any) => ({ id: c.id, nombre: c.nombre })));
+      }
+    } catch (error) {
+      console.error('Error loading companies:', error);
+    }
+  };
+
+  useEffect(() => {
+    const userRole = (session?.user as any)?.role;
+    if (status === 'authenticated' && userRole === 'super_admin') {
+      fetchCompanies();
+    }
+  }, [status, session]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -200,6 +222,7 @@ export default function UsersPage() {
       name: user.name,
       password: '',
       role: user.role,
+      companyId: user.company?.id || '',
     });
     setShowDialog(true);
   };
@@ -211,17 +234,21 @@ export default function UsersPage() {
       name: '',
       password: '',
       role: 'gestor',
+      companyId: '',
     });
   };
 
   const getRoleBadge = (role: string) => {
     const badges: Record<string, { label: string; variant: any }> = {
+      super_admin: { label: 'Super Admin', variant: 'destructive' },
       administrador: { label: 'Administrador', variant: 'destructive' },
       gestor: { label: 'Gestor', variant: 'default' },
       operador: { label: 'Operador', variant: 'secondary' },
     };
     return badges[role] || badges.gestor;
   };
+
+  const isSuperAdmin = (session?.user as any)?.role === 'super_admin';
 
   const columns = [
     {
@@ -235,6 +262,17 @@ export default function UsersPage() {
         </div>
       ),
     },
+    ...(isSuperAdmin ? [{
+      key: 'company',
+      label: 'Empresa',
+      sortable: true,
+      render: (user: User) => (
+        <div className="flex items-center gap-2">
+          <Building2 className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm">{user.company?.nombre || 'Sin empresa'}</span>
+        </div>
+      ),
+    }] : []),
     {
       key: 'role',
       label: 'Rol',
@@ -482,12 +520,37 @@ export default function UsersPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    {isSuperAdmin && <SelectItem value="super_admin">Super Administrador</SelectItem>}
                     <SelectItem value="administrador">Administrador</SelectItem>
                     <SelectItem value="gestor">Gestor</SelectItem>
                     <SelectItem value="operador">Operador</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+              {isSuperAdmin && !editingUser && (
+                <div className="space-y-2">
+                  <Label htmlFor="companyId">Empresa</Label>
+                  <Select
+                    value={formData.companyId}
+                    onValueChange={(value) => setFormData({ ...formData, companyId: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar empresa (opcional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Sin empresa (solo para Super Admin)</SelectItem>
+                      {companies.map((company) => (
+                        <SelectItem key={company.id} value={company.id}>
+                          {company.nombre}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Selecciona una empresa para asignar el usuario a ella
+                  </p>
+                </div>
+              )}
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => {

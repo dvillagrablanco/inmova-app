@@ -9,15 +9,24 @@ export async function GET() {
   try {
     const user = await requireAuth();
 
-    // Solo administradores pueden ver usuarios
-    if (user.role !== 'administrador') {
+    // Solo administradores y super_admin pueden ver usuarios
+    if (user.role !== 'administrador' && user.role !== 'super_admin') {
       return forbiddenResponse('No tienes permiso para ver usuarios');
     }
 
+    // Si es super_admin, puede ver usuarios de todas las empresas
+    // Si es administrador, solo de su empresa
+    const whereClause = user.role === 'super_admin' ? {} : { companyId: user.companyId };
+
     const users = await prisma.user.findMany({
-      where: { companyId: user.companyId },
+      where: whereClause,
       include: {
-        company: true,
+        company: {
+          select: {
+            id: true,
+            nombre: true,
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -39,21 +48,26 @@ export async function POST(req: NextRequest) {
   try {
     const user = await requireAuth();
 
-    // Solo administradores pueden crear usuarios
-    if (user.role !== 'administrador') {
+    // Solo administradores y super_admin pueden crear usuarios
+    if (user.role !== 'administrador' && user.role !== 'super_admin') {
       return forbiddenResponse('No tienes permiso para crear usuarios');
     }
 
     const body = await req.json();
-    const { email, name, password, role } = body;
+    const { email, name, password, role, companyId } = body;
 
     if (!email || !name || !password || !role) {
       return badRequestResponse('Faltan campos requeridos');
     }
 
     // Validar rol
-    if (!['administrador', 'gestor', 'operador'].includes(role)) {
+    if (!['administrador', 'gestor', 'operador', 'super_admin'].includes(role)) {
       return badRequestResponse('Rol inválido');
+    }
+
+    // Super_admin solo puede ser creado por otro super_admin
+    if (role === 'super_admin' && user.role !== 'super_admin') {
+      return forbiddenResponse('No tienes permiso para crear usuarios super_admin');
     }
 
     // Verificar si el email ya existe
@@ -65,6 +79,14 @@ export async function POST(req: NextRequest) {
       return badRequestResponse('El email ya está en uso');
     }
 
+    // Determinar la empresa:
+    // - Si es super_admin y proporciona companyId, usar ese
+    // - Si es administrador, usar su propia companyId
+    let targetCompanyId = user.companyId;
+    if (user.role === 'super_admin' && companyId) {
+      targetCompanyId = companyId;
+    }
+
     // Hash de contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -74,11 +96,16 @@ export async function POST(req: NextRequest) {
         name,
         password: hashedPassword,
         role,
-        companyId: user.companyId,
+        companyId: targetCompanyId,
         activo: true,
       },
       include: {
-        company: true,
+        company: {
+          select: {
+            id: true,
+            nombre: true,
+          },
+        },
       },
     });
 
