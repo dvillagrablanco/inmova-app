@@ -492,7 +492,8 @@ export default function LandingPage() {
                 // Si hay una URL externa configurada, usar iframe o video según el tipo
                 process.env.NEXT_PUBLIC_VIDEO_URL.includes('youtube.com') || 
                 process.env.NEXT_PUBLIC_VIDEO_URL.includes('youtu.be') ||
-                process.env.NEXT_PUBLIC_VIDEO_URL.includes('vimeo.com') ? (
+                process.env.NEXT_PUBLIC_VIDEO_URL.includes('vimeo.com') ||
+                process.env.NEXT_PUBLIC_VIDEO_URL.includes('drive.google.com') ? (
                   <iframe
                     src={process.env.NEXT_PUBLIC_VIDEO_URL}
                     className="w-full h-full"
@@ -525,6 +526,7 @@ export default function LandingPage() {
                       <div className="text-white/70 text-sm mt-2 space-y-1">
                         <div>• YouTube: https://www.youtube.com/embed/VIDEO_ID</div>
                         <div>• Vimeo: https://player.vimeo.com/video/VIDEO_ID</div>
+                        <div>• Google Drive: https://drive.google.com/file/d/FILE_ID/preview</div>
                         <div>• MP4 directo: https://cdn.com/video.mp4</div>
                       </div>
                     </div>
