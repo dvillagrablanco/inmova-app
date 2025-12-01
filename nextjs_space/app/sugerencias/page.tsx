@@ -100,7 +100,7 @@ export default function SugerenciasPage() {
       <PageHeader
         title="💡 Buzón de Sugerencias"
         description="Comparte tus ideas para mejorar la plataforma"
-        action={
+        actions={
           <Button
             variant="outline"
             onClick={() => router.back()}

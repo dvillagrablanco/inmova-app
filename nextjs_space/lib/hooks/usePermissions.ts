@@ -14,6 +14,16 @@ const PERMISSIONS = {
     viewReports: true,
     manageClients: true,
   },
+  soporte: {
+    read: true,
+    create: true,
+    update: true,
+    delete: false,
+    manageUsers: false,
+    manageCompany: false,
+    viewReports: true,
+    manageClients: true,
+  },
   administrador: {
     read: true,
     create: true,

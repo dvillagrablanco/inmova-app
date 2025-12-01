@@ -43,7 +43,7 @@ interface Company {
     nombre: string;
     tier: string;
     precioMensual: number;
-  };
+  } | null;
 }
 
 interface ChangePlanDialogProps {

@@ -28,7 +28,7 @@ import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { LoadingState } from '@/components/ui/loading-state';
 import { ChangePlanDialog } from '@/components/admin/ChangePlanDialog';
 
-interface Company {
+interface CompanyData {
   id: string;
   nombre: string;
   activo: boolean;
@@ -42,6 +42,7 @@ interface Company {
     id: string;
     nombre: string;
     tier: string;
+    precioMensual: number;
   } | null;
   parentCompany?: {
     id: string;
@@ -71,8 +72,8 @@ interface SubscriptionPlan {
 export default function ClientesAdminPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
-  const [companies, setCompanies] = useState<Company[]>([]);
-  const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
+  const [companies, setCompanies] = useState<CompanyData[]>([]);
+  const [filteredCompanies, setFilteredCompanies] = useState<CompanyData[]>([]);
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -92,7 +93,7 @@ export default function ClientesAdminPage() {
   
   // Estado para diálogo de cambio de plan
   const [showChangePlanDialog, setShowChangePlanDialog] = useState(false);
-  const [selectedCompanyForPlanChange, setSelectedCompanyForPlanChange] = useState<Company | null>(null);
+  const [selectedCompanyForPlanChange, setSelectedCompanyForPlanChange] = useState<CompanyData | null>(null);
   
   const [newCompany, setNewCompany] = useState({
     nombre: '',
@@ -356,7 +357,7 @@ export default function ClientesAdminPage() {
   };
 
   // Función para abrir el diálogo de cambio de plan
-  const handleOpenChangePlan = (company: Company) => {
+  const handleOpenChangePlan = (company: CompanyData) => {
     setSelectedCompanyForPlanChange(company);
     setShowChangePlanDialog(true);
   };

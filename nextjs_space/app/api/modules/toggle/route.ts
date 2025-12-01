@@ -5,7 +5,7 @@ import {
   activateModuleForCompany, 
   deactivateModuleForCompany 
 } from '@/lib/modules-service';
-import prisma from '@/lib/db';
+import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 

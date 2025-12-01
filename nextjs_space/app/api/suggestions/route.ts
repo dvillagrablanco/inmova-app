@@ -125,12 +125,14 @@ export async function POST(request: NextRequest) {
       superAdmins.map((admin) =>
         prisma.notification.create({
           data: {
+            companyId: user.companyId,
             userId: admin.id,
-            type: 'sugerencia',
-            title: '💡 Nueva Sugerencia',
-            message: `${user.name} (${suggestion.company.nombre}) envió: "${validatedData.titulo}"`,
-            link: `/admin/sugerencias/${suggestion.id}`,
-            read: false,
+            tipo: 'info',
+            titulo: '💡 Nueva Sugerencia',
+            mensaje: `${user.name} (${suggestion.company.nombre}) envió: "${validatedData.titulo}"`,
+            leida: false,
+            entityId: suggestion.id,
+            entityType: 'suggestion',
           },
         })
       )

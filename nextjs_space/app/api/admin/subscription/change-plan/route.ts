@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
       where: { id: companyId },
       include: {
         subscriptionPlan: true,
-        modules: true,
+        companyModules: true,
       },
     });
 
@@ -71,14 +71,14 @@ export async function POST(request: NextRequest) {
     const newPlanModules = (newPlan.modulosIncluidos as string[]) || [];
 
     // Deactivate modules not included in new plan
-    const currentModuleCodes = company.modules.map((m) => m.moduloCodigo);
+    const currentModuleCodes = company.companyModules.map((m: any) => m.moduloCodigo);
     const modulesToDeactivate = currentModuleCodes.filter(
-      (code) => !newPlanModules.includes(code)
+      (code: string) => !newPlanModules.includes(code)
     );
 
     // Activate modules included in new plan that are not currently active
     const modulesToActivate = newPlanModules.filter(
-      (code) => !currentModuleCodes.includes(code)
+      (code: string) => !currentModuleCodes.includes(code)
     );
 
     // Update modules
@@ -102,19 +102,23 @@ export async function POST(request: NextRequest) {
     }
 
     // Log audit
-    await auditLog({
-      userId: session.user.id,
-      companyId,
-      action: isUpgrade ? 'PLAN_UPGRADE' : isDowngrade ? 'PLAN_DOWNGRADE' : 'PLAN_CHANGE',
-      entityType: 'subscription',
-      entityId: updatedCompany.id,
-      details: {
-        oldPlan: oldPlan?.nombre || 'Sin plan',
-        newPlan: newPlan.nombre,
-        oldPrice: oldPlan?.precioMensual || 0,
-        newPrice: newPlan.precioMensual,
-        modulesActivated: modulesToActivate,
-        modulesDeactivated: modulesToDeactivate,
+    await prisma.auditLog.create({
+      data: {
+        userId: session.user.id,
+        companyId: companyId,
+        action: 'UPDATE',
+        entityType: 'Company',
+        entityId: updatedCompany.id,
+        entityName: updatedCompany.nombre,
+        changes: JSON.stringify({
+          changeType: isUpgrade ? 'PLAN_UPGRADE' : isDowngrade ? 'PLAN_DOWNGRADE' : 'PLAN_CHANGE',
+          oldPlan: oldPlan?.nombre || 'Sin plan',
+          newPlan: newPlan.nombre,
+          oldPrice: oldPlan?.precioMensual || 0,
+          newPrice: newPlan.precioMensual,
+          modulesActivated: modulesToActivate,
+          modulesDeactivated: modulesToDeactivate,
+        }),
       },
     });
 

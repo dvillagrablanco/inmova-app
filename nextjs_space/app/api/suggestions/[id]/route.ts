@@ -128,12 +128,14 @@ export async function PATCH(
     if (validatedData.respuesta && updatedSuggestion.userId) {
       await prisma.notification.create({
         data: {
+          companyId: updatedSuggestion.companyId,
           userId: updatedSuggestion.userId,
-          type: 'respuesta_sugerencia',
-          title: '✅ Respuesta a tu sugerencia',
-          message: `Tu sugerencia "${updatedSuggestion.titulo}" ha recibido una respuesta`,
-          link: `/sugerencias/${id}`,
-          read: false,
+          tipo: 'info',
+          titulo: '✅ Respuesta a tu sugerencia',
+          mensaje: `Tu sugerencia "${updatedSuggestion.titulo}" ha recibido una respuesta`,
+          leida: false,
+          entityId: id,
+          entityType: 'suggestion',
         },
       });
     }
