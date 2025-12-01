@@ -566,7 +566,7 @@ export default function LandingPage() {
           </div>
 
           <div className="text-center mt-12">
-            <Link href="/login">
+            <Link href="/landing/demo">
               <Button variant="outline" className="gap-2 border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 px-8 py-6">
                 Ver Todos los 88 Módulos
                 <ArrowRight className="h-5 w-5" />
