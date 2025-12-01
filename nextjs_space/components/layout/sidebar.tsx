@@ -49,6 +49,12 @@ import {
   Vote,
   Award,
   UserPlus,
+  Code,
+  Activity,
+  Palette,
+  Upload,
+  DollarSign,
+  Clock,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -81,7 +87,17 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/notificaciones': 'notificaciones',
   '/incidencias': 'incidencias',
   '/ocr': 'ocr',
+  '/admin/dashboard': 'admin_dashboard',
   '/admin/clientes': 'gestion_clientes',
+  '/admin/planes': 'admin_planes',
+  '/admin/facturacion-b2b': 'admin_facturacion_b2b',
+  '/admin/personalizacion': 'admin_personalizacion',
+  '/admin/activity': 'admin_activity',
+  '/admin/alertas': 'admin_alertas',
+  '/admin/aprobaciones': 'admin_aprobaciones',
+  '/admin/reportes-programados': 'admin_reportes_programados',
+  '/admin/importar': 'admin_importar',
+  '/api-docs': 'api_docs',
   '/admin/configuracion': 'configuracion',
   '/admin/usuarios': 'usuarios',
   '/admin/modulos': 'configuracion',
@@ -155,6 +171,16 @@ const CORE_MODULES = [
   'sms',
   'room_rental',
   'gestion_clientes',
+  'admin_dashboard',
+  'admin_planes',
+  'admin_facturacion_b2b',
+  'admin_personalizacion',
+  'admin_activity',
+  'admin_alertas',
+  'admin_aprobaciones',
+  'admin_reportes_programados',
+  'admin_importar',
+  'api_docs',
 ];
 
 // Navegación core - Funcionalidades principales
@@ -235,7 +261,20 @@ const serviciosProfesionalesItems = [
 
 // Admin
 const adminNavItems = [
+  // Super Admin - Gestión de Plataforma
+  { name: 'Dashboard Admin', href: '/admin/dashboard', icon: LayoutDashboard, roles: ['super_admin'] },
   { name: 'Gestión de Clientes', href: '/admin/clientes', icon: Building2, roles: ['super_admin'] },
+  { name: 'Planes y Facturación', href: '/admin/planes', icon: DollarSign, roles: ['super_admin'] },
+  { name: 'Facturación B2B', href: '/admin/facturacion-b2b', icon: FileText, roles: ['super_admin'] },
+  { name: 'Personalización', href: '/admin/personalizacion', icon: Palette, roles: ['super_admin'] },
+  { name: 'Actividad de Sistema', href: '/admin/activity', icon: Activity, roles: ['super_admin'] },
+  { name: 'Alertas de Sistema', href: '/admin/alertas', icon: Bell, roles: ['super_admin'] },
+  { name: 'Aprobaciones', href: '/admin/aprobaciones', icon: CheckSquare, roles: ['super_admin'] },
+  { name: 'Reportes Programados', href: '/admin/reportes-programados', icon: Clock, roles: ['super_admin'] },
+  { name: 'Importar Datos', href: '/admin/importar', icon: Upload, roles: ['super_admin'] },
+  { name: 'Documentación API', href: '/api-docs', icon: Code, roles: ['super_admin'] },
+  
+  // Administrador - Gestión de Empresa
   { name: 'Configuración', href: '/admin/configuracion', icon: Settings, roles: ['administrador'] },
   { name: 'Usuarios', href: '/admin/usuarios', icon: Users, roles: ['administrador'] },
   { name: 'Módulos', href: '/admin/modulos', icon: Settings, roles: ['administrador'] },
