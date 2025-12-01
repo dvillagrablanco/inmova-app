@@ -165,8 +165,7 @@ export default function ContratosPage() {
               
               {/* Loading message */}
               <LoadingState 
-                message="Cargando contratos..." 
-                submessage="Obteniendo información de contratos y alertas"
+                message="Cargando contratos..."
                 size="sm"
               />
             </div>

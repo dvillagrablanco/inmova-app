@@ -171,8 +171,7 @@ export default function PagosPage() {
               
               {/* Loading message */}
               <LoadingState 
-                message="Cargando pagos..." 
-                submessage="Obteniendo información de transacciones y estado"
+                message="Cargando pagos..."
                 size="sm"
               />
             </div>

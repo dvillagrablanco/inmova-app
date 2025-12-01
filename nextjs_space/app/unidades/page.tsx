@@ -217,8 +217,7 @@ export default function UnidadesPage() {
               
               {/* Loading message */}
               <LoadingState 
-                message="Cargando unidades..." 
-                submessage="Obteniendo información de propiedades y ocupación"
+                message="Cargando unidades..."
                 size="sm"
               />
             </div>

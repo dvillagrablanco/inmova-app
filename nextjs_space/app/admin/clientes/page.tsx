@@ -21,10 +21,11 @@ import {
   LogIn, Copy, ExternalLink, MoreVertical, Filter, Download, RefreshCw, Power, PowerOff,
   Check, X, Settings
 } from 'lucide-react';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+
 import { InfoTooltip } from '@/components/ui/info-tooltip';
 import { BackButton } from '@/components/ui/back-button';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
+import { LoadingState } from '@/components/ui/loading-state';
 
 interface Company {
   id: string;
@@ -408,7 +409,7 @@ export default function ClientesAdminPage() {
       Edificios: c._count.buildings,
       Inquilinos: c._count.tenants,
       Plan: c.subscriptionPlan?.nombre || 'Sin plan',
-      Creada: format(new Date(c.createdAt), 'dd/MM/yyyy'),
+      Creada: new Date(c.createdAt).toLocaleDateString('es-ES'),
     }));
 
     const headers = Object.keys(csvData[0]).join(',');
@@ -418,7 +419,9 @@ export default function ClientesAdminPage() {
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `empresas_${format(new Date(), 'yyyyMMdd')}.csv`;
+    const today = new Date();
+    const dateStr = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`;
+    link.download = `empresas_${dateStr}.csv`;
     link.click();
     
     toast.success('Datos exportados correctamente');
@@ -445,22 +448,16 @@ export default function ClientesAdminPage() {
   };
 
   if (loading || status === 'loading') {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent"></div>
-          <p className="mt-4 text-sm text-muted-foreground">Cargando...</p>
-        </div>
-      </div>
-    );
+    return <LoadingState message="Cargando datos de empresas..." fullScreen />;
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+    <ErrorBoundary>
+      <div className="flex h-screen overflow-hidden bg-background">
+        <Sidebar />
+        <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
+          <Header />
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <div className="mb-8">
@@ -573,14 +570,14 @@ export default function ClientesAdminPage() {
                             <InfoTooltip content="Define los módulos y funcionalidades disponibles para la empresa. Puedes cambiarlo más adelante." />
                           </div>
                           <Select
-                            value={newCompany.subscriptionPlanId}
-                            onValueChange={value => setNewCompany({ ...newCompany, subscriptionPlanId: value })}
+                            value={newCompany.subscriptionPlanId || "none"}
+                            onValueChange={value => setNewCompany({ ...newCompany, subscriptionPlanId: value === "none" ? "" : value })}
                           >
                             <SelectTrigger>
                               <SelectValue placeholder="Seleccionar plan" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="">Sin plan</SelectItem>
+                              <SelectItem value="none">Sin plan</SelectItem>
                               {plans.map(plan => (
                                 <SelectItem key={plan.id} value={plan.id}>
                                   {plan.nombre} - {plan.precioMensual}€/mes
@@ -614,14 +611,14 @@ export default function ClientesAdminPage() {
                           <InfoTooltip content="Crea grupos empresariales vinculando empresas. Útil para cadenas hoteleras, franquicias o grupos inmobiliarios. Las empresas vinculadas pueden compartir recursos y reportes consolidados." />
                         </div>
                         <Select
-                          value={newCompany.parentCompanyId}
-                          onValueChange={value => setNewCompany({ ...newCompany, parentCompanyId: value })}
+                          value={newCompany.parentCompanyId || "none"}
+                          onValueChange={value => setNewCompany({ ...newCompany, parentCompanyId: value === "none" ? "" : value })}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Sin empresa matriz (independiente)" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">Independiente</SelectItem>
+                            <SelectItem value="none">Independiente</SelectItem>
                             {companies.filter(c => !c.parentCompanyId).map(company => (
                               <SelectItem key={company.id} value={company.id}>
                                 {company.nombre}
@@ -835,7 +832,11 @@ export default function ClientesAdminPage() {
                             </div>
                           )}
                           <div className="text-muted-foreground">
-                            Creada: {format(new Date(company.createdAt), 'dd MMM yyyy', { locale: es })}
+                            Creada: {new Date(company.createdAt).toLocaleDateString('es-ES', { 
+                              year: 'numeric', 
+                              month: 'short', 
+                              day: 'numeric' 
+                            })}
                           </div>
                         </div>
 
@@ -867,5 +868,6 @@ export default function ClientesAdminPage() {
         </main>
       </div>
     </div>
+    </ErrorBoundary>
   );
 }
