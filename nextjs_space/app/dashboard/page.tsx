@@ -7,6 +7,7 @@ import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
 import { KPICard } from '@/components/ui/kpi-card';
 import { ContextualHelp } from '@/components/ui/contextual-help';
+import { LoadingState } from '@/components/ui/loading-state';
 import {
   TrendingUp,
   Building2,
@@ -87,10 +88,7 @@ export default function DashboardPage() {
   if (status === 'loading' || isLoading) {
     return (
       <div className="flex h-screen bg-gradient-bg items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600 font-medium">Cargando dashboard...</p>
-        </div>
+        <LoadingState message="Cargando dashboard..." size="lg" />
       </div>
     );
   }

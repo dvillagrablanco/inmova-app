@@ -248,7 +248,7 @@ export default function AnunciosPage() {
     return (
       <div className="flex h-screen">
         <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
           <Header />
           <main className="flex-1 overflow-y-auto bg-muted/30 p-4 sm:p-6 lg:p-8">
            <div className="max-w-7xl mx-auto">
@@ -265,7 +265,7 @@ export default function AnunciosPage() {
   return (
     <div className="flex h-screen">
       <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
         <Header />
         <main className="flex-1 overflow-y-auto bg-muted/30 p-4 sm:p-6 lg:p-8">
            <div className="max-w-7xl mx-auto">

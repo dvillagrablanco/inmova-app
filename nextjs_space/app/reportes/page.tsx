@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
 import { KPICard } from '@/components/ui/kpi-card';
+import { LoadingState } from '@/components/ui/loading-state';
 import { Button } from '@/components/ui/button';
 import {
   Breadcrumb,
@@ -157,7 +158,7 @@ export default function ReportesPage() {
   if (status === 'loading' || isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <LoadingState message="Cargando reportes..." size="lg" />
       </div>
     );
   }
