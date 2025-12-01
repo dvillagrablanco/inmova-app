@@ -36,6 +36,7 @@ interface Company {
   contactoPrincipal: string | null;
   emailContacto: string | null;
   parentCompanyId?: string | null;
+  category?: string | null;
   subscriptionPlan: {
     id: string;
     nombre: string;
@@ -81,9 +82,10 @@ export default function ClientesAdminPage() {
   const [selectedCompanies, setSelectedCompanies] = useState<Set<string>>(new Set());
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [planFilter, setPlanFilter] = useState<string>('all');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('createdAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'table' | 'cards'>('cards');
   const [showBulkActions, setShowBulkActions] = useState(false);
   const [bulkActionLoading, setBulkActionLoading] = useState(false);
   
@@ -142,6 +144,11 @@ export default function ClientesAdminPage() {
       filtered = filtered.filter(c => c.subscriptionPlan?.id === planFilter);
     }
 
+    // Aplicar filtro de categoría
+    if (categoryFilter !== 'all') {
+      filtered = filtered.filter(c => c.category === categoryFilter);
+    }
+
     // Aplicar ordenamiento
     filtered.sort((a, b) => {
       let comparison = 0;
@@ -166,7 +173,7 @@ export default function ClientesAdminPage() {
     });
 
     setFilteredCompanies(filtered);
-  }, [searchQuery, companies, statusFilter, planFilter, sortBy, sortOrder]);
+  }, [searchQuery, companies, statusFilter, planFilter, categoryFilter, sortBy, sortOrder]);
 
   const loadData = async () => {
     try {
@@ -294,6 +301,52 @@ export default function ClientesAdminPage() {
         return 'text-pink-600';
       default:
         return 'text-gray-600';
+    }
+  };
+
+  const getCategoryBadge = (category: string | null | undefined) => {
+    if (!category) return null;
+    
+    const categoryConfig: Record<string, { icon: string; label: string; className: string }> = {
+      enterprise: { icon: '🏢', label: 'Enterprise', className: 'bg-purple-100 text-purple-800 border-purple-300' },
+      pyme: { icon: '🏪', label: 'PYME', className: 'bg-blue-100 text-blue-800 border-blue-300' },
+      startup: { icon: '🚀', label: 'Startup', className: 'bg-green-100 text-green-800 border-green-300' },
+      trial: { icon: '⏱️', label: 'Trial', className: 'bg-yellow-100 text-yellow-800 border-yellow-300' },
+      premium: { icon: '⭐', label: 'Premium', className: 'bg-orange-100 text-orange-800 border-orange-300' },
+      standard: { icon: '📦', label: 'Standard', className: 'bg-gray-100 text-gray-800 border-gray-300' },
+    };
+    
+    const config = categoryConfig[category] || { icon: '📦', label: category, className: 'bg-gray-100 text-gray-800' };
+    
+    return (
+      <Badge variant="outline" className={config.className}>
+        <span className="mr-1">{config.icon}</span>
+        {config.label}
+      </Badge>
+    );
+  };
+
+  const handleChangeCategory = async (companyId: string, newCategory: string) => {
+    try {
+      const response = await fetch(`/api/admin/companies/${companyId}/category`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ category: newCategory }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al cambiar la categoría');
+      }
+
+      toast.success('Categoría actualizada correctamente');
+      loadData();
+    } catch (error: any) {
+      console.error('Error:', error);
+      toast.error('Error al cambiar la categoría', {
+        description: error.message,
+      });
     }
   };
 
@@ -680,7 +733,7 @@ export default function ClientesAdminPage() {
               </div>
 
               {/* Búsqueda */}
-              <div className="relative">
+              <div className="relative mb-4">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder="Buscar por nombre, email, contacto o dominio..."
@@ -689,6 +742,83 @@ export default function ClientesAdminPage() {
                   className="pl-10"
                 />
               </div>
+
+              {/* Filtros y Vista */}
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-base">
+                    <Filter className="h-4 w-4 mr-2" />
+                    Filtros y Vista
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                      <Label className="text-sm">Estado</Label>
+                      <Select value={statusFilter} onValueChange={setStatusFilter}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Todos" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Todos</SelectItem>
+                          <SelectItem value="activo">Activos</SelectItem>
+                          <SelectItem value="suspendido">Suspendidos</SelectItem>
+                          <SelectItem value="prueba">En Prueba</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div>
+                      <Label className="text-sm">Categoría</Label>
+                      <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Todas" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Todas</SelectItem>
+                          <SelectItem value="enterprise">🏢 Enterprise</SelectItem>
+                          <SelectItem value="pyme">🏪 PYME</SelectItem>
+                          <SelectItem value="startup">🚀 Startup</SelectItem>
+                          <SelectItem value="trial">⏱️ Trial</SelectItem>
+                          <SelectItem value="premium">⭐ Premium</SelectItem>
+                          <SelectItem value="standard">📦 Standard</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label className="text-sm">Plan</Label>
+                      <Select value={planFilter} onValueChange={setPlanFilter}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Todos" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Todos</SelectItem>
+                          {plans.map(plan => (
+                            <SelectItem key={plan.id} value={plan.id}>
+                              {plan.nombre}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label className="text-sm">Vista</Label>
+                      <Select value={viewMode} onValueChange={(value: any) => setViewMode(value)}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="cards">📋 Tarjetas</SelectItem>
+                          <SelectItem value="grid">🔲 Cuadrícula</SelectItem>
+                          <SelectItem value="table">📊 Lista</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
             {/* Lista de Empresas */}
@@ -708,9 +838,10 @@ export default function ClientesAdminPage() {
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
+                          <div className="flex items-center gap-3 mb-2 flex-wrap">
                             <CardTitle className="text-xl">{company.nombre}</CardTitle>
                             {getEstadoBadge(company.estadoCliente)}
+                            {getCategoryBadge(company.category)}
                           </div>
                           <CardDescription>
                             <div className="grid gap-1 text-sm">
@@ -752,6 +883,29 @@ export default function ClientesAdminPage() {
                                 <LogIn className="w-4 h-4 mr-2" />
                                 Login como...
                               </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              
+                              {/* Submenu para cambiar categoría */}
+                              <div className="px-2 py-1.5 text-sm font-semibold">Cambiar Categoría</div>
+                              <DropdownMenuItem onClick={() => handleChangeCategory(company.id, 'enterprise')}>
+                                <span className="mr-2">🏢</span>Enterprise
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleChangeCategory(company.id, 'pyme')}>
+                                <span className="mr-2">🏪</span>PYME
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleChangeCategory(company.id, 'startup')}>
+                                <span className="mr-2">🚀</span>Startup
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleChangeCategory(company.id, 'trial')}>
+                                <span className="mr-2">⏱️</span>Trial
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleChangeCategory(company.id, 'premium')}>
+                                <span className="mr-2">⭐</span>Premium
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleChangeCategory(company.id, 'standard')}>
+                                <span className="mr-2">📦</span>Standard
+                              </DropdownMenuItem>
+                              
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
                                 onClick={() => handleQuickToggleActive(company.id, company.activo, company.nombre)}

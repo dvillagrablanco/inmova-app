@@ -16,6 +16,18 @@ export const PERMISSIONS = {
     manageCompany: true,
     viewReports: true,
     manageClients: true, // Gestión de empresas/clientes
+    impersonateClients: true, // Acceso a múltiples clientes
+  },
+  soporte: {
+    read: true,
+    create: true,
+    update: true,
+    delete: true,
+    manageUsers: true,
+    manageCompany: true,
+    viewReports: true,
+    manageClients: true, // Gestión de empresas/clientes
+    impersonateClients: true, // Acceso a múltiples clientes
   },
   administrador: {
     read: true,
@@ -121,6 +133,11 @@ export async function getUserCompany() {
  */
 export async function canAccessCompanyResource(companyId: string) {
   const user = await requireAuth();
+  
+  // Super_admin y soporte pueden acceder a cualquier empresa
+  if (user.role === 'super_admin' || user.role === 'soporte') {
+    return true;
+  }
   
   if (user.companyId !== companyId) {
     throw new Error('No tienes acceso a recursos de esta empresa');

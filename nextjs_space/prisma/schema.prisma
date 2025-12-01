@@ -14,6 +14,30 @@ enum UserRole {
   administrador
   gestor
   operador
+  soporte
+}
+
+enum CompanyCategory {
+  enterprise
+  pyme
+  startup
+  trial
+  premium
+  standard
+}
+
+enum SuggestionStatus {
+  pendiente
+  en_revision
+  resuelta
+  rechazada
+}
+
+enum SuggestionPriority {
+  baja
+  media
+  alta
+  critica
 }
 
 enum BuildingType {
@@ -200,6 +224,9 @@ model User {
   
   // Multi-empresa
   companyAccess        UserCompanyAccess[]
+  
+  // Sugerencias
+  suggestions          Suggestion[]
 
   @@map("users")
 }
@@ -869,6 +896,7 @@ model Company {
   
   // Sistema de tags para organización
   tags              String[]         @default([])
+  category          CompanyCategory? @default(standard)
   
   // Stripe
   stripeCustomerId  String?          @unique
@@ -999,6 +1027,9 @@ model Company {
   b2bInvoices         B2BInvoice[]
   b2bPaymentHistory   B2BPaymentHistory[]
   b2bSubscriptionHistory B2BSubscriptionHistory[]
+  
+  // Buzón de sugerencias
+  suggestions         Suggestion[]
 
   @@map("company")
 }
@@ -7119,4 +7150,49 @@ model B2BFinancialReport {
   
   @@index([periodo])
   @@index([tipoReporte])
+}
+// ==========================================
+// BUZÓN DE SUGERENCIAS
+// ==========================================
+
+model Suggestion {
+  id                String              @id @default(cuid())
+  companyId         String
+  company           Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Información de quien envía
+  userId            String?
+  user              User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  nombreRemitente   String
+  emailRemitente    String
+  
+  // Contenido de la sugerencia
+  titulo            String
+  descripcion       String              @db.Text
+  categoria         String              // mejora_producto, reporte_bug, nueva_funcionalidad, otro
+  prioridad         SuggestionPriority  @default(media)
+  
+  // Estado y seguimiento
+  estado            SuggestionStatus    @default(pendiente)
+  respuesta         String?             @db.Text
+  respondidoPor     String?
+  fechaRespuesta    DateTime?
+  
+  // Metadatos
+  navegador         String?
+  sistemaOperativo  String?
+  urlOrigen         String?
+  
+  // Votos y valoración (opcional para futuro)
+  votos             Int                 @default(0)
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  @@index([companyId])
+  @@index([estado])
+  @@index([prioridad])
+  @@index([categoria])
+  @@index([createdAt])
+  @@map("suggestions")
 }
