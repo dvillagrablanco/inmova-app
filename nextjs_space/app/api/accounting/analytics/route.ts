@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { getAnalyticalAccounting } from '@/lib/accounting-service';
 import { startOfMonth, endOfMonth, subMonths, parse } from 'date-fns';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

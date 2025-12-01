@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { applyUtilityProrationToUnit, calculateUtilityProration } from '@/lib/room-rental-service';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/room-rental/proration
  * Calcula y aplica el prorrateo de suministros a una unidad

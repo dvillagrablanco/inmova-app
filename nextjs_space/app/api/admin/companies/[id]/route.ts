@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 // GET /api/admin/companies/[id] - Detalle de una empresa (solo super_admin)
 export async function GET(
   request: NextRequest,

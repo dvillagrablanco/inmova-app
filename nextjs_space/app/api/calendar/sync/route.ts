@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { sincronizarEventosAutomaticos } from '@/lib/calendar-service';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/calendar/sync
  * Sincroniza eventos automáticos del calendario

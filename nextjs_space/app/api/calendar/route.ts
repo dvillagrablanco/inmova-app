@@ -5,6 +5,8 @@ import { prisma } from '@/lib/db';
 import { obtenerEventosCalendario } from '@/lib/calendar-service';
 import { CalendarEventType, CalendarEventPriority } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/calendar
  * Obtiene eventos del calendario con filtros opcionales

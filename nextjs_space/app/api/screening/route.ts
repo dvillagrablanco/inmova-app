@@ -9,6 +9,8 @@ import {
 } from '@/lib/screening-service';
 import { ScreeningEstado } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/screening
  * Obtiene lista de screenings

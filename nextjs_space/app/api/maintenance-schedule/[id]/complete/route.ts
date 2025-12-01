@@ -3,6 +3,8 @@ import { prisma } from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+export const dynamic = 'force-dynamic';
+
 function calculateNextDate(currentDate: Date, frecuencia: string): Date {
   const nextDate = new Date(currentDate);
 

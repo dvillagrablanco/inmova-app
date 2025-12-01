@@ -5,6 +5,8 @@ import { prisma } from '@/lib/db';
 import { calcularPrediccionMorosidad } from '@/lib/morosidad-prediction-service';
 import { addDays } from 'date-fns';
 
+export const dynamic = 'force-dynamic';
+
 // POST /api/morosidad/predicciones/generar-todas - Generar predicciones para todos los inquilinos
 export async function POST(request: NextRequest) {
   try {

@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getContaSimpleService, isContaSimpleConfigured } from '@/lib/contasimple-integration-service';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/accounting/contasimple/test-connection
  * Prueba la conexión con ContaSimple y obtiene un token de acceso

@@ -9,6 +9,8 @@ import {
 } from '@/lib/publicacion-service';
 import { PublicacionEstado } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/publicaciones
  * Obtiene lista de publicaciones

@@ -5,6 +5,8 @@ import { prisma } from '@/lib/db';
 import { stripe, formatAmountForStripe } from '@/lib/stripe-config';
 import { getOrCreateStripeCustomer } from '@/lib/stripe-customer';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

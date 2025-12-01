@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { getZucchettiService } from '@/lib/zucchetti-integration-service';
 import { prisma } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/accounting/zucchetti/payments
  * Registra un pago de INMOVA en Zucchetti

@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { crearSolicitudFirma } from '@/lib/digital-signature-service';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/digital-signature
  * Obtiene documentos de firma con filtros

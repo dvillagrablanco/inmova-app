@@ -8,6 +8,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { runAllReminders, sendPaymentReminders, sendContractExpirationAlerts, sendMaintenanceNotifications } from '@/lib/reminder-service';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);

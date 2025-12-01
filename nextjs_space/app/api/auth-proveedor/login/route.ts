@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 
+export const dynamic = 'force-dynamic';
+
 // POST /api/auth-proveedor/login - Login para proveedores
 export async function POST(req: NextRequest) {
   try {

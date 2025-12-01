@@ -3,6 +3,8 @@ import { db } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
+export const dynamic = 'force-dynamic';
+
 const JWT_SECRET = process.env.NEXTAUTH_SECRET || 'fallback-secret-key';
 
 export async function POST(request: Request) {

@@ -5,6 +5,8 @@ import { prisma } from '@/lib/db';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
+export const dynamic = 'force-dynamic';
+
 // POST /api/reuniones/[id]/generar-acta - Generar PDF del acta
 export async function POST(
   req: NextRequest,

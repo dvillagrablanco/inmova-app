@@ -5,6 +5,8 @@ import { prisma } from '@/lib/db';
 import { enviarSMS, crearPlantilla } from '@/lib/sms-service';
 import { SMSTipo, SMSEstado } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/sms
  * Obtiene logs de SMS

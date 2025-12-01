@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { getZucchettiService } from '@/lib/zucchetti-integration-service';
 import { prisma } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/accounting/zucchetti/invoices
  * Crea una factura en Zucchetti desde un contrato de INMOVA

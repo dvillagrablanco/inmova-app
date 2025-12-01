@@ -8,6 +8,8 @@ import {
 } from '@/lib/valoracion-service';
 import { ValoracionMetodo, ValoracionFinalidad } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/valoraciones
  * Obtiene lista de valoraciones

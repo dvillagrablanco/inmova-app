@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { db } from '@/lib/db';
 import Papa from 'papaparse';
 
+export const dynamic = 'force-dynamic';
+
 // POST /api/import?type=buildings|units|tenants
 export async function POST(request: Request) {
   try {

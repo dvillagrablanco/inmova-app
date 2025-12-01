@@ -11,6 +11,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { InvoiceStatus } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+
 interface RouteParams {
   params: {
     id: string;

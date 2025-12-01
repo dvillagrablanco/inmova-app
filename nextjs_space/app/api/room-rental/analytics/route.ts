@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getRoomRentalAnalytics } from '@/lib/room-rental-service';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/room-rental/analytics
  * Obtiene analíticas del modelo de alquiler por habitaciones

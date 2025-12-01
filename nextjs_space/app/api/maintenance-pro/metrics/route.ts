@@ -5,6 +5,8 @@ import { calculateMaintenanceMetrics } from '@/lib/maintenance-prediction-servic
 import { prisma } from '@/lib/db';
 import { format } from 'date-fns';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

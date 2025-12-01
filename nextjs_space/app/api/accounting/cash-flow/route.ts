@@ -5,6 +5,8 @@ import { prisma } from '@/lib/db';
 import { generateCashFlowStatement, calculateCashFlow } from '@/lib/accounting-service';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

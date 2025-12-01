@@ -5,6 +5,8 @@ import { prisma } from '@/lib/db';
 import { calcularPrediccionMorosidad } from '@/lib/morosidad-prediction-service';
 import { addDays } from 'date-fns';
 
+export const dynamic = 'force-dynamic';
+
 // GET /api/morosidad/predicciones - Listar predicciones
 export async function GET(request: NextRequest) {
   try {

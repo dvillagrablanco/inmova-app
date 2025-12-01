@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 // PATCH /api/incidencias/[id] - Actualizar incidencia
 export async function PATCH(
   req: NextRequest,

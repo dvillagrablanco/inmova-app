@@ -9,6 +9,8 @@ import {
 } from '@/lib/reservas-service';
 import { ReservationStatus } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+
 // GET /api/reservas - Listar reservas
 export async function GET(request: NextRequest) {
   try {

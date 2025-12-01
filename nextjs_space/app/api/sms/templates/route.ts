@@ -5,6 +5,8 @@ import { prisma } from '@/lib/db';
 import { crearPlantilla, instalarPlantillasPredefinidas } from '@/lib/sms-service';
 import { SMSTipo } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/sms/templates
  * Obtiene plantillas de SMS

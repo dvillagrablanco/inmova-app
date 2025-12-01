@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { generateRecommendations } from '@/lib/prediction-service';
 import { prisma } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

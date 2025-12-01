@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { getContaSimpleService } from '@/lib/contasimple-integration-service';
 import { prisma } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/accounting/contasimple/invoices
  * Crea una factura en ContaSimple desde un contrato de INMOVA

@@ -5,6 +5,8 @@ import { getA3Service } from '@/lib/a3-integration-service';
 import { prisma } from '@/lib/db';
 import { startOfMonth, endOfMonth } from 'date-fns';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

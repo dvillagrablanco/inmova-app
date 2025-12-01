@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { getAlegraService } from '@/lib/alegra-integration-service';
 import { prisma } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

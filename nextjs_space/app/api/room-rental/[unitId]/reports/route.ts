@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval, differenceInDays, parseISO } from 'date-fns';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { unitId: string } }

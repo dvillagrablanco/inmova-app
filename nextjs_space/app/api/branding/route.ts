@@ -8,6 +8,8 @@ import {
 } from '@/lib/branding-service';
 import { prisma } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/branding
  * Obtiene la configuración de branding de la empresa del usuario

@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { uploadFile, deleteFile } from '@/lib/s3';
 
+export const dynamic = 'force-dynamic';
+
 // POST - Upload document
 export async function POST(
   req: NextRequest,

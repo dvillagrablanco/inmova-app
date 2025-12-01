@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { generateCleaningSchedule, saveCleaningScheduleToContracts } from '@/lib/room-rental-service';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/room-rental/cleaning-schedule
  * Obtiene el calendario de limpieza de una unidad

@@ -7,6 +7,8 @@ import {
   compareMultiPeriod,
 } from '@/lib/bi-service';
 
+export const dynamic = 'force-dynamic';
+
 // GET /api/bi/stats - Obtener estadísticas y análisis
 export async function GET(req: NextRequest) {
   try {

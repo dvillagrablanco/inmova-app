@@ -4,6 +4,8 @@ import { stripe, formatAmountFromStripe, STRIPE_WEBHOOK_SECRET } from '@/lib/str
 import { prisma } from '@/lib/db';
 import Stripe from 'stripe';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   const body = await request.text();
   const headersList = await headers();

@@ -11,6 +11,8 @@ import { prisma } from '@/lib/db';
 import { createB2BInvoice, generateMonthlyInvoices } from '@/lib/b2b-billing-service';
 import { InvoiceStatus } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

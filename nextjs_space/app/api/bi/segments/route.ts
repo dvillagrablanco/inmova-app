@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { segmentTenantsByBehavior } from '@/lib/bi-service';
 
+export const dynamic = 'force-dynamic';
+
 // GET /api/bi/segments - Obtener segmentos
 export async function GET(req: NextRequest) {
   try {

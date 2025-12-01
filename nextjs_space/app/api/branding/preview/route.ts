@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { generateCSSVariables } from '@/lib/branding-service';
 import { BrandingConfig } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/branding/preview
  * Genera una preview de los cambios de branding sin guardarlos

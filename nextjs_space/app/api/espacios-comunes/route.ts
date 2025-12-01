@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { CommonSpaceType } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+
 // GET /api/espacios-comunes - Listar espacios comunes
 export async function GET(request: NextRequest) {
   try {

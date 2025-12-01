@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { calculateFinancialRatios } from '@/lib/accounting-service';
 import { startOfMonth, endOfMonth } from 'date-fns';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

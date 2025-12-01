@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { db } from '@/lib/db';
 import Papa from 'papaparse';
 
+export const dynamic = 'force-dynamic';
+
 // GET /api/export?type=buildings|units|tenants|contracts|payments|expenses
 export async function GET(request: Request) {
   try {

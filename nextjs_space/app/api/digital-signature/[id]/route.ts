@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { obtenerEstadoDocumento, cancelarSolicitudFirma, reenviarInvitacion } from '@/lib/digital-signature-service';
 import { prisma } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/digital-signature/[id]
  * Obtiene el estado detallado de un documento de firma

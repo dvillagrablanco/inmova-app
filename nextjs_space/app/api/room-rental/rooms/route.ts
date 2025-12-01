@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getAvailableRooms } from '@/lib/room-rental-service';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/room-rental/rooms
  * Obtiene todas las habitaciones (con filtros opcionales)
