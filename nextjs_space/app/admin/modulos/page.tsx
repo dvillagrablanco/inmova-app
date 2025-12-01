@@ -75,10 +75,19 @@ export default function ModulosAdminPage() {
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');
-    } else if (status === 'authenticated') {
+      return;
+    }
+    
+    if (status === 'authenticated') {
+      const userRole = (session?.user as any)?.role;
+      if (userRole !== 'administrador' && userRole !== 'super_admin') {
+        router.push('/dashboard');
+        toast.error('No tienes permisos para acceder a esta página');
+        return;
+      }
       loadData();
     }
-  }, [status]);
+  }, [status, session, router]);
 
   async function loadData() {
     try {

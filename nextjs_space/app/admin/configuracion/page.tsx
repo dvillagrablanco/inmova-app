@@ -52,8 +52,14 @@ export default function ConfiguracionPage() {
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');
+      return;
     }
-  }, [status, router]);
+
+    if (status === 'authenticated' && !isAdmin) {
+      router.push('/dashboard');
+      toast.error('No tienes permisos para acceder a esta página');
+    }
+  }, [status, router, isAdmin]);
 
   useEffect(() => {
     const fetchCompany = async () => {
@@ -80,10 +86,10 @@ export default function ConfiguracionPage() {
       }
     };
 
-    if (status === 'authenticated') {
+    if (status === 'authenticated' && isAdmin) {
       fetchCompany();
     }
-  }, [status]);
+  }, [status, isAdmin]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

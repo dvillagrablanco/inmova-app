@@ -66,7 +66,7 @@ export function usePermissions() {
   const canManageClients = hasPermission('manageClients');
 
   const isSuperAdmin = role === 'super_admin';
-  const isAdmin = role === 'administrador';
+  const isAdmin = role === 'administrador' || role === 'super_admin'; // Super admins también tienen permisos de admin
   const isGestor = role === 'gestor';
   const isOperador = role === 'operador';
 
