@@ -194,6 +194,7 @@ const advancedNavItems = [
 
 // Módulos Multi-Vertical
 const multiVerticalItems = [
+  { name: 'STR Dashboard', href: '/str', icon: Hotel, roles: ['administrador', 'gestor'] },
   { name: 'Anuncios STR', href: '/str/listings', icon: Hotel, roles: ['administrador', 'gestor'] },
   { name: 'Reservas STR', href: '/str/bookings', icon: Calendar, roles: ['administrador', 'gestor'] },
   { name: 'Canales STR', href: '/str/channels', icon: BarChart2, roles: ['administrador', 'gestor'] },
