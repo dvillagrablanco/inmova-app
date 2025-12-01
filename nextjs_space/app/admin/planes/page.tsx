@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { InfoTooltip } from '@/components/ui/info-tooltip';
 import { toast } from 'sonner';
 import { 
   Package, 
@@ -215,8 +216,8 @@ export default function PlanesPage() {
                 <h1 className="text-3xl font-bold gradient-text">Planes de Suscripción</h1>
                 <p className="text-gray-600 mt-1">Gestiona los planes disponibles para las empresas</p>
               </div>
-              <Button onClick={() => handleOpenDialog()} className="gradient-primary shadow-primary">
-                <Plus className="h-4 w-4 mr-2" />
+              <Button size="lg" onClick={() => handleOpenDialog()} className="gradient-primary shadow-md hover:shadow-lg transition-all">
+                <Plus className="h-5 w-5 mr-2" />
                 Nuevo Plan
               </Button>
             </div>
@@ -332,7 +333,10 @@ export default function PlanesPage() {
           <form onSubmit={handleSubmit}>
             <div className="space-y-4 py-4">
               <div>
-                <Label htmlFor="nombre">Nombre del Plan *</Label>
+                <div className="flex items-center gap-2 mb-2">
+                  <Label htmlFor="nombre">Nombre del Plan *</Label>
+                  <InfoTooltip content="Nombre comercial del plan que verán las empresas. Ejemplo: 'Plan Starter', 'Plan Profesional'." />
+                </div>
                 <Input
                   id="nombre"
                   value={formData.nombre}
@@ -343,7 +347,10 @@ export default function PlanesPage() {
               </div>
 
               <div>
-                <Label htmlFor="descripcion">Descripción</Label>
+                <div className="flex items-center gap-2 mb-2">
+                  <Label htmlFor="descripcion">Descripción</Label>
+                  <InfoTooltip content="Descripción breve de las características principales del plan." />
+                </div>
                 <Textarea
                   id="descripcion"
                   value={formData.descripcion}
@@ -355,7 +362,10 @@ export default function PlanesPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="tier">Tier *</Label>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Label htmlFor="tier">Tier *</Label>
+                    <InfoTooltip content="Nivel del plan: Básico (funciones esenciales), Profesional (más funciones), Empresarial (funciones avanzadas), Premium (todo incluido)." />
+                  </div>
                   <select
                     id="tier"
                     value={formData.tier}
@@ -371,7 +381,10 @@ export default function PlanesPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="precio">Precio Mensual (€) *</Label>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Label htmlFor="precio">Precio Mensual (€) *</Label>
+                    <InfoTooltip content="Precio de suscripción mensual que pagará cada empresa. Puedes ajustarlo en cualquier momento." />
+                  </div>
                   <Input
                     id="precio"
                     type="number"
@@ -380,13 +393,17 @@ export default function PlanesPage() {
                     required
                     min="0"
                     step="0.01"
+                    placeholder="99.99"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="maxUsuarios">Máximo de Usuarios</Label>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Label htmlFor="maxUsuarios">Máximo de Usuarios</Label>
+                    <InfoTooltip content="Límite de usuarios que puede tener una empresa con este plan. Deja vacío para ilimitado." />
+                  </div>
                   <Input
                     id="maxUsuarios"
                     type="number"
@@ -398,7 +415,10 @@ export default function PlanesPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="maxPropiedades">Máximo de Propiedades</Label>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Label htmlFor="maxPropiedades">Máximo de Propiedades</Label>
+                    <InfoTooltip content="Límite de propiedades/edificios que puede gestionar una empresa. Deja vacío para ilimitado." />
+                  </div>
                   <Input
                     id="maxPropiedades"
                     type="number"

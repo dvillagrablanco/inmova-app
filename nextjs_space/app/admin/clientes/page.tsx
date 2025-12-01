@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { InfoTooltip } from '@/components/ui/info-tooltip';
 
 interface Company {
   id: string;
@@ -460,8 +461,8 @@ export default function ClientesAdminPage() {
                 </div>
                 <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
                   <DialogTrigger asChild>
-                    <Button className="flex items-center gap-2">
-                      <Plus className="w-4 h-4" />
+                    <Button size="lg" className="flex items-center gap-2 shadow-md hover:shadow-lg transition-all">
+                      <Plus className="w-5 h-5" />
                       Nueva Empresa
                     </Button>
                   </DialogTrigger>
@@ -475,7 +476,10 @@ export default function ClientesAdminPage() {
                     <div className="grid gap-4 py-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <Label htmlFor="nombre">Nombre de la Empresa *</Label>
+                          <div className="flex items-center gap-2 mb-2">
+                            <Label htmlFor="nombre">Nombre de la Empresa *</Label>
+                            <InfoTooltip content="Nombre comercial o razón social de la empresa cliente que aparecerá en toda la plataforma." />
+                          </div>
                           <Input
                             id="nombre"
                             value={newCompany.nombre}
@@ -484,7 +488,10 @@ export default function ClientesAdminPage() {
                           />
                         </div>
                         <div>
-                          <Label htmlFor="email">Email Corporativo</Label>
+                          <div className="flex items-center gap-2 mb-2">
+                            <Label htmlFor="email">Email Corporativo</Label>
+                            <InfoTooltip content="Email principal de la empresa. Se usará para comunicaciones oficiales y facturación." />
+                          </div>
                           <Input
                             id="email"
                             type="email"
@@ -528,7 +535,10 @@ export default function ClientesAdminPage() {
                           />
                         </div>
                         <div>
-                          <Label htmlFor="dominioPersonalizado">Dominio Personalizado</Label>
+                          <div className="flex items-center gap-2 mb-2">
+                            <Label htmlFor="dominioPersonalizado">Dominio Personalizado</Label>
+                            <InfoTooltip content="URL personalizada para el portal de la empresa. Ejemplo: miempresa.inmova.com. Debe ser único." />
+                          </div>
                           <Input
                             id="dominioPersonalizado"
                             value={newCompany.dominioPersonalizado}
@@ -540,7 +550,10 @@ export default function ClientesAdminPage() {
 
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <Label htmlFor="plan">Plan de Suscripción</Label>
+                          <div className="flex items-center gap-2 mb-2">
+                            <Label htmlFor="plan">Plan de Suscripción</Label>
+                            <InfoTooltip content="Define los módulos y funcionalidades disponibles para la empresa. Puedes cambiarlo más adelante." />
+                          </div>
                           <Select
                             value={newCompany.subscriptionPlanId}
                             onValueChange={value => setNewCompany({ ...newCompany, subscriptionPlanId: value })}
@@ -578,7 +591,10 @@ export default function ClientesAdminPage() {
 
                       {/* Grupo de Empresas */}
                       <div>
-                        <Label htmlFor="parentCompany">Empresa Matriz (Opcional)</Label>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Label htmlFor="parentCompany">Empresa Matriz (Opcional)</Label>
+                          <InfoTooltip content="Crea grupos empresariales vinculando empresas. Útil para cadenas hoteleras, franquicias o grupos inmobiliarios. Las empresas vinculadas pueden compartir recursos y reportes consolidados." />
+                        </div>
                         <Select
                           value={newCompany.parentCompanyId}
                           onValueChange={value => setNewCompany({ ...newCompany, parentCompanyId: value })}
@@ -596,8 +612,8 @@ export default function ClientesAdminPage() {
                             ))}
                           </SelectContent>
                         </Select>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Selecciona una empresa matriz para crear un grupo empresarial. Las empresas del grupo comparten recursos y pueden ser gestionadas en conjunto.
+                        <p className="text-xs text-muted-foreground mt-1.5">
+                          💡 Deja en "Independiente" para empresas sin relación jerárquica. Selecciona una empresa matriz para crear o unirse a un grupo empresarial.
                         </p>
                       </div>
                     </div>

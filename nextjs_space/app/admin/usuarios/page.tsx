@@ -35,6 +35,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { InfoTooltip } from '@/components/ui/info-tooltip';
 import { toast } from 'sonner';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 
@@ -401,8 +402,8 @@ export default function UsersPage() {
                 <h1 className="text-3xl font-bold tracking-tight">Gestión de Usuarios</h1>
                 <p className="text-muted-foreground">Administra los usuarios de tu empresa</p>
               </div>
-              <Button onClick={() => setShowDialog(true)}>
-                <Plus className="mr-2 h-4 w-4" />
+              <Button size="lg" onClick={() => setShowDialog(true)} className="shadow-md hover:shadow-lg transition-all">
+                <Plus className="mr-2 h-5 w-5" />
                 Nuevo Usuario
               </Button>
             </div>
@@ -478,13 +479,17 @@ export default function UsersPage() {
             <div className="space-y-4 py-4">
               {!editingUser && (
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="email">Email</Label>
+                    <InfoTooltip content="El email será utilizado para iniciar sesión y recibir notificaciones del sistema." />
+                  </div>
                   <Input
                     id="email"
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     required
+                    placeholder="usuario@ejemplo.com"
                   />
                 </div>
               )}
@@ -495,12 +500,16 @@ export default function UsersPage() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
+                  placeholder="Nombre completo del usuario"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">
-                  Contraseña {editingUser && '(dejar vacío para no cambiar)'}
-                </Label>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="password">
+                    Contraseña {editingUser && '(dejar vacío para no cambiar)'}
+                  </Label>
+                  <InfoTooltip content="La contraseña debe tener al menos 6 caracteres. El usuario podrá cambiarla desde su perfil." />
+                </div>
                 <Input
                   id="password"
                   type="password"
@@ -508,10 +517,14 @@ export default function UsersPage() {
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   required={!editingUser}
                   minLength={6}
+                  placeholder="Mínimo 6 caracteres"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="role">Rol</Label>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="role">Rol</Label>
+                  <InfoTooltip content="Define los permisos del usuario: Super Admin (acceso total), Administrador (gestión de empresa), Gestor (operaciones diarias), Operador (solo lectura)." />
+                </div>
                 <Select
                   value={formData.role}
                   onValueChange={(value) => setFormData({ ...formData, role: value })}
@@ -529,7 +542,10 @@ export default function UsersPage() {
               </div>
               {isSuperAdmin && !editingUser && (
                 <div className="space-y-2">
-                  <Label htmlFor="companyId">Empresa</Label>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="companyId">Empresa</Label>
+                    <InfoTooltip content="Asigna el usuario a una empresa específica. Solo usuarios Super Admin pueden no tener empresa asignada." />
+                  </div>
                   <Select
                     value={formData.companyId}
                     onValueChange={(value) => setFormData({ ...formData, companyId: value })}
@@ -546,8 +562,8 @@ export default function UsersPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-muted-foreground">
-                    Selecciona una empresa para asignar el usuario a ella
+                  <p className="text-xs text-muted-foreground mt-1.5">
+                    💡 Los usuarios de empresa solo verán los datos de su empresa asignada
                   </p>
                 </div>
               )}
