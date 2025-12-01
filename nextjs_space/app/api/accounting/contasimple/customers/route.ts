@@ -41,14 +41,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Sincronizar con ContaSimple (modo demo)
+    // Sincronizar con ContaSimple
     const contaSimpleService = getContaSimpleService();
-    const result = await contaSimpleService.syncTenantToCustomerDemo(tenant);
+    const customer = await contaSimpleService.syncTenantToCustomer(tenant);
+
+    // Actualizar inquilino con el ID de ContaSimple
+    await prisma.tenant.update({
+      where: { id: tenantId },
+      data: {
+        contasimpleCustomerId: customer.id,
+      },
+    });
 
     return NextResponse.json({
       success: true,
-      message: `Cliente sincronizado: ${tenant.nombreCompleto}`,
-      data: result,
+      message: `Cliente sincronizado exitosamente: ${tenant.nombreCompleto}`,
+      data: customer,
     });
   } catch (error) {
     console.error('Error al sincronizar cliente con ContaSimple:', error);

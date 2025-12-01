@@ -303,6 +303,8 @@ model Tenant {
   nivelRiesgo       RiskLevel         @default(medio)
   password          String?
   notas             String?           @db.Text
+  // Integraciones de Contabilidad
+  contasimpleCustomerId String?
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
 
@@ -455,6 +457,7 @@ model Contract {
   tipo              ContractType   @default(residencial)
   contractPdfPath   String?
   legalTemplateId   String?
+  contasimpleInvoiceId String?
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
 
@@ -501,6 +504,7 @@ model Payment {
   stripeFee             Float?
   stripeNetAmount       Float?
   
+  contasimplePaymentId String?
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
 
@@ -653,6 +657,7 @@ model Expense {
   notas             String?         @db.Text
   requiereAprobacion Boolean        @default(false)
   estadoAprobacion  ApprovalStatus? @default(pendiente)
+  contasimpleExpenseId String?
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
 
@@ -7084,4 +7089,3 @@ model B2BFinancialReport {
   @@index([periodo])
   @@index([tipoReporte])
 }
-

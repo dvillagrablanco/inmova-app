@@ -48,14 +48,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Crear factura en ContaSimple (modo demo)
+    // Verificar que el inquilino tenga ID de ContaSimple
+    if (!contract.tenant?.contasimpleCustomerId) {
+      return NextResponse.json(
+        { error: 'El inquilino debe sincronizarse primero con ContaSimple' },
+        { status: 400 }
+      );
+    }
+
+    // Crear factura en ContaSimple
     const contaSimpleService = getContaSimpleService();
-    const result = await contaSimpleService.createInvoiceDemo(contract);
+    const invoice = await contaSimpleService.createInvoiceFromContract(
+      contract,
+      contract.tenant.contasimpleCustomerId
+    );
+
+    // Guardar referencia de la factura en el contrato
+    await prisma.contract.update({
+      where: { id: contractId },
+      data: {
+        contasimpleInvoiceId: invoice.id,
+      },
+    });
 
     return NextResponse.json({
       success: true,
-      message: `Factura creada para contrato ${contract.id}`,
-      data: result,
+      message: `Factura creada exitosamente: ${invoice.number}`,
+      data: invoice,
     });
   } catch (error) {
     console.error('Error al crear factura en ContaSimple:', error);

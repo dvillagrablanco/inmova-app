@@ -237,9 +237,21 @@ export default function ContabilidadPage() {
   const handleSyncCustomers = async () => {
     try {
       setLoading(true);
-      toast.info('Sincronizando clientes...');
-      // Aquí se implementaría la lógica para seleccionar inquilinos y sincronizar
-      toast.success('Funcionalidad en desarrollo');
+      toast.info('Sincronizando clientes con ContaSimple...');
+      
+      // Verificar que ContaSimple esté configurado
+      if (!contaSimpleStatus?.configured) {
+        toast.error('ContaSimple no está configurado. Configura las credenciales primero.');
+        return;
+      }
+
+      // Para usar esta funcionalidad, el usuario debe ir a la sección de Inquilinos
+      // y desde allí sincronizar individualmente cada inquilino
+      toast.info(
+        'Ve a la sección de Inquilinos para sincronizar clientes individuales con ContaSimple',
+        { duration: 5000 }
+      );
+      
     } catch (error) {
       console.error('Error:', error);
       toast.error('Error al sincronizar clientes');
@@ -251,9 +263,21 @@ export default function ContabilidadPage() {
   const handleCreateInvoice = async () => {
     try {
       setLoading(true);
-      toast.info('Creando facturas...');
-      // Aquí se implementaría la lógica para crear facturas desde contratos
-      toast.success('Funcionalidad en desarrollo');
+      toast.info('Creando facturas en ContaSimple...');
+      
+      // Verificar que ContaSimple esté configurado
+      if (!contaSimpleStatus?.configured) {
+        toast.error('ContaSimple no está configurado. Configura las credenciales primero.');
+        return;
+      }
+
+      // Para usar esta funcionalidad, el usuario debe ir a la sección de Contratos
+      // y desde allí crear facturas individuales
+      toast.info(
+        'Ve a la sección de Contratos para crear facturas individuales en ContaSimple',
+        { duration: 5000 }
+      );
+      
     } catch (error) {
       console.error('Error:', error);
       toast.error('Error al crear facturas');
@@ -265,9 +289,21 @@ export default function ContabilidadPage() {
   const handleRegisterPayments = async () => {
     try {
       setLoading(true);
-      toast.info('Registrando pagos...');
-      // Aquí se implementaría la lógica para registrar pagos
-      toast.success('Funcionalidad en desarrollo');
+      toast.info('Registrando pagos en ContaSimple...');
+      
+      // Verificar que ContaSimple esté configurado
+      if (!contaSimpleStatus?.configured) {
+        toast.error('ContaSimple no está configurado. Configura las credenciales primero.');
+        return;
+      }
+
+      // Para usar esta funcionalidad, el usuario debe ir a la sección de Pagos
+      // y desde allí registrar pagos individuales
+      toast.info(
+        'Ve a la sección de Pagos para registrar pagos individuales en ContaSimple',
+        { duration: 5000 }
+      );
+      
     } catch (error) {
       console.error('Error:', error);
       toast.error('Error al registrar pagos');
@@ -643,14 +679,42 @@ export default function ContabilidadPage() {
                     </div>
 
                     {!contaSimpleStatus.configured && (
+                      <div className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-md p-4">
+                        <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                          <strong>No Configurado:</strong> {contaSimpleStatus.message}
+                        </p>
+                        <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-2">
+                          Para activar la integración con ContaSimple, configura las variables de entorno:
+                          CONTASIMPLE_AUTH_KEY y CONTASIMPLE_API_URL
+                        </p>
+                      </div>
+                    )}
+                    {contaSimpleStatus.configured && (
                       <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-md p-4">
                         <p className="text-sm text-green-800 dark:text-green-200">
-                          <strong>Modo Demo:</strong> {contaSimpleStatus.message}
+                          ✓ <strong>Integración Activa:</strong> ContaSimple está correctamente configurado y listo para usar.
                         </p>
-                        <p className="text-xs text-green-700 dark:text-green-300 mt-2">
-                          Para activar la integración real, configura las variables de entorno
-                          CONTASIMPLE_CLIENT_ID, CONTASIMPLE_CLIENT_SECRET y CONTASIMPLE_API_KEY
-                        </p>
+                        <Button
+                          onClick={async () => {
+                            try {
+                              toast.info('Probando conexión con ContaSimple...');
+                              const res = await fetch('/api/accounting/contasimple/test-connection');
+                              if (res.ok) {
+                                toast.success('Conexión exitosa con ContaSimple');
+                              } else {
+                                const data = await res.json();
+                                toast.error('Error al conectar: ' + data.message);
+                              }
+                            } catch (error) {
+                              toast.error('Error al probar la conexión');
+                            }
+                          }}
+                          variant="outline"
+                          size="sm"
+                          className="mt-2"
+                        >
+                          Probar Conexión
+                        </Button>
                       </div>
                     )}
                   </div>

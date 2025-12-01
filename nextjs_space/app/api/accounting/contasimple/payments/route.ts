@@ -54,14 +54,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Registrar pago en ContaSimple (modo demo)
+    // Verificar que el contrato tenga una factura en ContaSimple
+    if (!payment.contract?.contasimpleInvoiceId) {
+      return NextResponse.json(
+        { error: 'El contrato debe tener una factura en ContaSimple primero' },
+        { status: 400 }
+      );
+    }
+
+    // Registrar pago en ContaSimple
     const contaSimpleService = getContaSimpleService();
-    const result = await contaSimpleService.syncPaymentDemo(payment);
+    const contaSimplePayment = await contaSimpleService.syncPaymentToContaSimple(
+      payment,
+      payment.contract.contasimpleInvoiceId
+    );
+
+    // Guardar referencia del pago
+    await prisma.payment.update({
+      where: { id: paymentId },
+      data: {
+        contasimplePaymentId: contaSimplePayment.id,
+      },
+    });
 
     return NextResponse.json({
       success: true,
-      message: `Pago registrado: ${payment.monto}€`,
-      data: result,
+      message: `Pago registrado exitosamente: ${payment.monto}€`,
+      data: contaSimplePayment,
     });
   } catch (error) {
     console.error('Error al registrar pago en ContaSimple:', error);

@@ -50,14 +50,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Registrar gasto en ContaSimple (modo demo)
+    // Registrar gasto en ContaSimple
     const contaSimpleService = getContaSimpleService();
-    const result = await contaSimpleService.createExpenseDemo(expense);
+    const contaSimpleExpense = await contaSimpleService.syncExpenseToContaSimple(expense);
+
+    // Guardar referencia del gasto
+    await prisma.expense.update({
+      where: { id: expenseId },
+      data: {
+        contasimpleExpenseId: contaSimpleExpense.id,
+      },
+    });
 
     return NextResponse.json({
       success: true,
-      message: `Gasto registrado: ${expense.monto}€`,
-      data: result,
+      message: `Gasto registrado exitosamente: ${expense.monto}€`,
+      data: contaSimpleExpense,
     });
   } catch (error) {
     console.error('Error al registrar gasto en ContaSimple:', error);
