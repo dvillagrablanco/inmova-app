@@ -21,49 +21,50 @@ interface Message {
 const WHATSAPP_NUMBER = '+34600000000'; // Reemplazar con el número real de INMOVA
 const WHATSAPP_MESSAGE = 'Hola, me gustaría obtener más información sobre INMOVA';
 
-// Respuestas automáticas inteligentes
+// Respuestas automáticas con información correcta
 const FAQ_RESPONSES: Record<string, { answer: string; followUp?: Array<{ label: string; value: string }> }> = {
   precio: {
-    answer: '¡Excelente pregunta! INMOVA ofrece un plan único por solo €149/mes que incluye:\n\n• 88 módulos profesionales\n• Actualizaciones automáticas\n• Soporte técnico incluido\n• Sin costes ocultos\n\n¿Te gustaría probar INMOVA gratis por 30 días?',
+    answer: 'INMOVA ofrece varios planes:\n\n• Starter (€89/mes): 30 módulos, hasta 25 propiedades\n• Profesional (€199/mes): 60 módulos, hasta 200 propiedades\n• Empresarial (€499/mes): 88 módulos, hasta 1000 propiedades\n• Enterprise+ (€1,999+/mes): Personalizado\n\n30 días de prueba gratis en todos los planes.',
     followUp: [
-      { label: 'Sí, quiero probar gratis', value: 'trial' },
-      { label: 'Ver demo en vivo', value: 'demo' },
+      { label: 'Probar gratis 30 días', value: 'trial' },
+      { label: 'Ver comparativa de planes', value: 'planes' },
       { label: 'Hablar con ventas', value: 'contact' }
     ]
   },
   funcionalidades: {
-    answer: 'INMOVA es una plataforma completa con 88 módulos que cubren:\n\n✨ Gestión de propiedades\n✨ Alquiler tradicional y por habitaciones\n✨ Short-Term Rental (STR)\n✨ Mantenimiento predictivo con IA\n✨ Contabilidad automática\n✨ Portal de inquilinos\n✨ Firma digital\n\n¿Qué módulo te interesa más?',
+    answer: 'INMOVA incluye:\n\n• Gestión de propiedades completa\n• Alquiler tradicional y por habitaciones\n• Short-Term Rental con Channel Manager\n• Mantenimiento con IA predictiva\n• Contabilidad y pagos Stripe\n• Portales web para inquilinos y propietarios\n• Blockchain, ESG, IoT y más\n\n¿Qué te interesa más?',
     followUp: [
       { label: 'Alquiler por habitaciones', value: 'rooms' },
       { label: 'STR/Channel Manager', value: 'str' },
-      { label: 'IA y automatización', value: 'ai' },
-      { label: 'Ver todos los módulos', value: 'all-modules' }
+      { label: 'Ver demo', value: 'demo' }
     ]
   },
   demo: {
-    answer: '¡Perfecto! Te puedo ofrecer varias opciones:\n\n🎥 Ver video demo de 90 segundos\n💻 Acceder a demo interactiva en línea\n👤 Agendar demo personalizada con un experto\n\n¿Cuál prefieres?',
+    answer: 'Puedes ver INMOVA en acción:\n\n🎥 Video demo disponible en la página principal\n💻 Regístrate para acceder a la plataforma completa\n👤 Contacta con nosotros para una demo personalizada\n\n¿Qué prefieres?',
     followUp: [
-      { label: 'Video demo', value: 'video' },
-      { label: 'Demo interactiva', value: 'interactive' },
-      { label: 'Agendar con experto', value: 'schedule' }
+      { label: 'Registrarme ahora', value: 'trial' },
+      { label: 'Contactar con ventas', value: 'contact' }
     ]
   },
   comparativa: {
-    answer: 'INMOVA vs Competidores:\n\n✅ INMOVA: €149/mes, 88 módulos, todo incluido\n❌ Homming: €3,500/año, funciones limitadas\n❌ Rentger: €2,400/año, sin STR\n❌ Buildium: $3,600/año, solo para USA\n\n📊 Con INMOVA ahorras hasta 85% vs competidores\n\n¿Quieres ver una comparativa detallada?'
+    answer: 'INMOVA vs Competencia:\n\n✅ Más módulos (88 vs 10-25)\n✅ Multi-vertical (7 modelos de negocio)\n✅ Mejor precio/valor del mercado\n✅ Tecnología más avanzada (IA, Blockchain, IoT)\n\nConsulta la tabla comparativa completa en nuestra página.'
   },
   habitaciones: {
-    answer: '¡El módulo de Alquiler por Habitaciones es único!\n\n🏠 Gestiona múltiples inquilinos por propiedad\n💰 Prorrateo automático de gastos comunes\n📅 Calendario de limpieza rotativo\n📋 Normas de convivencia personalizables\n📊 Reportes individuales por habitación\n\n¿Te gustaría ver cómo funciona?',
+    answer: 'El módulo de Alquiler por Habitaciones incluye:\n\n🏠 Gestión de múltiples inquilinos por propiedad\n💰 Prorrateo automático de servicios (luz, agua, gas)\n📅 Calendario de limpieza y tareas\n📊 Reportes individuales\n\nIdeal para coliving y residencias compartidas.',
     followUp: [
-      { label: 'Ver demo del módulo', value: 'rooms-demo' },
-      { label: 'Casos de éxito', value: 'cases' },
-      { label: 'Hablar con experto', value: 'contact' }
+      { label: 'Probar gratis', value: 'trial' },
+      { label: 'Más información', value: 'contact' }
     ]
   },
   trial: {
-    answer: '🎉 ¡Genial! Puedes empezar tu prueba gratuita de 30 días ahora mismo.\n\n✨ Sin tarjeta de crédito\n✨ Acceso completo a todos los módulos\n✨ Soporte técnico incluido\n✨ Cancelación en cualquier momento\n\nDéjame tus datos y te enviamos el acceso inmediatamente:'
+    answer: '¡Perfecto! Regístrate para probar INMOVA gratis por 30 días:\n\n✅ Sin tarjeta de crédito\n✅ Acceso completo\n✅ Soporte incluido\n✅ Cancela cuando quieras\n\nHaz clic en "Comenzar Gratis" en el menú superior.'
   },
   contacto: {
-    answer: '📧 Email: sales@inmova.com\n📞 Teléfono: +34 900 123 456\n🌐 Web: www.inmova.com\n\n¿Prefieres que te contactemos nosotros?'
+    answer: 'Puedes contactarnos:\n\n📧 A través del formulario de contacto en nuestra web\n💬 Por WhatsApp (botón verde flotante)\n📞 O déjanos tus datos y te llamamos\n\n¿Prefieres que te contactemos?',
+    followUp: [
+      { label: 'Sí, contactadme', value: 'contact-form' },
+      { label: 'WhatsApp', value: 'whatsapp' }
+    ]
   }
 };
 
@@ -94,14 +95,12 @@ export function LandingChatbot() {
       // Mensaje de bienvenida
       setTimeout(() => {
         addBotMessage(
-          '¡Hola! 👋 Soy el asistente virtual de INMOVA.\n\n¿En qué puedo ayudarte hoy?',
+          '¡Hola! 👋 Soy el asistente de INMOVA.\n\n¿En qué puedo ayudarte?',
           'options',
           [
-            { label: '💰 Precio y planes', value: 'precio' },
+            { label: '💰 Precios', value: 'precio' },
             { label: '✨ Funcionalidades', value: 'funcionalidades' },
-            { label: '🎥 Ver demo', value: 'demo' },
-            { label: '🏠 Alquiler por habitaciones', value: 'habitaciones' },
-            { label: '📊 Comparativa', value: 'comparativa' },
+            { label: '🏠 Alquiler habitaciones', value: 'habitaciones' },
             { label: '📞 Contacto', value: 'contacto' }
           ]
         );
@@ -195,22 +194,26 @@ export function LandingChatbot() {
 
     switch (value) {
       case 'trial':
-        setShowContactForm(true);
         addBotMessage(
-          'Perfecto, completa este formulario y te enviaremos el acceso a tu prueba gratuita de 30 días:',
-          'contact-form'
+          '¡Perfecto! Para probar INMOVA gratis:\n\n1. Haz clic en "Comenzar Gratis" en el menú superior\n2. Completa el registro (sin tarjeta)\n3. Accede inmediatamente a todos los módulos\n\n¿Necesitas ayuda con el registro?',
+          'options',
+          [
+            { label: 'Sí, ayúdame', value: 'contact-form' },
+            { label: 'No, ya puedo', value: 'menu' }
+          ]
         );
         break;
       case 'contact':
+      case 'contact-form':
         setShowContactForm(true);
         addBotMessage(
-          'Completa este formulario y un experto de INMOVA te contactará en menos de 24 horas:',
+          'Déjanos tus datos y te contactaremos pronto:',
           'contact-form'
         );
         break;
       case 'whatsapp':
         addBotMessage(
-          '¡Perfecto! Puedes contactarnos directamente por WhatsApp haciendo clic en el botón verde flotante en la esquina inferior derecha 💬\n\nO haz clic aquí: ' + WHATSAPP_NUMBER
+          '¡Perfecto! Haz clic en el botón verde de WhatsApp en la esquina inferior derecha 💬'
         );
         break;
       case 'menu':
@@ -218,33 +221,16 @@ export function LandingChatbot() {
           '¿En qué puedo ayudarte?',
           'options',
           [
-            { label: '💰 Precio y planes', value: 'precio' },
+            { label: '💰 Precios', value: 'precio' },
             { label: '✨ Funcionalidades', value: 'funcionalidades' },
-            { label: '🎥 Ver demo', value: 'demo' },
-            { label: '📊 Comparativa', value: 'comparativa' }
+            { label: '🏠 Alquiler habitaciones', value: 'habitaciones' },
+            { label: '📞 Contacto', value: 'contacto' }
           ]
         );
         break;
-      case 'video':
+      case 'planes':
         addBotMessage(
-          '🎥 Puedes ver nuestro video demo aquí:\n\nhttps://www.youtube.com/inmova-demo\n\n¿Te gustaría también acceder a la demo interactiva?',
-          'options',
-          [
-            { label: 'Sí, demo interactiva', value: 'interactive' },
-            { label: 'Agendar demo personal', value: 'schedule' }
-          ]
-        );
-        break;
-      case 'interactive':
-        addBotMessage(
-          '¡Genial! Puedes acceder a la demo interactiva aquí:\n\n👉 www.inmova.com/demo\n\n¿Necesitas ayuda con algo más?'
-        );
-        break;
-      case 'schedule':
-        setShowContactForm(true);
-        addBotMessage(
-          'Completa tus datos y agendaremos una demo personalizada contigo:',
-          'contact-form'
+          'Consulta la comparativa detallada de planes en la sección de Precios de esta página.\n\nDesplázate hacia abajo para verla completa.'
         );
         break;
       default:
@@ -270,7 +256,13 @@ export function LandingChatbot() {
     toast.success('¡Gracias! Te contactaremos pronto.');
     setShowContactForm(false);
     addBotMessage(
-      `¡Gracias ${contactForm.name}! 🎉\n\nHemos recibido tu información y nuestro equipo te contactará en las próximas 24 horas.\n\nMientras tanto, puedes:\n\n✅ Visitar nuestra web: www.inmova.com\n✅ Contactarnos por WhatsApp\n✅ Ver nuestro blog con casos de éxito`
+      `¡Gracias ${contactForm.name}! 🎉\n\nHemos recibido tu información. Te contactaremos en menos de 24 horas.\n\n¿Necesitas algo más?`,
+      'options',
+      [
+        { label: 'Ver precios', value: 'precio' },
+        { label: 'WhatsApp ahora', value: 'whatsapp' },
+        { label: 'No, gracias', value: 'menu' }
+      ]
     );
     
     // Reset form

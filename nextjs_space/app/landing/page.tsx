@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { LandingChatbot } from '@/components/LandingChatbot';
 import { 
-  Building2, Users, TrendingUp, Zap, Shield, Bot, Leaf, Wallet, 
+  Building2, Users, TrendingUp, Zap, Shield, Bot, Leaf, 
   CheckCircle, Star, ArrowRight, Play, Hotel, Hammer, Briefcase,
   Cloud, Calendar, MessageSquare, FileText, CreditCard, BarChart3,
   Lock, Globe, Smartphone, Award, Target, Rocket, ChevronDown,
@@ -149,14 +149,14 @@ export default function LandingPage() {
               
               <h1 className="text-5xl md:text-7xl font-extrabold leading-tight">
                 <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600 bg-clip-text text-transparent animate-gradient">
-                  Elimina la Fragmentación
+                  Una Plataforma Para Todo
                 </span>{' '}
                 <br />
-                Una Plataforma, 7 Modelos de Negocio
+                Tu Negocio Inmobiliario
               </h1>
               
               <p className="text-xl text-gray-600 leading-relaxed">
-                Las gestoras operan con <span className="font-semibold text-red-600">5-8 plataformas desconectadas</span>, gastando 2.000-5.000€/mes. INMOVA elimina la fragmentación: <span className="font-semibold text-indigo-600">88 módulos profesionales.</span> <span className="font-semibold text-violet-600">7 verticales de negocio.</span> Blockchain + IA GPT-4 + IoT + Room Rental con prorrateo automático. Gestiona alquileres, coliving, STR turístico con Channel Manager nativo, flipping, construcción y servicios profesionales. <span className="font-bold text-green-600">Ahorra 70%, aumenta ROI 25%.</span>
+                Gestiona tu negocio inmobiliario completo desde una sola plataforma. <span className="font-semibold text-indigo-600">88 módulos profesionales</span> para alquileres, coliving, STR turístico, flipping y construcción. <span className="font-bold text-green-600">Ahorra tiempo y aumenta tu rentabilidad.</span>
               </p>
               
               <div className="flex flex-wrap gap-4">
@@ -334,10 +334,10 @@ export default function LandingPage() {
               Ventaja Competitiva
             </Badge>
             <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-              Por Qué Elegir INMOVA vs la Competencia
+              Por Qué Elegir INMOVA
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              <strong className="text-indigo-600">Reduce tu software un 70%.</strong> Aumenta el ROI un 25%. €3.32/módulo vs €6.96 de Buildium.
+              Una solución completa que integra todo lo que necesitas para gestionar tu negocio inmobiliario.
             </p>
           </div>
 
@@ -526,8 +526,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               { icon: Building2, title: 'Gestión de Propiedades', desc: 'Edificios, unidades, contratos y pagos completos', gradient: 'from-blue-500 to-cyan-500' },
-              { icon: Home, title: 'Alquiler por Habitaciones', desc: 'Coliving completo: prorrateo automático de utilidades (luz, agua, gas), gestión de habitaciones individuales, calendario de limpieza rotativo', gradient: 'from-teal-500 to-green-600' },
-              { icon: Wallet, title: 'Cupones de Descuento', desc: 'Sistema completo de cupones con validación, límites de uso, fechas de expiración, aplicación automática y estadísticas', gradient: 'from-fuchsia-500 to-pink-600', featured: true },
+              { icon: Home, title: 'Alquiler por Habitaciones', desc: 'Coliving completo con prorrateo automático de servicios y gestión individual', gradient: 'from-teal-500 to-green-600', featured: true },
               { icon: Users, title: 'Portal Inquilinos/Propietarios', desc: 'App móvil PWA + chat integrado + firma digital', gradient: 'from-purple-500 to-pink-500' },
               { icon: CreditCard, title: 'Pagos Stripe', desc: 'Cobros automáticos + suscripciones + portal de pago', gradient: 'from-green-500 to-emerald-500' },
               { icon: Hammer, title: 'Mantenimiento Pro', desc: 'IA predictiva + calendario + gestión proveedores', gradient: 'from-orange-500 to-red-500' },
@@ -929,24 +928,10 @@ export default function LandingPage() {
             ))}
           </div>
 
-          <div className="text-center mt-12 space-y-4">
+          <div className="text-center mt-12">
             <p className="text-sm text-gray-600">
               💳 <strong>30 días de prueba gratis.</strong> Sin tarjeta de crédito. Cancela cuando quieras.
             </p>
-            <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-700">
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">LAUNCH2025</Badge>
-                <span>50% dto. 1er mes</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">ANNUAL30</Badge>
-                <span>30% dto. pago anual</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="bg-violet-50 text-violet-700 border-violet-200">REFIERE100</Badge>
-                <span>€100 para ti y tu referido</span>
-              </div>
-            </div>
           </div>
         </div>
       </section>
