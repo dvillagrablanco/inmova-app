@@ -1,6 +1,6 @@
 /**
- * Rate Limiting Service
- * Protects APIs from abuse and ensures fair usage
+ * Rate Limiting Service - Enhanced
+ * Protects APIs from abuse and ensures fair usage with advanced features
  */
 
 import rateLimit from 'next-rate-limit';
@@ -11,6 +11,8 @@ interface RateLimitConfig {
   windowMs: number;
   max: number;
   message?: string;
+  skipSuccessfulRequests?: boolean;
+  skipFailedRequests?: boolean;
 }
 
 // Define rate limit configurations for different endpoint types
@@ -20,34 +22,56 @@ export const rateLimitConfigs = {
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 5, // 5 attempts
     message: 'Demasiados intentos de autenticación. Por favor, intente más tarde.',
+    skipSuccessfulRequests: true, // Solo contar intentos fallidos
   },
   
   // Standard limits for API endpoints
   api: {
     windowMs: 60 * 1000, // 1 minute
-    max: 60, // 60 requests per minute
+    max: 100, // 100 requests per minute (aumentado)
     message: 'Demasiadas solicitudes. Por favor, intente más tarde.',
   },
   
   // Relaxed limits for read-only endpoints
   read: {
     windowMs: 60 * 1000, // 1 minute
-    max: 100, // 100 requests per minute
+    max: 200, // 200 requests per minute (aumentado)
     message: 'Demasiadas solicitudes de lectura. Por favor, intente más tarde.',
   },
   
   // Strict limits for write operations
   write: {
     windowMs: 60 * 1000, // 1 minute
-    max: 30, // 30 requests per minute
+    max: 50, // 50 requests per minute (aumentado)
     message: 'Demasiadas operaciones de escritura. Por favor, intente más tarde.',
   },
   
-  // Very strict limits for expensive operations
+  // Very strict limits for expensive operations (exports, reports)
   expensive: {
     windowMs: 60 * 60 * 1000, // 1 hour
     max: 10, // 10 requests per hour
     message: 'Límite de operaciones costosas alcanzado. Por favor, intente más tarde.',
+  },
+  
+  // Limits for file uploads
+  upload: {
+    windowMs: 60 * 1000, // 1 minute
+    max: 20, // 20 uploads per minute
+    message: 'Demasiadas cargas de archivos. Por favor, intente más tarde.',
+  },
+  
+  // Limits for search operations
+  search: {
+    windowMs: 60 * 1000, // 1 minute
+    max: 120, // 120 searches per minute
+    message: 'Demasiadas búsquedas. Por favor, intente más tarde.',
+  },
+  
+  // Public endpoints (landing page, etc.)
+  public: {
+    windowMs: 60 * 1000, // 1 minute
+    max: 300, // 300 requests per minute
+    message: 'Límite de solicitudes alcanzado. Por favor, intente más tarde.',
   },
 };
 

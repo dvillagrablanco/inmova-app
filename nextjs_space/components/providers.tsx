@@ -7,25 +7,31 @@ import { ServiceWorkerRegister } from '@/components/pwa/ServiceWorkerRegister';
 import { InstallPrompt } from '@/components/pwa/InstallPrompt';
 import { I18nProvider } from '@/lib/i18n-context';
 import { BrandingProvider } from '@/components/BrandingProvider';
+import { DesignSystemProvider } from '@/components/DesignSystemProvider';
+import { QueryProvider } from '@/components/QueryProvider';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
-      <BrandingProvider>
-        <I18nProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="light"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <ServiceWorkerRegister />
-            {children}
-            <InstallPrompt />
-            <Toaster />
-          </ThemeProvider>
-        </I18nProvider>
-      </BrandingProvider>
+      <QueryProvider>
+        <DesignSystemProvider>
+          <BrandingProvider>
+            <I18nProvider>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="light"
+                enableSystem
+                disableTransitionOnChange
+              >
+                <ServiceWorkerRegister />
+                {children}
+                <InstallPrompt />
+                <Toaster />
+              </ThemeProvider>
+            </I18nProvider>
+          </BrandingProvider>
+        </DesignSystemProvider>
+      </QueryProvider>
     </SessionProvider>
   );
 }

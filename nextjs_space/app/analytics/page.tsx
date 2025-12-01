@@ -25,7 +25,20 @@ import {
   LineChart as LineChartIcon,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { 
+  LazyAreaChart as AreaChart, 
+  LazyArea as Area, 
+  LazyBarChart as BarChart, 
+  LazyBar as Bar, 
+  LazyLineChart as LineChart, 
+  LazyLine as Line, 
+  LazyXAxis as XAxis, 
+  LazyYAxis as YAxis, 
+  LazyCartesianGrid as CartesianGrid, 
+  LazyTooltip as Tooltip, 
+  LazyLegend as Legend, 
+  LazyResponsiveContainer as ResponsiveContainer 
+} from '@/components/ui/lazy-chart';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
