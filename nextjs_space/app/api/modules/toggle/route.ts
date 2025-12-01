@@ -5,6 +5,7 @@ import {
   activateModuleForCompany, 
   deactivateModuleForCompany 
 } from '@/lib/modules-service';
+import prisma from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,7 +35,34 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Verificar que el módulo esté incluido en el plan de suscripción si se quiere activar
     if (activo) {
+      const company = await prisma.company.findUnique({
+        where: { id: companyId },
+        include: {
+          subscriptionPlan: true,
+        },
+      });
+
+      if (!company) {
+        return NextResponse.json({ error: 'Empresa no encontrada' }, { status: 404 });
+      }
+
+      if (company.subscriptionPlan) {
+        const modulosIncluidos = (company.subscriptionPlan.modulosIncluidos as string[]) || [];
+        if (!modulosIncluidos.includes(moduloCodigo)) {
+          return NextResponse.json(
+            {
+              error: 'Módulo no incluido en el plan',
+              message: `El módulo "${moduloCodigo}" no está incluido en tu plan de suscripción actual (${company.subscriptionPlan.nombre}). Actualiza tu plan para acceder a este módulo.`,
+              upgradeRequired: true,
+              currentPlan: company.subscriptionPlan.nombre,
+            },
+            { status: 403 }
+          );
+        }
+      }
+
       await activateModuleForCompany(companyId, moduloCodigo, userId);
     } else {
       await deactivateModuleForCompany(companyId, moduloCodigo);

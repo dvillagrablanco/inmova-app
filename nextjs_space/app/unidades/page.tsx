@@ -37,6 +37,7 @@ import { SkeletonList, SkeletonCard } from '@/components/ui/skeleton-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { FilterChips } from '@/components/ui/filter-chips';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ViewModeToggle, ViewMode } from '@/components/ui/view-mode-toggle';
 
 interface Unit {
   id: string;
@@ -66,6 +67,21 @@ export default function UnidadesPage() {
   const [estadoFilter, setEstadoFilter] = useState<string>('all');
   const [tipoFilter, setTipoFilter] = useState<string>('all');
   const [activeFilters, setActiveFilters] = useState<Array<{ id: string; label: string; value: string }>>([]);
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+
+  // Load view preference from localStorage
+  useEffect(() => {
+    const savedViewMode = localStorage.getItem('unidades-view-mode') as ViewMode;
+    if (savedViewMode) {
+      setViewMode(savedViewMode);
+    }
+  }, []);
+
+  // Save view preference to localStorage
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    localStorage.setItem('unidades-view-mode', mode);
+  };
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -305,14 +321,17 @@ export default function UnidadesPage() {
             <div className="grid gap-4 md:grid-cols-3">
               <Card className="md:col-span-3">
                 <CardContent className="pt-6">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      placeholder="Buscar por número, edificio o inquilino..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                    />
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        placeholder="Buscar por número, edificio o inquilino..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                    <ViewModeToggle value={viewMode} onChange={handleViewModeChange} />
                   </div>
                 </CardContent>
               </Card>
@@ -384,29 +403,160 @@ export default function UnidadesPage() {
               </Card>
             </div>
 
-            {/* Units List */}
-            <div className="grid gap-4">
-              {filteredUnits.map((unit) => {
-                const estadoBadge = getEstadoBadge(unit.estado);
-
-                return (
-                  <Card key={unit.id} className="hover:shadow-md transition-shadow">
-                    <CardContent className="pt-6">
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                        <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
-                          <div className="p-3 bg-primary/10 rounded-lg flex-shrink-0">
-                            <Home className="h-6 w-6 text-primary" />
+            {/* Units Display - Grid View */}
+            {viewMode === 'grid' && (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {filteredUnits.map((unit) => {
+                  const estadoBadge = getEstadoBadge(unit.estado);
+                  return (
+                    <Card key={unit.id} className="hover:shadow-lg transition-shadow">
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div className="space-y-1 flex-1">
+                            <CardTitle className="text-lg">Unidad {unit.numero}</CardTitle>
+                            <p className="text-sm text-muted-foreground">{unit.building.nombre}</p>
                           </div>
-                          <div className="flex-1 space-y-2 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <h3 className="text-base sm:text-lg font-semibold break-words">
-                                {unit.building.nombre} - Unidad {unit.numero}
-                              </h3>
+                          <Badge variant={estadoBadge.variant}>{estadoBadge.label}</Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">Tipo</span>
+                            <span className="text-sm font-medium">{getTipoLabel(unit.tipo)}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">Superficie</span>
+                            <span className="text-sm font-medium">{unit.superficie}m²</span>
+                          </div>
+                          {unit.habitaciones && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-muted-foreground">Habitaciones</span>
+                              <span className="text-sm font-medium">{unit.habitaciones}</span>
+                            </div>
+                          )}
+                          {unit.tenant && (
+                            <div className="border-t pt-3">
+                              <div className="flex items-center gap-2 text-sm">
+                                <User className="h-4 w-4 text-muted-foreground" />
+                                <span className="truncate">{unit.tenant.nombreCompleto}</span>
+                              </div>
+                            </div>
+                          )}
+                          <div className="border-t pt-3">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-muted-foreground">Renta mensual</span>
+                              <span className="text-lg font-bold text-green-600">
+                                €{unit.rentaMensual.toLocaleString('es-ES')}
+                              </span>
+                            </div>
+                          </div>
+                          <Button
+                            onClick={() => router.push(`/unidades/${unit.id}`)}
+                            className="w-full mt-2"
+                            variant="outline"
+                          >
+                            Ver Detalles
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Units Display - List View (Detailed) */}
+            {viewMode === 'list' && (
+              <div className="space-y-4">
+                {filteredUnits.map((unit) => {
+                  const estadoBadge = getEstadoBadge(unit.estado);
+                  return (
+                    <Card key={unit.id} className="hover:shadow-lg transition-shadow">
+                      <CardContent className="pt-6">
+                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                          <div className="flex-1 space-y-4">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <h3 className="text-xl font-bold">
+                                  {unit.building.nombre} - Unidad {unit.numero}
+                                </h3>
+                                <p className="text-muted-foreground mt-1">{getTipoLabel(unit.tipo)}</p>
+                              </div>
                               <Badge variant={estadoBadge.variant}>{estadoBadge.label}</Badge>
                             </div>
-                            <div className="grid gap-2 text-sm text-muted-foreground">
-                              <div className="flex items-center gap-2 min-w-0 flex-wrap">
-                                <Building2 className="h-4 w-4 flex-shrink-0" />
+                            
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                              <div>
+                                <p className="text-sm text-muted-foreground">Superficie</p>
+                                <p className="text-lg font-semibold">{unit.superficie}m²</p>
+                              </div>
+                              {unit.habitaciones && (
+                                <div>
+                                  <p className="text-sm text-muted-foreground">Habitaciones</p>
+                                  <p className="text-lg font-semibold">{unit.habitaciones}</p>
+                                </div>
+                              )}
+                              {unit.banos && (
+                                <div>
+                                  <p className="text-sm text-muted-foreground">Baños</p>
+                                  <p className="text-lg font-semibold">{unit.banos}</p>
+                                </div>
+                              )}
+                              <div>
+                                <p className="text-sm text-muted-foreground">Renta/mes</p>
+                                <p className="text-lg font-semibold text-green-600">
+                                  €{unit.rentaMensual.toLocaleString('es-ES')}
+                                </p>
+                              </div>
+                            </div>
+
+                            {unit.tenant && (
+                              <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
+                                <User className="h-5 w-5 text-muted-foreground" />
+                                <div>
+                                  <p className="text-sm font-medium">{unit.tenant.nombreCompleto}</p>
+                                  <p className="text-xs text-muted-foreground">Inquilino actual</p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex lg:flex-col gap-2">
+                            <Button
+                              onClick={() => router.push(`/unidades/${unit.id}`)}
+                              className="flex-1 lg:flex-none"
+                            >
+                              <Eye className="mr-2 h-4 w-4" />
+                              Ver Detalles
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Units Display - Compact View */}
+            {viewMode === 'compact' && (
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="space-y-2">
+                    {filteredUnits.map((unit) => {
+                      const estadoBadge = getEstadoBadge(unit.estado);
+                      return (
+                        <div
+                          key={unit.id}
+                          className="flex items-center justify-between p-4 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                          onClick={() => router.push(`/unidades/${unit.id}`)}
+                        >
+                          <div className="flex items-center gap-4 flex-1">
+                            <Home className="h-8 w-8 text-muted-foreground" />
+                            <div className="flex-1">
+                              <p className="font-semibold">{unit.building.nombre} - Unidad {unit.numero}</p>
+                              <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                                 <span>{getTipoLabel(unit.tipo)}</span>
                                 <span>•</span>
                                 <span>{unit.superficie}m²</span>
@@ -416,47 +566,36 @@ export default function UnidadesPage() {
                                     <span>{unit.habitaciones} hab.</span>
                                   </>
                                 )}
-                                {unit.banos && (
-                                  <>
-                                    <span>•</span>
-                                    <span>{unit.banos} baños</span>
-                                  </>
-                                )}
+                                <Badge variant={estadoBadge.variant} className="text-xs">
+                                  {estadoBadge.label}
+                                </Badge>
                               </div>
-                              {unit.tenant && (
-                                <div className="flex items-center gap-2 min-w-0">
-                                  <User className="h-4 w-4 flex-shrink-0" />
-                                  <span className="truncate">{unit.tenant.nombreCompleto}</span>
-                                </div>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2 bg-muted/50 p-2 rounded-md">
-                              <span className="text-xs text-muted-foreground">Renta mensual:</span>
-                              <span className="text-base font-bold text-green-600">
-                                €{unit.rentaMensual.toLocaleString('es-ES')}
-                              </span>
                             </div>
                           </div>
-                        </div>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="self-start">
-                              <MoreVertical className="h-4 w-4" />
+                          <div className="flex items-center gap-6 text-sm">
+                            {unit.tenant && (
+                              <div className="text-center max-w-[120px]">
+                                <p className="text-muted-foreground">Inquilino</p>
+                                <p className="font-semibold truncate">{unit.tenant.nombreCompleto}</p>
+                              </div>
+                            )}
+                            <div className="text-center">
+                              <p className="text-muted-foreground">Renta/mes</p>
+                              <p className="font-semibold text-green-600">
+                                €{unit.rentaMensual.toLocaleString('es-ES')}
+                              </p>
+                            </div>
+                            <Button variant="ghost" size="icon">
+                              <Eye className="h-4 w-4" />
                             </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => router.push(`/unidades/${unit.id}`)}>
-                              <Eye className="mr-2 h-4 w-4" />
-                              Ver Detalles
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {filteredUnits.length === 0 && (
               (searchTerm || estadoFilter !== 'all' || tipoFilter !== 'all') ? (

@@ -29,6 +29,7 @@ import { usePermissions } from '@/lib/hooks/usePermissions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SkeletonList } from '@/components/ui/skeleton-card';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ViewModeToggle, ViewMode } from '@/components/ui/view-mode-toggle';
 
 interface Building {
   id: string;
@@ -53,6 +54,21 @@ export default function EdificiosPage() {
   const [filteredBuildings, setFilteredBuildings] = useState<Building[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+
+  // Load view preference from localStorage
+  useEffect(() => {
+    const savedViewMode = localStorage.getItem('edificios-view-mode') as ViewMode;
+    if (savedViewMode) {
+      setViewMode(savedViewMode);
+    }
+  }, []);
+
+  // Save view preference to localStorage
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    localStorage.setItem('edificios-view-mode', mode);
+  };
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -172,17 +188,20 @@ export default function EdificiosPage() {
               )}
             </div>
 
-            {/* Search Bar */}
+            {/* Search Bar and View Mode */}
             <Card>
               <CardContent className="pt-6">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    placeholder="Buscar por nombre, dirección o tipo..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      placeholder="Buscar por nombre, dirección o tipo..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                  <ViewModeToggle value={viewMode} onChange={handleViewModeChange} />
                 </div>
               </CardContent>
             </Card>
@@ -230,87 +249,227 @@ export default function EdificiosPage() {
               </Card>
             </div>
 
-            {/* Buildings Grid */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {filteredBuildings.map((building) => {
-                const tipoBadge = getTipoBadge(building.tipo);
-                return (
-                  <Card key={building.id} className="hover:shadow-lg transition-shadow">
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-1 flex-1">
-                          <CardTitle className="text-lg">{building.nombre}</CardTitle>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <MapPin className="h-4 w-4" />
-                            <span>{building.direccion}</span>
+            {/* Buildings Display - Grid View */}
+            {viewMode === 'grid' && (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {filteredBuildings.map((building) => {
+                  const tipoBadge = getTipoBadge(building.tipo);
+                  return (
+                    <Card key={building.id} className="hover:shadow-lg transition-shadow">
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div className="space-y-1 flex-1">
+                            <CardTitle className="text-lg">{building.nombre}</CardTitle>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <MapPin className="h-4 w-4" />
+                              <span>{building.direccion}</span>
+                            </div>
                           </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => router.push(`/edificios/${building.id}`)}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                Ver Detalles
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => router.push(`/edificios/${building.id}`)}>
-                              <Eye className="mr-2 h-4 w-4" />
-                              Ver Detalles
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">Tipo</span>
-                          <Badge variant={tipoBadge.variant}>{tipoBadge.label}</Badge>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">Año</span>
-                          <span className="text-sm font-medium">{building.anoConstructor}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">Unidades</span>
-                          <span className="text-sm font-medium">{building.numeroUnidades}</span>
-                        </div>
-                        {building.metrics && (
-                          <>
-                            <div className="border-t pt-3">
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">Tipo</span>
+                            <Badge variant={tipoBadge.variant}>{tipoBadge.label}</Badge>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">Año</span>
+                            <span className="text-sm font-medium">{building.anoConstructor}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">Unidades</span>
+                            <span className="text-sm font-medium">{building.numeroUnidades}</span>
+                          </div>
+                          {building.metrics && (
+                            <>
+                              <div className="border-t pt-3">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm text-muted-foreground">Ocupación</span>
+                                  <span className="text-sm font-bold">
+                                    {building.metrics.ocupacionPct}%
+                                  </span>
+                                </div>
+                                <div className="mt-2 h-2 w-full rounded-full bg-muted">
+                                  <div
+                                    className="h-2 rounded-full bg-primary transition-all"
+                                    style={{ width: `${building.metrics.ocupacionPct}%` }}
+                                  />
+                                </div>
+                              </div>
                               <div className="flex items-center justify-between">
-                                <span className="text-sm text-muted-foreground">Ocupación</span>
-                                <span className="text-sm font-bold">
-                                  {building.metrics.ocupacionPct}%
+                                <span className="text-sm text-muted-foreground">Ingresos/mes</span>
+                                <span className="text-sm font-bold text-green-600">
+                                  €{building.metrics.ingresosMensuales.toLocaleString()}
                                 </span>
                               </div>
-                              <div className="mt-2 h-2 w-full rounded-full bg-muted">
-                                <div
-                                  className="h-2 rounded-full bg-primary transition-all"
-                                  style={{ width: `${building.metrics.ocupacionPct}%` }}
-                                />
+                            </>
+                          )}
+                          <Button
+                            onClick={() => router.push(`/edificios/${building.id}`)}
+                            className="w-full mt-2"
+                            variant="outline"
+                          >
+                            Ver Detalles
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Buildings Display - List View (Detailed) */}
+            {viewMode === 'list' && (
+              <div className="space-y-4">
+                {filteredBuildings.map((building) => {
+                  const tipoBadge = getTipoBadge(building.tipo);
+                  return (
+                    <Card key={building.id} className="hover:shadow-lg transition-shadow">
+                      <CardContent className="pt-6">
+                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                          <div className="flex-1 space-y-4">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <h3 className="text-xl font-bold">{building.nombre}</h3>
+                                <div className="flex items-center gap-2 text-muted-foreground mt-1">
+                                  <MapPin className="h-4 w-4" />
+                                  <span>{building.direccion}</span>
+                                </div>
+                              </div>
+                              <Badge variant={tipoBadge.variant}>{tipoBadge.label}</Badge>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                              <div>
+                                <p className="text-sm text-muted-foreground">Año construcción</p>
+                                <p className="text-lg font-semibold">{building.anoConstructor}</p>
+                              </div>
+                              <div>
+                                <p className="text-sm text-muted-foreground">Unidades</p>
+                                <p className="text-lg font-semibold">{building.numeroUnidades}</p>
+                              </div>
+                              {building.metrics && (
+                                <>
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Ocupación</p>
+                                    <p className="text-lg font-semibold">{building.metrics.ocupacionPct}%</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Ingresos/mes</p>
+                                    <p className="text-lg font-semibold text-green-600">
+                                      €{building.metrics.ingresosMensuales.toLocaleString()}
+                                    </p>
+                                  </div>
+                                </>
+                              )}
+                            </div>
+
+                            {building.metrics && (
+                              <div>
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="text-sm font-medium">Tasa de ocupación</span>
+                                  <span className="text-sm font-medium">{building.metrics.ocupacionPct}%</span>
+                                </div>
+                                <div className="h-2 w-full rounded-full bg-muted">
+                                  <div
+                                    className="h-2 rounded-full bg-primary transition-all"
+                                    style={{ width: `${building.metrics.ocupacionPct}%` }}
+                                  />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex lg:flex-col gap-2">
+                            <Button
+                              onClick={() => router.push(`/edificios/${building.id}`)}
+                              className="flex-1 lg:flex-none"
+                            >
+                              <Eye className="mr-2 h-4 w-4" />
+                              Ver Detalles
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Buildings Display - Compact View */}
+            {viewMode === 'compact' && (
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="space-y-2">
+                    {filteredBuildings.map((building) => {
+                      const tipoBadge = getTipoBadge(building.tipo);
+                      return (
+                        <div
+                          key={building.id}
+                          className="flex items-center justify-between p-4 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                          onClick={() => router.push(`/edificios/${building.id}`)}
+                        >
+                          <div className="flex items-center gap-4 flex-1">
+                            <Building2 className="h-8 w-8 text-muted-foreground" />
+                            <div className="flex-1">
+                              <p className="font-semibold">{building.nombre}</p>
+                              <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                                <span className="flex items-center gap-1">
+                                  <MapPin className="h-3 w-3" />
+                                  {building.direccion}
+                                </span>
+                                <Badge variant={tipoBadge.variant} className="text-xs">
+                                  {tipoBadge.label}
+                                </Badge>
                               </div>
                             </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-muted-foreground">Ingresos/mes</span>
-                              <span className="text-sm font-bold text-green-600">
-                                €{building.metrics.ingresosMensuales.toLocaleString()}
-                              </span>
+                          </div>
+                          <div className="flex items-center gap-6 text-sm">
+                            <div className="text-center">
+                              <p className="text-muted-foreground">Unidades</p>
+                              <p className="font-semibold">{building.numeroUnidades}</p>
                             </div>
-                          </>
-                        )}
-                        <Button
-                          onClick={() => router.push(`/edificios/${building.id}`)}
-                          className="w-full mt-2"
-                          variant="outline"
-                        >
-                          Ver Detalles
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
+                            {building.metrics && (
+                              <>
+                                <div className="text-center">
+                                  <p className="text-muted-foreground">Ocupación</p>
+                                  <p className="font-semibold">{building.metrics.ocupacionPct}%</p>
+                                </div>
+                                <div className="text-center">
+                                  <p className="text-muted-foreground">Ingresos/mes</p>
+                                  <p className="font-semibold text-green-600">
+                                    €{building.metrics.ingresosMensuales.toLocaleString()}
+                                  </p>
+                                </div>
+                              </>
+                            )}
+                            <Button variant="ghost" size="icon">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {filteredBuildings.length === 0 && !searchTerm && (
               <EmptyState

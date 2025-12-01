@@ -19,13 +19,14 @@ import { toast } from 'sonner';
 import { 
   Building2, Users, TrendingUp, Plus, Search, Eye, Trash2, AlertCircle, CheckCircle2,
   LogIn, Copy, ExternalLink, MoreVertical, Filter, Download, RefreshCw, Power, PowerOff,
-  Check, X, Settings
+  Check, X, Settings, CreditCard
 } from 'lucide-react';
 
 import { InfoTooltip } from '@/components/ui/info-tooltip';
 import { BackButton } from '@/components/ui/back-button';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { LoadingState } from '@/components/ui/loading-state';
+import { ChangePlanDialog } from '@/components/admin/ChangePlanDialog';
 
 interface Company {
   id: string;
@@ -88,6 +89,10 @@ export default function ClientesAdminPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'table' | 'cards'>('cards');
   const [showBulkActions, setShowBulkActions] = useState(false);
   const [bulkActionLoading, setBulkActionLoading] = useState(false);
+  
+  // Estado para diálogo de cambio de plan
+  const [showChangePlanDialog, setShowChangePlanDialog] = useState(false);
+  const [selectedCompanyForPlanChange, setSelectedCompanyForPlanChange] = useState<Company | null>(null);
   
   const [newCompany, setNewCompany] = useState({
     nombre: '',
@@ -348,6 +353,12 @@ export default function ClientesAdminPage() {
         description: error.message,
       });
     }
+  };
+
+  // Función para abrir el diálogo de cambio de plan
+  const handleOpenChangePlan = (company: Company) => {
+    setSelectedCompanyForPlanChange(company);
+    setShowChangePlanDialog(true);
   };
 
   // Función para "Login como" empresa
@@ -883,6 +894,10 @@ export default function ClientesAdminPage() {
                                 <LogIn className="w-4 h-4 mr-2" />
                                 Login como...
                               </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleOpenChangePlan(company)}>
+                                <CreditCard className="w-4 h-4 mr-2" />
+                                Cambiar Plan
+                              </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               
                               {/* Submenu para cambiar categoría */}
@@ -1021,6 +1036,16 @@ export default function ClientesAdminPage() {
           </div>
         </main>
       </div>
+
+      {/* Change Plan Dialog */}
+      {selectedCompanyForPlanChange && (
+        <ChangePlanDialog
+          open={showChangePlanDialog}
+          onOpenChange={setShowChangePlanDialog}
+          company={selectedCompanyForPlanChange}
+          onSuccess={loadData}
+        />
+      )}
     </div>
     </ErrorBoundary>
   );
