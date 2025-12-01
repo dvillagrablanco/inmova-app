@@ -834,6 +834,9 @@ model Company {
   // Sistema de tags para organización
   tags              String[]         @default([])
   
+  // Stripe
+  stripeCustomerId  String?          @unique
+  
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
 
@@ -955,6 +958,11 @@ model Company {
   
   // Cupones de descuento
   discountCoupons     DiscountCoupon[]
+  
+  // Facturación B2B
+  b2bInvoices         B2BInvoice[]
+  b2bPaymentHistory   B2BPaymentHistory[]
+  b2bSubscriptionHistory B2BSubscriptionHistory[]
 
   @@map("company")
 }
@@ -4438,6 +4446,7 @@ model SubscriptionPlan {
   updatedAt        DateTime         @updatedAt
   
   companies        Company[]
+  b2bInvoices      B2BInvoice[]
 
   @@map("subscription_plans")
 }
@@ -6922,5 +6931,157 @@ model CouponUsage {
   @@index([userId])
   @@index([tenantId])
   @@map("coupon_usages")
+}
+
+// ============================================
+// FACTURACIÓN B2B - INMOVA A EMPRESAS
+// ============================================
+
+model B2BInvoice {
+  id                String        @id @default(uuid())
+  companyId         String
+  company           Company       @relation(fields: [companyId], references: [id])
+  
+  // Invoice Data
+  numeroFactura     String        @unique // INV-2026-0001
+  fechaEmision      DateTime      @default(now())
+  fechaVencimiento  DateTime
+  periodo           String        // "2026-01", "Q1-2026"
+  
+  // Billing Details
+  subscriptionPlanId String?
+  subscriptionPlan   SubscriptionPlan? @relation(fields: [subscriptionPlanId], references: [id])
+  
+  // Amounts
+  subtotal          Float
+  descuento         Float         @default(0)
+  impuestos         Float         // IVA 21%
+  total             Float
+  
+  // Payment
+  estado            InvoiceStatus @default(PENDIENTE)
+  metodoPago        String?       // "stripe", "transferencia", "otro"
+  fechaPago         DateTime?
+  
+  // Stripe Integration
+  stripeInvoiceId   String?       @unique
+  stripePaymentIntentId String?
+  stripePdfUrl      String?
+  
+  // Details
+  conceptos         Json          // [{descripcion, cantidad, precioUnitario, total}]
+  notas             String?
+  terminosPago      String?       @default("30 días")
+  
+  // History
+  recordatoriosEnviados Int       @default(0)
+  ultimoRecordatorio    DateTime?
+  
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  
+  @@index([companyId])
+  @@index([fechaEmision])
+  @@index([estado])
+}
+
+enum InvoiceStatus {
+  PENDIENTE
+  PAGADA
+  VENCIDA
+  CANCELADA
+  PARCIALMENTE_PAGADA
+}
+
+model B2BPaymentHistory {
+  id                String   @id @default(uuid())
+  companyId         String
+  company           Company  @relation(fields: [companyId], references: [id])
+  
+  invoiceId         String?
+  
+  // Payment Data
+  monto             Float
+  metodoPago        String
+  fechaPago         DateTime @default(now())
+  referencia        String?
+  
+  // Stripe Data
+  stripePaymentId   String?  @unique
+  stripeChargeId    String?
+  stripeFee         Float?
+  stripeNetAmount   Float?
+  
+  // Status
+  estado            String   // "completado", "fallido", "reembolsado"
+  notas             String?
+  
+  createdAt         DateTime @default(now())
+  
+  @@index([companyId])
+  @@index([invoiceId])
+  @@index([fechaPago])
+}
+
+model B2BSubscriptionHistory {
+  id                String   @id @default(uuid())
+  companyId         String
+  company           Company  @relation(fields: [companyId], references: [id])
+  
+  // Subscription Changes
+  accion            String   // "upgrade", "downgrade", "cancelacion", "reactivacion"
+  planAnteriorId    String?
+  planNuevoId       String?
+  
+  // Details
+  fechaCambio       DateTime @default(now())
+  razon             String?
+  costoAdicional    Float?   // Si aplica upgrade
+  
+  // User who made the change
+  realizadoPor      String?  // userId del admin
+  
+  createdAt         DateTime @default(now())
+  
+  @@index([companyId])
+  @@index([fechaCambio])
+}
+
+model B2BFinancialReport {
+  id                String   @id @default(uuid())
+  
+  // Period
+  periodo           String   @unique // "2026-01", "Q1-2026", "2026"
+  tipoReporte       String   // "mensual", "trimestral", "anual"
+  
+  // Revenue Metrics
+  ingresosBrutos    Float
+  descuentosTotal   Float
+  impuestosTotal    Float
+  ingresosNetos     Float
+  
+  // Subscription Metrics
+  empresasActivas   Int
+  empresasNuevas    Int
+  empresasCanceladas Int
+  tasaRetencion     Float    // %
+  
+  // Invoice Metrics
+  facturasEmitidas  Int
+  facturasPagadas   Int
+  facturasVencidas  Int
+  ticketPromedio    Float
+  
+  // Growth
+  crecimientoMoM    Float?   // Month over Month %
+  crecimientoYoY    Float?   // Year over Year %
+  
+  // Data Details
+  detalles          Json     // Breakdown por plan, industria, etc.
+  
+  fechaGeneracion   DateTime @default(now())
+  
+  @@index([periodo])
+  @@index([tipoReporte])
 }
 
