@@ -278,6 +278,11 @@ model Building {
   flippingProjects   FlippingProject[] @relation
   constructionProjects ConstructionProject[] @relation
 
+  // Índices optimizados para consultas frecuentes
+  @@index([companyId])
+  @@index([tipo, companyId])
+  @@index([companyId, createdAt])
+
   @@map("buildings")
 }
 
@@ -355,6 +360,12 @@ model Tenant {
   
   // Room Rental Module
   roomContracts       RoomContract[]
+
+  // Índices optimizados para consultas frecuentes
+  @@index([companyId])
+  @@index([email])
+  @@index([dni])
+  @@index([companyId, scoring])
 
   @@map("tenants")
 }
@@ -434,6 +445,12 @@ model Unit {
   roomSharedSpaces   RoomSharedSpace[]
   
   @@unique([buildingId, numero])
+  // Índices optimizados para consultas frecuentes
+  @@index([buildingId, estado])
+  @@index([estado])
+  @@index([tenantId])
+  @@index([tipo, estado])
+  
   @@map("units")
 }
 
@@ -472,6 +489,13 @@ model Contract {
   
   // Fase 1
   calendarEvents    CalendarEvent[]
+
+  // Índices optimizados para consultas frecuentes
+  @@index([tenantId, estado])
+  @@index([unitId, estado])
+  @@index([estado])
+  @@index([fechaInicio, fechaFin])
+  @@index([tenantId, fechaInicio])
 
   @@map("contracts")
 }
@@ -517,6 +541,13 @@ model Payment {
   
   // Fase 1
   calendarEvents    CalendarEvent[]
+
+  // Índices optimizados para consultas frecuentes
+  @@index([contractId, estado])
+  @@index([estado])
+  @@index([fechaVencimiento])
+  @@index([fechaPago])
+  @@index([contractId, fechaVencimiento])
 
   @@map("payments")
 }

@@ -678,15 +678,40 @@ export async function importData(
  * Genera una plantilla CSV para un tipo de entidad
  */
 export function generateCSVTemplate(entityType: ImportableEntity): string {
-  const headers: Record<ImportableEntity, string[]> = {
-    buildings: ['nombre', 'direccion', 'ciudad', 'codigoPostal', 'numeroUnidades', 'anosConstruccion'],
-    units: ['numero', 'edificio', 'tipo', 'superficie', 'habitaciones', 'banos', 'rentaMensual', 'estado'],
-    tenants: ['nombre', 'apellidos', 'email', 'telefono', 'dni', 'fechaNacimiento', 'ingresosMensuales'],
-    contracts: ['tenantEmail', 'unitNumero', 'edificio', 'fechaInicio', 'fechaFin', 'rentaMensual', 'diaPago', 'deposito'],
-    payments: ['contratoId', 'mes', 'monto', 'fechaVencimiento', 'estado', 'concepto'],
-    providers: ['nombre', 'tipo', 'email', 'telefono', 'cif', 'servicios'],
-    expenses: ['concepto', 'categoria', 'monto', 'fecha', 'edificio', 'notas']
+  const templates: Record<ImportableEntity, { headers: string[], examples: string[] }> = {
+    buildings: {
+      headers: ['nombre', 'direccion', 'tipo', 'anoConstructor', 'numeroUnidades', 'ascensor', 'garaje', 'piscina', 'gastosComunidad', 'ibiAnual', 'latitud', 'longitud'],
+      examples: ['Edificio Central', 'Calle Mayor 123, Madrid', 'residencial', '2010', '24', 'true', 'true', 'false', '150.50', '800.00', '40.4168', '-3.7038']
+    },
+    units: {
+      headers: ['numero', 'edificioNombre', 'tipo', 'estado', 'superficie', 'superficieUtil', 'habitaciones', 'banos', 'planta', 'orientacion', 'rentaMensual', 'aireAcondicionado', 'calefaccion', 'terraza', 'amueblado'],
+      examples: ['1A', 'Edificio Central', 'piso', 'disponible', '85.5', '78.0', '3', '2', '1', 'sur', '950.00', 'true', 'true', 'false', 'false']
+    },
+    tenants: {
+      headers: ['nombreCompleto', 'dni', 'email', 'telefono', 'fechaNacimiento', 'nacionalidad', 'estadoCivil', 'numeroOcupantes', 'direccionActual', 'situacionLaboral', 'empresa', 'puesto', 'antiguedad', 'ingresosMensuales'],
+      examples: ['Juan P\u00e9rez Garc\u00eda', '12345678A', 'juan.perez@email.com', '+34600123456', '1985-06-15', 'Espa\u00f1ola', 'casado', '3', 'Calle Falsa 123, Madrid', 'empleado', 'Tech Corp SL', 'Desarrollador Senior', '5', '3500.00']
+    },
+    contracts: {
+      headers: ['tenantEmail', 'unitNumero', 'edificioNombre', 'fechaInicio', 'fechaFin', 'rentaMensual', 'diaPago', 'deposito', 'mesesFianza', 'renovacionAutomatica', 'tipo', 'estado'],
+      examples: ['juan.perez@email.com', '1A', 'Edificio Central', '2024-01-01', '2025-12-31', '950.00', '5', '1900.00', '2', 'true', 'residencial', 'activo']
+    },
+    payments: {
+      headers: ['contratoTenantEmail', 'periodo', 'monto', 'fechaVencimiento', 'fechaPago', 'estado', 'metodoPago'],
+      examples: ['juan.perez@email.com', '2024-01', '950.00', '2024-01-05', '2024-01-03', 'pagado', 'transferencia']
+    },
+    providers: {
+      headers: ['nombre', 'email', 'telefono', 'cif', 'servicios', 'calificacion', 'certificaciones', 'activo'],
+      examples: ['Mantenimiento 24h SL', 'contacto@mant24h.com', '+34910123456', 'B12345678', 'fontaneria,electricidad,climatizacion', '4.5', 'ISO9001,ISO14001', 'true']
+    },
+    expenses: {
+      headers: ['concepto', 'categoria', 'monto', 'fecha', 'edificioNombre', 'metodoPago', 'proveedorNombre', 'notas', 'recurrente'],
+      examples: ['Reparaci\u00f3n ascensor', 'mantenimiento', '450.00', '2024-01-15', 'Edificio Central', 'transferencia', 'Ascensores R\u00e1pidos SA', 'Reparaci\u00f3n urgente', 'false']
+    }
   };
 
-  return headers[entityType].join(',') + '\n';
+  const template = templates[entityType];
+  const headerRow = template.headers.join(',');
+  const exampleRow = template.examples.join(',');
+  
+  return `${headerRow}\n${exampleRow}\n`;
 }
