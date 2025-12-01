@@ -171,9 +171,9 @@ export default function ModulosAdminPage() {
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
         <Header />
-        <main className="flex-1 overflow-y-auto p-6 bg-muted/30">
+        <main className="flex-1 overflow-y-auto p-6 bg-gradient-bg">
           {/* Header */}
           <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>

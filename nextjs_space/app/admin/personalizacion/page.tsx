@@ -238,10 +238,10 @@ export default function PersonalizacionPage() {
     <div className="flex h-screen overflow-hidden bg-muted/30">
       <Sidebar />
       
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
         <Header />
         
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-6 bg-gradient-bg">
           {/* Breadcrumbs y Header */}
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-4">
