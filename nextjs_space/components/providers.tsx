@@ -7,19 +7,8 @@ import { ServiceWorkerRegister } from '@/components/pwa/ServiceWorkerRegister';
 import { InstallPrompt } from '@/components/pwa/InstallPrompt';
 import { I18nProvider } from '@/lib/i18n-context';
 import { BrandingProvider } from '@/components/BrandingProvider';
-import { useEffect, useState } from 'react';
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return null;
-  }
-
   return (
     <SessionProvider>
       <BrandingProvider>
