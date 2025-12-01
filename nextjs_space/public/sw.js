@@ -84,15 +84,19 @@ self.addEventListener('fetch', (event) => {
 // Estrategia Cache First
 async function cacheFirstStrategy(request, cacheName) {
   const cache = await caches.open(cacheName);
-  const cached = await cache.match(request);
   
-  if (cached) {
-    return cached;
+  // Solo buscar en cache para peticiones GET
+  if (request.method === 'GET') {
+    const cached = await cache.match(request);
+    if (cached) {
+      return cached;
+    }
   }
 
   try {
     const response = await fetch(request);
-    if (response.status === 200) {
+    // Solo cachear peticiones GET exitosas
+    if (response.status === 200 && request.method === 'GET') {
       cache.put(request, response.clone());
     }
     return response;
@@ -108,16 +112,20 @@ async function networkFirstStrategy(request, cacheName) {
   
   try {
     const response = await fetch(request);
-    if (response.status === 200) {
+    // Solo cachear peticiones GET exitosas
+    if (response.status === 200 && request.method === 'GET') {
       cache.put(request, response.clone());
     }
     return response;
   } catch (error) {
-    const cached = await cache.match(request);
-    if (cached) {
-      return cached;
+    // Solo buscar en cache para peticiones GET
+    if (request.method === 'GET') {
+      const cached = await cache.match(request);
+      if (cached) {
+        return cached;
+      }
     }
-    console.log('[SW] Network and cache failed for:', request.url);
+    console.log('[SW] Network failed for:', request.url);
     return new Response(JSON.stringify({ error: 'Offline' }), {
       status: 503,
       headers: { 'Content-Type': 'application/json' }
@@ -131,20 +139,24 @@ async function networkFirstWithOfflineFallback(request) {
   
   try {
     const response = await fetch(request);
-    if (response.status === 200) {
+    // Solo cachear peticiones GET exitosas
+    if (response.status === 200 && request.method === 'GET') {
       cache.put(request, response.clone());
     }
     return response;
   } catch (error) {
-    const cached = await cache.match(request);
-    if (cached) {
-      return cached;
-    }
-    
-    // Si no hay caché, intentar devolver la página offline
-    const offlinePage = await cache.match('/offline');
-    if (offlinePage) {
-      return offlinePage;
+    // Solo buscar en cache para peticiones GET
+    if (request.method === 'GET') {
+      const cached = await cache.match(request);
+      if (cached) {
+        return cached;
+      }
+      
+      // Si no hay caché, intentar devolver la página offline
+      const offlinePage = await cache.match('/offline');
+      if (offlinePage) {
+        return offlinePage;
+      }
     }
     
     // Último recurso: respuesta genérica

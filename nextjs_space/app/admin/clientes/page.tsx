@@ -467,8 +467,8 @@ export default function ClientesAdminPage() {
               <div className="mb-4">
                 <BackButton fallbackUrl="/dashboard" />
               </div>
-              <div className="flex items-center justify-between mb-4">
-                <div>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+                <div className="flex-1">
                   <h1 className="text-3xl font-bold text-foreground">Gestión de Clientes</h1>
                   <p className="text-muted-foreground mt-1">
                     Administra todas las empresas y sus configuraciones
@@ -476,7 +476,10 @@ export default function ClientesAdminPage() {
                 </div>
                 <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
                   <DialogTrigger asChild>
-                    <Button size="lg" className="flex items-center gap-2 shadow-md hover:shadow-lg transition-all">
+                    <Button 
+                      size="lg" 
+                      className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-md hover:shadow-lg transition-all whitespace-nowrap shrink-0"
+                    >
                       <Plus className="w-5 h-5" />
                       Nueva Empresa
                     </Button>
