@@ -15,6 +15,9 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
+import { LoadingState } from '@/components/ui/loading-state';
+import { EmptyState } from '@/components/ui/empty-state';
+import { SkeletonCard } from '@/components/ui/skeleton-card';
 import {
   Home,
   ArrowLeft,
@@ -135,10 +138,26 @@ export default function GaleriasPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando...</p>
+      <div className="flex h-screen">
+        <Sidebar />
+        <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
+          <Header />
+          <main className="flex-1 overflow-y-auto bg-muted/30 p-4 sm:p-6 lg:p-8">
+            <div className="max-w-7xl mx-auto space-y-6">
+              <SkeletonCard />
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+              </div>
+            </div>
+          </main>
         </div>
       </div>
     );
@@ -304,18 +323,20 @@ export default function GaleriasPage() {
           {/* Lista de Galerías */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {galerias.length === 0 ? (
-              <Card className="col-span-full">
-                <CardContent className="py-12 text-center">
-                  <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500 mb-4">No hay galerías creadas</p>
-                  {canCreate && (
-                    <Button onClick={() => setOpenDialog(true)} className="gradient-primary hover:opacity-90 shadow-primary">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Crear Primera Galería
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
+              <div className="col-span-full">
+                <EmptyState
+                  icon={<ImageIcon className="h-12 w-12" />}
+                  title="No hay galerías creadas"
+                  description="Crea galerías multimedia para tus propiedades con fotos, videos y tours virtuales"
+                  action={
+                    canCreate ? {
+                      label: 'Crear Primera Galería',
+                      onClick: () => setOpenDialog(true),
+                      icon: <Plus className="w-4 h-4" />
+                    } : undefined
+                  }
+                />
+              </div>
             ) : (
               galerias.map((galeria) => (
                 <Card key={galeria.id} className="hover:shadow-lg transition-shadow">

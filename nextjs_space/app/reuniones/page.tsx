@@ -15,6 +15,9 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
+import { LoadingState } from '@/components/ui/loading-state';
+import { EmptyState } from '@/components/ui/empty-state';
+import { SkeletonCard } from '@/components/ui/skeleton-card';
 import { Home, ArrowLeft, Calendar as CalendarIcon, Plus, FileText, Users, Edit, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -174,7 +177,28 @@ export default function ReunionesPage() {
     });
   };
 
-  if (loading) return <div className="flex h-screen"><Sidebar /><div className="flex-1"><Header /><main className="p-6">Cargando...</main></div></div>;
+  if (loading) {
+    return (
+      <div className="flex h-screen">
+        <Sidebar />
+        <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
+          <Header />
+          <main className="flex-1 overflow-y-auto bg-muted/30 p-4 sm:p-6 lg:p-8">
+            <div className="max-w-7xl mx-auto space-y-6">
+              <SkeletonCard />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+              </div>
+              <SkeletonCard />
+              <SkeletonCard />
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen">
@@ -293,10 +317,11 @@ export default function ReunionesPage() {
 
           <div className="grid gap-4">
             {reuniones.length === 0 ? (
-              <Card><CardContent className="flex flex-col items-center justify-center py-12">
-                <CalendarIcon className="h-12 w-12 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">No hay reuniones programadas</p>
-              </CardContent></Card>
+              <EmptyState
+                icon={<CalendarIcon className="h-12 w-12" />}
+                title="No hay reuniones programadas"
+                description="Convoca reuniones de comunidad y genera actas automáticamente"
+              />
             ) : (
               reuniones.map((reunion) => (
                 <Card key={reunion.id} className="hover:shadow-lg transition-shadow">

@@ -16,6 +16,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
+import { LoadingState } from '@/components/ui/loading-state';
+import { EmptyState } from '@/components/ui/empty-state';
+import { SkeletonCard } from '@/components/ui/skeleton-card';
+import { FilterChips } from '@/components/ui/filter-chips';
 import { 
   Home, 
   ArrowLeft, 
@@ -251,10 +255,16 @@ export default function AnunciosPage() {
         <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
           <Header />
           <main className="flex-1 overflow-y-auto bg-muted/30 p-4 sm:p-6 lg:p-8">
-           <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-center h-full">
-              <p>Cargando anuncios...</p>
+           <div className="max-w-7xl mx-auto space-y-6">
+            <SkeletonCard />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
             </div>
+            <SkeletonCard />
+            <SkeletonCard />
            </div>
           </main>
         </div>
@@ -525,43 +535,70 @@ export default function AnunciosPage() {
           </div>
 
           {/* Filtros */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="flex-1">
-              <Input
-                placeholder="Buscar anuncios..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full"
-              />
+          <div className="space-y-4 mb-6">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <Input
+                  placeholder="Buscar anuncios..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+              <Select value={filterActivo} onValueChange={setFilterActivo}>
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos</SelectItem>
+                  <SelectItem value="activos">Activos</SelectItem>
+                  <SelectItem value="inactivos">Inactivos</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <Select value={filterActivo} onValueChange={setFilterActivo}>
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos</SelectItem>
-                <SelectItem value="activos">Activos</SelectItem>
-                <SelectItem value="inactivos">Inactivos</SelectItem>
-              </SelectContent>
-            </Select>
+            <FilterChips
+              filters={[
+                ...(searchTerm ? [{ 
+                  id: 'search',
+                  label: 'Búsqueda', 
+                  value: searchTerm 
+                }] : []),
+                ...(filterActivo !== 'todos' ? [{ 
+                  id: 'status',
+                  label: 'Estado', 
+                  value: filterActivo 
+                }] : []),
+              ]}
+              onRemove={(id) => {
+                if (id === 'search') setSearchTerm('');
+                if (id === 'status') setFilterActivo('todos');
+              }}
+              onClearAll={() => {
+                setSearchTerm('');
+                setFilterActivo('todos');
+              }}
+            />
           </div>
 
           {/* Lista de anuncios */}
           <div className="grid gap-4">
             {anunciosFiltrados.length === 0 ? (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <Megaphone className="h-12 w-12 text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground text-center">
-                    No hay anuncios disponibles
-                  </p>
-                  {isAdmin && (
-                    <Button onClick={() => setOpenDialog(true)} className="mt-4">
-                      Publicar Primer Anuncio
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
+              <EmptyState
+                icon={<Megaphone className="h-12 w-12" />}
+                title="No hay anuncios disponibles"
+                description={
+                  searchTerm || filterActivo !== 'todos'
+                    ? 'Intenta ajustar los filtros de búsqueda'
+                    : 'Comienza publicando tu primer anuncio a la comunidad'
+                }
+                action={
+                  isAdmin && !searchTerm && filterActivo === 'todos' ? {
+                    label: 'Publicar Primer Anuncio',
+                    onClick: () => setOpenDialog(true),
+                    icon: <Plus className="h-4 w-4" />
+                  } : undefined
+                }
+              />
             ) : (
               anunciosFiltrados.map((anuncio) => {
                 const isExpirado =

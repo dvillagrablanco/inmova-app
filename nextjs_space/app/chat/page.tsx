@@ -12,6 +12,9 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
+import { LoadingState } from '@/components/ui/loading-state';
+import { EmptyState } from '@/components/ui/empty-state';
+import { SkeletonCard } from '@/components/ui/skeleton-card';
 import { MessageSquare, Send, Home, ArrowLeft, CheckCircle2, Clock } from 'lucide-react';
 import {
   Breadcrumb,
@@ -144,8 +147,20 @@ export default function AdminChatPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="flex h-screen overflow-hidden bg-muted/30">
+        <Sidebar />
+        <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
+          <Header />
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <div className="max-w-7xl mx-auto space-y-6">
+              <SkeletonCard />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[700px]">
+                <SkeletonCard className="md:col-span-1" />
+                <SkeletonCard className="md:col-span-2" />
+              </div>
+            </div>
+          </main>
+        </div>
       </div>
     );
   }
@@ -197,9 +212,12 @@ export default function AdminChatPage() {
                 <CardContent className="p-0">
                   <ScrollArea className="h-[600px]">
                     {conversations.length === 0 ? (
-                      <div className="p-6 text-center text-gray-500">
-                        <MessageSquare className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                        <p>No hay conversaciones</p>
+                      <div className="p-6">
+                        <EmptyState
+                          icon={<MessageSquare className="h-12 w-12" />}
+                          title="No hay conversaciones"
+                          description="Las conversaciones con los inquilinos aparecerán aquí"
+                        />
                       </div>
                     ) : (
                       conversations.map((conv) => (
@@ -342,11 +360,12 @@ export default function AdminChatPage() {
                     </CardContent>
                   </>
                 ) : (
-                  <div className="flex items-center justify-center h-full text-gray-500">
-                    <div className="text-center">
-                      <MessageSquare className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                      <p>Selecciona una conversación</p>
-                    </div>
+                  <div className="flex items-center justify-center h-full">
+                    <EmptyState
+                      icon={<MessageSquare className="h-16 w-16" />}
+                      title="Selecciona una conversación"
+                      description="Elige una conversación de la lista para ver los mensajes"
+                    />
                   </div>
                 )}
               </Card>
