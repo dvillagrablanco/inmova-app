@@ -31,16 +31,27 @@ interface Company {
   dominioPersonalizado: string | null;
   contactoPrincipal: string | null;
   emailContacto: string | null;
+  parentCompanyId?: string | null;
   subscriptionPlan: {
     id: string;
     nombre: string;
     tier: string;
   } | null;
+  parentCompany?: {
+    id: string;
+    nombre: string;
+  } | null;
+  childCompanies?: {
+    id: string;
+    nombre: string;
+    estadoCliente: string;
+  }[];
   createdAt: string;
   _count: {
     users: number;
     buildings: number;
     tenants: number;
+    childCompanies?: number;
   };
 }
 
@@ -81,6 +92,7 @@ export default function ClientesAdminPage() {
     dominioPersonalizado: '',
     subscriptionPlanId: '',
     estadoCliente: 'activo',
+    parentCompanyId: '', // Para grupos de empresas
   });
 
   // Redirect si no está autenticado o no es super_admin
@@ -205,6 +217,7 @@ export default function ClientesAdminPage() {
           dominioPersonalizado: '',
           subscriptionPlanId: '',
           estadoCliente: 'activo',
+          parentCompanyId: '',
         });
         loadData();
       } else {
@@ -562,6 +575,31 @@ export default function ClientesAdminPage() {
                           </Select>
                         </div>
                       </div>
+
+                      {/* Grupo de Empresas */}
+                      <div>
+                        <Label htmlFor="parentCompany">Empresa Matriz (Opcional)</Label>
+                        <Select
+                          value={newCompany.parentCompanyId}
+                          onValueChange={value => setNewCompany({ ...newCompany, parentCompanyId: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sin empresa matriz (independiente)" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">Independiente</SelectItem>
+                            {companies.filter(c => !c.parentCompanyId).map(company => (
+                              <SelectItem key={company.id} value={company.id}>
+                                {company.nombre}
+                                {company._count?.childCompanies ? ` (${company._count.childCompanies} empresas en el grupo)` : ''}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Selecciona una empresa matriz para crear un grupo empresarial. Las empresas del grupo comparten recursos y pueden ser gestionadas en conjunto.
+                        </p>
+                      </div>
                     </div>
                     <DialogFooter>
                       <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
@@ -722,30 +760,69 @@ export default function ClientesAdminPage() {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex items-center gap-6 text-sm">
-                        <div className="flex items-center gap-2">
-                          <Users className="w-4 h-4 text-muted-foreground" />
-                          <span>{company._count.users} usuarios</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Building2 className="w-4 h-4 text-muted-foreground" />
-                          <span>{company._count.buildings} edificios</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <TrendingUp className="w-4 h-4 text-muted-foreground" />
-                          <span>{company._count.tenants} inquilinos</span>
-                        </div>
-                        {company.subscriptionPlan && (
-                          <div className="ml-auto">
-                            <span className="text-muted-foreground">Plan: </span>
-                            <span className={`font-semibold ${getTierColor(company.subscriptionPlan.tier)}`}>
-                              {company.subscriptionPlan.nombre}
-                            </span>
+                      <div className="space-y-3">
+                        {/* Jerarquía de Grupo */}
+                        {(company.parentCompany || (company._count?.childCompanies && company._count.childCompanies > 0)) && (
+                          <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-md">
+                            <Building2 className="w-4 h-4 text-primary" />
+                            {company.parentCompany ? (
+                              <span className="text-sm">
+                                <span className="text-muted-foreground">Parte del grupo:</span>{' '}
+                                <span className="font-medium">{company.parentCompany.nombre}</span>
+                              </span>
+                            ) : (
+                              <span className="text-sm">
+                                <span className="font-medium">Empresa Matriz</span> - {company._count.childCompanies} empresas en el grupo
+                              </span>
+                            )}
                           </div>
                         )}
-                        <div className="text-muted-foreground">
-                          Creada: {format(new Date(company.createdAt), 'dd MMM yyyy', { locale: es })}
+                        
+                        {/* Estadísticas */}
+                        <div className="flex items-center gap-6 text-sm">
+                          <div className="flex items-center gap-2">
+                            <Users className="w-4 h-4 text-muted-foreground" />
+                            <span>{company._count.users} usuarios</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Building2 className="w-4 h-4 text-muted-foreground" />
+                            <span>{company._count.buildings} edificios</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <TrendingUp className="w-4 h-4 text-muted-foreground" />
+                            <span>{company._count.tenants} inquilinos</span>
+                          </div>
+                          {company.subscriptionPlan && (
+                            <div className="ml-auto">
+                              <span className="text-muted-foreground">Plan: </span>
+                              <span className={`font-semibold ${getTierColor(company.subscriptionPlan.tier)}`}>
+                                {company.subscriptionPlan.nombre}
+                              </span>
+                            </div>
+                          )}
+                          <div className="text-muted-foreground">
+                            Creada: {format(new Date(company.createdAt), 'dd MMM yyyy', { locale: es })}
+                          </div>
                         </div>
+
+                        {/* Empresas Hijas - Lista expandible */}
+                        {company.childCompanies && company.childCompanies.length > 0 && (
+                          <div className="mt-3 p-3 bg-muted/30 rounded-md">
+                            <div className="text-sm font-medium mb-2">Empresas del Grupo:</div>
+                            <div className="flex flex-wrap gap-2">
+                              {company.childCompanies.map(child => (
+                                <Badge key={child.id} variant="outline" className="flex items-center gap-1">
+                                  {child.nombre}
+                                  {child.estadoCliente === 'activo' ? (
+                                    <CheckCircle2 className="w-3 h-3 text-green-500" />
+                                  ) : (
+                                    <AlertCircle className="w-3 h-3 text-yellow-500" />
+                                  )}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>

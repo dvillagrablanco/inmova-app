@@ -23,6 +23,19 @@ export async function GET(request: NextRequest) {
     const companies = await prisma.company.findMany({
       include: {
         subscriptionPlan: true,
+        parentCompany: {
+          select: {
+            id: true,
+            nombre: true,
+          },
+        },
+        childCompanies: {
+          select: {
+            id: true,
+            nombre: true,
+            estadoCliente: true,
+          },
+        },
         users: {
           select: {
             id: true,
@@ -42,6 +55,7 @@ export async function GET(request: NextRequest) {
             users: true,
             buildings: true,
             tenants: true,
+            childCompanies: true,
           },
         },
       },
@@ -99,6 +113,28 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Validar empresa matriz si se proporciona
+    if (data.parentCompanyId) {
+      const parentCompany = await prisma.company.findUnique({
+        where: { id: data.parentCompanyId },
+      });
+      
+      if (!parentCompany) {
+        return NextResponse.json(
+          { error: 'La empresa matriz especificada no existe' },
+          { status: 400 }
+        );
+      }
+
+      // Evitar que una empresa matriz se marque como hija de sí misma
+      if (data.parentCompanyId === data.id) {
+        return NextResponse.json(
+          { error: 'Una empresa no puede ser su propia matriz' },
+          { status: 400 }
+        );
+      }
+    }
+
     // Crear empresa
     const company = await prisma.company.create({
       data: {
@@ -121,10 +157,17 @@ export async function POST(request: NextRequest) {
         maxPropiedades: data.maxPropiedades || 10,
         maxEdificios: data.maxEdificios || 5,
         subscriptionPlanId: data.subscriptionPlanId,
+        parentCompanyId: data.parentCompanyId,
         activo: data.activo !== undefined ? data.activo : true,
       },
       include: {
         subscriptionPlan: true,
+        parentCompany: {
+          select: {
+            id: true,
+            nombre: true,
+          },
+        },
       },
     });
 

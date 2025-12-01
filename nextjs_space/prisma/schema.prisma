@@ -817,6 +817,11 @@ model Company {
   telefonoContacto   String?         // Teléfono del contacto
   notasAdmin         String?          @db.Text // Notas internas del super-admin
   
+  // Jerarquía de empresas (Grupos de empresas)
+  parentCompanyId    String?         // ID de la empresa matriz (si es parte de un grupo)
+  parentCompany      Company?        @relation("CompanyHierarchy", fields: [parentCompanyId], references: [id], onDelete: SetNull)
+  childCompanies     Company[]       @relation("CompanyHierarchy") // Empresas hijas
+  
   // Límites de uso según plan
   maxUsuarios        Int?             @default(5)
   maxPropiedades     Int?             @default(10)
