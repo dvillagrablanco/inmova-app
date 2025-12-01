@@ -1,6 +1,5 @@
 import { withAuth } from 'next-auth/middleware';
 import { NextResponse } from 'next/server';
-import crypto from 'crypto';
 
 // Rutas que requieren permisos específicos
 const ROLE_PERMISSIONS = {
@@ -84,7 +83,10 @@ export default withAuth(
     const { pathname } = req.nextUrl;
 
     // Generate nonce for CSP
-    const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
+    const nonce = Array.from(
+      { length: 16 },
+      () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0')
+    ).join('');
 
     // Si no hay token, redirigir a login
     if (!token) {

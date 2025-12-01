@@ -10,8 +10,8 @@ import { z } from 'zod';
  * Sanitize HTML content
  * Removes potentially dangerous tags and attributes
  */
-export function sanitizeHtml(dirty: string, options?: DOMPurify.Config): string {
-  const defaultConfig: DOMPurify.Config = {
+export function sanitizeHtml(dirty: string, options?: any): string {
+  const defaultConfig: any = {
     ALLOWED_TAGS: [
       'b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li',
       'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
@@ -21,7 +21,7 @@ export function sanitizeHtml(dirty: string, options?: DOMPurify.Config): string 
     ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):)/i,
   };
 
-  return DOMPurify.sanitize(dirty, { ...defaultConfig, ...options });
+  return String(DOMPurify.sanitize(dirty, { ...defaultConfig, ...options }));
 }
 
 /**

@@ -1,87 +1,88 @@
-/**
- * Lazy Chart Component
- * Wrapper for lazy-loaded chart components with loading states
- */
-
 import dynamic from 'next/dynamic';
-import { ComponentType } from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Loader2 } from 'lucide-react';
 
-interface LazyChartProps {
-  type: 'line' | 'bar' | 'doughnut' | 'pie' | 'plotly';
-  data: any;
-  options?: any;
-  height?: number;
-  className?: string;
-}
-
-const ChartSkeleton = ({ height = 300 }: { height?: number }) => (
-  <div className="w-full space-y-3" style={{ height: `${height}px` }}>
-    <Skeleton className="h-4 w-1/4" />
-    <Skeleton className="h-full w-full" />
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center h-64">
+    <Loader2 className="h-8 w-8 animate-spin text-primary" />
   </div>
 );
 
-// Dynamically import chart components based on type
-const getChartComponent = (type: LazyChartProps['type']): ComponentType<any> => {
-  switch (type) {
-    case 'line':
-      return dynamic(
-        () => import('react-chartjs-2').then(mod => mod.Line),
-        {
-          loading: () => <ChartSkeleton />,
-          ssr: false,
-        }
-      );
-    case 'bar':
-      return dynamic(
-        () => import('react-chartjs-2').then(mod => mod.Bar),
-        {
-          loading: () => <ChartSkeleton />,
-          ssr: false,
-        }
-      );
-    case 'doughnut':
-      return dynamic(
-        () => import('react-chartjs-2').then(mod => mod.Doughnut),
-        {
-          loading: () => <ChartSkeleton />,
-          ssr: false,
-        }
-      );
-    case 'pie':
-      return dynamic(
-        () => import('react-chartjs-2').then(mod => mod.Pie),
-        {
-          loading: () => <ChartSkeleton />,
-          ssr: false,
-        }
-      );
-    case 'plotly':
-      return dynamic(
-        () => import('react-plotly.js'),
-        {
-          loading: () => <ChartSkeleton />,
-          ssr: false,
-        }
-      );
-    default:
-      return dynamic(
-        () => import('react-chartjs-2').then(mod => mod.Line),
-        {
-          loading: () => <ChartSkeleton />,
-          ssr: false,
-        }
-      );
-  }
-};
+export const LazyChart = dynamic<any>(
+  () => import('recharts').then(mod => mod.BarChart as any),
+  { ssr: false, loading: LoadingFallback }
+);
 
-export function LazyChart({ type, data, options, height = 300, className }: LazyChartProps) {
-  const ChartComponent = getChartComponent(type);
-  
-  return (
-    <div className={className} style={{ height: `${height}px` }}>
-      <ChartComponent data={data} options={options} />
-    </div>
-  );
-}
+export const LazyAreaChart = dynamic<any>(
+  () => import('recharts').then(mod => mod.AreaChart as any),
+  { ssr: false, loading: LoadingFallback }
+);
+
+export const LazyBarChart = dynamic<any>(
+  () => import('recharts').then(mod => mod.BarChart as any),
+  { ssr: false, loading: LoadingFallback }
+);
+
+export const LazyLineChart = dynamic<any>(
+  () => import('recharts').then(mod => mod.LineChart as any),
+  { ssr: false, loading: LoadingFallback }
+);
+
+export const LazyPieChart = dynamic<any>(
+  () => import('recharts').then(mod => mod.PieChart as any),
+  { ssr: false, loading: LoadingFallback }
+);
+
+export const LazyArea = dynamic<any>(
+  () => import('recharts').then(mod => mod.Area as any),
+  { ssr: false }
+);
+
+export const LazyBar = dynamic<any>(
+  () => import('recharts').then(mod => mod.Bar as any),
+  { ssr: false }
+);
+
+export const LazyLine = dynamic<any>(
+  () => import('recharts').then(mod => mod.Line as any),
+  { ssr: false }
+);
+
+export const LazyPie = dynamic<any>(
+  () => import('recharts').then(mod => mod.Pie as any),
+  { ssr: false }
+);
+
+export const LazyCell = dynamic<any>(
+  () => import('recharts').then(mod => mod.Cell as any),
+  { ssr: false }
+);
+
+export const LazyXAxis = dynamic<any>(
+  () => import('recharts').then(mod => mod.XAxis as any),
+  { ssr: false }
+);
+
+export const LazyYAxis = dynamic<any>(
+  () => import('recharts').then(mod => mod.YAxis as any),
+  { ssr: false }
+);
+
+export const LazyCartesianGrid = dynamic<any>(
+  () => import('recharts').then(mod => mod.CartesianGrid as any),
+  { ssr: false }
+);
+
+export const LazyTooltip = dynamic<any>(
+  () => import('recharts').then(mod => mod.Tooltip as any),
+  { ssr: false }
+);
+
+export const LazyLegend = dynamic<any>(
+  () => import('recharts').then(mod => mod.Legend as any),
+  { ssr: false }
+);
+
+export const LazyResponsiveContainer = dynamic<any>(
+  () => import('recharts').then(mod => mod.ResponsiveContainer as any),
+  { ssr: false }
+);

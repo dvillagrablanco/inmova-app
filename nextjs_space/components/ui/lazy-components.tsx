@@ -81,8 +81,8 @@ export const LazyPieChart = dynamic(
   }
 );
 
-export const LazyPlotly = dynamic(
-  () => import('react-plotly.js'),
+export const LazyPlotly = dynamic<any>(
+  () => import('react-plotly.js').then(mod => (mod.default || mod) as any),
   {
     loading: () => <ChartSkeleton />,
     ssr: false,

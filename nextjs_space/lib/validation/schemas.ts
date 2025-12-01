@@ -106,8 +106,19 @@ export const contractCreateSchema = z.object({
   path: ['fechaFin'],
 });
 
-export const contractUpdateSchema = contractCreateSchema.partial()
-  .omit({ unitId: true, tenantId: true });
+export const contractUpdateSchema = z.object({
+  unitId: z.string().cuid().optional(),
+  tenantId: z.string().cuid().optional(),
+  fechaInicio: z.coerce.date().optional(),
+  fechaFin: z.coerce.date().optional(),
+  renta: z.number().positive().optional(),
+  diaCobranza: z.number().int().min(1).max(31).optional(),
+  deposito: z.number().nonnegative().optional(),
+  duracionMeses: z.number().int().positive().optional(),
+  renovacionAutomatica: z.boolean().optional(),
+  condiciones: sanitizedSchemas.html().optional(),
+  notas: sanitizedSchemas.text(0, 5000).optional(),
+}).omit({ unitId: true, tenantId: true });
 
 // Payment schemas
 export const paymentCreateSchema = z.object({

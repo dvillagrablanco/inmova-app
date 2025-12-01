@@ -22,7 +22,7 @@ describe('KPICard Component', () => {
       <KPICard
         title="Revenue"
         value="100"
-        trend={12.5}
+        trend={{ value: 12.5, isPositive: true }}
         icon={DollarSign}
       />
     );
@@ -37,7 +37,7 @@ describe('KPICard Component', () => {
       <KPICard
         title="Revenue"
         value="100"
-        trend={-5.2}
+        trend={{ value: 5.2, isPositive: false }}
         icon={DollarSign}
       />
     );

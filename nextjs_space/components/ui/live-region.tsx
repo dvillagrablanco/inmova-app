@@ -1,34 +1,30 @@
-/**
- * LiveRegion Component
- * Wrapper component for live regions for screen reader announcements
- */
-
-import { ReactNode } from 'react';
-
-type AnnouncerPriority = 'polite' | 'assertive';
+import React from 'react';
+import { cn } from '@/lib/utils';
 
 interface LiveRegionProps {
-  children: ReactNode;
-  priority?: AnnouncerPriority;
+  children: React.ReactNode;
+  role?: 'status' | 'alert' | 'log';
+  ariaLive?: 'polite' | 'assertive' | 'off';
   atomic?: boolean;
   relevant?: 'additions' | 'removals' | 'text' | 'all';
+  className?: string;
 }
 
 export function LiveRegion({
   children,
-  priority = 'polite',
+  role = 'status',
+  ariaLive = 'polite',
   atomic = true,
-  relevant = 'additions text',
+  relevant = 'additions',
+  className,
 }: LiveRegionProps) {
-  const role = priority === 'assertive' ? 'alert' : 'status';
-
   return (
     <div
       role={role}
-      aria-live={priority}
+      aria-live={ariaLive}
       aria-atomic={atomic}
       aria-relevant={relevant}
-      className="sr-only"
+      className={cn('sr-only', className)}
     >
       {children}
     </div>
