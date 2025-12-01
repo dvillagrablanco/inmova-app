@@ -1,4 +1,7 @@
-"use client";
+/**
+ * Virtualized List Component
+ * High-performance list rendering for large datasets
+ */
 
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useRef, ReactNode } from 'react';
@@ -6,66 +9,39 @@ import { cn } from '@/lib/utils';
 
 interface VirtualizedListProps<T> {
   items: T[];
-  height?: string | number;
-  itemHeight?: number;
-  overscan?: number;
   renderItem: (item: T, index: number) => ReactNode;
+  estimateSize?: number;
+  overscan?: number;
   className?: string;
-  containerClassName?: string;
-  onEndReached?: () => void;
-  endReachedThreshold?: number;
+  itemClassName?: string;
+  height?: string | number;
 }
 
-/**
- * Lista virtualizada que renderiza solo los elementos visibles
- * Perfecto para listas con miles de elementos
- * 
- * @example
- * ```tsx
- * <VirtualizedList
- *   items={buildings}
- *   itemHeight={100}
- *   renderItem={(building) => <BuildingCard building={building} />}
- * />
- * ```
- */
 export function VirtualizedList<T>({
   items,
-  height = '100vh',
-  itemHeight = 80,
-  overscan = 5,
   renderItem,
+  estimateSize = 100,
+  overscan = 5,
   className,
-  containerClassName,
-  onEndReached,
-  endReachedThreshold = 0.8,
+  itemClassName,
+  height = '100vh',
 }: VirtualizedListProps<T>) {
   const parentRef = useRef<HTMLDivElement>(null);
 
   const virtualizer = useVirtualizer({
     count: items.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => itemHeight,
+    estimateSize: () => estimateSize,
     overscan,
   });
 
   const virtualItems = virtualizer.getVirtualItems();
 
-  // Detectar cuando el usuario ha scrolleado cerca del final
-  const lastItem = virtualItems[virtualItems.length - 1];
-  if (
-    onEndReached &&
-    lastItem &&
-    lastItem.index >= items.length * endReachedThreshold
-  ) {
-    onEndReached();
-  }
-
   return (
     <div
       ref={parentRef}
-      className={cn('overflow-auto', containerClassName)}
-      style={{ height }}
+      className={cn('overflow-auto', className)}
+      style={{ height: typeof height === 'number' ? `${height}px` : height }}
     >
       <div
         style={{
@@ -73,7 +49,6 @@ export function VirtualizedList<T>({
           width: '100%',
           position: 'relative',
         }}
-        className={className}
       >
         {virtualItems.map((virtualItem) => {
           const item = items[virtualItem.index];
@@ -81,12 +56,13 @@ export function VirtualizedList<T>({
             <div
               key={virtualItem.key}
               data-index={virtualItem.index}
+              ref={virtualizer.measureElement}
+              className={itemClassName}
               style={{
                 position: 'absolute',
                 top: 0,
                 left: 0,
                 width: '100%',
-                height: `${virtualItem.size}px`,
                 transform: `translateY(${virtualItem.start}px)`,
               }}
             >
@@ -100,132 +76,83 @@ export function VirtualizedList<T>({
 }
 
 /**
- * Grid virtualizado para mostrar elementos en cuadrícula
+ * VirtualizedGrid - Virtualized grid layout
  */
-interface VirtualizedGridProps<T> {
-  items: T[];
-  height?: string | number;
+interface VirtualizedGridProps<T> extends Omit<VirtualizedListProps<T>, 'itemClassName'> {
   columns?: number;
-  rowHeight?: number;
   gap?: number;
-  overscan?: number;
-  renderItem: (item: T, index: number) => ReactNode;
-  className?: string;
-  containerClassName?: string;
 }
 
 export function VirtualizedGrid<T>({
   items,
-  height = '100vh',
-  columns = 3,
-  rowHeight = 200,
-  gap = 16,
-  overscan = 2,
   renderItem,
-  className,
-  containerClassName,
+  columns = 3,
+  gap = 16,
+  ...props
 }: VirtualizedGridProps<T>) {
-  const parentRef = useRef<HTMLDivElement>(null);
+  // Calculate items per row and row count
+  const itemsPerRow = columns;
+  const rowCount = Math.ceil(items.length / itemsPerRow);
 
-  // Calcular cuántas filas hay
-  const rowCount = Math.ceil(items.length / columns);
-
-  const virtualizer = useVirtualizer({
-    count: rowCount,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => rowHeight + gap,
-    overscan,
-  });
-
-  const virtualItems = virtualizer.getVirtualItems();
+  // Create rows from items
+  const rows = Array.from({ length: rowCount }, (_, i) =>
+    items.slice(i * itemsPerRow, (i + 1) * itemsPerRow)
+  );
 
   return (
-    <div
-      ref={parentRef}
-      className={cn('overflow-auto', containerClassName)}
-      style={{ height }}
-    >
-      <div
-        style={{
-          height: `${virtualizer.getTotalSize()}px`,
-          width: '100%',
-          position: 'relative',
-        }}
-      >
-        {virtualItems.map((virtualRow) => {
-          const rowStartIndex = virtualRow.index * columns;
-          const rowItems = items.slice(rowStartIndex, rowStartIndex + columns);
-
-          return (
-            <div
-              key={virtualRow.key}
-              data-index={virtualRow.index}
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: `${virtualRow.size}px`,
-                transform: `translateY(${virtualRow.start}px)`,
-              }}
-            >
-              <div
-                className={cn(
-                  'grid h-full',
-                  className
-                )}
-                style={{
-                  gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-                  gap: `${gap}px`,
-                }}
-              >
-                {rowItems.map((item, colIndex) => (
-                  <div key={rowStartIndex + colIndex}>
-                    {renderItem(item, rowStartIndex + colIndex)}
-                  </div>
-                ))}
-              </div>
+    <VirtualizedList
+      items={rows}
+      renderItem={(row, rowIndex) => (
+        <div
+          className="grid"
+          style={{
+            gridTemplateColumns: `repeat(${columns}, 1fr)`,
+            gap: `${gap}px`,
+            marginBottom: `${gap}px`,
+          }}
+        >
+          {row.map((item, colIndex) => (
+            <div key={`${rowIndex}-${colIndex}`}>
+              {renderItem(item, rowIndex * itemsPerRow + colIndex)}
             </div>
-          );
-        })}
-      </div>
-    </div>
+          ))}
+        </div>
+      )}
+      {...props}
+    />
   );
 }
 
 /**
- * Tabla virtualizada para grandes conjuntos de datos
+ * VirtualizedTable - Virtualized table with fixed header
  */
 interface VirtualizedTableProps<T> {
   items: T[];
-  height?: string | number;
-  rowHeight?: number;
-  overscan?: number;
-  columns: Array<{
-    key: string;
+  columns: {
     header: string;
+    accessor: (item: T) => ReactNode;
     width?: string;
-    render: (item: T) => ReactNode;
-  }>;
+  }[];
+  estimateSize?: number;
+  overscan?: number;
   className?: string;
-  onRowClick?: (item: T, index: number) => void;
+  height?: string | number;
 }
 
 export function VirtualizedTable<T>({
   items,
-  height = '600px',
-  rowHeight = 52,
-  overscan = 10,
   columns,
+  estimateSize = 60,
+  overscan = 5,
   className,
-  onRowClick,
+  height = '600px',
 }: VirtualizedTableProps<T>) {
   const parentRef = useRef<HTMLDivElement>(null);
 
   const virtualizer = useVirtualizer({
     count: items.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => rowHeight,
+    estimateSize: () => estimateSize,
     overscan,
   });
 
@@ -233,24 +160,26 @@ export function VirtualizedTable<T>({
 
   return (
     <div className={cn('border rounded-lg overflow-hidden', className)}>
-      {/* Header */}
-      <div className="grid bg-gray-50 border-b font-medium text-sm">
-        {columns.map((col) => (
-          <div
-            key={col.key}
-            className="px-4 py-3 text-left"
-            style={{ width: col.width }}
-          >
-            {col.header}
-          </div>
-        ))}
+      {/* Fixed Header */}
+      <div className="bg-muted border-b sticky top-0 z-10">
+        <div className="flex">
+          {columns.map((column, index) => (
+            <div
+              key={index}
+              className="px-4 py-3 font-medium text-sm"
+              style={{ width: column.width || 'auto', flex: column.width ? undefined : 1 }}
+            >
+              {column.header}
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Body con virtualización */}
+      {/* Virtualized Body */}
       <div
         ref={parentRef}
         className="overflow-auto"
-        style={{ height }}
+        style={{ height: typeof height === 'number' ? `${height}px` : height }}
       >
         <div
           style={{
@@ -259,31 +188,33 @@ export function VirtualizedTable<T>({
             position: 'relative',
           }}
         >
-          {virtualItems.map((virtualRow) => {
-            const item = items[virtualRow.index];
+          {virtualItems.map((virtualItem) => {
+            const item = items[virtualItem.index];
             return (
               <div
-                key={virtualRow.key}
-                data-index={virtualRow.index}
-                className={cn(
-                  'absolute top-0 left-0 w-full grid border-b hover:bg-gray-50 cursor-pointer transition-colors',
-                  onRowClick && 'cursor-pointer'
-                )}
+                key={virtualItem.key}
+                data-index={virtualItem.index}
+                ref={virtualizer.measureElement}
+                className="border-b hover:bg-muted/50 transition-colors"
                 style={{
-                  height: `${virtualRow.size}px`,
-                  transform: `translateY(${virtualRow.start}px)`,
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  transform: `translateY(${virtualItem.start}px)`,
                 }}
-                onClick={() => onRowClick?.(item, virtualRow.index)}
               >
-                {columns.map((col) => (
-                  <div
-                    key={col.key}
-                    className="px-4 py-3 flex items-center text-sm"
-                    style={{ width: col.width }}
-                  >
-                    {col.render(item)}
-                  </div>
-                ))}
+                <div className="flex">
+                  {columns.map((column, colIndex) => (
+                    <div
+                      key={colIndex}
+                      className="px-4 py-3 text-sm"
+                      style={{ width: column.width || 'auto', flex: column.width ? undefined : 1 }}
+                    >
+                      {column.accessor(item)}
+                    </div>
+                  ))}
+                </div>
               </div>
             );
           })}

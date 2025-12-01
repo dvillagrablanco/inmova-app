@@ -1,6 +1,6 @@
 /**
- * Sistema de Design Tokens centralizado para INMOVA
- * Define colores, espaciado, tipografía, sombras y transiciones de forma consistente
+ * Design System Tokens
+ * Centralized design tokens for consistent styling across the application
  */
 
 export const designTokens = {
@@ -10,154 +10,164 @@ export const designTokens = {
         50: 'hsl(235, 89%, 97%)',
         100: 'hsl(235, 89%, 93%)',
         200: 'hsl(235, 89%, 86%)',
-        300: 'hsl(235, 89%, 76%)',
+        300: 'hsl(235, 89%, 77%)',
         400: 'hsl(235, 89%, 66%)',
-        500: 'hsl(235, 89%, 56%)', // Main brand color
-        600: 'hsl(235, 89%, 46%)',
-        700: 'hsl(235, 89%, 36%)',
-        800: 'hsl(235, 89%, 26%)',
-        900: 'hsl(235, 89%, 16%)',
-        950: 'hsl(235, 89%, 10%)',
+        500: 'hsl(235, 89%, 55%)',
+        600: 'hsl(235, 89%, 45%)',
+        700: 'hsl(235, 70%, 35%)',
+        800: 'hsl(235, 60%, 25%)',
+        900: 'hsl(235, 50%, 15%)',
       },
       secondary: {
-        50: 'hsl(220, 70%, 97%)',
-        100: 'hsl(220, 70%, 93%)',
-        200: 'hsl(220, 70%, 86%)',
-        300: 'hsl(220, 70%, 76%)',
-        400: 'hsl(220, 70%, 66%)',
-        500: 'hsl(220, 70%, 56%)',
-        600: 'hsl(220, 70%, 46%)',
-        700: 'hsl(220, 70%, 36%)',
-        800: 'hsl(220, 70%, 26%)',
-        900: 'hsl(220, 70%, 16%)',
+        50: 'hsl(340, 82%, 97%)',
+        100: 'hsl(340, 82%, 93%)',
+        200: 'hsl(340, 82%, 86%)',
+        300: 'hsl(340, 82%, 77%)',
+        400: 'hsl(340, 82%, 66%)',
+        500: 'hsl(340, 82%, 55%)',
+        600: 'hsl(340, 82%, 45%)',
+        700: 'hsl(340, 70%, 35%)',
+        800: 'hsl(340, 60%, 25%)',
+        900: 'hsl(340, 50%, 15%)',
       },
     },
     semantic: {
       success: {
         light: 'hsl(142, 76%, 90%)',
-        DEFAULT: 'hsl(142, 76%, 45%)',
-        dark: 'hsl(142, 76%, 35%)',
+        DEFAULT: 'hsl(142, 76%, 36%)',
+        dark: 'hsl(142, 76%, 24%)',
       },
       error: {
-        light: 'hsl(0, 84%, 95%)',
+        light: 'hsl(0, 84%, 90%)',
         DEFAULT: 'hsl(0, 84%, 60%)',
-        dark: 'hsl(0, 84%, 45%)',
+        dark: 'hsl(0, 84%, 40%)',
       },
       warning: {
         light: 'hsl(45, 93%, 90%)',
         DEFAULT: 'hsl(45, 93%, 47%)',
-        dark: 'hsl(45, 93%, 37%)',
+        dark: 'hsl(45, 93%, 30%)',
       },
       info: {
-        light: 'hsl(199, 89%, 90%)',
-        DEFAULT: 'hsl(199, 89%, 48%)',
-        dark: 'hsl(199, 89%, 38%)',
+        light: 'hsl(200, 98%, 90%)',
+        DEFAULT: 'hsl(200, 98%, 39%)',
+        dark: 'hsl(200, 98%, 25%)',
       },
     },
     neutral: {
-      50: 'hsl(210, 20%, 98%)',
-      100: 'hsl(210, 20%, 95%)',
-      200: 'hsl(210, 16%, 93%)',
-      300: 'hsl(210, 14%, 89%)',
-      400: 'hsl(210, 14%, 83%)',
-      500: 'hsl(210, 11%, 71%)',
-      600: 'hsl(210, 7%, 56%)',
-      700: 'hsl(210, 9%, 31%)',
-      800: 'hsl(210, 10%, 23%)',
-      900: 'hsl(210, 11%, 15%)',
-      950: 'hsl(210, 13%, 9%)',
+      50: 'hsl(0, 0%, 98%)',
+      100: 'hsl(0, 0%, 96%)',
+      200: 'hsl(0, 0%, 90%)',
+      300: 'hsl(0, 0%, 83%)',
+      400: 'hsl(0, 0%, 64%)',
+      500: 'hsl(0, 0%, 45%)',
+      600: 'hsl(0, 0%, 32%)',
+      700: 'hsl(0, 0%, 25%)',
+      800: 'hsl(0, 0%, 15%)',
+      900: 'hsl(0, 0%, 9%)',
     },
   },
   spacing: {
-    xs: '0.25rem',     // 4px
-    sm: '0.5rem',      // 8px
-    md: '1rem',        // 16px
-    lg: '1.5rem',      // 24px
-    xl: '2rem',        // 32px
-    '2xl': '2.5rem',   // 40px
-    '3xl': '3rem',     // 48px
-    '4xl': '4rem',     // 64px
-    '5xl': '5rem',     // 80px
-    '6xl': '6rem',     // 96px
+    xs: '0.25rem',    // 4px
+    sm: '0.5rem',     // 8px
+    md: '1rem',       // 16px
+    lg: '1.5rem',     // 24px
+    xl: '2rem',       // 32px
+    '2xl': '3rem',    // 48px
+    '3xl': '4rem',    // 64px
+    '4xl': '6rem',    // 96px
+    '5xl': '8rem',    // 128px
   },
   typography: {
     fontFamily: {
-      sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
-      heading: ['Poppins', 'Inter', 'sans-serif'],
-      mono: ['JetBrains Mono', 'Menlo', 'Monaco', 'Courier New', 'monospace'],
+      sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+      heading: ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+      mono: ['JetBrains Mono', 'Consolas', 'Monaco', 'monospace'],
     },
     fontSize: {
-      xs: ['0.75rem', { lineHeight: '1rem', letterSpacing: '0.025em' }],
-      sm: ['0.875rem', { lineHeight: '1.25rem', letterSpacing: '0.0125em' }],
-      base: ['1rem', { lineHeight: '1.5rem', letterSpacing: '0em' }],
-      lg: ['1.125rem', { lineHeight: '1.75rem', letterSpacing: '-0.0125em' }],
-      xl: ['1.25rem', { lineHeight: '1.875rem', letterSpacing: '-0.0125em' }],
-      '2xl': ['1.5rem', { lineHeight: '2rem', letterSpacing: '-0.025em' }],
-      '3xl': ['1.875rem', { lineHeight: '2.25rem', letterSpacing: '-0.025em' }],
-      '4xl': ['2.25rem', { lineHeight: '2.5rem', letterSpacing: '-0.05em' }],
-      '5xl': ['3rem', { lineHeight: '1', letterSpacing: '-0.05em' }],
-      '6xl': ['3.75rem', { lineHeight: '1', letterSpacing: '-0.0625em' }],
+      xs: ['0.75rem', { lineHeight: '1rem' }],       // 12px
+      sm: ['0.875rem', { lineHeight: '1.25rem' }],   // 14px
+      base: ['1rem', { lineHeight: '1.5rem' }],      // 16px
+      lg: ['1.125rem', { lineHeight: '1.75rem' }],   // 18px
+      xl: ['1.25rem', { lineHeight: '1.75rem' }],    // 20px
+      '2xl': ['1.5rem', { lineHeight: '2rem' }],     // 24px
+      '3xl': ['1.875rem', { lineHeight: '2.25rem' }], // 30px
+      '4xl': ['2.25rem', { lineHeight: '2.5rem' }],  // 36px
+      '5xl': ['3rem', { lineHeight: '1' }],          // 48px
+      '6xl': ['3.75rem', { lineHeight: '1' }],       // 60px
     },
     fontWeight: {
-      thin: 100,
-      extralight: 200,
-      light: 300,
-      normal: 400,
-      medium: 500,
-      semibold: 600,
-      bold: 700,
-      extrabold: 800,
-      black: 900,
+      thin: '100',
+      extralight: '200',
+      light: '300',
+      normal: '400',
+      medium: '500',
+      semibold: '600',
+      bold: '700',
+      extrabold: '800',
+      black: '900',
     },
   },
   shadows: {
     none: 'none',
     sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-    DEFAULT: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)',
-    md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)',
-    lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)',
-    xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+    base: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+    md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+    lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+    xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
     '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-    inner: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.05)',
+    inner: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)',
     primary: '0 10px 40px -10px rgba(79, 70, 229, 0.4)',
-    success: '0 10px 40px -10px rgba(34, 197, 94, 0.4)',
+    success: '0 10px 40px -10px rgba(16, 185, 129, 0.4)',
     error: '0 10px 40px -10px rgba(239, 68, 68, 0.4)',
+    warning: '0 10px 40px -10px rgba(245, 158, 11, 0.4)',
   },
   transitions: {
     fast: '150ms cubic-bezier(0.4, 0, 0.2, 1)',
     base: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
     slow: '300ms cubic-bezier(0.4, 0, 0.2, 1)',
-    verySlow: '500ms cubic-bezier(0.4, 0, 0.2, 1)',
-    bounce: '600ms cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+    bounce: '500ms cubic-bezier(0.68, -0.55, 0.265, 1.55)',
   },
   borderRadius: {
     none: '0',
-    sm: '0.125rem',
-    DEFAULT: '0.25rem',
-    md: '0.375rem',
-    lg: '0.5rem',
-    xl: '0.75rem',
-    '2xl': '1rem',
-    '3xl': '1.5rem',
+    sm: '0.125rem',   // 2px
+    base: '0.25rem',  // 4px
+    md: '0.375rem',   // 6px
+    lg: '0.5rem',     // 8px
+    xl: '0.75rem',    // 12px
+    '2xl': '1rem',    // 16px
+    '3xl': '1.5rem',  // 24px
     full: '9999px',
   },
-  breakpoints: {
-    xs: '480px',
-    sm: '640px',
-    md: '768px',
-    lg: '1024px',
-    xl: '1280px',
-    '2xl': '1536px',
-  },
   zIndex: {
-    dropdown: 1000,
-    sticky: 1020,
-    fixed: 1030,
-    modalBackdrop: 1040,
-    modal: 1050,
-    popover: 1060,
-    tooltip: 1070,
+    base: '0',
+    dropdown: '1000',
+    sticky: '1020',
+    fixed: '1030',
+    modalBackdrop: '1040',
+    modal: '1050',
+    popover: '1060',
+    tooltip: '1070',
   },
-} as const;
+};
 
 export type DesignTokens = typeof designTokens;
+
+// Helper functions
+export const getColor = (path: string): string => {
+  const keys = path.split('.');
+  let value: any = designTokens.colors;
+  
+  for (const key of keys) {
+    value = value?.[key];
+  }
+  
+  return value || path;
+};
+
+export const getSpacing = (size: keyof typeof designTokens.spacing): string => {
+  return designTokens.spacing[size] || size;
+};
+
+export const getShadow = (size: keyof typeof designTokens.shadows): string => {
+  return designTokens.shadows[size] || size;
+};

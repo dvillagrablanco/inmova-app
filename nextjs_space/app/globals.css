@@ -248,3 +248,89 @@ a:focus-visible {
     @apply text-black bg-white;
   }
 }
+/* ========================================
+   HIGH CONTRAST MODE
+   ======================================== */
+.high-contrast {
+  --primary: hsl(220, 100%, 30%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(220, 100%, 20%);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(0, 0%, 0%);
+  --muted: hsl(220, 10%, 90%);
+  --muted-foreground: hsl(0, 0%, 0%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(0, 0%, 0%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(0, 0%, 0%);
+  --border: hsl(0, 0%, 0%);
+  --input: hsl(0, 0%, 0%);
+  --ring: hsl(220, 100%, 30%);
+}
+
+.high-contrast * {
+  text-shadow: none !important;
+  box-shadow: 0 0 0 1px black !important;
+}
+
+.high-contrast button,
+.high-contrast a {
+  border: 2px solid black !important;
+}
+
+.high-contrast img {
+  filter: contrast(1.2);
+}
+
+/* ========================================
+   REDUCED MOTION
+   ======================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ========================================
+   SCREEN READER ONLY
+   ======================================== */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.sr-only-focusable:focus,
+.sr-only-focusable:active {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: inherit;
+  margin: inherit;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* ========================================
+   SKIP LINKS
+   ======================================== */
+.skip-link {
+  @apply sr-only;
+}
+
+.skip-link:focus {
+  @apply not-sr-only fixed top-4 left-4 z-50 bg-primary text-primary-foreground px-4 py-2 rounded-md;
+}

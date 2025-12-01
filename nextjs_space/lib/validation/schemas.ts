@@ -1,406 +1,253 @@
 /**
- * Schemas de validación con Zod
- * Proporciona validación y sanitización centralizada de datos
+ * Validation Schemas
+ * Centralized validation schemas using Zod
  */
 
 import { z } from 'zod';
+import { sanitizedSchemas } from '@/lib/security/sanitize';
 
-/**
- * Funciones helper para sanitización
- */
-const sanitizeString = (str: string): string => {
-  return str
-    .trim()
-    .replace(/[<>"']/g, '') // Remove potentially dangerous characters
-    .slice(0, 500); // Limit length
-};
-
-const sanitizeEmail = (email: string): string => {
-  return email.trim().toLowerCase();
-};
-
-const sanitizePhone = (phone: string): string => {
-  return phone.replace(/[^0-9+\-\s()]/g, '').trim();
-};
-
-/**
- * Schemas comunes
- */
-export const commonSchemas = {
-  email: z.string()
-    .email('Email inválido')
-    .transform(sanitizeEmail),
-  
-  phone: z.string()
-    .min(9, 'Teléfono muy corto')
-    .max(20, 'Teléfono muy largo')
-    .transform(sanitizePhone),
-  
-  url: z.string()
-    .url('URL inválida')
-    .max(500, 'URL demasiado larga'),
-  
-  postalCode: z.string()
-    .min(4, 'Código postal inválido')
-    .max(10, 'Código postal inválido')
-    .transform(s => s.replace(/\s/g, '').toUpperCase()),
-  
-  currency: z.number()
-    .positive('El monto debe ser positivo')
-    .max(9999999999, 'El monto es demasiado grande'),
-  
-  percentage: z.number()
-    .min(0, 'El porcentaje no puede ser negativo')
-    .max(100, 'El porcentaje no puede ser mayor a 100'),
-  
-  date: z.coerce.date({
-    errorMap: () => ({ message: 'Fecha inválida' }),
-  }),
-  
-  futureDate: z.coerce.date()
-    .refine((date) => date > new Date(), {
-      message: 'La fecha debe ser futura',
-    }),
-  
-  pastDate: z.coerce.date()
-    .refine((date) => date <= new Date(), {
-      message: 'La fecha no puede ser futura',
-    }),
-};
-
-/**
- * Schema para Edificios
- */
-export const buildingSchema = z.object({
-  nombre: z.string()
-    .min(1, 'El nombre es requerido')
-    .max(100, 'El nombre es demasiado largo')
-    .transform(sanitizeString),
-  
-  direccion: z.string()
-    .min(1, 'La dirección es requerida')
-    .max(200, 'La dirección es demasiado larga')
-    .transform(sanitizeString),
-  
-  ciudad: z.string()
-    .min(1, 'La ciudad es requerida')
-    .max(100, 'La ciudad es demasiado larga')
-    .transform(sanitizeString),
-  
-  codigoPostal: commonSchemas.postalCode.optional(),
-  
-  numeroUnidades: z.number()
-    .int('Debe ser un número entero')
-    .positive('Debe ser mayor a 0')
-    .max(10000, 'Número de unidades demasiado grande'),
-  
-  anosConstruccion: z.number()
-    .int()
-    .min(1800, 'Año inválido')
-    .max(new Date().getFullYear() + 5, 'Año inválido')
-    .optional(),
-  
-  descripcion: z.string()
-    .max(1000, 'La descripción es demasiado larga')
-    .transform(sanitizeString)
-    .optional(),
-  
-  companyId: z.string().uuid('ID de compañía inválido'),
+// Auth schemas
+export const loginSchema = z.object({
+  email: sanitizedSchemas.email(),
+  password: z.string().min(1, 'Contraseña requerida'),
 });
 
-export type BuildingInput = z.infer<typeof buildingSchema>;
-
-/**
- * Schema para Unidades
- */
-export const unitSchema = z.object({
-  numero: z.string()
-    .min(1, 'El número es requerido')
-    .max(20, 'El número es demasiado largo')
-    .transform(sanitizeString),
-  
-  tipo: z.enum(['APARTAMENTO', 'CASA', 'LOCAL_COMERCIAL', 'OFICINA', 'ESTUDIO', 'LOFT', 'PARKING', 'BODEGA'], {
-    errorMap: () => ({ message: 'Tipo de unidad inválido' }),
-  }),
-  
-  estado: z.enum(['DISPONIBLE', 'OCUPADA', 'MANTENIMIENTO', 'RESERVADA'], {
-    errorMap: () => ({ message: 'Estado inválido' }),
-  }),
-  
-  tamano: z.number()
-    .positive('El tamaño debe ser positivo')
-    .max(100000, 'Tamaño demasiado grande')
-    .optional(),
-  
-  habitaciones: z.number()
-    .int()
-    .min(0, 'Número inválido')
-    .max(50, 'Número demasiado grande')
-    .optional(),
-  
-  banos: z.number()
-    .int()
-    .min(0, 'Número inválido')
-    .max(20, 'Número demasiado grande')
-    .optional(),
-  
-  piso: z.number()
-    .int()
-    .min(-10, 'Piso inválido')
-    .max(200, 'Piso inválido')
-    .optional(),
-  
-  rentaMensual: commonSchemas.currency.optional(),
-  
-  descripcion: z.string()
-    .max(1000, 'La descripción es demasiado larga')
-    .transform(sanitizeString)
-    .optional(),
-  
-  buildingId: z.string().uuid('ID de edificio inválido'),
+export const registerSchema = z.object({
+  nombre: sanitizedSchemas.text(1, 100),
+  apellidos: sanitizedSchemas.text(0, 100).optional(),
+  email: sanitizedSchemas.email(),
+  password: z.string()
+    .min(8, 'La contraseña debe tener al menos 8 caracteres')
+    .regex(/[A-Z]/, 'Debe contener al menos una mayúscula')
+    .regex(/[a-z]/, 'Debe contener al menos una minúscula')
+    .regex(/[0-9]/, 'Debe contener al menos un número'),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'Las contraseñas no coinciden',
+  path: ['confirmPassword'],
 });
 
-export type UnitInput = z.infer<typeof unitSchema>;
-
-/**
- * Schema para Inquilinos
- */
-export const tenantSchema = z.object({
-  nombre: z.string()
-    .min(1, 'El nombre es requerido')
-    .max(100, 'El nombre es demasiado largo')
-    .transform(sanitizeString),
-  
-  apellido: z.string()
-    .min(1, 'El apellido es requerido')
-    .max(100, 'El apellido es demasiado largo')
-    .transform(sanitizeString),
-  
-  email: commonSchemas.email,
-  
-  telefono: commonSchemas.phone.optional(),
-  
-  dni: z.string()
-    .min(5, 'DNI muy corto')
-    .max(20, 'DNI muy largo')
-    .transform(s => s.replace(/[^A-Z0-9]/gi, '').toUpperCase())
-    .optional(),
-  
-  fechaNacimiento: commonSchemas.pastDate.optional(),
-  
-  ocupacion: z.string()
-    .max(100, 'Ocupación demasiado larga')
-    .transform(sanitizeString)
-    .optional(),
-  
-  ingresosMensuales: commonSchemas.currency.optional(),
-  
-  contactoEmergencia: z.string()
-    .max(100, 'Nombre demasiado largo')
-    .transform(sanitizeString)
-    .optional(),
-  
-  telefonoEmergencia: commonSchemas.phone.optional(),
-  
-  companyId: z.string().uuid('ID de compañía inválido'),
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Contraseña actual requerida'),
+  newPassword: z.string()
+    .min(8, 'La contraseña debe tener al menos 8 caracteres')
+    .regex(/[A-Z]/, 'Debe contener al menos una mayúscula')
+    .regex(/[a-z]/, 'Debe contener al menos una minúscula')
+    .regex(/[0-9]/, 'Debe contener al menos un número'),
+  confirmPassword: z.string(),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: 'Las contraseñas no coinciden',
+  path: ['confirmPassword'],
 });
 
-export type TenantInput = z.infer<typeof tenantSchema>;
+// Building schemas
+export const buildingCreateSchema = z.object({
+  nombre: sanitizedSchemas.text(1, 100),
+  direccion: sanitizedSchemas.text(1, 200),
+  ciudad: sanitizedSchemas.text(0, 100).optional(),
+  codigoPostal: sanitizedSchemas.alphanumeric(0, 10).optional(),
+  pais: sanitizedSchemas.text(0, 100).optional(),
+  numeroUnidades: z.number().int().positive().max(10000),
+  anosConstruccion: z.number().int().min(1800).max(new Date().getFullYear() + 1).optional(),
+  descripcion: sanitizedSchemas.text(0, 2000).optional(),
+  notas: sanitizedSchemas.text(0, 5000).optional(),
+});
 
-/**
- * Schema para Contratos
- */
-export const contractSchema = z.object({
-  fechaInicio: commonSchemas.date,
-  
-  fechaFin: commonSchemas.futureDate,
-  
-  rentaMensual: commonSchemas.currency,
-  
-  diaPago: z.number()
-    .int()
-    .min(1, 'Día inválido')
-    .max(31, 'Día inválido'),
-  
-  deposito: commonSchemas.currency.optional(),
-  
-  clausulas: z.string()
-    .max(5000, 'Cláusulas demasiado largas')
-    .optional(),
-  
-  estado: z.enum(['ACTIVO', 'FINALIZADO', 'CANCELADO', 'PENDIENTE'], {
-    errorMap: () => ({ message: 'Estado inválido' }),
-  }).default('ACTIVO'),
-  
-  unitId: z.string().uuid('ID de unidad inválido'),
-  tenantId: z.string().uuid('ID de inquilino inválido'),
-  companyId: z.string().uuid('ID de compañía inválido'),
+export const buildingUpdateSchema = buildingCreateSchema.partial();
+
+// Unit schemas
+export const unitCreateSchema = z.object({
+  buildingId: z.string().cuid(),
+  numero: sanitizedSchemas.text(1, 20),
+  piso: sanitizedSchemas.text(0, 10).optional(),
+  tipo: z.enum(['apartamento', 'oficina', 'local', 'garaje', 'trastero', 'otro']),
+  habitaciones: z.number().int().nonnegative().optional(),
+  banos: z.number().int().nonnegative().optional(),
+  metrosCuadrados: z.number().positive().optional(),
+  estado: z.enum(['disponible', 'ocupado', 'mantenimiento', 'renovacion']),
+  renta: z.number().nonnegative().optional(),
+  descripcion: sanitizedSchemas.text(0, 2000).optional(),
+});
+
+export const unitUpdateSchema = unitCreateSchema.partial().omit({ buildingId: true });
+
+// Tenant schemas
+export const tenantCreateSchema = z.object({
+  nombre: sanitizedSchemas.text(1, 100),
+  apellidos: sanitizedSchemas.text(1, 100),
+  email: sanitizedSchemas.email(),
+  telefono: sanitizedSchemas.phone().optional(),
+  telefonoAlternativo: sanitizedSchemas.phone().optional(),
+  dni: sanitizedSchemas.alphanumeric(5, 20).optional(),
+  fechaNacimiento: z.coerce.date().optional(),
+  ocupacion: sanitizedSchemas.text(0, 100).optional(),
+  empresaTrabajo: sanitizedSchemas.text(0, 100).optional(),
+  referencias: sanitizedSchemas.text(0, 1000).optional(),
+  notas: sanitizedSchemas.text(0, 5000).optional(),
+});
+
+export const tenantUpdateSchema = tenantCreateSchema.partial();
+
+// Contract schemas
+export const contractCreateSchema = z.object({
+  unitId: z.string().cuid(),
+  tenantId: z.string().cuid(),
+  fechaInicio: z.coerce.date(),
+  fechaFin: z.coerce.date(),
+  renta: z.number().positive(),
+  diaCobranza: z.number().int().min(1).max(31),
+  deposito: z.number().nonnegative(),
+  duracionMeses: z.number().int().positive(),
+  renovacionAutomatica: z.boolean().optional(),
+  condiciones: sanitizedSchemas.html().optional(),
+  notas: sanitizedSchemas.text(0, 5000).optional(),
+}).refine((data) => data.fechaFin > data.fechaInicio, {
+  message: 'La fecha de fin debe ser posterior a la fecha de inicio',
+  path: ['fechaFin'],
+});
+
+export const contractUpdateSchema = contractCreateSchema.partial()
+  .omit({ unitId: true, tenantId: true });
+
+// Payment schemas
+export const paymentCreateSchema = z.object({
+  contractId: z.string().cuid(),
+  monto: z.number().positive(),
+  fechaPago: z.coerce.date(),
+  metodoPago: z.enum(['efectivo', 'transferencia', 'tarjeta', 'cheque', 'otro']),
+  concepto: sanitizedSchemas.text(1, 200),
+  referencia: sanitizedSchemas.alphanumeric(0, 50).optional(),
+  estado: z.enum(['pendiente', 'pagado', 'parcial', 'atrasado', 'cancelado']),
+  notas: sanitizedSchemas.text(0, 1000).optional(),
+});
+
+export const paymentUpdateSchema = paymentCreateSchema.partial()
+  .omit({ contractId: true });
+
+// Maintenance schemas
+export const maintenanceCreateSchema = z.object({
+  unitId: z.string().cuid(),
+  titulo: sanitizedSchemas.text(1, 200),
+  descripcion: sanitizedSchemas.text(1, 5000),
+  prioridad: z.enum(['baja', 'media', 'alta', 'urgente']),
+  categoria: z.enum([
+    'fontaneria',
+    'electricidad',
+    'climatizacion',
+    'estructura',
+    'pintura',
+    'limpieza',
+    'jardineria',
+    'seguridad',
+    'electrodomesticos',
+    'otro',
+  ]),
+  estado: z.enum(['abierto', 'en_progreso', 'en_espera', 'resuelto', 'cancelado']),
+  costoEstimado: z.number().nonnegative().optional(),
+  fechaLimite: z.coerce.date().optional(),
+});
+
+export const maintenanceUpdateSchema = maintenanceCreateSchema.partial()
+  .omit({ unitId: true });
+
+// Document schemas
+export const documentUploadSchema = z.object({
+  nombre: sanitizedSchemas.fileName(),
+  tipo: z.enum(['contrato', 'identificacion', 'comprobante', 'factura', 'otro']),
+  descripcion: sanitizedSchemas.text(0, 500).optional(),
+  entidadTipo: z.enum(['building', 'unit', 'tenant', 'contract', 'payment', 'maintenance']),
+  entidadId: z.string().cuid(),
+});
+
+// User schemas
+export const userCreateSchema = z.object({
+  nombre: sanitizedSchemas.text(1, 100),
+  apellidos: sanitizedSchemas.text(0, 100).optional(),
+  email: sanitizedSchemas.email(),
+  telefono: sanitizedSchemas.phone().optional(),
+  role: z.enum(['super_admin', 'admin', 'manager', 'agent', 'user']),
+  password: z.string().min(8),
+});
+
+export const userUpdateSchema = userCreateSchema.partial().omit({ password: true });
+
+// Company schemas
+export const companyCreateSchema = z.object({
+  nombre: sanitizedSchemas.text(1, 100),
+  cif: sanitizedSchemas.alphanumeric(0, 20).optional(),
+  direccion: sanitizedSchemas.text(0, 200).optional(),
+  telefono: sanitizedSchemas.phone().optional(),
+  email: sanitizedSchemas.email().optional(),
+  contactoPrincipal: sanitizedSchemas.text(0, 100).optional(),
+  emailContacto: sanitizedSchemas.email().optional(),
+  telefonoContacto: sanitizedSchemas.phone().optional(),
+  maxUsuarios: z.number().int().positive().optional(),
+  maxPropiedades: z.number().int().positive().optional(),
+  maxEdificios: z.number().int().positive().optional(),
+  subscriptionPlanId: z.string().cuid().optional(),
+  estadoCliente: z.enum(['activo', 'prueba', 'suspendido', 'cancelado']).optional(),
+  notasAdmin: sanitizedSchemas.text(0, 5000).optional(),
+});
+
+export const companyUpdateSchema = companyCreateSchema.partial();
+
+// Bulk operations
+export const bulkOperationSchema = z.object({
+  action: z.enum(['activate', 'deactivate', 'changePlan', 'changeStatus', 'delete']),
+  ids: z.array(z.string().cuid()).min(1, 'Al menos un ID es requerido'),
+  subscriptionPlanId: z.string().cuid().optional(),
+  estadoCliente: z.enum(['activo', 'prueba', 'suspendido', 'cancelado']).optional(),
 }).refine(
-  (data) => data.fechaFin > data.fechaInicio,
+  (data) => {
+    if (data.action === 'changePlan') {
+      return !!data.subscriptionPlanId;
+    }
+    if (data.action === 'changeStatus') {
+      return !!data.estadoCliente;
+    }
+    return true;
+  },
   {
-    message: 'La fecha de fin debe ser posterior a la fecha de inicio',
-    path: ['fechaFin'],
+    message: 'Parámetros requeridos para la acción seleccionada',
+    path: ['action'],
   }
 );
 
-export type ContractInput = z.infer<typeof contractSchema>;
-
-/**
- * Schema para Pagos
- */
-export const paymentSchema = z.object({
-  monto: commonSchemas.currency,
-  
-  fechaPago: commonSchemas.date,
-  
-  metodoPago: z.enum(['EFECTIVO', 'TRANSFERENCIA', 'TARJETA', 'CHEQUE', 'OTRO'], {
-    errorMap: () => ({ message: 'Método de pago inválido' }),
-  }),
-  
-  concepto: z.string()
-    .min(1, 'El concepto es requerido')
-    .max(200, 'El concepto es demasiado largo')
-    .transform(sanitizeString),
-  
-  referencia: z.string()
-    .max(100, 'Referencia demasiado larga')
-    .transform(sanitizeString)
-    .optional(),
-  
-  notas: z.string()
-    .max(500, 'Notas demasiado largas')
-    .transform(sanitizeString)
-    .optional(),
-  
-  estado: z.enum(['PENDIENTE', 'COMPLETADO', 'RECHAZADO', 'REEMBOLSADO'], {
-    errorMap: () => ({ message: 'Estado inválido' }),
-  }).default('COMPLETADO'),
-  
-  contractId: z.string().uuid('ID de contrato inválido'),
-  companyId: z.string().uuid('ID de compañía inválido'),
+// Search and filter schemas
+export const searchSchema = z.object({
+  query: sanitizedSchemas.text(0, 200).optional(),
+  page: z.number().int().positive().optional(),
+  limit: z.number().int().positive().max(100).optional(),
+  sortBy: z.string().optional(),
+  sortOrder: z.enum(['asc', 'desc']).optional(),
 });
 
-export type PaymentInput = z.infer<typeof paymentSchema>;
-
-/**
- * Schema para Mantenimiento
- */
-export const maintenanceSchema = z.object({
-  titulo: z.string()
-    .min(1, 'El título es requerido')
-    .max(150, 'El título es demasiado largo')
-    .transform(sanitizeString),
-  
-  descripcion: z.string()
-    .min(1, 'La descripción es requerida')
-    .max(2000, 'La descripción es demasiado larga')
-    .transform(sanitizeString),
-  
-  tipo: z.enum(['PREVENTIVO', 'CORRECTIVO', 'EMERGENCIA', 'MEJORA'], {
-    errorMap: () => ({ message: 'Tipo inválido' }),
-  }),
-  
-  prioridad: z.enum(['BAJA', 'MEDIA', 'ALTA', 'URGENTE'], {
-    errorMap: () => ({ message: 'Prioridad inválida' }),
-  }),
-  
-  estado: z.enum(['PENDIENTE', 'EN_PROGRESO', 'COMPLETADO', 'CANCELADO'], {
-    errorMap: () => ({ message: 'Estado inválido' }),
-  }).default('PENDIENTE'),
-  
-  fechaProgramada: commonSchemas.date.optional(),
-  
-  costo: commonSchemas.currency.optional(),
-  
-  unitId: z.string().uuid('ID de unidad inválido').optional(),
-  buildingId: z.string().uuid('ID de edificio inválido'),
-  companyId: z.string().uuid('ID de compañía inválido'),
+export const buildingFilterSchema = searchSchema.extend({
+  ciudad: sanitizedSchemas.text(0, 100).optional(),
+  minUnidades: z.number().int().nonnegative().optional(),
+  maxUnidades: z.number().int().positive().optional(),
 });
 
-export type MaintenanceInput = z.infer<typeof maintenanceSchema>;
+export const tenantFilterSchema = searchSchema.extend({
+  estado: z.enum(['activo', 'inactivo']).optional(),
+});
 
-/**
- * Schema para autenticación
- */
-export const authSchemas = {
-  login: z.object({
-    email: commonSchemas.email,
-    password: z.string()
-      .min(6, 'La contraseña debe tener al menos 6 caracteres')
-      .max(100, 'Contraseña demasiado larga'),
-  }),
-  
-  register: z.object({
-    email: commonSchemas.email,
-    password: z.string()
-      .min(8, 'La contraseña debe tener al menos 8 caracteres')
-      .max(100, 'Contraseña demasiado larga')
-      .regex(/[A-Z]/, 'Debe contener al menos una mayúscula')
-      .regex(/[a-z]/, 'Debe contener al menos una minúscula')
-      .regex(/[0-9]/, 'Debe contener al menos un número'),
-    confirmPassword: z.string(),
-    nombre: z.string()
-      .min(1, 'El nombre es requerido')
-      .max(100, 'El nombre es demasiado largo')
-      .transform(sanitizeString),
-    apellido: z.string()
-      .min(1, 'El apellido es requerido')
-      .max(100, 'El apellido es demasiado largo')
-      .transform(sanitizeString),
-  }).refine(
-    (data) => data.password === data.confirmPassword,
-    {
-      message: 'Las contraseñas no coinciden',
-      path: ['confirmPassword'],
-    }
-  ),
-  
-  changePassword: z.object({
-    currentPassword: z.string().min(1, 'Contraseña actual requerida'),
-    newPassword: z.string()
-      .min(8, 'La contraseña debe tener al menos 8 caracteres')
-      .max(100, 'Contraseña demasiado larga')
-      .regex(/[A-Z]/, 'Debe contener al menos una mayúscula')
-      .regex(/[a-z]/, 'Debe contener al menos una minúscula')
-      .regex(/[0-9]/, 'Debe contener al menos un número'),
-    confirmNewPassword: z.string(),
-  }).refine(
-    (data) => data.newPassword === data.confirmNewPassword,
-    {
-      message: 'Las contraseñas no coinciden',
-      path: ['confirmNewPassword'],
-    }
-  ).refine(
-    (data) => data.currentPassword !== data.newPassword,
-    {
-      message: 'La nueva contraseña debe ser diferente a la actual',
-      path: ['newPassword'],
-    }
-  ),
-};
+export const contractFilterSchema = searchSchema.extend({
+  estado: z.enum(['activo', 'vencido', 'cancelado']).optional(),
+  fechaInicio: z.coerce.date().optional(),
+  fechaFin: z.coerce.date().optional(),
+});
 
-/**
- * Helper para validar y sanitizar datos
- */
-export function validateAndSanitize<T>(
-  schema: z.ZodSchema<T>,
-  data: unknown
-): { success: true; data: T } | { success: false; errors: z.ZodError } {
-  const result = schema.safeParse(data);
-  
-  if (result.success) {
-    return { success: true, data: result.data };
-  }
-  
-  return { success: false, errors: result.error };
-}
+export const paymentFilterSchema = searchSchema.extend({
+  estado: z.enum(['pendiente', 'pagado', 'parcial', 'atrasado', 'cancelado']).optional(),
+  fechaDesde: z.coerce.date().optional(),
+  fechaHasta: z.coerce.date().optional(),
+  minMonto: z.number().nonnegative().optional(),
+  maxMonto: z.number().positive().optional(),
+});
 
-/**
- * Helper para formatear errores de Zod para respuestas de API
- */
-export function formatZodErrors(error: z.ZodError) {
-  return error.errors.map((err) => ({
-    field: err.path.join('.'),
-    message: err.message,
-  }));
-}
+export const maintenanceFilterSchema = searchSchema.extend({
+  estado: z.enum(['abierto', 'en_progreso', 'en_espera', 'resuelto', 'cancelado']).optional(),
+  prioridad: z.enum(['baja', 'media', 'alta', 'urgente']).optional(),
+  categoria: z.string().optional(),
+});
