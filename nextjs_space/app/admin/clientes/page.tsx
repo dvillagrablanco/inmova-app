@@ -28,6 +28,7 @@ import { InfoTooltip } from '@/components/ui/info-tooltip';
 interface Company {
   id: string;
   nombre: string;
+  activo: boolean;
   estadoCliente: string;
   dominioPersonalizado: string | null;
   contactoPrincipal: string | null;
@@ -739,10 +740,10 @@ export default function ClientesAdminPage() {
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
-                                onClick={() => handleQuickToggleActive(company.id, company.estadoCliente === 'activo', company.nombre)}
-                                className={company.estadoCliente === 'activo' ? 'text-yellow-600' : 'text-green-600'}
+                                onClick={() => handleQuickToggleActive(company.id, company.activo, company.nombre)}
+                                className={company.activo ? 'text-yellow-600' : 'text-green-600'}
                               >
-                                {company.estadoCliente === 'activo' ? (
+                                {company.activo ? (
                                   <>
                                     <PowerOff className="w-4 h-4 mr-2" />
                                     Desactivar
