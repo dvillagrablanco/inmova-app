@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { InfoTooltip } from '@/components/ui/info-tooltip';
+import { BackButton } from '@/components/ui/back-button';
 import { toast } from 'sonner';
 import { 
   Package, 
@@ -211,6 +212,9 @@ export default function PlanesPage() {
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
+            <div className="mb-4">
+              <BackButton fallbackUrl="/dashboard" />
+            </div>
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <h1 className="text-3xl font-bold gradient-text">Planes de Suscripción</h1>

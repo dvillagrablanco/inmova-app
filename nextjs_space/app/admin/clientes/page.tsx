@@ -24,6 +24,7 @@ import {
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { InfoTooltip } from '@/components/ui/info-tooltip';
+import { BackButton } from '@/components/ui/back-button';
 
 interface Company {
   id: string;
@@ -201,10 +202,20 @@ export default function ClientesAdminPage() {
     try {
       setCreating(true);
       
+      // Preparar datos, quitando campos vacíos
+      const companyData = {
+        ...newCompany,
+        subscriptionPlanId: newCompany.subscriptionPlanId || undefined,
+        parentCompanyId: newCompany.parentCompanyId || undefined,
+        dominioPersonalizado: newCompany.dominioPersonalizado || undefined,
+        contactoPrincipal: newCompany.contactoPrincipal || undefined,
+        telefonoContacto: newCompany.telefonoContacto || undefined,
+      };
+      
       const response = await fetch('/api/admin/companies', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newCompany),
+        body: JSON.stringify(companyData),
       });
 
       if (response.ok) {
@@ -453,6 +464,9 @@ export default function ClientesAdminPage() {
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <div className="mb-8">
+              <div className="mb-4">
+                <BackButton fallbackUrl="/dashboard" />
+              </div>
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h1 className="text-3xl font-bold text-foreground">Gestión de Clientes</h1>

@@ -20,6 +20,7 @@ import {
 import { Header } from '@/components/layout/header';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/ui/back-button';
 import {
   Card,
   CardContent,
@@ -95,7 +96,7 @@ export default function ReportesProgramadosPage() {
     if (status === 'unauthenticated') {
       router.push('/login');
     } else if (status === 'authenticated') {
-      if (session?.user?.role !== 'administrador') {
+      if (session?.user?.role !== 'administrador' && session?.user?.role !== 'super_admin') {
         router.push('/unauthorized');
       } else {
         fetchReports();
@@ -293,13 +294,7 @@ export default function ReportesProgramadosPage() {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => router.push('/dashboard')}
-                >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Volver al Dashboard
-                </Button>
+                <BackButton fallbackUrl="/dashboard" label="Volver al Dashboard" variant="outline" />
                 <Button onClick={() => setOpenDialog(true)}>
                   <Plus className="mr-2 h-4 w-4" />
                   Nuevo Reporte

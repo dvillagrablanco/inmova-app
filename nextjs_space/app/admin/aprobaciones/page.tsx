@@ -17,6 +17,7 @@ import {
 import { Header } from '@/components/layout/header';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/ui/back-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -75,7 +76,7 @@ export default function AprobacionesPage() {
     if (status === 'unauthenticated') {
       router.push('/login');
     } else if (status === 'authenticated') {
-      if (session?.user?.role !== 'administrador') {
+      if (session?.user?.role !== 'administrador' && session?.user?.role !== 'super_admin') {
         router.push('/unauthorized');
       } else {
         fetchApprovals(selectedTab);
@@ -221,13 +222,7 @@ export default function AprobacionesPage() {
                   Gestiona y revisa solicitudes de aprobación
                 </p>
               </div>
-              <Button
-                variant="outline"
-                onClick={() => router.push('/dashboard')}
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Volver al Dashboard
-              </Button>
+              <BackButton fallbackUrl="/dashboard" label="Volver al Dashboard" variant="outline" />
             </div>
           </div>
 
