@@ -1,91 +1,101 @@
-/**
- * Optimized Image Component
- * Wrapper around Next/Image with loading states and error handling
- */
+'use client';
 
-import Image, { ImageProps } from 'next/image';
+import Image from 'next/image';
 import { useState } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { ImageOff } from 'lucide-react';
 
-interface OptimizedImageProps extends Omit<ImageProps, 'onLoadingComplete'> {
-  containerClassName?: string;
-  fallbackSrc?: string;
+interface OptimizedImageProps {
+  src: string;
+  alt: string;
+  width?: number;
+  height?: number;
+  fill?: boolean;
+  className?: string;
+  aspectRatio?: 'square' | 'video' | 'portrait' | 'landscape' | string;
+  priority?: boolean;
+  sizes?: string;
+  quality?: number;
+  onLoad?: () => void;
+  onError?: () => void;
 }
 
 export function OptimizedImage({
   src,
   alt,
+  width,
+  height,
+  fill,
   className,
-  containerClassName,
+  aspectRatio,
   priority = false,
-  fallbackSrc = '/placeholder-image.svg',
-  ...props
+  sizes,
+  quality = 75,
+  onLoad,
+  onError,
 }: OptimizedImageProps) {
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [imgSrc, setImgSrc] = useState(src);
+  const [hasError, setHasError] = useState(false);
 
-  return (
-    <div className={cn('relative overflow-hidden bg-muted', containerClassName)}>
-      {isLoading && (
-        <div className="absolute inset-0 animate-pulse bg-muted" />
-      )}
-      <Image
-        src={error ? fallbackSrc : imgSrc}
-        alt={alt}
+  const getAspectRatioClass = () => {
+    if (!aspectRatio) return '';
+    
+    const ratios: Record<string, string> = {
+      square: 'aspect-square',
+      video: 'aspect-video',
+      portrait: 'aspect-[3/4]',
+      landscape: 'aspect-[4/3]',
+    };
+
+    return ratios[aspectRatio] || aspectRatio;
+  };
+
+  const handleLoad = () => {
+    setIsLoading(false);
+    onLoad?.();
+  };
+
+  const handleError = () => {
+    setIsLoading(false);
+    setHasError(true);
+    onError?.();
+  };
+
+  if (hasError) {
+    return (
+      <div
         className={cn(
-          'transition-opacity duration-300',
-          isLoading ? 'opacity-0' : 'opacity-100',
+          'flex items-center justify-center bg-muted',
+          getAspectRatioClass(),
           className
         )}
-        priority={priority}
-        quality={85}
-        onLoad={() => setIsLoading(false)}
-        onError={() => {
-          setError(true);
-          setImgSrc(fallbackSrc);
-          setIsLoading(false);
-        }}
-        {...props}
-      />
-    </div>
-  );
-}
-
-/**
- * AspectRatioImage - Image with fixed aspect ratio container
- */
-interface AspectRatioImageProps extends OptimizedImageProps {
-  aspectRatio?: 'square' | 'video' | 'portrait' | 'landscape' | number;
-}
-
-export function AspectRatioImage({
-  aspectRatio = 'video',
-  containerClassName,
-  ...props
-}: AspectRatioImageProps) {
-  const aspectClass = typeof aspectRatio === 'number'
-    ? ''
-    : {
-        square: 'aspect-square',
-        video: 'aspect-video',
-        portrait: 'aspect-[2/3]',
-        landscape: 'aspect-[3/2]',
-      }[aspectRatio];
-
-  const style = typeof aspectRatio === 'number'
-    ? { aspectRatio: aspectRatio.toString() }
-    : {};
+      >
+        <ImageOff className="h-8 w-8 text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
-    <div
-      className={cn('relative', aspectClass, containerClassName)}
-      style={style}
-    >
-      <OptimizedImage
-        {...props}
-        fill
-        className={cn('object-cover', props.className)}
+    <div className={cn('relative overflow-hidden', getAspectRatioClass(), className)}>
+      {isLoading && (
+        <Skeleton className="absolute inset-0" />
+      )}
+      <Image
+        src={src}
+        alt={alt}
+        width={width}
+        height={height}
+        fill={fill}
+        className={cn(
+          'object-cover transition-opacity duration-300',
+          isLoading ? 'opacity-0' : 'opacity-100'
+        )}
+        priority={priority}
+        sizes={sizes}
+        quality={quality}
+        onLoad={handleLoad}
+        onError={handleError}
       />
     </div>
   );

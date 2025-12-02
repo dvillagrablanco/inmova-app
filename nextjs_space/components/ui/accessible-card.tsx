@@ -1,57 +1,50 @@
-"use client";
+'use client';
 
-import { forwardRef, KeyboardEvent, HTMLAttributes } from 'react';
-import { Card } from '@/components/ui/card';
+import { ReactNode, forwardRef } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
-interface AccessibleCardProps extends HTMLAttributes<HTMLDivElement> {
+interface AccessibleCardProps {
+  title?: string;
+  description?: string;
+  children: ReactNode;
+  className?: string;
   onClick?: () => void;
-  onKeyDown?: (e: KeyboardEvent<HTMLDivElement>) => void;
+  href?: string;
+  'aria-label'?: string;
   role?: string;
-  ariaLabel?: string;
-  tabIndex?: number;
 }
 
-/**
- * Card accesible con soporte completo de teclado
- */
 export const AccessibleCard = forwardRef<HTMLDivElement, AccessibleCardProps>(
-  ({ onClick, onKeyDown, role = 'button', ariaLabel, tabIndex = 0, children, className, ...props }, ref) => {
-    const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-      if (onKeyDown) {
-        onKeyDown(e);
-        return;
-      }
-
-      if (onClick && (e.key === 'Enter' || e.key === ' ')) {
-        e.preventDefault();
-        onClick();
-      }
-    };
-
+  ({ title, description, children, className, onClick, href, 'aria-label': ariaLabel, role }, ref) => {
+    const isInteractive = onClick || href;
+    
     return (
       <Card
         ref={ref}
-        role={onClick ? role : undefined}
-        tabIndex={onClick ? tabIndex : undefined}
-        aria-label={ariaLabel}
-        onKeyDown={handleKeyDown}
-        onClick={onClick}
         className={cn(
-          onClick && [
-            'cursor-pointer',
-            'focus-visible:outline-none',
-            'focus-visible:ring-2',
-            'focus-visible:ring-ring',
-            'focus-visible:ring-offset-2',
-            'transition-all',
-            'hover:shadow-md',
-          ],
+          isInteractive && 'cursor-pointer hover:shadow-lg transition-shadow',
+          isInteractive && 'focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
           className
         )}
-        {...props}
+        onClick={onClick}
+        role={role || (isInteractive ? 'button' : undefined)}
+        tabIndex={isInteractive ? 0 : undefined}
+        aria-label={ariaLabel}
+        onKeyDown={(e) => {
+          if (isInteractive && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault();
+            onClick?.();
+          }
+        }}
       >
-        {children}
+        {(title || description) && (
+          <CardHeader>
+            {title && <CardTitle>{title}</CardTitle>}
+            {description && <CardDescription>{description}</CardDescription>}
+          </CardHeader>
+        )}
+        <CardContent>{children}</CardContent>
       </Card>
     );
   }

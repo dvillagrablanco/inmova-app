@@ -1,50 +1,56 @@
-import React from 'react';
-import { cn } from '@/lib/utils';
+'use client';
+
+import { useEffect, useRef } from 'react';
 
 interface LiveRegionProps {
   message: string;
-  politeness?: 'polite' | 'assertive' | 'off';
-  atomic?: boolean;
-  relevant?: 'additions' | 'removals' | 'text' | 'all';
-  className?: string;
+  role?: 'status' | 'alert';
+  'aria-live'?: 'polite' | 'assertive' | 'off';
 }
 
-/**
- * LiveRegion Component - For screen reader announcements
- * WCAG 2.1 AA - Provides dynamic content updates to assistive technologies
- */
 export function LiveRegion({
   message,
-  politeness = 'polite',
-  atomic = true,
-  relevant = 'all',
-  className
+  role = 'status',
+  'aria-live': ariaLive = 'polite',
 }: LiveRegionProps) {
   return (
     <div
-      role="status"
-      aria-live={politeness}
-      aria-atomic={atomic}
-      aria-relevant={relevant}
-      className={cn("sr-only", className)}
+      role={role}
+      aria-live={ariaLive}
+      aria-atomic="true"
+      className="sr-only"
     >
       {message}
     </div>
   );
 }
 
-/**
- * Alert LiveRegion - For important, time-sensitive messages
- */
-export function LiveAlert({ message, className }: { message: string; className?: string }) {
-  return (
+// Hook para anunciar mensajes dinámicamente
+export function useAnnouncer() {
+  const announcer = useRef<HTMLDivElement>(null);
+
+  const announce = (message: string, priority: 'polite' | 'assertive' = 'polite') => {
+    if (announcer.current) {
+      announcer.current.textContent = '';
+      // Forzar re-render para que el lector de pantalla detecte el cambio
+      setTimeout(() => {
+        if (announcer.current) {
+          announcer.current.setAttribute('aria-live', priority);
+          announcer.current.textContent = message;
+        }
+      }, 100);
+    }
+  };
+
+  const AnnouncerComponent = () => (
     <div
-      role="alert"
-      aria-live="assertive"
+      ref={announcer}
+      role="status"
+      aria-live="polite"
       aria-atomic="true"
-      className={cn("sr-only", className)}
-    >
-      {message}
-    </div>
+      className="sr-only"
+    />
   );
+
+  return { announce, Announcer: AnnouncerComponent };
 }
