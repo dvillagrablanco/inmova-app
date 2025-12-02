@@ -3,22 +3,17 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/components/providers';
 import { SkipLink } from '@/components/ui/skip-link';
+import { defaultMetadata } from '@/lib/seo-config';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'INMOVA - Sistema de Gestión Inmobiliaria',
-  description: 'Sistema profesional de gestión de propiedades inmobiliarias con innovación y tecnología',
+  ...defaultMetadata,
   icons: {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',
   },
   manifest: '/manifest.json',
-  openGraph: {
-    title: 'INMOVA - Gestión Inmobiliaria Innovadora',
-    description: 'Sistema profesional de gestión de propiedades',
-    images: ['/og-image.png'],
-  },
 };
 
 export default function RootLayout({

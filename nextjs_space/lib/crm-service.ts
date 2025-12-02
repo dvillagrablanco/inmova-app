@@ -3,266 +3,163 @@ import { addDays } from 'date-fns';
 
 interface LeadScoringFactors {
   presupuestoAdecuado: number;
-  fechaMudanzaCercana: number;
+  urgencia: number;
   fuenteConfiable: number;
-  interaccionesRecientes: number;
-  tiempoRespuesta: number;
+  verticalesInteres: number;
+  completitudDatos: number;
 }
 
-export async function calculateLeadScoring(leadId: string): Promise<number> {
-  const lead = await prisma.crmLead.findUnique({
-    where: { id: leadId },
-    include: {
-      activities: {
-        orderBy: { fecha: 'desc' },
-      },
-    },
-  });
-
-  if (!lead) return 0;
-
+// Función para calcular scoring inicial basado en datos del body
+export function calculateLeadScoring(leadData: any): number {
   let score = 0;
   const factors: LeadScoringFactors = {
     presupuestoAdecuado: 0,
-    fechaMudanzaCercana: 0,
+    urgencia: 0,
     fuenteConfiable: 0,
-    interaccionesRecientes: 0,
-    tiempoRespuesta: 0,
+    verticalesInteres: 0,
+    completitudDatos: 0,
   };
 
   // Factor 1: Presupuesto (25 puntos)
-  if (lead.unitId) {
-    const unit = await prisma.unit.findUnique({
-      where: { id: lead.unitId },
-    });
-
-    if (unit && lead.presupuesto) {
-      const ratio = lead.presupuesto / unit.rentaMensual;
-      if (ratio >= 1.2) factors.presupuestoAdecuado = 25;
-      else if (ratio >= 1.0) factors.presupuestoAdecuado = 20;
-      else if (ratio >= 0.8) factors.presupuestoAdecuado = 10;
-    }
+  if (leadData.presupuestoMensual) {
+    const presupuesto = parseFloat(leadData.presupuestoMensual);
+    if (presupuesto >= 500) factors.presupuestoAdecuado = 25;
+    else if (presupuesto >= 300) factors.presupuestoAdecuado = 20;
+    else if (presupuesto >= 149) factors.presupuestoAdecuado = 15;
+    else factors.presupuestoAdecuado = 5;
   }
 
-  // Factor 2: Fecha de mudanza cercana (20 puntos)
-  if (lead.fechaMudanza) {
-    const diasHastaMudanza = Math.ceil(
-      (lead.fechaMudanza.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
-    );
-    if (diasHastaMudanza <= 30) factors.fechaMudanzaCercana = 20;
-    else if (diasHastaMudanza <= 60) factors.fechaMudanzaCercana = 15;
-    else if (diasHastaMudanza <= 90) factors.fechaMudanzaCercana = 10;
-  }
+  // Factor 2: Urgencia (20 puntos)
+  if (leadData.urgencia === 'alta') factors.urgencia = 20;
+  else if (leadData.urgencia === 'media') factors.urgencia = 12;
+  else if (leadData.urgencia === 'baja') factors.urgencia = 5;
 
   // Factor 3: Fuente confiable (15 puntos)
-  if (lead.fuente === 'referido') factors.fuenteConfiable = 15;
-  else if (lead.fuente === 'web') factors.fuenteConfiable = 10;
-  else if (lead.fuente === 'llamada') factors.fuenteConfiable = 8;
+  if (leadData.fuente === 'referido') factors.fuenteConfiable = 15;
+  else if (leadData.fuente === 'chatbot' || leadData.fuente === 'landing') factors.fuenteConfiable = 12;
+  else if (leadData.fuente === 'formulario_contacto') factors.fuenteConfiable = 10;
+  else if (leadData.fuente === 'social_media') factors.fuenteConfiable = 8;
+  else factors.fuenteConfiable = 5;
 
-  // Factor 4: Interacciones recientes (25 puntos)
-  const recentActivities = lead.activities.filter((a) => {
-    const daysSince = Math.ceil(
-      (new Date().getTime() - a.fecha.getTime()) / (1000 * 60 * 60 * 24)
-    );
-    return daysSince <= 7;
-  });
+  // Factor 4: Verticales de interés (20 puntos)
+  const numVerticales = leadData.verticalesInteres?.length || 0;
+  if (numVerticales >= 3) factors.verticalesInteres = 20;
+  else if (numVerticales >= 2) factors.verticalesInteres = 15;
+  else if (numVerticales >= 1) factors.verticalesInteres = 10;
 
-  if (recentActivities.length >= 3) factors.interaccionesRecientes = 25;
-  else if (recentActivities.length >= 2) factors.interaccionesRecientes = 18;
-  else if (recentActivities.length >= 1) factors.interaccionesRecientes = 10;
+  // Factor 5: Completitud de datos (20 puntos)
+  let completitud = 0;
+  if (leadData.email) completitud += 4;
+  if (leadData.telefono) completitud += 4;
+  if (leadData.empresa) completitud += 3;
+  if (leadData.cargo) completitud += 3;
+  if (leadData.numeroUnidades) completitud += 3;
+  if (leadData.ciudad) completitud += 3;
+  factors.completitudDatos = completitud;
 
-  // Factor 5: Tiempo de respuesta (15 puntos)
-  if (lead.ultimoContacto) {
-    const diasDesdeContacto = Math.ceil(
-      (new Date().getTime() - lead.ultimoContacto.getTime()) / (1000 * 60 * 60 * 24)
-    );
-    if (diasDesdeContacto <= 1) factors.tiempoRespuesta = 15;
-    else if (diasDesdeContacto <= 3) factors.tiempoRespuesta = 10;
-    else if (diasDesdeContacto <= 7) factors.tiempoRespuesta = 5;
-  }
+  // Sumar todos los factores
+  score = Object.values(factors).reduce((acc, val) => acc + val, 0);
 
-  score =
-    factors.presupuestoAdecuado +
-    factors.fechaMudanzaCercana +
-    factors.fuenteConfiable +
-    factors.interaccionesRecientes +
-    factors.tiempoRespuesta;
-
-  // Actualizar scoring en la base de datos
-  await prisma.crmLead.update({
-    where: { id: leadId },
-    data: { scoring: score },
-  });
-
-  return score;
+  return Math.min(100, Math.max(0, score));
 }
 
-export async function calculateProbabilidadCierre(leadId: string): Promise<number> {
-  const lead = await prisma.crmLead.findUnique({
-    where: { id: leadId },
-    include: {
-      activities: true,
-    },
-  });
+// Función para calcular la probabilidad de cierre
+export function calculateProbabilidadCierre(leadData: any): number {
+  let probabilidad = 50; // Base del 50%
 
-  if (!lead) return 0;
-
-  let probabilidad = 0;
-
-  // Probabilidad base según estado
-  switch (lead.estado) {
-    case 'nuevo':
-      probabilidad = 10;
-      break;
-    case 'contactado':
-      probabilidad = 20;
-      break;
-    case 'calificado':
-      probabilidad = 40;
-      break;
-    case 'visitado':
-      probabilidad = 60;
-      break;
-    case 'propuesta_enviada':
-      probabilidad = 75;
-      break;
-    case 'negociacion':
-      probabilidad = 85;
-      break;
-    case 'ganado':
-      probabilidad = 100;
-      break;
-    case 'perdido':
-      probabilidad = 0;
-      break;
+  // Ajustar según presupuesto
+  if (leadData.presupuestoMensual) {
+    const presupuesto = parseFloat(leadData.presupuestoMensual);
+    if (presupuesto >= 500) probabilidad += 15;
+    else if (presupuesto >= 300) probabilidad += 10;
+    else if (presupuesto >= 149) probabilidad += 5;
+  } else {
+    probabilidad -= 10;
   }
 
-  // Ajustar por scoring
-  const scoringBonus = (lead.scoring / 100) * 15;
-  probabilidad = Math.min(100, probabilidad + scoringBonus);
+  // Ajustar según urgencia
+  if (leadData.urgencia === 'alta') probabilidad += 15;
+  else if (leadData.urgencia === 'baja') probabilidad -= 10;
 
-  // Ajustar por actividades
-  const actividadesCompletadas = lead.activities.filter((a) => a.completada).length;
-  if (actividadesCompletadas >= 5) probabilidad = Math.min(100, probabilidad + 5);
+  // Ajustar según fuente
+  if (leadData.fuente === 'referido') probabilidad += 10;
+  else if (leadData.fuente === 'chatbot' || leadData.fuente === 'landing') probabilidad += 5;
 
-  // Actualizar en la base de datos
-  await prisma.crmLead.update({
-    where: { id: leadId },
-    data: { probabilidadCierre: probabilidad },
-  });
+  // Ajustar según número de unidades
+  if (leadData.numeroUnidades) {
+    const num = parseInt(leadData.numeroUnidades);
+    if (num >= 50) probabilidad += 15;
+    else if (num >= 20) probabilidad += 10;
+    else if (num >= 5) probabilidad += 5;
+  }
 
-  return probabilidad;
+  // Ajustar según completitud de datos
+  let camposCompletos = 0;
+  if (leadData.email) camposCompletos++;
+  if (leadData.telefono) camposCompletos++;
+  if (leadData.empresa) camposCompletos++;
+  if (leadData.cargo) camposCompletos++;
+  if (leadData.ciudad) camposCompletos++;
+  
+  probabilidad += (camposCompletos / 5) * 10;
+
+  return Math.min(100, Math.max(0, probabilidad));
 }
 
-export async function suggestNextAction(leadId: string): Promise<string> {
-  const lead = await prisma.crmLead.findUnique({
-    where: { id: leadId },
-    include: {
-      activities: {
-        orderBy: { fecha: 'desc' },
-        take: 1,
-      },
-    },
-  });
-
-  if (!lead) return 'Revisar información del lead';
-
-  const lastActivity = lead.activities[0];
-
-  // Si no hay actividades recientes
-  if (!lastActivity) {
-    return 'Realizar primer contacto telefónico';
-  }
-
-  // Sugerencias según el estado
-  switch (lead.estado) {
-    case 'nuevo':
-      return 'Contactar al lead por teléfono o email';
-    case 'contactado':
-      return 'Calificar necesidades y presupuesto del lead';
-    case 'calificado':
-      return 'Programar visita a la propiedad';
-    case 'visitado':
-      return 'Enviar propuesta formal y condiciones';
-    case 'propuesta_enviada':
-      return 'Hacer seguimiento de la propuesta';
-    case 'negociacion':
-      return 'Cerrar negociación y preparar contrato';
-    default:
-      return 'Hacer seguimiento general';
-  }
+// Función para actualizar temperatura del lead según puntuación
+export function determinarTemperatura(puntuacion: number): string {
+  if (puntuacion >= 75) return 'caliente';
+  if (puntuacion >= 50) return 'tibio';
+  return 'frio';
 }
 
-export async function getPipelineStats(companyId: string) {
-  const leads = await prisma.crmLead.findMany({
+// Función para determinar etapa sugerida según datos
+export function determinarEtapaSugerida(leadData: any): string {
+  if (leadData.estado === 'ganado') return 'cerrado_ganado';
+  if (leadData.estado === 'perdido') return 'cerrado_perdido';
+  
+  if (leadData.urgencia === 'alta' && leadData.presupuestoMensual >= 300) {
+    return 'propuesta';
+  }
+  
+  if (leadData.verticalesInteres?.length >= 2) {
+    return 'calificacion';
+  }
+  
+  return 'contacto_inicial';
+}
+
+// Función para obtener estadísticas del CRM
+export async function getCRMStats(companyId: string) {
+  const leads = await prisma.lead.findMany({
     where: { companyId },
     include: {
-      activities: true,
+      actividades: true,
     },
   });
 
-  const stats = {
-    total: leads.length,
-    nuevo: 0,
-    contactado: 0,
-    calificado: 0,
-    visitado: 0,
-    propuesta_enviada: 0,
-    negociacion: 0,
-    ganado: 0,
-    perdido: 0,
-    tasaConversion: 0,
-    valorTotalPipeline: 0,
-    tiempoPromedioCierre: 0,
-  };
+  const totalLeads = leads.length;
+  const leadsPorEstado = leads.reduce((acc: any, lead) => {
+    acc[lead.estado] = (acc[lead.estado] || 0) + 1;
+    return acc;
+  }, {});
 
-  leads.forEach((lead) => {
-    stats[lead.estado]++;
-    if (lead.valorEstimado) {
-      stats.valorTotalPipeline += lead.valorEstimado;
-    }
-  });
+  const leadsPorFuente = leads.reduce((acc: any, lead) => {
+    acc[lead.fuente] = (acc[lead.fuente] || 0) + 1;
+    return acc;
+  }, {});
 
-  const totalActivos = stats.total - stats.ganado - stats.perdido;
-  stats.tasaConversion = stats.total > 0 ? (stats.ganado / stats.total) * 100 : 0;
+  const leadsPorTemperatura = leads.reduce((acc: any, lead) => {
+    acc[lead.temperatura] = (acc[lead.temperatura] || 0) + 1;
+    return acc;
+  }, {});
 
-  return stats;
-}
+  const tasaConversion = totalLeads > 0 
+    ? ((leadsPorEstado['ganado'] || 0) / totalLeads) * 100 
+    : 0;
 
-export async function autoProgressLeadStage(leadId: string): Promise<boolean> {
-  const lead = await prisma.crmLead.findUnique({
-    where: { id: leadId },
-    include: {
-      activities: {
-        where: { completada: true },
-        orderBy: { fecha: 'desc' },
-      },
-    },
-  });
+  const valorPotencialTotal = leads.reduce((sum, lead) => {
+    return sum + (lead.presupuestoMensual || 0) * 12; // Anualizado
+  }, 0);
 
-  if (!lead) return false;
-
-  let newEstado = lead.estado;
-
-  // Lógica de progresión automática
-  if (lead.estado === 'nuevo' && lead.activities.length > 0) {
-    newEstado = 'contactado';
-  } else if (lead.estado === 'contactado' && lead.presupuesto && lead.presupuesto > 0) {
-    newEstado = 'calificado';
-  } else if (lead.estado === 'calificado') {
-    const visitaActivity = lead.activities.find((a) => a.tipo === 'visita');
-    if (visitaActivity) {
-      newEstado = 'visitado';
-    }
-  }
-
-  if (newEstado !== lead.estado) {
-    await prisma.crmLead.update({
-      where: { id: leadId },
-      data: { estado: newEstado },
-    });
-    return true;
-  }
-
-  return false;
-}
+  const leadsCalientes = leads.filter(l => l.temperatura === 'caliente').length;\n  const leadsTibios = leads.filter(l => l.temperatura === 'tibio').length;\n\n  const promedioActividades = totalLeads > 0\n    ? leads.reduce((sum, lead) => sum + lead.numeroContactos, 0) / totalLeads\n    : 0;\n\n  return {\n    totalLeads,\n    leadsPorEstado,\n    leadsPorFuente,\n    leadsPorTemperatura,\n    tasaConversion: Math.round(tasaConversion * 100) / 100,\n    valorPotencialTotal: Math.round(valorPotencialTotal),\n    leadsCalientes,\n    leadsTibios,\n    promedioActividades: Math.round(promedioActividades * 10) / 10,\n    leadsMesActual: leads.filter(l => {\n      const mesActual = new Date().getMonth();\n      return new Date(l.createdAt).getMonth() === mesActual;\n    }).length,\n  };\n}\n

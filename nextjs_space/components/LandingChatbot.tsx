@@ -253,7 +253,35 @@ export function LandingChatbot() {
       return;
     }
 
-    toast.success('¡Gracias! Te contactaremos pronto.');
+    // Capturar lead en el CRM
+    try {
+      const conversacionId = `chat-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const preguntasHechas = messages
+        .filter(m => m.sender === 'user')
+        .map(m => m.text);
+
+      await fetch('/api/landing/capture-lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre: contactForm.name,
+          email: contactForm.email,
+          telefono: contactForm.phone,
+          mensajeInicial: contactForm.message,
+          fuente: 'chatbot',
+          conversacionId,
+          preguntasFrecuentes: preguntasHechas,
+          paginaOrigen: window.location.href,
+          urgencia: 'media',
+        }),
+      });
+
+      toast.success('¡Gracias! Te contactaremos pronto.');
+    } catch (error) {
+      console.error('Error capturing lead:', error);
+      toast.success('¡Gracias! Te contactaremos pronto.');
+    }
+
     setShowContactForm(false);
     addBotMessage(
       `¡Gracias ${contactForm.name}! 🎉\n\nHemos recibido tu información. Te contactaremos en menos de 24 horas.\n\n¿Necesitas algo más?`,

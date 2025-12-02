@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { getPipelineStats } from '@/lib/crm-service';
+import { getCRMStats } from '@/lib/crm-service';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
-    const stats = await getPipelineStats(user.companyId);
+    const stats = await getCRMStats(user.companyId);
 
     return NextResponse.json(stats);
   } catch (error) {

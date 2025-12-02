@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { autoProgressLeadStage } from '@/lib/crm-service';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,8 +30,17 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const activities = await prisma.crmActivity.findMany({
+    const activities = await prisma.leadActivity.findMany({
       where: { leadId },
+      include: {
+        usuario: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
       orderBy: { fecha: 'desc' },
     });
 
@@ -63,31 +71,42 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
 
-    const activity = await prisma.crmActivity.create({
+    const activity = await prisma.leadActivity.create({
       data: {
         leadId: body.leadId,
         tipo: body.tipo,
-        asunto: body.asunto,
+        titulo: body.titulo || body.asunto,
         descripcion: body.descripcion,
-        fecha: new Date(body.fecha),
+        fecha: new Date(body.fecha || Date.now()),
         duracion: body.duracion ? parseInt(body.duracion) : null,
         resultado: body.resultado,
-        proximaAccion: body.proximaAccion,
-        completada: body.completada || false,
         creadoPor: user.id,
       },
-    });
-
-    // Actualizar ultimoContacto del lead
-    await prisma.crmLead.update({
-      where: { id: body.leadId },
-      data: {
-        ultimoContacto: new Date(),
+      include: {
+        usuario: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
       },
     });
 
-    // Intentar progresión automática de estado
-    await autoProgressLeadStage(body.leadId);
+    // Actualizar ultimoContacto y numeroContactos del lead
+    const lead = await prisma.lead.findUnique({
+      where: { id: body.leadId },
+    });
+
+    if (lead) {
+      await prisma.lead.update({
+        where: { id: body.leadId },
+        data: {
+          ultimoContacto: new Date(),
+          numeroContactos: lead.numeroContactos + 1,
+        },
+      });
+    }
 
     return NextResponse.json(activity, { status: 201 });
   } catch (error) {

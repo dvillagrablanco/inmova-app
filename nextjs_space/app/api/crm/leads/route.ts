@@ -32,16 +32,23 @@ export async function GET(req: NextRequest) {
     if (estado) where.estado = estado;
     if (asignadoA) where.asignadoA = asignadoA;
 
-    const leads = await prisma.crmLead.findMany({
+    const leads = await prisma.lead.findMany({
       where,
       include: {
-        activities: {
+        actividades: {
           orderBy: { fecha: 'desc' },
           take: 5,
         },
+        asignadoUsuario: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
       },
       orderBy: [
-        { scoring: 'desc' },
+        { puntuacion: 'desc' },
         { createdAt: 'desc' },
       ],
     });
@@ -73,36 +80,56 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
 
-    const lead = await prisma.crmLead.create({
+    // Calcular scoring inicial basado en datos del lead
+    const puntuacionInicial = calculateLeadScoring(body);
+    const probabilidadInicial = calculateProbabilidadCierre(body);
+
+    const lead = await prisma.lead.create({
       data: {
         companyId: user.companyId,
-        nombreCompleto: body.nombreCompleto,
+        nombre: body.nombre || body.nombreCompleto?.split(' ')[0] || '',
+        apellidos: body.apellidos || body.nombreCompleto?.split(' ').slice(1).join(' ') || '',
         email: body.email,
         telefono: body.telefono,
-        unitId: body.unitId,
+        empresa: body.empresa,
+        cargo: body.cargo,
+        direccion: body.direccion,
+        ciudad: body.ciudad,
+        codigoPostal: body.codigoPostal,
+        pais: body.pais || 'España',
+        fuente: body.fuente || 'formulario_contacto',
+        origenDetalle: body.origenDetalle,
+        paginaOrigen: body.paginaOrigen,
         estado: body.estado || 'nuevo',
-        fuente: body.fuente || 'web',
-        presupuesto: body.presupuesto ? parseFloat(body.presupuesto) : null,
-        fechaMudanza: body.fechaMudanza ? new Date(body.fechaMudanza) : null,
-        necesidades: body.necesidades,
+        etapa: body.etapa || 'contacto_inicial',
+        puntuacion: puntuacionInicial,
+        temperatura: body.temperatura || 'frio',
+        tipoNegocio: body.tipoNegocio,
+        verticalesInteres: body.verticalesInteres || [],
+        numeroUnidades: body.numeroUnidades ? parseInt(body.numeroUnidades) : null,
+        presupuestoMensual: body.presupuestoMensual ? parseFloat(body.presupuestoMensual) : null,
+        urgencia: body.urgencia || 'media',
         notas: body.notas,
+        probabilidadCierre: probabilidadInicial,
+        fechaEstimadaCierre: body.fechaEstimadaCierre ? new Date(body.fechaEstimadaCierre) : null,
         asignadoA: body.asignadoA || user.id,
+        conversacionId: body.conversacionId,
+        mensajeInicial: body.mensajeInicial,
+        preguntasFrecuentes: body.preguntasFrecuentes || [],
       },
-    });
-
-    // Calcular scoring inicial
-    await calculateLeadScoring(lead.id);
-    await calculateProbabilidadCierre(lead.id);
-
-    // Obtener lead actualizado
-    const updatedLead = await prisma.crmLead.findUnique({
-      where: { id: lead.id },
       include: {
-        activities: true,
+        actividades: true,
+        asignadoUsuario: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
       },
     });
 
-    return NextResponse.json(updatedLead, { status: 201 });
+    return NextResponse.json(lead, { status: 201 });
   } catch (error) {
     console.error('Error creating lead:', error);
     return NextResponse.json(

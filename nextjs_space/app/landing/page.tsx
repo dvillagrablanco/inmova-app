@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { LandingChatbot } from '@/components/LandingChatbot';
+import { StructuredData } from '@/components/StructuredData';
 import { 
   Building2, Users, TrendingUp, Zap, Shield, Bot, Leaf, 
   CheckCircle, Star, ArrowRight, Play, Hotel, Hammer, Briefcase,
@@ -22,7 +23,9 @@ export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <>
+      <StructuredData />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       {/* NAVIGATION - Menú superior siempre visible */}
       <nav className="fixed top-0 left-0 right-0 w-full bg-white backdrop-blur-md border-b border-gray-200 z-[9999] shadow-lg">
         <div className="container mx-auto px-4">
@@ -1584,6 +1587,7 @@ export default function LandingPage() {
 
       {/* Chatbot y WhatsApp flotantes */}
       <LandingChatbot />
-    </div>
+      </div>
+    </>
   );
 }

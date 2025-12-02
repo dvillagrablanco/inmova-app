@@ -227,6 +227,11 @@ model User {
   
   // Sugerencias
   suggestions          Suggestion[]
+  
+  // CRM - Leads
+  leadsAsignados       Lead[]
+  actividadesLead      LeadActivity[]
+  documentosLead       LeadDocument[]
 
   @@map("users")
 }
@@ -1030,6 +1035,9 @@ model Company {
   
   // Buzón de sugerencias
   suggestions         Suggestion[]
+  
+  // CRM - Leads
+  leads               Lead[]
 
   @@map("company")
 }
@@ -7195,4 +7203,129 @@ model Suggestion {
   @@index([categoria])
   @@index([createdAt])
   @@map("suggestions")
+}
+
+// ================================
+// MODELO CRM - LEADS
+// ================================
+model Lead {
+  id                String   @id @default(cuid())
+  companyId         String
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Información básica
+  nombre            String
+  apellidos         String?
+  email             String
+  telefono          String?
+  empresa           String?
+  cargo             String?
+  
+  // Datos de contacto adicionales
+  direccion         String?
+  ciudad            String?
+  codigoPostal      String?
+  pais              String?   @default("España")
+  
+  // Origen y fuente
+  fuente            String    // "landing", "chatbot", "formulario_contacto", "referido", "social_media", "otros"
+  origenDetalle     String?   // Información adicional sobre el origen
+  paginaOrigen      String?   // URL de la página donde se generó el lead
+  
+  // Estado del lead
+  estado            String    @default("nuevo")  // "nuevo", "contactado", "calificado", "propuesta", "negociacion", "ganado", "perdido"
+  etapa             String    @default("contacto_inicial")  // Etapa específica del pipeline
+  puntuacion        Int       @default(0)  // Lead scoring: 0-100
+  temperatura       String    @default("frio")  // "frio", "tibio", "caliente"
+  
+  // Información de negocio
+  tipoNegocio       String?   // Tipo de negocio inmobiliario que le interesa
+  verticalesInteres String[]  // Array de verticales que le interesan
+  numeroUnidades    Int?      // Número de propiedades que gestiona o planea gestionar
+  presupuestoMensual Float?   // Presupuesto mensual estimado
+  urgencia          String?   @default("media")  // "baja", "media", "alta"
+  
+  // Notas y seguimiento
+  notas             String?   @db.Text
+  motivoPerdida     String?   // Si estado = "perdido", razón de la pérdida
+  probabilidadCierre Float?  // Probabilidad de conversión (0-100)
+  fechaEstimadaCierre DateTime?
+  
+  // Asignación
+  asignadoA         String?
+  asignadoUsuario   User?    @relation(fields: [asignadoA], references: [id], onDelete: SetNull)
+  
+  // Actividades y seguimiento
+  ultimoContacto    DateTime?
+  proximoSeguimiento DateTime?
+  numeroContactos   Int       @default(0)
+  
+  // Información adicional del chatbot
+  conversacionId    String?   // ID de la conversación del chatbot
+  mensajeInicial    String?   @db.Text
+  preguntasFrecuentes String[] // Preguntas que hizo durante la conversación
+  
+  // Metadata
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  // Relaciones
+  actividades       LeadActivity[]
+  documentos        LeadDocument[]
+  
+  @@index([companyId])
+  @@index([estado])
+  @@index([etapa])
+  @@index([fuente])
+  @@index([temperatura])
+  @@index([asignadoA])
+  @@index([email])
+  @@index([createdAt])
+  @@map("leads")
+}
+
+// Actividades del Lead (llamadas, emails, reuniones, etc.)
+model LeadActivity {
+  id          String   @id @default(cuid())
+  leadId      String
+  lead        Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  
+  tipo        String   // "llamada", "email", "reunion", "nota", "whatsapp", "demo"
+  titulo      String
+  descripcion String?  @db.Text
+  resultado   String?  // Resultado de la actividad
+  duracion    Int?     // Duración en minutos
+  
+  fecha       DateTime @default(now())
+  creadoPor   String
+  usuario     User     @relation(fields: [creadoPor], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([leadId])
+  @@index([tipo])
+  @@index([fecha])
+  @@map("lead_activities")
+}
+
+// Documentos asociados al Lead
+model LeadDocument {
+  id          String   @id @default(cuid())
+  leadId      String
+  lead        Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  
+  nombre      String
+  tipo        String   // "propuesta", "contrato", "presentacion", "otros"
+  url         String
+  tamano      Int?     // Tamaño en bytes
+  
+  creadoPor   String
+  usuario     User     @relation(fields: [creadoPor], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([leadId])
+  @@map("lead_documents")
 }
