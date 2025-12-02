@@ -507,6 +507,379 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* 10 UNIQUE COMPETITIVE ADVANTAGES SECTION */}
+      <section className="py-24 px-4 bg-gradient-to-br from-gray-900 via-indigo-900 to-violet-900 text-white relative overflow-hidden">
+        {/* Animated Background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-r from-indigo-500/20 to-violet-500/20 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-r from-pink-500/20 to-rose-500/20 rounded-full blur-3xl animate-pulse delay-700" />
+        </div>
+
+        <div className="container mx-auto relative z-10">
+          <div className="text-center mb-16">
+            <Badge className="mb-4 bg-gradient-to-r from-amber-400 to-orange-400 text-white border-0 px-4 py-2">
+              <Award className="h-4 w-4 mr-1 inline" />
+              Diferenciación Absoluta
+            </Badge>
+            <h2 className="text-4xl md:text-6xl font-black mb-4 bg-gradient-to-r from-white via-blue-100 to-violet-200 bg-clip-text text-transparent">
+              10 Ventajas Competitivas Únicas
+            </h2>
+            <p className="text-xl text-blue-100 max-w-4xl mx-auto">
+              Lo que hace a INMOVA <span className="font-bold text-amber-400">absolutamente diferente</span> de cualquier otra plataforma PropTech del mercado
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-8">
+            {/* Ventaja 1: Multi-Vertical */}
+            <Card className="bg-white/10 backdrop-blur-lg border-2 border-white/20 hover:border-amber-400 transition-all hover:shadow-2xl hover:shadow-amber-500/50 group">
+              <CardHeader>
+                <div className="p-3 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl w-fit mb-3 group-hover:scale-110 transition-transform">
+                  <Building2 className="h-8 w-8 text-white" />
+                </div>
+                <CardTitle className="text-white text-xl">Multi-Vertical Real</CardTitle>
+                <CardDescription className="text-blue-100">
+                  <strong className="text-amber-400">7 Modelos de Negocio</strong> en 1 Plataforma
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="text-sm text-blue-100">
+                <ul className="space-y-2">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>Alquiler tradicional + STR</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>House Flipping + Construcción</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>Coliving + Comercial</span>
+                  </li>
+                  <li className="font-bold text-amber-400 mt-3">
+                    Competencia: 1-2 verticales máx
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Ventaja 2: IA GPT-4 */}
+            <Card className="bg-white/10 backdrop-blur-lg border-2 border-white/20 hover:border-violet-400 transition-all hover:shadow-2xl hover:shadow-violet-500/50 group">
+              <CardHeader>
+                <div className="p-3 bg-gradient-to-br from-violet-400 to-purple-500 rounded-xl w-fit mb-3 group-hover:scale-110 transition-transform">
+                  <Bot className="h-8 w-8 text-white" />
+                </div>
+                <CardTitle className="text-white text-xl">IA GPT-4 Nativa</CardTitle>
+                <CardDescription className="text-blue-100">
+                  <strong className="text-violet-400">12 Módulos</strong> con Inteligencia Artificial
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="text-sm text-blue-100">
+                <ul className="space-y-2">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>Chatbot 24/7 (80% automatización)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>Pricing dinámico (+12% ingresos)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>Predicción morosidad (85% precisión)</span>
+                  </li>
+                  <li className="font-bold text-violet-400 mt-3">
+                    Competencia: Sin IA o básica
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Ventaja 3: Blockchain */}
+            <Card className="bg-white/10 backdrop-blur-lg border-2 border-white/20 hover:border-cyan-400 transition-all hover:shadow-2xl hover:shadow-cyan-500/50 group">
+              <CardHeader>
+                <div className="p-3 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl w-fit mb-3 group-hover:scale-110 transition-transform">
+                  <LinkIcon className="h-8 w-8 text-white" />
+                </div>
+                <CardTitle className="text-white text-xl">Blockchain Web3</CardTitle>
+                <CardDescription className="text-blue-100">
+                  <strong className="text-cyan-400">Tokenización</strong> de Propiedades
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="text-sm text-blue-100">
+                <ul className="space-y-2">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>ERC-20 tokens propiedades</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>Smart contracts rentas</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>Nuevo canal funding €84B 2030</span>
+                  </li>
+                  <li className="font-bold text-cyan-400 mt-3">
+                    Competencia: NO disponible
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Ventaja 4: IoT */}
+            <Card className="bg-white/10 backdrop-blur-lg border-2 border-white/20 hover:border-green-400 transition-all hover:shadow-2xl hover:shadow-green-500/50 group">
+              <CardHeader>
+                <div className="p-3 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl w-fit mb-3 group-hover:scale-110 transition-transform">
+                  <Zap className="h-8 w-8 text-white" />
+                </div>
+                <CardTitle className="text-white text-xl">IoT Smart Buildings</CardTitle>
+                <CardDescription className="text-blue-100">
+                  <strong className="text-green-400">50+ Sensores</strong> Integrados
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="text-sm text-blue-100">
+                <ul className="space-y-2">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>Energía + clima + seguridad</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>Mantenimiento predictivo (-35% costes)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>Ahorro energía (-20%)</span>
+                  </li>
+                  <li className="font-bold text-green-400 mt-3">
+                    Competencia: NO disponible
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Ventaja 5: ESG */}
+            <Card className="bg-white/10 backdrop-blur-lg border-2 border-white/20 hover:border-emerald-400 transition-all hover:shadow-2xl hover:shadow-emerald-500/50 group">
+              <CardHeader>
+                <div className="p-3 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl w-fit mb-3 group-hover:scale-110 transition-transform">
+                  <Leaf className="h-8 w-8 text-white" />
+                </div>
+                <CardTitle className="text-white text-xl">ESG Sostenibilidad</CardTitle>
+                <CardDescription className="text-blue-100">
+                  <strong className="text-emerald-400">Acceso €450B</strong> Fondos Verdes
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="text-sm text-blue-100">
+                <ul className="space-y-2">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>Huella carbono certificada</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>Reporting GRI, SASB, TCFD</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>Certificaciones LEED, BREEAM</span>
+                  </li>
+                  <li className="font-bold text-emerald-400 mt-3">
+                    Competencia: Básico o NO
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Ventaja 6: White Label */}
+            <Card className="bg-white/10 backdrop-blur-lg border-2 border-white/20 hover:border-pink-400 transition-all hover:shadow-2xl hover:shadow-pink-500/50 group">
+              <CardHeader>
+                <div className="p-3 bg-gradient-to-br from-pink-400 to-rose-500 rounded-xl w-fit mb-3 group-hover:scale-110 transition-transform">
+                  <Smartphone className="h-8 w-8 text-white" />
+                </div>
+                <CardTitle className="text-white text-xl">White Label 100%</CardTitle>
+                <CardDescription className="text-blue-100">
+                  <strong className="text-pink-400">Tu Marca</strong>, Tu Plataforma
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="text-sm text-blue-100">
+                <ul className="space-y-2">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>Logo, colores, dominio propio</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>Apps iOS/Android tu marca (Q2 2026)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>Valor: €150k desarrollo custom</span>
+                  </li>
+                  <li className="font-bold text-pink-400 mt-3">
+                    Competencia: NO disponible
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Ventaja 7: 5 Portales */}
+            <Card className="bg-white/10 backdrop-blur-lg border-2 border-white/20 hover:border-indigo-400 transition-all hover:shadow-2xl hover:shadow-indigo-500/50 group">
+              <CardHeader>
+                <div className="p-3 bg-gradient-to-br from-indigo-400 to-blue-500 rounded-xl w-fit mb-3 group-hover:scale-110 transition-transform">
+                  <Users className="h-8 w-8 text-white" />
+                </div>
+                <CardTitle className="text-white text-xl">5 Portales Pro</CardTitle>
+                <CardDescription className="text-blue-100">
+                  <strong className="text-indigo-400">Experiencia</strong> Multi-Stakeholder
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="text-sm text-blue-100">
+                <ul className="space-y-2">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>Inquilino + Propietario + Proveedor</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>Comunidad + Superadmin</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>PWA móvil + notificaciones push</span>
+                  </li>
+                  <li className="font-bold text-indigo-400 mt-3">
+                    Competencia: 2-3 portales básicos
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Ventaja 8: Implementación */}
+            <Card className="bg-white/10 backdrop-blur-lg border-2 border-white/20 hover:border-orange-400 transition-all hover:shadow-2xl hover:shadow-orange-500/50 group">
+              <CardHeader>
+                <div className="p-3 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl w-fit mb-3 group-hover:scale-110 transition-transform">
+                  <Rocket className="h-8 w-8 text-white" />
+                </div>
+                <CardTitle className="text-white text-xl">Express Setup</CardTitle>
+                <CardDescription className="text-blue-100">
+                  <strong className="text-orange-400">15 Días</strong> Operativo
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="text-sm text-blue-100">
+                <ul className="space-y-2">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>Importación datos automatizada</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>Formación incluida</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>CSM dedicado</span>
+                  </li>
+                  <li className="font-bold text-orange-400 mt-3">
+                    Competencia: 90-180 días
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Ventaja 9: Pricing */}
+            <Card className="bg-white/10 backdrop-blur-lg border-2 border-white/20 hover:border-yellow-400 transition-all hover:shadow-2xl hover:shadow-yellow-500/50 group">
+              <CardHeader>
+                <div className="p-3 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-xl w-fit mb-3 group-hover:scale-110 transition-transform">
+                  <DollarSign className="h-8 w-8 text-white" />
+                </div>
+                <CardTitle className="text-white text-xl">Pricing Disruptivo</CardTitle>
+                <CardDescription className="text-blue-100">
+                  <strong className="text-yellow-400">-70%</strong> vs Competencia
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="text-sm text-blue-100">
+                <ul className="space-y-2">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>Flat fee €499-1,999/mes</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>Unidades ilimitadas</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>Usuarios ilimitados</span>
+                  </li>
+                  <li className="font-bold text-yellow-400 mt-3">
+                    Competencia: €1-5 por unidad
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Ventaja 10: Integraciones */}
+            <Card className="bg-white/10 backdrop-blur-lg border-2 border-white/20 hover:border-teal-400 transition-all hover:shadow-2xl hover:shadow-teal-500/50 group">
+              <CardHeader>
+                <div className="p-3 bg-gradient-to-br from-teal-400 to-cyan-500 rounded-xl w-fit mb-3 group-hover:scale-110 transition-transform">
+                  <Globe className="h-8 w-8 text-white" />
+                </div>
+                <CardTitle className="text-white text-xl">Integraciones Nativas</CardTitle>
+                <CardDescription className="text-blue-100">
+                  <strong className="text-teal-400">30+</strong> Sistemas Integrados
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="text-sm text-blue-100">
+                <ul className="space-y-2">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>Contabilidad: Sage, A3, Holded, etc</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>STR: Airbnb, Booking, Vrbo</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                    <span>Pagos: Stripe, SEPA, Bizum</span>
+                  </li>
+                  <li className="font-bold text-teal-400 mt-3">
+                    API REST abierta completa
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* CTA Final */}
+          <div className="mt-16 text-center">
+            <div className="inline-block bg-white/10 backdrop-blur-lg border-2 border-white/20 rounded-2xl p-8 max-w-2xl">
+              <h3 className="text-3xl font-bold text-white mb-4">
+                ¿Listo para la <span className="text-amber-400">Transformación Digital</span>?
+              </h3>
+              <p className="text-blue-100 mb-6">
+                Únete a las <strong className="text-white">500+ empresas</strong> que ya gestionan sus propiedades con INMOVA
+              </p>
+              <div className="flex flex-wrap gap-4 justify-center">
+                <Link href="/register">
+                  <Button size="lg" className="gap-2 bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white shadow-xl text-lg px-8 py-6">
+                    <Rocket className="h-5 w-5" />
+                    Prueba Gratis 30 Días
+                    <ArrowRight className="h-5 w-5" />
+                  </Button>
+                </Link>
+                <Link href="/login">
+                  <Button size="lg" variant="outline" className="gap-2 border-2 border-amber-400 text-white hover:bg-amber-400 hover:text-gray-900 text-lg px-8 py-6 transition-all">
+                    <Play className="h-5 w-5" />
+                    Ver Demo Completa
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* FEATURES SECTION */}
       <section id="features" className="py-24 px-4 bg-white">
         <div className="container mx-auto">
@@ -951,7 +1324,7 @@ export default function LandingPage() {
               </Button>
             </Link>
             <Link href="/landing/contacto">
-              <Button size="lg" variant="outline" className="gap-2 bg-transparent text-white border-white hover:bg-white/10">
+              <Button size="lg" variant="outline" className="gap-2 bg-transparent text-white border-white hover:bg-white hover:text-gray-900">
                 <Phone className="h-5 w-5" />
                 Hablar con Ventas
               </Button>
