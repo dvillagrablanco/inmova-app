@@ -6,13 +6,31 @@
  * - Programación automática
  * - Variables dinámicas
  * - Logs de envío
- * 
- * Sin integración con proveedor SMS real (Twilio, etc)
- * Simula envíos y genera logs
+ * - Integración real con Twilio
  */
 
 import { prisma } from './db';
 import { SMSTipo, SMSEstado } from '@prisma/client';
+import twilio from 'twilio';
+
+// Configuración de Twilio
+const twilioConfig = {
+  accountSid: process.env.TWILIO_ACCOUNT_SID || '',
+  authToken: process.env.TWILIO_AUTH_TOKEN || '',
+  fromNumber: process.env.TWILIO_FROM_NUMBER || ''
+};
+
+// Cliente de Twilio
+const twilioClient = twilioConfig.accountSid && twilioConfig.authToken
+  ? twilio(twilioConfig.accountSid, twilioConfig.authToken)
+  : null;
+
+/**
+ * Verifica si Twilio está configurado
+ */
+export function isTwilioConfigured(): boolean {
+  return !!(twilioConfig.accountSid && twilioConfig.authToken && twilioConfig.fromNumber);
+}
 
 interface DatosSMS {
   tenantId: string;
@@ -78,11 +96,36 @@ export async function enviarSMS(
     }
   });
   
-  // 6. Si es envío inmediato, simular envío
+  // 6. Si es envío inmediato, enviar SMS real
   if (estado === 'enviado') {
-    console.log(`📱 SMS SIMULADO enviado a ${tenant.nombreCompleto} (${tenant.telefono})`);
-    console.log(`   Mensaje: ${mensajeProcesado}`);
-    console.log(`   Coste: ${costeEstimado.toFixed(3)}€`);
+    try {
+      const resultado = await enviarSMSReal(tenant.telefono, mensajeProcesado);
+      
+      // Actualizar con datos reales del envío
+      await prisma.sMSLog.update({
+        where: { id: smsLog.id },
+        data: {
+          idExterno: resultado.sid,
+          exitoso: true,
+          fechaEnvio: new Date(resultado.dateCreated)
+        }
+      });
+      
+      console.log(`📱 SMS enviado exitosamente a ${tenant.nombreCompleto} (${tenant.telefono})`);
+      console.log(`   SID: ${resultado.sid}`);
+    } catch (error: any) {
+      // Marcar como fallido
+      await prisma.sMSLog.update({
+        where: { id: smsLog.id },
+        data: {
+          estado: 'fallido',
+          exitoso: false,
+          mensajeError: error.message
+        }
+      });
+      
+      console.error(`❌ Error enviando SMS a ${tenant.nombreCompleto}:`, error.message);
+    }
   }
   
   // 7. Si usa template, actualizar estadísticas
@@ -393,29 +436,42 @@ export async function procesarSMSProgramados() {
   
   for (const sms of smsPendientes) {
     try {
-      // Simular envío
-      const exitoso = simularEnvioSMS(sms);
+      // Enviar SMS real con fallback a simulación
+      const resultado = await enviarSMSConFallback(sms.telefono, sms.mensaje);
       
       // Actualizar estado
       await prisma.sMSLog.update({
         where: { id: sms.id },
         data: {
-          estado: exitoso ? 'enviado' : 'fallido',
+          estado: resultado.exitoso ? 'enviado' : 'fallido',
           fechaEnvio: new Date(),
-          exitoso,
-          mensajeError: exitoso ? null : 'Error simulado de envío'
+          exitoso: resultado.exitoso,
+          idExterno: resultado.sid || sms.idExterno,
+          mensajeError: resultado.error || null
         }
       });
       
-      if (exitoso) {
+      if (resultado.exitoso) {
         resultados.exitosos++;
+        console.log(`✅ SMS enviado a ${sms.nombreDestinatario} (${sms.telefono})`);
       } else {
         resultados.fallidos++;
+        console.error(`❌ Error enviando SMS a ${sms.nombreDestinatario}: ${resultado.error}`);
       }
       
     } catch (error: any) {
       resultados.fallidos++;
       console.error(`Error procesando SMS ${sms.id}:`, error.message);
+      
+      // Marcar como fallido
+      await prisma.sMSLog.update({
+        where: { id: sms.id },
+        data: {
+          estado: 'fallido',
+          exitoso: false,
+          mensajeError: error.message
+        }
+      });
     }
   }
   
@@ -423,20 +479,51 @@ export async function procesarSMSProgramados() {
 }
 
 /**
- * Simula el envío de un SMS (90% de éxito)
+ * Envía un SMS real usando Twilio
  */
-function simularEnvioSMS(sms: any): boolean {
-  // 90% de probabilidad de éxito
-  const exitoso = Math.random() < 0.9;
-  
-  if (exitoso) {
-    console.log(`📱 SMS enviado a ${sms.nombreDestinatario} (${sms.telefono})`);
-    console.log(`   Mensaje: ${sms.mensaje}`);
-  } else {
-    console.log(`❌ Error enviando SMS a ${sms.nombreDestinatario}`);
+async function enviarSMSReal(telefono: string, mensaje: string): Promise<any> {
+  if (!twilioClient || !isTwilioConfigured()) {
+    throw new Error('Twilio no está configurado. Por favor, configura TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN y TWILIO_FROM_NUMBER');
   }
   
-  return exitoso;
+  // Normalizar número de teléfono (asegurarse que tenga código de país)
+  let telefonoNormalizado = telefono.trim();
+  if (!telefonoNormalizado.startsWith('+')) {
+    // Si no tiene +, asumir España (+34)
+    telefonoNormalizado = `+34${telefonoNormalizado.replace(/\s/g, '')}`;
+  }
+  
+  const message = await twilioClient.messages.create({
+    body: mensaje,
+    from: twilioConfig.fromNumber,
+    to: telefonoNormalizado
+  });
+  
+  return message;
+}
+
+/**
+ * Envía un SMS (con fallback a simulación si Twilio no está configurado)
+ */
+async function enviarSMSConFallback(telefono: string, mensaje: string): Promise<{ exitoso: boolean; sid?: string; error?: string }> {
+  if (isTwilioConfigured()) {
+    try {
+      const resultado = await enviarSMSReal(telefono, mensaje);
+      return { exitoso: true, sid: resultado.sid };
+    } catch (error: any) {
+      return { exitoso: false, error: error.message };
+    }
+  } else {
+    // Modo simulación si Twilio no está configurado
+    console.log(`📱 SMS SIMULADO (Twilio no configurado) a ${telefono}`);
+    console.log(`   Mensaje: ${mensaje}`);
+    const exitoso = Math.random() < 0.9; // 90% de éxito simulado
+    return { 
+      exitoso, 
+      sid: exitoso ? generarIdExterno() : undefined,
+      error: exitoso ? undefined : 'Error simulado'
+    };
+  }
 }
 
 /**

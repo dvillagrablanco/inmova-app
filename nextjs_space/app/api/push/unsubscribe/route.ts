@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { savePushSubscription } from '@/lib/push-notifications';
+import { removePushSubscription } from '@/lib/push-notifications';
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,25 +14,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const subscription = await request.json();
+    const { endpoint } = await request.json();
 
-    if (!subscription.endpoint || !subscription.keys) {
+    if (!endpoint) {
       return NextResponse.json(
-        { error: 'Suscripción inválida' },
+        { error: 'Endpoint requerido' },
         { status: 400 }
       );
     }
 
-    await savePushSubscription(session.user.id, subscription);
+    await removePushSubscription(endpoint);
 
     return NextResponse.json({
       success: true,
-      message: 'Suscripción guardada exitosamente'
+      message: 'Suscripción eliminada exitosamente'
     });
   } catch (error: any) {
-    console.error('Error saving push subscription:', error);
+    console.error('Error removing push subscription:', error);
     return NextResponse.json(
-      { error: 'Error al guardar la suscripción', details: error.message },
+      { error: 'Error al eliminar la suscripción', details: error.message },
       { status: 500 }
     );
   }

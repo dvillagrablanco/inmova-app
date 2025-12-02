@@ -232,6 +232,9 @@ model User {
   leadsAsignados       Lead[]
   actividadesLead      LeadActivity[]
   documentosLead       LeadDocument[]
+  
+  // Push Notifications
+  pushSubscriptions    PushSubscription[]
 
   @@map("users")
 }
@@ -1698,8 +1701,10 @@ model MaintenanceDiagnostic {
 model PushSubscription {
   id         String   @id @default(cuid())
   userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   endpoint   String   @unique
-  keys       String   @db.Text
+  p256dh     String   @db.Text  // Public key para encriptación
+  auth       String   @db.Text  // Authentication secret
   userAgent  String?  @db.Text
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -7329,3 +7334,8 @@ model LeadDocument {
   @@index([leadId])
   @@map("lead_documents")
 }
+// ===========================
+// SISTEMA DE NOTIFICACIONES PUSH
+// ===========================
+
+// Suscripciones a notificaciones push

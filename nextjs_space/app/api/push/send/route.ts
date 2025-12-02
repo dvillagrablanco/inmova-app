@@ -1,30 +1,55 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import { sendPushNotificationToUser, sendPushNotificationToUsers, sendPushNotificationToCompany } from '@/lib/push-notifications';
 
-export const dynamic = 'force-dynamic';
-
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'No autorizado' },
+        { status: 401 }
+      );
     }
 
-    const { title, body, icon, badge, data } = await req.json();
+    const { userId, userIds, companyId, payload } = await request.json();
 
-    // En producción, aquí usarías Web Push API con VAPID keys
-    // Por ahora, simplemente validamos y respondemos
-    console.log('Notificación push enviada:', { title, body });
+    if (!payload || !payload.title || !payload.body) {
+      return NextResponse.json(
+        { error: 'Payload inválido. Se requieren title y body.' },
+        { status: 400 }
+      );
+    }
 
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Notificación enviada' 
+    let result;
+
+    if (userId) {
+      // Enviar a un usuario específico
+      result = await sendPushNotificationToUser(userId, payload);
+    } else if (userIds && Array.isArray(userIds)) {
+      // Enviar a múltiples usuarios
+      result = await sendPushNotificationToUsers(userIds, payload);
+    } else if (companyId) {
+      // Enviar a todos los usuarios de una empresa
+      result = await sendPushNotificationToCompany(companyId, payload);
+    } else {
+      return NextResponse.json(
+        { error: 'Se requiere userId, userIds o companyId' },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: `Notificaciones enviadas: ${result.success} exitosas, ${result.failed} fallidas`,
+      ...result
     });
   } catch (error: any) {
-    console.error('Error al enviar notificación push:', error);
+    console.error('Error sending push notification:', error);
     return NextResponse.json(
-      { error: 'Error al enviar notificación' },
+      { error: 'Error al enviar notificación', details: error.message },
       { status: 500 }
     );
   }

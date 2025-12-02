@@ -1,239 +1,463 @@
 /**
- * HOLDED INTEGRATION SERVICE (PREPARADO - NO FUNCIONAL)
+ * Holded Integration Service
  * 
  * Servicio de integración con Holded
- * Software de gestión empresarial todo-en-uno, muy popular en startups y pymes tech
+ * Sistema de gestión empresarial todo-en-uno (ERP, CRM, Contabilidad, Proyectos)
+ * Popular en España y Latinoamérica
  * 
- * ==============================================================================
- * IMPORTANTE: Este código está preparado en modo DEMO
- * Requiere credenciales reales de Holded para funcionar
- * ==============================================================================
+ * Características:
+ * - Gestión de contactos
+ * - Emisión de facturas
+ * - Registro de pagos
+ * - Gestión de gastos
  * 
- * DOCUMENTACIÓN OFICIAL:
- * - Web oficial: https://www.holded.com
- * - API Docs: https://developers.holded.com
- * - API Reference: https://api.holded.com/docs
- * 
- * CÓMO ACTIVAR ESTA INTEGRACIÓN:
- * 
- * 1. Obtener Credenciales:
- *    - Acceder a https://www.holded.com
- *    - Ir a Configuración > Integraciones > API
- *    - Generar API Key
- * 
- * 2. Configurar Variables de Entorno (.env):
- *    HOLDED_API_KEY=tu_api_key
- *    HOLDED_API_URL=https://api.holded.com/api
- * 
- * 3. Descomentar el código de este archivo
- * 
- * 4. Instalar dependencias adicionales (si no están instaladas):
- *    yarn add axios
+ * Documentación API: https://developers.holded.com/reference
  */
 
-// import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance } from 'axios';
+import { prisma } from './db';
 
-export interface HoldedConfig {
+interface HoldedConfig {
   apiKey: string;
   apiUrl: string;
 }
 
-export interface HoldedContact {
-  id: string;
+interface HoldedContact {
+  id?: string;
   name: string;
   code?: string;
   email?: string;
-  phone?: string;
   mobile?: string;
-  vatNumber?: string; // CIF/NIF
-  type: 'client' | 'provider';
-  address?: {
-    street: string;
-    city: string;
-    postalCode: string;
-    province: string;
-    country: string;
-  };
+  phone?: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  province?: string;
+  country?: string;
+  vatNumber?: string;
+  type?: 'client' | 'supplier' | 'both';
 }
 
-export interface HoldedInvoice {
-  id: string;
-  docNumber: string;
+interface HoldedInvoice {
+  id?: string;
   contactId: string;
-  contactName: string;
-  date: Date;
-  dueDate?: Date;
-  items: HoldedInvoiceItem[];
-  subtotal: number;
-  tax: number;
-  total: number;
-  status: 'draft' | 'sent' | 'paid' | 'pending' | 'overdue';
+  contactName?: string;
+  date: string;
+  dueDate: string;
+  currency: string;
+  items: Array<{
+    name: string;
+    desc?: string;
+    units: number;
+    subtotal: number;
+    tax?: number;
+  }>;
   notes?: string;
 }
 
-export interface HoldedInvoiceItem {
-  name: string;
-  desc?: string;
-  units: number;
-  price: number;
-  tax: number; // Porcentaje de IVA
-  subtotal: number;
-  total: number;
-}
-
-export interface HoldedPayment {
-  id: string;
-  documentId: string;
-  date: Date;
+interface HoldedPayment {
+  id?: string;
+  date: string;
+  contactId: string;
+  documentsId: string[];  // IDs de facturas
   amount: number;
-  account: string;
+  paymentMethod?: string;
+  account?: string;
   notes?: string;
 }
 
-export interface HoldedExpense {
-  id: string;
+interface HoldedExpense {
+  id?: string;
+  date: string;
   contactId?: string;
-  date: Date;
   category: string;
   desc: string;
-  amount: number;
-  tax: number;
-  attachments?: string[];
+  subtotal: number;
+  tax?: number;
+  paymentMethod?: string;
+  account?: string;
 }
 
-export class HoldedIntegrationService {
-  // private config: HoldedConfig;
-  // private axiosInstance: AxiosInstance;
+class HoldedIntegrationService {
+  private config: HoldedConfig;
+  private client: AxiosInstance;
 
   constructor() {
-    // this.config = {
-    //   apiKey: process.env.HOLDED_API_KEY || '',
-    //   apiUrl: process.env.HOLDED_API_URL || 'https://api.holded.com/api',
-    // };
+    this.config = {
+      apiKey: process.env.HOLDED_API_KEY || '',
+      apiUrl: 'https://api.holded.com/api'
+    };
 
-    // this.axiosInstance = axios.create({
-    //   baseURL: this.config.apiUrl,
-    //   headers: {
-    //     'Accept': 'application/json',
-    //     'Content-Type': 'application/json',
-    //     'Key': this.config.apiKey,
-    //   },
-    // });
-
-    console.log('⚠️ Holded Integration Service: Modo DEMO - Requiere credenciales reales');
+    this.client = axios.create({
+      baseURL: this.config.apiUrl,
+      headers: {
+        'key': this.config.apiKey,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
   }
 
   /**
-   * GESTIÓN DE CONTACTOS
+   * Verifica si Holded está configurado
    */
-
-  // async createContact(contact: Omit<HoldedContact, 'id'>): Promise<HoldedContact> {
-  //   const response = await this.axiosInstance.post('/contacts', contact);
-  //   return response.data;
-  // }
-
-  // async getContact(contactId: string): Promise<HoldedContact> {
-  //   const response = await this.axiosInstance.get(`/contacts/${contactId}`);
-  //   return response.data;
-  // }
+  isConfigured(): boolean {
+    return !!this.config.apiKey;
+  }
 
   /**
-   * GESTIÓN DE FACTURAS
+   * Crea un contacto en Holded
    */
+  async createContact(contact: HoldedContact): Promise<any> {
+    if (!this.config.apiKey) {
+      throw new Error('Holded API key not configured');
+    }
 
-  // async createInvoice(invoice: Omit<HoldedInvoice, 'id'>): Promise<HoldedInvoice> {
-  //   const response = await this.axiosInstance.post('/invoicing/v1/documents/invoice', invoice);
-  //   return response.data;
-  // }
+    const response = await this.client.post('/contacts', {
+      name: contact.name,
+      code: contact.code,
+      email: contact.email,
+      mobile: contact.mobile,
+      phone: contact.phone,
+      billAddress: contact.address,
+      billCity: contact.city,
+      billPostalcode: contact.postalCode,
+      billProvince: contact.province,
+      billCountry: contact.country || 'ES',
+      vatnumber: contact.vatNumber,
+      type: contact.type || 'client'
+    });
 
-  // async getInvoice(invoiceId: string): Promise<HoldedInvoice> {
-  //   const response = await this.axiosInstance.get(`/invoicing/v1/documents/invoice/${invoiceId}`);
-  //   return response.data;
-  // }
+    return response.data;
+  }
 
   /**
-   * GESTIÓN DE PAGOS
+   * Obtiene un contacto por ID
    */
+  async getContact(contactId: string): Promise<any> {
+    if (!this.config.apiKey) {
+      throw new Error('Holded API key not configured');
+    }
 
-  // async registerPayment(payment: Omit<HoldedPayment, 'id'>): Promise<HoldedPayment> {
-  //   const response = await this.axiosInstance.post('/invoicing/v1/documents/invoice/payment', payment);
-  //   return response.data;
-  // }
+    const response = await this.client.get(`/contacts/${contactId}`);
+    return response.data;
+  }
 
   /**
-   * GESTIÓN DE GASTOS
+   * Busca un contacto por email
    */
+  async findContactByEmail(email: string): Promise<any> {
+    if (!this.config.apiKey) {
+      throw new Error('Holded API key not configured');
+    }
 
-  // async createExpense(expense: Omit<HoldedExpense, 'id'>): Promise<HoldedExpense> {
-  //   const response = await this.axiosInstance.post('/invoicing/v1/documents/expense', expense);
-  //   return response.data;
-  // }
+    const response = await this.client.get('/contacts', {
+      params: { email }
+    });
+
+    return response.data?.[0] || null;
+  }
 
   /**
-   * MÉTODOS DEMO
+   * Actualiza un contacto
    */
+  async updateContact(contactId: string, contact: Partial<HoldedContact>): Promise<any> {
+    if (!this.config.apiKey) {
+      throw new Error('Holded API key not configured');
+    }
 
-  async syncTenantToContactDemo(tenant: any): Promise<any> {
-    console.log('🔄 [DEMO] Sincronizando inquilino con Holded:', tenant.nombreCompleto);
-    return {
-      id: `holded_contact_${Math.random().toString(36).substring(7)}`,
+    const response = await this.client.put(`/contacts/${contactId}`, contact);
+    return response.data;
+  }
+
+  /**
+   * Crea una factura en Holded
+   */
+  async createInvoice(invoice: HoldedInvoice): Promise<any> {
+    if (!this.config.apiKey) {
+      throw new Error('Holded API key not configured');
+    }
+
+    const response = await this.client.post('/invoicing/v1/documents/invoice', {
+      contactId: invoice.contactId,
+      contactName: invoice.contactName,
+      date: new Date(invoice.date).getTime() / 1000,  // Unix timestamp
+      dueDate: new Date(invoice.dueDate).getTime() / 1000,
+      currency: invoice.currency || 'EUR',
+      items: invoice.items,
+      notes: invoice.notes
+    });
+
+    return response.data;
+  }
+
+  /**
+   * Obtiene una factura por ID
+   */
+  async getInvoice(invoiceId: string): Promise<any> {
+    if (!this.config.apiKey) {
+      throw new Error('Holded API key not configured');
+    }
+
+    const response = await this.client.get(`/invoicing/v1/documents/invoice/${invoiceId}`);
+    return response.data;
+  }
+
+  /**
+   * Registra un pago en Holded
+   */
+  async registerPayment(payment: HoldedPayment): Promise<any> {
+    if (!this.config.apiKey) {
+      throw new Error('Holded API key not configured');
+    }
+
+    const response = await this.client.post('/invoicing/v1/documents/payment', {
+      date: new Date(payment.date).getTime() / 1000,
+      contactId: payment.contactId,
+      documentsId: payment.documentsId,
+      amount: payment.amount,
+      paymethod: payment.paymentMethod || 'bank',
+      account: payment.account,
+      notes: payment.notes
+    });
+
+    return response.data;
+  }
+
+  /**
+   * Crea un gasto en Holded
+   */
+  async createExpense(expense: HoldedExpense): Promise<any> {
+    if (!this.config.apiKey) {
+      throw new Error('Holded API key not configured');
+    }
+
+    const response = await this.client.post('/expenses', {
+      date: new Date(expense.date).getTime() / 1000,
+      contactId: expense.contactId,
+      category: expense.category,
+      desc: expense.desc,
+      subtotal: expense.subtotal,
+      tax: expense.tax || 0,
+      paymethod: expense.paymentMethod || 'bank',
+      account: expense.account
+    });
+
+    return response.data;
+  }
+
+  /**
+   * Sincroniza un inquilino de INMOVA como contacto en Holded
+   */
+  async syncTenantToContact(tenantId: string, companyId: string): Promise<any> {
+    const tenant = await prisma.tenant.findUnique({
+      where: { id: tenantId },
+      include: { units: { include: { building: true } } }
+    });
+
+    if (!tenant || tenant.companyId !== companyId) {
+      throw new Error('Tenant not found or access denied');
+    }
+
+    // Buscar contacto existente
+    const existingContact = await this.findContactByEmail(tenant.email);
+
+    if (existingContact) {
+      return existingContact;
+    }
+
+    // Crear nuevo contacto
+    const firstUnit = tenant.units?.[0];
+    const contact: HoldedContact = {
       name: tenant.nombreCompleto,
-      vatNumber: tenant.dni,
+      code: tenantId.substring(0, 10),
       email: tenant.email,
-      type: 'client',
-      synced: true,
-      syncDate: new Date(),
+      mobile: tenant.telefono,
+      phone: tenant.telefono,
+      address: firstUnit?.building?.direccion || '',
+      city: firstUnit?.building?.ciudad,
+      postalCode: firstUnit?.building?.codigoPostal,
+      country: firstUnit?.building?.pais || 'ES',
+      vatNumber: tenant.dni,
+      type: 'client'
     };
+
+    return await this.createContact(contact);
   }
 
-  async createInvoiceDemo(contractData: any): Promise<any> {
-    console.log('📄 [DEMO] Creando factura en Holded para contrato:', contractData.id);
-    const docNumber = `HLD${new Date().getFullYear()}${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`;
-    
-    return {
-      id: `holded_invoice_${Math.random().toString(36).substring(7)}`,
-      docNumber,
-      subtotal: contractData.rentaMensual,
-      tax: contractData.rentaMensual * 0.21,
-      total: contractData.rentaMensual * 1.21,
-      status: 'draft',
-      created: true,
-      createdAt: new Date(),
+  /**
+   * Crea una factura en Holded desde un contrato de INMOVA
+   */
+  async createInvoiceFromContract(contractId: string, companyId: string): Promise<any> {
+    const contract = await prisma.contract.findUnique({
+      where: { id: contractId },
+      include: {
+        tenant: true,
+        unit: { include: { building: true } }
+      }
+    });
+
+    if (!contract || contract.tenant.companyId !== companyId) {
+      throw new Error('Contract not found or access denied');
+    }
+
+    // Sincronizar inquilino como contacto
+    const contact = await this.syncTenantToContact(contract.tenantId, companyId);
+
+    // Crear factura
+    const invoice: HoldedInvoice = {
+      contactId: contact.id,
+      contactName: contact.name,
+      date: new Date().toISOString(),
+      dueDate: contract.fechaVencimiento.toISOString(),
+      currency: 'EUR',
+      items: [
+        {
+          name: `Renta mensual - ${contract.unit?.nombre}`,
+          desc: `Alquiler de ${contract.unit?.nombre} en ${contract.unit?.building?.nombre}`,
+          units: 1,
+          subtotal: contract.rentaMensual,
+          tax: 21  // IVA estándar en España
+        }
+      ],
+      notes: `Contrato ID: ${contractId}`
     };
+
+    if (contract.deposito) {
+      invoice.items.push({
+        name: 'Depósito de garantía',
+        desc: 'Depósito reembolsable al finalizar el contrato',
+        units: 1,
+        subtotal: contract.deposito,
+        tax: 0  // El depósito no lleva IVA
+      });
+    }
+
+    return await this.createInvoice(invoice);
   }
 
-  async syncPaymentDemo(payment: any): Promise<any> {
-    console.log('💰 [DEMO] Registrando pago en Holded:', payment.monto);
-    return {
-      id: `holded_payment_${Math.random().toString(36).substring(7)}`,
+  /**
+   * Registra un pago de INMOVA en Holded
+   */
+  async syncPaymentToHolded(paymentId: string, companyId: string): Promise<any> {
+    const payment = await prisma.payment.findUnique({
+      where: { id: paymentId },
+      include: {
+        contract: {
+          include: {
+            tenant: true,
+            unit: { include: { building: true } }
+          }
+        }
+      }
+    });
+
+    if (!payment || payment.contract.tenant.companyId !== companyId) {
+      throw new Error('Payment not found or access denied');
+    }
+
+    // Buscar o crear contacto
+    const contact = await this.syncTenantToContact(payment.contract.tenantId, companyId);
+
+    const holdedPayment: HoldedPayment = {
+      date: payment.fechaPago?.toISOString() || new Date().toISOString(),
+      contactId: contact.id,
+      documentsId: payment.holdedInvoiceId ? [payment.holdedInvoiceId] : [],  // Necesitas almacenar esto
       amount: payment.monto,
-      registered: true,
-      registeredAt: new Date(),
+      paymentMethod: payment.metodoPago || 'bank',
+      notes: `Pago INMOVA - Ref: ${payment.concepto}`
     };
+
+    return await this.registerPayment(holdedPayment);
   }
 
-  async createExpenseDemo(expense: any): Promise<any> {
-    console.log('💸 [DEMO] Registrando gasto en Holded:', expense.monto);
-    return {
-      id: `holded_expense_${Math.random().toString(36).substring(7)}`,
-      desc: expense.concepto,
-      amount: expense.monto,
-      category: expense.categoria || 'general',
-      registered: true,
-      registeredAt: new Date(),
+  /**
+   * Sincroniza un gasto de INMOVA en Holded
+   */
+  async syncExpenseToHolded(expenseId: string, companyId: string): Promise<any> {
+    const expense = await prisma.expense.findUnique({
+      where: { id: expenseId },
+      include: {
+        building: true,
+        provider: true
+      }
+    });
+
+    if (!expense || expense.companyId !== companyId) {
+      throw new Error('Expense not found or access denied');
+    }
+
+    // Si hay proveedor, sincronizarlo como contacto tipo 'supplier'
+    let contactId: string | undefined;
+    if (expense.provider) {
+      const providerContact = await this.findContactByEmail(expense.provider.email);
+      if (!providerContact) {
+        const newContact = await this.createContact({
+          name: expense.provider.nombre,
+          email: expense.provider.email,
+          phone: expense.provider.telefono,
+          type: 'supplier'
+        });
+        contactId = newContact.id;
+      } else {
+        contactId = providerContact.id;
+      }
+    }
+
+    const holdedExpense: HoldedExpense = {
+      date: expense.fecha.toISOString(),
+      contactId,
+      category: expense.categoria,
+      desc: expense.descripcion,
+      subtotal: expense.monto,
+      tax: 21,  // IVA estándar
+      paymentMethod: 'bank'
     };
+
+    return await this.createExpense(holdedExpense);
   }
+
+  /**
+   * Prueba la conexión con Holded
+   */
+  async testConnection(): Promise<{ success: boolean; message: string }> {
+    try {
+      if (!this.config.apiKey) {
+        return {
+          success: false,
+          message: 'API Key no configurada. Por favor, añade HOLDED_API_KEY a las variables de entorno.'
+        };
+      }
+
+      // Intentar obtener información de la cuenta
+      const response = await this.client.get('/company/info');
+
+      return {
+        success: true,
+        message: `Conectado exitosamente a Holded (${response.data.name || 'Cuenta activa'})`
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: `Error de conexión: ${error.response?.data?.message || error.message}`
+      };
+    }
+  }
+}
+
+// Singleton instance
+let holdedService: HoldedIntegrationService | null = null;
+
+export function getHoldedService(): HoldedIntegrationService {
+  if (!holdedService) {
+    holdedService = new HoldedIntegrationService();
+  }
+  return holdedService;
 }
 
 export function isHoldedConfigured(): boolean {
-  return !!(process.env.HOLDED_API_KEY);
+  return getHoldedService().isConfigured();
 }
 
-let holdedServiceInstance: HoldedIntegrationService | null = null;
-
-export function getHoldedService(): HoldedIntegrationService {
-  if (!holdedServiceInstance) {
-    holdedServiceInstance = new HoldedIntegrationService();
-  }
-  return holdedServiceInstance;
-}
+export { HoldedIntegrationService };
+export type { HoldedContact, HoldedInvoice, HoldedPayment, HoldedExpense };

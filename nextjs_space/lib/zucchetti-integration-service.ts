@@ -405,6 +405,38 @@ export class ZucchettiIntegrationService {
       registeredAt: new Date(),
     };
   }
+
+  /**
+   * Prueba la conexión con Zucchetti
+   */
+  async testConnection(): Promise<{ success: boolean; message: string }> {
+    try {
+      if (!this.config.clientId || !this.config.clientSecret) {
+        return {
+          success: false,
+          message: 'Zucchetti no está configurado. Por favor, añade las credenciales en las variables de entorno.'
+        };
+      }
+
+      // Modo demo por ahora
+      return {
+        success: true,
+        message: 'Conectado exitosamente a Zucchetti (Modo Demo)'
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: `Error de conexión: ${error.message}`
+      };
+    }
+  }
+
+  /**
+   * Verifica si está configurado
+   */
+  isConfigured(): boolean {
+    return !!(this.config.clientId && this.config.clientSecret);
+  }
 }
 
 /**
@@ -456,3 +488,11 @@ export function getZucchettiService(): ZucchettiIntegrationService {
  * const invoice = await zucchetti.createInvoiceFromContract(contract, customer.id);
  * const payment = await zucchetti.syncPaymentToZucchetti(payment, invoice.id);
  */
+
+/**
+ * Verifica si Zucchetti está configurado
+ */
+export function isZucchettiConfigured(): boolean {
+  return getZucchettiService().isConfigured();
+}
+

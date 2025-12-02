@@ -467,6 +467,40 @@ export class ContaSimpleIntegrationService {
     return await this.createExpense(contaSimpleExpense);
   }
 
+  /**
+   * Prueba la conexión con ContaSimple
+   */
+  async testConnection(): Promise<{ success: boolean; message: string }> {
+    try {
+      if (!this.config.apiKey || !this.config.companyId) {
+        return {
+          success: false,
+          message: 'ContaSimple no está configurado. Por favor, añade las credenciales en las variables de entorno.'
+        };
+      }
+
+      // Intentar obtener información de la empresa
+      const response = await this.client.get('/company');
+      
+      return {
+        success: true,
+        message: `Conectado exitosamente a ContaSimple (${response.data.name || 'Cuenta activa'})`
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: `Error de conexión: ${error.response?.data?.message || error.message}`
+      };
+    }
+  }
+
+  /**
+   * Verifica si está configurado
+   */
+  isConfigured(): boolean {
+    return !!(this.config.apiKey && this.config.companyId);
+  }
+
 }
 
 /**
