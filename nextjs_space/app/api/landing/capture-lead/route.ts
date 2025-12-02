@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     // Buscar o crear compañía demo para leads públicos
     let demoCompany = await prisma.company.findFirst({
       where: {
-        name: 'Leads Landing Page',
+        nombre: 'Leads Landing Page',
       },
     });
 
@@ -28,14 +28,11 @@ export async function POST(req: NextRequest) {
       // Crear compañía demo si no existe
       demoCompany = await prisma.company.create({
         data: {
-          name: 'Leads Landing Page',
-          fiscalId: 'DEMO-LEADS',
+          nombre: 'Leads Landing Page',
+          cif: 'DEMO-LEADS',
           email: 'leads@inmova.app',
           telefono: '+34900000000',
           direccion: 'Oficina Virtual',
-          tipoPropiedad: 'residencial',
-          planActual: 'demo',
-          planVencimiento: new Date('2099-12-31'),
         },
       });
     }

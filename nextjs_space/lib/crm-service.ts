@@ -162,4 +162,26 @@ export async function getCRMStats(companyId: string) {
     return sum + (lead.presupuestoMensual || 0) * 12; // Anualizado
   }, 0);
 
-  const leadsCalientes = leads.filter(l => l.temperatura === 'caliente').length;\n  const leadsTibios = leads.filter(l => l.temperatura === 'tibio').length;\n\n  const promedioActividades = totalLeads > 0\n    ? leads.reduce((sum, lead) => sum + lead.numeroContactos, 0) / totalLeads\n    : 0;\n\n  return {\n    totalLeads,\n    leadsPorEstado,\n    leadsPorFuente,\n    leadsPorTemperatura,\n    tasaConversion: Math.round(tasaConversion * 100) / 100,\n    valorPotencialTotal: Math.round(valorPotencialTotal),\n    leadsCalientes,\n    leadsTibios,\n    promedioActividades: Math.round(promedioActividades * 10) / 10,\n    leadsMesActual: leads.filter(l => {\n      const mesActual = new Date().getMonth();\n      return new Date(l.createdAt).getMonth() === mesActual;\n    }).length,\n  };\n}\n
+  const leadsCalientes = leads.filter(l => l.temperatura === 'caliente').length;
+  const leadsTibios = leads.filter(l => l.temperatura === 'tibio').length;
+
+  const promedioActividades = totalLeads > 0
+    ? leads.reduce((sum, lead) => sum + lead.numeroContactos, 0) / totalLeads
+    : 0;
+
+  return {
+    totalLeads,
+    leadsPorEstado,
+    leadsPorFuente,
+    leadsPorTemperatura,
+    tasaConversion: Math.round(tasaConversion * 100) / 100,
+    valorPotencialTotal: Math.round(valorPotencialTotal),
+    leadsCalientes,
+    leadsTibios,
+    promedioActividades: Math.round(promedioActividades * 10) / 10,
+    leadsMesActual: leads.filter(l => {
+      const mesActual = new Date().getMonth();
+      return new Date(l.createdAt).getMonth() === mesActual;
+    }).length,
+  };
+}
