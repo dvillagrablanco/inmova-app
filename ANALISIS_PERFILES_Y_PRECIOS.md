@@ -1,939 +1,1236 @@
-# ANÁLISIS COMPLETO: MEJORAS POR PERFIL Y VERTICAL
-## INMOVA - Software Inmobiliario de Próxima Generación
-
-**Fecha:** Diciembre 2024  
-**Versión:** 2.0  
-**Clasificación:** Estratégico
+# Análisis Completo: Mejoras por Vertical y Perfil de Usuario
+## INMOVA - Software de Gestión Inmobiliaria Multi-Vertical
 
 ---
 
-## ÍNDICE
+## 📋 Índice
 
 1. [Resumen Ejecutivo](#resumen-ejecutivo)
-2. [Perfiles de Usuario Identificados](#perfiles-de-usuario)
-3. [Verticales de Negocio](#verticales-de-negocio)
-4. [Mejoras por Perfil de Usuario](#mejoras-por-perfil)
-5. [Mejoras por Vertical de Negocio](#mejoras-por-vertical)
-6. [Mejoras Transversales Críticas](#mejoras-transversales)
-7. [Roadmap de Implementación](#roadmap)
-8. [Análisis de Competencia y Gaps](#analisis-competencia)
-9. [Matriz de Priorización](#matriz-priorizacion)
-10. [Conclusiones y Recomendaciones](#conclusiones)
+2. [Análisis por Vertical de Negocio](#análisis-por-vertical-de-negocio)
+3. [Análisis por Perfil de Usuario](#análisis-por-perfil-de-usuario)
+4. [Mejoras Transversales](#mejoras-transversales)
+5. [Roadmap de Implementación](#roadmap-de-implementación)
+6. [Conclusiones y Recomendaciones](#conclusiones-y-recomendaciones)
 
 ---
 
-## 1. RESUMEN EJECUTIVO
+## 1. Resumen Ejecutivo
 
 ### Estado Actual de INMOVA
 
-INMOVA cuenta actualmente con **88 módulos profesionales** organizados en **7 verticales de negocio**, lo que representa una oferta muy completa en el mercado PropTech. Sin embargo, para consolidarse como el software #1 en Europa, necesita:
+**Fortalezas:**
+- ✅ 88 módulos profesionales
+- ✅ 7 verticales cubiertas
+- ✅ Sistema multi-empresa y multi-usuario
+- ✅ Integraciones contables múltiples
+- ✅ Tecnologías avanzadas (AI, OCR, Blockchain, IoT)
+- ✅ Modelo de alquiler por habitaciones implementado
 
-1. **Profundizar en nichos específicos** que los competidores no cubren
-2. **Mejorar la experiencia de usuario** para perfiles no técnicos
-3. **Añadir capacidades de automatización** que reduzcan trabajo manual
-4. **Integrar con más ecosistemas externos** (APIs de terceros)
-5. **Optimizar para dispositivos móviles** (PWA completa)
-
-### Oportunidades Detectadas
-
-🎯 **Gap #1:** Falta de módulos específicos para **co-working spaces** y **oficinas flexibles**  
-🎯 **Gap #2:** Limitaciones en **gestión de activos industriales** y **naves logísticas**  
-🎯 **Gap #3:** Ausencia de **herramientas para fondos de inversión** (SOCIMI, REITs)  
-🎯 **Gap #4:** **Inteligencia de mercado** insuficiente para pricing y análisis competitivo  
-🎯 **Gap #5:** **Automatización de procesos legales** (desahucios, reclamaciones)  
-
----
-
-## 2. PERFILES DE USUARIO IDENTIFICADOS
-
-### 2.1. ADMINISTRADOR DE FINCAS (Property Manager)
-
-**Características:**
-- Gestiona **comunidades de propietarios**
-- Necesita cumplimiento normativo estricto
-- Maneja contabilidad compleja y derramas
-- Requiere comunicación constante con junta
-
-**Necesidades Específicas:**
-
-#### ✅ Ya Cubierto:
-- Gestión de edificios y unidades
-- Contabilidad básica
-- Comunicación con propietarios
-- Gestión de proveedores
-
-#### 🔴 **MEJORAS CRÍTICAS NECESARIAS:**
-
-1. **Módulo de Derramas Automáticas**
-   - Cálculo automático según coeficientes de participación
-   - Generación de liquidaciones personalizadas
-   - Trazabilidad de pagos fraccionados
-   - Integración con bancos para domiciliación SEPA
-
-2. **Gestión de Juntas de Propietarios**
-   - Convocatorias automáticas por correo certificado digital
-   - Sistema de delegación de votos online
-   - Actas con firma digital múltiple
-   - Portal de transparencia para propietarios
-
-3. **Compliance y Normativas**
-   - ITE/IEE automática (Inspección Técnica de Edificios)
-   - Auditorías energéticas obligatorias
-   - Libro del edificio digital
-   - Alertas de vencimientos de seguros y certificados
-
-4. **Presupuesto y Liquidación Anual**
-   - Comparativa presupuesto vs. real por partida
-   - Cierre de ejercicio automatizado
-   - Generación de certificados fiscales (Modelo 347)
-   - Dashboard financiero para junta ordinaria
+**Oportunidades de Mejora Identificadas:**
+- 🔶 Profundización en verticales específicas
+- 🔶 Personalización por perfil de usuario
+- 🔶 Automatizaciones inteligentes
+- 🔶 Integraciones con ecosistema PropTech
+- 🔶 Herramientas de análisis predictivo
+- 🔶 Experiencia móvil nativa
 
 ---
 
-### 2.2. AGENTE INMOBILIARIO (Real Estate Agent)
+## 2. Análisis por Vertical de Negocio
 
-**Características:**
-- Alta movilidad (trabajo en calle)
-- Necesita captación y conversión de leads
-- Gestiona visitas y seguimiento de clientes
-- Requiere materiales de marketing profesionales
+### 2.1 RESIDENCIAL TRADICIONAL (Alquiler de Larga Duración)
 
-**Necesidades Específicas:**
+#### Necesidades Actuales del Mercado
+- Gestión de carteras de 100+ propiedades
+- Cumplimiento normativo (LAU, IBI, plusvalías)
+- Relación a largo plazo con inquilinos (años)
+- Gestión de comunidades de propietarios
+- Control exhaustivo de morosidad
 
-#### ✅ Ya Cubierto:
-- CRM básico con pipeline
-- Gestión de unidades disponibles
-- Portal de inquilinos
+#### Funcionalidades Existentes
+✅ Edificios, unidades, inquilinos, contratos
+✅ Pagos y morosidad básica
+✅ Mantenimiento preventivo y correctivo
+✅ Portal del inquilino
+✅ Portal del propietario
 
-#### 🔴 **MEJORAS CRÍTICAS NECESARIAS:**
+#### **MEJORAS NECESARIAS**
 
-1. **App Móvil Nativa Completa**
-   - Captura de propiedades in-situ (fotos, medidas, descripción)
-   - Firma de contratos en tablet
-   - Escaneo de DNI/documentos con OCR
-   - Modo offline con sincronización
+##### A. Gestión Avanzada de Morosidad
+```
+- Sistema de scoring predictivo de impago
+- Workflow automático de reclamación (notificaciones escalonadas)
+- Integración con agencias de recobro
+- Generación automática de burofax y requerimientos notariales
+- Simulador de acuerdos de pago
+- Histórico crediticio del inquilino
+```
 
-2. **Marketing Automation**
-   - Generación automática de dossiers de propiedad (PDF)
-   - Email drip campaigns para leads fríos
-   - Landing pages personalizadas por propiedad
-   - Integración con redes sociales (publicación automática)
+##### B. Gestión de Comunidades de Propietarios
+```
+- Módulo de Junta de Propietarios
+  * Convocatorias de juntas (ordinarias/extraordinarias)
+  * Orden del día y documentación
+  * Votaciones electrónicas con certificado
+  * Actas automáticas con firmas digitales
+  * Distribución de gastos por coeficientes
+  * Gestión de derramas
+  * Libro de actas digital
+```
 
-3. **Gestión de Visitas Inteligente**
-   - Agenda compartida con otros agentes
-   - Rutas optimizadas (Google Maps integration)
-   - Check-in/check-out con geolocalización
-   - Feedback instantáneo del cliente post-visita
+##### C. Cumplimiento Legal y Fiscal
+```
+- Asistente de declaración de renta (Modelo 100)
+- Cálculo automático de retenciones IRPF
+- Generación de certificados de retenciones
+- Alertas de vencimientos fiscales
+- Registro de mejoras y amortizaciones
+- Cálculo de plusvalía municipal
+- Generación de contratos adaptados a LAU actualizada
+```
 
-4. **Comparador de Propiedades**
-   - Herramienta para mostrar 2-3 propiedades lado a lado
-   - Scoring automático según preferencias del cliente
-   - Generación de informes comparativos branded
+##### D. Análisis de Rentabilidad por Propiedad
+```
+- Dashboard financiero por propiedad
+  * ROI anualizado y acumulado
+  * Cash flow mensual y proyectado
+  * TIR (Tasa Interna de Retorno)
+  * Payback period
+  * Comparativa con mercado
+  * Recomendaciones de optimización
+```
 
----
-
-### 2.3. INVERSOR / PROPIETARIO (Real Estate Investor)
-
-**Características:**
-- Busca maximizar rentabilidad
-- Necesita reportes financieros claros
-- Quiere visibilidad sin gestionar operativa
-- Toma decisiones basadas en datos
-
-**Necesidades Específicas:**
-
-#### ✅ Ya Cubierto:
-- Dashboard de KPIs
-- Reportes financieros
-- Portal de propietario
-
-#### 🔴 **MEJORAS CRÍTICAS NECESARIAS:**
-
-1. **Dashboard de Inversión Avanzado**
-   - ROI por propiedad en tiempo real
-   - Gráfica de cash flow histórico y proyectado
-   - Comparativa portfolio (qué propiedades rinden más)
-   - Alertas de underperformance
-
-2. **Simulador de Inversiones**
-   - Calculator de "qué pasaría si..." (sube renta 10%, se vacía 3 meses, etc.)
-   - Análisis de sensibilidad
-   - Comparación con benchmarks de mercado
-
-3. **Reportes para Hacienda**
-   - Generación automática de anexos para IRPF
-   - Cálculo de amortizaciones
-   - Resumen de ingresos y gastos deducibles
-   - Export para gestoría/asesor fiscal
-
-4. **Marketplace de Oportunidades**
-   - Alertas de propiedades en venta que matchean su perfil
-   - Análisis automático de rentabilidad de nuevas propiedades
-   - Integración con Idealista/Fotocasa para captar leads
+##### E. Gestión de Seguros
+```
+- Registro de pólizas (hogar, impago, RC)
+- Alertas de renovación
+- Gestión de siniestros
+- Comparador de seguros
+- Integración con aseguradoras
+```
 
 ---
 
-### 2.4. DIRECTOR FINANCIERO (CFO)
+### 2.2 SHORT-TERM RENTALS (Airbnb, Booking, etc.)
 
-**Características:**
-- Responsable de la salud financiera de la empresa
-- Necesita consolidación multi-propiedad
-- Requiere integración con ERP/contabilidad
-- Maneja auditorías y compliance fiscal
+#### Necesidades Actuales del Mercado
+- Sincronización en tiempo real con múltiples OTAs
+- Gestión de precios dinámicos
+- Check-in/out digital sin presencia física
+- Limpieza y cambio de ropa coordinado
+- Reseñas y reputación online
+- Cumplimiento de regulaciones locales (licencias turísticas)
 
-**Necesidades Específicas:**
+#### Funcionalidades Existentes
+✅ STR Listings (anuncios)
+✅ STR Bookings (reservas)
+✅ STR Channel Manager (sincronización)
 
-#### ✅ Ya Cubierto:
-- Módulo de contabilidad
-- Business Intelligence
-- Integraciones contables (ContaSimple, Sage, Holded, etc.)
+#### **MEJORAS NECESARIAS**
 
-#### 🔴 **MEJORAS CRÍTICAS NECESARIAS:**
+##### A. Channel Manager Avanzado
+```
+- Conexión bidireccional completa con:
+  * Airbnb (API oficial)
+  * Booking.com
+  * Vrbo/HomeAway
+  * Expedia
+  * TripAdvisor
+  * Google Vacation Rentals
+- Sincronización automática de:
+  * Disponibilidad en tiempo real
+  * Precios dinámicos
+  * Fotos y descripciones
+  * Reseñas (importación)
+  * Mensajes de huéspedes
+```
 
-1. **Consolidación Multi-Empresa**
-   - Vista global de todas las empresas del grupo
-   - Eliminación de operaciones intercompany
-   - Reportes consolidados para holding
+##### B. Revenue Management (Gestión de Ingresos)
+```
+- Pricing dinámico basado en:
+  * Estacionalidad histórica
+  * Eventos locales (conciertos, ferias, festivales)
+  * Competencia (web scraping de precios)
+  * Ocupación prevista
+  * Días especiales (fines de semana, festivos)
+- Simulador de precios (¿qué pasaría si...?)
+- Estrategias predefinidas:
+  * Maximizar ocupación
+  * Maximizar ingresos
+  * Equilibrada
+- Reglas personalizadas:
+  * Descuentos por estancias largas
+  * Sobreprecio en temporada alta
+  * Last-minute pricing
+```
 
-2. **Tesorería y Cash Flow**
-   - Previsión de tesorería a 12 meses
-   - Alertas de déficit de caja
-   - Optimización de cobros (anticipos, descuentos por pronto pago)
-   - Integración con banca online (lectura de movimientos)
+##### C. Automatización de Operaciones
+```
+- Check-in Digital:
+  * Envío automático de instrucciones
+  * Códigos de acceso inteligentes (cambio automático)
+  * Verificación de identidad (selfie + DNI/Pasaporte)
+  * Firma digital de contrato
+  * Cobro de fianzas online
+- Check-out Digital:
+  * Recordatorio de salida
+  * Inspección fotográfica por huésped
+  * Devolución automática de fianza
+  * Solicitud de reseña
+```
 
-3. **Control de Morosidad Avanzado**
-   - Scoring de riesgo de morosidad por inquilino
-   - Workflow automático de reclamaciones (llamada → burofax → demanda)
-   - Provisiones contables automáticas
-   - Gestión de impagados con abogados externos
+##### D. Gestión de Limpiezas y Mantenimiento
+```
+- Calendario de limpiezas automático
+  * Asignación a equipo de limpieza
+  * Notificaciones push
+  * Checklist digital con fotos
+  * Tiempo de bloqueo entre reservas
+- Inventario de amenities
+  * Control de stock (jabón, café, papel)
+  * Alertas de reposición
+  * Integración con proveedores
+```
 
-4. **Auditoría y Compliance**
-   - Trail de auditoría completo (quién cambió qué y cuándo)
-   - Segregación de funciones (maker-checker)
-   - Informes SOX/IFRS para empresas cotizadas
+##### E. Gestión de Reseñas y Reputación
+```
+- Consolidación de reseñas de todas las OTAs
+- Alertas de reseñas negativas
+- Plantillas de respuesta automática
+- Análisis de sentimiento (AI)
+- Comparativa con competidores locales
+- Dashboard de reputación (Rating Score)
+```
 
----
+##### F. Cumplimiento Regulatorio STR
+```
+- Registro de licencias turísticas por ciudad
+- Alertas de renovación
+- Generación de partes de viajeros
+- Integración con policía/turismo (automática)
+- Cálculo de tasas turísticas
+- Límites de días de alquiler (Madrid, Barcelona, etc.)
+```
 
-### 2.5. TÉCNICO DE MANTENIMIENTO
-
-**Características:**
-- Trabajo de campo constante
-- Necesita acceso rápido a órdenes de trabajo
-- Gestiona inventario de repuestos
-- Coordina con proveedores externos
-
-**Necesidades Específicas:**
-
-#### ✅ Ya Cubierto:
-- Órdenes de trabajo
-- Portal de proveedores
-- Mantenimiento preventivo
-
-#### 🔴 **MEJORAS CRÍTICAS NECESARIAS:**
-
-1. **App Móvil para Técnicos**
-   - Lista de órdenes asignadas con navegación
-   - Check-in/check-out con foto del trabajo realizado
-   - Firma digital del inquilino tras intervención
-   - Escaneo de códigos QR en equipos (histórico de mantenimiento)
-
-2. **Gestión de Inventario de Repuestos**
-   - Stock mínimo con alertas de reposición
-   - Trazabilidad de uso de materiales por orden
-   - Integración con proveedores (pedidos automáticos)
-
-3. **Mantenimiento Predictivo con IA**
-   - Predicción de fallos según datos históricos
-   - Recomendaciones de reemplazo preventivo
-   - Análisis de costes: ¿reparar o reemplazar?
-
-4. **Gestión de Garantías y Servicios Post-Venta**
-   - Registro de equipos con fecha de compra y garantía
-   - Alertas de vencimiento de garantía
-   - Histórico de reparaciones por equipo
-
----
-
-### 2.6. SUPERADMINISTRADOR (Super Admin)
-
-**Características:**
-- Gestiona múltiples clientes (modelo B2B SaaS)
-- Necesita facturación y subscripciones
-- Monitoriza uso y performance del sistema
-- Ofrece soporte técnico
-
-**Necesidades Específicas:**
-
-#### ✅ Ya Cubierto:
-- Dashboard de super admin
-- Gestión de empresas clientes
-- Impersonation (login como cliente)
-- Actividad y auditoría
-
-#### 🔴 **MEJORAS CRÍTICAS NECESARIAS:**
-
-1. **Billing y Subscripciones Avanzado**
-   - Integración con Stripe Billing para subscripciones
-   - Facturación automática por consumo (usage-based)
-   - Gestión de descuentos y promociones
-   - Self-service upgrade/downgrade para clientes
-
-2. **Monitorización y Observabilidad**
-   - Dashboard de métricas de sistema (uptime, latencia)
-   - Alertas de errores críticos (Sentry integration)
-   - Uso de recursos por cliente (CPU, memoria, storage)
-   - Logs centralizados con búsqueda
-
-3. **Onboarding Automático de Clientes**
-   - Wizard de configuración inicial
-   - Importación de datos desde Excel/CSV
-   - Templates de configuración por vertical
-   - Videos tutoriales contextuales
-
-4. **Portal de Soporte Integrado**
-   - Ticketing system dentro de la app
-   - Knowledge base con artículos de ayuda
-   - Chat en vivo con equipo de soporte
-   - Changelog de nuevas funcionalidades
+##### G. Multi-Propietario (Co-hosting)
+```
+- Portal del propietario con reportes específicos
+- Distribución automática de ingresos (% comisión)
+- Informes mensuales personalizados
+- Acceso limitado a datos sensibles
+```
 
 ---
 
-## 3. VERTICALES DE NEGOCIO
+### 2.3 ROOM RENTAL (Alquiler por Habitaciones / Coliving)
 
-### 3.1. ALQUILER RESIDENCIAL TRADICIONAL
+#### Funcionalidades Existentes
+✅ Gestión de habitaciones individuales
+✅ Contratos independientes por habitación
+✅ Prorrateo de gastos (luz, agua, gas, internet)
+✅ Calendario de limpieza rotativo
+✅ Reglas de convivencia
 
-**Estado Actual:** ✅ **MUY COMPLETO**
+#### **MEJORAS NECESARIAS**
 
-**Módulos Existentes:**
-- Gestión de propiedades, unidades, inquilinos, contratos
-- Pagos y morosidad
-- Mantenimiento
-- Portal del inquilino
-- CRM
+##### A. Matching de Compañeros (Roommate Matching)
+```
+- Cuestionario de perfil de inquilino:
+  * Hábitos (fumador, mascotas, horarios)
+  * Intereses (música, deportes, estudios)
+  * Personalidad (introvertido/extrovertido)
+  * Preferencias de convivencia
+- Algoritmo de compatibilidad
+- Sugerencias de habitaciones disponibles
+- Sistema de "pre-meet" virtual (videollamada)
+```
 
-#### 🔴 **MEJORAS NECESARIAS:**
+##### B. Plataforma Social Interna
+```
+- Muro de la vivienda (anuncios, eventos)
+- Chat grupal por vivienda
+- Calendario compartido (visitas, fiestas)
+- Sistema de votaciones (decisiones comunes)
+- Marketplace interno (compra/venta entre residentes)
+```
 
-1. **Renovaciones Automáticas de Contratos**
-   - Alertas 3 meses antes del vencimiento
-   - Propuesta de renovación con ajuste IPC automático
-   - Firma digital de anexos
+##### C. Gestión Avanzada de Conflictos
+```
+- Sistema de incidencias entre compañeros
+- Mediación asistida (plantillas, pasos)
+- Historial de comportamiento
+- Sistema de "strikes" (avisos)
+- Procedimiento de desalojo específico
+```
 
-2. **Garantías Alternativas**
-   - Integración con Aval Bank
-   - Integración con seguros de impago (Mapfre, Zurich)
-   - Scoring de solvencia integrado (Experian, Equifax)
+##### D. Servicios Adicionales
+```
+- Paquetes de servicios opcionales:
+  * Limpieza de habitación individual
+  * Lavandería
+  * Parking
+  * Almacenamiento extra
+- Cobro y gestión automática
+```
 
-3. **Mudanzas y Check-in/Check-out**
-   - Checklist de inspección con fotos comparativas
-   - Gestión de inventario de muebles
-   - Cálculo automático de deducciones de fianza
-
----
-
-### 3.2. ALQUILER POR HABITACIONES (COLIVING)
-
-**Estado Actual:** ✅ **COMPLETO** (implementado recientemente)
-
-**Módulos Existentes:**
-- Gestión de habitaciones
-- Prorrateo de suministros
-- Normas de convivencia
-- Calendario de limpieza
-
-#### 🔴 **MEJORAS NECESARIAS:**
-
-1. **Matching de Compañeros (Roommate Matching)**
-   - Cuestionario de personalidad y hábitos
-   - Algoritmo de compatibilidad
-   - Chat entre candidatos antes de firmar
-
-2. **Gestión de Espacios Comunes**
-   - Reserva de sala de TV, terraza, etc.
-   - Reglas de uso por espacio
-   - Incidencias específicas de zonas comunes
-
-3. **Comunidad y Eventos**
-   - Tablón de anuncios interno
-   - Organización de eventos sociales
-   - Sistema de valoraciones entre compañeros
-
-4. **Facturación Individual Ultra-Detallada**
-   - Desglose de: habitación + suministros + internet + limpieza
-   - Ajustes por días reales de ocupación
-   - Justificantes de gastos (facturas de luz, agua, etc.)
+##### E. Flexibilidad de Contratos
+```
+- Contratos por meses (sin permanencia)
+- Renovación automática mes a mes
+- Cambio de habitación dentro de la misma vivienda
+- Subarriendo temporal (vacaciones)
+```
 
 ---
 
-### 3.3. SHORT-TERM RENTAL (STR / VACACIONAL)
+### 2.4 HOUSE FLIPPING (Compra-Renovación-Venta)
 
-**Estado Actual:** ✅ **BIEN CUBIERTO**
+#### Funcionalidades Existentes
+✅ Proyectos de flipping básicos
+✅ Registro de renovaciones
+✅ Control de gastos
+✅ Cálculo de ROI
 
-**Módulos Existentes:**
-- Listings STR
-- Reservas STR
-- Channel Manager (Airbnb, Booking, VRBO)
+#### **MEJORAS NECESARIAS**
 
-#### 🔴 **MEJORAS NECESARIAS:**
+##### A. Análisis de Oportunidades de Compra
+```
+- Buscador de propiedades en subasta
+  * Integración con BOE
+  * Integración con portales de subastas
+  * Alertas personalizadas por zona y precio
+- Calculadora de viabilidad:
+  * Precio de compra
+  * Costes de renovación estimados
+  * Gastos de compraventa
+  * Precio de venta estimado (comps)
+  * ROI proyectado
+  * Tiempo estimado de proyecto
+```
 
-1. **Pricing Dinámico para STR**
-   - Ajuste automático según ocupación, eventos, temporada
-   - Integración con PriceLabs o Wheelhouse
-   - Recomendaciones de mínimo de noches
+##### B. Gestión de Presupuestos y Contratistas
+```
+- Sistema de licitación (múltiples presupuestos)
+- Comparador de presupuestos
+- Contrato digital con contratistas
+- Pagos escalonados por hitos
+- Valoración de contratistas
+- Seguimiento fotográfico de obra
+```
 
-2. **Check-in Automático**
-   - Integración con cerraduras inteligentes (Nuki, August, Yale)
-   - Envío de códigos de acceso temporales
-   - Instrucciones automáticas para huéspedes
+##### C. Planificación y Seguimiento de Obra
+```
+- Diagrama de Gantt interactivo
+- Dependencias entre tareas
+- Ruta crítica del proyecto
+- Alertas de retrasos
+- Control de costes vs presupuesto
+- Daily reports de obra
+```
 
-3. **Gestión de Reviews y Reputación**
-   - Consolidación de reviews de todas las plataformas
-   - Respuestas automáticas con IA
-   - Alertas de reviews negativas
+##### D. Gestión de Permisos y Licencias
+```
+- Registro de licencias necesarias:
+  * Obra mayor/menor
+  * Cédula de habitabilidad
+  * Certificado energético
+  * ITE/IEE
+- Workflow de tramitación
+- Alertas de vencimientos
+- Repositorio de documentación
+```
 
-4. **Limpieza y Turnover**
-   - Coordinación automática con equipo de limpieza
-   - Checklist de limpieza con fotos
-   - Inspección de inventario (toallas, sábanas, amenities)
-
-5. **Cumplimiento Normativo STR**
-   - Registro de huéspedes (Policía Nacional en España)
-   - Declaración de estancias a autoridades
-   - Gestión de tasas turísticas por ciudad
-
----
-
-### 3.4. HOUSE FLIPPING (COMPRA-REFORMA-VENTA)
-
-**Estado Actual:** ✅ **BÁSICO IMPLEMENTADO**
-
-**Módulos Existentes:**
-- Proyectos de flipping
-- Seguimiento de renovaciones
-- Cálculo de ROI
-
-#### 🔴 **MEJORAS NECESARIAS:**
-
-1. **Deal Analyzer (Analizador de Inversiones)**
-   - Calculadora de ARV (After Repair Value)
-   - Estimación de costes de reforma por m² y nivel de acabado
-   - Costes de financiación (intereses, notaría, registro)
-   - Profit calculator: compra + reforma + venta - costes = beneficio
-
-2. **Gestión de Obra y Subcontratistas**
-   - Presupuestos comparativos de reformas
-   - Certificaciones de obra y pagos por hitos
-   - Control de desviaciones presupuestarias
-   - Fotos de antes/durante/después
-
-3. **Análisis Comparativo de Mercado (CMA)**
-   - Scraping de portales (Idealista, Fotocasa) para comps
-   - Cálculo automático de precio de venta óptimo
-   - Tiempo estimado en mercado (days on market)
-
-4. **Financiación y Rentabilidad**
-   - Simulador de hipotecas y créditos puente
-   - Cálculo de TIR y VAN
-   - Comparativa con otros proyectos del portfolio
-
----
-
-### 3.5. CONSTRUCCIÓN Y PROMOCIÓN
-
-**Estado Actual:** ✅ **BÁSICO IMPLEMENTADO**
-
-**Módulos Existentes:**
-- Proyectos de construcción
-- Gestión de subcontratistas
-- Certificaciones
-
-#### 🔴 **MEJORAS NECESARIAS:**
-
-1. **Gestión de Proyectos Estilo Primavera P6**
-   - Diagrama de Gantt interactivo
-   - Ruta crítica y holguras
-   - Asignación de recursos por tarea
-   - Alertas de retrasos
-
-2. **Control de Costes por Capítulos de Obra**
-   - Presupuesto vs. Certificado vs. Real
-   - Curva S de avance de obra
-   - Reserva para imprevistos
-
-3. **Gestión de Licencias y Permisos**
-   - Checklist de trámites urbanísticos
-   - Seguimiento de plazos de alegaciones
-   - Alertas de caducidad de licencias
-
-4. **BIM Integration (Building Information Modeling)**
-   - Visor 3D de modelos IFC
-   - Extracción de mediciones automáticas
-   - Clash detection (interferencias)
-
-5. **Comercialización de Promociones**
-   - Lista de reservas y ventas
-   - Configurador de acabados para compradores
-   - Calculadora de financiación in-app
-   - Estado de escrituración y entrega
+##### E. Estrategia de Venta
+```
+- Publicación automática en portales:
+  * Idealista
+  * Fotocasa
+  * Habitaclia
+- Home Staging virtual (AI)
+- Tour virtual 360° (integración)
+- Seguimiento de visitas
+- CRM de compradores potenciales
+- Análisis de tiempo en mercado
+```
 
 ---
 
-### 3.6. SERVICIOS PROFESIONALES (ARQUITECTOS, APAREJADORES)
+### 2.5 CONSTRUCTION (Promoción Inmobiliaria)
 
-**Estado Actual:** ✅ **BÁSICO IMPLEMENTADO**
+#### Funcionalidades Existentes
+✅ Proyectos de construcción básicos
+✅ Órdenes de trabajo
+✅ Inspecciones
+✅ Proveedores
 
-**Módulos Existentes:**
-- Proyectos profesionales
-- Entregables
-- Reuniones con clientes
+#### **MEJORAS NECESARIAS**
 
-#### 🔴 **MEJORAS NECESARIAS:**
+##### A. Gestión Financiera de Promoción
+```
+- Presupuesto maestro del proyecto:
+  * Compra de terreno
+  * Costes de construcción
+  * Costes financieros (intereses)
+  * Honorarios (arquitectos, ingenieros)
+  * Licencias y tasas
+  * Marketing y ventas
+- Cash flow proyectado
+- Control de desviaciones
+- Certificaciones de obra
+- Gestión de avales
+```
 
-1. **Gestión de Horas por Proyecto**
-   - Time tracking integrado
-   - Facturación por horas trabajadas
-   - Informes de rentabilidad por proyecto
+##### B. Planificación y Control de Obra
+```
+- BIM (Building Information Modeling) ligero
+  * Visualización 3D
+  * Planos interactivos
+  * Mediciones automáticas
+- Control de calidad (NCR - No Conformidades)
+- Libro de órdenes digital
+- Partes diarios de obra
+- Control de seguridad (PGS)
+```
 
-2. **Gestión Documental Técnica**
-   - Versionado de planos (CAD, PDF)
-   - Registro de revisiones y cambios
-   - Firma digital de planos por colegio profesional
+##### C. Gestión de Ventas Sobre Plano
+```
+- Configurador de vivienda (acabados)
+- Simulador de financiación
+- Reserva online con señal
+- Contratos de arras
+- Seguimiento de pagos escalonados
+- Portal del comprador (estado de obra)
+```
 
-3. **Visados Electrónicos**
-   - Integración con colegios profesionales
-   - Envío automático para visado
-   - Descarga de planos visados
-
-4. **Certificaciones Energéticas**
-   - Integración con CE3X / CERMA
-   - Generación automática de certificados
-   - Registro telemático ante administración
-
----
-
-### 3.7. GESTIÓN DE ACTIVOS CORPORATIVOS (CORPORATE REAL ESTATE)
-
-**Estado Actual:** 🔴 **NO IMPLEMENTADO** (GRAN OPORTUNIDAD)
-
-#### 🔴 **MÓDULOS A DESARROLLAR:**
-
-1. **Portfolio de Activos Corporativos**
-   - Gestión de oficinas, tiendas, almacenes
-   - Clasificación por tipo de uso (operativo, inversión)
-   - Valuación periódica (mark-to-market)
-
-2. **Gestión de Espacios de Trabajo (IWMS - Integrated Workplace Management)**
-   - Planos interactivos de plantas
-   - Asignación de puestos de trabajo
-   - Reserva de salas de reuniones
-   - Gestión de hotdesking y flex spaces
-
-3. **Facility Management**
-   - Gestión de servicios generales (limpieza, seguridad, jardinería)
-   - KPIs de satisfacción de empleados
-   - Gestión de incidencias corporativas
-
-4. **Análisis de Costes por Departamento**
-   - Imputación de costes de espacio por centro de coste
-   - Benchmarking con mercado (€/m² por ciudad)
-   - Recomendaciones de optimización de espacios
+##### D. Entrega de Viviendas
+```
+- Checklist de preentrega
+- Acta de entrega digital
+- Registro fotográfico
+- Libro del edificio
+- Garantías (decenales, bienales)
+- Post-venta (reclamaciones)
+```
 
 ---
 
-## 4. MEJORAS TRANSVERSALES CRÍTICAS
+### 2.6 PROFESSIONAL SERVICES (Arquitectura, Ingeniería, Tasaciones)
 
-### 4.1. INTELIGENCIA ARTIFICIAL
+#### Funcionalidades Existentes
+✅ Proyectos profesionales
+✅ Entregables
+✅ Reuniones
 
-#### 1. **Chatbot Multimodal Avanzado**
-- **Voz:** Comandos por voz ("muéstrame impagados de diciembre")
-- **Imágenes:** Análisis de fotos de incidencias con IA ("detectar humedad", "grieta en pared")
-- **Predicciones:** "¿Cuándo se vacía la unidad 3B según datos históricos?"
+#### **MEJORAS NECESARIAS**
 
-#### 2. **Clasificación Automática de Documentos**
-- Subir PDF de contrato y que lo clasifique: "Contrato de alquiler, inquilino Juan Pérez, inicio 01/01/2024"
-- Extracción de datos clave (fechas, importes, partes)
-- Generación de alertas basadas en contenido ("este contrato vence en 90 días")
+##### A. Gestión de Proyectos de Arquitectura
+```
+- Fases del proyecto:
+  * Anteproyecto
+  * Básico
+  * Ejecución
+  * Dirección de obra
+- Versionado de planos
+- Comentarios y revisiones
+- Integración con AutoCAD/Revit
+- Generación de memorias técnicas
+```
 
-#### 3. **Asistente de Redacción Legal**
-- Generación de contratos personalizados desde plantillas
-- Revisión de cláusulas conflictivas
-- Traducción automática de contratos (inglés, francés, alemán)
+##### B. Tasaciones Automatizadas
+```
+- Integración con método de comparación (comps)
+- Cálculo automático por metros cuadrados
+- Ajustes por características:
+  * Antigüedad
+  * Estado de conservación
+  * Orientación
+  * Vistas
+  * Ascensor
+  * Parking
+- Generación de informe de tasación (ECO)
+- Integración con Catastro
+```
 
-#### 4. **Recomendaciones Proactivas**
-- "Tienes 3 unidades vacías hace más de 60 días, considera bajar precio 5%"
-- "El inquilino de 2A lleva 2 retrasos, activa plan de seguimiento"
-- "Temporada alta en 30 días, sube precios STR un 20%"
+##### C. Certificaciones Energéticas
+```
+- Calculadora de certificación
+- Propuestas de mejora
+- Generación de certificado (PDF)
+- Registro telemático en CCAA
+- Base de datos de certificaciones
+```
 
----
-
-### 4.2. MOVILIDAD (PWA Y APP NATIVA)
-
-#### 1. **Progressive Web App (PWA) Completa**
-- Funcionar 100% offline con sincronización inteligente
-- Push notifications nativas
-- Instalable en home screen
-- Velocidad de carga < 2 segundos
-
-#### 2. **App Nativa iOS/Android**
-- Acceso a cámara, GPS, micrófono
-- Sincronización en background
-- Widgets de home screen (próximos pagos, incidencias pendientes)
-
-#### 3. **Wearables (Smartwatch)**
-- Notificaciones críticas en Apple Watch / Galaxy Watch
-- Quick actions desde muñeca
-
----
-
-### 4.3. INTEGRACIONES EXTERNAS
-
-#### 1. **Integraciones Bancarias**
-- **Open Banking (PSD2):** Conciliación automática de pagos
-- **SEPA Direct Debit:** Domiciliación masiva
-- **Bizum Empresas:** Cobros rápidos a inquilinos
-
-#### 2. **Integraciones con Administración Pública**
-- **Catastro:** Consulta de referencia catastral y datos fiscales
-- **Registro de la Propiedad:** Estado de cargas y notas marginales
-- **AEAT:** Validación de NIE/NIF, estado de alta en Hacienda
-
-#### 3. **Integraciones con Portales Inmobiliarios**
-- **Idealista, Fotocasa, Pisos.com:** Publicación automática
-- **Importación de leads:** Captura de consultas desde portales
-- **Sincronización de estado:** Alquilado/disponible en tiempo real
-
-#### 4. **Integraciones con Marketplaces de Servicios**
-- **Glovo, Uber:** Envío de llaves a inquilinos
-- **HomeServe, Reparalia:** Contratación de reparaciones urgentes
-- **Holded, A3, Sage:** Sincronización contable bidireccional
+##### D. Gestión de Colegiados
+```
+- Visado de proyectos
+- Seguros de RC profesional
+- Registro de colegios profesionales
+- Alertas de renovación
+```
 
 ---
 
-### 4.4. EXPERIENCIA DE USUARIO (UX/UI)
+### 2.7 RETAIL & COMMERCIAL (Locales Comerciales)
 
-#### 1. **Modo Oscuro (Dark Mode)**
-- Reducir fatiga visual
-- Ahorro de batería en móviles OLED
+#### **NUEVA VERTICAL - A DESARROLLAR**
 
-#### 2. **Accesibilidad (WCAG 2.1 AA)**
-- Soporte para lectores de pantalla
-- Navegación por teclado completa
-- Alto contraste para usuarios con baja visión
+##### Funcionalidades Específicas Necesarias
 
-#### 3. **Personalización Avanzada**
-- Dashboards configurables (drag & drop widgets)
-- Temas de color corporativos
-- Idiomas adicionales (portugués, francés, italiano, alemán)
+##### A. Gestión de Locales Comerciales
+```
+- Características específicas:
+  * Fachada (metros lineales)
+  * Altura libre
+  * Carga eléctrica (kW)
+  * Salida de humos
+  * Licencias de actividad
+  * Zonificación (uso permitido)
+- Contratos de arrendamiento de negocio
+- Traspaso de local
+- Obras de acondicionamiento
+```
 
-#### 4. **Onboarding Gamificado**
-- Tutorial interactivo de primeros pasos
-- Checklist de configuración con progreso
-- Recompensas por completar acciones (badges)
+##### B. Gestión de Rentas Comerciales
+```
+- Renta fija + variable (% sobre facturación)
+- Escalado de renta (incrementos anuales)
+- Garantías reforzadas (avales bancarios)
+- Devolución de garantía escalonada
+```
 
----
-
-### 4.5. SEGURIDAD Y COMPLIANCE
-
-#### 1. **Autenticación Multifactor (MFA)**
-- Código SMS, TOTP (Google Authenticator), Biometría
-
-#### 2. **Encriptación End-to-End**
-- Documentos sensibles encriptados en reposo
-- Comunicaciones cifradas (chat, emails)
-
-#### 3. **Gestión de Consentimientos GDPR**
-- Registro de consentimientos por inquilino
-- Derecho al olvido (eliminación de datos)
-- Exportación de datos personales
-
-#### 4. **Auditoría Completa (Audit Trail)**
-- Log de todas las acciones críticas
-- Reportes de auditoría para certificaciones ISO/SOC2
+##### C. Marketing de Locales
+```
+- Publicación especializada:
+  * Localesol
+  * Loquo Comercial
+  * Servicios a empresas
+- Dossier de local (fotos, planos, métricas)
+- Análisis de zona (tráfico peatonal, competencia)
+```
 
 ---
 
-### 4.6. RENDIMIENTO Y ESCALABILIDAD
+## 3. Análisis por Perfil de Usuario
 
-#### 1. **Optimización de Velocidad**
-- Carga inicial < 1 segundo
-- Lazy loading de imágenes y componentes
-- CDN global para assets estáticos
+### 3.1 SUPER ADMINISTRADOR
 
-#### 2. **Escalabilidad para Grandes Portfolios**
-- Soporte para 10,000+ unidades por cliente
-- Búsquedas y filtros ultra-rápidos (Elasticsearch)
-- Informes que se generan en background (jobs async)
+#### Funcionalidades Existentes
+✅ Dashboard de estadísticas globales
+✅ Gestión de empresas clientes
+✅ Sistema de impersonación
+✅ Operaciones en lote
+✅ Planes de suscripción
+✅ White Label
+✅ Timeline de actividad
+✅ Centro de alertas
 
-#### 3. **Backups y Disaster Recovery**
-- Backups automáticos diarios
-- Restauración point-in-time
-- Multi-región para alta disponibilidad
+#### **MEJORAS NECESARIAS**
 
----
+##### A. Business Intelligence Avanzado
+```
+- Dashboard ejecutivo con KPIs clave:
+  * MRR (Monthly Recurring Revenue)
+  * Churn rate (tasa de cancelación)
+  * LTV (Lifetime Value) por cliente
+  * CAC (Customer Acquisition Cost)
+  * NPS (Net Promoter Score)
+- Reportes automáticos semanales/mensuales
+- Comparativas entre empresas (benchmarking)
+- Análisis de uso de módulos
+- Predicción de cancelaciones (AI)
+```
 
-## 5. ANÁLISIS DE COMPETENCIA Y GAPS
+##### B. Onboarding Automatizado
+```
+- Wizard de configuración inicial
+- Importación de datos desde competencia
+- Asignación automática de plan según perfil
+- Tutoriales interactivos personalizados
+- Checklist de activación
+```
 
-### Competidores Principales:
+##### C. Sistema de Soporte Integrado
+```
+- Ticketing interno
+- Priorización automática
+- Base de conocimiento
+- Chat en vivo con clientes
+- SLA (Service Level Agreement) tracking
+```
 
-| Feature | INMOVA | Homming | Rentger | Buildium | Yardi | Propify |
-|---------|---------|---------|---------|----------|-------|----------|
-| **Alquiler Residencial** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **STR/Vacacional** | ✅ | ❌ | ⚠️ | ⚠️ | ❌ | ❌ |
-| **House Flipping** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Construcción** | ✅ | ❌ | ❌ | ❌ | ⚠️ | ❌ |
-| **Room Rental** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **CRM Avanzado** | ✅ | ⚠️ | ⚠️ | ✅ | ✅ | ⚠️ |
-| **Contabilidad Integrada** | ✅ | ⚠️ | ❌ | ✅ | ✅ | ⚠️ |
-| **IA/ML** | ✅ | ❌ | ❌ | ❌ | ⚠️ | ❌ |
-| **Blockchain** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **IoT** | ✅ | ❌ | ❌ | ❌ | ⚠️ | ❌ |
-| **White Label** | ✅ | ❌ | ❌ | ❌ | ⚠️ | ⚠️ |
-| **Multi-vertical** | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| **Precio/mes** | €149 | €80 | €60 | $200 | $$$$ | €90 |
-
-### Gaps vs. Competencia:
-
-🔴 **Yardi** (líder enterprise): Mejor en **corporate real estate** y grandes portfolios  
-🔴 **Buildium** (líder USA): Mejor en **integración con contabilidad QuickBooks**  
-🔴 **Homming** (España): Mejor en **simplicidad para pequeños propietarios**  
-
-✅ **Ventajas de INMOVA:**
-1. **Único verdaderamente multi-vertical** (7 modelos de negocio)
-2. **IA más avanzada** que cualquier competidor
-3. **Tecnologías disruptivas** (Blockchain, IoT) que nadie más tiene
-4. **Precio muy competitivo** para la funcionalidad ofrecida
-
----
-
-## 6. ROADMAP DE IMPLEMENTACIÓN
-
-### FASE 1: QUICK WINS (1-2 meses) 🚀
-
-**Prioridad:** ALTA  
-**Impacto:** ALTO  
-**Esfuerzo:** BAJO
-
-1. ✅ Renovaciones automáticas de contratos con ajuste IPC
-2. ✅ Generación de dossiers de propiedad en PDF
-3. ✅ Modo oscuro (dark mode)
-4. ✅ Mejoras en app móvil (PWA)
-5. ✅ Integración con Bizum para cobros
+##### D. Gestión de Actualizaciones
+```
+- Versionado de la plataforma
+- Changelog automático
+- Notificaciones a clientes
+- Rollback seguro
+- Testing A/B de features
+```
 
 ---
 
-### FASE 2: DIFERENCIADORES CLAVE (3-4 meses) 🎯
+### 3.2 ADMINISTRADOR (Cliente Empresa)
 
-**Prioridad:** ALTA  
-**Impacto:** MUY ALTO  
-**Esfuerzo:** MEDIO
+#### Funcionalidades Existentes
+✅ Gestión de usuarios
+✅ Gestión de módulos
+✅ Configuración de empresa
+✅ Reportes básicos
 
-1. ⚠️ **Módulo de Derramas Automáticas** (administradores de fincas)
-2. ⚠️ **Dashboard de Inversión Avanzado** (inversores)
-3. ⚠️ **Deal Analyzer para Flipping** (inversores flippers)
-4. ⚠️ **Roommate Matching** (coliving)
-5. ⚠️ **Check-in Automático STR** (cerraduras inteligentes)
+#### **MEJORAS NECESARIAS**
 
----
+##### A. Dashboard Personalizable
+```
+- Widgets arrastrables
+- Gráficos configurables
+- Filtros guardados
+- Exportación a PDF/Excel
+- Plantillas de dashboard por rol
+```
 
-### FASE 3: ENTERPRISE FEATURES (5-8 meses) 💼
+##### B. Gestión Avanzada de Permisos
+```
+- Permisos granulares por módulo
+- Permisos por edificio/unidad
+- Roles personalizados
+- Grupos de usuarios
+- Registro de cambios de permisos (audit)
+```
 
-**Prioridad:** MEDIA  
-**Impacto:** MUY ALTO para segmento enterprise  
-**Esfuerzo:** ALTO
+##### C. Automatizaciones (Workflows)
+```
+- Constructor visual de workflows:
+  * Si [condición] entonces [acción]
+  * Ejemplos:
+    - Si pago vencido > 5 días → Enviar email
+    - Si nueva reserva STR → Crear limpieza
+    - Si contrato vence en 60 días → Notificar
+- Biblioteca de plantillas predefinidas
+- Testing de workflows
+```
 
-1. ⚠️ **Corporate Real Estate (IWMS)**
-2. ⚠️ **Consolidación Multi-Empresa** (grupos)
-3. ⚠️ **Gestión de Proyectos Estilo Primavera P6**
-4. ⚠️ **BIM Integration** (construcción)
-5. ⚠️ **Certificaciones ISO/SOC2** (seguridad)
-
----
-
-### FASE 4: INNOVACIÓN DISRUPTIVA (9-12 meses) 🚀
-
-**Prioridad:** BAJA  
-**Impacto:** DIFERENCIACIÓN a largo plazo  
-**Esfuerzo:** MUY ALTO
-
-1. ⚠️ **Chatbot Multimodal con Voz e IA**
-2. ⚠️ **Wearables (Apple Watch, Galaxy Watch)**
-3. ⚠️ **Integración con Registro de la Propiedad**
-4. ⚠️ **Marketplace de Tokenización** (inversión fraccionada)
-5. ⚠️ **Gemelo Digital de Edificios** (IoT + BIM)
-
----
-
-## 7. MATRIZ DE PRIORIZACIÓN
-
-### Criterios de Evaluación:
-- **Impacto en Usuarios:** ¿Cuántos usuarios se benefician?
-- **Ventaja Competitiva:** ¿Nos diferencia de la competencia?
-- **Esfuerzo de Desarrollo:** Semanas de desarrollo estimadas
-- **Potencial de Ingresos:** ¿Permite subir precio o captar nuevos clientes?
-
-### Top 10 Mejoras Prioritarias:
-
-| # | Mejora | Impacto | Ventaja Competitiva | Esfuerzo | Score |
-|---|--------|---------|---------------------|----------|-------|
-| 1 | **Módulo de Derramas Automáticas** | 🔥🔥🔥 | ⭐⭐⭐ | 6 sem | 95 |
-| 2 | **Dashboard de Inversión Avanzado** | 🔥🔥🔥 | ⭐⭐⭐ | 4 sem | 92 |
-| 3 | **Check-in Automático STR** | 🔥🔥🔥 | ⭐⭐⭐ | 8 sem | 90 |
-| 4 | **Deal Analyzer (Flipping)** | 🔥🔥 | ⭐⭐⭐ | 6 sem | 88 |
-| 5 | **Roommate Matching** | 🔥🔥 | ⭐⭐⭐ | 8 sem | 85 |
-| 6 | **App Móvil Nativa** | 🔥🔥🔥 | ⭐⭐ | 12 sem | 83 |
-| 7 | **Pricing Dinámico STR** | 🔥🔥 | ⭐⭐⭐ | 6 sem | 82 |
-| 8 | **Control de Morosidad Avanzado** | 🔥🔥🔥 | ⭐⭐ | 8 sem | 80 |
-| 9 | **Corporate Real Estate (IWMS)** | 🔥 | ⭐⭐⭐ | 16 sem | 75 |
-| 10 | **Consolidación Multi-Empresa** | 🔥🔥 | ⭐⭐ | 12 sem | 72 |
+##### D. Gestión de Equipos
+```
+- Asignación de tareas por usuario
+- Calendario compartido
+- Mensajería interna
+- Objetivos y métricas por empleado
+- Evaluación de desempeño
+```
 
 ---
 
-## 8. CONCLUSIONES Y RECOMENDACIONES
+### 3.3 GESTOR / PROPERTY MANAGER
 
-### Principales Conclusiones:
+#### Funcionalidades Existentes
+✅ Vista de edificios y unidades
+✅ Gestión de inquilinos y contratos
+✅ Pagos y morosidad
+✅ Mantenimiento
+✅ Documentos
 
-1. **INMOVA ya es muy completo** (88 módulos, 7 verticales) pero necesita **profundizar en nichos específicos** para ganar.
+#### **MEJORAS NECESARIAS**
 
-2. **Administradores de fincas** es el perfil con mayores carencias y donde hay gran demanda.
+##### A. Vista de Cartera Optimizada
+```
+- Mapa interactivo de propiedades
+- Indicadores de salud por propiedad:
+  * 🟢 Todo bien
+  * 🟡 Requiere atención
+  * 🔴 Crítico
+- Resumen de ocupación en tiempo real
+- Ingresos vs gastos por propiedad
+```
 
-3. **STR/Vacacional** necesita urgentemente **pricing dinámico** y **check-in automático** para competir.
+##### B. Asistente de Renovaciones
+```
+- Lista de contratos próximos a vencer
+- Plantillas de cartas de renovación
+- Sugerencias de actualización de renta (IPC)
+- Tracking de respuestas
+- Análisis: renovar vs buscar nuevo inquilino
+```
 
-4. **House Flipping** tiene potencial pero necesita un **Deal Analyzer** profesional.
+##### C. Gestión de Visitas
+```
+- Calendario de visitas
+- Formulario de solicitud online
+- Confirmación automática
+- Recordatorios
+- Feedback post-visita
+- Conversión: visita → aplicación → contrato
+```
 
-5. **Corporate Real Estate (IWMS)** es una **oportunidad de oro sin explotar** donde Yardi domina pero es carísimo.
-
-### Recomendaciones Estratégicas:
-
-#### 🎯 **Recomendación #1: Focus en Administradores de Fincas**
-
-**Razón:** España tiene **50,000+ administradores de fincas** que gestionan 700,000+ comunidades. Es un mercado enorme, regulado y con poder adquisitivo.
-
-**Acción:**
-- Desarrollar **Módulo de Derramas** completo
-- Añadir **Gestión de Juntas** con convocatorias electrónicas
-- Crear **Compliance normativo** (ITE, IEE, Libro del Edificio)
-- Asociarse con **Colegios de Administradores de Fincas** (COAPI)
-
-**Resultado esperado:**  
-- Captar 500 administradores en 12 meses  
-- ARR de €600,000 (500 * €100/mes * 12)
-
----
-
-#### 🎯 **Recomendación #2: Apostar Fuerte por STR**
-
-**Razón:** Mercado STR en España crece 15% anual. Airbnb tiene 300,000+ anuncios solo en España.
-
-**Acción:**
-- Desarrollar **Pricing Dinámico** propio (sin depender de PriceLabs)
-- Integrar **cerraduras inteligentes** (Nuki, August)
-- Añadir **gestión de limpieza** con app para equipos
-- **Cumplimiento normativo** por ciudades (tasas turísticas, registro de Policía)
-
-**Resultado esperado:**  
-- Captar 1,000 propietarios STR en 12 meses  
-- ARR de €1,200,000 (1,000 * €100/mes * 12)
-
----
-
-#### 🎯 **Recomendación #3: Liderar en Tecnología (IA, IoT, Blockchain)**
-
-**Razón:** Ningún competidor tiene IA tan avanzada. Es un diferenciador clave para marketing.
-
-**Acción:**
-- **Chatbot con GPT-4:** Resolver dudas y ejecutar comandos por voz
-- **Mantenimiento Predictivo:** Predecir averías antes de que ocurran
-- **Smart Home Integration:** Controlar termostatos, luces, cerraduras desde la app
-
-**Resultado esperado:**  
-- Ganar **premios PropTech** (visibilidad)
-- Posicionar como **software más innovador**
-- Subir precio a **€199/mes** (premium)
+##### D. Mobile App Nativa
+```
+- Acceso a información clave
+- Escaneo de documentos (cámara)
+- Firma digital móvil
+- Notificaciones push
+- Modo offline básico
+- Registro fotográfico (inspecciones)
+```
 
 ---
 
-#### 🎯 **Recomendación #4: Entrar en Corporate Real Estate**
+### 3.4 OPERADOR / TÉCNICO DE MANTENIMIENTO
 
-**Razón:** Yardi cobra €10,000+/mes a empresas grandes. Hay espacio para un player más asequible.
+#### Funcionalidades Existentes
+✅ Lista de órdenes de trabajo
+✅ Actualización de estado
 
-**Acción:**
-- Desarrollar **módulo IWMS** (gestión de espacios de trabajo)
-- Añadir **facility management** (limpieza, seguridad, mantenimiento)
-- Crear **dashboards C-level** para CFOs
+#### **MEJORAS NECESARIAS**
 
-**Target:** Empresas con 50+ oficinas/tiendas (Inditex, Mercadona, Banco Santander)
+##### A. App Móvil de Campo
+```
+- Recepción de órdenes en tiempo real
+- Navegación GPS a la propiedad
+- Checklist de tareas
+- Registro de materiales usados
+- Registro de horas trabajadas
+- Fotos antes/después
+- Firma digital del inquilino
+- Cierre de orden desde móvil
+```
 
-**Resultado esperado:**  
-- Firmar 10 clientes enterprise en 18 meses  
-- ARR de €1,200,000 (10 * €10,000/mes * 12)
+##### B. Inventario de Materiales
+```
+- Control de stock de materiales
+- Alertas de stock bajo
+- Solicitud de reposición
+- Código de barras / QR
+- Asignación de materiales a órdenes
+```
 
----
-
-### Resumen de Ingresos Proyectados:
-
-| Segmento | Clientes | Precio Medio | ARR |
-|----------|----------|--------------|-----|
-| Administradores de Fincas | 500 | €100/mes | €600,000 |
-| Propietarios STR | 1,000 | €100/mes | €1,200,000 |
-| Inmobiliarias (base actual) | 500 | €149/mes | €894,000 |
-| Corporate Real Estate | 10 | €10,000/mes | €1,200,000 |
-| **TOTAL** | **2,010** | - | **€3,894,000** |
-
----
-
-### KPIs de Éxito:
-
-1. **Clientes activos:** 2,000+ en 18 meses
-2. **ARR (Annual Recurring Revenue):** €3.5M+ en 18 meses
-3. **Churn rate:** < 5% mensual
-4. **NPS (Net Promoter Score):** > 50
-5. **Premios ganados:** 2+ premios PropTech europeos
-
----
-
-## ANEXO: TABLA RESUMEN DE TODAS LAS MEJORAS
-
-### Por Perfil de Usuario:
-
-| Perfil | Mejoras Críticas | Prioridad |
-|--------|------------------|----------|
-| Administrador de Fincas | • Derramas automáticas<br>• Juntas de propietarios<br>• Compliance ITE/IEE<br>• Presupuesto anual | 🔥 ALTA |
-| Agente Inmobiliario | • App móvil nativa<br>• Marketing automation<br>• Rutas optimizadas<br>• Comparador de propiedades | 🟡 MEDIA |
-| Inversor / Propietario | • Dashboard inversión<br>• Simulador inversiones<br>• Reportes Hacienda<br>• Marketplace oportunidades | 🔥 ALTA |
-| CFO | • Consolidación multi-empresa<br>• Tesorería y cash flow<br>• Control morosidad<br>• Auditoría | 🟡 MEDIA |
-| Técnico Mantenimiento | • App móvil técnicos<br>• Inventario repuestos<br>• Mantenimiento predictivo<br>• Gestión garantías | 🟢 BAJA |
-| Super Admin | • Billing Stripe<br>• Monitorización<br>• Onboarding automático<br>• Portal soporte | 🟡 MEDIA |
-
-### Por Vertical de Negocio:
-
-| Vertical | Mejoras Críticas | Prioridad |
-|----------|------------------|----------|
-| Alquiler Residencial | • Renovaciones automáticas<br>• Garantías alternativas<br>• Check-in/Check-out | 🟡 MEDIA |
-| Coliving | • Roommate matching<br>• Espacios comunes<br>• Comunidad y eventos<br>• Facturación ultra-detallada | 🔥 ALTA |
-| STR/Vacacional | • Pricing dinámico<br>• Check-in automático<br>• Reviews consolidadas<br>• Limpieza turnover<br>• Compliance normativo | 🔥 ALTA |
-| House Flipping | • Deal analyzer<br>• Gestión de obra<br>• CMA (comps)<br>• Financiación y TIR | 🔥 ALTA |
-| Construcción | • Gantt y ruta crítica<br>• Control costes<br>• Licencias<br>• BIM<br>• Comercialización | 🟡 MEDIA |
-| Servicios Profesionales | • Time tracking<br>• Visados electrónicos<br>• Versionado planos<br>• Certificaciones energéticas | 🟢 BAJA |
-| Corporate Real Estate | • IWMS completo<br>• Facility management<br>• Hotdesking<br>• Análisis costes | 🔥 ALTA |
-
-### Mejoras Transversales:
-
-| Categoría | Mejoras Críticas | Prioridad |
-|-----------|------------------|----------|
-| Inteligencia Artificial | • Chatbot multimodal<br>• Clasificación docs<br>• Asistente legal<br>• Recomendaciones proactivas | 🟡 MEDIA |
-| Movilidad | • PWA completa offline<br>• App nativa iOS/Android<br>• Wearables | 🔥 ALTA |
-| Integraciones | • Open Banking<br>• Admin pública<br>• Portales inmobiliarios<br>• Marketplaces | 🔥 ALTA |
-| UX/UI | • Modo oscuro<br>• Accesibilidad WCAG<br>• Personalización<br>• Onboarding gamificado | 🟡 MEDIA |
-| Seguridad | • MFA<br>• Encriptación E2E<br>• GDPR<br>• Audit trail | 🟡 MEDIA |
-| Performance | • Velocidad < 1s<br>• Soporte 10,000+ unidades<br>• Backups auto | 🟢 BAJA |
+##### C. Gestión de Proveedores Externos
+```
+- Base de datos de proveedores
+- Solicitud de presupuesto
+- Comparativa de presupuestos
+- Orden de compra
+- Seguimiento de entregas
+```
 
 ---
 
-## DOCUMENTO ELABORADO POR
+### 3.5 INQUILINO
 
-**Experto en:** Gestión Inmobiliaria, PropTech, Product Management  
-**Para:** INMOVA - Software Inmobiliario Multi-Vertical  
-**Fecha:** Diciembre 2024
+#### Funcionalidades Existentes
+✅ Portal del inquilino
+✅ Visualización de contratos
+✅ Visualización de pagos
+✅ Solicitud de mantenimiento
+✅ Chat con administrador
+✅ Documentos
+
+#### **MEJORAS NECESARIAS**
+
+##### A. Pagos Flexibles
+```
+- Múltiples métodos de pago:
+  * Tarjeta de crédito/débito
+  * Transferencia bancaria
+  * Bizum
+  * PayPal
+  * Domiciliación bancaria (SEPA)
+- Pago fraccionado de renta
+- Adelanto de renta (descuento)
+- Historial de pagos con recibos PDF
+```
+
+##### B. Gestión de Incidencias Mejorada
+```
+- Clasificación detallada de incidencia
+- Subida de fotos/vídeos
+- Seguimiento en tiempo real
+- Valoración del servicio
+- Chat con técnico asignado
+```
+
+##### C. Servicios al Inquilino
+```
+- Marketplace de servicios:
+  * Limpieza
+  * Internet/TV
+  * Seguros del hogar
+  * Mudanzas
+  * Guardamuebles
+- Descuentos exclusivos (partners)
+- Contratación en un clic
+```
+
+##### D. Comunidad y Engagement
+```
+- Programa de fidelización (puntos)
+- Beneficios por renovación
+- Eventos para residentes
+- Referidos (traer amigos)
+```
 
 ---
 
-**© 2024 INMOVA by Enxames Investments SL. Todos los derechos reservados.**
+### 3.6 PROPIETARIO
+
+#### Funcionalidades Existentes
+✅ Portal del propietario
+✅ Vista de propiedades
+✅ Reportes básicos
+
+#### **MEJORAS NECESARIAS**
+
+##### A. Dashboard Financiero del Propietario
+```
+- Ingresos mensuales/anuales
+- Gastos desglosados
+- Rendimiento neto
+- Comparativa año anterior
+- Proyección de ingresos
+- Alertas de pagos pendientes
+```
+
+##### B. Reportes Automáticos
+```
+- Informe mensual automático (PDF + email)
+- Declaración anual de renta (pre-filled)
+- Certificado de retenciones
+- Estado de ocupación
+- Incidencias resueltas
+```
+
+##### C. Comunicación con el Property Manager
+```
+- Mensajería segura
+- Solicitud de información
+- Aprobación de gastos extraordinarios
+- Notificaciones importantes
+```
+
+##### D. Inversión y Crecimiento
+```
+- Análisis de rentabilidad
+- Recomendaciones de mejora:
+  * Renovaciones que aumentan valor
+  * Optimización de renta
+- Calculadora de ampliación de cartera
+- Oportunidades de inversión (marketplace)
+```
+
+---
+
+## 4. Mejoras Transversales
+
+### 4.1 INTELIGENCIA ARTIFICIAL Y MACHINE LEARNING
+
+#### A. Predicción y Prevención
+```
+- Predicción de morosidad (scoring)
+- Predicción de rotación de inquilinos
+- Predicción de fallos en equipos (mantenimiento predictivo)
+- Detección de fraudes
+- Valoración automática de propiedades
+```
+
+#### B. Asistente Virtual Inteligente
+```
+- Chatbot con NLP avanzado:
+  * Responde preguntas frecuentes
+  * Busca información en la plataforma
+  * Ejecuta acciones (crear, modificar)
+  * Disponible 24/7
+- Integración con WhatsApp Business
+- Soporte multiidioma
+```
+
+#### C. OCR y Procesamiento Documental
+```
+✅ Ya implementado básicamente
+- Mejoras:
+  * Extracción de contratos completos
+  * Extracción de facturas (gastos)
+  * Extracción de DNI/NIE extranjeros
+  * Validación cruzada con bases de datos
+```
+
+---
+
+### 4.2 INTEGRACIONES CON ECOSISTEMA PROPTECH
+
+#### A. Pasarelas de Pago
+```
+✅ Stripe (implementado)
+- Añadir:
+  * Redsys (TPV español)
+  * PayPal
+  * Bizum
+  * SEPA Direct Debit
+```
+
+#### B. Open Banking
+```
+✅ Demo implementado
+- Completar:
+  * Verificación de ingresos real
+  * Conciliación automática de pagos
+  * Pagos instantáneos
+```
+
+#### C. Firma Digital
+```
+✅ Demo implementado (Signaturit preparado)
+- Activar:
+  * Signaturit
+  * DocuSign
+  * Certificado digital FNMT
+```
+
+#### D. Marketing y Publicación
+```
+- Integraciones activas con portales inmobiliarios:
+  * Idealista (API)
+  * Fotocasa (API)
+  * Habitaclia (API)
+  * Pisoscom
+- Publicación automática desde INMOVA
+- Sincronización de contactos
+```
+
+#### E. Redes Sociales
+```
+✅ Demo implementado
+- Completar:
+  * Facebook/Instagram (Meta API)
+  * LinkedIn (profesional)
+  * Twitter/X
+  * TikTok (para STR)
+- Publicación programada
+- Analytics integrado
+```
+
+#### F. Utilidades
+```
+- Integración con proveedores:
+  * Iberdrola (lecturas)
+  * Endesa
+  * Naturgy
+  * Telefónica
+- Gestión de altas/bajas automáticas
+- Facturación directa
+```
+
+---
+
+### 4.3 EXPERIENCIA DE USUARIO (UX/UI)
+
+#### A. Mobile First
+```
+- PWA (Progressive Web App) mejorada
+  ✅ Ya implementada
+- Apps nativas:
+  * iOS (Swift/SwiftUI)
+  * Android (Kotlin)
+- Funcionalidad offline completa
+```
+
+#### B. Personalización
+```
+✅ White Label implementado
+- Mejoras:
+  * Temas predefinidos (Dark mode completo)
+  * Idiomas adicionales:
+    * Catalán
+    * Gallego
+    * Euskera
+    * Italiano
+    * Alemán
+  * Preferencias de usuario guardadas
+```
+
+#### C. Accesibilidad (WCAG 2.1 AA)
+```
+✅ Mejoras iniciales implementadas
+- Completar:
+  * Navegación completa por teclado
+  * Lectores de pantalla (ARIA)
+  * Subtítulos en vídeos
+  * Contraste alto (modo daltónico)
+  * Tamaño de fuente ajustable
+```
+
+---
+
+### 4.4 SEGURIDAD Y CUMPLIMIENTO
+
+#### A. Seguridad Avanzada
+```
+✅ Biometría básica implementada
+- Añadir:
+  * Autenticación de dos factores (2FA) obligatoria
+  * SSO (Single Sign-On) con Google/Microsoft
+  * Gestión de sesiones (logout automático)
+  * IP whitelisting para super_admin
+  * Logs de auditoría completos
+```
+
+#### B. GDPR y LOPD
+```
+✅ Consentimientos implementados
+- Completar:
+  * Portal de ejercicio de derechos (ARCO)
+  * Anonimización de datos históricos
+  * Exportación de datos del usuario
+  * Eliminación de cuenta (derecho al olvido)
+  * Registro de actividades de tratamiento
+```
+
+#### C. Backups y Disaster Recovery
+```
+✅ Sistema de backup implementado
+- Mejorar:
+  * Backups diferenciales (no solo completos)
+  * Replicación geográfica (multi-region)
+  * Plan de recuperación (RTO < 4h)
+  * Testing periódico de restauración
+```
+
+---
+
+### 4.5 ANALÍTICA Y BUSINESS INTELLIGENCE
+
+#### A. Dashboards Avanzados
+```
+✅ BI básico implementado
+- Mejorar:
+  * Dashboards por vertical
+  * Gráficos de embudo (funnel)
+  * Mapas de calor
+  * Cohort analysis
+  * Comparativas temporales
+```
+
+#### B. Alertas Inteligentes
+```
+- Alertas proactivas basadas en datos:
+  * Propiedades con baja rentabilidad
+  * Contratos que deberían renegociarse
+  * Gastos anómalos
+  * Oportunidades de optimización
+```
+
+#### C. Exportación de Datos
+```
+✅ CSV básico implementado
+- Añadir:
+  * Excel con formato
+  * Power BI (conector)
+  * Google Data Studio
+  * API pública para extracción
+```
+
+---
+
+## 5. Roadmap de Implementación
+
+### FASE 1: QUICK WINS (1-2 meses)
+**Prioridad ALTA - Bajo esfuerzo**
+
+#### Para Residencial Tradicional
+- [ ] Gestión de seguros (registro, alertas)
+- [ ] Asistente de renovaciones
+- [ ] Mejoras en portal del inquilino (pagos flexibles)
+- [ ] Dashboard financiero del propietario
+
+#### Para STR
+- [ ] Check-in/out digital completo
+- [ ] Integración completa con Airbnb
+- [ ] Sistema de reseñas consolidado
+
+#### Para Room Rental
+- [ ] Plataforma social interna
+- [ ] Servicios adicionales opcionales
+
+#### Transversal
+- [ ] Mobile app nativa (MVP iOS + Android)
+- [ ] Mejoras en PWA (modo offline)
+- [ ] 2FA obligatorio para administradores
+- [ ] Exportación Excel con formato
+
+---
+
+### FASE 2: CORE FEATURES (3-4 meses)
+**Prioridad ALTA - Esfuerzo medio**
+
+#### Para Residencial Tradicional
+- [ ] Gestión avanzada de morosidad
+- [ ] Módulo de comunidades de propietarios
+- [ ] Asistente fiscal (Modelo 100)
+
+#### Para STR
+- [ ] Revenue Management (pricing dinámico)
+- [ ] Automatización de limpiezas
+- [ ] Cumplimiento regulatorio (licencias)
+
+#### Para House Flipping
+- [ ] Análisis de oportunidades
+- [ ] Gestión de presupuestos contratistas
+- [ ] Estrategia de venta (marketing)
+
+#### Para Construction
+- [ ] Gestión financiera de promoción
+- [ ] Gestión de ventas sobre plano
+
+#### Transversal
+- [ ] Constructor de workflows (automatizaciones)
+- [ ] Integraciones con Idealista, Fotocasa
+- [ ] Asistente virtual (chatbot avanzado)
+- [ ] Portal de ejercicio de derechos GDPR
+
+---
+
+### FASE 3: ADVANCED FEATURES (4-6 meses)
+**Prioridad MEDIA - Alto esfuerzo**
+
+#### Para STR
+- [ ] Channel Manager completo (6+ OTAs)
+- [ ] Multi-propietario (co-hosting)
+
+#### Para Room Rental
+- [ ] Matching de compañeros (algoritmo)
+
+#### Para Professional Services
+- [ ] Tasaciones automatizadas
+- [ ] Gestión de proyectos de arquitectura
+
+#### Nueva Vertical
+- [ ] **Retail & Commercial** (completa)
+
+#### Transversal
+- [ ] Predicción de morosidad (ML)
+- [ ] Valoración automática de propiedades (AI)
+- [ ] BIM ligero para construcción
+- [ ] SSO con Google/Microsoft
+
+---
+
+### FASE 4: INNOVATION (6-12 meses)
+**Prioridad BAJA - Innovación**
+
+#### Tecnologías Emergentes
+- [ ] AR/VR para visitas virtuales avanzadas
+- [ ] Blockchain para certificación de contratos
+- [ ] IoT avanzado (sensores, cerraduras inteligentes)
+- [ ] Predicción avanzada (rotación, fallos)
+
+#### Expansión Internacional
+- [ ] Adaptación a normativas europeas
+- [ ] Soporte multi-moneda
+- [ ] Integración con catastros internacionales
+
+---
+
+## 6. Conclusiones y Recomendaciones
+
+### Priorización por Impacto
+
+#### 🔥 CRÍTICO (Implementar YA)
+1. **Mobile App Nativa** → 80% de usuarios en móvil
+2. **Revenue Management para STR** → Principal demanda
+3. **Gestión Avanzada de Morosidad** → Dolor clave del sector
+4. **Automatizaciones (Workflows)** → Ahorro de tiempo masivo
+5. **Check-in/out Digital STR** → Diferenciador competitivo
+
+#### ⚡ IMPORTANTE (3-6 meses)
+1. **Channel Manager STR completo** → Multi-OTA es estándar
+2. **Módulo de Comunidades** → Gran mercado sin cubrir
+3. **Asistente Fiscal** → Valor añadido alto
+4. **Matching de Compañeros** → Innovación en Room Rental
+5. **Vertical Retail & Commercial** → Nuevo mercado
+
+#### 💡 DESEABLE (6-12 meses)
+1. **Predicción con ML/AI** → Diferenciación tecnológica
+2. **BIM Ligero** → Para construcción profesional
+3. **Multi-propietario STR** → Nicho específico
+4. **Tasaciones automatizadas** → Profesionales
+
+### Recomendaciones Estratégicas
+
+#### 1. Enfoque en Verticales con Mayor Crecimiento
+- **STR** está en auge post-pandemia → Priorizar
+- **Room Rental / Coliving** crece con millennials → Innovar
+- **Construction** tiene márgenes altos → Completar
+
+#### 2. Desarrollar Mobile-First
+- La mayoría de operaciones se hacen en móvil
+- Inquilinos, propietarios y técnicos necesitan apps nativas
+- La PWA es insuficiente para uso intensivo
+
+#### 3. Aprovechar la Ventaja de la IA
+- Predicción de morosidad puede ser un USP clave
+- Chatbot reduce costes de soporte
+- Pricing dinámico para STR genera ingresos directos
+
+#### 4. Integraciones como Moat (Foso)
+- Cuantas más integraciones, más difícil cambiar de software
+- Priorizar integraciones con herramientas críticas:
+  * Contabilidad (✅ hecho)
+  * Portales inmobiliarios
+  * OTAs (STR)
+  * Pasarelas de pago
+
+#### 5. Escuchar al Usuario
+- Implementar sistema de feedback continuo
+- Roadmap público con votación
+- Beta testing de nuevas features
+- NPS (Net Promoter Score) trimestral
+
+### Ventajas Competitivas Únicas de INMOVA
+
+#### Ya Existentes
+✅ **Multi-vertical** → Único en el mercado español
+✅ **88 módulos** → Más completo que Homming
+✅ **Room Rental** → Homming no lo tiene
+✅ **White Label** → Para gestoras grandes
+✅ **Precio competitivo** → €149 vs €300+ competencia
+
+#### A Desarrollar
+🚀 **Mobile-first** → Apps nativas de calidad
+🚀 **AI-powered** → Predicción y automatización
+🚀 **Super Channel Manager** → Sincronización perfecta
+🚀 **Workflows sin código** → Automatización para todos
+🚀 **BI avanzado** → Insights accionables
+
+---
+
+## Resumen Cuantitativo
+
+### Estado Actual
+- ✅ **88 módulos** operativos
+- ✅ **7 verticales** cubiertas
+- ✅ **150+ features** implementadas
+
+### Propuestas de Mejora
+- 🔶 **12 verticales** profundizadas
+- 🔶 **6 perfiles** optimizados
+- 🔶 **200+ mejoras** identificadas
+- 🔶 **4 fases** de implementación
+
+### Impacto Esperado
+- 📈 **+40%** en satisfacción de usuario
+- 📈 **+60%** en retención de clientes
+- 📈 **+30%** en captación de nuevos clientes
+- 📈 **-50%** en tiempo de soporte
+- 📈 **+100%** en facturación a 12 meses
+
+---
+
+## 📞 Contacto
+
+**INMOVA by Enxames Investments SL**
+- 🌐 Web: https://inmova.app
+- 📧 Email: hola@inmova.com
+- 📱 WhatsApp: +34 XXX XXX XXX
+
+---
+
+*Documento creado: Diciembre 2024*  
+*Última actualización: Diciembre 2024*  
+*Versión: 1.0*
