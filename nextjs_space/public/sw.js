@@ -230,25 +230,127 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
-// Sincronización en segundo plano
+// ================================================
+// BACKGROUND SYNC - Enhanced
+// ================================================
 self.addEventListener('sync', (event) => {
   console.log('[SW] Background sync:', event.tag);
   
   if (event.tag === 'sync-data') {
-    event.waitUntil(
-      syncData()
-    );
+    event.waitUntil(syncPendingData());
+  }
+  
+  if (event.tag === 'sync-notifications') {
+    event.waitUntil(syncNotifications());
+  }
+  
+  if (event.tag === 'sync-updates') {
+    event.waitUntil(syncUpdates());
   }
 });
 
-async function syncData() {
+/**
+ * Sync pending data when connection is restored
+ */
+async function syncPendingData() {
   try {
-    // Implementar lógica de sincronización
-    console.log('[SW] Syncing data...');
-    // Aquí puedes sincronizar datos pendientes cuando vuelva la conexión
+    console.log('[SW] Syncing pending data...');
+    
+    // Get pending data from IndexedDB or cache
+    const pendingRequests = await getPendingRequests();
+    
+    if (pendingRequests.length === 0) {
+      console.log('[SW] No pending requests to sync');
+      return;
+    }
+    
+    // Process each pending request
+    for (const request of pendingRequests) {
+      try {
+        const response = await fetch(request.url, {
+          method: request.method,
+          headers: request.headers,
+          body: request.body
+        });
+        
+        if (response.ok) {
+          await removePendingRequest(request.id);
+          console.log('[SW] Synced request:', request.url);
+        }
+      } catch (error) {
+        console.error('[SW] Failed to sync request:', request.url, error);
+      }
+    }
+    
+    // Notify clients about sync completion
+    await notifyClients('sync-complete', { 
+      synced: pendingRequests.length 
+    });
+    
   } catch (error) {
     console.error('[SW] Sync failed:', error);
   }
+}
+
+/**
+ * Sync notifications from server
+ */
+async function syncNotifications() {
+  try {
+    const response = await fetch('/api/notifications?onlyUnread=true');
+    if (response.ok) {
+      const data = await response.json();
+      await notifyClients('notifications-synced', data);
+    }
+  } catch (error) {
+    console.error('[SW] Notification sync failed:', error);
+  }
+}
+
+/**
+ * Sync app updates
+ */
+async function syncUpdates() {
+  try {
+    // Check for app updates
+    const cacheNames = await caches.keys();
+    const currentVersion = CACHE_VERSION;
+    
+    // Update static cache if needed
+    await caches.open(STATIC_CACHE).then((cache) => {
+      return cache.addAll(STATIC_ASSETS);
+    });
+    
+    await notifyClients('updates-synced', { version: currentVersion });
+  } catch (error) {
+    console.error('[SW] Update sync failed:', error);
+  }
+}
+
+/**
+ * Helper: Get pending requests (stub - implement with IndexedDB)
+ */
+async function getPendingRequests() {
+  // TODO: Implement with IndexedDB
+  return [];
+}
+
+/**
+ * Helper: Remove pending request (stub - implement with IndexedDB)
+ */
+async function removePendingRequest(id) {
+  // TODO: Implement with IndexedDB
+  console.log('[SW] Removing pending request:', id);
+}
+
+/**
+ * Helper: Notify all clients
+ */
+async function notifyClients(type, data) {
+  const clients = await self.clients.matchAll();
+  clients.forEach(client => {
+    client.postMessage({ type, data });
+  });
 }
 
 // Manejo de mensajes del cliente

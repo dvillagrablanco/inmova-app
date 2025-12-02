@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { ServiceWorkerRegister } from '@/components/pwa/ServiceWorkerRegister';
 import { InstallPrompt } from '@/components/pwa/InstallPrompt';
+import { ConnectivityIndicator } from '@/components/pwa/ConnectivityIndicator';
 import { I18nProvider } from '@/lib/i18n-context';
 import { BrandingProvider } from '@/components/BrandingProvider';
 import { DesignSystemProvider } from '@/components/DesignSystemProvider';
@@ -26,6 +27,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
                 <ServiceWorkerRegister />
                 {children}
                 <InstallPrompt />
+                <ConnectivityIndicator />
                 <Toaster />
               </ThemeProvider>
             </I18nProvider>

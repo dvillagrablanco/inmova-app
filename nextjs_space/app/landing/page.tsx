@@ -869,7 +869,7 @@ export default function LandingPage() {
                   </Button>
                 </Link>
                 <Link href="/login">
-                  <Button size="lg" variant="outline" className="gap-2 border-2 border-amber-400 text-white hover:bg-amber-400 hover:text-gray-900 text-lg px-8 py-6 transition-all">
+                  <Button size="lg" variant="outline" className="gap-2 border-2 border-amber-400 text-gray-900 hover:bg-amber-400 hover:text-white text-lg px-8 py-6 transition-all">
                     <Play className="h-5 w-5" />
                     Ver Demo Completa
                   </Button>

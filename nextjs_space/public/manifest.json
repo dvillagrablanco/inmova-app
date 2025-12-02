@@ -1,12 +1,16 @@
 {
   "name": "INMOVA - Innovación Inmobiliaria",
   "short_name": "INMOVA",
-  "description": "Sistema profesional de gestión inmobiliaria y property management",
+  "description": "Sistema profesional de gestión inmobiliaria y property management con capacidades offline",
   "start_url": "/dashboard",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "background_color": "#ffffff",
   "theme_color": "#000000",
-  "orientation": "portrait-primary",
+  "orientation": "any",
+  "lang": "es-ES",
+  "dir": "ltr",
   "icons": [
     {
       "src": "/inmova-logo-icon.jpg",
@@ -27,7 +31,8 @@
       "src": "/inmova-logo-cover.jpg",
       "sizes": "1280x720",
       "type": "image/jpeg",
-      "form_factor": "wide"
+      "form_factor": "wide",
+      "label": "Dashboard principal de INMOVA"
     }
   ],
   "shortcuts": [
@@ -36,6 +41,13 @@
       "short_name": "Dashboard",
       "description": "Ver el panel de control principal",
       "url": "/dashboard",
+      "icons": [{ "src": "/inmova-logo-icon.jpg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Edificios",
+      "short_name": "Edificios",
+      "description": "Gestionar edificios y propiedades",
+      "url": "/edificios",
       "icons": [{ "src": "/inmova-logo-icon.jpg", "sizes": "192x192" }]
     },
     {
@@ -60,5 +72,21 @@
       "icons": [{ "src": "/inmova-logo-icon.jpg", "sizes": "192x192" }]
     }
   ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "file",
+          "accept": ["image/*", "application/pdf", "text/*"]
+        }
+      ]
+    }
+  },
   "prefer_related_applications": false
 }

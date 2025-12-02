@@ -46,6 +46,7 @@
     "vitest.setup.tsx",
     "__tests__/**/*",
     "**/*.test.ts",
+    "scripts/seed-demo-data.ts",
     "**/*.test.tsx",
     "**/*.spec.ts",
     "**/*.spec.tsx",

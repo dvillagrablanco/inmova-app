@@ -1069,7 +1069,7 @@ export default function ClientesAdminPage() {
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
-                                      onClick={() => handleToggleActive(company.id, company.activo)}
+                                      onClick={() => handleQuickToggleActive(company.id, company.activo, company.nombre)}
                                       className={company.activo ? 'text-yellow-600' : 'text-green-600'}
                                     >
                                       {company.activo ? (
@@ -1305,8 +1305,7 @@ export default function ClientesAdminPage() {
                       </div>
                     </CardContent>
                   </Card>
-                ))
-              )}
+                ))}
             </div>
             )}
           </div>

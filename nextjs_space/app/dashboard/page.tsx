@@ -400,30 +400,29 @@ export default function DashboardPage() {
           
           {/* Contextual Help */}
           <ContextualHelp
+            module="dashboard"
             title="Dashboard"
-            resources={[
+            description="Panel principal con métricas y análisis de tu negocio inmobiliario"
+            sections={[
               {
-                title: 'Introducción al Dashboard',
-                description: 'Aprende a interpretar los KPIs principales',
-                type: 'tutorial',
-                link: '/landing/modulos'
+                title: 'Recursos de ayuda',
+                content: 'Aprende a interpretar los KPIs principales, personalizar vistas y generar reportes financieros completos.',
+                tips: [
+                  'Consulta la guía de introducción en la sección de módulos',
+                  'Personaliza tu dashboard desde configuración',
+                  'Accede a tutoriales de análisis financiero'
+                ]
               },
               {
-                title: 'Personalizar vistas',
-                description: 'Configura tu dashboard a medida',
-                type: 'doc'
-              },
-              {
-                title: 'Análisis financiero',
-                description: 'Guía completa de reportes financieros',
-                type: 'video'
+                title: 'Consejos rápidos',
+                content: 'Maximiza tu productividad con estos consejos útiles para el uso del dashboard.',
+                tips: [
+                  'Haz clic en cualquier KPI para ver más detalles y análisis histórico',
+                  'Usa los filtros de fecha para comparar períodos diferentes',
+                  'Los datos se actualizan automáticamente cada 5 minutos',
+                  'Puedes exportar cualquier gráfico haciendo clic derecho sobre él'
+                ]
               }
-            ]}
-            quickTips={[
-              'Haz clic en cualquier KPI para ver más detalles y análisis histórico',
-              'Usa los filtros de fecha para comparar períodos diferentes',
-              'Los datos se actualizan automáticamente cada 5 minutos',
-              'Puedes exportar cualquier gráfico haciendo clic derecho sobre él'
             ]}
           />
         </main>
