@@ -952,7 +952,6 @@ export default function ClientesAdminPage() {
                 </CardContent>
               </Card>
             ) : viewMode === 'table' ? (
-              /* Vista de Tabla */
               <Card>
                 <CardContent className="p-0">
                   <div className="overflow-x-auto">
@@ -1105,7 +1104,6 @@ export default function ClientesAdminPage() {
                 </CardContent>
               </Card>
             ) : (
-              /* Vista de Tarjetas */
               <div className="grid gap-4">
                 {filteredCompanies.map(company => (
                   <Card 
@@ -1310,8 +1308,10 @@ export default function ClientesAdminPage() {
                 ))
               )}
             </div>
+            )}
           </div>
         </main>
+      </div>
       </div>
 
       {/* Change Plan Dialog */}
@@ -1323,7 +1323,6 @@ export default function ClientesAdminPage() {
           onSuccess={loadData}
         />
       )}
-    </div>
     </ErrorBoundary>
   );
 }
