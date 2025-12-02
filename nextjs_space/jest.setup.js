@@ -1,68 +1,77 @@
-// Learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
 
-// Polyfill for setImmediate (required by Winston in Jest)
-global.setImmediate = global.setImmediate || ((fn, ...args) => global.setTimeout(fn, 0, ...args));
-
-// Mock next/navigation
+// Mock Next.js router
 jest.mock('next/navigation', () => ({
-  useRouter: jest.fn(() => ({
-    push: jest.fn(),
-    replace: jest.fn(),
-    refresh: jest.fn(),
-    back: jest.fn(),
-    forward: jest.fn(),
-    prefetch: jest.fn(),
-  })),
-  usePathname: jest.fn(),
-  useSearchParams: jest.fn(() => ({
-    get: jest.fn(),
-  })),
+  useRouter() {
+    return {
+      push: jest.fn(),
+      replace: jest.fn(),
+      prefetch: jest.fn(),
+      back: jest.fn(),
+      pathname: '/',
+      query: {},
+      asPath: '/',
+    };
+  },
+  useSearchParams() {
+    return {
+      get: jest.fn(),
+    };
+  },
+  usePathname() {
+    return '/';
+  },
 }));
 
 // Mock next-auth
 jest.mock('next-auth/react', () => ({
   useSession: jest.fn(() => ({
-    data: {
-      user: {
-        id: 'test-user-id',
-        email: 'test@example.com',
-        name: 'Test User',
-        role: 'administrador',
-        companyId: 'test-company-id',
-      },
-    },
-    status: 'authenticated',
+    data: null,
+    status: 'unauthenticated',
   })),
   signIn: jest.fn(),
   signOut: jest.fn(),
+  SessionProvider: ({ children }) => children,
 }));
 
-// Mock Prisma
-jest.mock('@/lib/db', () => ({
-  prisma: {
-    user: {
-      findUnique: jest.fn(),
-      findMany: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-    },
-    company: {
-      findUnique: jest.fn(),
-      findMany: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-    },
-    $queryRaw: jest.fn(),
-    // Add other models as needed
+// Mock Image component
+jest.mock('next/image', () => ({
+  __esModule: true,
+  default: (props) => {
+    // eslint-disable-next-line jsx-a11y/alt-text
+    return <img {...props} />;
   },
 }));
 
-// Suppress console errors in tests
-global.console = {
-  ...console,
-  error: jest.fn(),
-  warn: jest.fn(),
+// Setup global test utilities
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+}));
+
+// Mock IntersectionObserver
+global.IntersectionObserver = class IntersectionObserver {
+  constructor() {}
+  disconnect() {}
+  observe() {}
+  takeRecords() {
+    return [];
+  }
+  unobserve() {}
 };
+
+// Mock window.matchMedia
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: jest.fn().mockImplementation((query) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })),
+});

@@ -1,6 +1,9 @@
-import '@testing-library/jest-dom/vitest';
+import { expect, afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
-import { afterEach, vi } from 'vitest';
+import * as matchers from '@testing-library/jest-dom/matchers';
+
+// Extend Vitest's expect with jest-dom matchers
+expect.extend(matchers);
 
 // Cleanup after each test
 afterEach(() => {
@@ -18,25 +21,48 @@ vi.mock('next/navigation', () => ({
     query: {},
     asPath: '/',
   }),
+  useSearchParams: () => ({
+    get: vi.fn(),
+  }),
   usePathname: () => '/',
-  useSearchParams: () => new URLSearchParams(),
-  useParams: () => ({}),
+}));
+
+// Mock next-auth
+vi.mock('next-auth/react', () => ({
+  useSession: () => ({
+    data: null,
+    status: 'unauthenticated',
+  }),
+  signIn: vi.fn(),
+  signOut: vi.fn(),
+  SessionProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
 // Mock Next.js Image
 vi.mock('next/image', () => ({
   default: (props: any) => {
-    // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
+    // eslint-disable-next-line jsx-a11y/alt-text
     return <img {...props} />;
   },
 }));
 
-// Mock environment variables
-process.env.NEXTAUTH_SECRET = 'test-secret';
-process.env.NEXTAUTH_URL = 'http://localhost:3000';
-process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test';
+// Setup global mocks
+global.ResizeObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+}));
 
-// Mock window.matchMedia
+global.IntersectionObserver = class IntersectionObserver {
+  constructor() {}
+  disconnect() {}
+  observe() {}
+  takeRecords() {
+    return [];
+  }
+  unobserve() {}
+} as any;
+
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: vi.fn().mockImplementation((query) => ({
@@ -50,22 +76,3 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: vi.fn(),
   })),
 });
-
-// Mock IntersectionObserver
-global.IntersectionObserver = class IntersectionObserver {
-  constructor() {}
-  disconnect() {}
-  observe() {}
-  takeRecords() {
-    return [];
-  }
-  unobserve() {}
-} as any;
-
-// Mock ResizeObserver
-global.ResizeObserver = class ResizeObserver {
-  constructor() {}
-  disconnect() {}
-  observe() {}
-  unobserve() {}
-} as any;

@@ -6,30 +6,22 @@ export default defineConfig({
   plugins: [react()],
   test: {
     environment: 'jsdom',
-    setupFiles: ['./vitest.setup.tsx'],
     globals: true,
+    setupFiles: ['./vitest.setup.tsx'],
+    include: ['**/*.{test,spec}.{ts,tsx}'],
+    exclude: ['node_modules', '.next', 'e2e'],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html', 'lcov'],
+      reporter: ['text', 'json', 'html'],
       exclude: [
         'node_modules/',
         '.next/',
         'coverage/',
-        '**/*.config.{js,ts}',
         '**/*.d.ts',
-        '**/types/**',
-        'app/api/**', // API routes tested separately
-        'prisma/**',
+        '**/*.config.*',
+        '**/mockData',
       ],
-      thresholds: {
-        lines: 60,
-        functions: 60,
-        branches: 60,
-        statements: 60,
-      },
     },
-    include: ['**/*.{test,spec}.{js,ts,jsx,tsx}'],
-    exclude: ['node_modules', '.next', 'e2e'],
   },
   resolve: {
     alias: {

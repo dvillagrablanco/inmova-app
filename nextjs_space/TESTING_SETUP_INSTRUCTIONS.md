@@ -1,199 +1,376 @@
-# Testing Setup Instructions
+# INMOVA - Configuración de Testing
 
-## ✅ Completed Setup
+## 📚 Documentación Completa del Sistema de Testing
 
-The testing infrastructure has been successfully configured with:
+Este documento describe la configuración completa del sistema de testing implementado en INMOVA, incluyendo tests unitarios, de integración y end-to-end (E2E).
 
-- **Vitest** - Fast unit test runner
-- **@testing-library/react** - React component testing utilities
-- **@testing-library/jest-dom** - DOM matchers
-- **jsdom** - DOM environment for tests
-- **happy-dom** - Alternative lightweight DOM
+---
 
-## 📁 Files Created
+## 🛠️ Tecnologías Utilizadas
 
-### Configuration
-- `vitest.config.ts` - Vitest configuration
-- `vitest.setup.ts` - Test setup and mocks
+### 1. **Jest** - Tests Unitarios
+- **Propósito**: Testing de funciones, utilidades y componentes aislados
+- **Configuración**: `jest.config.js`
+- **Setup**: `jest.setup.js`
+- **Entorno**: jsdom para simular el navegador
 
-### Test Files
-- `__tests__/components/button.test.tsx`
-- `__tests__/components/kpi-card.test.tsx`
-- `__tests__/lib/sanitize.test.ts`
-- `__tests__/lib/utils.test.ts`
+### 2. **Vitest** - Tests de Integración
+- **Propósito**: Testing rápido y moderno con HMR
+- **Configuración**: `vitest.config.ts`
+- **Setup**: `vitest.setup.tsx`
+- **UI**: Interfaz web interactiva para debugging
 
-## 🔧 Manual Setup Required
+### 3. **Playwright** - Tests E2E
+- **Propósito**: Testing de flujos completos de usuario
+- **Configuración**: `playwright.config.ts`
+- **Tests**: Directorio `e2e/`
+- **Navegadores**: Chromium (configurable para Firefox y Safari)
 
-### Add Test Scripts to package.json
+### 4. **Testing Library**
+- `@testing-library/react`: Utilidades para testing de componentes React
+- `@testing-library/jest-dom`: Matchers personalizados para aserciones DOM
+- `@testing-library/user-event`: Simulación de interacciones de usuario
 
-Since `package.json` cannot be modified programmatically, please manually add these scripts:
+---
 
-```json
-"scripts": {
-  "dev": "next dev",
-  "build": "next build",
-  "start": "next start",
-  "lint": "next lint",
-  "test": "vitest",
-  "test:ui": "vitest --ui",
-  "test:coverage": "vitest --coverage",
-  "test:ci": "vitest run --coverage"
+## 📁 Estructura de Archivos
+
+```
+nextjs_space/
+├── __tests__/                # Tests unitarios (Jest)
+│   ├── components/
+│   │   ├── button.test.tsx
+│   │   └── kpi-card.test.tsx
+│   └── lib/
+│       ├── utils.test.ts
+│       └── sanitize.test.ts
+├── e2e/                      # Tests E2E (Playwright)
+│   ├── auth.spec.ts
+│   ├── buildings.spec.ts
+│   ├── contracts.spec.ts
+│   ├── dashboard.spec.ts
+│   ├── documents.spec.ts
+│   ├── maintenance.spec.ts
+│   ├── navigation.spec.ts
+│   ├── payments.spec.ts
+│   └── tenants.spec.ts
+├── jest.config.js            # Configuración Jest
+├── jest.setup.js             # Setup Jest (mocks globales)
+├── vitest.config.ts          # Configuración Vitest
+├── vitest.setup.tsx          # Setup Vitest
+└── playwright.config.ts      # Configuración Playwright
+```
+
+---
+
+## 🚀 Scripts de Testing
+
+Ejecutar desde el directorio `nextjs_space/`:
+
+### Jest (Tests Unitarios)
+```bash
+# Modo watch (desarrollo)
+yarn test
+
+# Ejecución única con coverage
+yarn test:ci
+```
+
+### Vitest (Tests de Integración)
+```bash
+# Modo watch
+yarn test:unit
+
+# Con UI interactiva
+yarn test:unit:ui
+```
+
+### Playwright (Tests E2E)
+```bash
+# Ejecutar todos los tests E2E
+yarn test:e2e
+
+# Con UI interactiva
+yarn test:e2e:ui
+
+# Modo debug
+yarn test:e2e:debug
+```
+
+### Todos los Tests
+```bash
+yarn test:all
+```
+
+---
+
+## 📝 Convenciones de Naming
+
+### Tests Unitarios
+- **Ubicación**: `__tests__/[categoria]/[nombre].test.ts(x)`
+- **Naming**: `describe('NombreComponente', () => { ... })`
+
+### Tests E2E
+- **Ubicación**: `e2e/[feature].spec.ts`
+- **Naming**: `test('should do something', async ({ page }) => { ... })`
+
+---
+
+## 🧰 Configuraciones Importantes
+
+### Jest
+```javascript
+// jest.config.js
+{
+  testEnvironment: 'jest-environment-jsdom',
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/$1'
+  },
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  collectCoverageFrom: [
+    'lib/**/*.{js,jsx,ts,tsx}',
+    'app/**/*.{js,jsx,ts,tsx}',
+    '!**/*.d.ts',
+  ]
 }
 ```
 
-## 📝 Usage
+### Playwright
+```typescript
+// playwright.config.ts
+{
+  testDir: './e2e',
+  use: {
+    baseURL: 'http://localhost:3000',
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+  },
+  webServer: {
+    command: 'yarn dev',
+    url: 'http://localhost:3000',
+  }
+}
+```
 
-### Run Tests
+---
+
+## 🎯 Coverage Goals
+
+### Objetivos de Cobertura
+- **Funciones críticas**: 90%+
+- **Componentes UI**: 80%+
+- **Utilidades**: 85%+
+- **APIs**: 75%+
+
+### Ver Reportes de Coverage
 ```bash
-# Run tests in watch mode
-yarn test
-
-# Run tests once
-yarn test run
-
-# Run tests with UI
-yarn test:ui
-
-# Generate coverage report
-yarn test:coverage
-
-# Run specific test file
-yarn test button.test.tsx
-
-# Run tests matching pattern
-yarn test -t "should render"
+yarn test:ci
+open coverage/lcov-report/index.html
 ```
 
-### Writing Tests
+---
 
-Example component test:
+## 🔧 Mocks Globales
 
-```typescript
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { MyComponent } from '@/components/MyComponent';
-
-describe('MyComponent', () => {
-  it('should render correctly', () => {
-    render(<MyComponent text="Hello" />);
-    expect(screen.getByText('Hello')).toBeInTheDocument();
-  });
-
-  it('should handle click', () => {
-    const handleClick = vi.fn();
-    render(<MyComponent onClick={handleClick} />);
-    
-    fireEvent.click(screen.getByRole('button'));
-    expect(handleClick).toHaveBeenCalledTimes(1);
-  });
-});
+### Next.js Router
+```javascript
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    // ...
+  }),
+}));
 ```
 
-Example service test:
-
-```typescript
-import { describe, it, expect } from 'vitest';
-import { myFunction } from '@/lib/myService';
-
-describe('myService', () => {
-  it('should process data correctly', () => {
-    const result = myFunction('input');
-    expect(result).toBe('expected output');
-  });
-});
+### NextAuth
+```javascript
+jest.mock('next-auth/react', () => ({
+  useSession: () => ({
+    data: null,
+    status: 'unauthenticated',
+  }),
+}));
 ```
 
-## 📈 Coverage Thresholds
+### Next Image
+```javascript
+jest.mock('next/image', () => ({
+  default: (props) => <img {...props} />
+}));
+```
 
-The project is configured with the following coverage thresholds:
+---
 
-- Lines: 60%
-- Functions: 60%
-- Branches: 60%
-- Statements: 60%
+## ✅ Best Practices
 
-These thresholds will be enforced when running `yarn test:coverage`.
-
-## 🎯 Best Practices
-
-### 1. Test Organization
-- Place tests next to the code they test OR in `__tests__` directory
-- Use descriptive test names: `it('should do X when Y happens')`
-- Group related tests with `describe` blocks
-
-### 2. What to Test
-- **Components**: Rendering, user interactions, conditional rendering
-- **Services**: Business logic, data transformations, edge cases
-- **Utils**: Pure functions, formatters, validators
-
-### 3. What NOT to Test
-- Third-party library internals
-- Next.js framework internals
-- Simple getters/setters
-- Trivial code
-
-### 4. Mocking
-- Mock external dependencies (APIs, databases)
-- Mock heavy computations
-- Mock Date/Math.random for deterministic tests
-- Use `vi.fn()` for function mocks
-- Use `vi.mock()` for module mocks
-
-### 5. Async Testing
+### 1. **Escribir Tests Legibles**
 ```typescript
-it('should fetch data', async () => {
-  const data = await fetchData();
-  expect(data).toBeDefined();
-});
-
-// Or with waitFor
-import { waitFor } from '@testing-library/react';
-
-it('should show loading then data', async () => {
-  render(<MyComponent />);
+test('should display user name when logged in', () => {
+  // Arrange
+  const user = { name: 'John Doe' };
   
-  expect(screen.getByText('Loading...')).toBeInTheDocument();
+  // Act
+  render(<UserProfile user={user} />);
   
-  await waitFor(() => {
-    expect(screen.getByText('Data loaded')).toBeInTheDocument();
-  });
+  // Assert
+  expect(screen.getByText('John Doe')).toBeInTheDocument();
 });
 ```
 
-## 🔍 Common Issues
+### 2. **Usar Data-Testid para Selectores Estables**
+```typescript
+// Componente
+<button data-testid="submit-button">Submit</button>
 
-### Issue: "Cannot find module '@/...'"
-**Solution**: Check that path aliases in `vitest.config.ts` match `tsconfig.json`
+// Test
+const button = screen.getByTestId('submit-button');
+```
 
-### Issue: "window is not defined"
-**Solution**: Ensure `environment: 'jsdom'` is set in `vitest.config.ts`
+### 3. **Simular Interacciones Reales**
+```typescript
+import { userEvent } from '@testing-library/user-event';
 
-### Issue: "useRouter() is not mocked"
-**Solution**: The router is already mocked in `vitest.setup.ts`. If you need custom behavior, override it in your test file.
+test('should submit form on button click', async () => {
+  const user = userEvent.setup();
+  render(<LoginForm />);
+  
+  await user.type(screen.getByLabelText('Email'), 'test@example.com');
+  await user.click(screen.getByRole('button', { name: 'Login' }));
+  
+  expect(mockSubmit).toHaveBeenCalled();
+});
+```
 
-### Issue: "Tests fail but code works"
-**Solution**: Check that your test environment matches your runtime environment. You may need to add specific mocks.
+### 4. **Tests E2E Resilientes**
+```typescript
+// Usar localizadores semánticos
+await page.getByRole('button', { name: 'Login' }).click();
 
-## 📚 Resources
+// Esperar a estados específicos
+await page.waitForURL('/dashboard');
 
+// Capturar errores de red
+page.on('pageerror', (error) => {
+  console.error('Page error:', error);
+});
+```
+
+---
+
+## 🐛 Debugging
+
+### Jest
+```bash
+# Ejecutar un test específico
+yarn test path/to/test.test.ts
+
+# Modo debug con Node inspector
+node --inspect-brk node_modules/.bin/jest --runInBand
+```
+
+### Playwright
+```bash
+# UI interactiva
+yarn test:e2e:ui
+
+# Modo debug con Playwright Inspector
+yarn test:e2e:debug
+
+# Ver trace de un test fallido
+npx playwright show-trace trace.zip
+```
+
+---
+
+## 📦 Dependencias Instaladas
+
+```json
+{
+  "devDependencies": {
+    "jest": "latest",
+    "jest-environment-jsdom": "latest",
+    "@testing-library/react": "latest",
+    "@testing-library/jest-dom": "latest",
+    "@testing-library/user-event": "latest",
+    "@playwright/test": "latest",
+    "vitest": "latest",
+    "@vitejs/plugin-react": "latest",
+    "@vitest/ui": "latest",
+    "jsdom": "latest"
+  }
+}
+```
+
+---
+
+## 📊 CI/CD Integration
+
+### GitHub Actions Example
+```yaml
+name: Test
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: yarn install
+      
+      - name: Run unit tests
+        run: yarn test:ci
+      
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+      
+      - name: Run E2E tests
+        run: yarn test:e2e
+      
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+```
+
+---
+
+## 📚 Recursos Adicionales
+
+- [Jest Documentation](https://jestjs.io/)
 - [Vitest Documentation](https://vitest.dev/)
-- [Testing Library Docs](https://testing-library.com/docs/react-testing-library/intro/)
-- [Jest DOM Matchers](https://github.com/testing-library/jest-dom)
+- [Playwright Documentation](https://playwright.dev/)
+- [Testing Library](https://testing-library.com/)
+- [Next.js Testing Guide](https://nextjs.org/docs/testing)
 
-## ✅ Next Steps
+---
 
-1. Manually add test scripts to `package.json`
-2. Run `yarn test` to verify setup
-3. Write tests for your critical components and services
-4. Gradually increase test coverage
-5. Add tests to CI/CD pipeline
-6. Consider adding E2E tests with Playwright (already configured)
+## ❓ Troubleshooting
 
-## 🎉 Examples Included
+### Error: "Cannot find module '@/...'"  
+➡️ Verificar `moduleNameMapper` en `jest.config.js`
 
-Four example test files have been created to demonstrate:
-- Component testing (Button, KPICard)
-- Service testing (sanitize functions)
-- Utility testing (className merger)
+### Error: "ReferenceError: window is not defined"  
+➡️ Asegurar que `testEnvironment: 'jsdom'` esté configurado
 
-You can use these as templates for writing your own tests.
+### Tests E2E lentos  
+➡️ Considerar ejecutar en paralelo: `workers: 4` en `playwright.config.ts`
+
+### Tests flaky (intermitentes)  
+➡️ Añadir `retries: 2` en la configuración de Playwright
+
+---
+
+## 🔄 Actualizaciones
+
+**Última actualización**: 2 de diciembre de 2025  
+**Versión**: 1.0  
+**Mantenido por**: Equipo de Desarrollo INMOVA
+
+---
+
+**📧 Contacto**: Para dudas sobre testing, contactar al equipo de QA en `qa@inmova.com`
