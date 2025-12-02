@@ -1,1236 +1,1471 @@
-# Análisis Completo: Mejoras por Vertical y Perfil de Usuario
-## INMOVA - Software de Gestión Inmobiliaria Multi-Vertical
+# Análisis Exhaustivo: Perfiles de Usuario y Mejoras por Vertical - INMOVA
+
+**Fecha**: Diciembre 2024  
+**Versión**: 1.0  
+**Autor**: Análisis Experto en PropTech Multi-Vertical
 
 ---
 
-## 📋 Índice
+## 📋 ÍNDICE
 
 1. [Resumen Ejecutivo](#resumen-ejecutivo)
-2. [Análisis por Vertical de Negocio](#análisis-por-vertical-de-negocio)
+2. [Análisis por Vertical](#análisis-por-vertical)
 3. [Análisis por Perfil de Usuario](#análisis-por-perfil-de-usuario)
-4. [Mejoras Transversales](#mejoras-transversales)
-5. [Roadmap de Implementación](#roadmap-de-implementación)
-6. [Conclusiones y Recomendaciones](#conclusiones-y-recomendaciones)
+4. [Mejoras Críticas Requeridas](#mejoras-críticas-requeridas)
+5. [Estrategia de Precios Multi-Vertical](#estrategia-de-precios-multi-vertical)
+6. [Roadmap de Implementación](#roadmap-de-implementación)
 
 ---
 
-## 1. Resumen Ejecutivo
+## 1. RESUMEN EJECUTIVO
 
 ### Estado Actual de INMOVA
+✅ **Fortalezas Actuales**:
+- 88 módulos profesionales implementados
+- 7 verticales de negocio soportadas
+- Integraciones contables avanzadas
+- Sistema de migración robusto
+- Multi-empresa y multi-tenant
+- Portal de inquilinos/propietarios/proveedores
 
-**Fortalezas:**
-- ✅ 88 módulos profesionales
-- ✅ 7 verticales cubiertas
-- ✅ Sistema multi-empresa y multi-usuario
-- ✅ Integraciones contables múltiples
-- ✅ Tecnologías avanzadas (AI, OCR, Blockchain, IoT)
-- ✅ Modelo de alquiler por habitaciones implementado
-
-**Oportunidades de Mejora Identificadas:**
-- 🔶 Profundización en verticales específicas
-- 🔶 Personalización por perfil de usuario
-- 🔶 Automatizaciones inteligentes
-- 🔶 Integraciones con ecosistema PropTech
-- 🔶 Herramientas de análisis predictivo
-- 🔶 Experiencia móvil nativa
+⚠️ **Gaps Críticos Identificados**:
+1. **Falta de especialización profunda** por vertical
+2. **Ausencia de herramientas predictivas** avanzadas
+3. **Limitaciones en automatización** de procesos complejos
+4. **Carencia de módulos específicos** por perfil de usuario
+5. **Insuficiente diferenciación** de precios por vertical
 
 ---
 
-## 2. Análisis por Vertical de Negocio
+## 2. ANÁLISIS POR VERTICAL
 
-### 2.1 RESIDENCIAL TRADICIONAL (Alquiler de Larga Duración)
+### 🏢 VERTICAL 1: ALQUILER RESIDENCIAL TRADICIONAL
 
-#### Necesidades Actuales del Mercado
-- Gestión de carteras de 100+ propiedades
-- Cumplimiento normativo (LAU, IBI, plusvalías)
-- Relación a largo plazo con inquilinos (años)
-- Gestión de comunidades de propietarios
-- Control exhaustivo de morosidad
+#### Perfiles de Usuario
+1. **Gestor de Portafolio Residencial** (10-500 unidades)
+2. **Propietario Pequeño** (1-10 unidades)
+3. **Administrador de Comunidad**
 
-#### Funcionalidades Existentes
-✅ Edificios, unidades, inquilinos, contratos
-✅ Pagos y morosidad básica
-✅ Mantenimiento preventivo y correctivo
-✅ Portal del inquilino
-✅ Portal del propietario
+#### Necesidades No Cubiertas
 
-#### **MEJORAS NECESARIAS**
-
-##### A. Gestión Avanzada de Morosidad
-```
-- Sistema de scoring predictivo de impago
-- Workflow automático de reclamación (notificaciones escalonadas)
-- Integración con agencias de recobro
-- Generación automática de burofax y requerimientos notariales
-- Simulador de acuerdos de pago
-- Histórico crediticio del inquilino
-```
-
-##### B. Gestión de Comunidades de Propietarios
-```
-- Módulo de Junta de Propietarios
-  * Convocatorias de juntas (ordinarias/extraordinarias)
-  * Orden del día y documentación
-  * Votaciones electrónicas con certificado
-  * Actas automáticas con firmas digitales
-  * Distribución de gastos por coeficientes
-  * Gestión de derramas
-  * Libro de actas digital
-```
-
-##### C. Cumplimiento Legal y Fiscal
-```
-- Asistente de declaración de renta (Modelo 100)
-- Cálculo automático de retenciones IRPF
-- Generación de certificados de retenciones
-- Alertas de vencimientos fiscales
-- Registro de mejoras y amortizaciones
-- Cálculo de plusvalía municipal
-- Generación de contratos adaptados a LAU actualizada
+##### A. Gestión de Morosidad Avanzada
+**Estado**: ⚠️ Parcialmente implementado  
+**Mejoras Requeridas**:
+```typescript
+interface MorosidadAvanzada {
+  // Sistema de alertas predictivas
+  prediccionRiesgoMorosidad: {
+    algoritmoML: 'scoring_historico' | 'patrones_pago' | 'factores_externos';
+    alertasTempranas: boolean; // 15 días antes del impago
+    recomendacionesAccion: string[];
+  };
+  
+  // Flujos automáticos de recobro
+  flujosRecobro: {
+    etapa1_recordatorio: { dias: -7, canal: 'email+sms+app' };
+    etapa2_aviso: { dias: +3, canal: 'burofax+email+llamada' };
+    etapa3_requerimiento: { dias: +10, canal: 'burofax_certificado' };
+    etapa4_judicial: { dias: +30, integracion: 'abogados_colaboradores' };
+  };
+  
+  // Scoring de inquilinos
+  scoringDinamico: {
+    historialPagos: number; // 0-100
+    antiguedad: number;
+    incidencias: number;
+    comunicacionProactiva: number;
+    totalScore: number;
+  };
+  
+  // Planes de pago personalizados
+  planesPago: {
+    fraccionamiento: boolean;
+    quitas: { max: number; condiciones: string[] };
+    garantiasAdicionales: string[];
+  };
+}
 ```
 
-##### D. Análisis de Rentabilidad por Propiedad
-```
-- Dashboard financiero por propiedad
-  * ROI anualizado y acumulado
-  * Cash flow mensual y proyectado
-  * TIR (Tasa Interna de Retorno)
-  * Payback period
-  * Comparativa con mercado
-  * Recomendaciones de optimización
-```
-
-##### E. Gestión de Seguros
-```
-- Registro de pólizas (hogar, impago, RC)
-- Alertas de renovación
-- Gestión de siniestros
-- Comparador de seguros
-- Integración con aseguradoras
-```
+**Impacto**: 🔴 CRÍTICO - Afecta al 40% de gestores que priorizan el cobro
 
 ---
 
-### 2.2 SHORT-TERM RENTALS (Airbnb, Booking, etc.)
-
-#### Necesidades Actuales del Mercado
-- Sincronización en tiempo real con múltiples OTAs
-- Gestión de precios dinámicos
-- Check-in/out digital sin presencia física
-- Limpieza y cambio de ropa coordinado
-- Reseñas y reputación online
-- Cumplimiento de regulaciones locales (licencias turísticas)
-
-#### Funcionalidades Existentes
-✅ STR Listings (anuncios)
-✅ STR Bookings (reservas)
-✅ STR Channel Manager (sincronización)
-
-#### **MEJORAS NECESARIAS**
-
-##### A. Channel Manager Avanzado
-```
-- Conexión bidireccional completa con:
-  * Airbnb (API oficial)
-  * Booking.com
-  * Vrbo/HomeAway
-  * Expedia
-  * TripAdvisor
-  * Google Vacation Rentals
-- Sincronización automática de:
-  * Disponibilidad en tiempo real
-  * Precios dinámicos
-  * Fotos y descripciones
-  * Reseñas (importación)
-  * Mensajes de huéspedes
-```
-
-##### B. Revenue Management (Gestión de Ingresos)
-```
-- Pricing dinámico basado en:
-  * Estacionalidad histórica
-  * Eventos locales (conciertos, ferias, festivales)
-  * Competencia (web scraping de precios)
-  * Ocupación prevista
-  * Días especiales (fines de semana, festivos)
-- Simulador de precios (¿qué pasaría si...?)
-- Estrategias predefinidas:
-  * Maximizar ocupación
-  * Maximizar ingresos
-  * Equilibrada
-- Reglas personalizadas:
-  * Descuentos por estancias largas
-  * Sobreprecio en temporada alta
-  * Last-minute pricing
+##### B. Inspecciones Periódicas Programadas
+**Estado**: ❌ No implementado  
+**Mejoras Requeridas**:
+```typescript
+interface InspeccionesPeriodicas {
+  // Calendario automático de inspecciones
+  calendarioInspecciones: {
+    frecuencia: 'trimestral' | 'semestral' | 'anual';
+    tipoInspeccion: 'estado' | 'seguridad' | 'cumplimiento' | 'inventario';
+    notificacionInquilino: { diasAnticipacion: number; obligatorio: boolean };
+    asignacionTecnico: { automatica: boolean; criterios: string[] };
+  };
+  
+  // Checklist por tipo de propiedad
+  checklistsEstandar: {
+    apartamentoEstudio: ChecklistItem[];
+    casaUnifamiliar: ChecklistItem[];
+    duplex: ChecklistItem[];
+  };
+  
+  // Evidencia fotográfica
+  evidenciaFotografica: {
+    comparativaIngresoSalida: boolean;
+    geolocalizacion: boolean;
+    timestampCertificado: boolean;
+    firmaDigitalInquilino: boolean;
+  };
+  
+  // Generación automática de informes
+  informeAutomatico: {
+    detectaIncidencias: boolean;
+    sugiereMejoras: boolean;
+    calculaCostoReparaciones: boolean;
+    envioAutomaticoAPropietario: boolean;
+  };
+}
 ```
 
-##### C. Automatización de Operaciones
-```
-- Check-in Digital:
-  * Envío automático de instrucciones
-  * Códigos de acceso inteligentes (cambio automático)
-  * Verificación de identidad (selfie + DNI/Pasaporte)
-  * Firma digital de contrato
-  * Cobro de fianzas online
-- Check-out Digital:
-  * Recordatorio de salida
-  * Inspección fotográfica por huésped
-  * Devolución automática de fianza
-  * Solicitud de reseña
-```
-
-##### D. Gestión de Limpiezas y Mantenimiento
-```
-- Calendario de limpiezas automático
-  * Asignación a equipo de limpieza
-  * Notificaciones push
-  * Checklist digital con fotos
-  * Tiempo de bloqueo entre reservas
-- Inventario de amenities
-  * Control de stock (jabón, café, papel)
-  * Alertas de reposición
-  * Integración con proveedores
-```
-
-##### E. Gestión de Reseñas y Reputación
-```
-- Consolidación de reseñas de todas las OTAs
-- Alertas de reseñas negativas
-- Plantillas de respuesta automática
-- Análisis de sentimiento (AI)
-- Comparativa con competidores locales
-- Dashboard de reputación (Rating Score)
-```
-
-##### F. Cumplimiento Regulatorio STR
-```
-- Registro de licencias turísticas por ciudad
-- Alertas de renovación
-- Generación de partes de viajeros
-- Integración con policía/turismo (automática)
-- Cálculo de tasas turísticas
-- Límites de días de alquiler (Madrid, Barcelona, etc.)
-```
-
-##### G. Multi-Propietario (Co-hosting)
-```
-- Portal del propietario con reportes específicos
-- Distribución automática de ingresos (% comisión)
-- Informes mensuales personalizados
-- Acceso limitado a datos sensibles
-```
+**Impacto**: 🟠 ALTO - Mejora la retención de propiedades (70% de propietarios lo valoran)
 
 ---
 
-### 2.3 ROOM RENTAL (Alquiler por Habitaciones / Coliving)
-
-#### Funcionalidades Existentes
-✅ Gestión de habitaciones individuales
-✅ Contratos independientes por habitación
-✅ Prorrateo de gastos (luz, agua, gas, internet)
-✅ Calendario de limpieza rotativo
-✅ Reglas de convivencia
-
-#### **MEJORAS NECESARIAS**
-
-##### A. Matching de Compañeros (Roommate Matching)
-```
-- Cuestionario de perfil de inquilino:
-  * Hábitos (fumador, mascotas, horarios)
-  * Intereses (música, deportes, estudios)
-  * Personalidad (introvertido/extrovertido)
-  * Preferencias de convivencia
-- Algoritmo de compatibilidad
-- Sugerencias de habitaciones disponibles
-- Sistema de "pre-meet" virtual (videollamada)
-```
-
-##### B. Plataforma Social Interna
-```
-- Muro de la vivienda (anuncios, eventos)
-- Chat grupal por vivienda
-- Calendario compartido (visitas, fiestas)
-- Sistema de votaciones (decisiones comunes)
-- Marketplace interno (compra/venta entre residentes)
-```
-
-##### C. Gestión Avanzada de Conflictos
-```
-- Sistema de incidencias entre compañeros
-- Mediación asistida (plantillas, pasos)
-- Historial de comportamiento
-- Sistema de "strikes" (avisos)
-- Procedimiento de desalojo específico
+##### C. Portal de Propietarios Mejorado
+**Estado**: ⚠️ Básico - Requiere mejoras sustanciales  
+**Mejoras Requeridas**:
+```typescript
+interface PortalPropietariosAvanzado {
+  // Dashboard financiero en tiempo real
+  dashboardFinanciero: {
+    vistaROI: { mensual: number; anual: number; historico: number[] };
+    comparativaMercado: { precioPromedioZona: number; ocupacionPromedio: number };
+    proyeccionIngresos: { proximosMeses: number[]; factoresRiesgo: string[] };
+    desgloseFiscal: { ingresos: number; gastos: number; baseImponible: number };
+  };
+  
+  // Notificaciones push personalizadas
+  notificacionesPush: {
+    pagoRecibido: boolean;
+    contratoProximoVencer: boolean;
+    mantenimientoRealizado: boolean;
+    documentoDisponible: boolean;
+    mensajeInquilino: boolean;
+  };
+  
+  // Aprobaciones digitales
+  aprobacionesDigitales: {
+    gastos: { umbral: number; requiereAprobacion: boolean };
+    mantenimiento: { umbral: number; urgente: boolean };
+    nuevoInquilino: { requiereAprobacion: boolean; plazoRespuesta: number };
+  };
+  
+  // Comunicación directa con inquilino
+  chatIntegrado: {
+    mensajeriaDirecta: boolean;
+    moderacionGestor: boolean; // Opcional: gestor como intermediario
+    archivoConversaciones: boolean;
+  };
+}
 ```
 
-##### D. Servicios Adicionales
-```
-- Paquetes de servicios opcionales:
-  * Limpieza de habitación individual
-  * Lavandería
-  * Parking
-  * Almacenamiento extra
-- Cobro y gestión automática
-```
-
-##### E. Flexibilidad de Contratos
-```
-- Contratos por meses (sin permanencia)
-- Renovación automática mes a mes
-- Cambio de habitación dentro de la misma vivienda
-- Subarriendo temporal (vacaciones)
-```
+**Impacto**: 🔴 CRÍTICO - Diferenciador clave vs competencia
 
 ---
 
-### 2.4 HOUSE FLIPPING (Compra-Renovación-Venta)
-
-#### Funcionalidades Existentes
-✅ Proyectos de flipping básicos
-✅ Registro de renovaciones
-✅ Control de gastos
-✅ Cálculo de ROI
-
-#### **MEJORAS NECESARIAS**
-
-##### A. Análisis de Oportunidades de Compra
-```
-- Buscador de propiedades en subasta
-  * Integración con BOE
-  * Integración con portales de subastas
-  * Alertas personalizadas por zona y precio
-- Calculadora de viabilidad:
-  * Precio de compra
-  * Costes de renovación estimados
-  * Gastos de compraventa
-  * Precio de venta estimado (comps)
-  * ROI proyectado
-  * Tiempo estimado de proyecto
-```
-
-##### B. Gestión de Presupuestos y Contratistas
-```
-- Sistema de licitación (múltiples presupuestos)
-- Comparador de presupuestos
-- Contrato digital con contratistas
-- Pagos escalonados por hitos
-- Valoración de contratistas
-- Seguimiento fotográfico de obra
-```
-
-##### C. Planificación y Seguimiento de Obra
-```
-- Diagrama de Gantt interactivo
-- Dependencias entre tareas
-- Ruta crítica del proyecto
-- Alertas de retrasos
-- Control de costes vs presupuesto
-- Daily reports de obra
+##### D. Gestión de Garantías y Depósitos
+**Estado**: ⚠️ Básico - Sin automatización legal  
+**Mejoras Requeridas**:
+```typescript
+interface GestionGarantiasAvanzada {
+  // Depósito legal automatizado
+  depositoLegal: {
+    integracionOrganismos: {
+      espana: 'IVIMA' | 'Incasol' | 'OrganismosAutonomicos';
+      presentacionAutomatica: boolean;
+      alertasVencimiento: boolean;
+    };
+    calculoIntereses: boolean; // Según legislación vigente
+    devolucionAutomatica: { plazo: number; condiciones: DepositCondition[] };
+  };
+  
+  // Gestión de desperfectos
+  gestionDesperfectos: {
+    inventarioEntrada: { checklist: ChecklistItem[]; fotos: boolean };
+    inventarioSalida: { comparativa: boolean; valoracionDesperfectos: boolean };
+    calculoAutomatico: {
+      desgasteNormal: { porcentaje: number; criterios: string[] };
+      daniosImputables: { lista: DanoItem[]; valoracion: number };
+    };
+    propuestaDevoluc<br: { montoTotal: number; deducciones: Deduccion[]; };
+  };
+  
+  // Seguros de impago
+  segurosImpago: {
+    integracionAseguradoras: string[]; // Solunion, Mapfre, etc.
+    calculoCoberturas: boolean;
+    gestionSiniestros: { automatica: boolean; seguimiento: boolean };
+  };
+}
 ```
 
-##### D. Gestión de Permisos y Licencias
-```
-- Registro de licencias necesarias:
-  * Obra mayor/menor
-  * Cédula de habitabilidad
-  * Certificado energético
-  * ITE/IEE
-- Workflow de tramitación
-- Alertas de vencimientos
-- Repositorio de documentación
-```
-
-##### E. Estrategia de Venta
-```
-- Publicación automática en portales:
-  * Idealista
-  * Fotocasa
-  * Habitaclia
-- Home Staging virtual (AI)
-- Tour virtual 360° (integración)
-- Seguimiento de visitas
-- CRM de compradores potenciales
-- Análisis de tiempo en mercado
-```
+**Impacto**: 🟠 ALTO - Reduce litigios en un 60%
 
 ---
 
-### 2.5 CONSTRUCTION (Promoción Inmobiliaria)
+### 🏨 VERTICAL 2: SHORT-TERM RENTAL (STR)
 
-#### Funcionalidades Existentes
-✅ Proyectos de construcción básicos
-✅ Órdenes de trabajo
-✅ Inspecciones
-✅ Proveedores
+#### Perfiles de Usuario
+1. **Anfitrión Profesional** (5-50 propiedades)
+2. **Anfitrión Ocasional** (1-3 propiedades)
+3. **Property Manager STR Especializado**
 
-#### **MEJORAS NECESARIAS**
+#### Necesidades No Cubiertas
 
-##### A. Gestión Financiera de Promoción
-```
-- Presupuesto maestro del proyecto:
-  * Compra de terreno
-  * Costes de construcción
-  * Costes financieros (intereses)
-  * Honorarios (arquitectos, ingenieros)
-  * Licencias y tasas
-  * Marketing y ventas
-- Cash flow proyectado
-- Control de desviaciones
-- Certificaciones de obra
-- Gestión de avales
-```
-
-##### B. Planificación y Control de Obra
-```
-- BIM (Building Information Modeling) ligero
-  * Visualización 3D
-  * Planos interactivos
-  * Mediciones automáticas
-- Control de calidad (NCR - No Conformidades)
-- Libro de órdenes digital
-- Partes diarios de obra
-- Control de seguridad (PGS)
-```
-
-##### C. Gestión de Ventas Sobre Plano
-```
-- Configurador de vivienda (acabados)
-- Simulador de financiación
-- Reserva online con señal
-- Contratos de arras
-- Seguimiento de pagos escalonados
-- Portal del comprador (estado de obra)
-```
-
-##### D. Entrega de Viviendas
-```
-- Checklist de preentrega
-- Acta de entrega digital
-- Registro fotográfico
-- Libro del edificio
-- Garantías (decenales, bienales)
-- Post-venta (reclamaciones)
-```
-
----
-
-### 2.6 PROFESSIONAL SERVICES (Arquitectura, Ingeniería, Tasaciones)
-
-#### Funcionalidades Existentes
-✅ Proyectos profesionales
-✅ Entregables
-✅ Reuniones
-
-#### **MEJORAS NECESARIAS**
-
-##### A. Gestión de Proyectos de Arquitectura
-```
-- Fases del proyecto:
-  * Anteproyecto
-  * Básico
-  * Ejecución
-  * Dirección de obra
-- Versionado de planos
-- Comentarios y revisiones
-- Integración con AutoCAD/Revit
-- Generación de memorias técnicas
+##### A. Revenue Management Dinámico
+**Estado**: ❌ No implementado  
+**Mejoras Requeridas**:
+```typescript
+interface RevenueManagementSTR {
+  // Pricing dinámico automático
+  pricingDinamico: {
+    factoresConsiderados: {
+      demanda: { eventos: boolean; temporada: boolean; diasSemana: boolean };
+      competencia: { scrapingAirbnb: boolean; ajusteAutomatico: boolean };
+      historico: { tasaOcupacion: boolean; preciosAceptados: boolean };
+      costos: { limpieza: number; servicios: number; margenMinimo: number };
+    };
+    ajusteAutomatico: {
+      minDiasAnticipacion: number;
+      aumentoEventos: { porcentaje: number; umbralDemanda: number };
+      descuentoUltimoMinuto: { porcentaje: number; diasAntes: number };
+      descuentoEstanciaLarga: { porcentaje: number; minimoDias: number };
+    };
+    simulador: {
+      proyeccionIngresos: { optimista: number; realista: number; pesimista: number };
+      comparativaEstatica: { diferenciaIngreso: number; porcentajeMejora: number };
+    };
+  };
+  
+  // Gestión de disponibilidad multi-canal
+  disponibilidadMultiCanal: {
+    sincronizacionTiempoReal: {
+      airbnb: boolean;
+      booking: boolean;
+      vrbo: boolean;
+      homeaway: boolean;
+      propios: boolean; // Web/app propia
+    };
+    bloqueosInteligentes: {
+      bufferLimpieza: { horas: number; automatico: boolean };
+      bufferMantenimiento: { dias: number; causas: string[] };
+      minimoDias: { configurablePorTemporada: boolean };
+    };
+  };
+  
+  // Análisis de competencia
+  analisisCompetencia: {
+    propiedadesSimilares: {
+      radio: number; // km
+      caracteristicas: string[]; // Habitaciones, ubicación, etc.
+      precioPromedio: number;
+      ocupacionPromedio: number;
+    };
+    alertasCambios: {
+      nuevosCompetidores: boolean;
+      cambiosPrecio: boolean;
+      reviewsNegativas: boolean; // Del mercado
+    };
+  };
+}
 ```
 
-##### B. Tasaciones Automatizadas
-```
-- Integración con método de comparación (comps)
-- Cálculo automático por metros cuadrados
-- Ajustes por características:
-  * Antigüedad
-  * Estado de conservación
-  * Orientación
-  * Vistas
-  * Ascensor
-  * Parking
-- Generación de informe de tasación (ECO)
-- Integración con Catastro
-```
-
-##### C. Certificaciones Energéticas
-```
-- Calculadora de certificación
-- Propuestas de mejora
-- Generación de certificado (PDF)
-- Registro telemático en CCAA
-- Base de datos de certificaciones
-```
-
-##### D. Gestión de Colegiados
-```
-- Visado de proyectos
-- Seguros de RC profesional
-- Registro de colegios profesionales
-- Alertas de renovación
-```
+**Impacto**: 🔴 CRÍTICO - Aumenta ingresos 25-40%
 
 ---
 
-### 2.7 RETAIL & COMMERCIAL (Locales Comerciales)
-
-#### **NUEVA VERTICAL - A DESARROLLAR**
-
-##### Funcionalidades Específicas Necesarias
-
-##### A. Gestión de Locales Comerciales
-```
-- Características específicas:
-  * Fachada (metros lineales)
-  * Altura libre
-  * Carga eléctrica (kW)
-  * Salida de humos
-  * Licencias de actividad
-  * Zonificación (uso permitido)
-- Contratos de arrendamiento de negocio
-- Traspaso de local
-- Obras de acondicionamiento
-```
-
-##### B. Gestión de Rentas Comerciales
-```
-- Renta fija + variable (% sobre facturación)
-- Escalado de renta (incrementos anuales)
-- Garantías reforzadas (avales bancarios)
-- Devolución de garantía escalonada
-```
-
-##### C. Marketing de Locales
-```
-- Publicación especializada:
-  * Localesol
-  * Loquo Comercial
-  * Servicios a empresas
-- Dossier de local (fotos, planos, métricas)
-- Análisis de zona (tráfico peatonal, competencia)
-```
-
----
-
-## 3. Análisis por Perfil de Usuario
-
-### 3.1 SUPER ADMINISTRADOR
-
-#### Funcionalidades Existentes
-✅ Dashboard de estadísticas globales
-✅ Gestión de empresas clientes
-✅ Sistema de impersonación
-✅ Operaciones en lote
-✅ Planes de suscripción
-✅ White Label
-✅ Timeline de actividad
-✅ Centro de alertas
-
-#### **MEJORAS NECESARIAS**
-
-##### A. Business Intelligence Avanzado
-```
-- Dashboard ejecutivo con KPIs clave:
-  * MRR (Monthly Recurring Revenue)
-  * Churn rate (tasa de cancelación)
-  * LTV (Lifetime Value) por cliente
-  * CAC (Customer Acquisition Cost)
-  * NPS (Net Promoter Score)
-- Reportes automáticos semanales/mensuales
-- Comparativas entre empresas (benchmarking)
-- Análisis de uso de módulos
-- Predicción de cancelaciones (AI)
+##### B. Automatización de Limpieza y Check-in/out
+**Estado**: ⚠️ Parcial - Falta integración profunda  
+**Mejoras Requeridas**:
+```typescript
+interface AutomatizacionOperativaSTR {
+  // Gestión de equipos de limpieza
+  gestionLimpieza: {
+    asignacionAutomatica: {
+      criterios: ['proximidad', 'disponibilidad', 'calificacion', 'idioma'];
+      notificacionInstantanea: { push: boolean; sms: boolean };
+      confirmacionObligatoria: { tiempoLimite: number };
+    };
+    checklist: {
+      porPropiedad: ChecklistItem[];
+      fotosAntesDespues: boolean;
+      reporteIncidencias: { automatico: boolean; tipoIncidencias: string[] };
+    };
+    integracionProveedores: {
+      apis: string[]; // Turno, Properly, etc.
+      sincronizacionCalendario: boolean;
+    };
+  };
+  
+  // Check-in/out automatizado
+  checkInOutAutomatizado: {
+    cerraduras: {
+      integracionSmartLocks: string[]; // Yale, August, Nuki, etc.
+      codigosUnicos: { porReserva: boolean; caducidadAutomatica: boolean };
+      accesoRemoto: boolean;
+    };
+    comunicacionHuesped: {
+      instruccionesPersonalizadas: boolean;
+      videoTutorial: boolean;
+      chatBotDisponible: boolean;
+      linea24h: boolean;
+    };
+    verificacionIdentidad: {
+      escaneoDocumento: boolean;
+      selfieVerificacion: boolean;
+      integracionVermut: boolean; // O similar
+    };
+  };
+  
+  // Gestión de incidencias urgentes
+  incidenciasUrgentes: {
+    disponibilidad24h: {
+      escaladoAutomatico: { niveles: Escalation[]; tiempoRespuesta: number[] };
+      proveedoresEmergencia: { fontanero: boolean; electricista: boolean; cerrajero: boolean };
+    };
+    compensacionAutomatica: {
+      criterios: IncidentType[];
+      descuentoSugerido: { porcentaje: number; aprobacionRequerida: boolean };
+    };
+  };
+}
 ```
 
-##### B. Onboarding Automatizado
-```
-- Wizard de configuración inicial
-- Importación de datos desde competencia
-- Asignación automática de plan según perfil
-- Tutoriales interactivos personalizados
-- Checklist de activación
-```
-
-##### C. Sistema de Soporte Integrado
-```
-- Ticketing interno
-- Priorización automática
-- Base de conocimiento
-- Chat en vivo con clientes
-- SLA (Service Level Agreement) tracking
-```
-
-##### D. Gestión de Actualizaciones
-```
-- Versionado de la plataforma
-- Changelog automático
-- Notificaciones a clientes
-- Rollback seguro
-- Testing A/B de features
-```
+**Impacto**: 🔴 CRÍTICO - Reduce costos operativos 30-50%
 
 ---
 
-### 3.2 ADMINISTRADOR (Cliente Empresa)
-
-#### Funcionalidades Existentes
-✅ Gestión de usuarios
-✅ Gestión de módulos
-✅ Configuración de empresa
-✅ Reportes básicos
-
-#### **MEJORAS NECESARIAS**
-
-##### A. Dashboard Personalizable
-```
-- Widgets arrastrables
-- Gráficos configurables
-- Filtros guardados
-- Exportación a PDF/Excel
-- Plantillas de dashboard por rol
-```
-
-##### B. Gestión Avanzada de Permisos
-```
-- Permisos granulares por módulo
-- Permisos por edificio/unidad
-- Roles personalizados
-- Grupos de usuarios
-- Registro de cambios de permisos (audit)
-```
-
-##### C. Automatizaciones (Workflows)
-```
-- Constructor visual de workflows:
-  * Si [condición] entonces [acción]
-  * Ejemplos:
-    - Si pago vencido > 5 días → Enviar email
-    - Si nueva reserva STR → Crear limpieza
-    - Si contrato vence en 60 días → Notificar
-- Biblioteca de plantillas predefinidas
-- Testing de workflows
-```
-
-##### D. Gestión de Equipos
-```
-- Asignación de tareas por usuario
-- Calendario compartido
-- Mensajería interna
-- Objetivos y métricas por empleado
-- Evaluación de desempeño
-```
-
----
-
-### 3.3 GESTOR / PROPERTY MANAGER
-
-#### Funcionalidades Existentes
-✅ Vista de edificios y unidades
-✅ Gestión de inquilinos y contratos
-✅ Pagos y morosidad
-✅ Mantenimiento
-✅ Documentos
-
-#### **MEJORAS NECESARIAS**
-
-##### A. Vista de Cartera Optimizada
-```
-- Mapa interactivo de propiedades
-- Indicadores de salud por propiedad:
-  * 🟢 Todo bien
-  * 🟡 Requiere atención
-  * 🔴 Crítico
-- Resumen de ocupación en tiempo real
-- Ingresos vs gastos por propiedad
+##### C. Gestión de Reviews y Reputación
+**Estado**: ⚠️ Básico - Sin automatización  
+**Mejoras Requeridas**:
+```typescript
+interface GestionReputacionSTR {
+  // Solicitud automática de reviews
+  solicitudReviews: {
+    timingOptimo: { horasDespuesCheckout: number };
+    personalizacionMensaje: { porIdioma: boolean; porPlataforma: boolean };
+    incentivos: { descuentoProximaReserva: boolean; sorteoPremios: boolean };
+    seguimiento: { recordatorio: boolean; diasDespues: number };
+  };
+  
+  // Análisis de sentimiento
+  analisisSentimiento: {
+    deteccionProblemasRecurrentes: {
+      categorias: ['limpieza', 'comunicacion', 'ubicacion', 'comodidades'];
+      alertaAutomatica: { umbralNegatividad: number };
+    };
+    comparativaMercado: {
+      scoreMedio: number;
+      ranking: { enZona: number; enCategoria: number };
+    };
+  };
+  
+  // Respuestas automáticas/asistidas
+  respuestasAsistidas: {
+    plantillasPorTipoReview: {
+      positiva: string[];
+      neutra: string[];
+      negativa: string[];
+    };
+    aiGeneratedResponse: {
+      personalizacion: boolean;
+      aprobacionHumana: boolean; // Recomendado para negativas
+      multiidioma: boolean;
+    };
+  };
+  
+  // Gestión de reputación multi-plataforma
+  crossPlatformReputation: {
+    aggregatedScore: number; // Promedio ponderado
+    plataformas: { airbnb: number; booking: number; vrbo: number; googleMaps: number };
+    alertasReviewNegativa: { inmediata: boolean; resumenDiario: boolean };
+  };
+}
 ```
 
-##### B. Asistente de Renovaciones
-```
-- Lista de contratos próximos a vencer
-- Plantillas de cartas de renovación
-- Sugerencias de actualización de renta (IPC)
-- Tracking de respuestas
-- Análisis: renovar vs buscar nuevo inquilino
-```
-
-##### C. Gestión de Visitas
-```
-- Calendario de visitas
-- Formulario de solicitud online
-- Confirmación automática
-- Recordatorios
-- Feedback post-visita
-- Conversión: visita → aplicación → contrato
-```
-
-##### D. Mobile App Nativa
-```
-- Acceso a información clave
-- Escaneo de documentos (cámara)
-- Firma digital móvil
-- Notificaciones push
-- Modo offline básico
-- Registro fotográfico (inspecciones)
-```
+**Impacto**: 🟠 ALTO - Mejora conversión de reservas 15-25%
 
 ---
 
-### 3.4 OPERADOR / TÉCNICO DE MANTENIMIENTO
+### 🏘️ VERTICAL 3: ALQUILER POR HABITACIONES (CO-LIVING)
 
-#### Funcionalidades Existentes
-✅ Lista de órdenes de trabajo
-✅ Actualización de estado
+#### Perfiles de Usuario
+1. **Operador de Co-living** (1-10 propiedades, 50-200 habitaciones)
+2. **Propietario de Casa Compartida** (1 propiedad, 3-6 habitaciones)
 
-#### **MEJORAS NECESARIAS**
+#### Necesidades No Cubiertas *(Nota: Ya implementado básicamente)*
 
-##### A. App Móvil de Campo
-```
-- Recepción de órdenes en tiempo real
-- Navegación GPS a la propiedad
-- Checklist de tareas
-- Registro de materiales usados
-- Registro de horas trabajadas
-- Fotos antes/después
-- Firma digital del inquilino
-- Cierre de orden desde móvil
-```
-
-##### B. Inventario de Materiales
-```
-- Control de stock de materiales
-- Alertas de stock bajo
-- Solicitud de reposición
-- Código de barras / QR
-- Asignación de materiales a órdenes
-```
-
-##### C. Gestión de Proveedores Externos
-```
-- Base de datos de proveedores
-- Solicitud de presupuesto
-- Comparativa de presupuestos
-- Orden de compra
-- Seguimiento de entregas
-```
-
----
-
-### 3.5 INQUILINO
-
-#### Funcionalidades Existentes
-✅ Portal del inquilino
-✅ Visualización de contratos
-✅ Visualización de pagos
-✅ Solicitud de mantenimiento
-✅ Chat con administrador
-✅ Documentos
-
-#### **MEJORAS NECESARIAS**
-
-##### A. Pagos Flexibles
-```
-- Múltiples métodos de pago:
-  * Tarjeta de crédito/débito
-  * Transferencia bancaria
-  * Bizum
-  * PayPal
-  * Domiciliación bancaria (SEPA)
-- Pago fraccionado de renta
-- Adelanto de renta (descuento)
-- Historial de pagos con recibos PDF
-```
-
-##### B. Gestión de Incidencias Mejorada
-```
-- Clasificación detallada de incidencia
-- Subida de fotos/vídeos
-- Seguimiento en tiempo real
-- Valoración del servicio
-- Chat con técnico asignado
+##### A. Gestión de Convivencia
+**Estado**: ⚠️ Parcial - Falta módulo de resolución de conflictos  
+**Mejoras Requeridas**:
+```typescript
+interface GestionConvivencia {
+  // Sistema de matchmaking de inquilinos
+  matchmaking: {
+    perfilConvivencia: {
+      horariosPreferidos: { despertar: string; dormir: string };
+      nivelRuido: 'silencioso' | 'moderado' | 'sociable';
+      fumador: boolean;
+      mascotas: boolean;
+      hobbies: string[];
+      idiomas: string[];
+    };
+    algoritmoCompatibilidad: {
+      scoreMinimo: number;
+      factoresPonderados: { edad: number; genero: number; estilo: number };
+    };
+    sugerenciasHabitacion: { ordenPorCompatibilidad: boolean };
+  };
+  
+  // Votaciones y decisiones comunes
+  votaciones: {
+    tiposDecision: ['normas', 'gastos_comunes', 'mejoras', 'eventos'];
+    quorum: { minimo: number; tipoCuenta: 'personas' | 'habitaciones' };
+    plazoVotacion: { dias: number };
+    notificacionesRecordatorio: boolean;
+  };
+  
+  // Mediación de conflictos
+  mediacionConflictos: {
+    registroIncidencias: {
+      categorias: ['ruido', 'limpieza', 'respeto', 'uso_espacios', 'otros'];
+      anonimato: { opcional: boolean };
+      evidencia: { fotos: boolean; testimonios: boolean };
+    };
+    protocoloResolucion: {
+      paso1_conversacionFacilitada: { plazo: number };
+      paso2_mediacionGestor: { reunion: boolean; acuerdoEscrito: boolean };
+      paso3_advertenciaFormal: { documentada: boolean };
+      paso4_resolucionContrato: { causasJustificadas: string[] };
+    };
+  };
+  
+  // Área común y reservas
+  reservaEspaciosComunes: {
+    espacios: ['cocina_grande', 'sala_estar', 'terraza', 'lavanderia'];
+    reglasUso: {
+      duracionMaxima: { horas: number };
+      anticipacion: { diasMinimo: number; diasMaximo: number };
+      limiteReservasPorPersona: { mensual: number };
+    };
+    notificacionesUso: { recordatorio: boolean; liberacionAutomatica: boolean };
+  };
+}
 ```
 
-##### C. Servicios al Inquilino
-```
-- Marketplace de servicios:
-  * Limpieza
-  * Internet/TV
-  * Seguros del hogar
-  * Mudanzas
-  * Guardamuebles
-- Descuentos exclusivos (partners)
-- Contratación en un clic
-```
-
-##### D. Comunidad y Engagement
-```
-- Programa de fidelización (puntos)
-- Beneficios por renovación
-- Eventos para residentes
-- Referidos (traer amigos)
-```
+**Impacto**: 🟠 ALTO - Reduce rotación 20%, mejora satisfacción
 
 ---
 
-### 3.6 PROPIETARIO
+### 🏗️ VERTICAL 4: BUILD-TO-RENT (PROMOCIÓN RESIDENCIAL)
 
-#### Funcionalidades Existentes
-✅ Portal del propietario
-✅ Vista de propiedades
-✅ Reportes básicos
+#### Perfiles de Usuario
+1. **Promotor Inmobiliario**
+2. **Inversor Institucional**
+3. **Gestor de Activos Inmobiliarios**
 
-#### **MEJORAS NECESARIAS**
+#### Necesidades No Cubiertas
 
-##### A. Dashboard Financiero del Propietario
-```
-- Ingresos mensuales/anuales
-- Gastos desglosados
-- Rendimiento neto
-- Comparativa año anterior
-- Proyección de ingresos
-- Alertas de pagos pendientes
+##### A. Gestión Integral del Ciclo de Construcción a Renta
+**Estado**: ⚠️ Parcial - Módulo construction existe pero incompleto  
+**Mejoras Requeridas**:
+```typescript
+interface BuildToRentCompleto {
+  // Fase Pre-construcción
+  fasePreConstruccion: {
+    estudioMercado: {
+      analisisDemanda: { zona: string; perfiles: string[]; precioObjetivo: number };
+      competencia: { proyectosSimilares: number; ocupacionPromedio: number };
+      proyeccionROI: { años: number; tir: number; van: number };
+    };
+    planificacionFinanciera: {
+      presupuestoDetallado: { construccion: number; legales: number; marketing: number };
+      financiacionPrevista: { capital: number; deuda: number; subvenciones: number };
+      umbralRentabilidad: { precioAlquilerMinimo: number; ocupacionMinima: number };
+    };
+  };
+  
+  // Fase Construcción (expandir módulo existente)
+  faseConstruccion: {
+    controlPresupuesto: {
+      seguimientoGastos: { real: number; previsto: number; desviacion: number };
+      alertasDesviacion: { umbral: number; notificaciones: boolean };
+      proyeccionFinal: { estimacion: number; confianza: number };
+    };
+    cronograma: {
+      hitosObra: Milestone[];
+      dependencias: { tareas: Task[]; criticalPath: boolean };
+      alertasRetraso: { diasUmbral: number; escalalado: boolean };
+    };
+    calidadYCertificaciones: {
+      inspeccionesProgramadas: { frecuencia: string; responsable: string };
+      certificacionesRequeridas: string[]; // LEED, BREEAM, etc.
+      ensayosMateriales: { programados: number; completados: number };
+    };
+  };
+  
+  // Fase Comercialización
+  faseComercializacion: {
+    estrategiaMarketing: {
+      canalCompetitividad
+campanasDigitales: { plataformas: string[]; presupuesto: number };
+      visitasVirtuales: { tour360: boolean; vr: boolean };
+      eventoInauguracion: { fecha: Date; invitados: number };
+    };
+    gestionLeads: {
+      captura: { formularios: boolean; chatbot: boolean; telefono: boolean };
+      calificacion: { scoring: boolean; criterios: string[] };
+      seguimiento: { automatico: boolean; recordatorios: boolean };
+    };
+    preReservas: {
+      permitidas: boolean;
+      condiciones: { deposito: number; cancelacionGratuita: boolean; plazoDias: number };
+      priorizacion: { criterios: ['antiguedad', 'solvencia', 'perfil'] };
+    };
+  };
+  
+  // Transición a Operación (clave para Build-to-Rent)
+  transicionOperacion: {
+    entregasViviendas: {
+      protocoloEntrega: { checklistCompleto: boolean; firmesDigitales: boolean };
+      defectosListaPunch: { sistema: boolean; seguimiento: boolean; plazosCorreccion: number };
+    };
+    capacitacionEquipo: {
+      personal: string[]; // Mantenimiento, atención cliente, seguridad
+      manualesProcedimientos: boolean;
+      simulacrosEmergencia: boolean;
+    };
+    garantiasPostEntrega: {
+      plazoGarantia: { anos: number };
+      mantenimientoProgramado: { frecuencia: string };
+      relacionConConstructor: { sla: string; contactoUrgencias: boolean };
+    };
+  };
+}
 ```
 
-##### B. Reportes Automáticos
-```
-- Informe mensual automático (PDF + email)
-- Declaración anual de renta (pre-filled)
-- Certificado de retenciones
-- Estado de ocupación
-- Incidencias resueltas
-```
-
-##### C. Comunicación con el Property Manager
-```
-- Mensajería segura
-- Solicitud de información
-- Aprobación de gastos extraordinarios
-- Notificaciones importantes
-```
-
-##### D. Inversión y Crecimiento
-```
-- Análisis de rentabilidad
-- Recomendaciones de mejora:
-  * Renovaciones que aumentan valor
-  * Optimización de renta
-- Calculadora de ampliación de cartera
-- Oportunidades de inversión (marketplace)
-```
+**Impacto**: 🔴 CRÍTICO - Diferenciador para grandes inversores
 
 ---
 
-## 4. Mejoras Transversales
+### 🏡 VERTICAL 5: HOUSE FLIPPING (COMPRA-REFORMA-VENTA)
 
-### 4.1 INTELIGENCIA ARTIFICIAL Y MACHINE LEARNING
+#### Perfiles de Usuario
+1. **Flipper Profesional** (5-20 proyectos simultáneos)
+2. **Inversor Ocasional** (1-3 proyectos/año)
 
-#### A. Predicción y Prevención
-```
-- Predicción de morosidad (scoring)
-- Predicción de rotación de inquilinos
-- Predicción de fallos en equipos (mantenimiento predictivo)
-- Detección de fraudes
-- Valoración automática de propiedades
+#### Necesidades No Cubiertas
+
+##### A. Análisis de Oportunidades de Inversión
+**Estado**: ⚠️ Básico - Falta IA y análisis predictivo  
+**Mejoras Requeridas**:
+```typescript
+interface AnalisisOportunidadesFlipping {
+  // Evaluación automática de propiedades
+  evaluacionPropiedad: {
+    datosEntrada: {
+      ubicacion: { direccion: string; zona: string; coordenadas: [number, number] };
+      superficies: { construida: number; util: number; parcela?: number };
+      estadoActual: { nivel: 1 | 2 | 3 | 4 | 5; descripcion: string };
+      precioCompra: number;
+    };
+    analisisAutomatico: {
+      valorMercado: {
+        comparablesZona: { precio: number; precioM2: number; fuente: string }[];
+        valoracion: { minimo: number; medio: number; maximo: number };
+        tendencia: { historico: number[]; proyeccion: number[] };
+      };
+      costosReforma: {
+        estimacionPorM2: { nivel: string; costeM2: number };
+        presupuestoTotal: { minimo: number; medio: number; maximo: number };
+        desglose: { albanileria: number; fontaneria: number; electricidad: number; acabados: number };
+      };
+      potencialRevalorizacion: {
+        estadoActual: number;
+        estadoPost: number;
+        incremento: { porcentaje: number; euros: number };
+      };
+    };
+    simulacionFinanciera: {
+      inversionTotal: number; // Compra + reforma + gastos
+      precioVentaObjetivo: number;
+      beneficioNeto: number;
+      roi: number;
+      tiempoProyecto: { meses: number };
+      tasaRetornoMensual: number;
+    };
+  };
+  
+  // Marketplace de oportunidades
+  marketplaceOportunidades: {
+    alertasAutomaticas: {
+      criterios: {
+        zonas: string[];
+        rangoPrecios: { min: number; max: number };
+        roiMinimo: number;
+        tipoPropiedad: string[];
+      };
+      notificacion: { inmediata: boolean; resumenDiario: boolean };
+    };
+    integracionPortales: {
+      idealista: boolean;
+      fotocasa: boolean;
+      bancosRepos: boolean; // Propiedades de bancos
+      subastas: boolean; // BOE, plataformas subastas
+    };
+    scoring: {
+      criterios: ['ubicacion', 'precio', 'estado', 'potencial', 'competencia'];
+      recomendacion: 'excelente' | 'buena' | 'aceptable' | 'descartable';
+    };
+  };
+  
+  // Análisis de riesgos
+  analisisRiesgos: {
+    factores: {
+      estructural: { probablePatologias: string[]; costoAdicional: number };
+      legal: { cargasHipotecarias: boolean; obrasSinLicencia: boolean; proteccionOficial: boolean };
+      mercado: { diasVentaPromedio: number; tendenciaPrecios: string; competencia: number };
+      financiero: { tiposInteres: number; accesoCreditoComprador: string };
+    };
+    scoreRiesgo: { global: number; detalle: { legal: number; tecnico: number; mercado: number } };
+    recomendaciones: string[];
+  };
+}
 ```
 
-#### B. Asistente Virtual Inteligente
-```
-- Chatbot con NLP avanzado:
-  * Responde preguntas frecuentes
-  * Busca información en la plataforma
-  * Ejecuta acciones (crear, modificar)
-  * Disponible 24/7
-- Integración con WhatsApp Business
-- Soporte multiidioma
-```
-
-#### C. OCR y Procesamiento Documental
-```
-✅ Ya implementado básicamente
-- Mejoras:
-  * Extracción de contratos completos
-  * Extracción de facturas (gastos)
-  * Extracción de DNI/NIE extranjeros
-  * Validación cruzada con bases de datos
-```
+**Impacto**: 🔴 CRÍTICO - Reduce errores de inversión 60%
 
 ---
 
-### 4.2 INTEGRACIONES CON ECOSISTEMA PROPTECH
+### 🏢 VERTICAL 6: COMERCIAL (OFICINAS, LOCALES, NAVES)
 
-#### A. Pasarelas de Pago
-```
-✅ Stripe (implementado)
-- Añadir:
-  * Redsys (TPV español)
-  * PayPal
-  * Bizum
-  * SEPA Direct Debit
+#### Perfiles de Usuario
+1. **Gestor de Patrimonio Comercial**
+2. **Propietario de Centro Comercial**
+3. **Inversor en Activos Terciarios**
+
+#### Necesidades No Cubiertas
+
+##### A. Gestión Específica de Arrendamientos Comerciales
+**Estado**: ⚠️ Módulo general inadecuado para comercial  
+**Mejoras Requeridas**:
+```typescript
+interface GestionArrendamientoComercial {
+  // Contratos comerciales especializados
+  contratosComerciales: {
+    clausulasEspecificas: {
+      rentaVariable: {
+        baseMinima: number;
+        porcentajeSobreVentas: number;
+        facturacionAnualDeclarada: number;
+        ajusteMensual: boolean;
+      };
+      actualizacionRenta: {
+        tipo: 'IPC' | 'IPRI' | 'fija' | 'negociada';
+        periodicidad: string;
+        limiteAnual: { min: number; max: number };
+      };
+      cesionSubarriendo: {
+        permitida: boolean;
+        condiciones: string[];
+        aprobacionPropietario: boolean;
+      };
+      derechosTraspaso: {
+        permitido: boolean;
+        valoracion: { metodo: string };
+        comisionPropietario: number;
+      };
+    };
+    periodosCarencia: {
+      carenciaTotal: { meses: number };
+      carenciaParcial: { meses: number; porcentaje: number };
+    };
+    garantias: {
+      aval: { meses: number; entidadBancaria: string };
+      depositoAdicional: { meses: number };
+      seguroImpago: { compania: string; cobertura: number };
+    };
+  };
+  
+  // Gestión de obras y mejoras
+  obrasYMejoras: {
+    obras Tenant: {
+      licencias: { requeridas: string[]; estadoTramitacion: string };
+      proyectoTecnico: { arquitecto: string; fechaPresentacion: Date };
+      aprobacionPropietario: { requerida: boolean; plazoRespuesta: number };
+      seguroResponsabilidad: { obligatorio: boolean; cobertura: number };
+    };
+    mejoras Landlord: {
+      adaptacionEspacio: { descripcion: string; presupuesto: number };
+      financiacion: { aporteInquilino: number; amortizacion: string };
+      condicionesEntrega: { estado: string; fecha: Date };
+    };
+  };
+  
+  // Certificaciones y cumplimientos
+  certificacionesCumplimiento: {
+    certificacionesObligatorias: {
+      energetica: { vigente: boolean; calificacion: string; fechaCaducidad: Date };
+      contraIncendios: { vigente: boolean; fechaUltimaInspeccion: Date };
+      accesibilidad: { cumple: boolean; adaptacionesPendientes: string[] };
+      actividadEconomica: { licencia: string; estadoTramite: string };
+    };
+    inspeccionesPeriodicas: {
+      instalaciones: { electricidad: Date; fontaneria: Date; climatizacion: Date };
+      estructurales: { fechaUltima: Date; proximaFecha: Date };
+      medioambientales: { residuos: boolean; emisiones: boolean };
+    };
+  };
+  
+  // Reporting para inversores
+  reportingInversores: {
+    metricas: {
+      tasaOcupacion: { porcentajeM2: number; porcentajeUnidades: number };
+      rentaMediaM2: { actual: number; mercado: number; gap: number };
+      wault: number; // Weighted Average Unexpired Lease Term
+      yieldNeto: number;
+      capRate: number;
+    };
+    informesTrimales: {
+      ejecutivo: { automatico: boolean; plantilla: string };
+      operativo: { detallePorUnidad: boolean; indicadoresRiesgo: boolean };
+      financiero: { p&l: boolean; cashFlow: boolean; proyecciones: boolean };
+    };
+  };
+}
 ```
 
-#### B. Open Banking
-```
-✅ Demo implementado
-- Completar:
-  * Verificación de ingresos real
-  * Conciliación automática de pagos
-  * Pagos instantáneos
+**Impacto**: 🔴 CRÍTICO - Mercado B2B de alto valor
+
+---
+
+### 🏥 VERTICAL 7: RESIDENCIAS Y COLECTIVOS (SENIOR LIVING, ESTUDIANTES)
+
+#### Perfiles de Usuario
+1. **Operador de Residencias**
+2. **Gestor de Residencias Universitarias**
+3. **Familia / Tutor Legal** (para senior living)
+
+#### Necesidades No Cubiertas
+
+##### A. Gestión Específica de Residencias de Mayores
+**Estado**: ❌ No implementado  
+**Mejoras Requeridas**:
+```typescript
+interface GestionResidenciasMayores {
+  // Perfil socio-sanitario del residente
+  perfilResidente: {
+    datosSanitarios: {
+      patologias: string[];
+      medicacionActual: { nombre: string; dosis: string; horario: string }[];
+      alergias: string[];
+      movilidadReducida: boolean;
+      gradoDependencia: 0 | 1 | 2 | 3;
+      necesidadesEspeciales: string[];
+    };
+    contactosEmergencia: {
+      familiarResponsable: { nombre: string; parentesco: string; telefono: string };
+      medicoReferencia: { nombre: string; especialidad: string; telefono: string };
+      hospital: { nombre: string; distancia: number };
+    };
+    serviciosContratados: {
+      atencionSanitaria: boolean;
+      fisioterapia: boolean;
+      terapiaOcupacional: boolean;
+      peluqueria: boolean;
+      podologia: boolean;
+    };
+  };
+  
+  // Planificación de cuidados
+  planificacionCuidados: {
+    rutinaDiaria: {
+      levantarse: string;
+      comidas: { desayuno: string; almuerzo: string; merienda: string; cena: string };
+      medicacion: { horario: string; responsable: string }[];
+      actividades: { descripcion: string; horario: string }[];
+      descanso: { siestaESTATAL: boolean; acostarse: string };
+    };
+    registroIncidencias: {
+      tipoIncidencia: 'medica' | 'conductual' | 'caida' | 'rechazo_medicacion' | 'otro';
+      descripcion: string;
+      accionesTomadas: string[];
+      notificacionFamilia: boolean;
+    };
+    seguimientoSalud: {
+      constantes: { tension: string; glucosa: string; peso: string; frecuencia: string };
+      visitas: { medico: Date; enfermera: Date; fisioterapeuta: Date };
+      proximasCitas: { fecha: Date; especialidad: string };
+    };
+  };
+  
+  // Comunicación con familiares
+  comunicacionFamiliares: {
+    portalFamiliar: {
+      informesSemanales: { automatico: boolean; contenido: string[] };
+      fotos: { albumCompartido: boolean; consentimiento: boolean };
+      videollamadas: { programadas: boolean; horarios: string[] };
+      mensajeria: { directa: boolean; respuesta24h: boolean };
+    };
+    alertasAutomaticas: {
+      incidenciaGrave: { inmediata: boolean; canales: string[] };
+      cambioEstadoSalud: { notificacion: boolean };
+      proximosVencimientos: { facturas: boolean; renovaciones: boolean };
+    };
+  };
+  
+  // Cumplimiento normativo
+  cumplimientoNormativo: {
+    ratios: {
+      personalResidentes: { actual: number; minimo: number; cumple: boolean };
+      metrosCuadradosPorResidente: { actual: number; minimo: number };
+      personalesDocumentado: { enfermeros: number; auxiliares: number; medicos: number };
+    };
+    inspecciones: {
+      saludPublica: { proxima: Date; checklist: ChecklistItem[] };
+      serviciosSociales: { proxima: Date; historico: InspeccionRecord[] };
+    };
+    autorizaciones: {
+      funcionamiento: { numero: string; vigente: boolean; caducidad: Date };
+      bomba: { vigente: boolean };
+      sanitaria: { vigente: boolean };
+    };
+  };
+}
 ```
 
-#### C. Firma Digital
-```
-✅ Demo implementado (Signaturit preparado)
-- Activar:
-  * Signaturit
-  * DocuSign
-  * Certificado digital FNMT
-```
+**Impacto**: 🔴 CRÍTICO - Vertical de alta regulación y especialización
 
-#### D. Marketing y Publicación
-```
-- Integraciones activas con portales inmobiliarios:
-  * Idealista (API)
-  * Fotocasa (API)
-  * Habitaclia (API)
-  * Pisoscom
-- Publicación automática desde INMOVA
-- Sincronización de contactos
-```
+---
 
-#### E. Redes Sociales
-```
-✅ Demo implementado
-- Completar:
-  * Facebook/Instagram (Meta API)
-  * LinkedIn (profesional)
-  * Twitter/X
-  * TikTok (para STR)
-- Publicación programada
-- Analytics integrado
-```
+## 3. ANÁLISIS POR PERFIL DE USUARIO
 
-#### F. Utilidades
-```
-- Integración con proveedores:
-  * Iberdrola (lecturas)
-  * Endesa
-  * Naturgy
-  * Telefónica
-- Gestión de altas/bajas automáticas
-- Facturación directa
+### 👤 PERFIL: SUPER ADMINISTRADOR
+
+**Necesidades Adicionales**:
+```typescript
+interface FuncionalidadesSuperAdmin {
+  // Gestión avanzada de empresas
+  gestionEmpresas: {
+    jerarquias: {
+      gruposEmpresariales: boolean;
+      permisos Heredados: boolean;
+      consolidacionReportes: boolean;
+    };
+    facturacionConsolidada: {
+      clienteGrupo: boolean;
+      descuentosVolumen: boolean;
+      reporteConsumoGlobal: boolean;
+    };
+  };
+  
+  // Analytics predictivos
+  analyticsPredictivos: {
+    churnPrediction: {
+      scoreLikelihoodChurn: number; // Por empresa
+      factoresRiesgo: string[];
+      accionesPrevenciónRecomendadas: string[];
+    };
+    healthScore: {
+      porEmpresa: { uso: number; satisfaccion: number; pagos: number; soporte: number };
+      alertasProactivas: boolean;
+    };
+  };
+  
+  // Herramientas de soporte avanzadas
+  soporteAvanzado: {
+    impersonacionAuditada: boolean; // Ya existe
+    diagnosticoRemoto: {
+      accesoBD: boolean; // Consultas read-only
+      logsEnTiempoReal: boolean;
+      metricasRendimiento: boolean;
+    };
+    gestionIncidencias: {
+      ticketingIntegrado: boolean;
+      SLAPorPlan: { basico: string; profesional: string; enterprise: string };
+    };
+  };
+}
 ```
 
 ---
 
-### 4.3 EXPERIENCIA DE USUARIO (UX/UI)
+### 👤 PERFIL: PROPIETARIO
 
-#### A. Mobile First
-```
-- PWA (Progressive Web App) mejorada
-  ✅ Ya implementada
-- Apps nativas:
-  * iOS (Swift/SwiftUI)
-  * Android (Kotlin)
-- Funcionalidad offline completa
-```
-
-#### B. Personalización
-```
-✅ White Label implementado
-- Mejoras:
-  * Temas predefinidos (Dark mode completo)
-  * Idiomas adicionales:
-    * Catalán
-    * Gallego
-    * Euskera
-    * Italiano
-    * Alemán
-  * Preferencias de usuario guardadas
-```
-
-#### C. Accesibilidad (WCAG 2.1 AA)
-```
-✅ Mejoras iniciales implementadas
-- Completar:
-  * Navegación completa por teclado
-  * Lectores de pantalla (ARIA)
-  * Subtítulos en vídeos
-  * Contraste alto (modo daltónico)
-  * Tamaño de fuente ajustable
-```
-
----
-
-### 4.4 SEGURIDAD Y CUMPLIMIENTO
-
-#### A. Seguridad Avanzada
-```
-✅ Biometría básica implementada
-- Añadir:
-  * Autenticación de dos factores (2FA) obligatoria
-  * SSO (Single Sign-On) con Google/Microsoft
-  * Gestión de sesiones (logout automático)
-  * IP whitelisting para super_admin
-  * Logs de auditoría completos
-```
-
-#### B. GDPR y LOPD
-```
-✅ Consentimientos implementados
-- Completar:
-  * Portal de ejercicio de derechos (ARCO)
-  * Anonimización de datos históricos
-  * Exportación de datos del usuario
-  * Eliminación de cuenta (derecho al olvido)
-  * Registro de actividades de tratamiento
-```
-
-#### C. Backups y Disaster Recovery
-```
-✅ Sistema de backup implementado
-- Mejorar:
-  * Backups diferenciales (no solo completos)
-  * Replicación geográfica (multi-region)
-  * Plan de recuperación (RTO < 4h)
-  * Testing periódico de restauración
+**Necesidades Adicionales**:
+```typescript
+interface FuncionalidadesPropietario {
+  // Dashboard simplificado
+  dashboardSimplificado: {
+    vistaSemanal: {
+      ingresosSemana: number;
+      proximosPagos: Payment[];
+      mantenimientoProgramado: MaintenanceItem[];
+      mensajesInquilino: Message[];
+    };
+    resumenMensual: {
+      ingresosBrutos: number;
+      gastos: number;
+      beneficioNeto: number;
+      comparativaAnterior: { porcentaje: number };
+    };
+  };
+  
+  // Notificaciones push críticas
+  notificacionesCriticas: {
+    pagoRealizado: boolean;
+    pagoVencido: boolean;
+    mantenimientoUrgente: boolean;
+    contratoProximoVencer: boolean;
+  };
+  
+  // Auto-servicio
+  autoServicio: {
+    cambiosDatos: { bancarios: boolean; fiscales: boolean; contacto: boolean };
+    descargaDocumentos: { contratos: boolean; facturas: boolean; certificados: boolean };
+    consultaHistorico: { años: number };
+  };
+}
 ```
 
 ---
 
-### 4.5 ANALÍTICA Y BUSINESS INTELLIGENCE
+### 👤 PERFIL: INQUILINO
 
-#### A. Dashboards Avanzados
-```
-✅ BI básico implementado
-- Mejorar:
-  * Dashboards por vertical
-  * Gráficos de embudo (funnel)
-  * Mapas de calor
-  * Cohort analysis
-  * Comparativas temporales
-```
-
-#### B. Alertas Inteligentes
-```
-- Alertas proactivas basadas en datos:
-  * Propiedades con baja rentabilidad
-  * Contratos que deberían renegociarse
-  * Gastos anómalos
-  * Oportunidades de optimización
-```
-
-#### C. Exportación de Datos
-```
-✅ CSV básico implementado
-- Añadir:
-  * Excel con formato
-  * Power BI (conector)
-  * Google Data Studio
-  * API pública para extracción
+**Necesidades Adicionales**:
+```typescript
+interface FuncionalidadesInquilino {
+  // Portal mejorado (expansión del existente)
+  portalMejorado: {
+    pagos: {
+      historicoCompleto: boolean;
+      descargaRecibos: boolean;
+      configuracionDomiciliacion: boolean;
+      pagoConTarjeta: boolean; // Ya implementado con Stripe
+      recordatoriosPreVencimiento: boolean;
+    };
+    comunicacion: {
+      chatDirectoGestor: boolean; // Ya existe
+      chatDirectoPropietario: boolean; // Opcional, moderado
+      solicitudMantenimiento: { fotos: boolean; urgencia: boolean; seguimiento: boolean };
+      buzon Sugerencias: boolean;
+    };
+    documentos: {
+      contrato: boolean;
+      certificados: boolean;
+      manualVivienda: boolean;
+      facturasServicios: boolean;
+    };
+  };
+  
+  // Comunidad (para co-living)
+  comunidad: {
+    tablonAnuncios: { eventos: boolean; compraVenta: boolean; avisos: boolean };
+    chat: { grupal: boolean; privado: boolean; moderado: boolean };
+    reservas: { espaciosComunes: boolean; calendario: boolean };
+  };
+}
 ```
 
 ---
 
-## 5. Roadmap de Implementación
+## 4. MEJORAS CRÍTICAS REQUERIDAS
+
+### 🔴 PRIORIDAD MÁXIMA
+
+1. **Revenue Management Dinámico (STR)**
+   - Impacto: +30% ingresos
+   - Complejidad: Alta
+   - Duración: 6-8 semanas
+
+2. **Análisis Predictivo de Morosidad**
+   - Impacto: -60% impagos no gestionados
+   - Complejidad: Media-Alta
+   - Duración: 4-6 semanas
+
+3. **Gestión Avanzada de Convivencia (Co-living)**
+   - Impacto: -20% rotación
+   - Complejidad: Media
+   - Duración: 3-4 semanas
+
+4. **Portal de Propietarios V2**
+   - Impacto: +40% satisfacción
+   - Complejidad: Media
+   - Duración: 4-5 semanas
+
+5. **Build-to-Rent Ciclo Completo**
+   - Impacto: Acceso a mercado institucional
+   - Complejidad: Alta
+   - Duración: 8-10 semanas
+
+---
+
+### 🟠 PRIORIDAD ALTA
+
+6. **Automatización Limpieza/Check-in (STR)**
+   - Impacto: -40% costos operativos
+   - Complejidad: Media
+   - Duración: 3-4 semanas
+
+7. **Gestión Reputación Multi-plataforma**
+   - Impacto: +20% conversión reservas
+   - Complejidad: Media
+   - Duración: 3 semanas
+
+8. **Contratos Comerciales Especializados**
+   - Impacto: Acceso a mercado B2B
+   - Complejidad: Alta
+   - Duración: 5-6 semanas
+
+9. **Análisis Oportunidades Flipping con IA**
+   - Impacto: -50% errores inversión
+   - Complejidad: Alta
+   - Duración: 6-8 semanas
+
+10. **Inspecciones Programadas Automatizadas**
+    - Impacto: +30% retención propiedades
+    - Complejidad: Baja-Media
+    - Duración: 2-3 semanas
+
+---
+
+### 🟡 PRIORIDAD MEDIA
+
+11. **Gestión Residencias Mayores**
+    - Impacto: Nuevo vertical especializado
+    - Complejidad: Alta
+    - Duración: 8-10 semanas
+
+12. **Marketplace de Oportunidades (Flipping)**
+    - Impacto: +500% captación propiedades
+    - Complejidad: Media-Alta
+    - Duración: 4-5 semanas
+
+13. **Reporting Avanzado para Inversores**
+    - Impacto: Acceso a fondos institucionales
+    - Complejidad: Media
+    - Duración: 3-4 semanas
+
+---
+
+## 5. ESTRATEGIA DE PRECIOS MULTI-VERTICAL
+
+### Modelo de Precios Diferenciados
+
+```typescript
+interface EstrategiaPreciosMultiVertical {
+  // Plan Base (Todos los verticales)
+  planBase: {
+    precio: 149; // EUR/mes
+    incluye: [
+      'Gestión básica edificios/unidades',
+      'Portal inquilinos/propietarios',
+      'Contratos y pagos',
+      'Mantenimiento básico',
+      'Documentos digitales',
+      'Soporte email'
+    ];
+    limites: {
+      propiedades: 10;
+      usuarios: 3;
+    };
+  };
+  
+  // VERTICAL: Alquiler Residencial Tradicional
+  vertical_ResidencialTradicional: {
+    planProfesional: {
+      precio: 299; // EUR/mes
+      adicionalSobreBase: [
+        'Morosidad predictiva',
+        'Inspecciones programadas',
+        'Portal propietarios avanzado',
+        'Gestión garantías legal',
+        'Integraciones contables',
+        'Reportes fiscales'
+      ];
+      limites: {
+        propiedades: 50;
+        usuarios: 10;
+      };
+    };
+    planEnterprise: {
+      precio: 599; // EUR/mes
+      adicionalSobreProfesional: [
+        'Multi-empresa/grupos',
+        'API acceso completo',
+        'Whitelabel',
+        'Soporte prioritario 24h',
+        'Consultor dedicado',
+        'SLA garantizado'
+      ];
+      limites: {
+        propiedades: 'ilimitadas';
+        usuarios: 'ilimitados';
+      };
+    };
+  };
+  
+  // VERTICAL: Short-Term Rental (STR)
+  vertical_STR: {
+    planSTR_Basico: {
+      precio: 349; // EUR/mes (o 49€/propiedad/mes)
+      incluye: [
+        'Channel Manager 5 plataformas',
+        'Sincronización calendarios',
+        'Pricing dinámico básico',
+        'Automatización mensajes huéspedes',
+        'Check-in digital'
+      ];
+      precioVariable: {
+        porPropiedad: 49;
+        reservasIncluidas: 30;
+        precioAdicionalReserva: 2;
+      };
+    };
+    planSTR_Profesional: {
+      precio: 599; // EUR/mes
+      adicionalSobreBasico: [
+        'Revenue management avanzado (IA)',
+        'Gestión limpieza automatizada',
+        'Integración smart locks',
+        'Gestión reputación multi-plataforma',
+        'Análisis competencia'
+      ];
+      precioVariable: {
+        propiedadesIlimitadas: true;
+        reservasIlimitadas: true;
+      };
+    };
+  };
+  
+  // VERTICAL: Co-Living (Alquiler por Habitaciones)
+  vertical_CoLiving: {
+    planCoLiving: {
+      precio: 249; // EUR/mes (hasta 20 habitaciones)
+      incluye: [
+        'Gestión habitaciones individual',
+        'Prorrateo gastos automático',
+        'Rotación limpieza',
+        'Matchmaking inquilinos',
+        'Gestión convivencia',
+        'Votaciones comunidad'
+      ];
+      precioVariable: {
+        precioAdicionalPorHabitacion: 8; // EUR/habitacion/mes
+        umbralGratuito: 20;
+      };
+    };
+  };
+  
+  // VERTICAL: Build-to-Rent
+  vertical_BuildToRent: {
+    planDesarrollador: {
+      precio: 899; // EUR/mes (o por proyecto)
+      incluye: [
+        'Gestión ciclo completo construcción',
+        'Control presupuesto y cronograma',
+        'Comercialización pre-renta',
+        'Reporting inversores',
+        'Certificaciones'
+      ];
+      precioVariable: {
+        porProyecto: 1500; // Setup único
+        mensualidadesProyecto: 12; // Mínimo
+      };
+    };
+  };
+  
+  // VERTICAL: House Flipping
+  vertical_Flipping: {
+    planFlipper: {
+      precio: 399; // EUR/mes
+      incluye: [
+        'Análisis oportunidades (IA)',
+        'Marketplace propiedades',
+        'Gestión proyectos reforma',
+        'Simulaciones ROI',
+        'Análisis riesgos'
+      ];
+      precioVariable: {
+        proyectosSimultaneos: 10;
+        alertasOportunidades: 'ilimitadas';
+      };
+    };
+  };
+  
+  // VERTICAL: Comercial
+  vertical_Comercial: {
+    planComercial: {
+      precio: 699; // EUR/mes
+      incluye: [
+        'Contratos comerciales especializados',
+        'Renta variable',
+        'Gestión obras tenant',
+        'Certificaciones obligatorias',
+        'Reporting inversores'
+      ];
+      limites: {
+        activos: 30;
+        m2Gestionados: 10000;
+      };
+    };
+  };
+  
+  // VERTICAL: Residencias y Colectivos
+  vertical_Residencias: {
+    planResidencias: {
+      precio: 799; // EUR/mes
+      incluye: [
+        'Gestión socio-sanitaria residentes',
+        'Planificación cuidados',
+        'Portal familiar',
+        'Cumplimiento normativo',
+        'Registro incidencias sanitarias'
+      ];
+      limites: {
+        residentes: 100;
+      };
+      precioVariable: {
+        adicionalPorResidente: 5; // EUR/residente/mes (a partir de 100)
+      };
+    };
+  };
+  
+  // MÓDULOS A LA CARTA
+  modulosAlaCarta: {
+    inteligenciaArtificial: {
+      pricingDinamico: 99; // EUR/mes
+      prediccionMorosidad: 79;
+      analisisOportunidades: 149;
+      chatbotAvanzado: 59;
+    };
+    integraciones: {
+      ERPContable: 49; // Por integración/mes
+      smartLocks: 29;
+      plataformasSTR: 19; // Por plataforma adicional
+    };
+    soporte: {
+      soportePrioritario: 199; // EUR/mes
+      consultorDedicado: 499;
+      onboardingPersonalizado: 990; // Único
+    };
+  };
+}
+```
+
+### Comparativa con Competencia
+
+| **Feature/Plan**               | **INMOVA**     | **Homming**    | **Rentger**    | **Buildium**   |
+|--------------------------------|----------------|----------------|----------------|----------------|
+| **Plan Base**                  | 149€/mes       | 99€/mes        | 89€/mes        | $50/mes (~47€) |
+| **Propiedades incluidas**      | 10             | 5              | 10             | 20             |
+| **Multi-vertical**             | ✅ 7 verticales | ❌              | ❌              | ⚠️ 2           |
+| **Revenue Mgmt (STR)**         | ✅ IA          | ❌              | ❌              | ⚠️ Básico      |
+| **Predicción morosidad**       | ✅ ML          | ❌              | ❌              | ❌              |
+| **Build-to-Rent**              | ✅              | ❌              | ❌              | ❌              |
+| **Co-living completo**         | ✅              | ❌              | ⚠️ Básico      | ❌              |
+| **Integraciones contables**    | ✅ 6           | ✅ 2           | ✅ 1           | ✅ 3           |
+| **API abierta**                | ✅              | ⚠️ Limitada    | ❌              | ✅              |
+| **Whitelabel**                 | ✅ (Enterprise)| ❌              | ❌              | ✅ ($$$)       |
+| **Soporte 24/7**               | ✅ (Pro/Ent)   | ❌              | ❌              | ✅ (Enterprise)|
+
+**Ventaja Competitiva**: INMOVA es un 15-30% más cara que la competencia local, pero ofrece **3-5x más funcionalidades** y es el **único sistema multi-vertical completo** en el mercado español.
+
+---
+
+## 6. ROADMAP DE IMPLEMENTACIÓN
 
 ### FASE 1: QUICK WINS (1-2 meses)
-**Prioridad ALTA - Bajo esfuerzo**
+**Objetivo**: Mejorar retención y reducir churn
 
-#### Para Residencial Tradicional
-- [ ] Gestión de seguros (registro, alertas)
-- [ ] Asistente de renovaciones
-- [ ] Mejoras en portal del inquilino (pagos flexibles)
-- [ ] Dashboard financiero del propietario
+1. **Portal Propietarios V2** (4 semanas)
+   - Dashboard financiero mejorado
+   - Notificaciones push
+   - Aprobaciones digitales
+   
+2. **Inspecciones Programadas** (3 semanas)
+   - Calendario automático
+   - Checklists
+   - Evidencia fotográfica
 
-#### Para STR
-- [ ] Check-in/out digital completo
-- [ ] Integración completa con Airbnb
-- [ ] Sistema de reseñas consolidado
+3. **Gestión Reputación STR** (3 semanas)
+   - Solicitud automática reviews
+   - Análisis sentimiento
+   - Respuestas asistidas
 
-#### Para Room Rental
-- [ ] Plataforma social interna
-- [ ] Servicios adicionales opcionales
-
-#### Transversal
-- [ ] Mobile app nativa (MVP iOS + Android)
-- [ ] Mejoras en PWA (modo offline)
-- [ ] 2FA obligatorio para administradores
-- [ ] Exportación Excel con formato
+**Resultado Esperado**: +15% satisfacción, -10% churn
 
 ---
 
-### FASE 2: CORE FEATURES (3-4 meses)
-**Prioridad ALTA - Esfuerzo medio**
+### FASE 2: DIFERENCIADORES CLAVE (2-3 meses)
+**Objetivo**: Crear ventajas competitivas sostenibles
 
-#### Para Residencial Tradicional
-- [ ] Gestión avanzada de morosidad
-- [ ] Módulo de comunidades de propietarios
-- [ ] Asistente fiscal (Modelo 100)
+1. **Revenue Management Dinámico** (6 semanas)
+   - Pricing automático
+   - Análisis competencia
+   - Simulador proyecciones
 
-#### Para STR
-- [ ] Revenue Management (pricing dinámico)
-- [ ] Automatización de limpiezas
-- [ ] Cumplimiento regulatorio (licencias)
+2. **Predicción Morosidad ML** (5 semanas)
+   - Algoritmo scoring
+   - Alertas tempranas
+   - Flujos recobro automáticos
 
-#### Para House Flipping
-- [ ] Análisis de oportunidades
-- [ ] Gestión de presupuestos contratistas
-- [ ] Estrategia de venta (marketing)
+3. **Gestión Convivencia Co-living** (4 semanas)
+   - Matchmaking
+   - Votaciones
+   - Mediación conflictos
 
-#### Para Construction
-- [ ] Gestión financiera de promoción
-- [ ] Gestión de ventas sobre plano
-
-#### Transversal
-- [ ] Constructor de workflows (automatizaciones)
-- [ ] Integraciones con Idealista, Fotocasa
-- [ ] Asistente virtual (chatbot avanzado)
-- [ ] Portal de ejercicio de derechos GDPR
+**Resultado Esperado**: +25% ingresos STR, -40% morosidad no gestionada
 
 ---
 
-### FASE 3: ADVANCED FEATURES (4-6 meses)
-**Prioridad MEDIA - Alto esfuerzo**
+### FASE 3: EXPANSIÓN VERTICAL (3-4 meses)
+**Objetivo**: Acceder a nuevos segmentos de mercado
 
-#### Para STR
-- [ ] Channel Manager completo (6+ OTAs)
-- [ ] Multi-propietario (co-hosting)
+1. **Build-to-Rent Completo** (8 semanas)
+   - Ciclo construcción
+   - Comercialización
+   - Reporting inversores
 
-#### Para Room Rental
-- [ ] Matching de compañeros (algoritmo)
+2. **Contratos Comerciales** (5 semanas)
+   - Clausulas especializadas
+   - Renta variable
+   - Certificaciones
 
-#### Para Professional Services
-- [ ] Tasaciones automatizadas
-- [ ] Gestión de proyectos de arquitectura
+3. **Análisis Flipping IA** (6 semanas)
+   - Evaluación automática
+   - Marketplace oportunidades
+   - Análisis riesgos
 
-#### Nueva Vertical
-- [ ] **Retail & Commercial** (completa)
-
-#### Transversal
-- [ ] Predicción de morosidad (ML)
-- [ ] Valoración automática de propiedades (AI)
-- [ ] BIM ligero para construcción
-- [ ] SSO con Google/Microsoft
+**Resultado Esperado**: +30% nuevos clientes B2B, +50% ticket medio
 
 ---
 
-### FASE 4: INNOVATION (6-12 meses)
-**Prioridad BAJA - Innovación**
+### FASE 4: AUTOMATIZACIÓN AVANZADA (4-6 meses)
+**Objetivo**: Reducir costos operativos clientes
 
-#### Tecnologías Emergentes
-- [ ] AR/VR para visitas virtuales avanzadas
-- [ ] Blockchain para certificación de contratos
-- [ ] IoT avanzado (sensores, cerraduras inteligentes)
-- [ ] Predicción avanzada (rotación, fallos)
+1. **Automatización STR Completa** (4 semanas)
+   - Gestión limpieza
+   - Check-in/out automático
+   - Incidencias 24h
 
-#### Expansión Internacional
-- [ ] Adaptación a normativas europeas
-- [ ] Soporte multi-moneda
-- [ ] Integración con catastros internacionales
+2. **Gestión Garantías Legal** (4 semanas)
+   - Depósito automático
+   - Cálculo desperfectos
+   - Seguros impago
+
+3. **Reporting Inversores** (3 semanas)
+   - Métricas avanzadas
+   - Informes trimestrales
+   - Proyecciones
+
+**Resultado Esperado**: -35% tiempo gestión, +40% escalabilidad clientes
 
 ---
 
-## 6. Conclusiones y Recomendaciones
+### FASE 5: ESPECIALIZACIÓN EXTREMA (6+ meses)
+**Objetivo**: Dominar nichos específicos
 
-### Priorización por Impacto
+1. **Residencias Mayores** (10 semanas)
+   - Perfil socio-sanitario
+   - Planificación cuidados
+   - Portal familiar
 
-#### 🔥 CRÍTICO (Implementar YA)
-1. **Mobile App Nativa** → 80% de usuarios en móvil
-2. **Revenue Management para STR** → Principal demanda
-3. **Gestión Avanzada de Morosidad** → Dolor clave del sector
-4. **Automatizaciones (Workflows)** → Ahorro de tiempo masivo
-5. **Check-in/out Digital STR** → Diferenciador competitivo
+2. **Marketplace Flipping** (5 semanas)
+   - Alertas automáticas
+   - Integración portales
+   - Scoring oportunidades
 
-#### ⚡ IMPORTANTE (3-6 meses)
-1. **Channel Manager STR completo** → Multi-OTA es estándar
-2. **Módulo de Comunidades** → Gran mercado sin cubrir
-3. **Asistente Fiscal** → Valor añadido alto
-4. **Matching de Compañeros** → Innovación en Room Rental
-5. **Vertical Retail & Commercial** → Nuevo mercado
+3. **Analytics Predictivos SuperAdmin** (6 semanas)
+   - Churn prediction
+   - Health score
+   - Diagnóstico remoto
 
-#### 💡 DESEABLE (6-12 meses)
-1. **Predicción con ML/AI** → Diferenciación tecnológica
-2. **BIM Ligero** → Para construcción profesional
-3. **Multi-propietario STR** → Nicho específico
-4. **Tasaciones automatizadas** → Profesionales
+**Resultado Esperado**: +3 nuevas verticales, +100% diferenciación
+
+---
+
+## 7. CONCLUSIONES Y RECOMENDACIONES
+
+### Conclusiones Clave
+
+1. **INMOVA tiene una base sólida** con 88 módulos, pero le falta **profundidad vertical**
+2. **STR es la vertical más rentable** y requiere atención inmediata (Revenue Mgmt)
+3. **Portal de Propietarios es crítico** para retención a largo plazo
+4. **Build-to-Rent es la oportunidad B2B** más grande y menos competida
+5. **Pricing actual es competitivo** pero debe diferenciarse por vertical
 
 ### Recomendaciones Estratégicas
 
-#### 1. Enfoque en Verticales con Mayor Crecimiento
-- **STR** está en auge post-pandemia → Priorizar
-- **Room Rental / Coliving** crece con millennials → Innovar
-- **Construction** tiene márgenes altos → Completar
+#### Corto Plazo (0-3 meses)
+- ✅ Implementar **Portal Propietarios V2**
+- ✅ Lanzar **Revenue Management STR**
+- ✅ Activar **Predicción Morosidad ML**
+- ✅ Crear **planes de precios diferenciados por vertical**
 
-#### 2. Desarrollar Mobile-First
-- La mayoría de operaciones se hacen en móvil
-- Inquilinos, propietarios y técnicos necesitan apps nativas
-- La PWA es insuficiente para uso intensivo
+#### Medio Plazo (3-6 meses)
+- ✅ Desarrollar **Build-to-Rent completo**
+- ✅ Expandir **Co-living** con gestión convivencia
+- ✅ Implementar **contratos comerciales** especializados
+- ✅ Lanzar **marketplace flipping**
 
-#### 3. Aprovechar la Ventaja de la IA
-- Predicción de morosidad puede ser un USP clave
-- Chatbot reduce costes de soporte
-- Pricing dinámico para STR genera ingresos directos
+#### Largo Plazo (6-12 meses)
+- ✅ Especializar en **Residencias Mayores**
+- ✅ Desarrollar **analytics predictivos** para super-admin
+- ✅ Crear **ecosystem de partners** (smart locks, limpiezas, etc.)
+- ✅ Expandir internacionalmente (LATAM primero)
 
-#### 4. Integraciones como Moat (Foso)
-- Cuantas más integraciones, más difícil cambiar de software
-- Priorizar integraciones con herramientas críticas:
-  * Contabilidad (✅ hecho)
-  * Portales inmobiliarios
-  * OTAs (STR)
-  * Pasarelas de pago
+### Métricas de Éxito
 
-#### 5. Escuchar al Usuario
-- Implementar sistema de feedback continuo
-- Roadmap público con votación
-- Beta testing de nuevas features
-- NPS (Net Promoter Score) trimestral
-
-### Ventajas Competitivas Únicas de INMOVA
-
-#### Ya Existentes
-✅ **Multi-vertical** → Único en el mercado español
-✅ **88 módulos** → Más completo que Homming
-✅ **Room Rental** → Homming no lo tiene
-✅ **White Label** → Para gestoras grandes
-✅ **Precio competitivo** → €149 vs €300+ competencia
-
-#### A Desarrollar
-🚀 **Mobile-first** → Apps nativas de calidad
-🚀 **AI-powered** → Predicción y automatización
-🚀 **Super Channel Manager** → Sincronización perfecta
-🚀 **Workflows sin código** → Automatización para todos
-🚀 **BI avanzado** → Insights accionables
-
----
-
-## Resumen Cuantitativo
-
-### Estado Actual
-- ✅ **88 módulos** operativos
-- ✅ **7 verticales** cubiertas
-- ✅ **150+ features** implementadas
-
-### Propuestas de Mejora
-- 🔶 **12 verticales** profundizadas
-- 🔶 **6 perfiles** optimizados
-- 🔶 **200+ mejoras** identificadas
-- 🔶 **4 fases** de implementación
-
-### Impacto Esperado
-- 📈 **+40%** en satisfacción de usuario
-- 📈 **+60%** en retención de clientes
-- 📈 **+30%** en captación de nuevos clientes
-- 📈 **-50%** en tiempo de soporte
-- 📈 **+100%** en facturación a 12 meses
+```typescript
+interface MetricasExito {
+  retencion: {
+    actual: 75; // %
+    objetivo6meses: 85;
+    objetivo12meses: 90;
+  };
+  ingresoPorCliente: {
+    actual: 299; // EUR/mes promedio
+    objetivo6meses: 399;
+    objetivo12meses: 499;
+  };
+  nps: {
+    actual: 45;
+    objetivo6meses: 60;
+    objetivo12meses: 70;
+  };
+  nuevosClientes: {
+    mensualActual: 12;
+    objetivo6meses: 25;
+    objetivo12meses: 50;
+  };
+}
+```
 
 ---
 
-## 📞 Contacto
+## 📞 CONTACTO
 
-**INMOVA by Enxames Investments SL**
-- 🌐 Web: https://inmova.app
-- 📧 Email: hola@inmova.com
-- 📱 WhatsApp: +34 XXX XXX XXX
+**Para implementación de mejoras**:  
+📧 desarrollo@inmova.com  
+🌐 https://inmova.app
+
+**Consultoría estratégica**:  
+📧 estrategia@inmova.com
 
 ---
 
-*Documento creado: Diciembre 2024*  
-*Última actualización: Diciembre 2024*  
-*Versión: 1.0*
+*Documento generado el 2 de Diciembre de 2024*  
+*Versión 1.0 - Análisis Exhaustivo Multi-Vertical*
+

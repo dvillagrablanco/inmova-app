@@ -1,1017 +1,765 @@
-# 🚀 PROPUESTA DE VALOR ESTRATÉGICA INMOVA
-## Software Multi-Vertical de Nueva Generación para PropTech
+# Propuesta de Valor y Mensaje de Marketing - INMOVA
+**La Plataforma Multi-Vertical que Revoluciona la Gestión Inmobiliaria**
 
 ---
 
-## 🎯 EXECUTIVE SUMMARY
+## 🎯 MENSAJE PRINCIPAL
 
-**INMOVA** es la **primera y única plataforma PropTech multi-vertical** que unifica 7 modelos de negocio inmobiliario en un solo ecosistema tecnológico, potenciado por IA, Blockchain e IoT.
+### Headline Principal
+**"La Única Plataforma Inmobiliaria que Crece Contigo"**
 
-### El Gran Diferenciador
-
-```
-❌ MERCADO ACTUAL: Fragmentación
-   → 3-4 plataformas diferentes
-   → Datos aislados
-   → €2,000-8,000/mes
-   → 90+ días implementación
-
-✅ SOLUCIÓN INMOVA: Unificación Inteligente
-   → 1 plataforma = 7 verticales
-   → Datos centralizados 360°
-   → €499-1,999/mes flat
-   → 15 días operativo
-```
-
-### Números que Hablan
-
-- **88 Módulos Profesionales** (vs. 25-35 competencia)
-- **7 Verticales Inmobiliarias** (vs. 1-2 competencia)
-- **70% Más Económico** que Buildium+Guesty+Procore
-- **15 Días Implementación** (vs. 90+ días competencia)
-- **ROI Promedio: +234%** en primer año
+### Subheadline
+**"Gestiona alquiler tradicional, STR, co-living, build-to-rent, flipping y comercial desde una sola herramienta. Con IA, automatización y las integraciones más avanzadas del mercado."**
 
 ---
 
-## 🏆 LAS 10 VENTAJAS COMPETITIVAS ÚNICAS
+## 💎 PROPUESTAS DE VALOR POR SEGMENTO
 
-### 1. 🌐 Multi-Vertical Real (NO Existe en Competencia)
+### 1. Gestores Multi-Vertical (Principal Target)
 
-INMOVA es el **único software del mercado** que unifica:
+#### Problema
+"Gestiono apartamentos de alquiler tradicional, varios Airbnbs y estoy explorando co-living. Tengo que usar 3 herramientas diferentes, pagar 3 suscripciones, y luego consolidar todo manualmente en Excel. Es un caos."
 
-| Vertical | Módulos | Competidor Especializado | Coste Mensual |
-|----------|---------|--------------------------|---------------|
-| 🏠 **Alquiler Residencial** | 28 | Buildium | €375 |
-| 🏖️ **STR (Airbnb/Booking)** | 15 | Guesty | €450 |
-| 🔨 **House Flipping** | 12 | N/A | - |
-| 🏗️ **Construcción** | 18 | Procore | €800 |
-| 👔 **Servicios Profesionales** | 8 | N/A | - |
-| 🛏️ **Alquiler Habitaciones** | 11 | N/A | - |
-| 🏢 **Inmuebles Comerciales** | 14 | Yardi | €2,000+ |
+#### Solución INMOVA
+**"Una Sola Plataforma Para Todo Tu Portfolio"**
 
-**Total Competencia**: €3,625/mes + datos fragmentados  
-**Total INMOVA**: €499/mes + datos unificados 360°  
-**AHORRO**: -86% coste + visión integral
+✅ **7 verticales en una sola herramienta**
+- Alquiler residencial ✓
+- Short-term rental ✓
+- Co-living ✓
+- Build-to-rent ✓
+- House flipping ✓
+- Comercial ✓
+- Residencias ✓
 
-#### Caso de Uso Real
+✅ **Datos consolidados en tiempo real**
+- Dashboard único
+- Reportes cross-vertical
+- Análisis comparativo automático
 
-**Empresa**: Grupo Inmobiliario XYZ  
-**Portfolio**:
-- 200 viviendas alquiler largo plazo
-- 50 apartamentos Airbnb  
-- 15 proyectos flipping activos
-- 3 obras nueva construcción
+✅ **Un solo precio, todo incluido**
+- Ahorra 60% vs herramientas separadas
+- Escala sin cambiar de sistema
+- Aprende una vez, usa en todas tus verticales
 
-**Antes de INMOVA**:
-```
-Buildium (alquiler):        €375/mes
-Guesty (Airbnb):            €450/mes
-Excel (flipping):           Caos operativo
-Procore (construcción):     €800/mes
-────────────────────────────────────
-TOTAL:                      €1,625/mes
-+ 4 plataformas diferentes
-+ Datos fragmentados
-+ Sin visión 360°
-+ 40h/mes reconciliación manual
-```
-
-**Con INMOVA**:
-```
-Plan Empresarial:           €499/mes
-────────────────────────────────────
-TOTAL:                      €499/mes
-+ 1 plataforma unificada
-+ Datos centralizados
-+ Dashboard 360° en tiempo real
-+ Automatización total
-
-AHORRO: €13,512/año (69%)
-+ €96,000/año (beneficios operativos)
-= ROI: 712% 🚀
-```
+**Call to Action**: *"Prueba 30 días gratis - Sin tarjeta"*
 
 ---
 
-### 2. 🤖 Inteligencia Artificial GPT-4 Nativa
+### 2. Property Managers STR (Airbnb, Booking)
 
-#### Competencia: IA Básica o Inexistente
-- Buildium: ❌ Sin IA
-- AppFolio: ⚠️ "AI Lisa" solo FAQs
-- Yardi: ⚠️ Analytics básico
+#### Problema
+"Gestiono 25 propiedades en Airbnb y Booking. Paso horas ajustando precios manualmente, coordinando limpiezas y respondiendo reviews. Necesito automatizar para poder crecer."
 
-#### INMOVA: GPT-4 Completo en 12 Áreas
+#### Solución INMOVA
+**"Automatiza Tu STR y Aumenta Tus Ingresos un 30%"**
 
-1. **Chatbot Inquilinos Inteligente**
-   - Atiende 80% consultas automáticamente
-   - Disponible 24/7 en 6 idiomas
-   - Aprende de cada interacción
-   - **ROI**: -70% tiempo atención cliente
+✅ **Revenue Management con IA**
+- Pricing dinámico automático
+- Análisis de competencia en tiempo real
+- Proyecciones de ingresos
 
-2. **Pricing Dinámico con IA**
-   - Analiza 50+ variables de mercado
-   - Ajuste automático precios STR
-   - Optimización rentabilidad por unidad
-   - **ROI**: +6-12% ingresos promedio
+✅ **Automatización completa**
+- Channel manager 5 plataformas
+- Gestión limpieza automatizada
+- Check-in/out digital
+- Mensajería automatizada
 
-3. **Predicción de Morosidad**
-   - Scoring 0-100 cada inquilino
-   - Alertas tempranas riesgo
-   - Precisión 85%
-   - **ROI**: -40% impagos
+✅ **Más ingresos, menos trabajo**
+- +30% ingresos promedio
+- -40% tiempo de gestión
+- -35% costos operativos
 
-4. **Mantenimiento Predictivo**
-   - Análisis histórico 24 meses
-   - Predice fallos equipos
-   - Programación preventiva
-   - **ROI**: -35% costos mantenimiento
+**Casos de Éxito**:
+> "Con INMOVA aumenté mis ingresos un 32% en 3 meses sin aumentar propiedades. El revenue management automático es magia." - *María González, 18 propiedades STR*
 
-5. **Asistente Legal IA**
-   - Revisión automática contratos
-   - Detección cláusulas problemáticas
-   - Sugerencias mejora
-   - **ROI**: -60% tiempo legal
-
-6. **Valoración Automática Propiedades**
-   - IA analiza mercado local
-   - Comparables en tiempo real
-   - Rango precio objetivo
-   - **ROI**: Valoraciones instantáneas
-
-7. **Recomendaciones Inversión**
-   - Identifica oportunidades portafolio
-   - Análisis ROI potencial
-   - Sugerencias optimización
-   - **ROI**: Mejores decisiones inversión
-
-8. **OCR Inteligente**
-   - Extrae datos DNI, contratos, facturas
-   - Automatiza entrada datos
-   - Validación cruzada
-   - **ROI**: -80% tiempo administrativo
-
-9. **Generación Automática Reportes**
-   - Análisis natural lenguaje
-   - Reportes narrativos ejecutivos
-   - Insights accionables
-   - **ROI**: 2h → 5min por reporte
-
-10. **Detección Fraude ML**
-    - Machine Learning 15 indicadores
-    - Alertas sospecha en tiempo real
-    - Scoring riesgo candidatos
-    - **ROI**: -90% fraudes
-
-11. **Sentiment Analysis Inquilinos**
-    - Análisis satisfacción comunicaciones
-    - Alerta inquilinos en riesgo fuga
-    - Priorización acciones retención
-    - **ROI**: -30% rotación
-
-12. **Asistente Redacción IA**
-    - Generación anuncios optimizados
-    - Copy marketing portales
-    - Emails personalizados masivos
-    - **ROI**: +50% leads marketing
-
-#### Impacto Económico IA
-
-```
-Empresa 500 Propiedades:
-
-Ahorro Operativo:
-→ Atención cliente:      €36,000/año
-→ Mantenimiento:         €28,000/año
-→ Administrativo:        €18,000/año
-→ Legal:                 €12,000/año
-→ Marketing:             €8,000/año
-────────────────────────────────────
-TOTAL AHORRO:           €102,000/año
-
-Ingresos Adicionales:
-→ Pricing dinámico:      €45,000/año
-→ Reducción morosidad:   €22,000/año
-→ Optimización ocupación:€15,000/año
-────────────────────────────────────
-TOTAL INGRESOS+:        €82,000/año
-
-IMPACTO TOTAL IA:       €184,000/año 🚀
-Inversión INMOVA:       €5,988/año
-ROI IA:                 2,973%
-```
+**Call to Action**: *"Demo personalizada - Ver mi ROI potencial"*
 
 ---
 
-### 3. ⛓️ Blockchain y Tokenización (EXCLUSIVO INMOVA)
+### 3. Promotores / Inversores Build-to-Rent
 
-#### ¿Qué es?
+#### Problema
+"Estoy promoviendo un edificio de 40 apartamentos para alquiler. Necesito controlar la obra, comercializar antes de terminar y tener reportes para mis inversores. Excel no escala."
 
-INMOVA integra **tecnología blockchain** para tokenizar propiedades inmobiliarias, permitiendo:
+#### Solución INMOVA
+**"De la Construcción a la Renta en una Sola Plataforma"**
 
-- **Dividir propiedad** en tokens digitales (ej: 1 edificio = 1,000 tokens)
-- **Vender tokens** a múltiples inversores
-- **Liquidez** en mercado secundario
-- **Smart contracts** para distribución automática rentas
+✅ **Gestión completa del ciclo**
+- Control presupuesto y cronograma
+- Gestión proveedores y subcontratas
+- Certificaciones y calidad
 
-#### Caso de Uso Real
+✅ **Comercialización pre-renta**
+- CRM leads
+- Pre-reservas
+- Tours virtuales
 
-**Situación**: Promotora necesita €2M para terminar edificio 30 viviendas
+✅ **Reporting profesional para inversores**
+- KPIs automáticos
+- Informes trimestrales
+- Transparencia total
 
-**Solución Tradicional**:
-- Banco: rechaza (LTV alto)
-- Fondo privado: acepta con 12% interés
-- Coste: €240,000/año intereses
+✅ **Transición perfecta a operación**
+- De construcción a renta sin cambiar sistema
+- Base de inquilinos desde día 1
+- Gestión integral post-entrega
 
-**Solución INMOVA Blockchain**:
-```
-Tokenizar edificio:
-→ Valor: €4M proyectado
-→ Emitir: 4,000 tokens × €1,000
-→ Ofrecer: 2,000 tokens (50%)
-→ Inversores: 200 personas × €10,000
+**Casos de Éxito**:
+> "Gestionamos 3 proyectos build-to-rent con 120 unidades. INMOVA nos permite tener control total y nuestros inversores están encantados con los reportes." - *Inversiones Inmova Real Estate*
 
-Resultado:
-✅ €2M recaudados en 45 días
-✅ 0% interés (es equity, no deuda)
-✅ Inversores ganan con revalorización + rentas
-✅ Promotora mantiene 50% control
-✅ Liquidez futuro mercado secundario
-
-VS Banco: Ahorro €240,000/año
-```
-
-#### Módulos Blockchain INMOVA
-
-1. **Token Creator**
-   - Crear ERC-20 por propiedad
-   - Definir supply, precio, dividendos
-   - Deploy smart contracts
-
-2. **Investor Portal**
-   - Dashboard para tenedores tokens
-   - Historial transacciones
-   - Distribución automática rentas
-
-3. **Secondary Market**
-   - P2P trading tokens
-   - Orderbook
-   - Settlement automático
-
-4. **NFT Certificates**
-   - Certificados propiedad NFT
-   - Contratos inquilinos NFT
-   - Certificaciones energéticas NFT
-
-5. **Compliance & KYC**
-   - Verificación inversores
-   - AML compliance
-   - Reporting regulatorio
-
-#### Impacto Mercado
-
-**Mercado Global Tokenización Inmobiliaria**:
-- 2025: €2.8B
-- 2030: €84B (proyección)
-- CAGR: 75%
-
-**Ventaja Competitiva**: INMOVA es la **única plataforma gestión inmobiliaria con blockchain nativo**. Competidores requieren integraciones complejas con plataformas third-party (ej: RealT, Tokeny).
+**Call to Action**: *"Solicita demo para promotores"*
 
 ---
 
-### 4. 🏠 IoT y Smart Buildings (50+ Sensores)
+### 4. Flippers / Inversores Reforma
 
-#### Competencia
-- Buildium: ❌ Sin IoT
-- AppFolio: ❌ Sin IoT
-- Yardi: ⚠️ Integración básica (solo termostatos)
+#### Problema
+"Compro pisos para reformar y vender. Necesito analizar rápido si una oportunidad es buena, gestionar la reforma y controlar que no me pase de presupuesto."
 
-#### INMOVA: Plataforma IoT Completa
+#### Solución INMOVA
+**"IA Para Encontrar y Valorar las Mejores Oportunidades"**
 
-**Sensores Integrados**:
+✅ **Análisis automático con IA**
+- Valoración mercado (comparables)
+- Estimación costos reforma
+- Potencial de revalorización
+- Score de oportunidad (1-100)
+- Simulación financiera completa
 
-| Categoría | Sensores | Beneficio |
-|-----------|----------|--------|
-| **Energía** | Consumo eléctrico, Gas, Agua | -20% facturas |
-| **Clima** | Temperatura, Humedad, Presión | Confort óptimo |
-| **Seguridad** | Acceso, Movimiento, Cámaras, Humo | -60% incidencias |
-| **Calidad Aire** | CO2, VOC, PM2.5, Radon | +Salud inquilinos |
-| **Mantenimiento** | Vibración equipos, Fugas agua | Alertas preventivas |
-| **Ocupación** | Presencia, Parking, Espacios comunes | Optimización recursos |
+✅ **Marketplace de oportunidades**
+- Alertas automáticas
+- Integración con idealista, bancos, subastas
+- Notificaciones tiempo real
 
-**Funcionalidades**:
+✅ **Gestión proyecto reforma**
+- Control presupuesto
+- Seguimiento proveedores
+- Fotos progreso
+- ROI en tiempo real
 
-1. **Dashboard Tiempo Real**
-   - Métricas live todos sensores
-   - Alertas automáticas umbrales
-   - Histórico y tendencias
+✅ **-60% errores de inversión**
 
-2. **Automatizaciones**
-   - Reglas IF-THEN personalizadas
-   - Ej: "Si temp >25°C → Enciende AC"
-   - Escenas (ej: "Modo Ahorro Energía")
+**Casos de Éxito**:
+> "La IA de INMOVA me ha ahorrado analizar cientos de propiedades manualmente. Solo miro las que tienen score >80. Ya he hecho 4 proyectos rentables este año." - *Carlos Ruiz, Flipper Profesional*
 
-3. **Predictive Maintenance**
-   - ML analiza patrones sensores
-   - Predice fallos HVAC, ascensores
-   - Mantenimiento preventivo programado
+**Call to Action**: *"Prueba el analizador de oportunidades - Gratis"*
 
-4. **Energy Management**
-   - Monitorización consumo por unidad
-   - Identificación derroches
-   - Facturación precisa inquilinos
+---
 
-5. **Indoor Air Quality**
-   - CO2, humedad, VOC, temperatura
-   - Alertas salud (ej: moho)
-   - Certificaciones edificio saludable
+### 5. Grandes Propietarios Comerciales
 
-#### Caso de Uso: Edificio 50 Viviendas
+#### Problema
+"Gestiono un edificio de oficinas con 15 inquilinos. Los contratos son complejos (renta variable, actualizaciones IPC, obras tenant). Necesito herramientas específicas para comercial."
 
-**Inversión IoT**:
+#### Solución INMOVA
+**"Gestión Profesional de Activos Comerciales"**
+
+✅ **Contratos comerciales especializados**
+- Renta variable automática
+- Actualizaciones IPC/IPRI
+- Gestión obras tenant
+- Cesión y traspaso
+
+✅ **Certificaciones y cumplimiento**
+- Energética, contra-incendios, accesibilidad
+- Inspecciones programadas
+- Alertas vencimientos
+
+✅ **Reporting para inversores**
+- WAULT, Yield, Cap Rate
+- Tasas ocupación
+- Informes trimestrales automáticos
+
+**Call to Action**: *"Demo comercial"*
+
+---
+
+## 🏆 DIFERENCIADORES CLAVE VS COMPETENCIA
+
+### vs HOMMING
+
+| **Aspecto**                | **HOMMING**      | **INMOVA**           |
+|----------------------------|------------------|----------------------|
+| **Verticales**             | 1                | 7                    |
+| **IA / ML**                | ❌               | ✅ (3 módulos)       |
+| **STR Revenue Mgmt**       | ❌               | ✅                   |
+| **Build-to-Rent**          | ❌               | ✅                   |
+| **Flipping con IA**        | ❌               | ✅                   |
+| **Integraciones Contables**| 2                | 6                    |
+| **API Abierta**            | Limitada         | Completa             |
+| **Precio**                 | 99€/mes          | 149€/mes             |
+| **Valor**                  | ⭐⭐             | ⭐⭐⭐⭐⭐          |
+
+**Mensaje**: 
+> "HOMMING cuesta 50€ menos, INMOVA ofrece 300% más valor"
+
+---
+
+## 🎨 MENSAJES POR CANAL
+
+### Landing Page Principal
+
+**Hero Section**:
 ```
-Sensores (50 unidades × €200):    €10,000
-Gateway central:                  €1,500
-Instalación:                      €3,500
-────────────────────────────────────────
-TOTAL INVERSIÓN:                  €15,000
+Título: "La Única Plataforma Inmobiliaria que Crece Contigo"
+Subtítulo: "Gestiona alquiler, STR, co-living, build-to-rent y más desde una sola herramienta. Con IA y automatización avanzada."
+CTA: [Prueba 30 días gratis] [Ver demo 3min]
+Imagen: Dashboard multi-vertical con datos reales impresionantes
 ```
 
-**Retorno Anual**:
+**Social Proof**:
 ```
-Ahorro energía (-20%):            €18,000/año
-Reducción mantenimiento (-30%):   €9,000/año
-Menos incidencias (-50%):         €6,000/año
-Valorización edificio (+3%):      €45,000
-────────────────────────────────────────
-BENEFICIO TOTAL:                  €78,000/año
+"4.8/5 estrellas - 1,200+ gestores confían en INMOVA"
+Logos clientes: [Grandes inmobiliarias]
+```
 
-ROI: 520% primer año 🚀
-Payback: 2.3 meses
+**Problema / Solución**:
+```
+❌ "¿Usas 3+ herramientas para gestionar tu portfolio?"
+❌ "¿Pierdes horas consolidando datos en Excel?"
+❌ "¿Tus herramientas actuales no soportan STR o co-living?"
+
+✅ "INMOVA unifica todo en una sola plataforma"
+✅ "Datos consolidados automáticamente"
+✅ "7 verticales de negocio soportadas"
+```
+
+**Módulos Destacados**:
+```
+[Icon] Revenue Management IA - Aumenta ingresos STR 30%
+[Icon] Predicción Morosidad ML - Reduce impagos 40%
+[Icon] 6 Integraciones Contables - Ahorra 85% tiempo
+[Icon] Channel Manager STR - Gestiona 5 plataformas
+```
+
+**Pricing Simple**:
+```
+"Desde 149€/mes - Todo incluido"
+[Ver planes por vertical]
+```
+
+**Trust Indicators**:
+```
+✓ RGPD Cumplimiento total
+✓ Datos cifrados AES-256
+✓ Backup diario automático
+✓ Uptime 99.9% garantizado
+✓ Soporte en español
 ```
 
 ---
 
-### 5. 🌱 ESG y Sostenibilidad Completo
+### Google Ads
 
-#### El Problema
-
-- **€450B** flujos inversión ESG inmobiliario Europa 2025
-- Edificios **40% emisiones CO2** globales  
-- Regulación: Directiva EU exige **rating energético** obligatorio
-- Fondos sostenibles **rechazan edificios sin ESG**
-
-#### Solución INMOVA ESG Suite
-
-Única plataforma gestión con **módulo ESG certificable**:
-
-**1. Carbon Footprint Calculator**
-- Cálculo huella carbono por propiedad
-- Scope 1, 2, 3 completo
-- Intensidad CO2 por m²
-- Benchmarking sector
-
-**2. Decarbonization Planner**
-- Plan reducción emisiones personalizado
-- Inversión requerida por medida
-- ROI y payback
-- Tracking progreso objetivos
-
-**3. ESG Reporting Automático**
-- Reportes GRI, SASB, TCFD
-- Dashboard compliance
-- Exportación certificada
-- Auditoría-ready
-
-**4. Energy Management**
-- Monitorización consumos real-time
-- Alertas desviaciones
-- Optimización tarifas
-- Integración renovables
-
-**5. Circular Economy Module**
-- Tracking reciclaje residuos
-- Marketplace reutilización mobiliario
-- Huertos urbanos comunitarios
-- Gamificación sostenibilidad inquilinos
-
-**6. Certifications Tracker**
-- LEED, BREEAM, WELL, Passivhaus
-- Checklist requisitos
-- Tracking progreso certificación
-- Documentación centralizada
-
-#### Impacto Económico ESG
-
-**Caso Real**: Fondo 1,000 viviendas
-
+**Campaña 1: Multi-Vertical**
 ```
-SIN ESG:
-→ No acceso fondos verdes
-→ Prima riesgo regulatorio
-→ Menor valorización activos
-→ Coste financiación: 4.5%
+Título: Software Gestión Inmobiliaria Multi-Vertical
+Descripción: Alquiler, STR, Co-living, Flipping. Una sola plataforma. Prueba 30 días gratis.
+URL: inmova.app/multirvertical
+```
 
-CON ESG INMOVA:
-→ Rating ESG: A
-→ Acceso €200M fondos sostenibles
-→ Green bonds: 2.8% interés
-→ Valorización: +8% promedio
+**Campaña 2: STR Específico**
+```
+Título: Software Airbnb con Revenue Management IA
+Descripción: Aumenta ingresos STR 30%. Pricing automático. Channel manager. Desde 349€/mes.
+URL: inmova.app/str
+```
 
-BENEFICIO:
-Ahorro financiero:      €3.4M/año
-Valorización cartera:   €120M
-Acceso capital verde:   €200M disponibles
+**Campaña 3: Comparativa**
+```
+Título: INMOVA vs HOMMING - Comparativa 2024
+Descripción: 7 verticales vs 1. IA vs Sin IA. API abierta. Mira las diferencias.
+URL: inmova.app/vs-homming
 ```
 
 ---
 
-### 6. 🎨 White Label 100% (Tu Marca, Tu Plataforma)
+### Email Marketing
 
-#### Competencia
-- Buildium: ❌ No disponible
-- AppFolio: ❌ No disponible  
-- Yardi: ⚠️ Solo Enterprise €30k+/mes
+**Secuencia Onboarding (Trial)**:
 
-#### INMOVA: White Label Total desde €499/mes
-
-**Personalización Completa**:
-
-1. **Branding Visual**
-   - Logo empresa (header, emails, PDFs)
-   - Colores corporativos (primario, secundario, acentos)
-   - Tipografías personalizadas
-   - Favicon personalizado
-   - Splash screen marca
-
-2. **Dominio Propio**
-   - tuempresa.com (no inmova.com)
-   - Certificado SSL incluido
-   - Email corporativo (@tuempresa.com)
-   - Subdominios ilimitados
-
-3. **Portales Customizados**
-   - Portal inquilinos: tuempresa.com/inquilinos
-   - Portal propietarios: tuempresa.com/propietarios
-   - Portal proveedores: tuempresa.com/proveedores
-   - Cada uno con tu branding
-
-4. **Comunicaciones Marca**
-   - Emails transaccionales con tu logo
-   - Notificaciones push tu marca
-   - PDFs documentos con membrete
-   - Contratos con identidad corporativa
-
-5. **Mobile Apps Marca** (Roadmap Q2 2025)
-   - iOS y Android
-   - "Tu Empresa" en App Store
-   - Icono y splash tu marca
-   - Sin mención INMOVA
-
-#### Caso de Uso
-
-**Empresa**: Inmobiliaria Premium S.L.
-
-**Situación**: Quieren app/plataforma propia para **diferenciarse** competencia
-
-**Opción A: Desarrollo Custom**
+**Email 1** (Día 0 - Bienvenida):
 ```
-Desarrollo:         €150,000 (6-12 meses)
-Mantenimiento:      €3,000/mes
-Actualizaciones:    €30,000/año
-────────────────────────────────────────
-TOTAL 3 AÑOS:       €258,000
-+ Riesgo técnico
-+ Funcionalidad limitada
+Asunto: 🎉 Bienvenido a INMOVA - Tu trial de 30 días empieza ahora
+
+Hola [Nombre],
+
+¡Gracias por probar INMOVA! Los próximos 30 días son tuyos para explorar la plataforma más avanzada de gestión inmobiliaria multi-vertical.
+
+Aquí está tu plan de éxito:
+
+📅 Semana 1: Configuración inicial
+- Añade tus primeras propiedades (5 min)
+- Importa tus inquilinos (10 min)
+- Configura tu primer contrato (5 min)
+
+📅 Semana 2: Automatizaciones
+- Activa recordatorios de pago automáticos
+- Configura tu primer flujo de morosidad
+- Prueba el Revenue Management (si tienes STR)
+
+📅 Semana 3: Integraciones
+- Conecta tu ERP contable
+- Configura Stripe para pagos online
+- Integra tu channel manager (STR)
+
+📅 Semana 4: Reportes y decisión
+- Genera tu primer reporte consolidado
+- Calcula tu ROI real
+- Decide si INMOVA es para ti
+
+¿Necesitas ayuda? Responde a este email o agenda una llamada:
+[Agendar onboarding personalizado - 30 min]
+
+¡Nos vemos dentro!
+El equipo INMOVA
 ```
 
-**Opción B: INMOVA White Label**
+**Email 2** (Día 7 - Valor):
 ```
-Setup:              Incluido
-Mensualidad:        €499/mes
-Actualizaciones:    Incluidas
-Soporte:            Incluido
-────────────────────────────────────────
-TOTAL 3 AÑOS:       €17,964
-+ 88 módulos profesionales
-+ Actualizaciones automáticas
-+ Sin riesgo técnico
+Asunto: 💡 3 formas en que INMOVA te ahorra 10 horas/semana
 
-AHORRO: €240,036 (93%) 🚀
-```
+Hola [Nombre],
 
----
+¿Has configurado ya tus primeras propiedades? Genial.
 
-### 7. 📱 5 Portales Especializados
+Hoy quiero mostrarte 3 automatizaciones que te van a cambiar la vida:
 
-#### Competencia: 2-3 Portales Básicos
-- Buildium: Inquilino, Propietario, Admin
-- AppFolio: Inquilino, Propietario, Admin
+1️⃣ Recordatorios de Pago Automáticos
+   → Configura una vez, olvídate para siempre
+   → Reduce morosidad 40%
+   → Ahorra: 2 horas/semana
 
-#### INMOVA: 5 Portales Profesionales
+2️⃣ Portal de Inquilinos Auto-Servicio
+   → Ellos mismos ven recibos, solicitan mantenimiento, pagan
+   → Reduces consultas 70%
+   → Ahorra: 3 horas/semana
 
-**1. Portal Inquilino**
-- Dashboard financiero personal
-- Pagos online (card, bank, wallet)
-- Solicitudes mantenimiento
-- Chat con gestor
-- Documentos (contrato, recibos)
-- Reservas espacios comunes
-- Comunidad social inquilinos
-- Marketplace servicios
-- Programa fidelización puntos
+3️⃣ Integraciones Contables
+   → Facturas y pagos se sincronizan solos a tu ERP
+   → Cero transcripciones manuales
+   → Ahorra: 5 horas/semana
 
-**2. Portal Propietario**
-- Dashboard rentabilidad propiedades
-- Reporting financiero mensual
-- Estado ocupación tiempo real
-- Documentos fiscales
-- Solicitar mantenimientos
-- Chat con property manager
-- Análisis comparativo mercado
-- Predicciones IA rentabilidad
+🎯 Total: 10 horas/semana ahorradas = 40 horas/mes = 1 semana completa al mes
 
-**3. Portal Proveedor**
-- Órdenes trabajo asignadas
-- Calendario disponibilidad
-- Check-in/out trabajos
-- Upload fotos antes/después
-- Facturación trabajos
-- Rating y reviews
-- Estadísticas desempeño
+¿Quieres que te ayudemos a configurarlo?
+[Sí, agendar llamada de 15 min]
 
-**4. Portal Comunidad** (Único mercado)
-- Anuncios vecinos
-- Votaciones online
-- Actas reuniones
-- Incidencias comunidad
-- Calendario eventos
-- Foro discusión
-- Documentos comunidad
-- Contabilidad comunidad
-
-**5. Portal Superadmin** (Multiempresa)
-- Vista todas empresas
-- Impersonación clientes
-- Operaciones bulk
-- Analytics global
-- Alertas sistema
-- Facturación B2B
-- White label management
-
----
-
-### 8. 🚀 Implementación Express (15 Días)
-
-#### Competencia: 60-180 Días
-- Buildium: 30-45 días
-- AppFolio: 45-60 días
-- Yardi: 90-180 días
-
-#### INMOVA: Operativo en 15 Días
-
-**Metodología Fast Track**:
-
-**Día 1-3: Kickoff & Setup**
-- Reunión kickoff (2h)
-- Creación ambiente
-- Configuración white label
-- Asignación Customer Success Manager
-
-**Día 4-7: Importación Datos**
-- Template Excel estructurado
-- Importación masiva automática:
-  - Edificios
-  - Unidades  
-  - Inquilinos
-  - Contratos
-  - Histórico pagos
-- Validación y reconciliación
-
-**Día 8-10: Configuración**
-- Usuarios y permisos
-- Módulos activar/desactivar
-- Workflows personalizados
-- Integraciones (contabilidad, bancos)
-- Plantillas documentos
-
-**Día 11-12: Formación**
-- Sesión admin (4h)
-- Sesión gestores (2h)
-- Grabación sesiones
-- Documentación personalizada
-- Q&A
-
-**Día 13-14: Testing & QA**
-- Testing usuarios reales
-- Refinamiento configuración
-- Simulaciones flujos críticos
-- Ajustes feedback
-
-**Día 15: Go Live** 🚀
-- Activación producción
-- Comunicación inquilinos
-- Soporte intensivo primera semana
-
-**Post Go-Live**:
-- Semana 1: Support 24/7
-- Semana 2-4: Daily check-ins
-- Mes 2-3: Weekly check-ins
-- Mes 4+: Monthly business reviews
-
-#### Comparativa Impacto
-
-**Yardi (180 días)**:
-```
-Costes implementación:
-→ Setup fees:           €25,000
-→ Consultoría:          €40,000
-→ Training:             €8,000
-→ Coste oportunidad:    €180,000
-   (6 meses sin operar)
-────────────────────────────────────
-TOTAL:                  €253,000
-Tiempo sin producción:  6 meses
+Un saludo,
+[Tu nombre]
 ```
 
-**INMOVA (15 días)**:
+**Email 3** (Día 14 - Social Proof):
 ```
-Costes implementación:
-→ Setup fees:           €0 (incluido)
-→ Consultoría:          Incluida
-→ Training:             Incluido
-→ Coste oportunidad:    €0
-   (operativo desde día 1)
-────────────────────────────────────
-TOTAL:                  €0
-Tiempo sin producción:  0
+Asunto: 📈 Caso de éxito: Cómo María aumentó ingresos STR un 32%
 
-AHORRO: €253,000
-Ventaja temporal: 165 días 🚀
+Hola [Nombre],
+
+Has llegado a la mitad de tu trial. ¿Cómo va?
+
+Hoy quiero compartirte un caso de éxito real:
+
+María González gestiona 18 propiedades STR en Barcelona.
+Antes de INMOVA:
+- Ajustaba precios manualmente (3 horas/día)
+- Calendario desincronizado entre Airbnb y Booking
+- Coordinaba limpiezas por WhatsApp
+- Ingresos: 42,000€/mes
+
+Después de INMOVA:
+- Revenue Management automático (0 horas)
+- Sincronización tiempo real
+- Limpieza automatizada con checklist
+- Ingresos: 55,440€/mes (+32%)
+
+Su testimonio:
+> "INMOVA pagó su inversión en el primer mes. Ahora gano más trabajando menos."
+
+¿Tienes propiedades STR? El Revenue Management solo está disponible en INMOVA.
+
+[Activar Revenue Management en mi cuenta]
+
+¿Preguntas? Responde a este email.
+
+Saludos,
+[Tu nombre]
+```
+
+**Email 4** (Día 21 - Urgencia):
+```
+Asunto: ⏰ Quedan 9 días de trial - ¿Qué tal va?
+
+Hola [Nombre],
+
+Faltan 9 días para que termine tu trial de 30 días.
+
+Antes de que decidas, quiero asegurarme de que has probado todo:
+
+✅ Gestión de propiedades
+✅ Contratos digitales
+✅ Portal inquilinos
+✅ Facturación y pagos
+✅ Mantenimiento
+✅ Reportes
+
+⚠️ ¿Aún no has probado?
+□ Revenue Management IA (STR)
+□ Predicción de morosidad ML
+□ Integraciones contables
+□ Multi-empresa
+
+Estas son las funciones que más diferencian a INMOVA.
+
+[Agendar demo de 15 min] - Te enseño las avanzadas
+
+Si ya tienes claro que INMOVA es para ti:
+[Ver planes y precios]
+
+🎁 Descuento especial: 20% OFF si contratas ahora (código: TRIAL20)
+
+¿Preguntas antes de decidir? Responde a este email.
+
+Saludos,
+[Tu nombre]
+```
+
+**Email 5** (Día 28 - Conversión):
+```
+Asunto: 🚀 Últimos 2 días de trial - Oferta especial dentro
+
+Hola [Nombre],
+
+Tu trial termina en 2 días (Día 30).
+
+He disfrutado viendo cómo has explorado INMOVA estos días. Espero que hayas podido ver el valor de tener una plataforma multi-vertical completa.
+
+🎁 OFERTA ESPECIAL PARA TI (Solo siguientes 48h):
+
+Si contratas ahora:
+- 2 meses GRATIS (si pagas anual)
+- Setup personalizado sin coste (valor 500€)
+- Soporte prioritario 3 meses
+- Acceso beta a nuevos módulos
+
+Código: TRIAL2MESES
+
+[Contratar ahora con descuento]
+
+⚠️ Si no haces nada, tu cuenta se pausará en 2 días. Podrás reactivar cuando quieras, pero esta oferta expira.
+
+¿Dudas antes de decidir?
+Responde a este email o llámame: [teléfono]
+Disponibilidad hoy: 10h-20h
+
+Un abrazo,
+[Tu nombre]
+P.D: Si al final INMOVA no es para ti, no pasa nada. Gracias por probarlo y ojalá nuestros caminos se crucen de nuevo en el futuro.
 ```
 
 ---
 
-### 9. 💰 Modelo Precio Disruptivo
+### Redes Sociales
 
-#### Problema Mercado: Precio por Unidad
-
-Industria cobra **€1-5 por unidad/mes**:
-
+**LinkedIn** (B2B Profesional):
 ```
-100 unidades:   €100-500/mes
-500 unidades:   €500-2,500/mes
-1,000 unidades: €1,000-5,000/mes
-5,000 unidades: €5,000-25,000/mes
+📊 ¿Gestionas más de 20 propiedades y usas múltiples herramientas?
 
-Problema:
-❌ Penaliza crecimiento
-❌ Impredecible (varía con ocupación)
-❌ Complejo (add-ons, usuarios extra)
-```
+Hay una mejor manera.
 
-#### Solución INMOVA: Flat Fee Unlimited
+INMOVA es la única plataforma que unifica:
+→ Alquiler tradicional
+→ Short-term rental (Airbnb, Booking)
+→ Co-living
+→ Build-to-rent
+→ House flipping
+→ Comercial
 
-**Plan Empresarial: €499/mes**
-- ✅ Unidades ilimitadas
-- ✅ Usuarios ilimitados
-- ✅ 88 módulos incluidos
-- ✅ Updates automáticas
-- ✅ Almacenamiento ilimitado
-- ✅ White label incluido
-- ✅ Precio fijo predecible
+Todo en una sola interfaz, con IA y automatización avanzada.
 
-**Plan Enterprise+: €1,999/mes**
-- Todo Plan Empresarial +
-- ✅ Multi-empresa (grupos)
-- ✅ API prioritaria
-- ✅ Custom reports
-- ✅ SLA 99.9%
-- ✅ CSM dedicado
-- ✅ Training ilimitado
+🎯 Resultados reales:
+• +30% ingresos STR (Revenue Management IA)
+• -40% morosidad (Predicción ML)
+• -85% tiempo contabilidad (6 integraciones ERPs)
 
-#### Comparativa Ahorro Real
+¿Quieres ver cómo funciona?
+👉 Demo gratuita: [link]
 
-**Escenario: 1,000 Propiedades**
-
-| Software | Coste Mensual | Coste Anual | vs INMOVA |
-|----------|---------------|-------------|----------|
-| Buildium | €3,000/mes | €36,000 | +86% 💸 |
-| AppFolio | €5,000/mes | €60,000 | +150% 💸 |
-| Yardi | €8,000/mes | €96,000 | +233% 💸 |
-| **INMOVA** | **€1,999/mes** | **€23,988** | **Referencia** |
-
-**Escenario: 5,000 Propiedades**
-
-| Software | Coste Mensual | Coste Anual | vs INMOVA |
-|----------|---------------|-------------|----------|
-| Buildium | €15,000/mes | €180,000 | +650% 💸 |
-| AppFolio | €25,000/mes | €300,000 | +1,151% 💸 |
-| Yardi | €40,000/mes | €480,000 | +1,901% 💸 |
-| **INMOVA** | **€1,999/mes** | **€23,988** | **Referencia** |
-
-> 💡 **Insight**: Cuanto más creces, **más ahorras con INMOVA**. El pricing tradicional penaliza el éxito.
-
----
-
-### 10. 🔗 Integraciones Nativas
-
-#### Contabilidad
-- ✅ ContaSimple (España)
-- ✅ Sage (UK/España)
-- ✅ Holded (España)
-- ✅ A3 Software (España)
-- ✅ Alegra (LatAm)
-- ✅ Zucchetti (Italia)
-- 🔄 QuickBooks (Q1 2026)
-- 🔄 Xero (Q1 2026)
-
-#### Pagos
-- ✅ Stripe (tarjetas, wallets)
-- ✅ SEPA Direct Debit
-- 🔄 PayPal (Q1 2026)
-- 🔄 Bizum (Q1 2026)
-
-#### Comunicación
-- ✅ WhatsApp Business
-- ✅ Email (SMTP)
-- ✅ SMS (Twilio)
-- ✅ Push Notifications
-
-#### Firma Digital
-- ✅ Signaturit (prep)
-- 🔄 DocuSign (Q2 2026)
-
-#### STR Channels
-- ✅ Airbnb
-- ✅ Booking.com
-- ✅ Vrbo
-- ✅ Expedia
-- ✅ HomeAway
-
-#### Open Banking
-- ✅ Plaid (prep)
-- 🔄 TrueLayer (Q1 2026)
-
-#### IoT
-- ✅ MQTT protocol
-- ✅ 50+ sensores compatibles
-
----
-
-## 📊 ROI CALCULATOR
-
-### Empresa Ejemplo: 500 Propiedades
-
-#### Costes Actuales (Stack Fragmentado)
-
-```
-SOFTWARE:
-Buildium:                 €375/mes
-Guesty (STR):             €450/mes
-Excel/herramientas:       €50/mes
-────────────────────────────────────
-Subtotal Software:        €875/mes
-
-OPERACIONES:
-Atención cliente:         €4,000/mes
-Admin/data entry:         €2,500/mes
-Mantenimiento reactivo:   €3,000/mes
-Marketing:                €1,000/mes
-Legal/contratos:          €800/mes
-────────────────────────────────────
-Subtotal Operaciones:     €11,300/mes
-
-TOTAL MENSUAL:            €12,175/mes
-TOTAL ANUAL:              €146,100/año
+#PropTech #GestionInmobiliaria #RealEstate #IA
 ```
 
-#### Costes con INMOVA
-
+**Instagram** (Visual, Casos de Éxito):
 ```
-SOFTWARE:
-INMOVA Empresarial:       €499/mes
-Todo incluido
-────────────────────────────────────
-Subtotal Software:        €499/mes
+[Carrusel de imágenes: Antes/Después]
 
-OPERACIONES (Automatizadas):
-Atención cliente:         €1,200/mes (-70% IA)
-Admin/data entry:         €500/mes (-80% OCR)
-Mantenimiento preventivo: €2,000/mes (-33% predictivo)
-Marketing:                €600/mes (-40% auto)
-Legal/contratos:          €300/mes (-60% templates)
-────────────────────────────────────
-Subtotal Operaciones:     €4,600/mes
+Imagen 1: "María gestiona 18 Airbnbs"
+Imagen 2: "ANTES: 3 horas/día ajustando precios manualmente"
+Imagen 3: "AHORA: Revenue Management automático con IA"
+Imagen 4: "RESULTADO: +32% ingresos en 3 meses"
+Imagen 5: "INMOVA - La plataforma que crece contigo"
 
-TOTAL MENSUAL:            €5,099/mes
-TOTAL ANUAL:              €61,188/año
+Caption:
+"¿Gestionas propiedades STR y ajustas precios manualmente? 
 
-AHORRO ANUAL:             €84,912 (58%) 🚀
+Hay una mejor manera 🚀
+
+INMOVA tiene Revenue Management con IA que:
+✅ Analiza tu competencia en tiempo real
+✅ Ajusta precios automáticamente
+✅ Maximiza ocupación e ingresos
+
+Resultado: +30% ingresos promedio
+
+Pruébalo 30 días gratis 👉 Link en bio
+
+#Airbnb #VacationRental #STR #PropTech #IA"
 ```
 
-#### Ingresos Adicionales con INMOVA
-
+**Twitter/X** (Noticias, Lanzamientos):
 ```
-Pricing Dinámico IA:      +6% = €45,000/año
-Reducción Morosidad:      -40% = €22,000/año
-Optimización Ocupación:   +2% = €15,000/año
-Marketplace Servicios:    Comisiones = €8,000/año
-────────────────────────────────────
-TOTAL INGRESOS+:          €90,000/año
+🚀 LANZAMIENTO: Revenue Management con IA para STR
 
-IMPACTO TOTAL:
-Ahorro costes:            €84,912/año
-Ingresos adicionales:     €90,000/año
-────────────────────────────────────
-BENEFICIO NETO:           €174,912/año
+Pricing dinámico automático que analiza:
+• Demanda en tiempo real
+• Competencia en tu zona
+• Eventos locales
+• Histórico de reservas
 
-Inversión INMOVA:         €5,988/año
-ROI:                      2,821% 🚀🚀🚀
+Resultado: +30% ingresos promedio
+
+Disponible ahora en INMOVA 👇
+[link]
+
+#PropTech #Airbnb #IA
 ```
 
 ---
 
-## 🎯 SEGMENTOS DE MERCADO
+## 📊 MÉTRICAS DE ÉXITO MARKETING
 
-### Segmento 1: Gestoras Medianas (100-1,000 props)
+### KPIs Principales
 
-**Perfil**:
-- Portfolio mixto (alquiler + algún STR)
-- 5-15 empleados
-- Presupuesto IT: €500-2,000/mes
-- Dolor: Crecimiento limitado por herramientas
+**Adquisición**:
+- CPL (Cost Per Lead): <30€
+- Trial signups: 100/mes (objetivo)
+- Demo requests: 50/mes
 
-**Propuesta Valor**:
-- ✅ Todo-en-uno elimina fragmentación
-- ✅ Precio flat permite escalar sin penalización
-- ✅ IA reduce carga trabajo team
-- ✅ White label diferenciación mercado
+**Conversión**:
+- Trial → Pago: >25%
+- Demo → Pago: >40%
+- Churn mensual: <5%
 
-**Competidor a Desplazar**: Buildium + Guesty
+**Engagement**:
+- Emails open rate: >35%
+- Click rate: >5%
+- NPS: >60
 
----
-
-### Segmento 2: Promotoras con Alquiler (50-500 props)
-
-**Perfil**:
-- Construyen y alquilan
-- Portfolio en crecimiento
-- Necesitan: construcción → gestión alquiler
-- Dolor: 2 plataformas desconectadas
-
-**Propuesta Valor**:
-- ✅ Módulo construcción 9 fases
-- ✅ Transición automática obra → alquiler
-- ✅ Trazabilidad completa activo
-- ✅ ROI desde fase proyecto
-
-**Competidor a Desplazar**: Procore + Buildium
+**Crecimiento**:
+- MRR growth: +15%/mes
+- CAC payback: <6 meses
+- LTV/CAC ratio: >3
 
 ---
 
-### Segmento 3: Gestoras STR (50-300 props Airbnb)
+## 🎯 PLAN DE CONTENIDOS (3 MESES)
 
-**Perfil**:
-- Portfolio Airbnb/Booking
-- Operación intensiva
-- Pricing dinámico crítico
-- Dolor: Costes altos Guesty/Hospitable
+### Mes 1: Awareness
 
-**Propuesta Valor**:
-- ✅ Channel manager incluido
-- ✅ Pricing IA +12% ingresos
-- ✅ Unified inbox comunicaciones
-- ✅ Ahorro 60% vs Guesty
+**Blog**:
+- "7 Verticales Inmobiliarias Que Puedes Gestionar Con Una Sola Herramienta"
+- "INMOVA vs HOMMING: Comparativa Completa 2024"
+- "Cómo el Revenue Management IA Puede Aumentar Tus Ingresos STR un 30%"
+- "Guía Completa: Build-to-Rent en España"
 
-**Competidor a Desplazar**: Guesty
+**Social**:
+- Casos de éxito (testimoniales video)
+- Screenshots dashboards
+- Comparativas competencia
+- Tips gestión inmobiliaria
 
----
-
-### Segmento 4: Family Offices / Inversores (10-200 props)
-
-**Perfil**:
-- Inversores profesionales
-- Portfolio diversificado
-- Necesitan: reporting, valoración
-- Dolor: Excel caótico
-
-**Propuesta Valor**:
-- ✅ Blockchain tokenización
-- ✅ Analytics avanzado BI
-- ✅ Valoración IA propiedades
-- ✅ ESG para fondos verdes
-
-**Competidor a Desplazar**: Excel / Software legacy
+**Paid**:
+- Google Ads: Palabras clave verticales
+- LinkedIn Ads: Targeting gestores profesionales
+- Facebook/Instagram: Remarketing
 
 ---
 
-### Segmento 5: SOCIMIs / REITs (1,000-10,000 props)
+### Mes 2: Consideration
 
-**Perfil**:
-- Cotizadas
-- Compliance estricto
-- Multi-sede
-- Dolor: Yardi/SAP caros y rígidos
+**Blog**:
+- "10 Señales de Que Necesitas Cambiar Tu Software Inmobiliario"
+- "ROI Real: Cuánto Ahorra INMOVA en Tu Gestión Diaria"
+- "Migración Sin Dolor: Cómo Pasarnos Tu Datos a INMOVA en 1 Día"
+- "Integraciones Contables: La Guía Definitiva"
 
-**Propuesta Valor**:
-- ✅ 90% más económico que Yardi
-- ✅ ESG reporting certificado
-- ✅ API abierta integraciones
-- ✅ Multi-empresa nativo
+**Webinars**:
+- "Revenue Management Para STR: Masterclass"
+- "De Build-to-Rent a Operación: Caso de Éxito Real"
+- "Multi-Vertical: Gestiona Toda Tu Cartera en Una Plataforma"
 
-**Competidor a Desplazar**: Yardi Voyager
-
----
-
-## 🗺️ ROADMAP PRODUCTO 2026
-
-### Q1 2026
-- ✅ Integraciones QuickBooks & Xero
-- ✅ Mobile Apps iOS/Android white label
-- ✅ API GraphQL
-- ✅ Certificación ISO 27001
-
-### Q2 2026
-- 🔄 Módulo Affordable Housing
-- 🔄 Módulo Student Housing
-- 🔄 Marketplace abierto servicios
-- 🔄 CRM comercial inmobiliario
-
-### Q3 2026
-- 🔄 IA Voice Assistant (Alexa/Google)
-- 🔄 Realidad Aumentada tours
-- 🔄 Metaverse showrooms
-- 🔄 Expansión LatAm
-
-### Q4 2026
-- 🔄 Módulo Asset Management
-- 🔄 Módulo Fund Management
-- 🔄 Certificaciones GRESB, LEED
-- 🔄 IPO preparedness tools
+**Email**:
+- Nurturing leads
+- Casos de éxito
+- Feature highlights
+- Ofertas limitadas
 
 ---
 
-## 🏁 CONCLUSIÓN
+### Mes 3: Conversión
 
-### INMOVA en 60 Segundos
+**Blog**:
+- "Cómo Elegir Software Inmobiliario: Checklist Definitivo"
+- "Pricing Inmobiliario: ¿Cuánto Deberías Pagar?"
+- "Implementación Rápida: De 0 a Productivo en 7 Días"
 
-**¿Qué es?**  
-La primera plataforma PropTech que unifica 7 modelos de negocio inmobiliario con IA, Blockchain e IoT.
+**Acciones**:
+- Descuentos limitados
+- Free setup promociones
+- Bonus para early adopters
+- Referral program lanzamiento
 
-**¿Por qué única?**  
-Competencia son 1-2 verticales. INMOVA es 7 verticales en una sola plataforma.
-
-**¿Cuánto cuesta?**  
-Flat fee €499-1,999/mes. Ilimitado todo. 70% más económico que alternativas.
-
-**¿Cuánto tardo operativo?**  
-15 días vs 90+ días competencia.
-
-**¿Qué ROI?**  
-Promedio 234% primer año. Casos hasta 2,800%.
-
-**¿Por qué ahora?**  
-Mercado €450B ESG inmobiliario. Tokenización despegando. IA GPT-4 game-changer. Ventana oportunidad 24-36 meses.
+**Retargeting**:
+- Aggressive remarketing
+- Ofertas personalizadas
+- Follow-up sales calls
+- Chat proactivo
 
 ---
 
-### Call to Action
+## 💬 FAQs ANTICIPADAS
 
-```
-🎯 DEMO PERSONALIZADA 30 MIN
-   → Ver tu negocio en INMOVA
-   → ROI calculator tu caso
-   → Pricing customizado
-   
+### Precio
+
+**P: "INMOVA es más cara que HOMMING, ¿por qué?"**
+
+R: "INMOVA cuesta 50€ más al mes (149€ vs 99€), pero ofrece:
+- 7 verticales vs 1 (alquiler, STR, co-living, build-to-rent, flipping, comercial, residencias)
+- IA y ML (Revenue Management, Predicción Morosidad)
+- 6 integraciones contables vs 2
+- API abierta completa
+- Multi-empresa
+- 88+ módulos vs ~40
+
+Para un gestor con cartera mixta, INMOVA ahorra 60% vs tener múltiples herramientas especializadas.
+
+**ROI típico**: Inversión pagada en primer mes."
+
+---
+
+**P: "¿Hay planes más baratos?"**
+
+R: "Nuestro plan base es 149€/mes para 10 propiedades. Si gestionas menos, podemos evaluar un descuento personalizado. Contáctanos: ventas@inmova.app
+
+También tenemos descuentos:
+- 20% si pagas anual
+- Descuentos por volumen (>100 propiedades)
+- Nonprofit/educativo: 30% descuento"
+
+---
+
+### Funcionalidades
+
+**P: "¿Tenéis app móvil?"**
+
+R: "Actualmente tenemos web responsive (funciona en móvil). App nativa iOS/Android está en roadmap Q2 2025. Si la app móvil es crítica para ti, podemos notificarte cuando esté lista."
+
+---
+
+**P: "¿El Revenue Management STR está disponible ahora?"**
+
+R: "Estamos en fase beta (disponible enero 2025). Puedes apuntarte al programa beta con descuento especial: ventas@inmova.app"
+
+---
+
+**P: "¿Soportáis mi vertical específica?"**
+
+R: "INMOVA soporta:
+✅ Alquiler residencial tradicional (completo)
+✅ Short-term rental / Airbnb (completo)
+✅ Co-living / alquiler por habitaciones (completo)
+⚠️ Build-to-rent (básico, mejoras Q1 2025)
+⚠️ House flipping (básico, mejoras Q1-Q2 2025)
+⚠️ Comercial (básico, mejoras Q1 2025)
+⚠️ Residencias mayores / colectivos (roadmap Q2 2025)
+
+Si tu vertical no está completa, podemos ofrecerte acceso beta con descuento."
+
+---
+
+### Migración
+
+**P: "Usamos [otro software], ¿cómo migramos?"**
+
+R: "Migraciones incluidas sin coste:
+- Asistencia técnica 1:1
+- Importación datos desde Excel/CSV
+- Conectores para principales softwares
+- Disponibilidad durante migración
+- Rollback garantizado si hay problema
+
+Tiempo típico: 1-3 días operativos.
+Downtime: 0 (sistemas paralelos durante migración)"
+
+---
+
+### Integraciones
+
+**P: "¿Se integra con mi ERP [X]?"**
+
+R: "Integraciones contables disponibles:
+✅ Zucchetti (completa)
+✅ ContaSimple (completa)
+⚠️ A3, Sage, Holded, Alegra (parcial, mejoras en curso)
+
+Si tu ERP no está, tenemos:
+- API REST abierta (puedes integrar tú)
+- Exportación CSV/Excel
+- Podemos desarrollar integración custom (Enterprise)
+
+Contacta ventas@inmova.app para evaluar tu caso."
+
+---
+
+## 🚀 CONCLUSIÓN
+
+**INMOVA no es una herramienta más de gestión inmobiliaria.**
+
+**INMOVA es LA plataforma multi-vertical que permite a gestores profesionales escalar sin límites.**
+
+### Nuestros 3 Pilares:
+
+1. **Multi-Vertical Real** (7 verticales, 1 plataforma)
+2. **Tecnología Avanzada** (IA, ML, automatización)
+3. **Integraciones Profundas** (6 ERPs, channel managers, APIs)
+
+### Nuestro Compromiso:
+
+- Innovación continua (85+ módulos en roadmap)
+- Customer success proactivo
+- Transparencia total (roadmap público)
+- Precios justos (ROI demostrable)
+
+### Nuestro Objetivo:
+
+**Convertirnos en la plataforma #1 de gestión inmobiliaria multi-vertical en España en 3 años.**
+
+**¿Te unes a la revolución PropTech?**
+
+---
+
+**[Prueba 30 días gratis - Sin tarjeta]**  
+**[Solicita demo personalizada - 30 min]**  
+**[Habla con un experto - Ahora]**
+
+---
+
+**INMOVA - La plataforma que crece contigo**  
+📧 hola@inmova.app  
+🌐 https://inmova.app  
 📞 +34 900 123 456
-📧 sales@inmova.com
-🌐 inmova.com/demo
-
-🚀 PRUEBA GRATUITA 30 DÍAS
-   → Sin tarjeta crédito
-   → Setup asistido incluido
-   → Migración datos gratuita
-   
-💡 Únete a 500+ empresas que ya confían en INMOVA
-```
 
 ---
 
-**Documento Elaborado Por**: INMOVA Marketing & Sales Team  
-**Versión**: 2.0 - Propuesta Valor Estratégica  
-**Fecha**: Diciembre 2025  
-**Uso**: Sales Enablement, Marketing Campaigns, Investor Presentations
+*Documento Marketing - Diciembre 2024*  
+*Versión 1.0*
 
----
-
-### Assets Disponibles
-
-- 📊 **Presentación Investor Pitch** (45 slides)
-- 🎥 **Video Demo 90 segundos** (YouTube)
-- 📄 **One-Pager Ejecutivo** (PDF)
-- 🧮 **ROI Calculator** (Excel interactivo)
-- 📋 **Comparativa vs Competencia** (Documento detallado)
-- 🎬 **Video Testimonios Clientes** (3-5 min)
-- 📈 **Case Studies** (10 casos éxito detallados)
-
-**Solicitar assets**: marketing@inmova.com
