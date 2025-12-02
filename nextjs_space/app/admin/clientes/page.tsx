@@ -758,13 +758,33 @@ export default function ClientesAdminPage() {
               {/* Filtros y Vista */}
               <Card className="mb-6">
                 <CardHeader>
-                  <CardTitle className="flex items-center text-base">
-                    <Filter className="h-4 w-4 mr-2" />
-                    Filtros y Vista
-                  </CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center text-base">
+                      <Filter className="h-4 w-4 mr-2" />
+                      Filtros y Vista
+                    </CardTitle>
+                    {/* Seleccionar todos */}
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
+                        <Checkbox 
+                          id="select-all"
+                          checked={filteredCompanies.length > 0 && selectedCompanies.size === filteredCompanies.length}
+                          onCheckedChange={toggleSelectAll}
+                        />
+                        <Label htmlFor="select-all" className="text-sm font-medium cursor-pointer">
+                          Seleccionar todas ({filteredCompanies.length})
+                        </Label>
+                      </div>
+                      {selectedCompanies.size > 0 && (
+                        <Badge variant="secondary" className="ml-2">
+                          {selectedCompanies.size} seleccionada{selectedCompanies.size > 1 ? 's' : ''}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                     <div>
                       <Label className="text-sm">Estado</Label>
                       <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -773,9 +793,9 @@ export default function ClientesAdminPage() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">Todos</SelectItem>
-                          <SelectItem value="activo">Activos</SelectItem>
-                          <SelectItem value="suspendido">Suspendidos</SelectItem>
-                          <SelectItem value="prueba">En Prueba</SelectItem>
+                          <SelectItem value="activo">✅ Activos</SelectItem>
+                          <SelectItem value="suspendido">⏸️ Suspendidos</SelectItem>
+                          <SelectItem value="prueba">🔬 En Prueba</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -816,6 +836,21 @@ export default function ClientesAdminPage() {
                     </div>
 
                     <div>
+                      <Label className="text-sm">Ordenar por</Label>
+                      <Select value={sortBy} onValueChange={setSortBy}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="nombre">Nombre</SelectItem>
+                          <SelectItem value="createdAt">Fecha creación</SelectItem>
+                          <SelectItem value="usuarios">Nº Usuarios</SelectItem>
+                          <SelectItem value="edificios">Nº Edificios</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
                       <Label className="text-sm">Vista</Label>
                       <Select value={viewMode} onValueChange={(value: any) => setViewMode(value)}>
                         <SelectTrigger>
@@ -833,22 +868,263 @@ export default function ClientesAdminPage() {
               </Card>
             </div>
 
+            {/* Menú de Bulk Actions */}
+            {selectedCompanies.size > 0 && (
+              <Card className="mb-6 border-primary shadow-lg">
+                <CardContent className="py-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <span className="font-semibold text-primary">
+                        {selectedCompanies.size} empresa{selectedCompanies.size > 1 ? 's' : ''} seleccionada{selectedCompanies.size > 1 ? 's' : ''}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedCompanies(new Set())}
+                      >
+                        <X className="w-4 h-4 mr-2" />
+                        Limpiar selección
+                      </Button>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleBulkAction('activate')}
+                        disabled={bulkActionLoading}
+                      >
+                        <Power className="w-4 h-4 mr-2" />
+                        Activar
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleBulkAction('deactivate')}
+                        disabled={bulkActionLoading}
+                      >
+                        <PowerOff className="w-4 h-4 mr-2" />
+                        Desactivar
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleExport}
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Exportar
+                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <Settings className="w-4 h-4 mr-2" />
+                            Más acciones
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleBulkAction('changePlan')}>
+                            <CreditCard className="w-4 h-4 mr-2" />
+                            Cambiar plan
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            onClick={() => handleBulkAction('delete')}
+                            className="text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Eliminar
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Lista de Empresas */}
-            <div className="grid gap-4">
-              {filteredCompanies.length === 0 ? (
-                <Card>
-                  <CardContent className="flex flex-col items-center justify-center py-12">
-                    <Building2 className="h-12 w-12 text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">
-                      {searchQuery ? 'No se encontraron empresas' : 'No hay empresas registradas'}
-                    </p>
-                  </CardContent>
-                </Card>
-              ) : (
-                filteredCompanies.map(company => (
-                  <Card key={company.id} className="hover:shadow-lg transition-shadow">
+            {filteredCompanies.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Building2 className="h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">
+                    {searchQuery ? 'No se encontraron empresas' : 'No hay empresas registradas'}
+                  </p>
+                </CardContent>
+              </Card>
+            ) : viewMode === 'table' ? (
+              /* Vista de Tabla */
+              <Card>
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-muted/50 border-b">
+                        <tr>
+                          <th className="p-3 text-left">
+                            <Checkbox 
+                              checked={filteredCompanies.length > 0 && selectedCompanies.size === filteredCompanies.length}
+                              onCheckedChange={toggleSelectAll}
+                            />
+                          </th>
+                          <th className="p-3 text-left font-semibold">Empresa</th>
+                          <th className="p-3 text-left font-semibold">Estado</th>
+                          <th className="p-3 text-left font-semibold">Categoría</th>
+                          <th className="p-3 text-left font-semibold">Plan</th>
+                          <th className="p-3 text-left font-semibold">Usuarios</th>
+                          <th className="p-3 text-left font-semibold">Edificios</th>
+                          <th className="p-3 text-left font-semibold">Inquilinos</th>
+                          <th className="p-3 text-right font-semibold">Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredCompanies.map(company => (
+                          <tr 
+                            key={company.id} 
+                            className={`border-b hover:bg-muted/30 transition-colors ${
+                              selectedCompanies.has(company.id) ? 'bg-primary/5' : ''
+                            }`}
+                          >
+                            <td className="p-3">
+                              <Checkbox 
+                                checked={selectedCompanies.has(company.id)}
+                                onCheckedChange={() => toggleCompanySelection(company.id)}
+                              />
+                            </td>
+                            <td className="p-3">
+                              <div>
+                                <div className="font-medium">{company.nombre}</div>
+                                {company.emailContacto && (
+                                  <div className="text-sm text-muted-foreground">{company.emailContacto}</div>
+                                )}
+                              </div>
+                            </td>
+                            <td className="p-3">
+                              {getEstadoBadge(company.estadoCliente)}
+                            </td>
+                            <td className="p-3">
+                              {getCategoryBadge(company.category)}
+                            </td>
+                            <td className="p-3">
+                              <div className="text-sm">
+                                {company.subscriptionPlan ? (
+                                  <>
+                                    <div className="font-medium">{company.subscriptionPlan.nombre}</div>
+                                    <div className="text-muted-foreground">
+                                      {company.subscriptionPlan.precioMensual}€/mes
+                                    </div>
+                                  </>
+                                ) : (
+                                  <span className="text-muted-foreground">Sin plan</span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="p-3">
+                              <div className="flex items-center gap-1">
+                                <Users className="w-4 h-4 text-muted-foreground" />
+                                <span>{company._count.users}</span>
+                              </div>
+                            </td>
+                            <td className="p-3">
+                              <div className="flex items-center gap-1">
+                                <Building2 className="w-4 h-4 text-muted-foreground" />
+                                <span>{company._count.buildings}</span>
+                              </div>
+                            </td>
+                            <td className="p-3">
+                              <div className="flex items-center gap-1">
+                                <Users className="w-4 h-4 text-muted-foreground" />
+                                <span>{company._count.tenants}</span>
+                              </div>
+                            </td>
+                            <td className="p-3 text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleImpersonate(company.id, company.nombre)}
+                                  title="Login como empresa"
+                                >
+                                  <LogIn className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => router.push(`/admin/clientes/${company.id}`)}
+                                  title="Ver detalles"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </Button>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="sm">
+                                      <MoreVertical className="w-4 h-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => handleCopyId(company.id)}>
+                                      <Copy className="w-4 h-4 mr-2" />
+                                      Copiar ID
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleOpenChangePlan(company)}>
+                                      <CreditCard className="w-4 h-4 mr-2" />
+                                      Cambiar Plan
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      onClick={() => handleToggleActive(company.id, company.activo)}
+                                      className={company.activo ? 'text-yellow-600' : 'text-green-600'}
+                                    >
+                                      {company.activo ? (
+                                        <>
+                                          <PowerOff className="w-4 h-4 mr-2" />
+                                          Desactivar
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Power className="w-4 h-4 mr-2" />
+                                          Activar
+                                        </>
+                                      )}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      onClick={() => handleDeleteCompany(company.id, company.nombre)}
+                                      className="text-destructive"
+                                    >
+                                      <Trash2 className="w-4 h-4 mr-2" />
+                                      Eliminar
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              /* Vista de Tarjetas */
+              <div className="grid gap-4">
+                {filteredCompanies.map(company => (
+                  <Card 
+                    key={company.id} 
+                    className={`hover:shadow-lg transition-all ${
+                      selectedCompanies.has(company.id) ? 'ring-2 ring-primary' : ''
+                    }`}
+                  >
                     <CardHeader>
-                      <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-4">
+                        {/* Checkbox de selección */}
+                        <div className="pt-1">
+                          <Checkbox 
+                            id={`select-${company.id}`}
+                            checked={selectedCompanies.has(company.id)}
+                            onCheckedChange={() => toggleCompanySelection(company.id)}
+                          />
+                        </div>
+                        
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2 flex-wrap">
                             <CardTitle className="text-xl">{company.nombre}</CardTitle>

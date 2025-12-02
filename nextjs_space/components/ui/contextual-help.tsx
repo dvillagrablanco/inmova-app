@@ -1,112 +1,131 @@
 'use client';
 
 import { useState } from 'react';
-import { HelpCircle, X, Book, MessageCircle, Video, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { HelpCircle, X, BookOpen, Lightbulb, Target } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-interface HelpResource {
+interface HelpSection {
   title: string;
-  description: string;
-  type: 'doc' | 'video' | 'tutorial';
-  link?: string;
+  content: string;
+  tips?: string[];
 }
 
 interface ContextualHelpProps {
+  module: string;
   title: string;
-  resources: HelpResource[];
-  quickTips?: string[];
+  description: string;
+  sections: HelpSection[];
+  quickActions?: { label: string; action: () => void }[];
 }
 
-export function ContextualHelp({ title, resources, quickTips = [] }: ContextualHelpProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  if (!isOpen) {
-    return (
-      <Button
-        onClick={() => setIsOpen(true)}
-        variant="outline"
-        size="sm"
-        className="fixed bottom-24 right-6 h-12 px-4 rounded-full shadow-lg border-2 border-indigo-200 hover:border-indigo-400 bg-white z-40"
-      >
-        <HelpCircle className="h-4 w-4 mr-2 text-indigo-600" />
-        <span className="text-sm font-medium">Ayuda</span>
-      </Button>
-    );
-  }
+export function ContextualHelp({ 
+  module, 
+  title, 
+  description, 
+  sections,
+  quickActions 
+}: ContextualHelpProps) {
+  const [open, setOpen] = useState(false);
 
   return (
-    <Card className="fixed bottom-24 right-6 w-96 shadow-2xl border-2 border-indigo-200 z-40 animate-in slide-in-from-bottom-4">
-      <CardHeader className="relative">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute right-2 top-2"
-          onClick={() => setIsOpen(false)}
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="flex items-center gap-2 text-muted-foreground hover:text-primary"
         >
-          <X className="h-4 w-4" />
+          <HelpCircle className="h-5 w-5" />
+          <span className="hidden sm:inline">Ayuda</span>
         </Button>
-        <CardTitle className="text-lg pr-8">Ayuda: {title}</CardTitle>
-        <CardDescription>Recursos y tips para esta sección</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="recursos" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="recursos">Recursos</TabsTrigger>
-            <TabsTrigger value="tips">Tips Rápidos</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="recursos" className="space-y-3 mt-4">
-            {resources.map((resource, index) => (
-              <div
-                key={index}
-                className="flex items-start gap-3 p-3 rounded-lg border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50/50 transition-colors cursor-pointer"
-                onClick={() => resource.link && window.open(resource.link, '_blank')}
-              >
-                <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-50 to-violet-50">
-                  {resource.type === 'doc' && <Book className="h-4 w-4 text-indigo-600" />}
-                  {resource.type === 'video' && <Video className="h-4 w-4 text-violet-600" />}
-                  {resource.type === 'tutorial' && <MessageCircle className="h-4 w-4 text-pink-600" />}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-gray-900 truncate">{resource.title}</p>
-                    {resource.link && <ExternalLink className="h-3 w-3 text-gray-400 flex-shrink-0" />}
+      </DialogTrigger>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <DialogTitle className="text-2xl">
+                {title}
+              </DialogTitle>
+              <DialogDescription className="mt-2">
+                {description}
+              </DialogDescription>
+            </div>
+            <Badge variant="secondary" className="ml-4">
+              {module}
+            </Badge>
+          </div>
+        </DialogHeader>
+
+        <div className="space-y-6 mt-4">
+          {/* Secciones de ayuda */}
+          {sections.map((section, index) => (
+            <Card key={index}>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <BookOpen className="h-5 w-5 text-primary" />
+                  {section.title}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground mb-3">{section.content}</p>
+                {section.tips && section.tips.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    <div className="flex items-center gap-2 text-sm font-semibold">
+                      <Lightbulb className="h-4 w-4 text-yellow-500" />
+                      <span>Consejos:</span>
+                    </div>
+                    <ul className="space-y-1 ml-6">
+                      {section.tips.map((tip, tipIndex) => (
+                        <li key={tipIndex} className="text-sm text-muted-foreground list-disc">
+                          {tip}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                  <p className="text-xs text-gray-600 mt-0.5">{resource.description}</p>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+
+          {/* Acciones rápidas */}
+          {quickActions && quickActions.length > 0 && (
+            <Card className="bg-primary/5 border-primary/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Target className="h-5 w-5 text-primary" />
+                  Acciones Rápidas
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {quickActions.map((action, index) => (
+                    <Button
+                      key={index}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        action.action();
+                        setOpen(false);
+                      }}
+                    >
+                      {action.label}
+                    </Button>
+                  ))}
                 </div>
-              </div>
-            ))}
-          </TabsContent>
-          
-          <TabsContent value="tips" className="space-y-2 mt-4">
-            {quickTips.length > 0 ? (
-              quickTips.map((tip, index) => (
-                <div key={index} className="flex items-start gap-2 p-3 rounded-lg bg-gradient-to-r from-indigo-50 to-violet-50">
-                  <Badge className="mt-0.5 bg-indigo-600 text-white">Tip {index + 1}</Badge>
-                  <p className="text-sm text-gray-700 flex-1">{tip}</p>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-gray-500 text-center py-4">No hay tips disponibles para esta sección</p>
-            )}
-          </TabsContent>
-        </Tabs>
-        
-        <div className="mt-4 pt-4 border-t border-gray-200">
-          <Button
-            onClick={() => window.open('/landing/contacto', '_blank')}
-            variant="outline"
-            size="sm"
-            className="w-full"
-          >
-            <MessageCircle className="h-4 w-4 mr-2" />
-            Contactar Soporte
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        <div className="flex justify-end mt-6">
+          <Button onClick={() => setOpen(false)}>
+            Entendido
           </Button>
         </div>
-      </CardContent>
-    </Card>
+      </DialogContent>
+    </Dialog>
   );
 }

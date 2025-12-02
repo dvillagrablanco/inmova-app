@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { ContextualHelp } from '@/components/ui/contextual-help';
+import { helpData } from '@/lib/contextual-help-data';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -245,11 +247,25 @@ export default function ContratosPage() {
 
             {/* Header Section */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="min-w-0">
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Contratos</h1>
-                <p className="text-sm sm:text-base text-muted-foreground">
-                  Gestiona los contratos de arrendamiento
-                </p>
+              <div className="flex items-start gap-3 min-w-0">
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Contratos</h1>
+                  <p className="text-sm sm:text-base text-muted-foreground">
+                    Gestiona los contratos de arrendamiento
+                  </p>
+                </div>
+                <ContextualHelp
+                  module={helpData.contratos.module}
+                  title={helpData.contratos.title}
+                  description={helpData.contratos.description}
+                  sections={helpData.contratos.sections}
+                  quickActions={canCreate ? [
+                    {
+                      label: 'Crear nuevo contrato',
+                      action: () => router.push('/contratos/nuevo')
+                    }
+                  ] : undefined}
+                />
               </div>
               {canCreate && (
                 <Button onClick={() => router.push('/contratos/nuevo')} className="w-full sm:w-auto">

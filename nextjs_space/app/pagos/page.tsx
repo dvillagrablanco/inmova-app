@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { ContextualHelp } from '@/components/ui/contextual-help';
+import { helpData } from '@/lib/contextual-help-data';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Breadcrumb,
@@ -249,11 +251,19 @@ export default function PagosPage() {
 
             {/* Header Section */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="min-w-0">
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Pagos</h1>
-                <p className="text-sm sm:text-base text-muted-foreground">
-                  Gestiona los pagos de alquileres
-                </p>
+              <div className="flex items-start gap-3 min-w-0">
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Pagos</h1>
+                  <p className="text-sm sm:text-base text-muted-foreground">
+                    Gestiona los pagos de alquileres
+                  </p>
+                </div>
+                <ContextualHelp
+                  module={helpData.pagos.module}
+                  title={helpData.pagos.title}
+                  description={helpData.pagos.description}
+                  sections={helpData.pagos.sections}
+                />
               </div>
               <div className="flex gap-2">
                 <Button

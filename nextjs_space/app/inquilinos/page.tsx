@@ -12,6 +12,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
+import { ContextualHelp } from '@/components/ui/contextual-help';
+import { helpData } from '@/lib/contextual-help-data';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -224,11 +226,25 @@ export default function InquilinosPage() {
 
             {/* Header Section */}
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight">Inquilinos</h1>
-                <p className="text-muted-foreground">
-                  Gestiona los inquilinos de tus propiedades
-                </p>
+              <div className="flex items-start gap-3">
+                <div>
+                  <h1 className="text-3xl font-bold tracking-tight">Inquilinos</h1>
+                  <p className="text-muted-foreground">
+                    Gestiona los inquilinos de tus propiedades
+                  </p>
+                </div>
+                <ContextualHelp
+                  module={helpData.inquilinos.module}
+                  title={helpData.inquilinos.title}
+                  description={helpData.inquilinos.description}
+                  sections={helpData.inquilinos.sections}
+                  quickActions={canCreate ? [
+                    {
+                      label: 'Registrar nuevo inquilino',
+                      action: () => router.push('/inquilinos/nuevo')
+                    }
+                  ] : undefined}
+                />
               </div>
               {canCreate && (
                 <Button onClick={() => router.push('/inquilinos/nuevo')}>

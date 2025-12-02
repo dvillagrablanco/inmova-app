@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { ContextualHelp } from '@/components/ui/contextual-help';
+import { helpData } from '@/lib/contextual-help-data';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -174,11 +176,25 @@ export default function EdificiosPage() {
 
             {/* Header Section */}
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight">Edificios</h1>
-                <p className="text-muted-foreground">
-                  Gestiona los edificios de tu cartera inmobiliaria
-                </p>
+              <div className="flex items-start gap-3">
+                <div>
+                  <h1 className="text-3xl font-bold tracking-tight">Edificios</h1>
+                  <p className="text-muted-foreground">
+                    Gestiona los edificios de tu cartera inmobiliaria
+                  </p>
+                </div>
+                <ContextualHelp
+                  module={helpData.edificios.module}
+                  title={helpData.edificios.title}
+                  description={helpData.edificios.description}
+                  sections={helpData.edificios.sections}
+                  quickActions={canCreate ? [
+                    {
+                      label: 'Crear nuevo edificio',
+                      action: () => router.push('/edificios/nuevo')
+                    }
+                  ] : undefined}
+                />
               </div>
               {canCreate && (
                 <Button onClick={() => router.push('/edificios/nuevo')}>
