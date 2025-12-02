@@ -2,29 +2,20 @@
  * Funciones de sanitización y seguridad para inputs del usuario
  */
 
-// Sanitizar HTML para prevenir XSS
-export function sanitizeHtml(html: string): string {
-  const map: Record<string, string> = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#x27;',
-    '/': '&#x2F;',
-  };
-  const reg = /[&<>"'\/]/gi;
-  return html.replace(reg, (match) => map[match]);
+// Sanitizar input general - remueve caracteres peligrosos
+export function sanitizeInput(input: string, maxLength = 10000): string {
+  return input
+    .replace(/[<>"']/g, '') // Remover < > " '
+    .trim()
+    .substring(0, maxLength);
 }
 
-// Sanitizar texto para prevenir inyección SQL (aunque esto debe hacerse en el backend)
-export function sanitizeSql(input: string): string {
-  return input
-    .replace(/'/g, "''")
-    .replace(/\\/g, '\\\\')
-    .replace(/;/g, '')
-    .replace(/--/g, '')
-    .replace(/\/\*/g, '')
-    .replace(/\*\//g, '');
+// Sanitizar email
+export function sanitizeEmail(email: string): string {
+  return email
+    .toLowerCase()
+    .trim()
+    .substring(0, 254);
 }
 
 // Validar y sanitizar URLs
@@ -41,12 +32,68 @@ export function sanitizeUrl(url: string): string {
   }
 }
 
+// Sanitizar número de teléfono
+export function sanitizePhone(phone: string): string {
+  return phone
+    .replace(/[^0-9+\-() ]/g, '') // Solo números y símbolos comunes
+    .replace(/\s+/g, ' ') // Normalizar espacios múltiples
+    .trim()
+    .substring(0, 20);
+}
+
+// Sanitizar alfanumérico (solo letras, números y espacios)
+export function sanitizeAlphanumeric(input: string): string {
+  return input
+    .replace(/[^a-zA-Z0-9 ]/g, '')
+    .substring(0, 1000);
+}
+
 // Sanitizar nombre de archivo
-export function sanitizeFilename(filename: string): string {
-  return filename
-    .replace(/[^a-zA-Z0-9._-]/g, '_')
-    .replace(/\.\./g, '_')
-    .substring(0, 255);
+export function sanitizeFileName(filename: string): string {
+  // Primero reemplazar .. con _ para prevenir path traversal
+  let sanitized = filename.replace(/\.\./g, '_');
+  
+  // Luego reemplazar otros caracteres especiales
+  sanitized = sanitized.replace(/[^a-zA-Z0-9._-]/g, '_');
+  
+  // No debe empezar con punto
+  if (sanitized.startsWith('.')) {
+    sanitized = '_' + sanitized.substring(1);
+  }
+  
+  return sanitized.substring(0, 255);
+}
+
+// Backward compatibility
+export const sanitizeFilename = sanitizeFileName;
+
+// Sanitizar HTML - permite tags seguros
+export function sanitizeHtml(html: string): string {
+  // Esta es una implementación básica. En producción, usar DOMPurify o similar
+  // Por ahora, simplemente remueve scripts y atributos peligrosos
+  let sanitized = html;
+  
+  // Remover script tags
+  sanitized = sanitized.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+  
+  // Remover event handlers
+  sanitized = sanitized.replace(/on\w+\s*=\s*["'][^"']*["']/gi, '');
+  
+  // Remover javascript: en hrefs
+  sanitized = sanitized.replace(/javascript:/gi, '');
+  
+  return sanitized;
+}
+
+// Sanitizar texto para prevenir inyección SQL (aunque esto debe hacerse en el backend)
+export function sanitizeSql(input: string): string {
+  return input
+    .replace(/'/g, "''")
+    .replace(/\\/g, '\\\\')
+    .replace(/;/g, '')
+    .replace(/--/g, '')
+    .replace(/\/\*/g, '')
+    .replace(/\*\//g, '');
 }
 
 // Validar tipo MIME de archivo
@@ -57,31 +104,6 @@ export function isValidMimeType(mimeType: string, allowedTypes: string[]): boole
     }
     return mimeType === type;
   });
-}
-
-// Sanitizar input general
-export function sanitizeInput(input: string, options?: {
-  allowHtml?: boolean;
-  maxLength?: number;
-  trim?: boolean;
-}): string {
-  const { allowHtml = false, maxLength, trim = true } = options || {};
-  
-  let sanitized = input;
-  
-  if (trim) {
-    sanitized = sanitized.trim();
-  }
-  
-  if (!allowHtml) {
-    sanitized = sanitizeHtml(sanitized);
-  }
-  
-  if (maxLength) {
-    sanitized = sanitized.substring(0, maxLength);
-  }
-  
-  return sanitized;
 }
 
 // Generar token CSRF

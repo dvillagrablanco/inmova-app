@@ -38,7 +38,7 @@ export function KPICard({ title, value, icon: Icon, trend, suffix = '', classNam
                 trend.isPositive ? 'text-green-600' : 'text-red-600'
               }`}
             >
-              {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%
+              {trend.isPositive ? '+' : '-'}{Math.abs(trend.value)}%
             </p>
           )}
         </div>

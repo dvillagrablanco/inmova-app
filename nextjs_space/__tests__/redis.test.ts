@@ -2,6 +2,7 @@
  * Tests for Redis Cache Service
  */
 
+import { describe, it, expect, vi } from 'vitest';
 import {
   getCached,
   setCached,
@@ -28,7 +29,7 @@ describe('Redis Cache Service', () => {
   });
   
   it('should execute withCache fetcher when cache misses', async () => {
-    const fetcher = jest.fn().mockResolvedValue({ data: 'fresh' });
+    const fetcher = vi.fn().mockResolvedValue({ data: 'fresh' });
     
     const result = await withCache('test-key', fetcher, CACHE_TTL.SHORT);
     

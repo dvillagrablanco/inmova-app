@@ -236,6 +236,11 @@ model User {
   // Push Notifications
   pushSubscriptions    PushSubscription[]
 
+  @@index([email])
+  @@index([companyId])
+  @@index([role, companyId])
+  @@index([activo])
+  @@index([createdAt])
   @@map("users")
 }
 
@@ -667,6 +672,13 @@ model MaintenanceRequest {
   // Fase 3
   workOrders        ProviderWorkOrder[]
 
+  @@index([unitId])
+  @@index([estado])
+  @@index([prioridad])
+  @@index([unitId, estado])
+  @@index([estado, prioridad])
+  @@index([fechaProgramada])
+  @@index([createdAt])
   @@map("maintenance_requests")
 }
 
@@ -734,6 +746,14 @@ model Expense {
   bankTransactions  BankTransaction[]
   conciliacionesManual ConciliacionManual[]
 
+  @@index([buildingId])
+  @@index([unitId])
+  @@index([providerId])
+  @@index([categoria])
+  @@index([fecha])
+  @@index([buildingId, categoria])
+  @@index([buildingId, fecha])
+  @@index([createdAt])
   @@map("expenses")
 }
 
@@ -763,7 +783,14 @@ model Document {
   versions          DocumentVersion[]
   shares            DocumentShare[]
 
+  @@index([buildingId])
+  @@index([unitId])
+  @@index([tenantId])
+  @@index([contractId])
+  @@index([tipo])
   @@index([folderId])
+  @@index([createdAt])
+  @@index([fechaVencimiento])
   @@map("documents")
 }
 
@@ -785,8 +812,13 @@ model Notification {
   company           Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
   user              User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
+  @@index([leida])
+  @@index([userId, leida])
   @@index([companyId, leida])
   @@index([companyId, createdAt])
+  @@index([tipo])
+  @@index([createdAt])
   @@map("notifications")
 }
 
@@ -1112,6 +1144,14 @@ model Task {
   asignadoUser      User?            @relation("TaskAssignedTo", fields: [asignadoA], references: [id], onDelete: SetNull)
   creadorUser       User             @relation("TaskCreatedBy", fields: [creadoPor], references: [id], onDelete: Cascade)
 
+  @@index([companyId])
+  @@index([asignadoA])
+  @@index([estado])
+  @@index([prioridad])
+  @@index([fechaLimite])
+  @@index([companyId, estado])
+  @@index([asignadoA, estado])
+  @@index([createdAt])
   @@map("tasks")
 }
 

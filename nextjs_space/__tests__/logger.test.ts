@@ -2,12 +2,10 @@
  * Tests for Logger Service
  */
 
+import { describe, it, expect } from 'vitest';
 import logger, { logError, logApiRequest, logPerformance } from '@/lib/logger';
 
 describe('Logger Service', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
   
   it('should log errors with context', () => {
     const error = new Error('Test error');
