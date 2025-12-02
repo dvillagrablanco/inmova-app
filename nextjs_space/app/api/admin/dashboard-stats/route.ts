@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { subDays, subMonths, startOfMonth, endOfMonth } from 'date-fns';
+import { subDays, subMonths, startOfMonth, endOfMonth, startOfDay, format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +26,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Obtener todas las empresas
+    const now = new Date();
+    const startOfCurrentMonth = startOfMonth(now);
+    const startOfLastMonth = startOfMonth(subMonths(now, 1));
+    const endOfLastMonth = endOfMonth(subMonths(now, 1));
+    const last30Days = subDays(now, 30);
+    const last90Days = subDays(now, 90);
+
+    // ===== MÉTRICAS DE EMPRESAS =====
     const totalCompanies = await prisma.company.count();
     const activeCompanies = await prisma.company.count({
       where: { activo: true },
@@ -37,7 +45,29 @@ export async function GET(request: NextRequest) {
       where: { estadoCliente: 'suspendido' },
     });
 
-    // Usuarios totales en el sistema
+    const newCompaniesLast30Days = await prisma.company.count({
+      where: {
+        createdAt: { gte: last30Days },
+      },
+    });
+
+    const newCompaniesLast90Days = await prisma.company.count({
+      where: {
+        createdAt: { gte: last90Days },
+      },
+    });
+
+    // Churn rate (empresas suspendidas en últimos 30 días)
+    const churnedCompanies = await prisma.company.count({
+      where: {
+        estadoCliente: 'suspendido',
+        updatedAt: { gte: last30Days },
+      },
+    });
+
+    const churnRate = totalCompanies > 0 ? (churnedCompanies / totalCompanies) * 100 : 0;
+
+    // ===== MÉTRICAS DE USUARIOS =====
     const totalUsers = await prisma.user.count();
     const activeUsers = await prisma.user.count({
       where: {
@@ -47,9 +77,21 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Propiedades totales
+    const newUsersLast30Days = await prisma.user.count({
+      where: {
+        createdAt: { gte: last30Days },
+      },
+    });
+
+    // ===== MÉTRICAS DE PROPIEDADES =====
     const totalBuildings = await prisma.building.count();
     const totalUnits = await prisma.unit.count();
+
+    const newBuildingsLast30Days = await prisma.building.count({
+      where: {
+        createdAt: { gte: last30Days },
+      },
+    });
 
     // Inquilinos totales
     const totalTenants = await prisma.tenant.count();
@@ -69,16 +111,13 @@ export async function GET(request: NextRequest) {
       where: { estado: 'activo' },
     });
 
+    // ===== MÉTRICAS FINANCIERAS =====
     // Ingresos del mes actual
-    const currentMonth = new Date();
-    const monthStart = startOfMonth(currentMonth);
-    const monthEnd = endOfMonth(currentMonth);
-
     const paymentsThisMonth = await prisma.payment.findMany({
       where: {
         fechaVencimiento: {
-          gte: monthStart,
-          lte: monthEnd,
+          gte: startOfCurrentMonth,
+          lte: endOfMonth(now),
         },
         estado: 'pagado',
       },
@@ -92,24 +131,112 @@ export async function GET(request: NextRequest) {
       0
     );
 
-    // Crecimiento de empresas (últimos 30 días)
-    const thirtyDaysAgo = subDays(new Date(), 30);
-    const newCompaniesLast30Days = await prisma.company.count({
+    // Ingresos del mes pasado
+    const paymentsLastMonth = await prisma.payment.findMany({
       where: {
-        createdAt: {
-          gte: thirtyDaysAgo,
+        fechaVencimiento: {
+          gte: startOfLastMonth,
+          lte: endOfLastMonth,
+        },
+        estado: 'pagado',
+      },
+      select: {
+        monto: true,
+      },
+    });
+
+    const lastMonthRevenue = paymentsLastMonth.reduce(
+      (sum, payment) => sum + payment.monto,
+      0
+    );
+
+    // Crecimiento de ingresos
+    const revenueGrowth = lastMonthRevenue > 0
+      ? ((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100
+      : 0;
+
+    // MRR (Monthly Recurring Revenue) - Basado en planes de suscripción
+    const companiesWithPlans = await prisma.company.findMany({
+      where: {
+        subscriptionPlanId: { not: null },
+        activo: true,
+      },
+      include: {
+        subscriptionPlan: {
+          select: {
+            precioMensual: true,
+          },
         },
       },
     });
 
-    // Tasa de ocupación global
+    const mrr = companiesWithPlans.reduce(
+      (sum, company) => sum + (company.subscriptionPlan?.precioMensual || 0),
+      0
+    );
+
+    const arr = mrr * 12; // Annual Recurring Revenue
+
+    // ===== MÉTRICAS DE OCUPACIÓN =====
     const occupiedUnits = await prisma.unit.count({
       where: {
         estado: 'ocupada',
       },
     });
-    const occupancyRate =
-      totalUnits > 0 ? (occupiedUnits / totalUnits) * 100 : 0;
+    const occupancyRate = totalUnits > 0 ? (occupiedUnits / totalUnits) * 100 : 0;
+
+    // ===== DATOS HISTÓRICOS PARA GRÁFICOS (últimos 12 meses) =====
+    const historicalData = [];
+    for (let i = 11; i >= 0; i--) {
+      const monthDate = subMonths(now, i);
+      const monthStart = startOfMonth(monthDate);
+      const monthEnd = endOfMonth(monthDate);
+
+      const [companiesCount, usersCount, buildingsCount, revenueData] = await Promise.all([
+        prisma.company.count({
+          where: {
+            createdAt: { lte: monthEnd },
+          },
+        }),
+        prisma.user.count({
+          where: {
+            createdAt: { lte: monthEnd },
+          },
+        }),
+        prisma.building.count({
+          where: {
+            createdAt: { lte: monthEnd },
+          },
+        }),
+        prisma.payment.findMany({
+          where: {
+            fechaVencimiento: {
+              gte: monthStart,
+              lte: monthEnd,
+            },
+            estado: 'pagado',
+          },
+          select: {
+            monto: true,
+          },
+        }),
+      ]);
+
+      const monthRevenue = revenueData.reduce((sum, p) => sum + p.monto, 0);
+
+      historicalData.push({
+        month: format(monthDate, 'MMM yyyy', { locale: es }),
+        companies: companiesCount,
+        users: usersCount,
+        buildings: buildingsCount,
+        revenue: monthRevenue,
+      });
+    }
+
+    // ===== MÉTRICAS DE CONVERSIÓN =====
+    const trialToActiveRate = trialCompanies > 0
+      ? (activeCompanies / (activeCompanies + trialCompanies)) * 100
+      : 0;
 
     // Planes de suscripción más populares
     const subscriptionStats = await prisma.company.groupBy({
@@ -229,8 +356,28 @@ export async function GET(request: NextRequest) {
         monthlyRevenue,
         occupancyRate,
         newCompaniesLast30Days,
+        newCompaniesLast90Days,
+        newUsersLast30Days,
+        newBuildingsLast30Days,
+        churnRate,
+        churnedCompanies,
+      },
+      financial: {
+        mrr,
+        arr,
+        monthlyRevenue,
+        lastMonthRevenue,
+        revenueGrowth,
+      },
+      growth: {
+        newCompaniesLast30Days,
+        newCompaniesLast90Days,
+        newUsersLast30Days,
+        newBuildingsLast30Days,
+        trialToActiveRate,
       },
       subscriptionBreakdown,
+      historicalData,
       recentActivity,
       topCompaniesByProperties,
       companiesNeedingAttention,

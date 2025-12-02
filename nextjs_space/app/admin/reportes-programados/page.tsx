@@ -4,23 +4,26 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import {
-  ArrowLeft,
   CalendarDays,
   FileText,
-  Home,
   Mail,
   MoreVertical,
   Plus,
   Send,
   Trash2,
+  Download,
+  Eye,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  Filter,
 } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Button } from '@/components/ui/button';
-import { BackButton } from '@/components/ui/back-button';
 import {
   Card,
   CardContent,
@@ -53,63 +56,85 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
+import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
 
 interface ScheduledReport {
   id: string;
   nombre: string;
   tipo: 'morosidad' | 'ocupacion' | 'ingresos' | 'gastos' | 'mantenimiento' | 'general';
-  frecuencia: 'diario' | 'semanal' | 'quincenal' | 'mensual';
+  frecuencia: 'diario' | 'semanal' | 'quincenal' | 'mensual' | 'trimestral' | 'anual';
   destinatarios: string[];
   ultimoEnvio: string | null;
   proximoEnvio: string;
   activo: boolean;
   incluirPdf: boolean;
   incluirCsv: boolean;
+  filtros?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ReportHistory {
+  id: string;
+  reportId: string;
+  fechaEnvio: string;
+  destinatarios: string[];
+  estado: 'exitoso' | 'fallido';
+  error?: string;
 }
 
 export default function ReportesProgramadosPage() {
-  const { data: session, status } = useSession();
+  const { data: session, status } = useSession() || {};
   const router = useRouter();
+  
   const [reports, setReports] = useState<ScheduledReport[]>([]);
+  const [history, setHistory] = useState<ReportHistory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
+  const [openHistoryDialog, setOpenHistoryDialog] = useState(false);
   const [editingReport, setEditingReport] = useState<ScheduledReport | null>(null);
-  const [formData, setFormData] = useState({
+  const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
+  const [sending, setSending] = useState<string | null>(null);
+  
+  const [formData, setFormData] = useState<{
+    nombre: string;
+    tipo: 'morosidad' | 'ocupacion' | 'ingresos' | 'gastos' | 'mantenimiento' | 'general';
+    frecuencia: 'diario' | 'semanal' | 'quincenal' | 'mensual' | 'trimestral' | 'anual';
+    destinatarios: string;
+    activo: boolean;
+    incluirPdf: boolean;
+    incluirCsv: boolean;
+    filtros: string;
+  }>({
     nombre: '',
-    tipo: 'morosidad' as const,
-    frecuencia: 'semanal' as const,
+    tipo: 'morosidad',
+    frecuencia: 'semanal',
     destinatarios: '',
     activo: true,
     incluirPdf: true,
     incluirCsv: true,
+    filtros: '',
   });
 
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');
     } else if (status === 'authenticated') {
-      if (session?.user?.role !== 'administrador' && session?.user?.role !== 'super_admin') {
+      if (session?.user?.role !== 'administrador' && session?.user?.role !== 'super_admin' && session?.user?.role !== 'gestor') {
         router.push('/unauthorized');
-      } else {
-        fetchReports();
+        return;
       }
+      fetchReports();
     }
   }, [status, session, router]);
 
   const fetchReports = async () => {
     try {
-      setIsLoading(true);
-      const res = await fetch('/api/scheduled-reports');
-      if (!res.ok) throw new Error('Error al cargar reportes');
-      const data = await res.json();
+      const response = await fetch('/api/scheduled-reports');
+      if (!response.ok) throw new Error('Error al cargar reportes');
+      const data = await response.json();
       setReports(data);
     } catch (error) {
       console.error('Error:', error);
@@ -119,51 +144,76 @@ export default function ReportesProgramadosPage() {
     }
   };
 
-  const handleCreateReport = async () => {
+  const fetchHistory = async (reportId: string) => {
+    try {
+      const response = await fetch(`/api/scheduled-reports/${reportId}/history`);
+      if (response.ok) {
+        const data = await response.json();
+        setHistory(data);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  const handleSave = async () => {
     try {
       const destinatariosArray = formData.destinatarios
         .split(',')
         .map((email) => email.trim())
-        .filter((email) => email.length > 0);
+        .filter((email) => email);
 
       if (destinatariosArray.length === 0) {
-        toast.error('Debe agregar al menos un destinatario');
+        toast.error('Debes agregar al menos un destinatario');
         return;
       }
 
-      const res = await fetch('/api/scheduled-reports', {
-        method: 'POST',
+      const body = {
+        ...formData,
+        destinatarios: destinatariosArray,
+      };
+
+      const url = editingReport
+        ? `/api/scheduled-reports/${editingReport.id}`
+        : '/api/scheduled-reports';
+      
+      const method = editingReport ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          destinatarios: destinatariosArray,
-        }),
+        body: JSON.stringify(body),
       });
 
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.error || 'Error al crear reporte');
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Error al guardar reporte');
       }
 
-      toast.success('Reporte programado creado correctamente');
+      toast.success(
+        editingReport
+          ? 'Reporte actualizado correctamente'
+          : 'Reporte programado creado correctamente'
+      );
+
       setOpenDialog(false);
       resetForm();
       fetchReports();
     } catch (error: any) {
       console.error('Error:', error);
-      toast.error(error.message || 'Error al crear reporte programado');
+      toast.error(error.message || 'Error al guardar reporte');
     }
   };
 
-  const handleDeleteReport = async (id: string) => {
+  const handleDelete = async (id: string) => {
     if (!confirm('¿Estás seguro de eliminar este reporte programado?')) return;
 
     try {
-      const res = await fetch(`/api/scheduled-reports/${id}`, {
+      const response = await fetch(`/api/scheduled-reports/${id}`, {
         method: 'DELETE',
       });
 
-      if (!res.ok) throw new Error('Error al eliminar reporte');
+      if (!response.ok) throw new Error('Error al eliminar reporte');
 
       toast.success('Reporte eliminado correctamente');
       fetchReports();
@@ -173,25 +223,9 @@ export default function ReportesProgramadosPage() {
     }
   };
 
-  const handleSendReport = async (id: string) => {
+  const handleToggleActive = async (report: ScheduledReport) => {
     try {
-      const res = await fetch(`/api/scheduled-reports/${id}/send`, {
-        method: 'POST',
-      });
-
-      if (!res.ok) throw new Error('Error al enviar reporte');
-
-      toast.success('Reporte enviado correctamente');
-      fetchReports();
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error('Error al enviar reporte');
-    }
-  };
-
-  const handleToggleStatus = async (report: ScheduledReport) => {
-    try {
-      const res = await fetch(`/api/scheduled-reports/${report.id}`, {
+      const response = await fetch(`/api/scheduled-reports/${report.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -200,7 +234,7 @@ export default function ReportesProgramadosPage() {
         }),
       });
 
-      if (!res.ok) throw new Error('Error al actualizar reporte');
+      if (!response.ok) throw new Error('Error al actualizar reporte');
 
       toast.success(
         report.activo ? 'Reporte desactivado' : 'Reporte activado'
@@ -212,6 +246,54 @@ export default function ReportesProgramadosPage() {
     }
   };
 
+  const handleSendNow = async (id: string) => {
+    if (!confirm('¿Enviar este reporte ahora a todos los destinatarios?')) return;
+
+    setSending(id);
+    try {
+      const response = await fetch(`/api/scheduled-reports/${id}/send`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) throw new Error('Error al enviar reporte');
+
+      toast.success('Reporte enviado correctamente');
+      fetchReports();
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Error al enviar reporte');
+    } finally {
+      setSending(null);
+    }
+  };
+
+  const handleShowHistory = (reportId: string) => {
+    setSelectedReportId(reportId);
+    fetchHistory(reportId);
+    setOpenHistoryDialog(true);
+  };
+
+  const openNewDialog = () => {
+    resetForm();
+    setEditingReport(null);
+    setOpenDialog(true);
+  };
+
+  const openEditDialog = (report: ScheduledReport) => {
+    setFormData({
+      nombre: report.nombre,
+      tipo: report.tipo,
+      frecuencia: report.frecuencia,
+      destinatarios: report.destinatarios.join(', '),
+      activo: report.activo,
+      incluirPdf: report.incluirPdf,
+      incluirCsv: report.incluirCsv,
+      filtros: report.filtros || '',
+    });
+    setEditingReport(report);
+    setOpenDialog(true);
+  };
+
   const resetForm = () => {
     setFormData({
       nombre: '',
@@ -221,6 +303,7 @@ export default function ReportesProgramadosPage() {
       activo: true,
       incluirPdf: true,
       incluirCsv: true,
+      filtros: '',
     });
     setEditingReport(null);
   };
@@ -243,300 +326,508 @@ export default function ReportesProgramadosPage() {
       semanal: 'Semanal',
       quincenal: 'Quincenal',
       mensual: 'Mensual',
+      trimestral: 'Trimestral',
+      anual: 'Anual',
     };
     return labels[frecuencia] || frecuencia;
   };
 
-  if (status === 'loading' || isLoading) {
+  const getTipoBadgeColor = (tipo: string) => {
+    const colors: Record<string, string> = {
+      morosidad: 'bg-red-100 text-red-800',
+      ocupacion: 'bg-blue-100 text-blue-800',
+      ingresos: 'bg-green-100 text-green-800',
+      gastos: 'bg-amber-100 text-amber-800',
+      mantenimiento: 'bg-purple-100 text-purple-800',
+      general: 'bg-gray-100 text-gray-800',
+    };
+    return colors[tipo] || 'bg-gray-100 text-gray-800';
+  };
+
+  if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4" />
-          <p className="text-muted-foreground">Cargando...</p>
+          <Clock className="h-8 w-8 animate-spin mx-auto text-indigo-600" />
+          <p className="mt-2 text-sm text-gray-600">Cargando reportes...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-gradient-bg">
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
         <Header />
-        <main className="flex-1 overflow-y-auto bg-muted/30 p-4 md:p-6 lg:p-8">
-          {/* Header con Breadcrumbs */}
-          <div className="mb-6 space-y-4">
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink
-                    href="/dashboard"
-                    className="flex items-center gap-2"
-                  >
-                    <Home className="h-4 w-4" />
-                    Inicio
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Reportes Programados</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto space-y-6">
+            {/* Header */}
+            <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight">
+                <h1 className="text-3xl font-bold gradient-text">
                   Reportes Programados
                 </h1>
-                <p className="text-muted-foreground mt-2">
-                  Configura el envío automático de reportes por email
+                <p className="text-gray-600 mt-1">
+                  Configura reportes automáticos por email
                 </p>
               </div>
-              <div className="flex gap-2">
-                <BackButton fallbackUrl="/dashboard" label="Volver al Dashboard" variant="outline" />
-                <Button onClick={() => setOpenDialog(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Nuevo Reporte
-                </Button>
+              <Button onClick={openNewDialog} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Nuevo Reporte
+              </Button>
+            </div>
+
+            {/* Estadísticas Rápidas */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total</p>
+                      <p className="text-2xl font-bold">{reports.length}</p>
+                    </div>
+                    <FileText className="h-8 w-8 text-indigo-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Activos</p>
+                      <p className="text-2xl font-bold text-green-600">
+                        {reports.filter((r) => r.activo).length}
+                      </p>
+                    </div>
+                    <CheckCircle className="h-8 w-8 text-green-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Pausados</p>
+                      <p className="text-2xl font-bold text-amber-600">
+                        {reports.filter((r) => !r.activo).length}
+                      </p>
+                    </div>
+                    <AlertCircle className="h-8 w-8 text-amber-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Próximos 7 días</p>
+                      <p className="text-2xl font-bold text-blue-600">
+                        {reports.filter((r) => {
+                          const days = Math.ceil(
+                            (new Date(r.proximoEnvio).getTime() - Date.now()) /
+                              (1000 * 60 * 60 * 24)
+                          );
+                          return days <= 7 && days >= 0;
+                        }).length}
+                      </p>
+                    </div>
+                    <Clock className="h-8 w-8 text-blue-600" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Lista de Reportes */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Reportes Configurados</CardTitle>
+                <CardDescription>
+                  Gestiona tus reportes automáticos
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {reports.length === 0 ? (
+                  <div className="text-center py-12">
+                    <FileText className="h-12 w-12 mx-auto text-gray-400" />
+                    <h3 className="mt-4 text-lg font-medium text-gray-900">
+                      No hay reportes programados
+                    </h3>
+                    <p className="mt-2 text-sm text-gray-500">
+                      Comienza creando tu primer reporte automático.
+                    </p>
+                    <Button onClick={openNewDialog} className="mt-4 gap-2">
+                      <Plus className="h-4 w-4" />
+                      Crear Reporte
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {reports.map((report) => (
+                      <div
+                        key={report.id}
+                        className="flex items-center justify-between p-4 rounded-lg border bg-white hover:shadow-md transition"
+                      >
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3">
+                            <h3 className="font-semibold text-lg">
+                              {report.nombre}
+                            </h3>
+                            <Badge className={getTipoBadgeColor(report.tipo)}>
+                              {getTipoLabel(report.tipo)}
+                            </Badge>
+                            <Badge variant="outline">
+                              {getFrecuenciaLabel(report.frecuencia)}
+                            </Badge>
+                            {report.activo ? (
+                              <Badge className="bg-green-100 text-green-800">
+                                Activo
+                              </Badge>
+                            ) : (
+                              <Badge variant="secondary">Pausado</Badge>
+                            )}
+                          </div>
+
+                          <div className="mt-2 space-y-1 text-sm text-gray-600">
+                            <div className="flex items-center gap-2">
+                              <Mail className="h-4 w-4" />
+                              <span>
+                                {report.destinatarios.length} destinatario
+                                {report.destinatarios.length !== 1 ? 's' : ''}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <CalendarDays className="h-4 w-4" />
+                              <span>
+                                Próximo envío:{' '}
+                                {format(new Date(report.proximoEnvio), 'PPP', {
+                                  locale: es,
+                                })}{' '}
+                                (
+                                {formatDistanceToNow(new Date(report.proximoEnvio), {
+                                  addSuffix: true,
+                                  locale: es,
+                                })}
+                                )
+                              </span>
+                            </div>
+                            {report.ultimoEnvio && (
+                              <div className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-green-600" />
+                                <span>
+                                  Último envío:{' '}
+                                  {format(new Date(report.ultimoEnvio), 'PPP', {
+                                    locale: es,
+                                  })}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="mt-2 flex items-center gap-2">
+                            {report.incluirPdf && (
+                              <Badge variant="outline" className="text-xs">
+                                PDF
+                              </Badge>
+                            )}
+                            {report.incluirCsv && (
+                              <Badge variant="outline" className="text-xs">
+                                CSV
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleSendNow(report.id)}
+                            disabled={sending === report.id}
+                          >
+                            {sending === report.id ? (
+                              <>
+                                <Clock className="h-4 w-4 mr-2 animate-spin" />
+                                Enviando...
+                              </>
+                            ) : (
+                              <>
+                                <Send className="h-4 w-4 mr-2" />
+                                Enviar ahora
+                              </>
+                            )}
+                          </Button>
+
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => openEditDialog(report)}
+                              >
+                                <Eye className="h-4 w-4 mr-2" />
+                                Editar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleToggleActive(report)}
+                              >
+                                {report.activo ? (
+                                  <>
+                                    <AlertCircle className="h-4 w-4 mr-2" />
+                                    Pausar
+                                  </>
+                                ) : (
+                                  <>
+                                    <CheckCircle className="h-4 w-4 mr-2" />
+                                    Activar
+                                  </>
+                                )}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleShowHistory(report.id)}
+                              >
+                                <Clock className="h-4 w-4 mr-2" />
+                                Ver historial
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleDelete(report.id)}
+                                className="text-red-600"
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Eliminar
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </main>
+      </div>
+
+      {/* Dialog Crear/Editar */}
+      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {editingReport ? 'Editar Reporte' : 'Nuevo Reporte Programado'}
+            </DialogTitle>
+            <DialogDescription>
+              Configura un reporte automático que se enviará por email según la
+              frecuencia seleccionada.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="nombre">Nombre del Reporte *</Label>
+              <Input
+                id="nombre"
+                placeholder="Ej: Reporte Semanal de Morosidad"
+                value={formData.nombre}
+                onChange={(e) =>
+                  setFormData({ ...formData, nombre: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="tipo">Tipo de Reporte *</Label>
+                <Select
+                  value={formData.tipo}
+                  onValueChange={(value: any) =>
+                    setFormData({ ...formData, tipo: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="morosidad">Morosidad</SelectItem>
+                    <SelectItem value="ocupacion">Ocupación</SelectItem>
+                    <SelectItem value="ingresos">Ingresos</SelectItem>
+                    <SelectItem value="gastos">Gastos</SelectItem>
+                    <SelectItem value="mantenimiento">Mantenimiento</SelectItem>
+                    <SelectItem value="general">General</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="frecuencia">Frecuencia *</Label>
+                <Select
+                  value={formData.frecuencia}
+                  onValueChange={(value: any) =>
+                    setFormData({ ...formData, frecuencia: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="diario">Diario</SelectItem>
+                    <SelectItem value="semanal">Semanal</SelectItem>
+                    <SelectItem value="quincenal">Quincenal</SelectItem>
+                    <SelectItem value="mensual">Mensual</SelectItem>
+                    <SelectItem value="trimestral">Trimestral</SelectItem>
+                    <SelectItem value="anual">Anual</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="destinatarios">
+                Destinatarios (separados por comas) *
+              </Label>
+              <Textarea
+                id="destinatarios"
+                placeholder="email1@ejemplo.com, email2@ejemplo.com"
+                value={formData.destinatarios}
+                onChange={(e) =>
+                  setFormData({ ...formData, destinatarios: e.target.value })
+                }
+                rows={3}
+              />
+              <p className="text-xs text-muted-foreground">
+                Ingresa uno o más emails separados por comas
+              </p>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-3">
+              <Label>Formatos de Exportación</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="incluirPdf" className="cursor-pointer">
+                  Incluir PDF
+                </Label>
+                <Switch
+                  id="incluirPdf"
+                  checked={formData.incluirPdf}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, incluirPdf: checked })
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="incluirCsv" className="cursor-pointer">
+                  Incluir CSV
+                </Label>
+                <Switch
+                  id="incluirCsv"
+                  checked={formData.incluirCsv}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, incluirCsv: checked })
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="activo" className="cursor-pointer">
+                  Activar inmediatamente
+                </Label>
+                <Switch
+                  id="activo"
+                  checked={formData.activo}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, activo: checked })
+                  }
+                />
               </div>
             </div>
           </div>
 
-          {/* Lista de Reportes Programados */}
-          {reports.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground mb-4">
-                  No hay reportes programados
-                </p>
-                <Button onClick={() => setOpenDialog(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Crear Primer Reporte
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {reports.map((report) => (
-                <Card key={report.id} className="relative">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-lg mb-2">
-                          {report.nombre}
-                        </CardTitle>
-                        <div className="flex gap-2">
-                          <Badge variant="secondary">
-                            {getTipoLabel(report.tipo)}
-                          </Badge>
-                          <Badge
-                            variant={report.activo ? 'default' : 'outline'}
-                          >
-                            {report.activo ? 'Activo' : 'Inactivo'}
-                          </Badge>
-                        </div>
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => handleSendReport(report.id)}
-                          >
-                            <Send className="mr-2 h-4 w-4" />
-                            Enviar Ahora
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleToggleStatus(report)}
-                          >
-                            {report.activo ? 'Desactivar' : 'Activar'}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleDeleteReport(report.id)}
-                            className="text-destructive"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Eliminar
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <CalendarDays className="h-4 w-4" />
-                      Frecuencia: {getFrecuenciaLabel(report.frecuencia)}
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Mail className="h-4 w-4" />
-                      {report.destinatarios.length} destinatario(s)
-                    </div>
-                    {report.ultimoEnvio && (
-                      <div className="text-sm">
-                        <span className="text-muted-foreground">
-                          Último envío:
-                        </span>{' '}
-                        {format(
-                          new Date(report.ultimoEnvio),
-                          'dd MMM yyyy',
-                          { locale: es }
-                        )}
-                      </div>
-                    )}
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">
-                        Próximo envío:
-                      </span>{' '}
-                      {format(
-                        new Date(report.proximoEnvio),
-                        'dd MMM yyyy',
-                        { locale: es }
-                      )}
-                    </div>
-                    <div className="flex gap-2 text-xs">
-                      {report.incluirPdf && (
-                        <Badge variant="outline">PDF</Badge>
-                      )}
-                      {report.incluirCsv && (
-                        <Badge variant="outline">CSV</Badge>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setOpenDialog(false);
+                resetForm();
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button onClick={handleSave}>
+              {editingReport ? 'Actualizar' : 'Crear'} Reporte
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-          {/* Dialog para crear reporte */}
-          <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Nuevo Reporte Programado</DialogTitle>
-                <DialogDescription>
-                  Configura el envío automático de reportes por email
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="nombre">Nombre del Reporte</Label>
-                  <Input
-                    id="nombre"
-                    value={formData.nombre}
-                    onChange={(e) =>
-                      setFormData({ ...formData, nombre: e.target.value })
-                    }
-                    placeholder="Ej: Reporte Semanal de Morosidad"
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="tipo">Tipo de Reporte</Label>
-                  <Select
-                    value={formData.tipo}
-                    onValueChange={(value: any) =>
-                      setFormData({ ...formData, tipo: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="morosidad">Morosidad</SelectItem>
-                      <SelectItem value="ocupacion">Ocupación</SelectItem>
-                      <SelectItem value="ingresos">Ingresos</SelectItem>
-                      <SelectItem value="gastos">Gastos</SelectItem>
-                      <SelectItem value="mantenimiento">
-                        Mantenimiento
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="frecuencia">Frecuencia de Envío</Label>
-                  <Select
-                    value={formData.frecuencia}
-                    onValueChange={(value: any) =>
-                      setFormData({ ...formData, frecuencia: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="diario">Diario</SelectItem>
-                      <SelectItem value="semanal">Semanal</SelectItem>
-                      <SelectItem value="quincenal">Quincenal</SelectItem>
-                      <SelectItem value="mensual">Mensual</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="destinatarios">
-                    Destinatarios (separados por comas)
-                  </Label>
-                  <Input
-                    id="destinatarios"
-                    value={formData.destinatarios}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        destinatarios: e.target.value,
-                      })
-                    }
-                    placeholder="email1@ejemplo.com, email2@ejemplo.com"
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="incluirPdf">Incluir PDF</Label>
-                  <Switch
-                    id="incluirPdf"
-                    checked={formData.incluirPdf}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, incluirPdf: checked })
-                    }
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="incluirCsv">Incluir CSV</Label>
-                  <Switch
-                    id="incluirCsv"
-                    checked={formData.incluirCsv}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, incluirCsv: checked })
-                    }
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="activo">Activar inmediatamente</Label>
-                  <Switch
-                    id="activo"
-                    checked={formData.activo}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, activo: checked })
-                    }
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setOpenDialog(false);
-                    resetForm();
-                  }}
+      {/* Dialog Historial */}
+      <Dialog open={openHistoryDialog} onOpenChange={setOpenHistoryDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Historial de Envíos</DialogTitle>
+            <DialogDescription>
+              Últimos envíos de este reporte
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {history.length === 0 ? (
+              <p className="text-center text-gray-500 py-8">
+                No hay historial de envíos
+              </p>
+            ) : (
+              history.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-start gap-3 p-3 rounded-lg border"
                 >
-                  Cancelar
-                </Button>
-                <Button onClick={handleCreateReport}>Crear Reporte</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </main>
-      </div>
+                  {item.estado === 'exitoso' ? (
+                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                  ) : (
+                    <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
+                  )}
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">
+                        {format(new Date(item.fechaEnvio), 'PPP HH:mm', {
+                          locale: es,
+                        })}
+                      </span>
+                      <Badge
+                        variant={
+                          item.estado === 'exitoso' ? 'default' : 'destructive'
+                        }
+                      >
+                        {item.estado}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Enviado a: {item.destinatarios.join(', ')}
+                    </p>
+                    {item.error && (
+                      <p className="text-sm text-red-600 mt-1">{item.error}</p>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setOpenHistoryDialog(false)}
+            >
+              Cerrar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

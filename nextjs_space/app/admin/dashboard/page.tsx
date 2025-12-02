@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -21,10 +21,32 @@ import {
   BarChart3,
   PieChart,
   RefreshCw,
+  TrendingDown,
+  Euro,
+  Percent,
+  UserPlus,
+  Home,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
+import {
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  Cell,
+  PieChart as RePieChart,
+  Pie,
+} from 'recharts';
 
 interface DashboardStats {
   overview: {
@@ -43,11 +65,37 @@ interface DashboardStats {
     monthlyRevenue: number;
     occupancyRate: number;
     newCompaniesLast30Days: number;
+    newCompaniesLast90Days: number;
+    newUsersLast30Days: number;
+    newBuildingsLast30Days: number;
+    churnRate: number;
+    churnedCompanies: number;
+  };
+  financial: {
+    mrr: number;
+    arr: number;
+    monthlyRevenue: number;
+    lastMonthRevenue: number;
+    revenueGrowth: number;
+  };
+  growth: {
+    newCompaniesLast30Days: number;
+    newCompaniesLast90Days: number;
+    newUsersLast30Days: number;
+    newBuildingsLast30Days: number;
+    trialToActiveRate: number;
   };
   subscriptionBreakdown: Array<{
     planId: string | null;
     planName: string;
     count: number;
+  }>;
+  historicalData: Array<{
+    month: string;
+    companies: number;
+    users: number;
+    buildings: number;
+    revenue: number;
   }>;
   recentActivity: Array<{
     id: string;
@@ -83,9 +131,11 @@ interface DashboardStats {
   }>;
 }
 
+const COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b', '#3b82f6'];
+
 export default function SuperAdminDashboardPage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: session, status } = useSession() || {};
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -105,29 +155,31 @@ export default function SuperAdminDashboardPage() {
     }
   };
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
-    } else if (status === 'authenticated') {
-      if (session?.user?.role !== 'super_admin') {
-        router.push('/unauthorized');
-      } else {
-        fetchStats();
-      }
-    }
-  }, [status, session, router]);
-
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
     setRefreshing(true);
-    fetchStats();
+    await fetchStats();
+    toast.success('Dashboard actualizado');
   };
 
-  if (loading || status === 'loading') {
+  useEffect(() => {
+    if (status === 'loading') return;
+    if (status === 'unauthenticated') {
+      router.push('/login');
+      return;
+    }
+    if (session?.user?.role !== 'super_admin') {
+      router.push('/unauthorized');
+      return;
+    }
+    fetchStats();
+  }, [status, session, router]);
+
+  if (status === 'loading' || loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gradient-bg">
+      <div className="flex h-screen items-center justify-center">
         <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-indigo-600 border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
-          <p className="mt-4 text-gray-600">Cargando dashboard...</p>
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto text-indigo-600" />
+          <p className="mt-2 text-sm text-gray-600">Cargando dashboard...</p>
         </div>
       </div>
     );
@@ -135,7 +187,13 @@ export default function SuperAdminDashboardPage() {
 
   if (!stats) return null;
 
-  const { overview } = stats;
+  const { overview, financial, growth, subscriptionBreakdown, historicalData, recentActivity, topCompaniesByProperties, companiesNeedingAttention } = stats;
+
+  // Formatear números
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(value);
+  
+  const formatPercent = (value: number) => `${value.toFixed(1)}%`;
 
   return (
     <div className="flex h-screen overflow-hidden bg-gradient-bg">
@@ -143,9 +201,9 @@ export default function SuperAdminDashboardPage() {
       <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
         <Header />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-[1600px] mx-auto space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-3xl font-bold gradient-text">
                   Dashboard de Superadministrador
@@ -167,291 +225,448 @@ export default function SuperAdminDashboardPage() {
               </Button>
             </div>
 
-            {/* KPIs Principales */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <Card className="border-l-4 border-l-indigo-600">
+            {/* KPIs Financieros Principales */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card className="border-l-4 border-l-emerald-600 bg-gradient-to-br from-emerald-50 to-white">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Total Empresas
-                  </CardTitle>
-                  <Building2 className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium">MRR</CardTitle>
+                  <Euro className="h-4 w-4 text-emerald-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{overview.totalCompanies}</div>
-                  <div className="flex items-center text-xs text-muted-foreground mt-1">
-                    <CheckCircle className="h-3 w-3 mr-1 text-green-600" />
-                    {overview.activeCompanies} activas
+                  <div className="text-2xl font-bold text-emerald-700">
+                    {formatCurrency(financial.mrr)}
                   </div>
-                  <div className="flex items-center text-xs text-muted-foreground">
-                    <Clock className="h-3 w-3 mr-1 text-yellow-600" />
-                    {overview.trialCompanies} en prueba
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Ingresos recurrentes mensuales
+                  </p>
+                  <div className="mt-2 flex items-center text-xs">
+                    <TrendingUp className="h-3 w-3 mr-1 text-emerald-600" />
+                    <span className="font-semibold text-emerald-700">
+                      ARR: {formatCurrency(financial.arr)}
+                    </span>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="border-l-4 border-l-violet-600">
+              <Card className="border-l-4 border-l-blue-600 bg-gradient-to-br from-blue-50 to-white">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
-                    Usuarios Totales
+                    Ingresos del Mes
                   </CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <DollarSign className="h-4 w-4 text-blue-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{overview.totalUsers}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {overview.activeUsers} activos
-                  </p>
+                  <div className="text-2xl font-bold text-blue-700">
+                    {formatCurrency(financial.monthlyRevenue)}
+                  </div>
+                  <div className="flex items-center mt-2">
+                    {financial.revenueGrowth >= 0 ? (
+                      <TrendingUp className="h-4 w-4 mr-1 text-green-600" />
+                    ) : (
+                      <TrendingDown className="h-4 w-4 mr-1 text-red-600" />
+                    )}
+                    <span
+                      className={`text-xs font-semibold ${
+                        financial.revenueGrowth >= 0
+                          ? 'text-green-700'
+                          : 'text-red-700'
+                      }`}
+                    >
+                      {formatPercent(Math.abs(financial.revenueGrowth))}
+                    </span>
+                    <span className="text-xs text-muted-foreground ml-1">
+                      vs mes anterior
+                    </span>
+                  </div>
                 </CardContent>
               </Card>
 
-              <Card className="border-l-4 border-l-pink-600">
+              <Card className="border-l-4 border-l-indigo-600 bg-gradient-to-br from-indigo-50 to-white">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
-                    Propiedades
+                    Empresas Activas
                   </CardTitle>
-                  <Building2 className="h-4 w-4 text-muted-foreground" />
+                  <Building2 className="h-4 w-4 text-indigo-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{overview.totalBuildings}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {overview.totalUnits} unidades
-                  </p>
-                  <div className="mt-2">
-                    <div className="flex items-center justify-between text-xs">
-                      <span>Ocupación</span>
-                      <span className="font-semibold">
-                        {overview.occupancyRate.toFixed(1)}%
+                  <div className="text-2xl font-bold text-indigo-700">
+                    {overview.activeCompanies}
+                  </div>
+                  <div className="space-y-1 mt-2">
+                    <div className="flex items-center text-xs">
+                      <CheckCircle className="h-3 w-3 mr-1 text-green-600" />
+                      <span className="text-muted-foreground">
+                        {overview.trialCompanies} en prueba
+                      </span>
+                    </div>
+                    <div className="flex items-center text-xs">
+                      <AlertTriangle className="h-3 w-3 mr-1 text-red-600" />
+                      <span className="text-muted-foreground">
+                        {overview.suspendedCompanies} suspendidas
                       </span>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="border-l-4 border-l-green-600">
+              <Card className="border-l-4 border-l-purple-600 bg-gradient-to-br from-purple-50 to-white">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
-                    Ingresos del Mes
+                    Tasa de Conversión
                   </CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <Percent className="h-4 w-4 text-purple-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
-                    €{overview.monthlyRevenue.toLocaleString('es-ES')}
+                  <div className="text-2xl font-bold text-purple-700">
+                    {formatPercent(growth.trialToActiveRate)}
                   </div>
-                  <div className="flex items-center text-xs text-green-600 mt-1">
-                    <TrendingUp className="h-3 w-3 mr-1" />
-                    {overview.newCompaniesLast30Days} nuevas empresas (30 días)
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Trial → Activo
+                  </p>
+                  <div className="mt-2 flex items-center text-xs">
+                    <AlertTriangle className="h-3 w-3 mr-1 text-amber-600" />
+                    <span className="text-muted-foreground">
+                      Churn: {formatPercent(overview.churnRate)}
+                    </span>
                   </div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Tabs */}
+            {/* KPIs de Crecimiento */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Nuevas Empresas (30d)
+                  </CardTitle>
+                  <Building2 className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{growth.newCompaniesLast30Days}</div>
+                  <p className="text-xs text-muted-foreground">
+                    {growth.newCompaniesLast90Days} en 90 días
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Nuevos Usuarios (30d)
+                  </CardTitle>
+                  <UserPlus className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{growth.newUsersLast30Days}</div>
+                  <p className="text-xs text-muted-foreground">
+                    Total: {overview.totalUsers}
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Nuevas Propiedades (30d)
+                  </CardTitle>
+                  <Home className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{growth.newBuildingsLast30Days}</div>
+                  <p className="text-xs text-muted-foreground">
+                    Total: {overview.totalBuildings}
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Tasa de Ocupación
+                  </CardTitle>
+                  <Activity className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {formatPercent(overview.occupancyRate)}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {overview.activeTenants} inquilinos activos
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Tabs con Gráficos y Datos */}
             <Tabs defaultValue="overview" className="space-y-4">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-4 lg:w-auto">
                 <TabsTrigger value="overview">Resumen</TabsTrigger>
-                <TabsTrigger value="subscriptions">Suscripciones</TabsTrigger>
+                <TabsTrigger value="growth">Crecimiento</TabsTrigger>
                 <TabsTrigger value="activity">Actividad</TabsTrigger>
-                <TabsTrigger value="attention">Requieren Atención</TabsTrigger>
+                <TabsTrigger value="companies">Empresas</TabsTrigger>
               </TabsList>
 
+              {/* Tab: Resumen con Gráficos */}
               <TabsContent value="overview" className="space-y-4">
-                {/* Top Empresas */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <BarChart3 className="h-5 w-5 mr-2" />
-                      Top 5 Empresas por Propiedades
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {stats.topCompaniesByProperties.map((company, index) => (
-                        <div
-                          key={company.id}
-                          className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors"
-                        >
-                          <div className="flex items-center space-x-3">
-                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold text-sm">
-                              {index + 1}
-                            </div>
-                            <div>
-                              <p className="font-medium">{company.nombre}</p>
-                              <div className="flex items-center space-x-3 text-xs text-gray-500 mt-1">
-                                <span>{company._count.buildings} edificios</span>
-                                <span>•</span>
-                                <span>{company._count.users} usuarios</span>
-                                <span>•</span>
-                                <span>{company._count.tenants} inquilinos</span>
-                              </div>
-                            </div>
-                          </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => router.push(`/admin/clientes/${company.id}`)}
-                          >
-                            Ver Detalles
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Métricas Adicionales */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {/* Gráfico de Ingresos */}
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-sm">Inquilinos</CardTitle>
+                      <CardTitle>Evolución de Ingresos</CardTitle>
+                      <CardDescription>Últimos 12 meses</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">
-                        {overview.totalTenants}
+                      <div className="h-80">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={historicalData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                            <YAxis tick={{ fontSize: 12 }} />
+                            <Tooltip
+                              formatter={(value: any) => formatCurrency(Number(value))}
+                            />
+                            <Legend />
+                            <Area
+                              type="monotone"
+                              dataKey="revenue"
+                              name="Ingresos"
+                              stroke="#10b981"
+                              fill="#10b981"
+                              fillOpacity={0.6}
+                            />
+                          </AreaChart>
+                        </ResponsiveContainer>
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        {overview.activeTenants} con contratos activos
-                      </p>
                     </CardContent>
                   </Card>
 
+                  {/* Gráfico de Empresas */}
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-sm">Contratos</CardTitle>
+                      <CardTitle>Crecimiento de Empresas</CardTitle>
+                      <CardDescription>Últimos 12 meses</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">
-                        {overview.totalContracts}
+                      <div className="h-80">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={historicalData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                            <YAxis tick={{ fontSize: 12 }} />
+                            <Tooltip />
+                            <Legend />
+                            <Line
+                              type="monotone"
+                              dataKey="companies"
+                              name="Empresas"
+                              stroke="#6366f1"
+                              strokeWidth={2}
+                            />
+                            <Line
+                              type="monotone"
+                              dataKey="users"
+                              name="Usuarios"
+                              stroke="#8b5cf6"
+                              strokeWidth={2}
+                            />
+                          </LineChart>
+                        </ResponsiveContainer>
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        {overview.activeContracts} activos
-                      </p>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-sm">Tasa de Ocupación</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">
-                        {overview.occupancyRate.toFixed(1)}%
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {overview.totalUnits - Math.round((overview.occupancyRate / 100) * overview.totalUnits)} unidades disponibles
-                      </p>
                     </CardContent>
                   </Card>
                 </div>
-              </TabsContent>
 
-              <TabsContent value="subscriptions">
+                {/* Distribución de Planes */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <PieChart className="h-5 w-5 mr-2" />
-                      Distribución de Suscripciones
-                    </CardTitle>
+                    <CardTitle>Distribución de Planes de Suscripción</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-3">
-                      {stats.subscriptionBreakdown.map((sub) => (
-                        <div
-                          key={sub.planId || 'no-plan'}
-                          className="flex items-center justify-between p-3 border rounded-lg"
-                        >
-                          <div>
-                            <p className="font-medium">{sub.planName}</p>
-                            <p className="text-sm text-gray-500">
-                              {sub.count} {sub.count === 1 ? 'empresa' : 'empresas'}
-                            </p>
-                          </div>
-                          <Badge variant="secondary">
-                            {((sub.count / overview.totalCompanies) * 100).toFixed(1)}%
-                          </Badge>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="activity">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Activity className="h-5 w-5 mr-2" />
-                      Actividad Reciente
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {stats.recentActivity.map((activity) => (
-                        <div
-                          key={activity.id}
-                          className="flex items-start space-x-3 p-3 border-l-2 border-indigo-600 bg-gray-50 rounded"
-                        >
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-2">
-                              <Badge variant="outline">{activity.action}</Badge>
-                              <span className="text-sm text-gray-600">
-                                {activity.entityType}
-                              </span>
-                            </div>
-                            <p className="text-sm mt-1">
-                              <span className="font-medium">{activity.user.name || activity.user.email}</span>
-                              {' en '}
-                              <span className="font-medium">{activity.company.nombre}</span>
-                            </p>
-                            {activity.entityName && (
-                              <p className="text-xs text-gray-500 mt-1">
-                                {activity.entityName}
-                              </p>
-                            )}
-                            <p className="text-xs text-gray-400 mt-1">
-                              {format(new Date(activity.createdAt), "d 'de' MMMM 'a las' HH:mm", {
-                                locale: es,
-                              })}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="attention">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center text-orange-600">
-                      <AlertTriangle className="h-5 w-5 mr-2" />
-                      Empresas que Requieren Atención
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {stats.companiesNeedingAttention.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
-                        <CheckCircle className="h-12 w-12 mx-auto mb-3 text-green-600" />
-                        <p>¡Todas las empresas están funcionando correctamente!</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        {stats.companiesNeedingAttention.map((company) => (
-                          <div
-                            key={company.id}
-                            className="flex items-center justify-between p-3 border border-orange-200 bg-orange-50 rounded-lg"
+                    <div className="h-80 flex items-center justify-center">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <RePieChart>
+                          <Pie
+                            data={subscriptionBreakdown}
+                            dataKey="count"
+                            nameKey="planName"
+                            cx="50%"
+                            cy="50%"
+                            outerRadius={100}
+                            label={(entry) => `${entry.planName}: ${entry.count}`}
                           >
-                            <div>
-                              <div className="flex items-center space-x-2">
-                                <p className="font-medium">{company.nombre}</p>
-                                <Badge variant="destructive">
-                                  {company.estadoCliente}
+                            {subscriptionBreakdown.map((entry, index) => (
+                              <Cell
+                                key={`cell-${index}`}
+                                fill={COLORS[index % COLORS.length]}
+                              />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                          <Legend />
+                        </RePieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Tab: Crecimiento */}
+              <TabsContent value="growth" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Crecimiento Multi-Métrica</CardTitle>
+                    <CardDescription>Evolución de usuarios, edificios y empresas</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-96">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={historicalData}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                          <YAxis tick={{ fontSize: 12 }} />
+                          <Tooltip />
+                          <Legend />
+                          <Bar dataKey="companies" name="Empresas" fill="#6366f1" />
+                          <Bar dataKey="buildings" name="Edificios" fill="#8b5cf6" />
+                          <Bar dataKey="users" name="Usuarios" fill="#ec4899" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Tab: Actividad Reciente */}
+              <TabsContent value="activity" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Actividad Reciente</CardTitle>
+                    <CardDescription>Últimas acciones en el sistema</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {recentActivity && recentActivity.length > 0 ? (
+                      <div className="space-y-3">
+                        {recentActivity.map((activity) => (
+                          <div
+                            key={activity.id}
+                            className="flex items-start space-x-3 p-3 rounded-lg border bg-gray-50 hover:bg-gray-100 transition"
+                          >
+                            <Activity className="h-5 w-5 text-indigo-600 mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between">
+                                <p className="text-sm font-medium text-gray-900">
+                                  {activity.action}
+                                </p>
+                                <Badge variant="secondary" className="text-xs">
+                                  {activity.entityType}
                                 </Badge>
                               </div>
                               <p className="text-sm text-gray-600 mt-1">
-                                {company._count.buildings} edificios • {company._count.users} usuarios
+                                {activity.entityName || 'Sin nombre'}
                               </p>
+                              <div className="flex items-center mt-2 text-xs text-gray-500">
+                                <span>{activity.user.name || activity.user.email}</span>
+                                <span className="mx-2">•</span>
+                                <span>{activity.company.nombre}</span>
+                                <span className="mx-2">•</span>
+                                <span>
+                                  {format(new Date(activity.createdAt), 'dd MMM yyyy HH:mm', {
+                                    locale: es,
+                                  })}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-center text-gray-500 py-8">
+                        No hay actividad reciente
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Tab: Empresas */}
+              <TabsContent value="companies" className="space-y-4">
+                {/* Top Empresas */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Top Empresas por Propiedades</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {topCompaniesByProperties && topCompaniesByProperties.length > 0 ? (
+                      <div className="space-y-3">
+                        {topCompaniesByProperties.map((company, index) => (
+                          <div
+                            key={company.id}
+                            className="flex items-center justify-between p-3 rounded-lg border hover:border-indigo-300 transition cursor-pointer"
+                            onClick={() => router.push(`/admin/clientes/${company.id}`)}
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 font-bold">
+                                {index + 1}
+                              </div>
+                              <div>
+                                <p className="font-medium">{company.nombre}</p>
+                                <div className="flex items-center gap-3 text-xs text-gray-500 mt-1">
+                                  <span>{company._count.buildings} edificios</span>
+                                  <span>•</span>
+                                  <span>{company._count.users} usuarios</span>
+                                  <span>•</span>
+                                  <span>{company._count.tenants} inquilinos</span>
+                                </div>
+                              </div>
+                            </div>
+                            <Button variant="ghost" size="sm">
+                              Ver detalles
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-center text-gray-500 py-8">
+                        No hay datos disponibles
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Empresas que Requieren Atención */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Empresas que Requieren Atención</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {companiesNeedingAttention && companiesNeedingAttention.length > 0 ? (
+                      <div className="space-y-3">
+                        {companiesNeedingAttention.map((company) => (
+                          <div
+                            key={company.id}
+                            className="flex items-center justify-between p-3 rounded-lg border border-amber-200 bg-amber-50"
+                          >
+                            <div className="flex items-center space-x-3">
+                              <AlertTriangle className="h-5 w-5 text-amber-600" />
+                              <div>
+                                <p className="font-medium">{company.nombre}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Badge
+                                    variant={
+                                      company.estadoCliente === 'suspendido'
+                                        ? 'destructive'
+                                        : 'secondary'
+                                    }
+                                  >
+                                    {company.estadoCliente}
+                                  </Badge>
+                                  <span className="text-xs text-gray-500">
+                                    {company._count.users} usuarios • {company._count.buildings}{' '}
+                                    edificios
+                                  </span>
+                                </div>
+                              </div>
                             </div>
                             <Button
                               variant="outline"
@@ -463,6 +678,10 @@ export default function SuperAdminDashboardPage() {
                           </div>
                         ))}
                       </div>
+                    ) : (
+                      <p className="text-center text-gray-500 py-8">
+                        No hay empresas que requieran atención
+                      </p>
                     )}
                   </CardContent>
                 </Card>

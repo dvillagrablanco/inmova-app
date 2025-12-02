@@ -5,48 +5,45 @@ import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: NextRequest) {
+/**
+ * GET /api/crm/activities
+ * Obtiene todas las actividades CRM
+ */
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+
+    if (!session?.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
-    }
-
-    const { searchParams } = new URL(req.url);
+    const { searchParams } = new URL(request.url);
     const leadId = searchParams.get('leadId');
 
-    if (!leadId) {
-      return NextResponse.json(
-        { error: 'leadId es requerido' },
-        { status: 400 }
-      );
+    const where: any = {};
+
+    if (leadId) {
+      where.leadId = leadId;
     }
 
-    const activities = await prisma.leadActivity.findMany({
-      where: { leadId },
+    const activities = await prisma.crmActivity.findMany({
+      where,
       include: {
-        usuario: {
+        lead: {
           select: {
-            id: true,
-            name: true,
+            nombreCompleto: true,
             email: true,
           },
         },
       },
-      orderBy: { fecha: 'desc' },
+      orderBy: {
+        fecha: 'desc',
+      },
     });
 
     return NextResponse.json(activities);
   } catch (error) {
-    console.error('Error fetching activities:', error);
+    console.error('Error al obtener actividades CRM:', error);
     return NextResponse.json(
       { error: 'Error al obtener actividades' },
       { status: 500 }
@@ -54,63 +51,68 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function POST(req: NextRequest) {
+/**
+ * POST /api/crm/activities
+ * Crea una nueva actividad CRM
+ */
+export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+
+    if (!session?.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
+    const body = await request.json();
+    const { leadId, tipo, asunto, descripcion, fecha, duracion, resultado, proximaAccion, completada } = body;
 
-    if (!user) {
-      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
+    if (!leadId || !tipo || !asunto || !fecha) {
+      return NextResponse.json(
+        { error: 'Faltan campos requeridos' },
+        { status: 400 }
+      );
     }
 
-    const body = await req.json();
+    // Verificar que el lead existe
+    const lead = await prisma.crmLead.findUnique({
+      where: {
+        id: leadId,
+      },
+    });
 
-    const activity = await prisma.leadActivity.create({
+    if (!lead) {
+      return NextResponse.json(
+        { error: 'Lead no encontrado' },
+        { status: 404 }
+      );
+    }
+
+    const activity = await prisma.crmActivity.create({
       data: {
-        leadId: body.leadId,
-        tipo: body.tipo,
-        titulo: body.titulo || body.asunto,
-        descripcion: body.descripcion,
-        fecha: new Date(body.fecha || Date.now()),
-        duracion: body.duracion ? parseInt(body.duracion) : null,
-        resultado: body.resultado,
-        creadoPor: user.id,
+        leadId,
+        tipo,
+        asunto,
+        descripcion,
+        fecha: new Date(fecha),
+        duracion,
+        resultado,
+        proximaAccion,
+        completada: completada || false,
+        creadoPor: session.user.id,
       },
       include: {
-        usuario: {
+        lead: {
           select: {
-            id: true,
-            name: true,
+            nombreCompleto: true,
             email: true,
           },
         },
       },
     });
 
-    // Actualizar ultimoContacto y numeroContactos del lead
-    const lead = await prisma.lead.findUnique({
-      where: { id: body.leadId },
-    });
-
-    if (lead) {
-      await prisma.lead.update({
-        where: { id: body.leadId },
-        data: {
-          ultimoContacto: new Date(),
-          numeroContactos: lead.numeroContactos + 1,
-        },
-      });
-    }
-
     return NextResponse.json(activity, { status: 201 });
   } catch (error) {
-    console.error('Error creating activity:', error);
+    console.error('Error al crear actividad CRM:', error);
     return NextResponse.json(
       { error: 'Error al crear actividad' },
       { status: 500 }
