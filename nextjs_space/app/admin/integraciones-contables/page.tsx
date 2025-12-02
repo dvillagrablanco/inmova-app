@@ -265,8 +265,6 @@ export default function IntegracionesContablesPage() {
     switch (status) {
       case 'connected':
         return <Badge className="bg-green-500"><CheckCircle2 className="w-3 h-3 mr-1" /> Conectado</Badge>;
-      case 'error':
-        return <Badge variant="destructive"><AlertCircle className="w-3 h-3 mr-1" /> Error</Badge>;
       default:
         return <Badge variant="secondary"><Unlink className="w-3 h-3 mr-1" /> Desconectado</Badge>;
     }

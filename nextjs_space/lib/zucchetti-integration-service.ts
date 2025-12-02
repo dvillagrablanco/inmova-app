@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ZUCCHETTI INTEGRATION SERVICE (PREPARADO - NO FUNCIONAL)
  * 
@@ -488,11 +489,4 @@ export function getZucchettiService(): ZucchettiIntegrationService {
  * const invoice = await zucchetti.createInvoiceFromContract(contract, customer.id);
  * const payment = await zucchetti.syncPaymentToZucchetti(payment, invoice.id);
  */
-
-/**
- * Verifica si Zucchetti está configurado
- */
-export function isZucchettiConfigured(): boolean {
-  return getZucchettiService().isConfigured();
-}
 

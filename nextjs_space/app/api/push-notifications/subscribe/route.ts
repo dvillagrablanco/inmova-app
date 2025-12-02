@@ -27,14 +27,16 @@ export async function POST(request: NextRequest) {
         endpoint: subscription.endpoint,
       },
       update: {
-        keys: JSON.stringify(subscription.keys),
+        p256dh: subscription.keys.p256dh,
+        auth: subscription.keys.auth,
         userAgent: userAgent || null,
         updatedAt: new Date(),
       },
       create: {
         userId: session.user.id,
         endpoint: subscription.endpoint,
-        keys: JSON.stringify(subscription.keys),
+        p256dh: subscription.keys.p256dh,
+        auth: subscription.keys.auth,
         userAgent: userAgent || null,
       },
     });

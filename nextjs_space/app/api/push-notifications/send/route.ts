@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { sendPushNotification } from '@/lib/push-notifications';
+import { sendPushNotificationToUser } from '@/lib/push-notifications';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await sendPushNotification(userId, {
+    const result = await sendPushNotificationToUser(userId, {
       title,
       body,
       data: {

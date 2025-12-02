@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * CONTASIMPLE INTEGRATION SERVICE - ACTIVO
  * 

@@ -9,16 +9,22 @@ import { prisma } from './db';
 // Configuración de VAPID keys
 // Para generar keys nuevas: `npx web-push generate-vapid-keys`
 const vapidKeys = {
-  publicKey: process.env.VAPID_PUBLIC_KEY || 'BF8XFsz_Pg8xAJ_Jl0lnP2YVZ5dBj3QjQo8FZk7VmN9cQWzD_kN4xQjJlL8mP2yVZ5dBj3QjQo8FZk7VmN9cQ',
-  privateKey: process.env.VAPID_PRIVATE_KEY || 'o8FZk7VmN9cQWzD_kN4xQjJlL8mP2yVZ5dBj3QjQo8FZk7VmN9cQWzD'
+  publicKey: process.env.VAPID_PUBLIC_KEY,
+  privateKey: process.env.VAPID_PRIVATE_KEY
 };
 
-// Configurar web-push con las credenciales VAPID
-webpush.setVapidDetails(
-  process.env.VAPID_SUBJECT || 'mailto:soporte@inmova.app',
-  vapidKeys.publicKey,
-  vapidKeys.privateKey
-);
+// Configurar web-push con las credenciales VAPID solo si están disponibles
+if (vapidKeys.publicKey && vapidKeys.privateKey) {
+  try {
+    webpush.setVapidDetails(
+      process.env.VAPID_SUBJECT || 'mailto:soporte@inmova.app',
+      vapidKeys.publicKey,
+      vapidKeys.privateKey
+    );
+  } catch (error) {
+    console.warn('Error configurando VAPID keys:', error);
+  }
+}
 
 export interface PushSubscriptionInfo {
   endpoint: string;
@@ -331,6 +337,9 @@ export async function sendContractExpiryNotification(
  * Obtiene la clave pública VAPID para el cliente
  */
 export function getPublicVapidKey(): string {
+  if (!vapidKeys.publicKey) {
+    throw new Error('VAPID keys no configuradas. Ejecuta: npx web-push generate-vapid-keys');
+  }
   return vapidKeys.publicKey;
 }
 
