@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { KPICard } from '@/components/ui/kpi-card';
 import { DollarSign } from 'lucide-react';

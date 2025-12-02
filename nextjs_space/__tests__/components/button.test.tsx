@@ -1,4 +1,3 @@
-import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Button } from '@/components/ui/button';
 
@@ -9,7 +8,7 @@ describe('Button Component', () => {
   });
 
   it('should call onClick handler when clicked', () => {
-    const handleClick = vi.fn();
+    const handleClick = jest.fn();
     render(<Button onClick={handleClick}>Click me</Button>);
     
     const button = screen.getByText('Click me');
