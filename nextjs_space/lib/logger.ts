@@ -1,62 +1,41 @@
 /**
- * Structured Logging Service with Winston
+ * Structured Logging Service
  * Provides different log levels and formats for development and production
+ * Compatible with both server and client environments
  */
 
-import winston from 'winston';
-
-const { combine, timestamp, printf, colorize, errors, json } = winston.format;
-
-// Custom format for development (readable)
-const devFormat = printf(({ level, message, timestamp, ...metadata }) => {
-  let msg = `${timestamp} [${level}]: ${message}`;
-  
-  if (Object.keys(metadata).length > 0) {
-    msg += ` ${JSON.stringify(metadata, null, 2)}`;
-  }
-  
-  return msg;
-});
-
-// Create the logger
-const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || (process.env.NODE_ENV === 'production' ? 'info' : 'debug'),
-  format: combine(
-    errors({ stack: true }),
-    timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    process.env.NODE_ENV === 'production' ? json() : combine(colorize(), devFormat)
-  ),
-  defaultMeta: {
-    service: 'inmova',
-    environment: process.env.NODE_ENV,
+// Simple console-based logger that works everywhere
+const logger = {
+  error: (message: string, meta?: any) => {
+    if (typeof window !== 'undefined') {
+      console.error(message, meta);
+    } else {
+      console.error(`[ERROR] ${message}`, meta);
+    }
   },
-  transports: [
-    // Console transport
-    new winston.transports.Console({
-      stderrLevels: ['error'],
-    }),
-  ],
-});
-
-// Add file transports for production
-if (process.env.NODE_ENV === 'production') {
-  logger.add(
-    new winston.transports.File({
-      filename: 'logs/error.log',
-      level: 'error',
-      maxsize: 5242880, // 5MB
-      maxFiles: 5,
-    })
-  );
-  
-  logger.add(
-    new winston.transports.File({
-      filename: 'logs/combined.log',
-      maxsize: 5242880, // 5MB
-      maxFiles: 5,
-    })
-  );
-}
+  warn: (message: string, meta?: any) => {
+    if (typeof window !== 'undefined') {
+      console.warn(message, meta);
+    } else {
+      console.warn(`[WARN] ${message}`, meta);
+    }
+  },
+  info: (message: string, meta?: any) => {
+    if (typeof window !== 'undefined') {
+      console.info(message, meta);
+    } else {
+      console.info(`[INFO] ${message}`, meta);
+    }
+  },
+  debug: (message: string, meta?: any) => {
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`[DEBUG] ${message}`, meta);
+    }
+  },
+  log: (level: string, message: string, meta?: any) => {
+    console.log(`[${level.toUpperCase()}] ${message}`, meta);
+  },
+};
 
 // Helper functions for common logging scenarios
 export const logError = (error: Error, context?: Record<string, any>) => {

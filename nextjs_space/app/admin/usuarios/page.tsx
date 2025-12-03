@@ -254,7 +254,7 @@ export default function UsersPage() {
   const columns = [
     {
       key: 'name',
-      label: 'Nombre',
+      header: 'Nombre',
       sortable: true,
       render: (user: User) => (
         <div className="flex flex-col">
@@ -265,7 +265,7 @@ export default function UsersPage() {
     },
     ...(isSuperAdmin ? [{
       key: 'company',
-      label: 'Empresa',
+      header: 'Empresa',
       sortable: true,
       render: (user: User) => (
         <div className="flex items-center gap-2">
@@ -276,7 +276,7 @@ export default function UsersPage() {
     }] : []),
     {
       key: 'role',
-      label: 'Rol',
+      header: 'Rol',
       sortable: true,
       render: (user: User) => {
         const badge = getRoleBadge(user.role);
@@ -285,7 +285,7 @@ export default function UsersPage() {
     },
     {
       key: 'activo',
-      label: 'Estado',
+      header: 'Estado',
       render: (user: User) => (
         <div className="flex items-center gap-2">
           {user.activo ? (
@@ -304,13 +304,13 @@ export default function UsersPage() {
     },
     {
       key: 'createdAt',
-      label: 'Fecha Creación',
+      header: 'Fecha Creación',
       sortable: true,
       render: (user: User) => new Date(user.createdAt).toLocaleDateString('es-ES'),
     },
     {
       key: 'actions',
-      label: 'Acciones',
+      header: 'Acciones',
       render: (user: User) => (
         <div className="flex items-center gap-2">
           <Button
@@ -453,8 +453,6 @@ export default function UsersPage() {
           <DataTable
             data={users}
             columns={columns}
-            searchable
-            searchKeys={['name', 'email']}
           />
         </CardContent>
       </Card>
