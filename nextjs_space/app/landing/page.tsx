@@ -15,7 +15,7 @@ import {
   Cloud, Calendar, MessageSquare, FileText, CreditCard, BarChart3,
   Lock, Globe, Smartphone, Award, Target, Rocket, ChevronDown,
   Link as LinkIcon, Recycle, Phone, Mail, MapPin, Sparkles, 
-  TrendingDown, DollarSign, Home, X, Menu
+  TrendingDown, DollarSign, Home, X, Menu, AlertCircle
 } from 'lucide-react';
 
 export default function LandingPage() {
@@ -284,6 +284,72 @@ export default function LandingPage() {
                       </div>
                     </CardContent>
                   </Card>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* OFERTA LAUNCH2025 */}
+      <section className="py-16 bg-gradient-to-br from-yellow-50 via-orange-50 to-amber-50 border-y-4 border-yellow-400\">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto bg-gradient-to-r from-indigo-600 to-violet-600 rounded-3xl p-8 md:p-12 shadow-2xl">
+            <div className="grid md:grid-cols-2 gap-8 items-center">
+              <div>
+                <Badge className="mb-4 bg-yellow-400 text-gray-900 border-0 text-base px-4 py-1.5\">
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  OFERTA Q1 2025
+                </Badge>
+                <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-4">
+                  50% DE DESCUENTO<br />Primer Mes
+                </h2>
+                <p className="text-xl text-indigo-100 mb-6">
+                  Únete a la campaña <strong className="text-yellow-300">LAUNCH2025</strong> y obtén acceso completo a los 88 módulos profesionales.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Link href="/landing/campanas/launch2025">
+                    <Button size="lg" className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold text-lg h-14 px-8">
+                      <Rocket className="mr-2 h-5 w-5" />
+                      Ver Oferta Completa
+                    </Button>
+                  </Link>
+                  <Link href="/landing/calculadora-roi">
+                    <Button size="lg" variant="outline" className="bg-white/10 hover:bg-white/20 text-white border-white/30 font-semibold text-lg h-14 px-8">
+                      Calcular Mi Ahorro
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 space-y-4">
+                <h3 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+                  <CheckCircle className="h-6 w-6 text-green-400" />
+                  Incluye:
+                </h3>
+                <div className="space-y-3 text-white">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-400 flex-shrink-0 mt-0.5" />
+                    <p>Acceso a los <strong>88 módulos profesionales</strong></p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-400 flex-shrink-0 mt-0.5" />
+                    <p>Migración asistida <strong>GRATIS</strong> (valor €500)</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-400 flex-shrink-0 mt-0.5" />
+                    <p>Onboarding personalizado 1-a-1</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-400 flex-shrink-0 mt-0.5" />
+                    <p>Sin permanencia - Cancela cuando quieras</p>
+                  </div>
+                </div>
+                <div className="pt-4 border-t border-white/20">
+                  <p className="text-sm text-indigo-200">
+                    <AlertCircle className="inline h-4 w-4 mr-1" />
+                    Válido hasta el 31 de marzo de 2025
+                  </p>
                 </div>
               </div>
             </div>
@@ -1029,6 +1095,178 @@ export default function LandingPage() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* HERRAMIENTAS ESPECIALIZADAS */}
+      <section className="py-20 px-4 bg-gradient-to-br from-slate-50 via-indigo-50 to-violet-50">
+        <div className="container mx-auto">
+          <div className="text-center mb-16">
+            <Badge className="mb-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white border-0">Herramientas Especializadas</Badge>
+            <h2 className="text-4xl font-bold mb-4">Recursos Para Impulsar Tu Negocio</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Más allá del software: herramientas, calculadoras y webinars gratuitos
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <Link href="/landing/calculadora-roi" className="group">
+              <Card className="h-full hover:shadow-2xl transition-all border-2 hover:border-indigo-400 cursor-pointer">
+                <CardHeader>
+                  <div className="bg-indigo-100 rounded-lg p-4 w-fit mb-4 group-hover:bg-indigo-200 transition-colors">
+                    <DollarSign className="h-10 w-10 text-indigo-600" />
+                  </div>
+                  <CardTitle className="text-2xl group-hover:text-indigo-600 transition-colors">Calculadora ROI</CardTitle>
+                  <CardDescription className="text-base">
+                    Compara INMOVA con tu sistema actual y ve cuánto puedes ahorrar
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 text-sm text-gray-600">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <span>Comparativa con competidores</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <span>Calcula costes reales vs INMOVA</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <span>Ahorro anualizado proyectado</span>
+                    </div>
+                  </div>
+                  <Button className="w-full mt-6 bg-indigo-600 hover:bg-indigo-700 text-white">
+                    Calcular Mi Ahorro
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link href="/landing/modulos/house-flipping" className="group">
+              <Card className="h-full hover:shadow-2xl transition-all border-2 hover:border-orange-400 cursor-pointer">
+                <CardHeader>
+                  <div className="bg-orange-100 rounded-lg p-4 w-fit mb-4 group-hover:bg-orange-200 transition-colors">
+                    <Hammer className="h-10 w-10 text-orange-600" />
+                  </div>
+                  <CardTitle className="text-2xl group-hover:text-orange-600 transition-colors">House Flipping</CardTitle>
+                  <CardDescription className="text-base">
+                    Calculadora de ROI en tiempo real para proyectos de flipping
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 text-sm text-gray-600">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <span>ROI automático por proyecto</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <span>Control de costes vs presupuesto</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <span>Gestión de 9 fases de obra</span>
+                    </div>
+                  </div>
+                  <Button className="w-full mt-6 bg-orange-600 hover:bg-orange-700 text-white">
+                    Ver Demo Flipping
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link href="/landing/modulos/coliving" className="group">
+              <Card className="h-full hover:shadow-2xl transition-all border-2 hover:border-cyan-400 cursor-pointer">
+                <CardHeader>
+                  <div className="bg-cyan-100 rounded-lg p-4 w-fit mb-4 group-hover:bg-cyan-200 transition-colors">
+                    <Users className="h-10 w-10 text-cyan-600" />
+                  </div>
+                  <CardTitle className="text-2xl group-hover:text-cyan-600 transition-colors">Coliving Avanzado</CardTitle>
+                  <CardDescription className="text-base">
+                    Prorrateo automático de suministros y gestión de convivencia
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 text-sm text-gray-600">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <span>3 métodos de prorrateo</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <span>División transparente de gastos</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <span>Gestión de normas digitales</span>
+                    </div>
+                  </div>
+                  <Button className="w-full mt-6 bg-cyan-600 hover:bg-cyan-700 text-white">
+                    Ver Demo Coliving
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+
+          {/* CTA WEBINARS */}
+          <div className="mt-16">
+            <Card className="bg-gradient-to-r from-indigo-600 to-violet-600 border-0 shadow-2xl">
+              <CardContent className="p-8 md:p-12">
+                <div className="grid md:grid-cols-2 gap-8 items-center">
+                  <div className="text-white">
+                    <Badge className="mb-4 bg-yellow-400 text-gray-900 border-0">
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Webinars Gratuitos
+                    </Badge>
+                    <h3 className="text-3xl md:text-4xl font-bold mb-4">
+                      Aprende de los Expertos
+                    </h3>
+                    <p className="text-xl text-indigo-100 mb-6">
+                      Sesiones en vivo sobre House Flipping, Coliving y estrategias Multi-Vertical. <strong className="text-white">100% gratuito.</strong>
+                    </p>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <CheckCircle className="h-5 w-5 text-green-400" />
+                        <span>Casos reales y números verídicos</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <CheckCircle className="h-5 w-5 text-green-400" />
+                        <span>Demos en vivo de INMOVA</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <CheckCircle className="h-5 w-5 text-green-400" />
+                        <span>Q&A con participantes</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6">
+                      <div className="flex items-center gap-3 mb-3">
+                        <Calendar className="h-6 w-6 text-yellow-300" />
+                        <p className="font-bold text-white text-lg">Próximos Webinars en Enero</p>
+                      </div>
+                      <ul className="space-y-2 text-sm text-indigo-100">
+                        <li>• House Flipping: Cálculo de ROI (15 Enero)</li>
+                        <li>• Coliving: Prorrateo de Suministros (17 Enero)</li>
+                        <li>• Multi-Vertical Mastery (22 Enero)</li>
+                      </ul>
+                    </div>
+                    <Link href="/landing/webinars">
+                      <Button size="lg" className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold text-lg h-14">
+                        <ArrowRight className="mr-2 h-5 w-5" />
+                        Ver Calendario y Registrarse
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
