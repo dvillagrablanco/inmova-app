@@ -658,7 +658,7 @@ export class BankinterIntegrationService {
             }
           });
 
-          if (!existente) {
+          if (!existente && connection.companyId) {
             await prisma.bankTransaction.create({
               data: {
                 companyId: connection.companyId,

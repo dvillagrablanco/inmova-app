@@ -107,7 +107,7 @@ export async function POST(
         <h1>ACTA DE REUNIÓN DE COMUNIDAD</h1>
         
         <div class="header-info">
-          <p><strong>Edificio:</strong> ${reunion.building.nombre}</p>
+          <p><strong>Edificio:</strong> ${reunion.building?.nombre || 'No especificado'}</p>
           <p><strong>Título:</strong> ${reunion.titulo}</p>
           <p><strong>Fecha:</strong> ${format(new Date(reunion.fechaReunion), "dd 'de' MMMM 'de' yyyy, HH:mm 'horas'", { locale: es })}</p>
           <p><strong>Lugar:</strong> ${reunion.ubicacion || 'No especificado'}</p>
