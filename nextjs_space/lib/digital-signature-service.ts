@@ -54,6 +54,18 @@ export function getActiveProvider(): 'docusign' | 'signaturit' | 'demo' {
 
 /**
  * Envia documento a DocuSign (cuando esté configurado)
+ * 
+ * NOTA IMPORTANTE: La integración real de DocuSign está preparada pero requiere
+ * implementación manual debido a incompatibilidades del paquete docusign-esign con Next.js.
+ * 
+ * Ver documentación completa en:
+ * - /home/ubuntu/homming_vidaro/INTEGRACION_DOCUSIGN_VIDARO.md
+ * - /home/ubuntu/homming_vidaro/GUIA_RAPIDA_DOCUSIGN.md
+ * 
+ * Para activar la integración real:
+ * 1. Obtener credenciales de DocuSign (ver guías)
+ * 2. Configurar variables de entorno en .env
+ * 3. Implementar el código de integración proporcionado en la documentación
  */
 async function enviarDocuSignEnvelope(params: {
   titulo: string;
@@ -63,14 +75,23 @@ async function enviarDocuSignEnvelope(params: {
   diasExpiracion: number;
 }) {
   // TODO: Implementar integración real con DocuSign API
-  // Referencia: https://developers.docusign.com/docs/esign-rest-api/
+  // Referencia: Ver INTEGRACION_DOCUSIGN_VIDARO.md para código completo
   
-  logger.info('📧 [DocuSign] Envío de documento (preparado para integración real)');
+  const isConfigured = isDocuSignConfigured;
+  
+  logger.info('📧 [DocuSign] Envío de documento', {
+    modo: isConfigured ? 'PREPARADO (requiere implementación)' : 'DEMO',
+    titulo: params.titulo,
+    firmantes: params.firmantes.length,
+    credencialesConfiguradas: isConfigured
+  });
   
   return {
     envelopeId: `DS_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     status: 'sent',
-    message: 'Documento enviado via DocuSign (simulado - configure credenciales)'
+    message: isConfigured 
+      ? 'Documento preparado para DocuSign (Consulte la documentación para activar integración real)'
+      : 'Documento enviado via DocuSign (MODO DEMO - Configure credenciales en .env)'
   };
 }
 
