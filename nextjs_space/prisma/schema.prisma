@@ -2776,35 +2776,47 @@ enum TransactionStatus {
 
 model BankConnection {
   id                String               @id @default(cuid())
-  companyId         String
-  company           Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Relaciones (al menos una debe estar presente)
+  userId            String?
+  user              User?                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  companyId         String?
+  company           Company?             @relation(fields: [companyId], references: [id], onDelete: Cascade)
   
   tenantId          String?
   tenant            Tenant?              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   
   // Proveedor (Plaid, Tink, Yapily, Bankinter/Redsys)
-  proveedor         String               // "plaid", "tink", "yapily", "bankinter_redsys"
+  proveedor         String               // "plaid", "tink", "yapily", "bankinter_redsys", "redsys"
+  provider          String?              // Alias para proveedor (para compatibilidad API)
   proveedorItemId   String?              @unique  // ID del item en el proveedor
   accessToken       String?              // Token encriptado
+  refreshToken      String?              // Refresh token para renovar acceso
+  expiresAt         DateTime?            // Fecha de expiración del access token
+  scope             String?              // Alcance de permisos (AIS, PIS, FCS)
   
   // Open Banking PSD2 (Bankinter/Redsys)
   consentId         String?              @unique  // ID del consentimiento AIS/PIS
   consentValidUntil DateTime?            // Fecha de expiración del consentimiento
   
   // Datos del banco
-  nombreBanco       String
-  tipoCuenta        String               // "corriente", "ahorro", "credito"
+  nombreBanco       String?
+  tipoCuenta        String?              // "corriente", "ahorro", "credito"
   ultimosDigitos    String?              // Últimos 4 dígitos
   moneda            String               @default("EUR")
   
   // Estado
   estado            BankConnectionStatus @default(conectado)
+  status            String?              // Alias para estado (para compatibilidad API)
   ultimaSync        DateTime?
   proximaSync       DateTime?
   errorDetalle      String?              @db.Text
   
-  // Transacciones
+  // Relaciones
   transactions      BankTransaction[]
+  consents          BankConsent[]
+  payments          BankPayment[]
   
   // Configuración
   autoReconciliar   Boolean              @default(true)
@@ -2814,6 +2826,7 @@ model BankConnection {
   updatedAt         DateTime             @updatedAt
   desconectadaEn    DateTime?
 
+  @@index([userId])
   @@index([companyId])
   @@index([tenantId])
   @@index([estado])
@@ -7463,4 +7476,47 @@ model TicketMessage {
   ticket          SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   
   @@index([ticketId])
+}
+
+// ============================================================================
+// MODELOS PARA INTEGRACION REDSYS PSD2
+// ============================================================================
+
+model BankConsent {
+  id              String   @id @default(cuid())
+  connectionId    String
+  connection      BankConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  
+  consentId       String   @unique  // ID del consentimiento en Redsys
+  status          String   // received, valid, rejected, expired, revoked, terminated
+  scaRedirectUrl  String?  @db.Text  // URL para autenticación fuerte
+  validUntil      String?  // Fecha de validez del consentimiento (formato ISO)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([connectionId])
+  @@index([status])
+}
+
+model BankPayment {
+  id              String   @id @default(cuid())
+  connectionId    String
+  connection      BankConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  
+  paymentId       String   @unique  // ID del pago en Redsys
+  amount          String   // Monto del pago
+  currency        String   // Moneda (EUR, USD, etc.)
+  debtorIban      String   // IBAN de la cuenta de débito
+  creditorIban    String   // IBAN de la cuenta de crédito
+  creditorName    String   // Nombre del beneficiario
+  description     String?  @db.Text  // Descripción del pago
+  status          String   // ACCP, ACSC, ACSP, ACTC, ACWC, ACWP, RCVD, PDNG, RJCT, CANC
+  scaRedirectUrl  String?  @db.Text  // URL para autenticación fuerte
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([connectionId])
+  @@index([status])
 }
