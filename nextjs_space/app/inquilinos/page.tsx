@@ -5,13 +5,12 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
-import { Users, Plus, Mail, Phone, Home, ArrowLeft, MoreVertical, Eye, Search, AlertCircle } from 'lucide-react';
+import { Users, Plus, Mail, Phone, Home, ArrowLeft, MoreVertical, Eye, AlertCircle, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Input } from '@/components/ui/input';
 import { ContextualHelp } from '@/components/ui/contextual-help';
 import { helpData } from '@/lib/contextual-help-data';
 import {
@@ -35,6 +34,14 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { FilterChips } from '@/components/ui/filter-chips';
 import { ButtonWithLoading } from '@/components/ui/button-with-loading';
 import { ViewModeToggle, ViewMode } from '@/components/ui/view-mode-toggle';
+import { SearchInput } from '@/components/ui/search-input';
+import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
+import { IconButton } from '@/components/ui/icon-button';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
+import logger, { logError } from '@/lib/logger';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
+import toast from 'react-hot-toast';
 
 interface Tenant {
   id: string;
@@ -55,28 +62,24 @@ interface Tenant {
   }>;
 }
 
-export default function InquilinosPage() {
+function InquilinosPageContent() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
-  const { canCreate } = usePermissions();
+  const { canCreate, canDelete } = usePermissions();
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [filteredTenants, setFilteredTenants] = useState<Tenant[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [viewMode, setViewMode, viewModeLoaded] = useLocalStorage<ViewMode>('inquilinos-view-mode', 'grid');
+  
+  // Delete confirmation dialog state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [tenantToDelete, setTenantToDelete] = useState<Tenant | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  // Load view preference from localStorage
-  useEffect(() => {
-    const savedViewMode = localStorage.getItem('inquilinos-view-mode') as ViewMode;
-    if (savedViewMode) {
-      setViewMode(savedViewMode);
-    }
-  }, []);
-
-  // Save view preference to localStorage
   const handleViewModeChange = (mode: ViewMode) => {
     setViewMode(mode);
-    localStorage.setItem('inquilinos-view-mode', mode);
   };
 
   useEffect(() => {
@@ -88,14 +91,21 @@ export default function InquilinosPage() {
   useEffect(() => {
     const fetchTenants = async () => {
       try {
+        setError(null);
         const response = await fetch('/api/tenants');
-        if (response.ok) {
-          const data = await response.json();
-          setTenants(data);
-          setFilteredTenants(data);
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: No se pudieron cargar los inquilinos`);
         }
+        const data = await response.json();
+        setTenants(data);
+        setFilteredTenants(data);
       } catch (error) {
-        console.error('Error fetching tenants:', error);
+        const errorMsg = error instanceof Error ? error.message : 'Error desconocido';
+        setError(errorMsg);
+        logError(
+          error instanceof Error ? error : new Error(errorMsg),
+          { context: 'fetchTenants', page: 'inquilinos' }
+        );
       } finally {
         setIsLoading(false);
       }
@@ -105,6 +115,40 @@ export default function InquilinosPage() {
       fetchTenants();
     }
   }, [status]);
+
+  const handleDeleteClick = (tenant: Tenant) => {
+    setTenantToDelete(tenant);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!tenantToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/tenants/${tenantToDelete.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('No se pudo eliminar el inquilino');
+      }
+
+      setTenants((prev) => prev.filter((t) => t.id !== tenantToDelete.id));
+      toast.success(`Inquilino "${tenantToDelete.nombreCompleto}" eliminado correctamente`);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Error al eliminar';
+      toast.error(errorMsg);
+      logError(
+        error instanceof Error ? error : new Error(errorMsg),
+        { context: 'deleteTenant', tenantId: tenantToDelete.id }
+      );
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialogOpen(false);
+      setTenantToDelete(null);
+    }
+  };
 
   useEffect(() => {
     if (searchTerm) {
@@ -254,20 +298,32 @@ export default function InquilinosPage() {
               )}
             </div>
 
+            {/* Error Alert */}
+            {error && (
+              <Card className="border-destructive">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-2 text-destructive">
+                    <AlertCircle className="h-5 w-5" />
+                    <p className="font-medium">{error}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Search Bar and View Mode */}
             <Card>
               <CardContent className="pt-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      placeholder="Buscar por nombre, email o DNI..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                  <ViewModeToggle value={viewMode} onChange={handleViewModeChange} />
+                  <SearchInput
+                    value={searchTerm}
+                    onChange={setSearchTerm}
+                    placeholder="Buscar por nombre, email o DNI..."
+                    className="flex-1"
+                    aria-label="Buscar inquilinos por nombre, email o DNI"
+                  />
+                  {viewModeLoaded && (
+                    <ViewModeToggle value={viewMode} onChange={handleViewModeChange} />
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -358,13 +414,27 @@ export default function InquilinosPage() {
                               </div>
                             </div>
                           )}
-                          <Button
-                            onClick={() => router.push(`/inquilinos/${tenant.id}`)}
-                            className="w-full mt-2"
-                            variant="outline"
-                          >
-                            Ver Detalles
-                          </Button>
+                          <div className="flex gap-2 mt-2">
+                            <Button
+                              onClick={() => router.push(`/inquilinos/${tenant.id}`)}
+                              className="flex-1"
+                              variant="outline"
+                            >
+                              <Eye className="mr-2 h-4 w-4" aria-hidden="true" />
+                              Ver Detalles
+                            </Button>
+                            {canDelete && (
+                              <Button
+                                onClick={() => handleDeleteClick(tenant)}
+                                variant="outline"
+                                size="icon"
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                aria-label={`Eliminar a ${tenant.nombreCompleto}`}
+                              >
+                                <Trash2 className="h-4 w-4" aria-hidden="true" />
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -527,6 +597,31 @@ export default function InquilinosPage() {
           </div>
         </main>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteConfirm}
+        title="¿Eliminar inquilino?"
+        itemName={tenantToDelete?.nombreCompleto}
+        description={
+          tenantToDelete
+            ? `Se eliminará a ${tenantToDelete.nombreCompleto} y todos sus datos asociados. Esta acción no se puede deshacer.`
+            : undefined
+        }
+        confirmText="Sí, eliminar"
+        isLoading={isDeleting}
+      />
     </div>
+  );
+}
+
+// Export with Error Boundary
+export default function InquilinosPage() {
+  return (
+    <ErrorBoundary>
+      <InquilinosPageContent />
+    </ErrorBoundary>
   );
 }

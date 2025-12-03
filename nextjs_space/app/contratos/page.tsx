@@ -5,11 +5,10 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
-import { FileText, Plus, Calendar, Euro, Home, ArrowLeft, MoreVertical, Eye, Search, AlertTriangle, Clock } from 'lucide-react';
+import { FileText, Plus, Calendar, Euro, Home, ArrowLeft, MoreVertical, Eye, AlertTriangle, Clock, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { ContextualHelp } from '@/components/ui/contextual-help';
 import { helpData } from '@/lib/contextual-help-data';
 import {
@@ -34,6 +33,13 @@ import { SkeletonList, SkeletonCard } from '@/components/ui/skeleton-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { FilterChips } from '@/components/ui/filter-chips';
 import { Skeleton } from '@/components/ui/skeleton';
+import { SearchInput } from '@/components/ui/search-input';
+import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
+import { IconButton } from '@/components/ui/icon-button';
+import { StatusBadge } from '@/components/ui/status-badge';
+import logger, { logError } from '@/lib/logger';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
+import toast from 'react-hot-toast';
 
 interface Contract {
   id: string;
@@ -54,15 +60,21 @@ interface Contract {
   diasHastaVencimiento?: number;
 }
 
-export default function ContratosPage() {
+function ContratosPageContent() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
-  const { canCreate } = usePermissions();
+  const { canCreate, canDelete } = usePermissions();
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [filteredContracts, setFilteredContracts] = useState<Contract[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilters, setActiveFilters] = useState<Array<{ id: string; label: string; value: string }>>([]);
+  
+  // Delete confirmation dialog state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [contractToDelete, setContractToDelete] = useState<Contract | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -73,14 +85,21 @@ export default function ContratosPage() {
   useEffect(() => {
     const fetchContracts = async () => {
       try {
+        setError(null);
         const response = await fetch('/api/contracts');
-        if (response.ok) {
-          const data = await response.json();
-          setContracts(data);
-          setFilteredContracts(data);
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: No se pudieron cargar los contratos`);
         }
+        const data = await response.json();
+        setContracts(data);
+        setFilteredContracts(data);
       } catch (error) {
-        console.error('Error fetching contracts:', error);
+        const errorMsg = error instanceof Error ? error.message : 'Error desconocido';
+        setError(errorMsg);
+        logError(
+          error instanceof Error ? error : new Error(errorMsg),
+          { context: 'fetchContracts', page: 'contratos' }
+        );
       } finally {
         setIsLoading(false);
       }
@@ -90,6 +109,40 @@ export default function ContratosPage() {
       fetchContracts();
     }
   }, [status]);
+
+  const handleDeleteClick = (contract: Contract) => {
+    setContractToDelete(contract);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!contractToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/contracts/${contractToDelete.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('No se pudo eliminar el contrato');
+      }
+
+      setContracts((prev) => prev.filter((c) => c.id !== contractToDelete.id));
+      toast.success(`Contrato eliminado correctamente`);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Error al eliminar';
+      toast.error(errorMsg);
+      logError(
+        error instanceof Error ? error : new Error(errorMsg),
+        { context: 'deleteContract', contractId: contractToDelete.id }
+      );
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialogOpen(false);
+      setContractToDelete(null);
+    }
+  };
 
   useEffect(() => {
     if (searchTerm) {
@@ -275,18 +328,27 @@ export default function ContratosPage() {
               )}
             </div>
 
+            {/* Error Alert */}
+            {error && (
+              <Card className="border-destructive">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-2 text-destructive">
+                    <AlertTriangle className="h-5 w-5" />
+                    <p className="font-medium">{error}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Search Bar */}
             <Card>
               <CardContent className="pt-6">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    placeholder="Buscar por inquilino, edificio o unidad..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
+                <SearchInput
+                  value={searchTerm}
+                  onChange={setSearchTerm}
+                  placeholder="Buscar por inquilino, edificio o unidad..."
+                  aria-label="Buscar contratos por inquilino, edificio o unidad"
+                />
               </CardContent>
             </Card>
 
@@ -419,15 +481,28 @@ export default function ContratosPage() {
 
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="self-start">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
+                            <IconButton
+                              variant="ghost"
+                              size="icon"
+                              icon={<MoreVertical className="h-4 w-4" />}
+                              aria-label={`Opciones para contrato de ${contract.tenant.nombreCompleto}`}
+                              className="self-start"
+                            />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => router.push(`/contratos/${contract.id}`)}>
-                              <Eye className="mr-2 h-4 w-4" />
+                              <Eye className="mr-2 h-4 w-4" aria-hidden="true" />
                               Ver Detalles
                             </DropdownMenuItem>
+                            {canDelete && (
+                              <DropdownMenuItem
+                                onClick={() => handleDeleteClick(contract)}
+                                className="text-destructive focus:text-destructive"
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
+                                Eliminar
+                              </DropdownMenuItem>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
@@ -440,7 +515,7 @@ export default function ContratosPage() {
             {filteredContracts.length === 0 && (
               searchTerm ? (
                 <EmptyState
-                  icon={<Search className="h-16 w-16 text-gray-400" />}
+                  icon={<FileText className="h-16 w-16 text-gray-400" />}
                   title="No se encontraron resultados"
                   description={`No hay contratos que coincidan con "${searchTerm}"`}
                   action={{
@@ -464,6 +539,30 @@ export default function ContratosPage() {
           </div>
         </main>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteConfirm}
+        title="¿Eliminar contrato?"
+        description={
+          contractToDelete
+            ? `Se eliminará el contrato de ${contractToDelete.tenant.nombreCompleto} para la unidad ${contractToDelete.unit.numero}. Esta acción no se puede deshacer.`
+            : 'Se eliminará el contrato y todos sus datos asociados.'
+        }
+        confirmText="Sí, eliminar"
+        isLoading={isDeleting}
+      />
     </div>
+  );
+}
+
+// Export with Error Boundary
+export default function ContratosPage() {
+  return (
+    <ErrorBoundary>
+      <ContratosPageContent />
+    </ErrorBoundary>
   );
 }

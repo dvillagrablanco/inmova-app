@@ -1,43 +1,60 @@
-'use client';
+/**
+ * Safe localStorage hook that prevents hydration issues
+ * by only accessing localStorage on the client side
+ */
 
-import { useState, useEffect, Dispatch, SetStateAction } from 'react';
+import { useState, useEffect } from 'react';
+import logger, { logError } from '@/lib/logger';
+
+type SetValue<T> = T | ((val: T) => T);
 
 export function useLocalStorage<T>(
   key: string,
   initialValue: T
-): [T, Dispatch<SetStateAction<T>>] {
-  // Estado para almacenar nuestro valor
-  // Pasar la función inicial a useState para que la lógica solo se ejecute una vez
-  const [storedValue, setStoredValue] = useState<T>(() => {
-    if (typeof window === 'undefined') {
-      return initialValue;
-    }
+): [T, (value: SetValue<T>) => void, boolean] {
+  // State to store our value
+  // Pass initial state function to useState so logic is only executed once
+  const [storedValue, setStoredValue] = useState<T>(initialValue);
+  const [isLoaded, setIsLoaded] = useState(false);
 
+  // Load value from localStorage on mount (client-side only)
+  useEffect(() => {
     try {
       const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
+      if (item) {
+        setStoredValue(JSON.parse(item));
+      }
     } catch (error) {
-      console.error(`Error loading localStorage key "${key}":`, error);
-      return initialValue;
+      logError(
+        error instanceof Error ? error : new Error('localStorage read error'),
+        { context: 'useLocalStorage', key }
+      );
+    } finally {
+      setIsLoaded(true);
     }
-  });
+  }, [key]);
 
-  // Devolver una versión envuelta de la función setter de useState que ...
-  // ... persiste el nuevo valor en localStorage.
-  const setValue: Dispatch<SetStateAction<T>> = (value) => {
+  // Return a wrapped version of useState's setter function that
+  // persists the new value to localStorage.
+  const setValue = (value: SetValue<T>) => {
     try {
-      // Permitir que el valor sea una función para tener la misma API que useState
+      // Allow value to be a function so we have same API as useState
       const valueToStore = value instanceof Function ? value(storedValue) : value;
-      // Guardar el estado
+      
+      // Save state
       setStoredValue(valueToStore);
-      // Guardar en localStorage
+      
+      // Save to local storage
       if (typeof window !== 'undefined') {
         window.localStorage.setItem(key, JSON.stringify(valueToStore));
       }
     } catch (error) {
-      console.error(`Error setting localStorage key "${key}":`, error);
+      logError(
+        error instanceof Error ? error : new Error('localStorage write error'),
+        { context: 'useLocalStorage', key }
+      );
     }
   };
 
-  return [storedValue, setValue];
+  return [storedValue, setValue, isLoaded];
 }

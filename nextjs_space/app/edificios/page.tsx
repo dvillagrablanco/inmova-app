@@ -5,12 +5,11 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
-import { Building2, Plus, MapPin, TrendingUp, Home, ArrowLeft, MoreVertical, Eye, Search } from 'lucide-react';
+import { Building2, Plus, MapPin, TrendingUp, Home, ArrowLeft, MoreVertical, Eye, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { ContextualHelp } from '@/components/ui/contextual-help';
 import { helpData } from '@/lib/contextual-help-data';
 import {
@@ -32,6 +31,14 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { SkeletonList } from '@/components/ui/skeleton-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ViewModeToggle, ViewMode } from '@/components/ui/view-mode-toggle';
+import { SearchInput } from '@/components/ui/search-input';
+import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
+import { IconButton } from '@/components/ui/icon-button';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
+import logger, { logError } from '@/lib/logger';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
+import toast from 'react-hot-toast';
 
 interface Building {
   id: string;
@@ -48,28 +55,24 @@ interface Building {
   };
 }
 
-export default function EdificiosPage() {
+function EdificiosPageContent() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
   const { canCreate, canUpdate, canDelete } = usePermissions();
   const [buildings, setBuildings] = useState<Building[]>([]);
   const [filteredBuildings, setFilteredBuildings] = useState<Building[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [viewMode, setViewMode, viewModeLoaded] = useLocalStorage<ViewMode>('edificios-view-mode', 'grid');
+  
+  // Delete confirmation dialog state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [buildingToDelete, setBuildingToDelete] = useState<Building | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  // Load view preference from localStorage
-  useEffect(() => {
-    const savedViewMode = localStorage.getItem('edificios-view-mode') as ViewMode;
-    if (savedViewMode) {
-      setViewMode(savedViewMode);
-    }
-  }, []);
-
-  // Save view preference to localStorage
   const handleViewModeChange = (mode: ViewMode) => {
     setViewMode(mode);
-    localStorage.setItem('edificios-view-mode', mode);
   };
 
   useEffect(() => {
@@ -81,14 +84,21 @@ export default function EdificiosPage() {
   useEffect(() => {
     const fetchBuildings = async () => {
       try {
+        setError(null);
         const response = await fetch('/api/buildings');
-        if (response.ok) {
-          const data = await response.json();
-          setBuildings(data);
-          setFilteredBuildings(data);
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: No se pudieron cargar los edificios`);
         }
+        const data = await response.json();
+        setBuildings(data);
+        setFilteredBuildings(data);
       } catch (error) {
-        console.error('Error fetching buildings:', error);
+        const errorMsg = error instanceof Error ? error.message : 'Error desconocido';
+        setError(errorMsg);
+        logError(
+          error instanceof Error ? error : new Error(errorMsg),
+          { context: 'fetchBuildings', page: 'edificios' }
+        );
       } finally {
         setIsLoading(false);
       }
@@ -111,6 +121,41 @@ export default function EdificiosPage() {
       setFilteredBuildings(buildings);
     }
   }, [searchTerm, buildings]);
+
+  const handleDeleteClick = (building: Building) => {
+    setBuildingToDelete(building);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!buildingToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/buildings/${buildingToDelete.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('No se pudo eliminar el edificio');
+      }
+
+      // Remove from local state
+      setBuildings((prev) => prev.filter((b) => b.id !== buildingToDelete.id));
+      toast.success(`Edificio "${buildingToDelete.nombre}" eliminado correctamente`);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Error al eliminar';
+      toast.error(errorMsg);
+      logError(
+        error instanceof Error ? error : new Error(errorMsg),
+        { context: 'deleteBuilding', buildingId: buildingToDelete.id }
+      );
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialogOpen(false);
+      setBuildingToDelete(null);
+    }
+  };
 
   if (status === 'loading' || isLoading) {
     return (
@@ -204,20 +249,32 @@ export default function EdificiosPage() {
               )}
             </div>
 
+            {/* Error Alert */}
+            {error && (
+              <Card className="border-destructive">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-2 text-destructive">
+                    <Building2 className="h-5 w-5" />
+                    <p className="font-medium">{error}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Search Bar and View Mode */}
             <Card>
               <CardContent className="pt-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      placeholder="Buscar por nombre, dirección o tipo..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                  <ViewModeToggle value={viewMode} onChange={handleViewModeChange} />
+                  <SearchInput
+                    value={searchTerm}
+                    onChange={setSearchTerm}
+                    placeholder="Buscar por nombre, dirección o tipo..."
+                    className="flex-1"
+                    aria-label="Buscar edificios por nombre, dirección o tipo"
+                  />
+                  {viewModeLoaded && (
+                    <ViewModeToggle value={viewMode} onChange={handleViewModeChange} />
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -283,15 +340,27 @@ export default function EdificiosPage() {
                           </div>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
+                              <IconButton
+                                variant="ghost"
+                                size="icon"
+                                icon={<MoreVertical className="h-4 w-4" />}
+                                aria-label={`Opciones para ${building.nombre}`}
+                              />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={() => router.push(`/edificios/${building.id}`)}>
-                                <Eye className="mr-2 h-4 w-4" />
+                                <Eye className="mr-2 h-4 w-4" aria-hidden="true" />
                                 Ver Detalles
                               </DropdownMenuItem>
+                              {canDelete && (
+                                <DropdownMenuItem
+                                  onClick={() => handleDeleteClick(building)}
+                                  className="text-destructive focus:text-destructive"
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
+                                  Eliminar
+                                </DropdownMenuItem>
+                              )}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>
@@ -502,7 +571,7 @@ export default function EdificiosPage() {
             
             {filteredBuildings.length === 0 && searchTerm && (
               <EmptyState
-                icon={<Search className="h-16 w-16 text-gray-400" />}
+                icon={<Building2 className="h-16 w-16 text-gray-400" />}
                 title="No se encontraron resultados"
                 description={`No encontramos edificios que coincidan con "${searchTerm}". Intenta con otros términos de búsqueda.`}
                 action={{
@@ -514,6 +583,31 @@ export default function EdificiosPage() {
           </div>
         </main>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteConfirm}
+        title="¿Eliminar edificio?"
+        itemName={buildingToDelete?.nombre}
+        description={
+          buildingToDelete
+            ? `Se eliminará el edificio "${buildingToDelete.nombre}" y todos sus datos asociados. Esta acción no se puede deshacer.`
+            : undefined
+        }
+        confirmText="Sí, eliminar"
+        isLoading={isDeleting}
+      />
     </div>
+  );
+}
+
+// Export with Error Boundary
+export default function EdificiosPage() {
+  return (
+    <ErrorBoundary>
+      <EdificiosPageContent />
+    </ErrorBoundary>
   );
 }

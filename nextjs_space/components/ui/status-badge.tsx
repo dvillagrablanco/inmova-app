@@ -1,85 +1,65 @@
-'use client';
+/**
+ * Accessible status badge with proper ARIA attributes
+ * Includes screen reader text for status context
+ */
 
-import { Badge } from '@/components/ui/badge';
+import { Badge, BadgeProps } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { CheckCircle2, XCircle, Clock, AlertCircle, Info } from 'lucide-react';
-import { ReactNode } from 'react';
 
-type StatusType = 'success' | 'error' | 'warning' | 'pending' | 'info' | 'active' | 'inactive';
-
-interface StatusBadgeProps {
-  status: StatusType | string;
-  label?: string;
-  showIcon?: boolean;
-  size?: 'sm' | 'md' | 'lg';
-  className?: string;
+interface StatusBadgeProps extends Omit<BadgeProps, 'children'> {
+  status: 'success' | 'warning' | 'error' | 'info' | 'neutral';
+  label: string;
+  screenReaderText?: string;
 }
 
-const statusConfig: Record<string, { color: string; icon: ReactNode; label: string }> = {
+const statusConfig = {
   success: {
-    color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-    icon: <CheckCircle2 className="h-3 w-3" />,
-    label: 'Éxito',
-  },
-  error: {
-    color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-    icon: <XCircle className="h-3 w-3" />,
-    label: 'Error',
+    variant: 'default' as const,
+    className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100',
+    srPrefix: 'Estado exitoso:',
   },
   warning: {
-    color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-    icon: <AlertCircle className="h-3 w-3" />,
-    label: 'Advertencia',
+    variant: 'secondary' as const,
+    className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100',
+    srPrefix: 'Advertencia:',
   },
-  pending: {
-    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-    icon: <Clock className="h-3 w-3" />,
-    label: 'Pendiente',
+  error: {
+    variant: 'destructive' as const,
+    className: '',
+    srPrefix: 'Error:',
   },
   info: {
-    color: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200',
-    icon: <Info className="h-3 w-3" />,
-    label: 'Info',
+    variant: 'outline' as const,
+    className: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100',
+    srPrefix: 'Información:',
   },
-  active: {
-    color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-    icon: <CheckCircle2 className="h-3 w-3" />,
-    label: 'Activo',
-  },
-  inactive: {
-    color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
-    icon: <XCircle className="h-3 w-3" />,
-    label: 'Inactivo',
+  neutral: {
+    variant: 'outline' as const,
+    className: '',
+    srPrefix: 'Estado:',
   },
 };
 
 export function StatusBadge({
   status,
   label,
-  showIcon = true,
-  size = 'md',
+  screenReaderText,
   className,
+  ...props
 }: StatusBadgeProps) {
-  const config = statusConfig[status.toLowerCase()] || statusConfig.info;
-  const displayLabel = label || config.label;
-
-  const sizeClasses = {
-    sm: 'text-xs px-2 py-0.5',
-    md: 'text-sm px-2.5 py-1',
-    lg: 'text-base px-3 py-1.5',
-  };
+  const config = statusConfig[status];
+  const srText = screenReaderText || `${config.srPrefix} ${label}`;
 
   return (
     <Badge
-      className={cn(
-        'inline-flex items-center gap-1.5 font-medium',
-        config.color,
-        sizeClasses[size],
-        className
-      )}
+      variant={config.variant}
+      className={cn(config.className, className)}
+      role="status"
+      aria-label={srText}
+      {...props}
     >
-      {showIcon && config.icon}
-      {displayLabel}
+      <span aria-hidden="true">{label}</span>
+      <span className="sr-only">{srText}</span>
     </Badge>
   );
 }
