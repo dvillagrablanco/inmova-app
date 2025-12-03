@@ -23,6 +23,9 @@ import { AdvancedAnalytics } from './components/advanced-analytics';
 import { PendingApprovals } from './components/pending-approvals';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import Link from 'next/link';
+import { AIAssistant } from '@/components/automation/AIAssistant';
+import { OnboardingChecklist } from '@/components/automation/OnboardingChecklist';
+import { ProactiveSuggestions } from '@/components/automation/ProactiveSuggestions';
 
 interface DashboardData {
   kpis: {
@@ -117,6 +120,12 @@ export default function DashboardPage() {
               Bienvenido, {session?.user?.name || 'Usuario'}
             </p>
           </div>
+
+          {/* Onboarding Checklist */}
+          {session?.user?.id && <OnboardingChecklist userId={session.user.id} />}
+
+          {/* Proactive Suggestions */}
+          {session?.user?.id && <ProactiveSuggestions userId={session.user.id} />}
 
           {/* KPIs Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -427,6 +436,7 @@ export default function DashboardPage() {
           />
         </main>
       </div>
+      <AIAssistant />
     </div>
   );
 }

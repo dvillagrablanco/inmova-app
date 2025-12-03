@@ -55,6 +55,8 @@ import {
   Upload,
   DollarSign,
   Clock,
+  Zap,
+  BookOpen,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -195,6 +197,13 @@ const coreNavItems = [
   { name: 'Mantenimiento', href: '/mantenimiento', icon: Wrench, roles: ['administrador', 'gestor', 'operador'] },
   { name: 'Calendario', href: '/calendario', icon: Calendar, roles: ['administrador', 'gestor'] },
   { name: 'Chat', href: '/chat', icon: MessageSquare, roles: ['administrador', 'gestor'] },
+];
+
+// Automatización y Soporte
+const automatizacionNavItems = [
+  { name: 'Automatización', href: '/automatizacion', icon: Zap, roles: ['administrador', 'gestor', 'operador'] },
+  { name: 'Soporte', href: '/soporte', icon: HeadphonesIcon, roles: ['administrador', 'gestor', 'operador'] },
+  { name: 'Base de Conocimientos', href: '/knowledge-base', icon: BookOpen, roles: ['administrador', 'gestor', 'operador'] },
 ];
 
 // Módulos de Gestión Operativa
@@ -408,6 +417,7 @@ export function Sidebar() {
   };
 
   const filteredCoreItems = filterItems(coreNavItems);
+  const filteredAutomatizacionItems = filterItems(automatizacionNavItems);
   const filteredGestionItems = filterItems(gestionNavItems);
   const filteredAdvancedItems = filterItems(advancedNavItems);
   const filteredMultiVerticalItems = filterItems(multiVerticalItems);
@@ -418,7 +428,8 @@ export function Sidebar() {
 
   // Obtener items favoritos
   const allItems = [
-    ...coreNavItems, 
+    ...coreNavItems,
+    ...automatizacionNavItems,
     ...gestionNavItems, 
     ...advancedNavItems, 
     ...multiVerticalItems, 
@@ -589,6 +600,26 @@ export function Sidebar() {
                 {expandedSections.core && (
                   <div className="space-y-1 mt-1">
                     {filteredCoreItems.map((item) => (
+                      <NavItem key={item.href} item={item} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Automatización y Soporte Section */}
+            {filteredAutomatizacionItems.length > 0 && (
+              <div className="mb-4">
+                <button
+                  onClick={() => toggleSection('automatizacion')}
+                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
+                >
+                  <span>Automatización</span>
+                  {expandedSections.automatizacion ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                </button>
+                {expandedSections.automatizacion && (
+                  <div className="space-y-1 mt-1">
+                    {filteredAutomatizacionItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
                   </div>
