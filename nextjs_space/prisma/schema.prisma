@@ -6161,6 +6161,8 @@ model STRListing {
   totalReviews      Int           @default(0)
   tasaOcupacion     Float?
   
+  pricingRules      Json?         // Reglas de pricing dinámico
+  
   activo            Boolean       @default(true)
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt

@@ -620,3 +620,322 @@ Ante cualquier problema o conflicto, se recomienda:
 *Última actualización: ${format(new Date(), 'dd/MM/yyyy', { locale: es })}*
   `.trim();
 }
+
+// ========================================
+// PLANTILLAS DE CONTRATO PARA HABITACIONES
+// ========================================
+
+export interface RoomContractTemplateData {
+  // Datos del propietario/arrendador
+  landlordName: string;
+  landlordId: string;
+  landlordAddress: string;
+  
+  // Datos del inquilino
+  tenantName: string;
+  tenantId: string;
+  tenantEmail: string;
+  tenantPhone: string;
+  
+  // Datos de la propiedad
+  buildingAddress: string;
+  roomNumber: string;
+  roomSurface: number;
+  commonAreas: string[];
+  
+  // Datos económicos
+  monthlyRent: number;
+  deposit: number;
+  utilitiesIncluded: boolean;
+  utilityProrationMethod?: string;
+  
+  // Fechas
+  startDate: Date;
+  endDate: Date;
+  
+  // Reglas adicionales
+  customRules?: string[];
+}
+
+/**
+ * Genera contrato completo para alquiler de habitación
+ */
+export function generateRoomRentalContract(data: RoomContractTemplateData): string {
+  const contractDate = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: es });
+  const startDateFormatted = format(data.startDate, "dd 'de' MMMM 'de' yyyy", { locale: es });
+  const endDateFormatted = format(data.endDate, "dd 'de' MMMM 'de' yyyy", { locale: es });
+  const duration = Math.ceil((data.endDate.getTime() - data.startDate.getTime()) / (1000 * 60 * 60 * 24 * 30));
+  
+  return `
+# CONTRATO DE ARRENDAMIENTO DE HABITACIÓN
+
+En la ciudad que corresponda, a fecha de ${contractDate}
+
+## PARTES CONTRATANTES
+
+**ARRENDADOR:**
+- Nombre: ${data.landlordName}
+- DNI/NIE: ${data.landlordId}
+- Domicilio: ${data.landlordAddress}
+
+**ARRENDATARIO:**
+- Nombre: ${data.tenantName}
+- DNI/NIE: ${data.tenantId}
+- Email: ${data.tenantEmail}
+- Teléfono: ${data.tenantPhone}
+
+## I. OBJETO DEL CONTRATO
+
+El ARRENDADOR cede en arrendamiento al ARRENDATARIO una habitación individual en la propiedad ubicada en:
+
+**${data.buildingAddress}**
+
+**Habitación número:** ${data.roomNumber}
+**Superficie:** ${data.roomSurface} m²
+
+### Áreas Comunes Incluidas:
+${data.commonAreas.map((area, i) => `${i + 1}. ${area}`).join('\n')}
+
+## II. DURACIÓN DEL CONTRATO
+
+- **Fecha de inicio:** ${startDateFormatted}
+- **Fecha de finalización:** ${endDateFormatted}
+- **Duración:** ${duration} meses
+
+El contrato se renovará automáticamente por períodos iguales salvo notificación de alguna de las partes con al menos 30 días de antelación.
+
+## III. RENTA Y FORMA DE PAGO
+
+### Renta Mensual
+**€${data.monthlyRent.toLocaleString('es-ES')}** (${numberToWords(data.monthlyRent)} euros)
+
+La renta se abonará dentro de los primeros 5 días naturales de cada mes mediante transferencia bancaria a la cuenta designada por el ARRENDADOR.
+
+### Fianza
+**€${data.deposit.toLocaleString('es-ES')}** (${numberToWords(data.deposit)} euros)
+
+La fianza será devuelta al finalizar el contrato, previa comprobación del estado de la habitación y liquidación de deudas pendientes.
+
+## IV. GASTOS Y SUMINISTROS
+
+${data.utilitiesIncluded 
+  ? `Los suministros (agua, luz, gas, internet) están **INCLUIDOS** en la renta mensual.
+
+${data.utilityProrationMethod 
+  ? `Los gastos de suministros se prorratean entre todas las habitaciones usando el método: **${data.utilityProrationMethod}**`
+  : ''}` 
+  : `Los suministros (agua, luz, gas, internet) **NO están incluidos** en la renta y se prorratearán entre todos los arrendatarios según consumo o superficie.`
+}
+
+### Concepto de Gastos Comunes
+- Luz
+- Agua
+- Gas
+- Internet/WiFi
+- Limpieza de zonas comunes (opcional)
+
+## V. NORMAS DE CONVIVENCIA
+
+Ambas partes acuerdan respetar las siguientes normas:
+
+${generateColivingRulesTemplate(data.customRules)}
+
+## VI. OBLIGACIONES DEL ARRENDATARIO
+
+1. **Pago puntual** de la renta y gastos acordados.
+2. **Uso adecuado** de la habitación y áreas comunes.
+3. **Mantenimiento** del buen estado de la habitación.
+4. **Respeto** a los demás inquilinos y vecinos.
+5. **Comunicación** de cualquier desperfecto o avería.
+6. **No subarrendar** la habitación sin autorización expresa.
+7. **Permitir** inspecciones previo aviso de 24 horas.
+
+## VII. OBLIGACIONES DEL ARRENDADOR
+
+1. **Entregar** la habitación en condiciones habitables.
+2. **Mantener** en buen estado las instalaciones comunes.
+3. **Realizar** reparaciones necesarias en tiempo razonable.
+4. **Respetar** la privacidad del arrendatario.
+5. **Devolver** la fianza al término del contrato según condiciones.
+6. **Emitir** recibos de pago mensuales.
+
+## VIII. CAUSAS DE RESOLUCIÓN
+
+El contrato podrá resolverse por:
+
+1. **Mutuo acuerdo** de ambas partes.
+2. **Expiración** del plazo pactado sin renovación.
+3. **Impago** de dos mensualidades consecutivas.
+4. **Incumplimiento grave** de las normas de convivencia.
+5. **Daños intencionados** a la propiedad.
+6. **Uso indebido** de la vivienda.
+
+En caso de resolución anticipada por parte del arrendatario, deberá notificarse con **30 días de antelación**.
+
+## IX. INVENTARIO
+
+Al inicio del contrato se ha realizado un inventario detallado del mobiliario y equipamiento de la habitación:
+
+✓ Cama individual/doble
+✓ Armario/Closet
+✓ Escritorio y silla
+✓ Mesita de noche
+✓ Lámpara
+✓ Cortinas/Persianas
+✓ Cerradura con llave individual
+
+Estado general al inicio: **Buen estado**
+
+## X. PROTECCIÓN DE DATOS
+
+En cumplimiento de la normativa de protección de datos (RGPD), el ARRENDADOR informa que los datos personales del ARRENDATARIO serán tratados exclusivamente para la gestión del presente contrato.
+
+## XI. LEGISLACIÓN APLICABLE
+
+El presente contrato se rige por la Ley de Arrendamientos Urbanos (LAU) y demás normativa aplicable vigente en España.
+
+## XII. JURISDICCIÓN
+
+Para cualquier controversia derivada del presente contrato, ambas partes se someten a los Juzgados y Tribunales de la ciudad correspondiente.
+
+---
+
+**Leído y conforme, se firma el presente contrato por duplicado en el lugar y fecha arriba indicados.**
+
+___________________________
+**${data.landlordName}**
+ARRENDADOR
+DNI: ${data.landlordId}
+
+___________________________
+**${data.tenantName}**
+ARRENDATARIO
+DNI: ${data.tenantId}
+
+---
+
+*Documento generado el ${contractDate}*
+*Sistema INMOVA - Gestión Inmobiliaria Inteligente*
+  `.trim();
+}
+
+/**
+ * Genera anexo de inventario detallado
+ */
+export function generateRoomInventoryAnnex(
+  roomNumber: string,
+  items: Array<{ name: string; quantity: number; condition: string; observations?: string }>
+): string {
+  const today = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: es });
+  
+  return `
+# ANEXO I: INVENTARIO DETALLADO
+## Habitación ${roomNumber}
+
+Fecha: ${today}
+
+| Artículo | Cantidad | Estado | Observaciones |
+|----------|----------|--------|---------------|
+${items.map(item => 
+  `| ${item.name} | ${item.quantity} | ${item.condition} | ${item.observations || '-'} |`
+).join('\n')}
+
+**Estado General:** El inquilino reconoce haber recibido la habitación y sus enseres en el estado descrito.
+
+Al término del contrato, se realizará una nueva inspección para verificar el estado de los elementos inventariados.
+
+---
+
+**Firmas:**
+
+___________________________          ___________________________
+**ARRENDADOR**                       **ARRENDATARIO**
+
+*Fecha: ${today}*
+  `.trim();
+}
+
+/**
+ * Genera addenda para modificaciones del contrato
+ */
+export function generateContractAddendum(
+  contractId: string,
+  modifications: Array<{ section: string; oldValue: string; newValue: string; reason: string }>,
+  landlordName: string,
+  tenantName: string
+): string {
+  const today = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: es });
+  
+  return `
+# ADDENDA AL CONTRATO DE ARRENDAMIENTO
+## Contrato ID: ${contractId}
+
+Fecha: ${today}
+
+Las partes firmantes del contrato original acuerdan las siguientes modificaciones:
+
+## MODIFICACIONES
+
+${modifications.map((mod, i) => `
+### ${i + 1}. Modificación de: ${mod.section}
+
+**Valor Original:** ${mod.oldValue}
+**Nuevo Valor:** ${mod.newValue}
+**Motivo:** ${mod.reason}
+`).join('\n')}
+
+## VIGENCIA
+
+Las presentes modificaciones entran en vigor a partir de la fecha de firma de esta addenda y forman parte integrante del contrato original.
+
+Las demás cláusulas del contrato que no hayan sido modificadas permanecen vigentes.
+
+---
+
+**Leído y conforme:**
+
+___________________________          ___________________________
+**${landlordName}**                  **${tenantName}**
+ARRENDADOR                           ARRENDATARIO
+
+*Fecha: ${today}*
+  `.trim();
+}
+
+/**
+ * Función auxiliar para convertir números a palabras (simplificada)
+ */
+function numberToWords(num: number): string {
+  // Implementación simplificada para números comunes en rentas
+  const hundreds = Math.floor(num / 100);
+  const tens = Math.floor((num % 100) / 10);
+  const units = num % 10;
+  
+  const hundredsWords = ['', 'ciento', 'doscientos', 'trescientos', 'cuatrocientos', 'quinientos', 'seiscientos', 'setecientos', 'ochocientos', 'novecientos'];
+  const tensWords = ['', '', 'veinte', 'treinta', 'cuarenta', 'cincuenta', 'sesenta', 'setenta', 'ochenta', 'noventa'];
+  const unitsWords = ['', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve'];
+  const teens = ['diez', 'once', 'doce', 'trece', 'catorce', 'quince', 'dieciséis', 'diecisiete', 'dieciocho', 'diecinueve'];
+  
+  let result = '';
+  
+  if (hundreds === 1 && tens === 0 && units === 0) {
+    result = 'cien';
+  } else {
+    if (hundreds > 0) result += hundredsWords[hundreds];
+    if (tens === 1) {
+      result += (result ? ' ' : '') + teens[units];
+      return result;
+    } else {
+      if (tens > 0) result += (result ? ' ' : '') + tensWords[tens];
+      if (units > 0) {
+        if (tens === 2) {
+          result += (units === 1 ? 'uno' : units === 2 ? 'dos' : units === 3 ? 'tres' : units === 4 ? 'cuatro' : units === 5 ? 'cinco' : units === 6 ? 'seis' : units === 7 ? 'siete' : units === 8 ? 'ocho' : 'nueve');
+        } else {
+          result += (result ? ' y ' : '') + unitsWords[units];
+        }
+      }
+    }
+  }
+  
+  return result || 'cero';
+}
