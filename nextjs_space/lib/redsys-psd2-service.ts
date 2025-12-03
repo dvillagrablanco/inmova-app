@@ -29,7 +29,7 @@ export interface RedsysConfig {
   environment: 'sandbox' | 'production';
 }
 
-export interface OAuth AuthorizationParams {
+export interface OAuthAuthorizationParams {
   aspsp: string; // Bank identifier (e.g., 'bankinter', 'bbva', 'santander')
   scope: 'AIS' | 'PIS' | 'FCS' | 'AIS PIS' | 'AIS FCS' | 'PIS FCS' | 'AIS PIS FCS';
   state?: string;
