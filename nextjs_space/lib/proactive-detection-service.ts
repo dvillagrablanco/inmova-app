@@ -140,11 +140,11 @@ async function detectExpiringContracts(
       type: 'contract_expiring',
       severity,
       title: `Contrato vence en ${daysUntilExpiry} días`,
-      description: `El contrato de ${contract.tenant.nombreCompleto} en ${contract.unit.nombre} (${contract.unit.building.nombre}) vence el ${contract.fechaFin.toLocaleDateString('es-ES')}.`,
+      description: `El contrato de ${contract.tenant.nombreCompleto} en unidad ${contract.unit.numero} (${contract.unit.building.nombre}) vence el ${contract.fechaFin.toLocaleDateString('es-ES')}.`,
       affectedEntity: {
         type: 'contract',
         id: contract.id,
-        name: `${contract.tenant.nombreCompleto} - ${contract.unit.nombre}`
+        name: `${contract.tenant.nombreCompleto} - Unidad ${contract.unit.numero}`
       },
       suggestedAction: 'Contacta al inquilino para renovar el contrato o buscar nuevo inquilino.',
       actionUrl: `/contratos/${contract.id}`,
@@ -167,6 +167,9 @@ async function detectOverduePayments(
         unit: {
           building: {
             companyId
+          }
+        }
+      },
       estado: {
         in: ['pendiente']
       },
@@ -191,7 +194,6 @@ async function detectOverduePayments(
     }
   });
 
-  return overduePayments.map(payment => {
   return overduePayments.map((payment: any) => {
     const daysOverdue = differenceInDays(today, payment.fechaVencimiento);
     
@@ -229,8 +231,6 @@ async function detectOverdueMaintenances(
 ): Promise<DetectedIssue[]> {
   // TODO: Implementar cuando el modelo Maintenance esté disponible
   return [];
-}
-  });
 }
 
 /**
@@ -343,15 +343,14 @@ async function detectMissingData(
   return issues;
 }
 
-  return issues;
-}
-
 /**
  * Detecta oportunidades de automatización
  */
 async function detectAutomationOpportunities(
   companyId: string
 ): Promise<DetectedIssue[]> {
+  const opportunities: DetectedIssue[] = [];
+
   // Contratos sin pagos recurrentes configurados
   const contractsWithoutRecurring = await prisma.contract.count({
     where: {
@@ -368,18 +367,21 @@ async function detectAutomationOpportunities(
   if (contractsWithoutRecurring > 3) {
     opportunities.push({
       id: 'enable-recurring-payments',
-      type: 'missing_data' as const,
-      severity: 'medium',
-
-  if (contractsWithoutRecurring > 3) {
-    opportunities.push({
-      id: 'enable-recurring-payments',
       type: 'missing_data',
       severity: 'medium',
       title: `${contractsWithoutRecurring} contratos sin pagos automáticos`,
       description: 'Activa pagos recurrentes con Stripe para reducir morosidad hasta un 40%.',
       affectedEntity: {
         type: 'contracts',
+        id: 'recurring-payments',
+        name: `${contractsWithoutRecurring} contratos`
+      },
+      suggestedAction: 'Configura pagos recurrentes en contratos activos.',
+      actionUrl: '/contratos',
+      detectedAt: new Date()
+    });
+  }
+
   // Sin mantenimiento preventivo configurado
   const preventiveMaintenance = 0; // TODO: Implementar cuando el modelo MaintenanceSchedule esté disponible
 
@@ -387,22 +389,6 @@ async function detectAutomationOpportunities(
     opportunities.push({
       id: 'setup-preventive-maintenance',
       type: 'missing_data' as const,
-      severity: 'low',
-      title: 'Sin mantenimiento preventivo',
-      description: 'Programa revisiones automáticas de ascensores, calderas y otros equipos.',
-      affectedEntity: {
-        type: 'company',
-        id: companyId,
-        name: 'Sistema de mantenimiento'
-      },
-      suggestedAction: 'Configura programación de mantenimientos.',
-      actionUrl: '/mantenimiento-preventivo',
-      detectedAt: new Date()
-    });
-  }
-
-  return opportunities;
-}
       severity: 'low',
       title: 'Sin mantenimiento preventivo',
       description: 'Programa revisiones automáticas de ascensores, calderas y otros equipos.',
@@ -439,8 +425,6 @@ export async function sendProactiveNotifications(
 
   // Obtener usuarios de la empresa
   const users = await prisma.user.findMany({
-  // Obtener usuarios de la empresa
-  const users = await prisma.user.findMany({
     where: {
       companyId,
       activo: true,
@@ -456,7 +440,8 @@ export async function sendProactiveNotifications(
       await prisma.notification.create({
         data: {
           userId: user.id,
-          tipo: 'system',
+          companyId,
+          tipo: 'alerta_sistema',
           titulo: issue.title,
           mensaje: issue.description,
           leida: false

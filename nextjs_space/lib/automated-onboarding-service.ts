@@ -386,70 +386,90 @@ export async function getOrCreateOnboardingProgress(
   companyId: string,
   vertical: BusinessVertical = 'residencial'
 ): Promise<OnboardingProgress> {
-  // Buscar progreso existente
-  const existing = await prisma.onboardingProgress.findUnique({
-    where: {
-      userId_companyId: {
-        userId,
-        companyId
+  try {
+    // Buscar progreso existente
+    const existing = await prisma.onboardingProgress.findUnique({
+      where: {
+        userId_companyId: {
+          userId,
+          companyId
+        }
       }
+    });
+
+    if (existing) {
+      const steps = ONBOARDING_FLOWS[existing.vertical as BusinessVertical] || ONBOARDING_FLOWS.residencial;
+      const completedSteps = (existing.completedSteps as string[]) || [];
+      
+      // Marcar pasos completados
+      const updatedSteps = steps.map(step => ({
+        ...step,
+        completed: completedSteps.includes(step.id)
+      }));
+
+      const completedCount = updatedSteps.filter(s => s.completed).length;
+
+      return {
+        userId: existing.userId,
+        companyId: existing.companyId,
+        vertical: existing.vertical as BusinessVertical,
+        currentStep: existing.currentStep,
+        totalSteps: steps.length,
+        completedSteps: completedCount,
+        percentageComplete: Math.round((completedCount / steps.length) * 100),
+        steps: updatedSteps,
+        startedAt: existing.startedAt,
+        lastActivityAt: existing.lastActivityAt,
+        completedAt: existing.completedAt || undefined
+      };
     }
-  });
 
-  if (existing) {
-    const steps = ONBOARDING_FLOWS[existing.vertical as BusinessVertical] || ONBOARDING_FLOWS.residencial;
-    const completedSteps = (existing.completedSteps as string[]) || [];
-    
-    // Marcar pasos completados
-    const updatedSteps = steps.map(step => ({
-      ...step,
-      completed: completedSteps.includes(step.id)
-    }));
-
-    const completedCount = updatedSteps.filter(s => s.completed).length;
+    // Crear nuevo progreso
+    const steps = ONBOARDING_FLOWS[vertical] || ONBOARDING_FLOWS.residencial;
+    const newProgress = await prisma.onboardingProgress.create({
+      data: {
+        userId,
+        companyId,
+        vertical,
+        currentStep: 0,
+        totalSteps: steps.length,
+        completedSteps: [],
+        startedAt: new Date(),
+        lastActivityAt: new Date()
+      }
+    });
 
     return {
-      userId: existing.userId,
-      companyId: existing.companyId,
-      vertical: existing.vertical as BusinessVertical,
-      currentStep: existing.currentStep,
+      userId: newProgress.userId,
+      companyId: newProgress.companyId,
+      vertical: newProgress.vertical as BusinessVertical,
+      currentStep: newProgress.currentStep,
       totalSteps: steps.length,
-      completedSteps: completedCount,
-      percentageComplete: Math.round((completedCount / steps.length) * 100),
-      steps: updatedSteps,
-      startedAt: existing.startedAt,
-      lastActivityAt: existing.lastActivityAt,
-      completedAt: existing.completedAt || undefined
+      completedSteps: 0,
+      percentageComplete: 0,
+      steps: steps,
+      startedAt: newProgress.startedAt,
+      lastActivityAt: newProgress.lastActivityAt
     };
-  }
-
-  // Crear nuevo progreso
-  const steps = ONBOARDING_FLOWS[vertical] || ONBOARDING_FLOWS.residencial;
-  const newProgress = await prisma.onboardingProgress.create({
-    data: {
+  } catch (error) {
+    // Si la tabla no existe, devolver progreso por defecto
+    console.error('Error accessing OnboardingProgress table:', error);
+    const steps = ONBOARDING_FLOWS[vertical] || ONBOARDING_FLOWS.residencial;
+    const now = new Date();
+    
+    return {
       userId,
       companyId,
       vertical,
       currentStep: 0,
       totalSteps: steps.length,
-      completedSteps: [],
-      startedAt: new Date(),
-      lastActivityAt: new Date()
-    }
-  });
-
-  return {
-    userId: newProgress.userId,
-    companyId: newProgress.companyId,
-    vertical: newProgress.vertical as BusinessVertical,
-    currentStep: newProgress.currentStep,
-    totalSteps: steps.length,
-    completedSteps: 0,
-    percentageComplete: 0,
-    steps: steps,
-    startedAt: newProgress.startedAt,
-    lastActivityAt: newProgress.lastActivityAt
-  };
+      completedSteps: 0,
+      percentageComplete: 0,
+      steps: steps,
+      startedAt: now,
+      lastActivityAt: now
+    };
+  }
 }
 
 /**
@@ -460,53 +480,59 @@ export async function completeOnboardingStep(
   companyId: string,
   stepId: string
 ): Promise<OnboardingProgress> {
-  const progress = await prisma.onboardingProgress.findUnique({
-    where: {
-      userId_companyId: {
-        userId,
-        companyId
+  try {
+    const progress = await prisma.onboardingProgress.findUnique({
+      where: {
+        userId_companyId: {
+          userId,
+          companyId
+        }
       }
+    });
+
+    if (!progress) {
+      throw new Error('Progreso de onboarding no encontrado');
     }
-  });
 
-  if (!progress) {
-    throw new Error('Progreso de onboarding no encontrado');
-  }
+    const completedSteps = (progress.completedSteps as string[]) || [];
+    
+    // Si ya está completado, no hacer nada
+    if (completedSteps.includes(stepId)) {
+      return getOrCreateOnboardingProgress(userId, companyId, progress.vertical as BusinessVertical);
+    }
 
-  const completedSteps = (progress.completedSteps as string[]) || [];
-  
-  // Si ya está completado, no hacer nada
-  if (completedSteps.includes(stepId)) {
+    // Añadir paso completado
+    const updatedCompleted = [...completedSteps, stepId];
+    
+    const steps = ONBOARDING_FLOWS[progress.vertical as BusinessVertical] || ONBOARDING_FLOWS.residencial;
+    const currentStepIndex = steps.findIndex(s => s.id === stepId);
+    
+    // Verificar si el onboarding está completo
+    const requiredSteps = steps.filter(s => s.required);
+    const completedRequired = requiredSteps.filter(s => updatedCompleted.includes(s.id)).length;
+    const isComplete = completedRequired === requiredSteps.length;
+
+    await prisma.onboardingProgress.update({
+      where: {
+        userId_companyId: {
+          userId,
+          companyId
+        }
+      },
+      data: {
+        completedSteps: updatedCompleted,
+        currentStep: currentStepIndex + 1,
+        lastActivityAt: new Date(),
+        completedAt: isComplete ? new Date() : null
+      }
+    });
+
     return getOrCreateOnboardingProgress(userId, companyId, progress.vertical as BusinessVertical);
+  } catch (error) {
+    console.error('Error completing onboarding step:', error);
+    // Si hay error, devolver progreso por defecto
+    return getOrCreateOnboardingProgress(userId, companyId, 'residencial');
   }
-
-  // Añadir paso completado
-  const updatedCompleted = [...completedSteps, stepId];
-  
-  const steps = ONBOARDING_FLOWS[progress.vertical as BusinessVertical] || ONBOARDING_FLOWS.residencial;
-  const currentStepIndex = steps.findIndex(s => s.id === stepId);
-  
-  // Verificar si el onboarding está completo
-  const requiredSteps = steps.filter(s => s.required);
-  const completedRequired = requiredSteps.filter(s => updatedCompleted.includes(s.id)).length;
-  const isComplete = completedRequired === requiredSteps.length;
-
-  await prisma.onboardingProgress.update({
-    where: {
-      userId_companyId: {
-        userId,
-        companyId
-      }
-    },
-    data: {
-      completedSteps: updatedCompleted,
-      currentStep: currentStepIndex + 1,
-      lastActivityAt: new Date(),
-      completedAt: isComplete ? new Date() : null
-    }
-  });
-
-  return getOrCreateOnboardingProgress(userId, companyId, progress.vertical as BusinessVertical);
 }
 
 /**

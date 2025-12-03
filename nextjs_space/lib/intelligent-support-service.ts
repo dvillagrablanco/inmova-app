@@ -774,6 +774,7 @@ export async function createSupportTicket(
     updatedAt: ticket.updatedAt,
     autoResolved: ticket.autoResolved
   };
+}
 
 /**
  * Analiza la prioridad basándose en el contenido
@@ -842,7 +843,14 @@ async function attemptAutoResolution(
       }
     });
 
-    return message;
+    return {
+      id: message.id,
+      ticketId: message.ticketId,
+      sender: message.sender as 'user' | 'system' | 'ai',
+      message: message.message,
+      isAutomatic: message.isAutomatic,
+      createdAt: message.createdAt
+    };
   }
 
   return null;

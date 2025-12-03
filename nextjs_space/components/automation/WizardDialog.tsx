@@ -13,27 +13,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, ArrowRight, ArrowLeft, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-
-interface WizardStep {
-  id: string;
-  title: string;
-  description: string;
-  fields: WizardField[];
-}
-
-interface WizardField {
-  name: string;
-  label: string;
-  type: 'text' | 'select' | 'number' | 'date';
-  placeholder?: string;
-  required?: boolean;
-  options?: { value: string; label: string }[];
-}
+import type { WizardStep, WizardField } from '@/lib/wizard-config';
 
 interface WizardDialogProps {
   open: boolean;
@@ -129,6 +116,25 @@ export default function WizardDialog({
           </Select>
         );
       
+      case 'multiselect':
+        return (
+          <Select
+            value={formData[field.name] || ''}
+            onValueChange={(value) => handleFieldChange(field.name, value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={field.placeholder || `Selecciona ${field.label}`} />
+            </SelectTrigger>
+            <SelectContent>
+              {field.options?.map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+      
       case 'number':
         return (
           <Input
@@ -148,6 +154,52 @@ export default function WizardDialog({
           />
         );
       
+      case 'email':
+        return (
+          <Input
+            type="email"
+            placeholder={field.placeholder}
+            value={formData[field.name] || ''}
+            onChange={(e) => handleFieldChange(field.name, e.target.value)}
+          />
+        );
+      
+      case 'textarea':
+        return (
+          <Textarea
+            placeholder={field.placeholder}
+            value={formData[field.name] || ''}
+            onChange={(e) => handleFieldChange(field.name, e.target.value)}
+            rows={4}
+          />
+        );
+      
+      case 'checkbox':
+        return (
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id={field.name}
+              checked={formData[field.name] || false}
+              onCheckedChange={(checked) => handleFieldChange(field.name, checked)}
+            />
+            <label
+              htmlFor={field.name}
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              {field.label}
+            </label>
+          </div>
+        );
+      
+      case 'file':
+        return (
+          <Input
+            type="file"
+            onChange={(e) => handleFieldChange(field.name, e.target.files?.[0])}
+          />
+        );
+      
+      case 'text':
       default:
         return (
           <Input
