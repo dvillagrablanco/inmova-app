@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { detectUserIntent, searchKnowledgeBase } from '@/lib/ai-automation-service';
 import { toast } from 'sonner';
+import logger, { logError } from '@/lib/logger';
 
 interface Message {
   id: string;
@@ -191,7 +192,7 @@ export function AIAssistant() {
 
       addBotMessage(response, suggestions);
     } catch (error) {
-      console.error('Error processing message:', error);
+      logger.error('Error processing message:', error);
       addBotMessage(
         'Disculpa, tuve un problema al procesar tu mensaje. ¿Podrías intentar de nuevo?'
       );

@@ -14,6 +14,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Home, ArrowLeft, HardHat, Building2, Euro, Calendar, Users, ClipboardCheck } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 interface ConstructionProject {
   id: string;
@@ -64,7 +65,7 @@ export default function ConstructionProjectsPage() {
         setProjects(Array.isArray(data) ? data : []);
       }
     } catch (error) {
-      console.error('Error loading projects:', error);
+      logger.error('Error loading projects:', error);
       setProjects([]);
     } finally {
       setLoading(false);

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,7 +22,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ tags });
   } catch (error: any) {
-    console.error('Error fetching tags:', error);
+    logger.error('Error fetching tags:', error);
     return NextResponse.json(
       { error: error.message || 'Error al cargar etiquetas' },
       { status: 500 }
@@ -57,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ tag }, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating tag:', error);
+    logger.error('Error creating tag:', error);
     return NextResponse.json(
       { error: error.message || 'Error al crear etiqueta' },
       { status: 500 }

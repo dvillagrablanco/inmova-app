@@ -30,6 +30,7 @@ import { SkeletonList, SkeletonCard } from '@/components/ui/skeleton-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { FilterChips } from '@/components/ui/filter-chips';
 import { Skeleton } from '@/components/ui/skeleton';
+import logger, { logError } from '@/lib/logger';
 
 interface Payment {
   id: string;
@@ -80,7 +81,7 @@ export default function PagosPage() {
           setFilteredPayments(data);
         }
       } catch (error) {
-        console.error('Error fetching payments:', error);
+        logger.error('Error fetching payments:', error);
       } finally {
         setIsLoading(false);
       }

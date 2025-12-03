@@ -1,5 +1,6 @@
 import { prisma } from './db';
 import { SocialMediaPlatform, SocialPostStatus } from '@prisma/client';
+import logger, { logError } from '@/lib/logger';
 
 /**
  * SERVICIO DE REDES SOCIALES
@@ -111,7 +112,7 @@ export async function connectSocialMediaAccount(
       },
     });
   } catch (error) {
-    console.error('Error connecting social media account:', error);
+    logger.error('Error connecting social media account:', error);
     throw error;
   }
 }
@@ -182,7 +183,7 @@ export async function publishToSocialMedia(
 
     return { success: true, postId: post.id };
   } catch (error) {
-    console.error('Error publishing to social media:', error);
+    logger.error('Error publishing to social media:', error);
     return { success: false, error: (error as Error).message };
   }
 }
@@ -203,7 +204,7 @@ async function executePublish(
     // - LinkedIn: POST /v2/ugcPosts
     // - WhatsApp: POST /{whatsapp-business-account-id}/messages
 
-    console.log(`[DEMO] Publicando en ${account.platform}...`);
+    logger.info(`[DEMO] Publicando en ${account.platform}...`);
 
     // Simular ID de post
     const externalPostId = `${account.platform}_${Date.now()}`;
@@ -288,7 +289,7 @@ export async function updatePostMetrics(postId: string) {
       },
     });
   } catch (error) {
-    console.error('Error updating post metrics:', error);
+    logger.error('Error updating post metrics:', error);
   }
 }
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getAnalyticsTrends } from '@/lib/analytics-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ trends });
   } catch (error: any) {
-    console.error('Error fetching trends:', error);
+    logger.error('Error fetching trends:', error);
     return NextResponse.json(
       { error: error.message || 'Error al cargar tendencias' },
       { status: 500 }

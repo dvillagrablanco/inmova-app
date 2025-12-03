@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { firmarDocumento } from '@/lib/digital-signature-service';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,7 +55,7 @@ export async function POST(
 
     return NextResponse.json(result);
   } catch (error: any) {
-    console.error('Error firmando documento:', error);
+    logger.error('Error firmando documento:', error);
     return NextResponse.json(
       { error: error.message || 'Error firmando documento' },
       { status: 500 }

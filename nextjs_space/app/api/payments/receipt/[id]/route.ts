@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { db } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -100,7 +101,7 @@ export async function GET(
 
     return NextResponse.json(receiptData);
   } catch (error) {
-    console.error('Error al obtener datos del recibo:', error);
+    logger.error('Error al obtener datos del recibo:', error);
     return NextResponse.json(
       { error: 'Error al obtener datos del recibo' },
       { status: 500 }

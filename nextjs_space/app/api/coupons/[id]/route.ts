@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 import {
   getCouponStats,
   deactivateCoupon,
@@ -50,7 +51,7 @@ export async function GET(
 
     return NextResponse.json(coupon);
   } catch (error) {
-    console.error('Error al obtener cupón:', error);
+    logger.error('Error al obtener cupón:', error);
     return NextResponse.json(
       { error: 'Error al obtener cupón' },
       { status: 500 }
@@ -116,7 +117,7 @@ export async function PATCH(
 
     return NextResponse.json(updated);
   } catch (error: any) {
-    console.error('Error al actualizar cupón:', error);
+    logger.error('Error al actualizar cupón:', error);
     return NextResponse.json(
       { error: error.message || 'Error al actualizar cupón' },
       { status: 500 }
@@ -144,7 +145,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Cupón eliminado' });
   } catch (error) {
-    console.error('Error al eliminar cupón:', error);
+    logger.error('Error al eliminar cupón:', error);
     return NextResponse.json(
       { error: 'Error al eliminar cupón' },
       { status: 500 }

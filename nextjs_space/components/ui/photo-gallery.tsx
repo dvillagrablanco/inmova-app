@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Upload, X, Star, Trash2 } from 'lucide-react';
 import Image from 'next/image';
+import logger, { logError } from '@/lib/logger';
 
 interface Photo {
   id: string;
@@ -50,7 +51,7 @@ export function PhotoGallery({ entityType, entityId, canEdit = false }: PhotoGal
       const data = await res.json();
       setPhotos(data.photos || []);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cargar las fotos');
     } finally {
       setIsLoading(false);
@@ -84,7 +85,7 @@ export function PhotoGallery({ entityType, entityId, canEdit = false }: PhotoGal
       setIsPortada(false);
       fetchPhotos();
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al subir la foto');
     } finally {
       setUploading(false);
@@ -105,7 +106,7 @@ export function PhotoGallery({ entityType, entityId, canEdit = false }: PhotoGal
       toast.success('Foto eliminada correctamente');
       fetchPhotos();
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al eliminar la foto');
     }
   };

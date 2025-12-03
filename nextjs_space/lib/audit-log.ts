@@ -1,4 +1,5 @@
 import { prisma } from './db';
+import logger, { logError } from '@/lib/logger';
 
 export type AuditAction = 'CREATE' | 'UPDATE' | 'DELETE' | 'LOGIN' | 'LOGOUT' | 'EXPORT' | 'IMPORT';
 
@@ -42,7 +43,7 @@ export async function logAudit(params: LogAuditParams) {
       },
     });
   } catch (error) {
-    console.error('Error logging audit:', error);
+    logger.error('Error logging audit:', error);
     // Don't throw - audit logging should not break the main operation
   }
 }

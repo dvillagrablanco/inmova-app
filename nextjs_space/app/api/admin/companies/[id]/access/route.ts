@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -85,7 +86,7 @@ export async function GET(
       access: allAccess,
     });
   } catch (error) {
-    console.error('Error fetching company access:', error);
+    logger.error('Error fetching company access:', error);
     return NextResponse.json(
       { error: 'Error al obtener los accesos' },
       { status: 500 }
@@ -171,7 +172,7 @@ export async function POST(
       access,
     });
   } catch (error) {
-    console.error('Error granting company access:', error);
+    logger.error('Error granting company access:', error);
     return NextResponse.json(
       { error: 'Error al otorgar el acceso' },
       { status: 500 }
@@ -237,7 +238,7 @@ export async function DELETE(
       message: 'Acceso revocado exitosamente',
     });
   } catch (error) {
-    console.error('Error revoking company access:', error);
+    logger.error('Error revoking company access:', error);
     return NextResponse.json(
       { error: 'Error al revocar el acceso' },
       { status: 500 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 // import { suggestProviderForService } from '@/lib/marketplace-service';
@@ -34,7 +35,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(quotes);
   } catch (error) {
-    console.error('Error fetching quotes:', error);
+    logger.error('Error fetching quotes:', error);
     return NextResponse.json(
       { error: 'Error al obtener cotizaciones' },
       { status: 500 }
@@ -101,7 +102,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(quote, { status: 201 });
   } catch (error) {
-    console.error('Error creating quote:', error);
+    logger.error('Error creating quote:', error);
     return NextResponse.json(
       { error: 'Error al crear cotización' },
       { status: 500 }

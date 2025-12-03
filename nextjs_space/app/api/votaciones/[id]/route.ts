@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -72,7 +73,7 @@ export async function GET(
       opcionGanadora,
     });
   } catch (error) {
-    console.error('Error al obtener votación:', error);
+    logger.error('Error al obtener votación:', error);
     return NextResponse.json(
       { error: 'Error al obtener votación' },
       { status: 500 }
@@ -155,7 +156,7 @@ export async function PATCH(
 
     return NextResponse.json(votacion);
   } catch (error) {
-    console.error('Error al actualizar votación:', error);
+    logger.error('Error al actualizar votación:', error);
     return NextResponse.json(
       { error: 'Error al actualizar votación' },
       { status: 500 }
@@ -208,7 +209,7 @@ export async function DELETE(
 
     return NextResponse.json(votacion);
   } catch (error) {
-    console.error('Error al cancelar votación:', error);
+    logger.error('Error al cancelar votación:', error);
     return NextResponse.json(
       { error: 'Error al cancelar votación' },
       { status: 500 }

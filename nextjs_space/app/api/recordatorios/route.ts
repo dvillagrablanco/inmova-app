@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,7 +30,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(reminders);
   } catch (error) {
-    console.error('Error al obtener recordatorios:', error);
+    logger.error('Error al obtener recordatorios:', error);
     return NextResponse.json({ error: 'Error al obtener recordatorios' }, { status: 500 });
   }
 }
@@ -71,7 +72,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(reminder, { status: 201 });
   } catch (error) {
-    console.error('Error al crear recordatorio:', error);
+    logger.error('Error al crear recordatorio:', error);
     return NextResponse.json({ error: 'Error al crear recordatorio' }, { status: 500 });
   }
 }
@@ -94,7 +95,7 @@ export async function PATCH(req: NextRequest) {
 
     return NextResponse.json(reminder);
   } catch (error) {
-    console.error('Error al actualizar recordatorio:', error);
+    logger.error('Error al actualizar recordatorio:', error);
     return NextResponse.json({ error: 'Error al actualizar recordatorio' }, { status: 500 });
   }
 }

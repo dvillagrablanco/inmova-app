@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { uploadFile, deleteFile } from '@/lib/s3';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -71,7 +72,7 @@ export async function POST(
       message: 'Documento subido correctamente',
     });
   } catch (error) {
-    console.error('Error uploading document:', error);
+    logger.error('Error uploading document:', error);
     return NextResponse.json(
       { error: 'Error al subir el documento' },
       { status: 500 }
@@ -126,7 +127,7 @@ export async function DELETE(
     try {
       await deleteFile(documentUrl);
     } catch (error) {
-      console.error('Error deleting file from S3:', error);
+      logger.error('Error deleting file from S3:', error);
       // Continue anyway
     }
 
@@ -135,7 +136,7 @@ export async function DELETE(
       message: 'Documento eliminado correctamente',
     });
   } catch (error) {
-    console.error('Error deleting document:', error);
+    logger.error('Error deleting document:', error);
     return NextResponse.json(
       { error: 'Error al eliminar el documento' },
       { status: 500 }

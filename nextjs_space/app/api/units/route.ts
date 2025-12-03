@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,7 +38,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(units);
   } catch (error) {
-    console.error('Error fetching units:', error);
+    logger.error('Error fetching units:', error);
     return NextResponse.json({ error: 'Error al obtener unidades' }, { status: 500 });
   }
 }
@@ -72,7 +73,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(unit, { status: 201 });
   } catch (error) {
-    console.error('Error creating unit:', error);
+    logger.error('Error creating unit:', error);
     return NextResponse.json({ error: 'Error al crear unidad' }, { status: 500 });
   }
 }

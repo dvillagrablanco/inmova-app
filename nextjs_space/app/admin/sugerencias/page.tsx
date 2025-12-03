@@ -39,6 +39,7 @@ import {
 import { PageHeader } from '@/components/ui/page-header';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 type Suggestion = {
   id: string;
@@ -104,7 +105,7 @@ export default function SugerenciasAdminPage() {
       const data = await response.json();
       setSuggestions(data.suggestions);
     } catch (error: any) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cargar sugerencias', {
         description: error.message,
       });
@@ -140,7 +141,7 @@ export default function SugerenciasAdminPage() {
       setDialogOpen(false);
       fetchSuggestions();
     } catch (error: any) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al actualizar', {
         description: error.message,
       });

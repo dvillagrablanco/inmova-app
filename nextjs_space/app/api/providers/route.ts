@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, requirePermission, forbiddenResponse, badRequestResponse } from '@/lib/permissions';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,7 +29,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(providers);
   } catch (error: any) {
-    console.error('Error fetching providers:', error);
+    logger.error('Error fetching providers:', error);
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
@@ -61,7 +62,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(provider, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating provider:', error);
+    logger.error('Error creating provider:', error);
     if (error.message?.includes('permiso')) {
       return forbiddenResponse(error.message);
     }

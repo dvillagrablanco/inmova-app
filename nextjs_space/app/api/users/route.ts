@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth, requirePermission, forbiddenResponse, badRequestResponse } from '@/lib/permissions';
 import bcrypt from 'bcryptjs';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,7 +37,7 @@ export async function GET() {
 
     return NextResponse.json(usersWithoutPasswords);
   } catch (error: any) {
-    console.error('Error fetching users:', error);
+    logger.error('Error fetching users:', error);
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
@@ -114,7 +115,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(userWithoutPassword, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating user:', error);
+    logger.error('Error creating user:', error);
     if (error.message?.includes('permiso')) {
       return forbiddenResponse(error.message);
     }

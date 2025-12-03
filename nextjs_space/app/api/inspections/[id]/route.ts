@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,7 +57,7 @@ export async function GET(
       tenant,
     });
   } catch (error) {
-    console.error('Error al obtener inspección:', error);
+    logger.error('Error al obtener inspección:', error);
     return NextResponse.json(
       { error: 'Error al obtener inspección' },
       { status: 500 }
@@ -101,7 +102,7 @@ export async function PATCH(
 
     return NextResponse.json(updated);
   } catch (error) {
-    console.error('Error al actualizar inspección:', error);
+    logger.error('Error al actualizar inspección:', error);
     return NextResponse.json(
       { error: 'Error al actualizar inspección' },
       { status: 500 }
@@ -136,7 +137,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Inspección eliminada' });
   } catch (error) {
-    console.error('Error al eliminar inspección:', error);
+    logger.error('Error al eliminar inspección:', error);
     return NextResponse.json(
       { error: 'Error al eliminar inspección' },
       { status: 500 }

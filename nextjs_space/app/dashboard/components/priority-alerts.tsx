@@ -22,6 +22,7 @@ import {
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import Link from 'next/link';
+import logger, { logError } from '@/lib/logger';
 
 interface Alert {
   id: string;
@@ -53,7 +54,7 @@ export function PriorityAlerts() {
         setAlerts(data.alerts || []);
       }
     } catch (error) {
-      console.error('Error fetching alerts:', error);
+      logger.error('Error fetching alerts:', error);
     } finally {
       setIsLoading(false);
     }

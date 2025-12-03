@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { generateCSVTemplate, ImportableEntity } from '@/lib/import-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,7 +36,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error: any) {
-    console.error('Error generating template:', error);
+    logger.error('Error generating template:', error);
     return NextResponse.json(
       { error: error.message || 'Error al generar la plantilla' },
       { status: 500 }

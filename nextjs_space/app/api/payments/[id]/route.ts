@@ -6,6 +6,7 @@ import { generatePaymentReceiptPDF, generatePaymentReceiptFilename } from '@/lib
 import { paymentReceiptEmail } from '@/lib/email-templates';
 import { sendEmail } from '@/lib/email-config';
 import { uploadFile } from '@/lib/s3';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,7 +39,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
     return NextResponse.json(payment);
   } catch (error) {
-    console.error('Error fetching payment:', error);
+    logger.error('Error fetching payment:', error);
     return NextResponse.json({ error: 'Error al obtener pago' }, { status: 500 });
   }
 }
@@ -185,16 +186,16 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
           companyName: payment.contract.unit.building.company.nombre,
         });
 
-        console.log(`✅ Recibo generado y enviado para pago ${payment.id}`);
+        logger.info(`✅ Recibo generado y enviado para pago ${payment.id}`);
       } catch (emailError) {
-        console.error('Error generando recibo o enviando email:', emailError);
+        logger.error('Error generando recibo o enviando email:', emailError);
         // No fallar la actualización del pago si falla el email
       }
     }
 
     return NextResponse.json(payment);
   } catch (error) {
-    console.error('Error updating payment:', error);
+    logger.error('Error updating payment:', error);
     return NextResponse.json({ error: 'Error al actualizar pago' }, { status: 500 });
   }
 }
@@ -212,7 +213,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
     return NextResponse.json({ message: 'Pago eliminado' });
   } catch (error) {
-    console.error('Error deleting payment:', error);
+    logger.error('Error deleting payment:', error);
     return NextResponse.json({ error: 'Error al eliminar pago' }, { status: 500 });
   }
 }

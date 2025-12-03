@@ -26,6 +26,7 @@ import {
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
 import { processImageOCR, extractDNIData, extractContractData } from '@/lib/ocr-service';
+import logger, { logError } from '@/lib/logger';
 
 interface OCRResult {
   text: string;
@@ -105,7 +106,7 @@ export default function OCRPage() {
 
       toast.success('¡OCR completado exitosamente!');
     } catch (error) {
-      console.error('Error al procesar OCR:', error);
+      logger.error('Error al procesar OCR:', error);
       toast.error('Error al procesar la imagen');
     } finally {
       setProcessing(false);

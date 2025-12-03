@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,7 +33,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(votaciones);
   } catch (error) {
-    console.error('Error fetching votaciones:', error);
+    logger.error('Error fetching votaciones:', error);
     return NextResponse.json(
       { error: 'Error al obtener votaciones' },
       { status: 500 }
@@ -80,7 +81,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(votacion, { status: 201 });
   } catch (error) {
-    console.error('Error creating votacion:', error);
+    logger.error('Error creating votacion:', error);
     return NextResponse.json(
       { error: 'Error al crear votación' },
       { status: 500 }

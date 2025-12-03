@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, Calculator, Zap, Droplet, Flame, Wifi, Sparkles, CheckCircle, AlertCircle } from 'lucide-react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
+import logger, { logError } from '@/lib/logger';
 
 export default function ProrationPage() {
   const router = useRouter();
@@ -55,7 +56,7 @@ export default function ProrationPage() {
       if (unitRes.ok) setUnit(await unitRes.json());
       if (roomsRes.ok) setRooms(await roomsRes.json());
     } catch (error) {
-      console.error('Error loading data:', error);
+      logger.error('Error loading data:', error);
       toast.error('Error al cargar los datos');
     } finally {
       setLoading(false);
@@ -102,7 +103,7 @@ export default function ProrationPage() {
       setPreview(results);
       toast.success('Cálculo completado');
     } catch (error) {
-      console.error('Error calculating proration:', error);
+      logger.error('Error calculating proration:', error);
       toast.error('Error al calcular prorrateo');
     } finally {
       setCalculating(false);
@@ -154,7 +155,7 @@ export default function ProrationPage() {
         toast.error(error.error || 'Error al aplicar prorrateo');
       }
     } catch (error) {
-      console.error('Error applying proration:', error);
+      logger.error('Error applying proration:', error);
       toast.error('Error al aplicar prorrateo');
     } finally {
       setCalculating(false);

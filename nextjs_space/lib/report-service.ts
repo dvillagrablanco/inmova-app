@@ -10,6 +10,7 @@ import { es } from 'date-fns/locale';
 import { prisma } from '@/lib/db';
 import { sendEmail } from '@/lib/email-config';
 import { uploadFile } from '@/lib/s3';
+import logger, { logError } from '@/lib/logger';
 
 interface ReportData {
   tipo: string;
@@ -572,19 +573,19 @@ export const processScheduledReports = async () => {
       },
     });
 
-    console.log(`Procesando ${reports.length} reportes programados...`);
+    logger.info(`Procesando ${reports.length} reportes programados...`);
 
     for (const report of reports) {
       try {
         await sendScheduledReport(report.id);
       } catch (error) {
-        console.error(`Error al procesar reporte ${report.id}:`, error);
+        logger.error(`Error al procesar reporte ${report.id}:`, error);
       }
     }
 
-    console.log('Reportes programados procesados correctamente');
+    logger.info('Reportes programados procesados correctamente');
   } catch (error) {
-    console.error('Error al procesar reportes programados:', error);
+    logger.error('Error al procesar reportes programados:', error);
     throw error;
   }
 };
@@ -735,5 +736,5 @@ export const sendScheduledReport = async (reportId: string) => {
     },
   });
 
-  console.log(`Reporte ${report.nombre} enviado correctamente a ${report.destinatarios.length} destinatarios`);
+  logger.info(`Reporte ${report.nombre} enviado correctamente a ${report.destinatarios.length} destinatarios`);
 };

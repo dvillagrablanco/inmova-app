@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,7 +32,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(anuncios);
   } catch (error) {
-    console.error('Error fetching anuncios:', error);
+    logger.error('Error fetching anuncios:', error);
     return NextResponse.json(
       { error: 'Error al obtener anuncios' },
       { status: 500 }
@@ -79,7 +80,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(anuncio, { status: 201 });
   } catch (error) {
-    console.error('Error creating anuncio:', error);
+    logger.error('Error creating anuncio:', error);
     return NextResponse.json(
       { error: 'Error al crear anuncio' },
       { status: 500 }

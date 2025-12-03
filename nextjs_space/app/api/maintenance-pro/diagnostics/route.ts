@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { generateDiagnostic } from '@/lib/maintenance-prediction-service';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ diagnostics });
   } catch (error: any) {
-    console.error('Error fetching diagnostics:', error);
+    logger.error('Error fetching diagnostics:', error);
     return NextResponse.json(
       { error: error.message || 'Error al cargar diagnósticos' },
       { status: 500 }
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ diagnostic }, { status: 201 });
   } catch (error: any) {
-    console.error('Error generating diagnostic:', error);
+    logger.error('Error generating diagnostic:', error);
     return NextResponse.json(
       { error: error.message || 'Error al generar diagnóstico' },
       { status: 500 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,7 +42,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(projects);
   } catch (error) {
-    console.error('Error fetching construction projects:', error);
+    logger.error('Error fetching construction projects:', error);
     return NextResponse.json(
       { error: 'Failed to fetch projects' },
       { status: 500 }
@@ -70,7 +71,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(project, { status: 201 });
   } catch (error) {
-    console.error('Error creating construction project:', error);
+    logger.error('Error creating construction project:', error);
     return NextResponse.json(
       { error: 'Failed to create project' },
       { status: 500 }

@@ -17,6 +17,7 @@ import {
   Zap, RefreshCw
 } from 'lucide-react';
 import { toast } from 'sonner';
+import logger, { logError } from '@/lib/logger';
 
 interface ModuloDefinicion {
   codigo: string;
@@ -108,7 +109,7 @@ export default function ModulosAdminPage() {
         setCompanyModules(companyData.modules || []);
       }
     } catch (error: any) {
-      console.error('Error loading modules:', error);
+      logger.error('Error loading modules:', error);
       toast.error('Error al cargar módulos');
     } finally {
       setLoading(false);
@@ -133,7 +134,7 @@ export default function ModulosAdminPage() {
       toast.success(activo ? 'Módulo activado' : 'Módulo desactivado');
       await loadData();
     } catch (error: any) {
-      console.error('Error toggling module:', error);
+      logger.error('Error toggling module:', error);
       toast.error(error.message || 'Error al modificar módulo');
     } finally {
       setUpdating(null);

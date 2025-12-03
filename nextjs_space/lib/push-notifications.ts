@@ -5,6 +5,7 @@
 
 import webpush from 'web-push';
 import { prisma } from './db';
+import logger, { logError } from '@/lib/logger';
 
 // Configuración de VAPID keys
 // Para generar keys nuevas: `npx web-push generate-vapid-keys`
@@ -22,7 +23,7 @@ if (vapidKeys.publicKey && vapidKeys.privateKey) {
       vapidKeys.privateKey
     );
   } catch (error) {
-    console.warn('Error configurando VAPID keys:', error);
+    logger.warn('Error configurando VAPID keys:', error);
   }
 }
 
@@ -88,7 +89,7 @@ export async function savePushSubscription(
       }
     });
   } catch (error) {
-    console.error('Error saving push subscription:', error);
+    logger.error('Error saving push subscription:', error);
     throw error;
   }
 }
@@ -102,7 +103,7 @@ export async function removePushSubscription(endpoint: string): Promise<void> {
       where: { endpoint }
     });
   } catch (error) {
-    console.error('Error removing push subscription:', error);
+    logger.error('Error removing push subscription:', error);
     throw error;
   }
 }
@@ -116,7 +117,7 @@ export async function getUserSubscriptions(userId: string): Promise<any[]> {
       where: { userId }
     });
   } catch (error) {
-    console.error('Error getting user subscriptions:', error);
+    logger.error('Error getting user subscriptions:', error);
     return [];
   }
 }
@@ -132,7 +133,7 @@ export async function sendPushNotificationToUser(
     const subscriptions = await getUserSubscriptions(userId);
     
     if (subscriptions.length === 0) {
-      console.log(`No push subscriptions found for user ${userId}`);
+      logger.info(`No push subscriptions found for user ${userId}`);
       return { success: 0, failed: 0 };
     }
 
@@ -164,7 +165,7 @@ export async function sendPushNotificationToUser(
 
     return { success, failed };
   } catch (error) {
-    console.error('Error sending push to user:', error);
+    logger.error('Error sending push to user:', error);
     return { success: 0, failed: 1 };
   }
 }
@@ -208,7 +209,7 @@ export async function sendPushNotificationToCompany(
     const userIds = users.map(u => u.id);
     return await sendPushNotificationToUsers(userIds, payload);
   } catch (error) {
-    console.error('Error sending push to company:', error);
+    logger.error('Error sending push to company:', error);
     return { success: 0, failed: 1 };
   }
 }

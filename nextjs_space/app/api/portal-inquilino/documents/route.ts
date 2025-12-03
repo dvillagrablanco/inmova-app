@@ -7,6 +7,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,7 +38,7 @@ export async function GET() {
 
     return NextResponse.json(documents);
   } catch (error) {
-    console.error('Error obteniendo documentos:', error);
+    logger.error('Error obteniendo documentos:', error);
     return NextResponse.json(
       { error: 'Error al obtener documentos' },
       { status: 500 }

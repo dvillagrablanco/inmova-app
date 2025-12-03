@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import logger, { logError } from '@/lib/logger';
 import {
   analyzeRevenueTrends,
   benchmarkProperties,
@@ -52,7 +53,7 @@ export async function GET(req: NextRequest) {
       benchmarks,
     });
   } catch (error) {
-    console.error('Error fetching BI stats:', error);
+    logger.error('Error fetching BI stats:', error);
     return NextResponse.json(
       { error: 'Error al obtener estadísticas' },
       { status: 500 }

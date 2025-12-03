@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getBalanceSheet } from '@/lib/accounting-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,7 +30,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(balance);
   } catch (error) {
-    console.error('Error fetching balance:', error);
+    logger.error('Error fetching balance:', error);
     return NextResponse.json(
       { error: 'Error al obtener balance' },
       { status: 500 }

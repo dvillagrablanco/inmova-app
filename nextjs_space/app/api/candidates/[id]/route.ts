@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,7 +31,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
     return NextResponse.json(candidate);
   } catch (error) {
-    console.error('Error fetching candidate:', error);
+    logger.error('Error fetching candidate:', error);
     return NextResponse.json({ error: 'Error al obtener candidato' }, { status: 500 });
   }
 }
@@ -64,7 +65,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
     return NextResponse.json(candidate);
   } catch (error) {
-    console.error('Error updating candidate:', error);
+    logger.error('Error updating candidate:', error);
     return NextResponse.json({ error: 'Error al actualizar candidato' }, { status: 500 });
   }
 }
@@ -82,7 +83,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
 
     return NextResponse.json({ message: 'Candidato eliminado' });
   } catch (error) {
-    console.error('Error deleting candidate:', error);
+    logger.error('Error deleting candidate:', error);
     return NextResponse.json({ error: 'Error al eliminar candidato' }, { status: 500 });
   }
 }

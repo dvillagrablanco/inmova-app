@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth-options';
 import { getHoldedService } from '@/lib/holded-integration-service';
 import { prisma } from '@/lib/db';
 import { startOfMonth, endOfMonth } from 'date-fns';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -71,7 +72,7 @@ export async function POST(req: NextRequest) {
       results,
     });
   } catch (error) {
-    console.error('Error registering payments in Holded:', error);
+    logger.error('Error registering payments in Holded:', error);
     return NextResponse.json(
       { error: 'Error al registrar pagos en Holded' },
       { status: 500 }

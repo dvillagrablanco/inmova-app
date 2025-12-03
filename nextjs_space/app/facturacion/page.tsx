@@ -44,6 +44,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 interface Invoice {
   id: string;
@@ -119,7 +120,7 @@ export default function FacturacionPage() {
         });
       }
     } catch (error) {
-      console.error('Error al cargar datos:', error);
+      logger.error('Error al cargar datos:', error);
       toast.error('Error al cargar datos de facturación');
     } finally {
       setLoading(false);

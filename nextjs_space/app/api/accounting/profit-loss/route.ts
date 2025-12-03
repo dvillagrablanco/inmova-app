@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getProfitLossStatement } from '@/lib/accounting-service';
 import { startOfMonth, endOfMonth } from 'date-fns';
+import logger, { logError } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -36,7 +37,7 @@ export async function GET(request: NextRequest) {
       periodo,
     });
   } catch (error) {
-    console.error('Error al obtener cuenta de pérdidas y ganancias:', error);
+    logger.error('Error al obtener cuenta de pérdidas y ganancias:', error);
     return NextResponse.json(
       { error: 'Error al obtener cuenta de pérdidas y ganancias' },
       { status: 500 }

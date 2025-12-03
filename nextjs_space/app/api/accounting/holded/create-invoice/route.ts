@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getHoldedService } from '@/lib/holded-integration-service';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -64,7 +65,7 @@ export async function POST(req: NextRequest) {
       results,
     });
   } catch (error) {
-    console.error('Error creating invoices in Holded:', error);
+    logger.error('Error creating invoices in Holded:', error);
     return NextResponse.json(
       { error: 'Error al crear facturas en Holded' },
       { status: 500 }

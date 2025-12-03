@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
       message: `Ahora estás navegando como: ${company.nombre}`,
     });
   } catch (error) {
-    console.error('Error en impersonation:', error);
+    logger.error('Error en impersonation:', error);
     return NextResponse.json(
       { error: 'Error al iniciar impersonation' },
       { status: 500 }
@@ -112,7 +113,7 @@ export async function DELETE(request: NextRequest) {
       message: 'Impersonation finalizado',
     });
   } catch (error) {
-    console.error('Error al finalizar impersonation:', error);
+    logger.error('Error al finalizar impersonation:', error);
     return NextResponse.json(
       { error: 'Error al finalizar impersonation' },
       { status: 500 }

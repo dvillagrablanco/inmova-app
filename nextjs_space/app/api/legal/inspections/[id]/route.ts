@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,7 +29,7 @@ export async function GET(
 
     return NextResponse.json(inspection);
   } catch (error) {
-    console.error('Error fetching inspection:', error);
+    logger.error('Error fetching inspection:', error);
     return NextResponse.json(
       { error: 'Error al obtener inspección' },
       { status: 500 }
@@ -68,7 +69,7 @@ export async function PATCH(
 
     return NextResponse.json(inspection);
   } catch (error) {
-    console.error('Error updating inspection:', error);
+    logger.error('Error updating inspection:', error);
     return NextResponse.json(
       { error: 'Error al actualizar inspección' },
       { status: 500 }

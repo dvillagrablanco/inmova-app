@@ -13,6 +13,7 @@ import WizardDialog from '@/components/automation/WizardDialog';
 import { AIAssistant } from '@/components/automation/AIAssistant';
 import { initialSetupWizard, createBuildingWizard, createTenantWizard } from '@/lib/wizard-config';
 import { toast } from 'sonner';
+import logger, { logError } from '@/lib/logger';
 
 export default function AutomatizacionPage() {
   const router = useRouter();
@@ -70,7 +71,7 @@ export default function AutomatizacionPage() {
   ];
 
   const handleWizardComplete = async (data: any) => {
-    console.log('Wizard completed with data:', data);
+    logger.info('Wizard completed with data:', data);
     toast.success('¡Wizard completado exitosamente!');
   };
 

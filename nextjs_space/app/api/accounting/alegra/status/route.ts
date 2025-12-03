@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { isAlegraConfigured } from '@/lib/alegra-integration-service';
+import logger, { logError } from '@/lib/logger';
 
 export async function GET(req: NextRequest) {
   try {
@@ -28,7 +29,7 @@ export async function GET(req: NextRequest) {
       status: isConfigured ? 'active' : 'demo'
     });
   } catch (error) {
-    console.error('Error checking Alegra status:', error);
+    logger.error('Error checking Alegra status:', error);
     return NextResponse.json(
       { error: 'Error al verificar estado de Alegra' },
       { status: 500 }

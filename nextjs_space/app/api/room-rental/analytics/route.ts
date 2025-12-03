@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getRoomRentalAnalytics } from '@/lib/room-rental-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(analytics);
   } catch (error: any) {
-    console.error('Error fetching analytics:', error);
+    logger.error('Error fetching analytics:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

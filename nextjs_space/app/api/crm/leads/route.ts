@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { calculateLeadScoring, calculateProbabilidadCierre } from '@/lib/crm-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,7 +56,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(leads);
   } catch (error) {
-    console.error('Error fetching leads:', error);
+    logger.error('Error fetching leads:', error);
     return NextResponse.json(
       { error: 'Error al obtener leads' },
       { status: 500 }
@@ -131,7 +132,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(lead, { status: 201 });
   } catch (error) {
-    console.error('Error creating lead:', error);
+    logger.error('Error creating lead:', error);
     return NextResponse.json(
       { error: 'Error al crear lead' },
       { status: 500 }

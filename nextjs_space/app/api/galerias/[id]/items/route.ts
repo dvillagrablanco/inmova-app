@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,7 +55,7 @@ export async function POST(
 
     return NextResponse.json(item, { status: 201 });
   } catch (error) {
-    console.error('Error creating gallery item:', error);
+    logger.error('Error creating gallery item:', error);
     return NextResponse.json(
       { error: 'Error al agregar item a galería' },
       { status: 500 }

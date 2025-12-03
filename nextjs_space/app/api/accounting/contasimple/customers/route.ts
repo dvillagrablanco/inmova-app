@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getContaSimpleService } from '@/lib/contasimple-integration-service';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
       data: customer,
     });
   } catch (error) {
-    console.error('Error al sincronizar cliente con ContaSimple:', error);
+    logger.error('Error al sincronizar cliente con ContaSimple:', error);
     return NextResponse.json(
       { error: 'Error al sincronizar cliente' },
       { status: 500 }

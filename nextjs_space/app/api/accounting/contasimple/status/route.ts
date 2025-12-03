@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { isContaSimpleConfigured } from '@/lib/contasimple-integration-service';
+import logger, { logError } from '@/lib/logger';
 
 /**
  * GET /api/accounting/contasimple/status
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
         : 'Para activar la integración, configure las credenciales en variables de entorno.',
     });
   } catch (error) {
-    console.error('Error al verificar estado de ContaSimple:', error);
+    logger.error('Error al verificar estado de ContaSimple:', error);
     return NextResponse.json(
       { error: 'Error al verificar el estado' },
       { status: 500 }

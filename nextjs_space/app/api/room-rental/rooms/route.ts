@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getAvailableRooms } from '@/lib/room-rental-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -63,7 +64,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(rooms);
   } catch (error: any) {
-    console.error('Error fetching rooms:', error);
+    logger.error('Error fetching rooms:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -126,7 +127,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(room, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating room:', error);
+    logger.error('Error creating room:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

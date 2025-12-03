@@ -3,6 +3,7 @@ import { headers } from 'next/headers';
 import { stripe, formatAmountFromStripe, STRIPE_WEBHOOK_SECRET } from '@/lib/stripe-config';
 import { prisma } from '@/lib/db';
 import Stripe from 'stripe';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,7 +28,7 @@ export async function POST(request: NextRequest) {
       STRIPE_WEBHOOK_SECRET
     );
   } catch (err: any) {
-    console.error('Webhook signature verification failed:', err.message);
+    logger.error('Webhook signature verification failed:', err.message);
     return NextResponse.json(
       { error: `Webhook Error: ${err.message}` },
       { status: 400 }
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error logging webhook event:', error);
+    logger.error('Error logging webhook event:', error);
   }
 
   // Handle the event
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
         break;
 
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        logger.info(`Unhandled event type: ${event.type}`);
     }
 
     // Mark event as processed
@@ -95,7 +96,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ received: true });
   } catch (error: any) {
-    console.error('Error processing webhook:', error);
+    logger.error('Error processing webhook:', error);
 
     // Log processing error
     await prisma.stripeWebhookEvent.updateMany({
@@ -116,7 +117,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
   const paymentId = paymentIntent.metadata.paymentId;
 
   if (!paymentId) {
-    console.error('No paymentId in metadata');
+    logger.error('No paymentId in metadata');
     return;
   }
 
@@ -125,7 +126,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
   });
 
   if (!payment) {
-    console.error(`Payment not found: ${paymentId}`);
+    logger.error(`Payment not found: ${paymentId}`);
     return;
   }
 
@@ -159,14 +160,14 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
     },
   });
 
-  console.log(`Payment ${paymentId} marked as succeeded`);
+  logger.info(`Payment ${paymentId} marked as succeeded`);
 }
 
 async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
   const paymentId = paymentIntent.metadata.paymentId;
 
   if (!paymentId) {
-    console.error('No paymentId in metadata');
+    logger.error('No paymentId in metadata');
     return;
   }
 
@@ -177,14 +178,14 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
     },
   });
 
-  console.log(`Payment ${paymentId} marked as failed`);
+  logger.info(`Payment ${paymentId} marked as failed`);
 }
 
 async function handlePaymentIntentCanceled(paymentIntent: Stripe.PaymentIntent) {
   const paymentId = paymentIntent.metadata.paymentId;
 
   if (!paymentId) {
-    console.error('No paymentId in metadata');
+    logger.error('No paymentId in metadata');
     return;
   }
 
@@ -195,14 +196,14 @@ async function handlePaymentIntentCanceled(paymentIntent: Stripe.PaymentIntent) 
     },
   });
 
-  console.log(`Payment ${paymentId} marked as canceled`);
+  logger.info(`Payment ${paymentId} marked as canceled`);
 }
 
 async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
   const contractId = subscription.metadata.contractId;
 
   if (!contractId) {
-    console.error('No contractId in subscription metadata');
+    logger.error('No contractId in subscription metadata');
     return;
   }
 
@@ -235,7 +236,7 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
     },
   });
 
-  console.log(`Subscription ${subscription.id} updated`);
+  logger.info(`Subscription ${subscription.id} updated`);
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
@@ -247,7 +248,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     },
   });
 
-  console.log(`Subscription ${subscription.id} deleted`);
+  logger.info(`Subscription ${subscription.id} deleted`);
 }
 
 async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
@@ -266,7 +267,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
   });
 
   if (!subscription) {
-    console.error(`Subscription not found: ${subscriptionId}`);
+    logger.error(`Subscription not found: ${subscriptionId}`);
     return;
   }
 
@@ -290,7 +291,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
     },
   });
 
-  console.log(`Payment created from invoice: ${payment.id}`);
+  logger.info(`Payment created from invoice: ${payment.id}`);
 }
 
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
@@ -306,7 +307,7 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   });
 
   if (!subscription) {
-    console.error(`Subscription not found: ${subscriptionId}`);
+    logger.error(`Subscription not found: ${subscriptionId}`);
     return;
   }
 
@@ -318,5 +319,5 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
     },
   });
 
-  console.log(`Subscription ${subscriptionId} marked as past_due`);
+  logger.info(`Subscription ${subscriptionId} marked as past_due`);
 }

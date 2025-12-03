@@ -1,4 +1,5 @@
 import { Redis } from '@upstash/redis';
+import logger, { logError } from '@/lib/logger';
 
 // Initialize Redis client
 const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
@@ -89,7 +90,7 @@ export class RateLimiter {
         reset: Math.ceil((now + this.config.windowMs) / 1000),
       };
     } catch (error) {
-      console.error('Redis rate limit error:', error);
+      logger.error('Redis rate limit error:', error);
       // Fallback to in-memory on Redis error
       return this.checkLimitFallback(identifier);
     }

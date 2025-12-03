@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { sendScheduledReport } from '@/lib/report-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -62,14 +63,14 @@ export async function POST(
         success: true,
       });
     } catch (sendError: any) {
-      console.error('Error al enviar reporte:', sendError);
+      logger.error('Error al enviar reporte:', sendError);
       return NextResponse.json(
         { error: sendError.message || 'Error al enviar reporte' },
         { status: 500 }
       );
     }
   } catch (error) {
-    console.error('Error en endpoint send:', error);
+    logger.error('Error en endpoint send:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }

@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 interface SubscriptionPlan {
   id: string;
@@ -89,7 +90,7 @@ export default function PlanesPage() {
         toast.error('Error al cargar los planes');
       }
     } catch (error) {
-      console.error('Error loading plans:', error);
+      logger.error('Error loading plans:', error);
       toast.error('Error de conexión');
     } finally {
       setLoading(false);
@@ -150,7 +151,7 @@ export default function PlanesPage() {
         toast.error(data.error || 'Error al guardar el plan');
       }
     } catch (error) {
-      console.error('Error saving plan:', error);
+      logger.error('Error saving plan:', error);
       toast.error('Error de conexión');
     } finally {
       setLoading(false);
@@ -173,7 +174,7 @@ export default function PlanesPage() {
         toast.error(data.error || 'Error al eliminar el plan');
       }
     } catch (error) {
-      console.error('Error deleting plan:', error);
+      logger.error('Error deleting plan:', error);
       toast.error('Error de conexión');
     }
   };

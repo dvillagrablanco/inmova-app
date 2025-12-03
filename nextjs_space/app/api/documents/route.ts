@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { uploadFile, deleteFile } from '@/lib/s3';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,7 +50,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(documents);
   } catch (error) {
-    console.error('Error fetching documents:', error);
+    logger.error('Error fetching documents:', error);
     return NextResponse.json({ error: 'Error al obtener documentos' }, { status: 500 });
   }
 }
@@ -124,7 +125,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(document, { status: 201 });
   } catch (error) {
-    console.error('Error creating document:', error);
+    logger.error('Error creating document:', error);
     return NextResponse.json({ error: 'Error al crear documento' }, { status: 500 });
   }
 }

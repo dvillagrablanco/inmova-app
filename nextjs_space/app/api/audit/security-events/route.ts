@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,7 +48,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(events);
   } catch (error) {
-    console.error('Error al obtener eventos de seguridad:', error);
+    logger.error('Error al obtener eventos de seguridad:', error);
     return NextResponse.json(
       { error: 'Error al obtener eventos' },
       { status: 500 }
@@ -80,7 +81,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(event, { status: 201 });
   } catch (error) {
-    console.error('Error al crear evento de seguridad:', error);
+    logger.error('Error al crear evento de seguridad:', error);
     return NextResponse.json(
       { error: 'Error al crear evento' },
       { status: 500 }
@@ -121,7 +122,7 @@ export async function PATCH(req: NextRequest) {
 
     return NextResponse.json(updated);
   } catch (error) {
-    console.error('Error al resolver evento:', error);
+    logger.error('Error al resolver evento:', error);
     return NextResponse.json({ error: 'Error al resolver evento' }, { status: 500 });
   }
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ folders });
   } catch (error: any) {
-    console.error('Error fetching folders:', error);
+    logger.error('Error fetching folders:', error);
     return NextResponse.json(
       { error: error.message || 'Error al cargar carpetas' },
       { status: 500 }
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ folder }, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating folder:', error);
+    logger.error('Error creating folder:', error);
     return NextResponse.json(
       { error: error.message || 'Error al crear carpeta' },
       { status: 500 }

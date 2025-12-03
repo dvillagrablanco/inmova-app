@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { ArrowLeft, Send, Wrench } from 'lucide-react';
 import Link from 'next/link';
+import logger, { logError } from '@/lib/logger';
 
 export default function PortalInquilinoMantenimientoPage() {
   const router = useRouter();
@@ -49,7 +50,7 @@ export default function PortalInquilinoMantenimientoPage() {
         toast.error(error.error || 'Error al enviar solicitud');
       }
     } catch (error) {
-      console.error('Error al enviar solicitud:', error);
+      logger.error('Error al enviar solicitud:', error);
       toast.error('Error al enviar solicitud');
     } finally {
       setLoading(false);

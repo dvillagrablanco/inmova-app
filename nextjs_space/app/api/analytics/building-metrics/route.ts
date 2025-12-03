@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { generateBuildingMetrics } from '@/lib/analytics-service';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -62,7 +63,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ metrics });
   } catch (error: any) {
-    console.error('Error fetching building metrics:', error);
+    logger.error('Error fetching building metrics:', error);
     return NextResponse.json(
       { error: error.message || 'Error al cargar métricas' },
       { status: 500 }
@@ -107,7 +108,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ metrics }, { status: 201 });
   } catch (error: any) {
-    console.error('Error generating building metrics:', error);
+    logger.error('Error generating building metrics:', error);
     return NextResponse.json(
       { error: error.message || 'Error al generar métricas' },
       { status: 500 }

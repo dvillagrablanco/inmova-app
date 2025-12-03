@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -165,7 +166,7 @@ export async function POST(
       reunion: reunionActualizada,
     });
   } catch (error) {
-    console.error('Error al generar acta:', error);
+    logger.error('Error al generar acta:', error);
     return NextResponse.json(
       { error: 'Error al generar acta' },
       { status: 500 }

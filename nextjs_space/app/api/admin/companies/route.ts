@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -66,7 +67,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(companies);
   } catch (error) {
-    console.error('Error fetching companies:', error);
+    logger.error('Error fetching companies:', error);
     return NextResponse.json(
       { error: 'Error al obtener empresas' },
       { status: 500 }
@@ -196,7 +197,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(company, { status: 201 });
   } catch (error) {
-    console.error('Error creating company:', error);
+    logger.error('Error creating company:', error);
     return NextResponse.json(
       { error: 'Error al crear empresa' },
       { status: 500 }

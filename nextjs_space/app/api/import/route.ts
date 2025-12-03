@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { db } from '@/lib/db';
 import Papa from 'papaparse';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -164,7 +165,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(results);
   } catch (error) {
-    console.error('Error al importar:', error);
+    logger.error('Error al importar:', error);
     return NextResponse.json(
       { error: 'Error al importar datos' },
       { status: 500 }
@@ -207,7 +208,7 @@ export async function DELETE(request: Request) {
       message: 'Datos de ejemplo eliminados correctamente',
     });
   } catch (error) {
-    console.error('Error al limpiar datos:', error);
+    logger.error('Error al limpiar datos:', error);
     return NextResponse.json(
       { error: 'Error al limpiar datos' },
       { status: 500 }

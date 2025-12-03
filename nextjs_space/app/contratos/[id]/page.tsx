@@ -16,6 +16,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import SubscriptionManager from './components/SubscriptionManager';
+import logger, { logError } from '@/lib/logger';
 
 export default function ContratoDetailPage() {
   const router = useRouter();
@@ -39,7 +40,7 @@ export default function ContratoDetailPage() {
           setContract(data);
         }
       } catch (error) {
-        console.error('Error fetching contract:', error);
+        logger.error('Error fetching contract:', error);
       } finally {
         setIsLoading(false);
       }
@@ -201,7 +202,7 @@ export default function ContratoDetailPage() {
               fetch(`/api/contracts/${params?.id}`)
                 .then(res => res.json())
                 .then(data => setContract(data))
-                .catch(err => console.error('Error refreshing contract:', err));
+                .catch(err => logger.error('Error refreshing contract:', err));
             }}
           />
           </div>

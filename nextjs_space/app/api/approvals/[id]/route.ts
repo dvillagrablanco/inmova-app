@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/permissions';
 import { createNotification } from '@/lib/notification-generator';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -128,7 +129,7 @@ export async function PUT(
 
     return NextResponse.json(updatedApproval);
   } catch (error: any) {
-    console.error('Error al procesar aprobación:', error);
+    logger.error('Error al procesar aprobación:', error);
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
@@ -203,7 +204,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Solicitud cancelada correctamente' });
   } catch (error: any) {
-    console.error('Error al cancelar aprobación:', error);
+    logger.error('Error al cancelar aprobación:', error);
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }

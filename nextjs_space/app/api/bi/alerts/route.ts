@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { checkIntelligentAlerts } from '@/lib/bi-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,7 +28,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(alerts);
   } catch (error) {
-    console.error('Error fetching alerts:', error);
+    logger.error('Error fetching alerts:', error);
     return NextResponse.json(
       { error: 'Error al obtener alertas' },
       { status: 500 }
@@ -79,7 +80,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(alert, { status: 201 });
   } catch (error) {
-    console.error('Error creating alert:', error);
+    logger.error('Error creating alert:', error);
     return NextResponse.json(
       { error: 'Error al crear alerta' },
       { status: 500 }

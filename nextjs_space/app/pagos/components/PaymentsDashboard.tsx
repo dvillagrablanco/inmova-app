@@ -17,6 +17,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
+import logger, { logError } from '@/lib/logger';
 
 interface PaymentStats {
   totalCollected: number;
@@ -79,7 +80,7 @@ export default function PaymentsDashboard() {
       setStats(statsData);
       setPayments(paymentsData.payments || []);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      logger.error('Error fetching data:', error);
       toast.error('Error al cargar datos de pagos');
     } finally {
       setLoading(false);

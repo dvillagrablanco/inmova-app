@@ -10,6 +10,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { createB2BInvoice, generateMonthlyInvoices } from '@/lib/b2b-billing-service';
 import { InvoiceStatus } from '@prisma/client';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -90,7 +91,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error: any) {
-    console.error('Error al obtener facturas:', error);
+    logger.error('Error al obtener facturas:', error);
     return NextResponse.json(
       { error: 'Error al obtener facturas', details: error.message },
       { status: 500 }
@@ -145,7 +146,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(invoice, { status: 201 });
   } catch (error: any) {
-    console.error('Error al crear factura:', error);
+    logger.error('Error al crear factura:', error);
     return NextResponse.json(
       { error: 'Error al crear factura', details: error.message },
       { status: 500 }

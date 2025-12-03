@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import logger, { logError } from '@/lib/logger';
 
 interface OnboardingStep {
   id: string;
@@ -63,7 +64,7 @@ export default function SmartOnboardingWizard() {
         }
       }
     } catch (error) {
-      console.error('Error loading onboarding progress:', error);
+      logger.error('Error loading onboarding progress:', error);
     } finally {
       setLoading(false);
     }
@@ -111,7 +112,7 @@ export default function SmartOnboardingWizard() {
         }
       }
     } catch (error) {
-      console.error('Error completing step:', error);
+      logger.error('Error completing step:', error);
     }
   };
 
@@ -128,7 +129,7 @@ export default function SmartOnboardingWizard() {
         setIsVisible(false);
       }
     } catch (error) {
-      console.error('Error skipping onboarding:', error);
+      logger.error('Error skipping onboarding:', error);
     }
   };
 
@@ -146,7 +147,7 @@ export default function SmartOnboardingWizard() {
         toast.success('Onboarding reiniciado');
       }
     } catch (error) {
-      console.error('Error restarting onboarding:', error);
+      logger.error('Error restarting onboarding:', error);
     }
   };
 

@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import logger, { logError } from '@/lib/logger';
 
 // Use AES-256-GCM for encryption
 const ALGORITHM = 'aes-256-gcm';
@@ -49,7 +50,7 @@ export function encrypt(text: string, password?: string): string {
     // Combine salt, iv, tag, and encrypted data
     return `${salt.toString('hex')}:${iv.toString('hex')}:${tag.toString('hex')}:${encrypted}`;
   } catch (error) {
-    console.error('Encryption error:', error);
+    logger.error('Encryption error:', error);
     throw new Error('Failed to encrypt data');
   }
 }
@@ -94,7 +95,7 @@ export function decrypt(encryptedData: string, password?: string): string {
     
     return decrypted;
   } catch (error) {
-    console.error('Decryption error:', error);
+    logger.error('Decryption error:', error);
     throw new Error('Failed to decrypt data');
   }
 }
@@ -165,7 +166,7 @@ export function decryptFields<T extends Record<string, any>>(
       try {
         result[field] = decrypt(result[field] as string) as any;
       } catch (error) {
-        console.error(`Failed to decrypt field ${String(field)}:`, error);
+        logger.error(`Failed to decrypt field ${String(field)}:`, error);
         // Keep encrypted value if decryption fails
       }
     }

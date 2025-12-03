@@ -14,6 +14,7 @@ import {
 import { sendEmail } from '@/lib/email-config';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -83,7 +84,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error: any) {
-    console.error('Error en notificaciones:', error);
+    logger.error('Error en notificaciones:', error);
     return NextResponse.json(
       { error: 'Error al procesar notificaciones', details: error.message },
       { status: 500 }
@@ -196,7 +197,7 @@ async function sendInvoiceReminder(invoiceId: string, customMessage?: string) {
       message: `Recordatorio enviado a ${invoice.company.email}`,
     };
   } catch (error: any) {
-    console.error('Error al enviar email:', error);
+    logger.error('Error al enviar email:', error);
     return {
       success: false,
       error: error.message,
@@ -298,7 +299,7 @@ async function sendMonthlySummaries() {
 
       results.sent.push(company.nombre);
     } catch (error: any) {
-      console.error(`Error enviando resumen a ${company.nombre}:`, error);
+      logger.error(`Error enviando resumen a ${company.nombre}:`, error);
       results.failed.push(company.nombre);
     }
   }

@@ -21,6 +21,7 @@ import { CheckCircle2, ArrowRight, ArrowLeft, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import type { WizardStep, WizardField } from '@/lib/wizard-config';
+import logger, { logError } from '@/lib/logger';
 
 interface WizardDialogProps {
   open: boolean;
@@ -88,7 +89,7 @@ export default function WizardDialog({
       setCurrentStep(0);
       setFormData({});
     } catch (error) {
-      console.error('Error completing wizard:', error);
+      logger.error('Error completing wizard:', error);
       toast.error('Hubo un error. Por favor, inténtalo de nuevo.');
     } finally {
       setLoading(false);

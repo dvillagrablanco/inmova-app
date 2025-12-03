@@ -17,6 +17,7 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import logger, { logError } from '@/lib/logger';
 
 interface Alert {
   id: string;
@@ -53,7 +54,7 @@ export default function AlertsPage() {
       const data = await response.json();
       setAlertsData(data);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cargar alertas');
     } finally {
       setLoading(false);

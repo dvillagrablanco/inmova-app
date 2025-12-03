@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { sincronizarEventosAutomaticos } from '@/lib/calendar-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Error sincronizando eventos:', error);
+    logger.error('Error sincronizando eventos:', error);
     return NextResponse.json(
       { error: 'Error sincronizando eventos' },
       { status: 500 }

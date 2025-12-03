@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -229,7 +230,7 @@ export async function GET(request: NextRequest) {
       topListings
     });
   } catch (error) {
-    console.error('Error fetching STR dashboard stats:', error);
+    logger.error('Error fetching STR dashboard stats:', error);
     return NextResponse.json(
       { error: 'Error al obtener estadísticas' },
       { status: 500 }

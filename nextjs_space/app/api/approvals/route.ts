@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/permissions';
 import { createNotification } from '@/lib/notification-generator';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -100,7 +101,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(approvals);
   } catch (error: any) {
-    console.error('Error al obtener aprobaciones:', error);
+    logger.error('Error al obtener aprobaciones:', error);
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
@@ -184,7 +185,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(approval, { status: 201 });
   } catch (error: any) {
-    console.error('Error al crear solicitud de aprobación:', error);
+    logger.error('Error al crear solicitud de aprobación:', error);
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }

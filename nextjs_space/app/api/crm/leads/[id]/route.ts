@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { calculateLeadScoring, calculateProbabilidadCierre, determinarTemperatura } from '@/lib/crm-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -70,7 +71,7 @@ export async function GET(
 
     return NextResponse.json(lead);
   } catch (error) {
-    console.error('Error fetching lead:', error);
+    logger.error('Error fetching lead:', error);
     return NextResponse.json(
       { error: 'Error al obtener lead' },
       { status: 500 }
@@ -168,7 +169,7 @@ export async function PUT(
 
     return NextResponse.json(lead);
   } catch (error) {
-    console.error('Error updating lead:', error);
+    logger.error('Error updating lead:', error);
     return NextResponse.json(
       { error: 'Error al actualizar lead' },
       { status: 500 }
@@ -213,7 +214,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Lead eliminado correctamente' });
   } catch (error) {
-    console.error('Error deleting lead:', error);
+    logger.error('Error deleting lead:', error);
     return NextResponse.json(
       { error: 'Error al eliminar lead' },
       { status: 500 }

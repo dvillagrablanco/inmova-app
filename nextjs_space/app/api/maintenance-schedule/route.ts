@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,7 +49,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(schedules);
   } catch (error) {
-    console.error('Error fetching maintenance schedules:', error);
+    logger.error('Error fetching maintenance schedules:', error);
     return NextResponse.json(
       { error: 'Error al obtener mantenimientos programados' },
       { status: 500 }
@@ -113,7 +114,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(schedule, { status: 201 });
   } catch (error) {
-    console.error('Error creating maintenance schedule:', error);
+    logger.error('Error creating maintenance schedule:', error);
     return NextResponse.json(
       { error: 'Error al crear mantenimiento programado' },
       { status: 500 }

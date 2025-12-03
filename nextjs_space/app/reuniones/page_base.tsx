@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 interface Votacion {
   id: string;
@@ -117,7 +118,7 @@ export default function VotacionesPage() {
         setVotaciones(Array.isArray(data) ? data : []);
       }
     } catch (error) {
-      console.error('Error al cargar votaciones:', error);
+      logger.error('Error al cargar votaciones:', error);
       toast.error('Error al cargar votaciones');
     } finally {
       setLoading(false);
@@ -132,7 +133,7 @@ export default function VotacionesPage() {
         setBuildings(Array.isArray(data) ? data : []);
       }
     } catch (error) {
-      console.error('Error al cargar edificios:', error);
+      logger.error('Error al cargar edificios:', error);
     }
   };
 
@@ -179,7 +180,7 @@ export default function VotacionesPage() {
         toast.error(error.error || 'Error al crear votación');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al crear votación');
     }
   };
@@ -195,7 +196,7 @@ export default function VotacionesPage() {
         toast.error('Error al cargar detalles de votación');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cargar detalles');
     }
   };
@@ -220,7 +221,7 @@ export default function VotacionesPage() {
         toast.error(error.error || 'Error al votar');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al registrar voto');
     }
   };
@@ -241,7 +242,7 @@ export default function VotacionesPage() {
         toast.error('Error al cerrar votación');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cerrar votación');
     }
   };

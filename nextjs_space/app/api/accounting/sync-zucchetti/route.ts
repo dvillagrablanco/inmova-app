@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error al sincronizar con Zucchetti:', error);
+    logger.error('Error al sincronizar con Zucchetti:', error);
     return NextResponse.json(
       { error: 'Error al sincronizar con Zucchetti' },
       { status: 500 }
@@ -103,7 +104,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error al verificar integración Zucchetti:', error);
+    logger.error('Error al verificar integración Zucchetti:', error);
     return NextResponse.json(
       { error: 'Error al verificar integración' },
       { status: 500 }

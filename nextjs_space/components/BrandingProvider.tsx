@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { BrandingConfig } from '@prisma/client';
 import { generateCSSVariables } from '@/lib/branding-service';
+import logger, { logError } from '@/lib/logger';
 
 interface BrandingContextType {
   branding: BrandingConfig | null;
@@ -40,7 +41,7 @@ export function BrandingProvider({ children }: BrandingProviderProps) {
         }
       }
     } catch (error) {
-      console.error('[BrandingProvider] Error loading branding:', error);
+      logger.error('[BrandingProvider] Error loading branding:', error);
     } finally {
       setIsLoading(false);
     }

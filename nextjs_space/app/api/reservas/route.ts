@@ -8,6 +8,7 @@ import {
   validarReglasEspacio,
 } from '@/lib/reservas-service';
 import { ReservationStatus } from '@prisma/client';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -72,7 +73,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(reservas);
   } catch (error) {
-    console.error('Error fetching reservas:', error);
+    logger.error('Error fetching reservas:', error);
     return NextResponse.json(
       { error: 'Error al obtener reservas' },
       { status: 500 }
@@ -185,7 +186,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(reserva, { status: 201 });
   } catch (error) {
-    console.error('Error creating reserva:', error);
+    logger.error('Error creating reserva:', error);
     return NextResponse.json(
       { error: 'Error al crear reserva' },
       { status: 500 }

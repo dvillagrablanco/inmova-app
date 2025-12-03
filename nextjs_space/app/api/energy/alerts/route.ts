@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -35,7 +36,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(alerts);
   } catch (error) {
-    console.error('Error fetching energy alerts:', error);
+    logger.error('Error fetching energy alerts:', error);
     return NextResponse.json(
       { error: 'Error al obtener alertas' },
       { status: 500 }
@@ -69,7 +70,7 @@ export async function PATCH(req: NextRequest) {
 
     return NextResponse.json(alert);
   } catch (error) {
-    console.error('Error resolving energy alert:', error);
+    logger.error('Error resolving energy alert:', error);
     return NextResponse.json(
       { error: 'Error al resolver alerta' },
       { status: 500 }

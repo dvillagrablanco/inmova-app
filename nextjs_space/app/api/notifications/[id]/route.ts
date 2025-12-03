@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,7 +27,7 @@ export async function PATCH(
 
     return NextResponse.json(notification);
   } catch (error) {
-    console.error('Error updating notification:', error);
+    logger.error('Error updating notification:', error);
     return NextResponse.json(
       { error: 'Error al actualizar la notificación' },
       { status: 500 }
@@ -53,7 +54,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Notificación eliminada' });
   } catch (error) {
-    console.error('Error deleting notification:', error);
+    logger.error('Error deleting notification:', error);
     return NextResponse.json(
       { error: 'Error al eliminar la notificación' },
       { status: 500 }

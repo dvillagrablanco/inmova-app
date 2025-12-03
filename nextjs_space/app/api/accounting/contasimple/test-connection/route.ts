@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getContaSimpleService, isContaSimpleConfigured } from '@/lib/contasimple-integration-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('Error al probar conexión con ContaSimple:', error);
+    logger.error('Error al probar conexión con ContaSimple:', error);
     return NextResponse.json(
       {
         error: 'Error al conectar con ContaSimple',

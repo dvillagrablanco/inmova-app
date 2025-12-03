@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { stripe, formatAmountForStripe } from '@/lib/stripe-config';
 import { getOrCreateStripeCustomer } from '@/lib/stripe-customer';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -120,7 +121,7 @@ export async function POST(request: NextRequest) {
       nextBillingDate: new Date((subscription as any).current_period_end * 1000),
     });
   } catch (error: any) {
-    console.error('Error creating subscription:', error);
+    logger.error('Error creating subscription:', error);
     return NextResponse.json(
       { error: error.message || 'Error al crear suscripción' },
       { status: 500 }

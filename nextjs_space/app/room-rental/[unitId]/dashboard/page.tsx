@@ -26,6 +26,7 @@ import {
   BarChart3
 } from 'lucide-react';
 import { toast } from 'sonner';
+import logger, { logError } from '@/lib/logger';
 
 interface DashboardData {
   unit: {
@@ -104,7 +105,7 @@ export default function CoLivingDashboard() {
         toast.error('Error al cargar dashboard');
       }
     } catch (error) {
-      console.error('Error loading dashboard:', error);
+      logger.error('Error loading dashboard:', error);
       toast.error('Error al cargar dashboard');
     } finally {
       setLoading(false);

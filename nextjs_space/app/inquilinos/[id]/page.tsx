@@ -7,6 +7,7 @@ import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
 import { Users, ArrowLeft, Mail, Phone, CreditCard, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import logger, { logError } from '@/lib/logger';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -38,7 +39,7 @@ export default function InquilinoDetailPage() {
           setTenant(data);
         }
       } catch (error) {
-        console.error('Error fetching tenant:', error);
+        logger.error('Error fetching tenant:', error);
       } finally {
         setIsLoading(false);
       }

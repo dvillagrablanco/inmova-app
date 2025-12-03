@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getCRMStats } from '@/lib/crm-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +26,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(stats);
   } catch (error) {
-    console.error('Error fetching CRM stats:', error);
+    logger.error('Error fetching CRM stats:', error);
     return NextResponse.json(
       { error: 'Error al obtener estadísticas' },
       { status: 500 }

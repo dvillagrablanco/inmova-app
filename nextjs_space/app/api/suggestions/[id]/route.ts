@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/permissions';
 import { z } from 'zod';
+import logger, { logError } from '@/lib/logger';
 
 const updateSuggestionSchema = z.object({
   estado: z.enum(['pendiente', 'en_revision', 'resuelta', 'rechazada']).optional(),
@@ -59,7 +60,7 @@ export async function GET(
 
     return NextResponse.json(suggestion);
   } catch (error: any) {
-    console.error('Error al obtener sugerencia:', error);
+    logger.error('Error al obtener sugerencia:', error);
     return NextResponse.json(
       { error: error.message || 'Error al obtener sugerencia' },
       { status: 500 }
@@ -142,7 +143,7 @@ export async function PATCH(
 
     return NextResponse.json(updatedSuggestion);
   } catch (error: any) {
-    console.error('Error al actualizar sugerencia:', error);
+    logger.error('Error al actualizar sugerencia:', error);
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -181,7 +182,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Sugerencia eliminada correctamente' });
   } catch (error: any) {
-    console.error('Error al eliminar sugerencia:', error);
+    logger.error('Error al eliminar sugerencia:', error);
     return NextResponse.json(
       { error: error.message || 'Error al eliminar sugerencia' },
       { status: 500 }

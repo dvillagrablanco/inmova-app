@@ -12,6 +12,7 @@
 import { prisma } from './db';
 import { SMSTipo, SMSEstado } from '@prisma/client';
 import twilio from 'twilio';
+import logger, { logError } from '@/lib/logger';
 
 // Configuración de Twilio
 const twilioConfig = {
@@ -111,8 +112,8 @@ export async function enviarSMS(
         }
       });
       
-      console.log(`📱 SMS enviado exitosamente a ${tenant.nombreCompleto} (${tenant.telefono})`);
-      console.log(`   SID: ${resultado.sid}`);
+      logger.info(`📱 SMS enviado exitosamente a ${tenant.nombreCompleto} (${tenant.telefono})`);
+      logger.info(`   SID: ${resultado.sid}`);
     } catch (error: any) {
       // Marcar como fallido
       await prisma.sMSLog.update({
@@ -124,7 +125,7 @@ export async function enviarSMS(
         }
       });
       
-      console.error(`❌ Error enviando SMS a ${tenant.nombreCompleto}:`, error.message);
+      logger.error(`❌ Error enviando SMS a ${tenant.nombreCompleto}:`, error.message);
     }
   }
   
@@ -453,15 +454,15 @@ export async function procesarSMSProgramados() {
       
       if (resultado.exitoso) {
         resultados.exitosos++;
-        console.log(`✅ SMS enviado a ${sms.nombreDestinatario} (${sms.telefono})`);
+        logger.info(`✅ SMS enviado a ${sms.nombreDestinatario} (${sms.telefono})`);
       } else {
         resultados.fallidos++;
-        console.error(`❌ Error enviando SMS a ${sms.nombreDestinatario}: ${resultado.error}`);
+        logger.error(`❌ Error enviando SMS a ${sms.nombreDestinatario}: ${resultado.error}`);
       }
       
     } catch (error: any) {
       resultados.fallidos++;
-      console.error(`Error procesando SMS ${sms.id}:`, error.message);
+      logger.error(`Error procesando SMS ${sms.id}:`, error.message);
       
       // Marcar como fallido
       await prisma.sMSLog.update({
@@ -515,8 +516,8 @@ async function enviarSMSConFallback(telefono: string, mensaje: string): Promise<
     }
   } else {
     // Modo simulación si Twilio no está configurado
-    console.log(`📱 SMS SIMULADO (Twilio no configurado) a ${telefono}`);
-    console.log(`   Mensaje: ${mensaje}`);
+    logger.info(`📱 SMS SIMULADO (Twilio no configurado) a ${telefono}`);
+    logger.info(`   Mensaje: ${mensaje}`);
     const exitoso = Math.random() < 0.9; // 90% de éxito simulado
     return { 
       exitoso, 

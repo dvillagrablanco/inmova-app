@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/permissions';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,7 +39,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(preferences);
   } catch (error: any) {
-    console.error('Error al obtener preferencias:', error);
+    logger.error('Error al obtener preferencias:', error);
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
@@ -89,7 +90,7 @@ export async function PUT(request: Request) {
 
     return NextResponse.json(preferences);
   } catch (error: any) {
-    console.error('Error al actualizar preferencias:', error);
+    logger.error('Error al actualizar preferencias:', error);
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }

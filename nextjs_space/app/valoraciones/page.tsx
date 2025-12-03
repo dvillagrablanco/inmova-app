@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Home, ArrowLeft, TrendingUp, Calculator, Building2, DollarSign, Award, BarChart3, FileText, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import logger, { logError } from '@/lib/logger';
 
 export default function ValoracionesPage() {
   const { data: session, status } = useSession();
@@ -59,7 +60,7 @@ export default function ValoracionesPage() {
       setUnits(unitsData);
       setLoading(false);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cargar datos');
       setLoading(false);
     }

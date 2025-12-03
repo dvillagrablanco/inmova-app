@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { toast } from 'sonner';
+import logger, { logError } from '@/lib/logger';
 
 export function ServiceWorkerRegister() {
   useEffect(() => {
@@ -9,7 +10,7 @@ export function ServiceWorkerRegister() {
       navigator.serviceWorker
         .register('/sw.js', { scope: '/' })
         .then((registration) => {
-          console.log('[SW] Service Worker registered:', registration.scope);
+          logger.info('[SW] Service Worker registered:', registration.scope);
 
           // Verificar actualizaciones del SW cada hora
           setInterval(() => {
@@ -40,12 +41,12 @@ export function ServiceWorkerRegister() {
           });
         })
         .catch((error) => {
-          console.error('[SW] Service Worker registration failed:', error);
+          logger.error('[SW] Service Worker registration failed:', error);
         });
 
       // Manejar cuando el SW toma el control
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        console.log('[SW] New service worker activated');
+        logger.info('[SW] New service worker activated');
       });
     }
   }, []);

@@ -1,3 +1,5 @@
+
+
 /**
  * Structured Logging Service
  * Provides different log levels and formats for development and production
@@ -29,11 +31,11 @@ const logger = {
   },
   debug: (message: string, meta?: any) => {
     if (process.env.NODE_ENV !== 'production') {
-      console.log(`[DEBUG] ${message}`, meta);
+      logger.info(`[DEBUG] ${message}`, meta);
     }
   },
   log: (level: string, message: string, meta?: any) => {
-    console.log(`[${level.toUpperCase()}] ${message}`, meta);
+    logger.info(`[${level.toUpperCase()}] ${message}`, meta);
   },
 };
 

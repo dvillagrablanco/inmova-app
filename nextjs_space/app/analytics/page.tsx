@@ -41,6 +41,7 @@ import {
 } from 'recharts';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 interface Trend {
   periodo: string;
@@ -115,7 +116,7 @@ export default function AnalyticsPage() {
         setRecommendations(data.recommendations || []);
       }
     } catch (error) {
-      console.error('Error fetching analytics:', error);
+      logger.error('Error fetching analytics:', error);
       toast.error('Error al cargar analytics');
     } finally {
       setIsLoading(false);
@@ -148,7 +149,7 @@ export default function AnalyticsPage() {
       toast.success('Predicciones generadas exitosamente');
       fetchData();
     } catch (error) {
-      console.error('Error generating predictions:', error);
+      logger.error('Error generating predictions:', error);
       toast.error('Error al generar predicciones');
     } finally {
       setIsGenerating(false);
@@ -165,7 +166,7 @@ export default function AnalyticsPage() {
       toast.success('Recomendación marcada como aplicada');
       fetchData();
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al actualizar recomendación');
     }
   };

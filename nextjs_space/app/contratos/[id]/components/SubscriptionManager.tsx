@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { CreditCard, CheckCircle, XCircle, Calendar, DollarSign, AlertCircle } from 'lucide-react';
+import logger, { logError } from '@/lib/logger';
 
 interface SubscriptionManagerProps {
   contractId: string;
@@ -49,7 +50,7 @@ export default function SubscriptionManager({
       toast.success('¡Suscripción creada exitosamente!');
       onUpdate();
     } catch (error: any) {
-      console.error('Error creating subscription:', error);
+      logger.error('Error creating subscription:', error);
       toast.error(error.message || 'Error al crear suscripción');
     } finally {
       setLoading(false);
@@ -77,7 +78,7 @@ export default function SubscriptionManager({
       toast.success(data.message);
       onUpdate();
     } catch (error: any) {
-      console.error('Error canceling subscription:', error);
+      logger.error('Error canceling subscription:', error);
       toast.error(error.message || 'Error al cancelar suscripción');
     } finally {
       setLoading(false);

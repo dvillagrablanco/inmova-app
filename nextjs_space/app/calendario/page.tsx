@@ -57,6 +57,7 @@ import { format as formatDate } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { startOfMonth, endOfMonth, addMonths, subMonths } from 'date-fns';
 import { LoadingState } from '@/components/ui/loading-state';
+import logger, { logError } from '@/lib/logger';
 
 // Configurar moment en español
 moment.locale('es');
@@ -181,7 +182,7 @@ export default function CalendarioPage() {
       const data = await response.json();
       setEventos(data);
     } catch (error) {
-      console.error('Error cargando eventos:', error);
+      logger.error('Error cargando eventos:', error);
       toast.error('Error al cargar los eventos');
     } finally {
       setLoading(false);
@@ -202,7 +203,7 @@ export default function CalendarioPage() {
       toast.success('Eventos sincronizados correctamente');
       cargarEventos();
     } catch (error) {
-      console.error('Error sincronizando:', error);
+      logger.error('Error sincronizando:', error);
       toast.error('Error al sincronizar eventos');
     } finally {
       setSincronizando(false);
@@ -249,7 +250,7 @@ export default function CalendarioPage() {
       resetFormData();
       cargarEventos();
     } catch (error) {
-      console.error('Error creando evento:', error);
+      logger.error('Error creando evento:', error);
       toast.error('Error al crear el evento');
     }
   };
@@ -268,7 +269,7 @@ export default function CalendarioPage() {
       setMostrarDialogoDetalles(false);
       cargarEventos();
     } catch (error) {
-      console.error('Error actualizando evento:', error);
+      logger.error('Error actualizando evento:', error);
       toast.error('Error al actualizar el evento');
     }
   };
@@ -287,7 +288,7 @@ export default function CalendarioPage() {
       setMostrarDialogoDetalles(false);
       cargarEventos();
     } catch (error) {
-      console.error('Error cancelando evento:', error);
+      logger.error('Error cancelando evento:', error);
       toast.error('Error al cancelar el evento');
     }
   };

@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { generateCSSVariables } from '@/lib/branding-service';
 import { BrandingConfig } from '@prisma/client';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
       cssVariables
     });
   } catch (error) {
-    console.error('[API Branding Preview] Error:', error);
+    logger.error('[API Branding Preview] Error:', error);
     return NextResponse.json(
       { error: 'Error al generar preview' },
       { status: 500 }

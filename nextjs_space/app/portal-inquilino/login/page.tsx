@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Home, Lock, Mail } from 'lucide-react';
+import logger, { logError } from '@/lib/logger';
 
 export default function PortalInquilinoLoginPage() {
   const router = useRouter();
@@ -36,7 +37,7 @@ export default function PortalInquilinoLoginPage() {
         toast.error(error.error || 'Credenciales inválidas');
       }
     } catch (error) {
-      console.error('Error en login:', error);
+      logger.error('Error en login:', error);
       toast.error('Error al iniciar sesión');
     } finally {
       setLoading(false);

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,7 +60,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ shares });
   } catch (error: any) {
-    console.error('Error fetching shared documents:', error);
+    logger.error('Error fetching shared documents:', error);
     return NextResponse.json(
       { error: error.message || 'Error al cargar documentos compartidos' },
       { status: 500 }

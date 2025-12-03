@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { Home, ArrowLeft, Hotel, TrendingUp, Star, Calendar, Plus, Search, Building2 } from 'lucide-react';
 import { toast } from 'sonner';
+import logger, { logError } from '@/lib/logger';
 
 interface STRListing {
   id: string;
@@ -73,7 +74,7 @@ export default function STRListingsPage() {
       const data = await response.json();
       setListings(data);
     } catch (error) {
-      console.error('Error fetching listings:', error);
+      logger.error('Error fetching listings:', error);
       toast.error('Error al cargar los anuncios');
       setListings([]);
     } finally {

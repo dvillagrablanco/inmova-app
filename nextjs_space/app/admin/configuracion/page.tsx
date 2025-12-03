@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { toast } from 'sonner';
+import logger, { logError } from '@/lib/logger';
 
 interface Company {
   id: string;
@@ -79,7 +80,7 @@ export default function ConfiguracionPage() {
           });
         }
       } catch (error) {
-        console.error('Error fetching company:', error);
+        logger.error('Error fetching company:', error);
         toast.error('Error al cargar la información de la empresa');
       } finally {
         setIsLoading(false);
@@ -117,7 +118,7 @@ export default function ConfiguracionPage() {
         toast.error(error.error || 'Error al guardar los cambios');
       }
     } catch (error) {
-      console.error('Error updating company:', error);
+      logger.error('Error updating company:', error);
       toast.error('Error al guardar los cambios');
     } finally {
       setIsSaving(false);

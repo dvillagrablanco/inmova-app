@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,7 +49,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(listings);
   } catch (error) {
-    console.error('Error fetching STR listings:', error);
+    logger.error('Error fetching STR listings:', error);
     return NextResponse.json(
       { error: 'Failed to fetch listings' },
       { status: 500 }
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(listing, { status: 201 });
   } catch (error) {
-    console.error('Error creating STR listing:', error);
+    logger.error('Error creating STR listing:', error);
     return NextResponse.json(
       { error: 'Failed to create listing' },
       { status: 500 }

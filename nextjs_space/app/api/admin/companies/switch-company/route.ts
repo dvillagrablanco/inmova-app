@@ -4,6 +4,7 @@ import { requireAuth } from '@/lib/permissions';
 import { z } from 'zod';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import logger, { logError } from '@/lib/logger';
 
 const switchCompanySchema = z.object({
   companyId: z.string(),
@@ -72,7 +73,7 @@ export async function POST(request: NextRequest) {
       access,
     });
   } catch (error: any) {
-    console.error('Error al cambiar de empresa:', error);
+    logger.error('Error al cambiar de empresa:', error);
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(

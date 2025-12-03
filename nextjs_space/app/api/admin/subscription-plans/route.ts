@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,7 +36,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(plans);
   } catch (error) {
-    console.error('Error fetching subscription plans:', error);
+    logger.error('Error fetching subscription plans:', error);
     return NextResponse.json(
       { error: 'Error al obtener planes de suscripción' },
       { status: 500 }
@@ -85,7 +86,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(plan, { status: 201 });
   } catch (error) {
-    console.error('Error creating subscription plan:', error);
+    logger.error('Error creating subscription plan:', error);
     return NextResponse.json(
       { error: 'Error al crear plan de suscripción' },
       { status: 500 }

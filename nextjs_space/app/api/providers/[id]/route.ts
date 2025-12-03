@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,7 +43,7 @@ export async function GET(
 
     return NextResponse.json(provider);
   } catch (error) {
-    console.error('Error fetching provider:', error);
+    logger.error('Error fetching provider:', error);
     return NextResponse.json({ error: 'Error al obtener proveedor' }, { status: 500 });
   }
 }
@@ -75,7 +76,7 @@ export async function PUT(
 
     return NextResponse.json(provider);
   } catch (error) {
-    console.error('Error updating provider:', error);
+    logger.error('Error updating provider:', error);
     return NextResponse.json({ error: 'Error al actualizar proveedor' }, { status: 500 });
   }
 }
@@ -96,7 +97,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Proveedor eliminado exitosamente' });
   } catch (error) {
-    console.error('Error deleting provider:', error);
+    logger.error('Error deleting provider:', error);
     return NextResponse.json({ error: 'Error al eliminar proveedor' }, { status: 500 });
   }
 }

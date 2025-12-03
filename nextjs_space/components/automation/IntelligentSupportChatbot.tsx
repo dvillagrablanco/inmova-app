@@ -22,6 +22,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import logger, { logError } from '@/lib/logger';
 
 interface Message {
   id: string;
@@ -112,7 +113,7 @@ export default function IntelligentSupportChatbot() {
         throw new Error('Error en la respuesta');
       }
     } catch (error) {
-      console.error('Error sending message:', error);
+      logger.error('Error sending message:', error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         sender: 'bot',
@@ -164,7 +165,7 @@ export default function IntelligentSupportChatbot() {
         setMessages(prev => [...prev, articleMessage]);
       }
     } catch (error) {
-      console.error('Error fetching article:', error);
+      logger.error('Error fetching article:', error);
     }
   };
 

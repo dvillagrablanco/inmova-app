@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/permissions';
 import { z } from 'zod';
+import logger, { logError } from '@/lib/logger';
 
 const createSuggestionSchema = z.object({
   titulo: z.string().min(3, 'El título debe tener al menos 3 caracteres'),
@@ -80,7 +81,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('Error al obtener sugerencias:', error);
+    logger.error('Error al obtener sugerencias:', error);
     return NextResponse.json(
       { error: error.message || 'Error al obtener sugerencias' },
       { status: 500 }
@@ -140,7 +141,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(suggestion, { status: 201 });
   } catch (error: any) {
-    console.error('Error al crear sugerencia:', error);
+    logger.error('Error al crear sugerencia:', error);
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(

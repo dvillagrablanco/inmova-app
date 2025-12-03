@@ -19,6 +19,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
+import logger, { logError } from '@/lib/logger';
 
 interface DashboardData {
   tenant: {
@@ -72,7 +73,7 @@ export default function PortalInquilinoDashboardPage() {
         router.push('/portal-inquilino/login');
       }
     } catch (error) {
-      console.error('Error al cargar dashboard:', error);
+      logger.error('Error al cargar dashboard:', error);
       toast.error('Error al cargar datos');
     } finally {
       setLoading(false);

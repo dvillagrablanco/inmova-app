@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { generateCleaningSchedule, saveCleaningScheduleToContracts } from '@/lib/room-rental-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(schedule);
   } catch (error: any) {
-    console.error('Error fetching cleaning schedule:', error);
+    logger.error('Error fetching cleaning schedule:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -74,7 +75,7 @@ export async function POST(request: NextRequest) {
       message: 'Calendario de limpieza generado y guardado correctamente',
     });
   } catch (error: any) {
-    console.error('Error saving cleaning schedule:', error);
+    logger.error('Error saving cleaning schedule:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

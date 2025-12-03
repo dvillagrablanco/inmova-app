@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/permissions';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,7 +37,7 @@ export async function GET(
 
     return NextResponse.json(task);
   } catch (error: any) {
-    console.error('Error fetching task:', error);
+    logger.error('Error fetching task:', error);
     if (error.message === 'No autorizado') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
@@ -116,7 +117,7 @@ export async function PATCH(
 
     return NextResponse.json(task);
   } catch (error: any) {
-    console.error('Error updating task:', error);
+    logger.error('Error updating task:', error);
     if (error.message === 'No autorizado') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
@@ -156,7 +157,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Tarea eliminada correctamente' });
   } catch (error: any) {
-    console.error('Error deleting task:', error);
+    logger.error('Error deleting task:', error);
     if (error.message === 'No autorizado') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }

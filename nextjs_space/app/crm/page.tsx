@@ -20,6 +20,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { LoadingState } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
+import logger, { logError } from '@/lib/logger';
 
 interface Lead {
   id: string;
@@ -108,7 +109,7 @@ export default function CRMPage() {
         setLeads(data);
       }
     } catch (error) {
-      console.error('Error fetching leads:', error);
+      logger.error('Error fetching leads:', error);
       toast.error('Error al cargar los leads');
     } finally {
       setLoading(false);
@@ -123,7 +124,7 @@ export default function CRMPage() {
         setStats(data);
       }
     } catch (error) {
-      console.error('Error fetching stats:', error);
+      logger.error('Error fetching stats:', error);
     }
   };
 
@@ -153,7 +154,7 @@ export default function CRMPage() {
         toast.error(error.message || 'Error al guardar el lead');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al guardar el lead');
     }
   };

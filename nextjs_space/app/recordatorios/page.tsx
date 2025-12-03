@@ -17,6 +17,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { Home, ArrowLeft, Bell, Plus, Mail, MessageSquare, Calendar, Clock } from 'lucide-react';
+import logger, { logError } from '@/lib/logger';
 
 interface Reminder {
   id: string;
@@ -69,7 +70,7 @@ export default function RecordatoriosPage() {
         setReminders(Array.isArray(data) ? data : []);
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cargar recordatorios');
     } finally {
       setLoading(false);

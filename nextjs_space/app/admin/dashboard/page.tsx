@@ -30,6 +30,7 @@ import {
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
+import logger, { logError } from '@/lib/logger';
 import {
   LineChart,
   Line,
@@ -147,7 +148,7 @@ export default function SuperAdminDashboardPage() {
       const data = await response.json();
       setStats(data);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cargar estadísticas del dashboard');
     } finally {
       setLoading(false);

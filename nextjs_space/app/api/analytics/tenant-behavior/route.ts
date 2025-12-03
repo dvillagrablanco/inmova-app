@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { analyzeTenantBehavior } from '@/lib/analytics-service';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,7 +50,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ behaviors });
   } catch (error: any) {
-    console.error('Error fetching tenant behavior:', error);
+    logger.error('Error fetching tenant behavior:', error);
     return NextResponse.json(
       { error: error.message || 'Error al cargar comportamiento' },
       { status: 500 }
@@ -94,7 +95,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ behavior }, { status: 201 });
   } catch (error: any) {
-    console.error('Error analyzing tenant behavior:', error);
+    logger.error('Error analyzing tenant behavior:', error);
     return NextResponse.json(
       { error: error.message || 'Error al analizar comportamiento' },
       { status: 500 }

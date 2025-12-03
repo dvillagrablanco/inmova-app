@@ -8,6 +8,7 @@ import {
   actualizarScreening
 } from '@/lib/screening-service';
 import { ScreeningEstado } from '@prisma/client';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,7 +54,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(screenings);
   } catch (error: any) {
-    console.error('Error al obtener screenings:', error);
+    logger.error('Error al obtener screenings:', error);
     return NextResponse.json(
       { error: 'Error al obtener screenings' },
       { status: 500 }
@@ -113,7 +114,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(screening, { status: 201 });
     
   } catch (error: any) {
-    console.error('Error al crear/recalcular screening:', error);
+    logger.error('Error al crear/recalcular screening:', error);
     return NextResponse.json(
       { error: error.message || 'Error al procesar screening' },
       { status: 500 }
@@ -155,7 +156,7 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json(screening);
     
   } catch (error: any) {
-    console.error('Error al actualizar screening:', error);
+    logger.error('Error al actualizar screening:', error);
     return NextResponse.json(
       { error: 'Error al actualizar screening' },
       { status: 500 }

@@ -6,6 +6,7 @@
 import { prisma } from './db';
 import { CalendarEventType, CalendarEventPriority } from '@prisma/client';
 import { addDays, addMonths, startOfMonth, endOfMonth } from 'date-fns';
+import logger, { logError } from '@/lib/logger';
 
 export interface EventoCalendario {
   id: string;
@@ -32,7 +33,7 @@ export interface EventoCalendario {
  * Sincroniza automáticamente los eventos del calendario basados en las entidades existentes
  */
 export async function sincronizarEventosAutomaticos(companyId: string) {
-  console.log('🔄 Sincronizando eventos automáticos del calendario...');
+  logger.info('🔄 Sincronizando eventos automáticos del calendario...');
 
   // Obtener la fecha actual y rangos
   const hoy = new Date();
@@ -55,10 +56,10 @@ export async function sincronizarEventosAutomaticos(companyId: string) {
     // 5. INSPECCIONES
     await sincronizarEventosInspecciones(companyId, hoy, finPeriodo);
 
-    console.log('✅ Sincronización completada');
+    logger.info('✅ Sincronización completada');
     return { success: true, message: 'Eventos sincronizados correctamente' };
   } catch (error) {
-    console.error('❌ Error sincronizando eventos:', error);
+    logger.error('❌ Error sincronizando eventos:', error);
     throw error;
   }
 }

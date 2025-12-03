@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { obtenerEstadoDocumento, cancelarSolicitudFirma, reenviarInvitacion } from '@/lib/digital-signature-service';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,7 +41,7 @@ export async function GET(
     const estado = await obtenerEstadoDocumento(id);
     return NextResponse.json(estado);
   } catch (error) {
-    console.error('Error obteniendo estado del documento:', error);
+    logger.error('Error obteniendo estado del documento:', error);
     return NextResponse.json(
       { error: 'Error obteniendo estado del documento' },
       { status: 500 }
@@ -111,7 +112,7 @@ export async function PATCH(
       { status: 400 }
     );
   } catch (error) {
-    console.error('Error actualizando documento:', error);
+    logger.error('Error actualizando documento:', error);
     return NextResponse.json(
       { error: 'Error actualizando documento' },
       { status: 500 }

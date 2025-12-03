@@ -52,6 +52,7 @@ import { usePermissions } from '@/lib/hooks/usePermissions';
 import { LoadingState } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
 import { FilterChips } from '@/components/ui/filter-chips';
+import logger, { logError } from '@/lib/logger';
 
 interface Task {
   id: string;
@@ -136,7 +137,7 @@ export default function TareasPage() {
       const data = await res.json();
       setTasks(data);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cargar las tareas');
     } finally {
       setIsLoading(false);
@@ -150,7 +151,7 @@ export default function TareasPage() {
       const data = await res.json();
       setUsers(data);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
     }
   };
 
@@ -210,7 +211,7 @@ export default function TareasPage() {
       setOpenDialog(false);
       fetchTasks();
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al guardar la tarea');
     }
   };
@@ -225,7 +226,7 @@ export default function TareasPage() {
       toast.success('Tarea eliminada correctamente');
       fetchTasks();
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al eliminar la tarea');
     }
   };
@@ -243,7 +244,7 @@ export default function TareasPage() {
       toast.success('Tarea marcada como completada');
       fetchTasks();
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al actualizar la tarea');
     }
   };

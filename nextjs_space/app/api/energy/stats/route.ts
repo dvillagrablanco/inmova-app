@@ -8,6 +8,7 @@ import {
   calculateTenantBilling,
 } from '@/lib/energy-service';
 import { format } from 'date-fns';
+import logger, { logError } from '@/lib/logger';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -61,7 +62,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(stats);
   } catch (error) {
-    console.error('Error fetching energy stats:', error);
+    logger.error('Error fetching energy stats:', error);
     return NextResponse.json(
       { error: 'Error al obtener estadísticas' },
       { status: 500 }

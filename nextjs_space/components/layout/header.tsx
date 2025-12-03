@@ -18,6 +18,7 @@ import { useEffect, useState } from 'react';
 import { useBranding } from '@/lib/hooks/useBranding';
 import { cn } from '@/lib/utils';
 import { LanguageSelector } from '@/components/LanguageSelector';
+import logger, { logError } from '@/lib/logger';
 
 interface Notification {
   id: string;
@@ -49,7 +50,7 @@ export function Header() {
           setNotifications(data.notifications || data || []);
         }
       } catch (error) {
-        console.error('Error fetching notifications:', error);
+        logger.error('Error fetching notifications:', error);
       }
     }
   };
@@ -68,7 +69,7 @@ export function Header() {
       await fetch(`/api/notifications/${id}/read`, { method: 'PUT' });
       fetchNotifications();
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      logger.error('Error marking notification as read:', error);
     }
   };
 
@@ -76,7 +77,7 @@ export function Header() {
     try {
       // Validar que la notificación tenga la estructura esperada
       if (!notif || !notif.id) {
-        console.error('Notificación inválida:', notif);
+        logger.error('Notificación inválida:', notif);
         return;
       }
 
@@ -122,7 +123,7 @@ export function Header() {
         router.push('/notificaciones');
       }
     } catch (error) {
-      console.error('Error al procesar notificación:', error);
+      logger.error('Error al procesar notificación:', error);
       // En caso de error, al menos cerrar el dropdown
       setShowNotifications(false);
     }
@@ -134,7 +135,7 @@ export function Header() {
       fetchNotifications();
       setShowNotifications(false);
     } catch (error) {
-      console.error('Error marking all as read:', error);
+      logger.error('Error marking all as read:', error);
     }
   };
 

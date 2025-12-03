@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval, differenceInDays, parseISO } from 'date-fns';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -173,7 +174,7 @@ export async function GET(
       timeline
     });
   } catch (error) {
-    console.error('Error generating occupancy report:', error);
+    logger.error('Error generating occupancy report:', error);
     return NextResponse.json(
       { error: 'Error al generar reporte' },
       { status: 500 }

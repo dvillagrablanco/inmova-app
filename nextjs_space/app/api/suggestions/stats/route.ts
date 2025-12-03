@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/permissions';
+import logger, { logError } from '@/lib/logger';
 
 // GET - Obtener estadísticas de sugerencias
 export async function GET(request: NextRequest) {
@@ -59,7 +60,7 @@ export async function GET(request: NextRequest) {
       recientes,
     });
   } catch (error: any) {
-    console.error('Error al obtener estadísticas:', error);
+    logger.error('Error al obtener estadísticas:', error);
     return NextResponse.json(
       { error: error.message || 'Error al obtener estadísticas' },
       { status: 500 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,7 +24,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(widgets);
   } catch (error) {
-    console.error('Error al obtener widgets:', error);
+    logger.error('Error al obtener widgets:', error);
     return NextResponse.json({ error: 'Error al obtener widgets' }, { status: 500 });
   }
 }
@@ -72,7 +73,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(widget);
   } catch (error) {
-    console.error('Error al crear widget:', error);
+    logger.error('Error al crear widget:', error);
     return NextResponse.json({ error: 'Error al crear widget' }, { status: 500 });
   }
 }
@@ -98,7 +99,7 @@ export async function DELETE(req: NextRequest) {
 
     return NextResponse.json({ message: 'Widget eliminado' });
   } catch (error) {
-    console.error('Error al eliminar widget:', error);
+    logger.error('Error al eliminar widget:', error);
     return NextResponse.json({ error: 'Error al eliminar widget' }, { status: 500 });
   }
 }

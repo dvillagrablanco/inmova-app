@@ -21,6 +21,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
+import logger, { logError } from '@/lib/logger';
 
 interface Unit {
   id: string;
@@ -50,7 +51,7 @@ export default function NuevaMantenimientoPage() {
           setUnits(data);
         }
       } catch (error) {
-        console.error('Error fetching units:', error);
+        logger.error('Error fetching units:', error);
       }
     };
 
@@ -85,7 +86,7 @@ export default function NuevaMantenimientoPage() {
         toast.error(error.error || 'Error al crear la solicitud');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al crear la solicitud');
     } finally {
       setIsLoading(false);

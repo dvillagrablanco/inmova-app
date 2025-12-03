@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { predictOccupancy } from '@/lib/prediction-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,7 +20,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ predictions }, { status: 201 });
   } catch (error: any) {
-    console.error('Error predicting occupancy:', error);
+    logger.error('Error predicting occupancy:', error);
     return NextResponse.json(
       { error: error.message || 'Error al predecir ocupación' },
       { status: 500 }

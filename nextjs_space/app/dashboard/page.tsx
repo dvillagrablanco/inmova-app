@@ -27,6 +27,7 @@ import { AIAssistant } from '@/components/automation/AIAssistant';
 import SmartOnboardingWizard from '@/components/automation/SmartOnboardingWizard';
 import ProactiveSuggestions from '@/components/automation/ProactiveSuggestions';
 import IntelligentSupportChatbot from '@/components/automation/IntelligentSupportChatbot';
+import logger, { logError } from '@/lib/logger';
 
 interface DashboardData {
   kpis: {
@@ -78,7 +79,7 @@ export default function DashboardPage() {
           setData(dashboardData);
         }
       } catch (error) {
-        console.error('Error fetching dashboard data:', error);
+        logger.error('Error fetching dashboard data:', error);
       } finally {
         setIsLoading(false);
       }

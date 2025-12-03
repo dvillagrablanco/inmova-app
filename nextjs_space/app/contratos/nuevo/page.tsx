@@ -22,6 +22,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
+import logger, { logError } from '@/lib/logger';
 
 interface Unit {
   id: string;
@@ -69,7 +70,7 @@ export default function NuevoContratoPage() {
           setTenants(tenantsData);
         }
       } catch (error) {
-        console.error('Error fetching data:', error);
+        logger.error('Error fetching data:', error);
       }
     };
 
@@ -106,7 +107,7 @@ export default function NuevoContratoPage() {
         toast.error(error.error || 'Error al crear el contrato');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al crear el contrato');
     } finally {
       setIsLoading(false);

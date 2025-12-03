@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -206,7 +207,7 @@ export async function GET(req: NextRequest) {
       integraciones,
     });
   } catch (error: any) {
-    console.error('Error en dashboard de contabilidad:', error);
+    logger.error('Error en dashboard de contabilidad:', error);
     return NextResponse.json(
       { error: 'Error al obtener datos del dashboard', details: error.message },
       { status: 500 }

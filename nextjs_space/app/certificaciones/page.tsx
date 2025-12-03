@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { Home, ArrowLeft, Leaf, Plus, Search, Calendar, TrendingUp, AlertCircle, Euro, Edit } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 export default function CertificacionesPage() {
   const { data: session, status } = useSession() || {};
@@ -74,7 +75,7 @@ export default function CertificacionesPage() {
       if (certsRes.ok) setCertificados(await certsRes.json());
       if (unitsRes.ok) setUnits(await unitsRes.json());
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cargar datos');
     } finally {
       setLoading(false);
@@ -103,7 +104,7 @@ export default function CertificacionesPage() {
         toast.error('Error al crear certificado');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al crear certificado');
     }
   };
@@ -149,7 +150,7 @@ export default function CertificacionesPage() {
         toast.error('Error al actualizar certificado');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al actualizar certificado');
     }
   };

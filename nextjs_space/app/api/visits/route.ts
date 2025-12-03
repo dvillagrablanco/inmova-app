@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,7 +32,7 @@ export async function GET() {
 
     return NextResponse.json(visits);
   } catch (error) {
-    console.error('Error fetching visits:', error);
+    logger.error('Error fetching visits:', error);
     return NextResponse.json({ error: 'Error al obtener visitas' }, { status: 500 });
   }
 }
@@ -67,7 +68,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(visit, { status: 201 });
   } catch (error) {
-    console.error('Error creating visit:', error);
+    logger.error('Error creating visit:', error);
     return NextResponse.json({ error: 'Error al crear visita' }, { status: 500 });
   }
 }

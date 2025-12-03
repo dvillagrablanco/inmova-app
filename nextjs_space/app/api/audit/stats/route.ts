@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { startOfDay, subDays } from 'date-fns';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -112,7 +113,7 @@ export async function GET(req: NextRequest) {
       })),
     });
   } catch (error) {
-    console.error('Error al obtener estadísticas:', error);
+    logger.error('Error al obtener estadísticas:', error);
     return NextResponse.json(
       { error: 'Error al obtener estadísticas' },
       { status: 500 }

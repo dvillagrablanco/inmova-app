@@ -21,6 +21,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
+import logger, { logError } from '@/lib/logger';
 
 interface Unit {
   id: string;
@@ -54,7 +55,7 @@ export default function NuevoCandidatoPage() {
           setUnits(data);
         }
       } catch (error) {
-        console.error('Error fetching units:', error);
+        logger.error('Error fetching units:', error);
       }
     };
 
@@ -92,7 +93,7 @@ export default function NuevoCandidatoPage() {
         toast.error(error.error || 'Error al registrar el candidato');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al registrar el candidato');
     } finally {
       setIsLoading(false);

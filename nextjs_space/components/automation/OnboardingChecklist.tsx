@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import { getOnboardingProgress, type OnboardingProgress } from '@/lib/ai-automation-service';
 import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
+import logger, { logError } from '@/lib/logger';
 
 interface OnboardingChecklistProps {
   userId: string;
@@ -49,7 +50,7 @@ export function OnboardingChecklist({ userId }: OnboardingChecklistProps) {
         }
       }
     } catch (error) {
-      console.error('Error loading progress:', error);
+      logger.error('Error loading progress:', error);
     } finally {
       setIsLoading(false);
     }

@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { subMonths, format, startOfMonth, endOfMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -211,7 +212,7 @@ export async function GET(req: NextRequest) {
       tendencias
     });
   } catch (error: any) {
-    console.error('Error en BI dashboard:', error);
+    logger.error('Error en BI dashboard:', error);
     return NextResponse.json(
       { error: 'Error al cargar datos de BI', details: error.message },
       { status: 500 }

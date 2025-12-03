@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -68,7 +69,7 @@ export async function POST(req: NextRequest) {
       message: 'Inicio de sesión exitoso',
     });
   } catch (error) {
-    console.error('Error en login de proveedor:', error);
+    logger.error('Error en login de proveedor:', error);
     return NextResponse.json(
       { error: 'Error al iniciar sesión' },
       { status: 500 }

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/permissions';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,7 +28,7 @@ export async function GET() {
 
     return NextResponse.json(tasks);
   } catch (error: any) {
-    console.error('Error fetching tasks:', error);
+    logger.error('Error fetching tasks:', error);
     if (error.message === 'No autorizado') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
@@ -88,7 +89,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(task, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating task:', error);
+    logger.error('Error creating task:', error);
     if (error.message === 'No autorizado') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }

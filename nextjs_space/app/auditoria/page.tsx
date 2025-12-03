@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { Shield, Home, ArrowLeft, AlertTriangle, FileText, CheckCircle2, Clock, Users, Activity } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 interface AuditStats {
   totalSecurityEvents: number;
@@ -93,7 +94,7 @@ export default function AuditoriaPage() {
       const data = await res.json();
       setStats(data);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
     }
   };
 
@@ -106,7 +107,7 @@ export default function AuditoriaPage() {
       const data = await res.json();
       setSecurityEvents(data);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
     }
   };
 
@@ -116,7 +117,7 @@ export default function AuditoriaPage() {
       const data = await res.json();
       setAuditReports(data);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
     }
   };
 
@@ -141,7 +142,7 @@ export default function AuditoriaPage() {
         toast.error('Error al crear reporte');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al crear reporte');
     }
   };
@@ -162,7 +163,7 @@ export default function AuditoriaPage() {
         toast.error('Error al resolver evento');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al resolver evento');
     }
   };

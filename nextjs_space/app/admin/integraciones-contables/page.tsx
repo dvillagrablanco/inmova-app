@@ -23,6 +23,7 @@ import {
   Unlink
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import logger, { logError } from '@/lib/logger';
 
 interface Integration {
   id: string;
@@ -181,7 +182,7 @@ export default function IntegracionesContablesPage() {
         setIntegrationStatus(data);
       }
     } catch (error) {
-      console.error('Error fetching integration status:', error);
+      logger.error('Error fetching integration status:', error);
     } finally {
       setLoading(false);
     }
@@ -203,7 +204,7 @@ export default function IntegracionesContablesPage() {
         toast.error(data.message || 'Error al conectar');
       }
     } catch (error) {
-      console.error('Error testing connection:', error);
+      logger.error('Error testing connection:', error);
       toast.error('Error al probar la conexión');
     } finally {
       setTestingConnection(null);
@@ -228,7 +229,7 @@ export default function IntegracionesContablesPage() {
         toast.error(data.message || 'Error al guardar configuración');
       }
     } catch (error) {
-      console.error('Error saving config:', error);
+      logger.error('Error saving config:', error);
       toast.error('Error al guardar configuración');
     }
   };
@@ -250,7 +251,7 @@ export default function IntegracionesContablesPage() {
         toast.error('Error al desconectar');
       }
     } catch (error) {
-      console.error('Error disconnecting:', error);
+      logger.error('Error disconnecting:', error);
       toast.error('Error al desconectar');
     }
   };

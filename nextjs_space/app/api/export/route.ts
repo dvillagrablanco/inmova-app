@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { db } from '@/lib/db';
 import Papa from 'papaparse';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -181,7 +182,7 @@ export async function GET(request: Request) {
       },
     });
   } catch (error) {
-    console.error('Error al exportar:', error);
+    logger.error('Error al exportar:', error);
     return NextResponse.json(
       { error: 'Error al exportar datos' },
       { status: 500 }

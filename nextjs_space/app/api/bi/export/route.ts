@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,7 +22,7 @@ export async function GET(req: NextRequest) {
       data: csvContent
     });
   } catch (error: any) {
-    console.error('Error al exportar datos de BI:', error);
+    logger.error('Error al exportar datos de BI:', error);
     return NextResponse.json(
       { error: 'Error al exportar datos' },
       { status: 500 }

@@ -9,6 +9,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { registerInvoicePayment } from '@/lib/b2b-billing-service';
 import Stripe from 'stripe';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -115,7 +116,7 @@ export async function POST(request: NextRequest) {
       paymentIntentId: paymentIntent.id,
     });
   } catch (error: any) {
-    console.error('Error al crear payment intent:', error);
+    logger.error('Error al crear payment intent:', error);
     return NextResponse.json(
       { error: 'Error al procesar el pago', details: error.message },
       { status: 500 }
@@ -184,7 +185,7 @@ export async function PUT(request: NextRequest) {
       message: 'El pago no ha sido completado',
     });
   } catch (error: any) {
-    console.error('Error al confirmar pago:', error);
+    logger.error('Error al confirmar pago:', error);
     return NextResponse.json(
       { error: 'Error al confirmar el pago', details: error.message },
       { status: 500 }

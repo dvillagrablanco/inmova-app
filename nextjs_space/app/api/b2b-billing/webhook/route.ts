@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { registerInvoicePayment } from '@/lib/b2b-billing-service';
 import Stripe from 'stripe';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
     try {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
     } catch (err: any) {
-      console.error('Webhook signature verification failed:', err.message);
+      logger.error('Webhook signature verification failed:', err.message);
       return NextResponse.json(
         { error: 'Webhook signature verification failed' },
         { status: 400 }
@@ -56,12 +57,12 @@ export async function POST(request: NextRequest) {
         break;
 
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        logger.info(`Unhandled event type: ${event.type}`);
     }
 
     return NextResponse.json({ received: true });
   } catch (error: any) {
-    console.error('Error processing webhook:', error);
+    logger.error('Error processing webhook:', error);
     return NextResponse.json(
       { error: 'Webhook processing failed', details: error.message },
       { status: 500 }
@@ -76,7 +77,7 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
   const { invoiceId } = paymentIntent.metadata;
 
   if (!invoiceId) {
-    console.warn('Payment intent without invoiceId:', paymentIntent.id);
+    logger.warn('Payment intent without invoiceId:', paymentIntent.id);
     return;
   }
 
@@ -85,13 +86,13 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
   });
 
   if (!invoice) {
-    console.warn('Invoice not found:', invoiceId);
+    logger.warn('Invoice not found:', invoiceId);
     return;
   }
 
   // Ya está pagada?
   if (invoice.estado === 'PAGADA') {
-    console.log('Invoice already paid:', invoiceId);
+    logger.info('Invoice already paid:', invoiceId);
     return;
   }
 
@@ -122,7 +123,7 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
     stripeFee,
   });
 
-  console.log('Payment registered for invoice:', invoiceId);
+  logger.info('Payment registered for invoice:', invoiceId);
 }
 
 /**
@@ -136,7 +137,7 @@ async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
   }
 
   // Aquí podríamos enviar notificaciones, actualizar estado, etc.
-  console.log('Payment failed for invoice:', invoiceId);
+  logger.info('Payment failed for invoice:', invoiceId);
   
   // Registrar el intento fallido
   await prisma.b2BPaymentHistory.create({
@@ -167,7 +168,7 @@ async function handleStripeInvoiceSuccess(stripeInvoice: Stripe.Invoice) {
   });
 
   if (!company) {
-    console.warn('Company not found for customer:', customerId);
+    logger.warn('Company not found for customer:', customerId);
     return;
   }
 
@@ -188,5 +189,5 @@ async function handleStripeInvoiceSuccess(stripeInvoice: Stripe.Invoice) {
     });
   }
 
-  console.log('Stripe invoice synced:', stripeInvoice.id);
+  logger.info('Stripe invoice synced:', stripeInvoice.id);
 }

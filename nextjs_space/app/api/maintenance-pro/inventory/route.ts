@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ inventory });
   } catch (error: any) {
-    console.error('Error fetching inventory:', error);
+    logger.error('Error fetching inventory:', error);
     return NextResponse.json(
       { error: error.message || 'Error al cargar inventario' },
       { status: 500 }
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ item }, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating inventory item:', error);
+    logger.error('Error creating inventory item:', error);
     return NextResponse.json(
       { error: error.message || 'Error al crear item' },
       { status: 500 }

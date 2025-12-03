@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tag, Check, X, Loader2, Percent, Euro, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import logger, { logError } from '@/lib/logger';
 
 interface CouponInputProps {
   amount: number;
@@ -73,7 +74,7 @@ export function CouponInput({
         toast.error(data.message || 'Cupón inválido');
       }
     } catch (error) {
-      console.error('Error validating coupon:', error);
+      logger.error('Error validating coupon:', error);
       toast.error('Error al validar cupón');
     } finally {
       setValidating(false);

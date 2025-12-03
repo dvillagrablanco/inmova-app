@@ -58,6 +58,7 @@ import { toast } from 'react-hot-toast';
 import { LoadingState } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
 import { FilterChips } from '@/components/ui/filter-chips';
+import logger, { logError } from '@/lib/logger';
 
 interface MaintenanceRequest {
   id: string;
@@ -152,7 +153,7 @@ export default function MantenimientoPage() {
           setRequests(data);
         }
       } catch (error) {
-        console.error('Error fetching maintenance requests:', error);
+        logger.error('Error fetching maintenance requests:', error);
       }
     };
 
@@ -177,7 +178,7 @@ export default function MantenimientoPage() {
         if (buildRes.ok) setBuildings(await buildRes.json());
         if (provRes.ok) setProviders(await provRes.json());
       } catch (error) {
-        console.error('Error fetching schedules:', error);
+        logger.error('Error fetching schedules:', error);
         toast.error('Error al cargar datos');
       }
     };
@@ -326,7 +327,7 @@ export default function MantenimientoPage() {
         toast.error('Error al guardar');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al guardar');
     }
   };
@@ -345,7 +346,7 @@ export default function MantenimientoPage() {
         toast.error('Error al completar mantenimiento');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al completar mantenimiento');
     }
   };
@@ -365,7 +366,7 @@ export default function MantenimientoPage() {
         toast.error('Error al eliminar');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al eliminar');
     }
   };

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,7 +38,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
     return NextResponse.json(visit);
   } catch (error) {
-    console.error('Error updating visit:', error);
+    logger.error('Error updating visit:', error);
     return NextResponse.json({ error: 'Error al actualizar visita' }, { status: 500 });
   }
 }
@@ -59,7 +60,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
 
     return NextResponse.json({ message: 'Visita eliminada' });
   } catch (error) {
-    console.error('Error deleting visit:', error);
+    logger.error('Error deleting visit:', error);
     return NextResponse.json({ error: 'Error al eliminar visita' }, { status: 500 });
   }
 }

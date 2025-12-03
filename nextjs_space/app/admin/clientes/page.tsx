@@ -27,6 +27,7 @@ import { BackButton } from '@/components/ui/back-button';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { LoadingState } from '@/components/ui/loading-state';
 import { ChangePlanDialog } from '@/components/admin/ChangePlanDialog';
+import logger, { logError } from '@/lib/logger';
 
 interface CompanyData {
   id: string;
@@ -200,7 +201,7 @@ export default function ClientesAdminPage() {
         setPlans(data);
       }
     } catch (error) {
-      console.error('Error loading data:', error);
+      logger.error('Error loading data:', error);
       toast.error('Error al cargar datos');
     } finally {
       setLoading(false);
@@ -252,7 +253,7 @@ export default function ClientesAdminPage() {
         toast.error(error.error || 'Error al crear empresa');
       }
     } catch (error) {
-      console.error('Error creating company:', error);
+      logger.error('Error creating company:', error);
       toast.error('Error al crear empresa');
     } finally {
       setCreating(false);
@@ -277,7 +278,7 @@ export default function ClientesAdminPage() {
         toast.error(error.error || 'Error al eliminar empresa');
       }
     } catch (error) {
-      console.error('Error deleting company:', error);
+      logger.error('Error deleting company:', error);
       toast.error('Error al eliminar empresa');
     }
   };
@@ -349,7 +350,7 @@ export default function ClientesAdminPage() {
       toast.success('Categoría actualizada correctamente');
       loadData();
     } catch (error: any) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cambiar la categoría', {
         description: error.message,
       });
@@ -387,7 +388,7 @@ export default function ClientesAdminPage() {
         toast.error(error.error || 'Error al iniciar impersonation');
       }
     } catch (error) {
-      console.error('Error impersonating:', error);
+      logger.error('Error impersonating:', error);
       toast.error('Error al iniciar impersonation');
     }
   };
@@ -455,7 +456,7 @@ export default function ClientesAdminPage() {
         toast.error(error.error || 'Error en operación en lote');
       }
     } catch (error) {
-      console.error('Error en bulk action:', error);
+      logger.error('Error en bulk action:', error);
       toast.error('Error en operación en lote');
     } finally {
       setBulkActionLoading(false);

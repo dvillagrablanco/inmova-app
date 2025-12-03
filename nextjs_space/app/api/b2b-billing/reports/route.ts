@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 import { 
   generateFinancialReport, 
   getBillingStats,
@@ -60,7 +61,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(reports);
   } catch (error: any) {
-    console.error('Error al obtener reportes:', error);
+    logger.error('Error al obtener reportes:', error);
     return NextResponse.json(
       { error: 'Error al obtener reportes', details: error.message },
       { status: 500 }
@@ -98,7 +99,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(report, { status: 201 });
   } catch (error: any) {
-    console.error('Error al generar reporte:', error);
+    logger.error('Error al generar reporte:', error);
     return NextResponse.json(
       { error: 'Error al generar reporte', details: error.message },
       { status: 500 }

@@ -29,6 +29,7 @@ import {
   Settings
 } from 'lucide-react';
 import { useBranding } from '@/lib/hooks/useBranding';
+import logger, { logError } from '@/lib/logger';
 
 interface BrandingFormData {
   // Identidad
@@ -180,7 +181,7 @@ export default function PersonalizacionPage() {
         window.location.reload();
       }, 1000);
     } catch (error) {
-      console.error('Error saving branding:', error);
+      logger.error('Error saving branding:', error);
       toast.error('Error al guardar', {
         description: 'No se pudo guardar la configuración de personalización.'
       });

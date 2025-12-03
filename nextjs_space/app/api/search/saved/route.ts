@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +26,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ saved });
   } catch (error: any) {
-    console.error('Error al obtener búsquedas guardadas:', error);
+    logger.error('Error al obtener búsquedas guardadas:', error);
     return NextResponse.json(
       { error: 'Error al obtener búsquedas guardadas' },
       { status: 500 }
@@ -55,7 +56,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ saved }, { status: 201 });
   } catch (error: any) {
-    console.error('Error al guardar búsqueda:', error);
+    logger.error('Error al guardar búsqueda:', error);
     return NextResponse.json(
       { error: 'Error al guardar búsqueda' },
       { status: 500 }
@@ -83,7 +84,7 @@ export async function DELETE(req: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('Error al eliminar búsqueda guardada:', error);
+    logger.error('Error al eliminar búsqueda guardada:', error);
     return NextResponse.json(
       { error: 'Error al eliminar búsqueda guardada' },
       { status: 500 }

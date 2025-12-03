@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest) {
       redirect: true,
     });
   } catch (error) {
-    console.error('Error switching company:', error);
+    logger.error('Error switching company:', error);
     return NextResponse.json(
       { error: 'Error al cambiar de empresa' },
       { status: 500 }

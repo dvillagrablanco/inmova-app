@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -66,7 +67,7 @@ export async function PATCH(
 
     return NextResponse.json(eventoActualizado);
   } catch (error) {
-    console.error('Error actualizando evento:', error);
+    logger.error('Error actualizando evento:', error);
     return NextResponse.json(
       { error: 'Error actualizando evento' },
       { status: 500 }
@@ -112,7 +113,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true, message: 'Evento eliminado' });
   } catch (error) {
-    console.error('Error eliminando evento:', error);
+    logger.error('Error eliminando evento:', error);
     return NextResponse.json(
       { error: 'Error eliminando evento' },
       { status: 500 }

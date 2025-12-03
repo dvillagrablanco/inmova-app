@@ -1,4 +1,5 @@
 import Tesseract from 'tesseract.js';
+import logger, { logError } from '@/lib/logger';
 
 /**
  * Servicio de OCR usando Tesseract.js
@@ -41,7 +42,7 @@ export async function processImageOCR(
     const result: any = await Tesseract.recognize(imageFile, language, {
       logger: (m: any) => {
         if (m.status === 'recognizing text') {
-          console.log(`OCR Progress: ${Math.round(m.progress * 100)}%`);
+          logger.info(`OCR Progress: ${Math.round(m.progress * 100)}%`);
         }
       },
     });
@@ -61,7 +62,7 @@ export async function processImageOCR(
       processingTime: Date.now() - startTime,
     };
   } catch (error) {
-    console.error('Error en OCR:', error);
+    logger.error('Error en OCR:', error);
     throw new Error('Error al procesar la imagen con OCR');
   }
 }

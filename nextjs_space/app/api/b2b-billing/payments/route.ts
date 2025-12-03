@@ -9,6 +9,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { registerInvoicePayment } from '@/lib/b2b-billing-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -57,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result, { status: 201 });
   } catch (error: any) {
-    console.error('Error al registrar pago:', error);
+    logger.error('Error al registrar pago:', error);
     return NextResponse.json(
       { error: 'Error al registrar pago', details: error.message },
       { status: 500 }
@@ -121,7 +122,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error: any) {
-    console.error('Error al obtener pagos:', error);
+    logger.error('Error al obtener pagos:', error);
     return NextResponse.json(
       { error: 'Error al obtener pagos', details: error.message },
       { status: 500 }

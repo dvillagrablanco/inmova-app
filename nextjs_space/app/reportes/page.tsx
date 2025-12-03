@@ -8,6 +8,7 @@ import { Header } from '@/components/layout/header';
 import { KPICard } from '@/components/ui/kpi-card';
 import { LoadingState } from '@/components/ui/loading-state';
 import { Button } from '@/components/ui/button';
+import logger, { logError } from '@/lib/logger';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -109,7 +110,7 @@ export default function ReportesPage() {
           }
         }
       } catch (error) {
-        console.error('Error fetching reportes:', error);
+        logger.error('Error fetching reportes:', error);
       } finally {
         setIsLoading(false);
       }

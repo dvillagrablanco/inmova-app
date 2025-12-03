@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,7 +47,7 @@ export async function GET(
       },
     });
   } catch (error: any) {
-    console.error('Error fetching conversation:', error);
+    logger.error('Error fetching conversation:', error);
     return NextResponse.json(
       { error: error.message || 'Error al cargar conversación' },
       { status: 500 }
@@ -79,7 +80,7 @@ export async function PATCH(
 
     return NextResponse.json({ conversation });
   } catch (error: any) {
-    console.error('Error updating conversation:', error);
+    logger.error('Error updating conversation:', error);
     return NextResponse.json(
       { error: error.message || 'Error al actualizar conversación' },
       { status: 500 }

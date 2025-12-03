@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Download, X } from 'lucide-react';
 import { toast } from 'sonner';
+import logger, { logError } from '@/lib/logger';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -69,7 +70,7 @@ export function InstallPrompt() {
       setDeferredPrompt(null);
       setShowPrompt(false);
     } catch (error) {
-      console.error('Error installing app:', error);
+      logger.error('Error installing app:', error);
       toast.error('Error al instalar la aplicación');
     }
   };

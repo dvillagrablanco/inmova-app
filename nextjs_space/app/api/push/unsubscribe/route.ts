@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { removePushSubscription } from '@/lib/push-notifications';
+import logger, { logError } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
       message: 'Suscripción eliminada exitosamente'
     });
   } catch (error: any) {
-    console.error('Error removing push subscription:', error);
+    logger.error('Error removing push subscription:', error);
     return NextResponse.json(
       { error: 'Error al eliminar la suscripción', details: error.message },
       { status: 500 }

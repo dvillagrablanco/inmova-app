@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { Home, ArrowLeft, Shield, AlertTriangle, CheckCircle, Plus, Search, Phone, Mail, Euro, Calendar, Upload, FileText, Download, Trash2, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 export default function SegurosPage() {
   const { data: session, status } = useSession() || {};
@@ -66,7 +67,7 @@ export default function SegurosPage() {
       if (buildingsRes.ok) setBuildings(await buildingsRes.json());
       if (unitsRes.ok) setUnits(await unitsRes.json());
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cargar datos');
     } finally {
       setLoading(false);
@@ -102,7 +103,7 @@ export default function SegurosPage() {
         toast.error('Error al subir el documento');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al subir el documento');
     } finally {
       setUploading(false);
@@ -134,7 +135,7 @@ export default function SegurosPage() {
         toast.error('Error al eliminar el documento');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al eliminar el documento');
     }
   };
@@ -164,7 +165,7 @@ export default function SegurosPage() {
         toast.error('Error al crear seguro');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al crear seguro');
     }
   };

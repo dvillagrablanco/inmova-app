@@ -30,6 +30,7 @@ import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { LoadingState } from '@/components/ui/loading-state';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import logger, { logError } from '@/lib/logger';
 
 interface DashboardStats {
   totalListings: number;
@@ -80,7 +81,7 @@ export default function STRDashboardPage() {
       const data = await response.json();
       setStats(data);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cargar el dashboard');
     } finally {
       setLoading(false);

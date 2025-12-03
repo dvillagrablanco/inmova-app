@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,7 +38,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(preference);
   } catch (error) {
-    console.error('Error al obtener preferencias:', error);
+    logger.error('Error al obtener preferencias:', error);
     return NextResponse.json({ error: 'Error al obtener preferencias' }, { status: 500 });
   }
 }
@@ -77,7 +78,7 @@ export async function PATCH(req: NextRequest) {
 
     return NextResponse.json(preference);
   } catch (error) {
-    console.error('Error al actualizar preferencias:', error);
+    logger.error('Error al actualizar preferencias:', error);
     return NextResponse.json({ error: 'Error al actualizar preferencias' }, { status: 500 });
   }
 }

@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { subMonths, startOfMonth, endOfMonth } from 'date-fns';
+import logger, { logError } from '@/lib/logger';
 
 // GET /api/admin/companies/[id]/stats - Estadísticas de uso de una empresa
 export async function GET(
@@ -165,7 +166,7 @@ export async function GET(
       ultimoAcceso: ultimoUsuarioActivo?.updatedAt,
     });
   } catch (error) {
-    console.error('Error fetching company stats:', error);
+    logger.error('Error fetching company stats:', error);
     return NextResponse.json(
       { error: 'Error al obtener estadísticas' },
       { status: 500 }

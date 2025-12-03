@@ -59,6 +59,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import logger, { logError } from '@/lib/logger';
 
 interface ScheduledReport {
   id: string;
@@ -137,7 +138,7 @@ export default function ReportesProgramadosPage() {
       const data = await response.json();
       setReports(data);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cargar reportes programados');
     } finally {
       setIsLoading(false);
@@ -152,7 +153,7 @@ export default function ReportesProgramadosPage() {
         setHistory(data);
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
     }
   };
 
@@ -200,7 +201,7 @@ export default function ReportesProgramadosPage() {
       resetForm();
       fetchReports();
     } catch (error: any) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error(error.message || 'Error al guardar reporte');
     }
   };
@@ -218,7 +219,7 @@ export default function ReportesProgramadosPage() {
       toast.success('Reporte eliminado correctamente');
       fetchReports();
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al eliminar reporte');
     }
   };
@@ -241,7 +242,7 @@ export default function ReportesProgramadosPage() {
       );
       fetchReports();
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al actualizar reporte');
     }
   };
@@ -260,7 +261,7 @@ export default function ReportesProgramadosPage() {
       toast.success('Reporte enviado correctamente');
       fetchReports();
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al enviar reporte');
     } finally {
       setSending(null);

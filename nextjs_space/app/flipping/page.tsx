@@ -19,6 +19,7 @@ import {
   Settings,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import logger, { logError } from '@/lib/logger';
 
 interface FlippingProject {
   id: string;
@@ -59,7 +60,7 @@ export default function FlippingPage() {
         toast.error('Error al cargar proyectos de flipping');
       }
     } catch (error) {
-      console.error('Error loading flipping projects:', error);
+      logger.error('Error loading flipping projects:', error);
       toast.error('Error al cargar proyectos');
     } finally {
       setLoading(false);

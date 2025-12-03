@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -118,7 +119,7 @@ export async function POST(request: NextRequest) {
       action: actionRecord
     });
   } catch (error: any) {
-    console.error('Error al ejecutar acción:', error);
+    logger.error('Error al ejecutar acción:', error);
     return NextResponse.json(
       { error: 'Error al ejecutar acción', details: error.message },
       { status: 500 }
@@ -162,7 +163,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(actions);
   } catch (error: any) {
-    console.error('Error al obtener acciones:', error);
+    logger.error('Error al obtener acciones:', error);
     return NextResponse.json(
       { error: 'Error al obtener acciones' },
       { status: 500 }

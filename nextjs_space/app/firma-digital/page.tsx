@@ -43,6 +43,7 @@ import {
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 interface DocumentoFirma {
   id: string;
@@ -103,7 +104,7 @@ export default function FirmaDigitalPage() {
       const data = await response.json();
       setDocumentos(data);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cargar los documentos');
     } finally {
       setLoading(false);
@@ -119,7 +120,7 @@ export default function FirmaDigitalPage() {
       setDocumentoSeleccionado(data.documento);
       setMostrarDialogoDetalle(true);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cargar el detalle');
     }
   };

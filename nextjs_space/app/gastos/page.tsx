@@ -28,6 +28,7 @@ import { es } from 'date-fns/locale';
 import { LoadingState } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
 import { FilterChips } from '@/components/ui/filter-chips';
+import logger, { logError } from '@/lib/logger';
 
 interface Expense {
   id: string;
@@ -87,7 +88,7 @@ export default function GastosPage() {
         setExpenses(data);
       }
     } catch (error) {
-      console.error('Error fetching expenses:', error);
+      logger.error('Error fetching expenses:', error);
       toast.error('Error al cargar gastos');
     } finally {
       setLoading(false);
@@ -117,7 +118,7 @@ export default function GastosPage() {
         toast.error('Error al registrar gasto');
       }
     } catch (error) {
-      console.error('Error creating expense:', error);
+      logger.error('Error creating expense:', error);
       toast.error('Error al registrar gasto');
     }
   };
@@ -157,7 +158,7 @@ export default function GastosPage() {
         toast.error('Error al actualizar gasto');
       }
     } catch (error) {
-      console.error('Error updating expense:', error);
+      logger.error('Error updating expense:', error);
       toast.error('Error al actualizar gasto');
     }
   };
@@ -179,7 +180,7 @@ export default function GastosPage() {
         toast.error('Error al eliminar gasto');
       }
     } catch (error) {
-      console.error('Error deleting expense:', error);
+      logger.error('Error deleting expense:', error);
       toast.error('Error al eliminar gasto');
     }
   };

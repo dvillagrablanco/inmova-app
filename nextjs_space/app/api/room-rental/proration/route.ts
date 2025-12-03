@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { applyUtilityProrationToUnit, calculateUtilityProration } from '@/lib/room-rental-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
       message: `Prorrateo aplicado correctamente a ${result.paymentsCreated.length} habitaciones`,
     });
   } catch (error: any) {
-    console.error('Error applying proration:', error);
+    logger.error('Error applying proration:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -90,7 +91,7 @@ export async function GET(request: NextRequest) {
       distribution: result,
     });
   } catch (error: any) {
-    console.error('Error calculating proration:', error);
+    logger.error('Error calculating proration:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

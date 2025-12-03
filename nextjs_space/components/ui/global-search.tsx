@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import logger, { logError } from '@/lib/logger';
 
 interface SearchResult {
   id: string;
@@ -90,7 +91,7 @@ export function GlobalSearch() {
       const data = await response.json();
       setResults(data);
     } catch (error) {
-      console.error('Error searching:', error);
+      logger.error('Error searching:', error);
       toast.error('Error al buscar');
     } finally {
       setIsLoading(false);

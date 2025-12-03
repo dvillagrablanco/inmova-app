@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,7 +32,7 @@ export async function PUT(req: NextRequest) {
 
     return NextResponse.json({ message: 'Todas las notificaciones marcadas como leídas' });
   } catch (error) {
-    console.error('Error marking all notifications as read:', error);
+    logger.error('Error marking all notifications as read:', error);
     return NextResponse.json({ error: 'Error al marcar notificaciones' }, { status: 500 });
   }
 }

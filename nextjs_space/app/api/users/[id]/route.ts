@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth, forbiddenResponse, badRequestResponse, notFoundResponse } from '@/lib/permissions';
 import bcrypt from 'bcryptjs';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,7 +34,7 @@ export async function GET(
     const { password, ...userWithoutPassword } = targetUser;
     return NextResponse.json(userWithoutPassword);
   } catch (error: any) {
-    console.error('Error fetching user:', error);
+    logger.error('Error fetching user:', error);
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
@@ -89,7 +90,7 @@ export async function PUT(
     const { password: _, ...userWithoutPassword } = updatedUser;
     return NextResponse.json(userWithoutPassword);
   } catch (error: any) {
-    console.error('Error updating user:', error);
+    logger.error('Error updating user:', error);
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
@@ -131,7 +132,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Usuario eliminado correctamente' });
   } catch (error: any) {
-    console.error('Error deleting user:', error);
+    logger.error('Error deleting user:', error);
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }

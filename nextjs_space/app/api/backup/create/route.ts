@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { createBackup } from '@/lib/backup-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,7 +37,7 @@ export async function POST(req: NextRequest) {
       tamano: result.tamano
     });
   } catch (error: any) {
-    console.error('Error creating backup:', error);
+    logger.error('Error creating backup:', error);
     return NextResponse.json(
       { error: 'Error al crear backup', details: error.message },
       { status: 500 }

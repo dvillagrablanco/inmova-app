@@ -35,6 +35,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 export default function ReservasPage() {
   const { data: session, status } = useSession() || {};
@@ -103,7 +104,7 @@ export default function ReservasPage() {
       if (tenantsRes.ok) setTenants(await tenantsRes.json());
       if (buildingsRes.ok) setBuildings(await buildingsRes.json());
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cargar datos');
     } finally {
       setLoading(false);
@@ -132,7 +133,7 @@ export default function ReservasPage() {
         toast.error(error.error || 'Error al crear espacio');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al crear espacio');
     }
   };
@@ -156,7 +157,7 @@ export default function ReservasPage() {
         toast.error(error.error || 'Error al crear reserva');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al crear reserva');
     }
   };
@@ -178,7 +179,7 @@ export default function ReservasPage() {
         toast.error('Error al cancelar reserva');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cancelar reserva');
     }
   };
@@ -219,7 +220,7 @@ export default function ReservasPage() {
         toast.error(error.error || 'Error al actualizar reserva');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al actualizar reserva');
     }
   };
@@ -237,7 +238,7 @@ export default function ReservasPage() {
         toast.error('Error al eliminar reserva');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al eliminar reserva');
     }
   };

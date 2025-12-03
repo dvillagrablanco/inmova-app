@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { crearPlantilla } from '@/lib/sms-service';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ plantillas });
   } catch (error: any) {
-    console.error('Error fetching SMS templates:', error);
+    logger.error('Error fetching SMS templates:', error);
     return NextResponse.json(
       { error: 'Error al obtener plantillas', details: error.message },
       { status: 500 }
@@ -55,7 +56,7 @@ export async function POST(request: NextRequest) {
       message: 'Plantilla creada exitosamente' 
     });
   } catch (error: any) {
-    console.error('Error creating SMS template:', error);
+    logger.error('Error creating SMS template:', error);
     return NextResponse.json(
       { error: 'Error al crear plantilla', details: error.message },
       { status: 500 }

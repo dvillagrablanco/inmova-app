@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { format } from 'date-fns';
+import logger, { logError } from '@/lib/logger';
 
 interface Provider {
   id: string;
@@ -186,7 +187,7 @@ export default function MarketplacePage() {
       setBuildings(buildingsData);
       setUnits(unitsData);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      logger.error('Error fetching data:', error);
       toast.error('Error al cargar los datos');
     } finally {
       setLoading(false);
@@ -217,7 +218,7 @@ export default function MarketplacePage() {
       });
       fetchData();
     } catch (error) {
-      console.error('Error creating quote:', error);
+      logger.error('Error creating quote:', error);
       toast.error('Error al crear la cotización');
     }
   };
@@ -249,7 +250,7 @@ export default function MarketplacePage() {
       });
       fetchData();
     } catch (error) {
-      console.error('Error creating job:', error);
+      logger.error('Error creating job:', error);
       toast.error('Error al crear el trabajo');
     }
   };

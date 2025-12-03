@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -61,7 +62,7 @@ export async function POST(request: Request) {
       message: 'Contraseña actualizada correctamente' 
     });
   } catch (error) {
-    console.error('Error changing password:', error);
+    logger.error('Error changing password:', error);
     return NextResponse.json(
       { error: 'Error al cambiar contraseña' },
       { status: 500 }

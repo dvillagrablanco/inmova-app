@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getTaxSummary } from '@/lib/accounting-service';
 import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
       periodo,
     });
   } catch (error) {
-    console.error('Error al obtener resumen fiscal:', error);
+    logger.error('Error al obtener resumen fiscal:', error);
     return NextResponse.json(
       { error: 'Error al obtener resumen fiscal' },
       { status: 500 }

@@ -5,6 +5,7 @@
 
 import { prisma } from './db';
 import { subHours, subDays } from 'date-fns';
+import logger, { logError } from '@/lib/logger';
 
 /**
  * Registra una lectura de un dispositivo IoT
@@ -264,7 +265,7 @@ async function ejecutarAccion(
 
   // En un entorno real, aquí se enviaría el comando al dispositivo
   // Por ahora, simulamos la ejecución
-  console.log(`Ejecutando acción en dispositivo ${device.nombre}:`, accion);
+  logger.info(`Ejecutando acción en dispositivo ${device.nombre}:`, accion);
 
   return {
     tipo: accion.tipo,

@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getContaSimpleService } from '@/lib/contasimple-integration-service';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -70,7 +71,7 @@ export async function POST(request: NextRequest) {
       data: contaSimpleExpense,
     });
   } catch (error) {
-    console.error('Error al registrar gasto en ContaSimple:', error);
+    logger.error('Error al registrar gasto en ContaSimple:', error);
     return NextResponse.json(
       { error: 'Error al registrar gasto' },
       { status: 500 }

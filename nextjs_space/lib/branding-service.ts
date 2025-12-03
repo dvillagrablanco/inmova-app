@@ -1,5 +1,6 @@
 import { prisma } from './db';
 import { BrandingConfig } from '@prisma/client';
+import logger, { logError } from '@/lib/logger';
 
 /**
  * Servicio de gestión de personalización White Label
@@ -52,7 +53,7 @@ export async function getBrandingConfig(companyId: string): Promise<BrandingConf
     
     return config;
   } catch (error) {
-    console.error('[Branding Service] Error getting config:', error);
+    logger.error('[Branding Service] Error getting config:', error);
     return getDefaultBranding(companyId);
   }
 }
@@ -76,7 +77,7 @@ export async function updateBrandingConfig(
     
     return config;
   } catch (error) {
-    console.error('[Branding Service] Error updating config:', error);
+    logger.error('[Branding Service] Error updating config:', error);
     throw new Error('Error al actualizar la configuración de personalización');
   }
 }
@@ -187,7 +188,7 @@ export async function deleteBrandingConfig(companyId: string): Promise<void> {
       where: { companyId }
     });
   } catch (error) {
-    console.error('[Branding Service] Error deleting config:', error);
+    logger.error('[Branding Service] Error deleting config:', error);
     throw new Error('Error al eliminar la configuración de personalización');
   }
 }
@@ -216,7 +217,7 @@ export async function cloneBrandingConfig(
     
     return await updateBrandingConfig(targetCompanyId, configData);
   } catch (error) {
-    console.error('[Branding Service] Error cloning config:', error);
+    logger.error('[Branding Service] Error cloning config:', error);
     throw new Error('Error al clonar la configuración de personalización');
   }
 }

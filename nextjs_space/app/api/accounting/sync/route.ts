@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { syncPaymentsToAccounting, syncExpensesToAccounting } from '@/lib/accounting-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest) {
       totalSynced: paymentsSynced + expensesSynced,
     });
   } catch (error) {
-    console.error('Error syncing to accounting:', error);
+    logger.error('Error syncing to accounting:', error);
     return NextResponse.json(
       { error: 'Error al sincronizar con contabilidad' },
       { status: 500 }

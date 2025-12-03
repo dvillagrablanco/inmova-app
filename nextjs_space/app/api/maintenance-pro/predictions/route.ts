@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { predictEquipmentFailures } from '@/lib/maintenance-prediction-service';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ predictions });
   } catch (error: any) {
-    console.error('Error fetching predictions:', error);
+    logger.error('Error fetching predictions:', error);
     return NextResponse.json(
       { error: error.message || 'Error al cargar predicciones' },
       { status: 500 }
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ predictions, count: predictions.length }, { status: 201 });
   } catch (error: any) {
-    console.error('Error generating predictions:', error);
+    logger.error('Error generating predictions:', error);
     return NextResponse.json(
       { error: error.message || 'Error al generar predicciones' },
       { status: 500 }

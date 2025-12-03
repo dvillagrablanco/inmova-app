@@ -16,6 +16,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import Image from 'next/image';
+import logger, { logError } from '@/lib/logger';
 
 export default function UnidadDetailPage() {
   const router = useRouter();
@@ -39,7 +40,7 @@ export default function UnidadDetailPage() {
           setUnit(data);
         }
       } catch (error) {
-        console.error('Error fetching unit:', error);
+        logger.error('Error fetching unit:', error);
       } finally {
         setIsLoading(false);
       }

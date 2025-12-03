@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { stripe, formatAmountForStripe } from '@/lib/stripe-config';
 import { getOrCreateStripeCustomer } from '@/lib/stripe-customer';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -106,7 +107,7 @@ export async function POST(request: NextRequest) {
       paymentIntentId: paymentIntent.id,
     });
   } catch (error: any) {
-    console.error('Error creating payment intent:', error);
+    logger.error('Error creating payment intent:', error);
     return NextResponse.json(
       { error: error.message || 'Error al crear intención de pago' },
       { status: 500 }

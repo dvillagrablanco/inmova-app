@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,11 +9,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     
     // Registrar el webhook para debugging (en modo demo no se procesa)
-    console.log('📥 [MODO DEMO] Webhook de firma digital recibido:', body.event);
+    logger.info('📥 [MODO DEMO] Webhook de firma digital recibido:', body.event);
 
     return NextResponse.json({ received: true, mode: 'demo' });
   } catch (error) {
-    console.error('Error procesando webhook:', error);
+    logger.error('Error procesando webhook:', error);
     return NextResponse.json(
       { error: 'Error procesando webhook' },
       { status: 500 }

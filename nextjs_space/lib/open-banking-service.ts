@@ -1,4 +1,5 @@
 import { prisma } from './db';
+import logger, { logError } from '@/lib/logger';
 
 export async function conectarCuentaBancaria(params: any) {
   const { companyId, nombreBanco, tipoCuenta } = params;
@@ -17,7 +18,7 @@ export async function conectarCuentaBancaria(params: any) {
     }
   });
 
-  console.log(`🏦 [MODO DEMO] Cuenta bancaria conectada: ${nombreBanco}`);
+  logger.info(`🏦 [MODO DEMO] Cuenta bancaria conectada: ${nombreBanco}`);
 
   return {
     success: true,
@@ -35,7 +36,7 @@ export async function sincronizarTransacciones(connectionId: string) {
     throw new Error('Conexión bancaria no encontrada');
   }
 
-  console.log(`💳 [MODO DEMO] Sincronización simulada`);
+  logger.info(`💳 [MODO DEMO] Sincronización simulada`);
 
   return {
     success: true,
@@ -45,7 +46,7 @@ export async function sincronizarTransacciones(connectionId: string) {
 }
 
 export async function verificarIngresos(tenantId: string) {
-  console.log(`💰 [MODO DEMO] Verificación de ingresos simulada para tenant ${tenantId}`);
+  logger.info(`💰 [MODO DEMO] Verificación de ingresos simulada para tenant ${tenantId}`);
 
   return {
     success: true,
@@ -65,7 +66,7 @@ export async function verificarIngresos(tenantId: string) {
 }
 
 export async function conciliarPagos(companyId: string) {
-  console.log(`🔄 [MODO DEMO] Conciliación de pagos simulada`);
+  logger.info(`🔄 [MODO DEMO] Conciliación de pagos simulada`);
 
   return {
     success: true,

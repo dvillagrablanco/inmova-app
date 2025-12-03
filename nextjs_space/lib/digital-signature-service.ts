@@ -1,5 +1,6 @@
 import { prisma } from './db';
 import { SignatureStatus, SignerStatus } from '@prisma/client';
+import logger, { logError } from '@/lib/logger';
 
 interface FirmanteData {
   email: string;
@@ -70,7 +71,7 @@ export async function crearSolicitudFirma(params: CrearDocumentoFirmaParams) {
     }
   });
 
-  console.log(`📧 [MODO DEMO] Envío simulado de ${firmantes.length} invitaciones de firma`);
+  logger.info(`📧 [MODO DEMO] Envío simulado de ${firmantes.length} invitaciones de firma`);
 
   return {
     success: true,
@@ -234,7 +235,7 @@ export async function reenviarInvitacion(
     throw new Error('Firmante no encontrado');
   }
 
-  console.log(`📧 [MODO DEMO] Reenvío de invitación simulado`);
+  logger.info(`📧 [MODO DEMO] Reenvío de invitación simulado`);
 
   return {
     success: true,

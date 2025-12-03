@@ -1,3 +1,6 @@
+import logger, { logError } from '@/lib/logger';
+
+
 // @ts-nocheck
 /**
  * ZUCCHETTI INTEGRATION SERVICE (PREPARADO - NO FUNCIONAL)
@@ -108,18 +111,18 @@ export interface ZucchettiPayment {
  * CLASE PRINCIPAL DE INTEGRACIÓN
  */
 export class ZucchettiIntegrationService {
-  // private config: ZucchettiConfig;
+  private config: ZucchettiConfig;
   // private axiosInstance: AxiosInstance;
   // private tokens?: ZucchettiTokens;
 
   constructor() {
-    // this.config = {
-    //   clientId: process.env.ZUCCHETTI_CLIENT_ID || '',
-    //   clientSecret: process.env.ZUCCHETTI_CLIENT_SECRET || '',
-    //   apiKey: process.env.ZUCCHETTI_API_KEY || '',
-    //   apiUrl: process.env.ZUCCHETTI_API_URL || 'https://api.zucchetti.it/v1',
-    //   oauthUrl: process.env.ZUCCHETTI_OAUTH_URL || 'https://auth.zucchetti.it/oauth',
-    // };
+    this.config = {
+      clientId: process.env.ZUCCHETTI_CLIENT_ID || '',
+      clientSecret: process.env.ZUCCHETTI_CLIENT_SECRET || '',
+      apiKey: process.env.ZUCCHETTI_API_KEY || '',
+      apiUrl: process.env.ZUCCHETTI_API_URL || 'https://api.zucchetti.it/v1',
+      oauthUrl: process.env.ZUCCHETTI_OAUTH_URL || 'https://auth.zucchetti.it/oauth',
+    };
 
     // this.axiosInstance = axios.create({
     //   baseURL: this.config.apiUrl,
@@ -129,7 +132,7 @@ export class ZucchettiIntegrationService {
     //   },
     // });
 
-    console.log('⚠️ Zucchetti Integration Service: Modo DEMO - Requiere credenciales reales');
+    logger.info('⚠️ Zucchetti Integration Service: Modo DEMO - Requiere credenciales reales');
   }
 
   /**
@@ -374,7 +377,7 @@ export class ZucchettiIntegrationService {
    */
 
   async syncTenantToCustomerDemo(tenant: any): Promise<any> {
-    console.log('🔄 [DEMO] Sincronizando inquilino con Zucchetti:', tenant.nombreCompleto);
+    logger.info('🔄 [DEMO] Sincronizando inquilino con Zucchetti:', tenant.nombreCompleto);
     return {
       id: `zucchetti_customer_${Math.random().toString(36).substring(7)}`,
       name: tenant.nombreCompleto,
@@ -386,7 +389,7 @@ export class ZucchettiIntegrationService {
   }
 
   async createInvoiceDemo(contractData: any): Promise<any> {
-    console.log('📄 [DEMO] Creando factura en Zucchetti para contrato:', contractData.id);
+    logger.info('📄 [DEMO] Creando factura en Zucchetti para contrato:', contractData.id);
     return {
       id: `zucchetti_invoice_${Math.random().toString(36).substring(7)}`,
       number: `INV-${contractData.id.substring(0, 8).toUpperCase()}`,
@@ -398,7 +401,7 @@ export class ZucchettiIntegrationService {
   }
 
   async syncPaymentDemo(payment: any): Promise<any> {
-    console.log('💰 [DEMO] Registrando pago en Zucchetti:', payment.monto);
+    logger.info('💰 [DEMO] Registrando pago en Zucchetti:', payment.monto);
     return {
       id: `zucchetti_payment_${Math.random().toString(36).substring(7)}`,
       amount: payment.monto,
@@ -489,4 +492,3 @@ export function getZucchettiService(): ZucchettiIntegrationService {
  * const invoice = await zucchetti.createInvoiceFromContract(contract, customer.id);
  * const payment = await zucchetti.syncPaymentToZucchetti(payment, invoice.id);
  */
-

@@ -38,6 +38,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 interface Anuncio {
   id: string;
@@ -102,7 +103,7 @@ export default function AnunciosPage() {
         setAnuncios(Array.isArray(data) ? data : []);
       }
     } catch (error) {
-      console.error('Error al cargar anuncios:', error);
+      logger.error('Error al cargar anuncios:', error);
       toast.error('Error al cargar anuncios');
     } finally {
       setLoading(false);
@@ -117,7 +118,7 @@ export default function AnunciosPage() {
         setBuildings(Array.isArray(data) ? data : []);
       }
     } catch (error) {
-      console.error('Error al cargar edificios:', error);
+      logger.error('Error al cargar edificios:', error);
     }
   };
 
@@ -157,7 +158,7 @@ export default function AnunciosPage() {
         toast.error(error.error || 'Error al guardar anuncio');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al guardar anuncio');
     }
   };
@@ -193,7 +194,7 @@ export default function AnunciosPage() {
         toast.error('Error al desactivar anuncio');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al desactivar anuncio');
     }
   };

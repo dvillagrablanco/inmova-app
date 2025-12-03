@@ -5,6 +5,7 @@
 
 import { prisma } from './db';
 import { UserRole } from '@prisma/client';
+import logger, { logError } from '@/lib/logger';
 
 // Tipos de negocio soportados
 export type BusinessVertical = 
@@ -478,7 +479,7 @@ export async function getOrCreateOnboardingProgress(
     };*/
   } catch (error) {
     // Si la tabla no existe, devolver progreso por defecto
-    console.error('Error accessing OnboardingProgress table:', error);
+    logger.error('Error accessing OnboardingProgress table:', error);
     const steps = ONBOARDING_FLOWS[vertical] || ONBOARDING_FLOWS.residencial;
     const now = new Date();
     
@@ -558,7 +559,7 @@ export async function completeOnboardingStep(
 
     return getOrCreateOnboardingProgress(userId, companyId, progress.vertical as BusinessVertical);
   } catch (error) {
-    console.error('Error completing onboarding step:', error);
+    logger.error('Error completing onboarding step:', error);
     // Si hay error, devolver progreso por defecto
     return getOrCreateOnboardingProgress(userId, companyId, 'residencial');
   }

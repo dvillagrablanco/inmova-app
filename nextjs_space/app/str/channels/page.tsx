@@ -14,6 +14,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Home, ArrowLeft, Share2, CheckCircle, AlertCircle, Clock, Building2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 interface STRChannel {
   id: string;
@@ -69,7 +70,7 @@ export default function STRChannelsPage() {
         setChannels(Array.isArray(data) ? data : []);
       }
     } catch (error) {
-      console.error('Error loading channels:', error);
+      logger.error('Error loading channels:', error);
       setChannels([]);
     } finally {
       setLoading(false);

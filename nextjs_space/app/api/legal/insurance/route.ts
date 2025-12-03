@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { addDays } from 'date-fns';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,7 +40,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(policies);
   } catch (error) {
-    console.error('Error fetching insurance policies:', error);
+    logger.error('Error fetching insurance policies:', error);
     return NextResponse.json(
       { error: 'Error al obtener pólizas de seguro' },
       { status: 500 }
@@ -87,7 +88,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(policy, { status: 201 });
   } catch (error) {
-    console.error('Error creating insurance policy:', error);
+    logger.error('Error creating insurance policy:', error);
     return NextResponse.json(
       { error: 'Error al crear póliza de seguro' },
       { status: 500 }

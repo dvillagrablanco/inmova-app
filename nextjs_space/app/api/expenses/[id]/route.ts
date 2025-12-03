@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,7 +31,7 @@ export async function GET(
 
     return NextResponse.json(expense);
   } catch (error) {
-    console.error('Error fetching expense:', error);
+    logger.error('Error fetching expense:', error);
     return NextResponse.json({ error: 'Error al obtener gasto' }, { status: 500 });
   }
 }
@@ -70,7 +71,7 @@ export async function PUT(
 
     return NextResponse.json(expense);
   } catch (error) {
-    console.error('Error updating expense:', error);
+    logger.error('Error updating expense:', error);
     return NextResponse.json({ error: 'Error al actualizar gasto' }, { status: 500 });
   }
 }
@@ -91,7 +92,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Gasto eliminado exitosamente' });
   } catch (error) {
-    console.error('Error deleting expense:', error);
+    logger.error('Error deleting expense:', error);
     return NextResponse.json({ error: 'Error al eliminar gasto' }, { status: 500 });
   }
 }

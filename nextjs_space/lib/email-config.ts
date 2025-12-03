@@ -4,6 +4,7 @@
  */
 
 import nodemailer from 'nodemailer';
+import logger, { logError } from '@/lib/logger';
 
 // Configuración del transporter de Nodemailer
 export const createEmailTransporter = () => {
@@ -63,16 +64,16 @@ export const sendEmail = async ({
 
     // En modo desarrollo, mostrar el email en consola
     if (!process.env.SMTP_HOST) {
-      console.log('\n📧 EMAIL ENVIADO (Modo Desarrollo)');
-      console.log('Para:', to);
-      console.log('Asunto:', subject);
-      console.log('MessageId:', info.messageId || 'N/A');
-      console.log('\n');
+      logger.info('\n📧 EMAIL ENVIADO (Modo Desarrollo)');
+      logger.info('Para:', to);
+      logger.info('Asunto:', subject);
+      logger.info('MessageId:', info.messageId || 'N/A');
+      logger.info('\n');
     }
 
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error('Error enviando email:', error);
+    logger.error('Error enviando email:', error);
     return { success: false, error };
   }
 };

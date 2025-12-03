@@ -20,6 +20,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
+import logger, { logError } from '@/lib/logger';
 
 export default function NuevoInquilinoPage() {
   const router = useRouter();
@@ -68,7 +69,7 @@ export default function NuevoInquilinoPage() {
         toast.error(error.error || 'Error al crear el inquilino');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al crear el inquilino');
     } finally {
       setIsLoading(false);

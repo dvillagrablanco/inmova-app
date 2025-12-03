@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { calculateFinancialRatios } from '@/lib/accounting-service';
 import { startOfMonth, endOfMonth } from 'date-fns';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
       periodo,
     });
   } catch (error) {
-    console.error('Error al calcular ratios financieros:', error);
+    logger.error('Error al calcular ratios financieros:', error);
     return NextResponse.json(
       { error: 'Error al calcular ratios financieros' },
       { status: 500 }

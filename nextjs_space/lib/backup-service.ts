@@ -1,5 +1,6 @@
 import { prisma } from './db';
 import { format as formatDate } from 'date-fns';
+import logger, { logError } from '@/lib/logger';
 
 export interface BackupOptions {
   companyId: string;
@@ -126,7 +127,7 @@ export async function createBackup(options: BackupOptions) {
       data // En producción, no retornar los datos, solo la ubicación
     };
   } catch (error: any) {
-    console.error('Error creating backup:', error);
+    logger.error('Error creating backup:', error);
     throw new Error(`Error al crear backup: ${error.message}`);
   }
 }
@@ -269,7 +270,7 @@ export async function exportData(options: ExportOptions) {
       };
     }
   } catch (error: any) {
-    console.error('Error exporting data:', error);
+    logger.error('Error exporting data:', error);
     throw new Error(`Error al exportar datos: ${error.message}`);
   }
 }

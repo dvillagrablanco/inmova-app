@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getCenterOfCostsReport } from '@/lib/accounting-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest) {
       periodo,
     });
   } catch (error) {
-    console.error('Error al obtener centros de coste:', error);
+    logger.error('Error al obtener centros de coste:', error);
     return NextResponse.json(
       { error: 'Error al obtener centros de coste' },
       { status: 500 }

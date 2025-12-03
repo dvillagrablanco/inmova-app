@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { calcularPrediccionMorosidad } from '@/lib/morosidad-prediction-service';
 import { addDays } from 'date-fns';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -61,7 +62,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(predicciones);
   } catch (error: any) {
-    console.error('Error al obtener predicciones:', error);
+    logger.error('Error al obtener predicciones:', error);
     return NextResponse.json(
       { error: 'Error al obtener predicciones' },
       { status: 500 }
@@ -138,7 +139,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(prediccion, { status: 201 });
   } catch (error: any) {
-    console.error('Error al generar predicción:', error);
+    logger.error('Error al generar predicción:', error);
     return NextResponse.json(
       { error: 'Error al generar predicción', details: error.message },
       { status: 500 }

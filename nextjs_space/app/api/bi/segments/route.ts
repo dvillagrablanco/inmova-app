@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { segmentTenantsByBehavior } from '@/lib/bi-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,7 +25,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(segments);
   } catch (error) {
-    console.error('Error fetching segments:', error);
+    logger.error('Error fetching segments:', error);
     return NextResponse.json(
       { error: 'Error al obtener segmentos' },
       { status: 500 }
@@ -105,7 +106,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(segment, { status: 201 });
   } catch (error) {
-    console.error('Error creating segment:', error);
+    logger.error('Error creating segment:', error);
     return NextResponse.json(
       { error: 'Error al crear segmento' },
       { status: 500 }

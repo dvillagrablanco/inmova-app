@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -224,7 +225,7 @@ export async function POST(request: NextRequest) {
       companies: comparisons,
     });
   } catch (error) {
-    console.error('Error comparing companies:', error);
+    logger.error('Error comparing companies:', error);
     return NextResponse.json(
       { error: 'Error al comparar empresas' },
       { status: 500 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { exportData } from '@/lib/backup-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error: any) {
-    console.error('Error exporting data:', error);
+    logger.error('Error exporting data:', error);
     return NextResponse.json(
       { error: 'Error al exportar datos', details: error.message },
       { status: 500 }

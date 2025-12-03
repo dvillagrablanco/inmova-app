@@ -5,6 +5,7 @@ import { WifiOff, RefreshCw, Home, FileText, Users, Building2 } from 'lucide-rea
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
+import logger, { logError } from '@/lib/logger';
 
 /**
  * Offline Page - Enhanced fallback when no connection
@@ -33,7 +34,7 @@ export default function OfflinePage() {
         window.location.reload();
       }
     } catch (error) {
-      console.error('Still offline');
+      logger.error('Still offline');
     } finally {
       setTimeout(() => setIsRetrying(false), 1000);
     }

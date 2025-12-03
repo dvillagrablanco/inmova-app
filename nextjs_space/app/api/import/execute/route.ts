@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { parseCSV, importData, ImportableEntity, SYSTEM_MAPPINGS } from '@/lib/import-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -68,7 +69,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(importResult);
   } catch (error: any) {
-    console.error('Error executing import:', error);
+    logger.error('Error executing import:', error);
     return NextResponse.json(
       { error: error.message || 'Error al importar los datos' },
       { status: 500 }

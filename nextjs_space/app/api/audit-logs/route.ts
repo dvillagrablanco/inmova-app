@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/permissions';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,7 +49,7 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('Error fetching audit logs:', error);
+    logger.error('Error fetching audit logs:', error);
     if (error.message === 'No autorizado') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }

@@ -22,6 +22,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { FilterChips } from '@/components/ui/filter-chips';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 interface Coupon {
   id: string;
@@ -109,7 +110,7 @@ export default function CuponesPage() {
         setCoupons(data);
       }
     } catch (error) {
-      console.error('Error loading coupons:', error);
+      logger.error('Error loading coupons:', error);
       toast.error('Error al cargar cupones');
     } finally {
       setLoading(false);
@@ -145,7 +146,7 @@ export default function CuponesPage() {
         toast.error(error.message || 'Error al guardar cupón');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al guardar cupón');
     }
   };
@@ -179,7 +180,7 @@ export default function CuponesPage() {
         toast.error('Error al eliminar cupón');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al eliminar cupón');
     }
   };
@@ -200,7 +201,7 @@ export default function CuponesPage() {
         toast.error('Error al cambiar estado');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cambiar estado');
     }
   };

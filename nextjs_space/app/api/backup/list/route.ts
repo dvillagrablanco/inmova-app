@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getBackups } from '@/lib/backup-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,7 +18,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ backups });
   } catch (error: any) {
-    console.error('Error listing backups:', error);
+    logger.error('Error listing backups:', error);
     return NextResponse.json(
       { error: 'Error al listar backups' },
       { status: 500 }

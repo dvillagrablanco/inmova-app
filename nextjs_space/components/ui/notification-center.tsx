@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import Link from 'next/link';
+import logger, { logError } from '@/lib/logger';
 
 export interface Notification {
   id: string;
@@ -56,7 +57,7 @@ export function NotificationCenter() {
         setNotifications(data);
       }
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      logger.error('Error fetching notifications:', error);
     }
   };
 
@@ -72,7 +73,7 @@ export function NotificationCenter() {
         );
       }
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      logger.error('Error marking notification as read:', error);
     }
   };
 
@@ -86,7 +87,7 @@ export function NotificationCenter() {
         setNotifications(prev => prev.map(n => ({ ...n, read: true })));
       }
     } catch (error) {
-      console.error('Error marking all as read:', error);
+      logger.error('Error marking all as read:', error);
     }
   };
 
@@ -100,7 +101,7 @@ export function NotificationCenter() {
         setNotifications(prev => prev.filter(n => n.id !== id));
       }
     } catch (error) {
-      console.error('Error deleting notification:', error);
+      logger.error('Error deleting notification:', error);
     }
   };
 
@@ -114,7 +115,7 @@ export function NotificationCenter() {
         setNotifications(prev => prev.filter(n => !n.read));
       }
     } catch (error) {
-      console.error('Error deleting read notifications:', error);
+      logger.error('Error deleting read notifications:', error);
     }
   };
 

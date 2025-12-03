@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { calculateMaintenanceMetrics } from '@/lib/maintenance-prediction-service';
 import { prisma } from '@/lib/db';
 import { format } from 'date-fns';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ metrics });
   } catch (error: any) {
-    console.error('Error fetching metrics:', error);
+    logger.error('Error fetching metrics:', error);
     return NextResponse.json(
       { error: error.message || 'Error al cargar métricas' },
       { status: 500 }
@@ -57,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ metrics }, { status: 201 });
   } catch (error: any) {
-    console.error('Error calculating metrics:', error);
+    logger.error('Error calculating metrics:', error);
     return NextResponse.json(
       { error: error.message || 'Error al calcular métricas' },
       { status: 500 }

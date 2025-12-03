@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { obtenerEventosCalendario } from '@/lib/calendar-service';
 import { CalendarEventType, CalendarEventPriority } from '@prisma/client';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,7 +61,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(eventos);
   } catch (error) {
-    console.error('Error obteniendo eventos del calendario:', error);
+    logger.error('Error obteniendo eventos del calendario:', error);
     return NextResponse.json(
       { error: 'Error obteniendo eventos del calendario' },
       { status: 500 }
@@ -137,7 +138,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(evento, { status: 201 });
   } catch (error) {
-    console.error('Error creando evento:', error);
+    logger.error('Error creando evento:', error);
     return NextResponse.json(
       { error: 'Error creando evento' },
       { status: 500 }

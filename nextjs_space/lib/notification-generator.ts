@@ -1,4 +1,5 @@
 import { prisma } from './db';
+import logger, { logError } from '@/lib/logger';
 
 interface NotificationParams {
   companyId: string;
@@ -28,7 +29,7 @@ export async function createNotification(params: NotificationParams) {
       },
     });
   } catch (error) {
-    console.error('Error creating notification:', error);
+    logger.error('Error creating notification:', error);
     return null;
   }
 }

@@ -38,6 +38,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { InfoTooltip } from '@/components/ui/info-tooltip';
 import { toast } from 'sonner';
 import { usePermissions } from '@/lib/hooks/usePermissions';
+import logger, { logError } from '@/lib/logger';
 
 interface User {
   id: string;
@@ -96,7 +97,7 @@ export default function UsersPage() {
         toast.error('Error al cargar usuarios');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cargar usuarios');
     } finally {
       setLoading(false);
@@ -111,7 +112,7 @@ export default function UsersPage() {
         setCompanies(data.map((c: any) => ({ id: c.id, nombre: c.nombre })));
       }
     } catch (error) {
-      console.error('Error loading companies:', error);
+      logger.error('Error loading companies:', error);
     }
   };
 
@@ -170,7 +171,7 @@ export default function UsersPage() {
         }
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al guardar usuario');
     }
   };
@@ -191,7 +192,7 @@ export default function UsersPage() {
         toast.error(error.error || 'Error al eliminar usuario');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al eliminar usuario');
     }
   };
@@ -211,7 +212,7 @@ export default function UsersPage() {
         toast.error('Error al cambiar estado del usuario');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cambiar estado del usuario');
     }
   };

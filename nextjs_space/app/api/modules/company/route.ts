@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { MODULOS_CATALOGO } from '@/lib/modules-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,7 +37,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ modules: enrichedModules });
   } catch (error: any) {
-    console.error('Error al obtener módulos de empresa:', error);
+    logger.error('Error al obtener módulos de empresa:', error);
     return NextResponse.json(
       { error: 'Error al obtener módulos' },
       { status: 500 }

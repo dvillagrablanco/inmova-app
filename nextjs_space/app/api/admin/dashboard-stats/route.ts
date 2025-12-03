@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { subDays, subMonths, startOfMonth, endOfMonth, startOfDay, format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -383,7 +384,7 @@ export async function GET(request: NextRequest) {
       companiesNeedingAttention,
     });
   } catch (error) {
-    console.error('Error fetching admin dashboard stats:', error);
+    logger.error('Error fetching admin dashboard stats:', error);
     return NextResponse.json(
       { error: 'Error al obtener estadísticas' },
       { status: 500 }

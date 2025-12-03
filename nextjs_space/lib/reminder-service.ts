@@ -6,6 +6,7 @@
 import { PrismaClient } from '@prisma/client';
 import { addDays, differenceInDays, isBefore, startOfDay } from 'date-fns';
 import { sendEmail } from './email-config';
+import logger, { logError } from '@/lib/logger';
 import {
   paymentReminderEmail,
   contractExpirationEmail,
@@ -31,7 +32,7 @@ export const sendPaymentReminders = async (companyId: string) => {
     });
 
     if (!company) {
-      console.error('Empresa no encontrada:', companyId);
+      logger.error('Empresa no encontrada:', companyId);
       return { success: false, error: 'Empresa no encontrada' };
     }
 
@@ -134,7 +135,7 @@ export const sendPaymentReminders = async (companyId: string) => {
         });
       } else {
         errors++;
-        console.error(`Error enviando recordatorio a ${payment.contract.tenant.email}:`, result.error);
+        logger.error(`Error enviando recordatorio a ${payment.contract.tenant.email}:`, result.error);
       }
     }
 
@@ -145,7 +146,7 @@ export const sendPaymentReminders = async (companyId: string) => {
       message: `Recordatorios de pago enviados: ${emailsSent}, Errores: ${errors}`,
     };
   } catch (error) {
-    console.error('Error en sendPaymentReminders:', error);
+    logger.error('Error en sendPaymentReminders:', error);
     return { success: false, error };
   }
 };
@@ -165,7 +166,7 @@ export const sendContractExpirationAlerts = async (companyId: string) => {
     });
 
     if (!company) {
-      console.error('Empresa no encontrada:', companyId);
+      logger.error('Empresa no encontrada:', companyId);
       return { success: false, error: 'Empresa no encontrada' };
     }
 
@@ -260,7 +261,7 @@ export const sendContractExpirationAlerts = async (companyId: string) => {
         });
       } else {
         errors++;
-        console.error(`Error enviando alerta a ${contract.tenant.email}:`, result.error);
+        logger.error(`Error enviando alerta a ${contract.tenant.email}:`, result.error);
       }
     }
 
@@ -271,7 +272,7 @@ export const sendContractExpirationAlerts = async (companyId: string) => {
       message: `Alertas de contrato enviadas: ${emailsSent}, Errores: ${errors}`,
     };
   } catch (error) {
-    console.error('Error en sendContractExpirationAlerts:', error);
+    logger.error('Error en sendContractExpirationAlerts:', error);
     return { success: false, error };
   }
 };
@@ -290,7 +291,7 @@ export const sendMaintenanceNotifications = async (companyId: string) => {
     });
 
     if (!company) {
-      console.error('Empresa no encontrada:', companyId);
+      logger.error('Empresa no encontrada:', companyId);
       return { success: false, error: 'Empresa no encontrada' };
     }
 
@@ -391,7 +392,7 @@ export const sendMaintenanceNotifications = async (companyId: string) => {
         });
       } else {
         errors++;
-        console.error(`Error enviando notificación a ${maintenance.unit.tenant.email}:`, result.error);
+        logger.error(`Error enviando notificación a ${maintenance.unit.tenant.email}:`, result.error);
       }
     }
 
@@ -402,7 +403,7 @@ export const sendMaintenanceNotifications = async (companyId: string) => {
       message: `Notificaciones de mantenimiento enviadas: ${emailsSent}, Errores: ${errors}`,
     };
   } catch (error) {
-    console.error('Error en sendMaintenanceNotifications:', error);
+    logger.error('Error en sendMaintenanceNotifications:', error);
     return { success: false, error };
   }
 };
@@ -411,7 +412,7 @@ export const sendMaintenanceNotifications = async (companyId: string) => {
 // FUNCIÓN PRINCIPAL PARA EJECUTAR TODOS LOS RECORDATORIOS
 // ============================================
 export const runAllReminders = async (companyId: string) => {
-  console.log(`\n🔔 Ejecutando recordatorios automáticos para empresa: ${companyId}`);
+  logger.info(`\n🔔 Ejecutando recordatorios automáticos para empresa: ${companyId}`);
   
   const results = {
     paymentReminders: await sendPaymentReminders(companyId),
@@ -419,11 +420,11 @@ export const runAllReminders = async (companyId: string) => {
     maintenanceNotifications: await sendMaintenanceNotifications(companyId),
   };
 
-  console.log('\n✅ Resultados de recordatorios:');
-  console.log('  - Recordatorios de pago:', results.paymentReminders.message);
-  console.log('  - Alertas de contratos:', results.contractAlerts.message);
-  console.log('  - Notificaciones de mantenimiento:', results.maintenanceNotifications.message);
-  console.log('\n');
+  logger.info('\n✅ Resultados de recordatorios:');
+  logger.info('  - Recordatorios de pago:', results.paymentReminders.message);
+  logger.info('  - Alertas de contratos:', results.contractAlerts.message);
+  logger.info('  - Notificaciones de mantenimiento:', results.maintenanceNotifications.message);
+  logger.info('\n');
 
   return results;
 };

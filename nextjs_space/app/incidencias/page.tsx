@@ -29,6 +29,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { usePermissions } from '@/lib/hooks/usePermissions';
+import logger, { logError } from '@/lib/logger';
 
 interface Incidencia {
   id: string;
@@ -98,7 +99,7 @@ export default function IncidenciasPage() {
       setIncidencias(Array.isArray(incidenciasData) ? incidenciasData : []);
       setBuildings(Array.isArray(buildingsData) ? buildingsData : []);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      logger.error('Error fetching data:', error);
       toast.error('Error al cargar datos');
       setIncidencias([]);
       setBuildings([]);
@@ -129,7 +130,7 @@ export default function IncidenciasPage() {
         ubicacion: '',
       });
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al crear incidencia');
     }
   };
@@ -147,7 +148,7 @@ export default function IncidenciasPage() {
       toast.success('Estado actualizado');
       fetchData();
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al actualizar estado');
     }
   };
@@ -189,7 +190,7 @@ export default function IncidenciasPage() {
         ubicacion: '',
       });
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al actualizar incidencia');
     }
   };
@@ -206,7 +207,7 @@ export default function IncidenciasPage() {
       toast.success('Incidencia eliminada exitosamente');
       fetchData();
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al eliminar incidencia');
     }
   };

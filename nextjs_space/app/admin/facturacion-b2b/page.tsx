@@ -61,6 +61,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 interface Invoice {
   id: string;
@@ -128,7 +129,7 @@ export default function B2BBillingDashboard() {
         setInvoices(data.invoices);
       }
     } catch (error) {
-      console.error('Error al cargar datos:', error);
+      logger.error('Error al cargar datos:', error);
       toast.error('Error al cargar datos de facturación');
     } finally {
       setLoading(false);
@@ -160,7 +161,7 @@ export default function B2BBillingDashboard() {
         toast.error('Error al generar facturas mensuales');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al generar facturas mensuales');
     } finally {
       setIsGeneratingMonthly(false);

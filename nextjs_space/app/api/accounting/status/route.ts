@@ -7,6 +7,7 @@ import { getA3Service } from '@/lib/a3-integration-service';
 import { getAlegraService } from '@/lib/alegra-integration-service';
 import { getZucchettiService } from '@/lib/zucchetti-integration-service';
 import { getContaSimpleService } from '@/lib/contasimple-integration-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(status);
   } catch (error: any) {
-    console.error('Error checking integration status:', error);
+    logger.error('Error checking integration status:', error);
     return NextResponse.json(
       { error: 'Error al verificar el estado de las integraciones', details: error.message },
       { status: 500 }

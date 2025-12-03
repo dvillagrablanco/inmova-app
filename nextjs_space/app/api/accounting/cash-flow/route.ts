@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { generateCashFlowStatement, calculateCashFlow } from '@/lib/accounting-service';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,7 +49,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(statements);
     }
   } catch (error) {
-    console.error('Error fetching cash flow:', error);
+    logger.error('Error fetching cash flow:', error);
     return NextResponse.json(
       { error: 'Error al obtener flujo de caja' },
       { status: 500 }
@@ -88,7 +89,7 @@ export async function POST(req: NextRequest) {
       statement,
     });
   } catch (error) {
-    console.error('Error generating cash flow:', error);
+    logger.error('Error generating cash flow:', error);
     return NextResponse.json(
       { error: 'Error al generar flujo de caja' },
       { status: 500 }

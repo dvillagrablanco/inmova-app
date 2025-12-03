@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -78,7 +79,7 @@ export async function GET(
 
     return NextResponse.json(company);
   } catch (error) {
-    console.error('Error fetching company:', error);
+    logger.error('Error fetching company:', error);
     return NextResponse.json(
       { error: 'Error al obtener empresa' },
       { status: 500 }
@@ -156,7 +157,7 @@ export async function PATCH(
 
     return NextResponse.json(company);
   } catch (error) {
-    console.error('Error updating company:', error);
+    logger.error('Error updating company:', error);
     return NextResponse.json(
       { error: 'Error al actualizar empresa' },
       { status: 500 }
@@ -190,7 +191,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Empresa eliminada correctamente' });
   } catch (error) {
-    console.error('Error deleting company:', error);
+    logger.error('Error deleting company:', error);
     return NextResponse.json(
       { error: 'Error al eliminar empresa' },
       { status: 500 }

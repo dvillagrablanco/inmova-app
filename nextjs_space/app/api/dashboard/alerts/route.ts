@@ -8,6 +8,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { addDays, differenceInDays, startOfDay } from 'date-fns';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -257,7 +258,7 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error('Error obteniendo alertas:', error);
+    logger.error('Error obteniendo alertas:', error);
     return NextResponse.json(
       { error: 'Error al obtener alertas' },
       { status: 500 }

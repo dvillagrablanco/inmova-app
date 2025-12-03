@@ -23,6 +23,7 @@ import {
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 interface ProfessionalProject {
   id: string;
@@ -66,7 +67,7 @@ export default function ProfessionalPage() {
         toast.error('Error al cargar proyectos profesionales');
       }
     } catch (error) {
-      console.error('Error loading professional projects:', error);
+      logger.error('Error loading professional projects:', error);
       toast.error('Error al cargar proyectos');
     } finally {
       setLoading(false);

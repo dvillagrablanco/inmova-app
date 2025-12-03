@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,7 +55,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(messages);
   } catch (error: any) {
-    console.error('Error al obtener mensajes:', error);
+    logger.error('Error al obtener mensajes:', error);
     return NextResponse.json(
       { error: 'Error al obtener mensajes' },
       { status: 500 }
@@ -237,7 +238,7 @@ Instrucciones:
             controller.enqueue(encoder.encode(chunk));
           }
         } catch (error) {
-          console.error('Stream error:', error);
+          logger.error('Stream error:', error);
           controller.error(error);
         } finally {
           controller.close();
@@ -253,7 +254,7 @@ Instrucciones:
       }
     });
   } catch (error: any) {
-    console.error('Error al procesar mensaje:', error);
+    logger.error('Error al procesar mensaje:', error);
     return NextResponse.json(
       { error: 'Error al procesar mensaje' },
       { status: 500 }

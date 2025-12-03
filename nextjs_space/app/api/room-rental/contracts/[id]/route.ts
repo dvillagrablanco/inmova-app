@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,7 +50,7 @@ export async function GET(
 
     return NextResponse.json(contract);
   } catch (error: any) {
-    console.error('Error fetching contract:', error);
+    logger.error('Error fetching contract:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -113,7 +114,7 @@ export async function PATCH(
 
     return NextResponse.json(contract);
   } catch (error: any) {
-    console.error('Error updating contract:', error);
+    logger.error('Error updating contract:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

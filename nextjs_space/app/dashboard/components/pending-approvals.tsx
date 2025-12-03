@@ -25,6 +25,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+import logger, { logError } from '@/lib/logger';
 
 interface Approval {
   id: string;
@@ -59,7 +60,7 @@ export function PendingApprovals() {
       const data = await res.json();
       setApprovals(data);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -79,7 +80,7 @@ export function PendingApprovals() {
       toast.success('Solicitud aprobada correctamente');
       fetchApprovals();
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al aprobar solicitud');
     } finally {
       setIsProcessing(false);
@@ -108,7 +109,7 @@ export function PendingApprovals() {
       setSelectedApproval(null);
       fetchApprovals();
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al rechazar solicitud');
     } finally {
       setIsProcessing(false);

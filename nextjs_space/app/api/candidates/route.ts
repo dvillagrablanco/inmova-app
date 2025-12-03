@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,7 +29,7 @@ export async function GET() {
 
     return NextResponse.json(candidates);
   } catch (error) {
-    console.error('Error fetching candidates:', error);
+    logger.error('Error fetching candidates:', error);
     return NextResponse.json({ error: 'Error al obtener candidatos' }, { status: 500 });
   }
 }
@@ -90,7 +91,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(candidate, { status: 201 });
   } catch (error) {
-    console.error('Error creating candidate:', error);
+    logger.error('Error creating candidate:', error);
     return NextResponse.json({ error: 'Error al crear candidato' }, { status: 500 });
   }
 }

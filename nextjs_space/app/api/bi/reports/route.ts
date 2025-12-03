@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,7 +27,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(reports);
   } catch (error) {
-    console.error('Error fetching reports:', error);
+    logger.error('Error fetching reports:', error);
     return NextResponse.json(
       { error: 'Error al obtener reportes' },
       { status: 500 }
@@ -69,7 +70,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(report, { status: 201 });
   } catch (error) {
-    console.error('Error creating report:', error);
+    logger.error('Error creating report:', error);
     return NextResponse.json(
       { error: 'Error al crear reporte' },
       { status: 500 }

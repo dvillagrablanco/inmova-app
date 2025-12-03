@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { isSageConfigured } from '@/lib/sage-integration-service';
+import logger, { logError } from '@/lib/logger';
 
 export async function GET(req: NextRequest) {
   try {
@@ -28,7 +29,7 @@ export async function GET(req: NextRequest) {
       status: isConfigured ? 'active' : 'demo'
     });
   } catch (error) {
-    console.error('Error checking Sage status:', error);
+    logger.error('Error checking Sage status:', error);
     return NextResponse.json(
       { error: 'Error al verificar estado de Sage' },
       { status: 500 }

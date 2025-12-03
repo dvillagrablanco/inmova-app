@@ -14,6 +14,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Home, ArrowLeft, Briefcase, Euro, Calendar, FileText, Users } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 interface ProfessionalProject {
   id: string;
@@ -57,7 +58,7 @@ export default function ProfessionalProjectsPage() {
         setProjects(Array.isArray(data) ? data : []);
       }
     } catch (error) {
-      console.error('Error loading projects:', error);
+      logger.error('Error loading projects:', error);
       setProjects([]);
     } finally {
       setLoading(false);

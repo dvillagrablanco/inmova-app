@@ -1,3 +1,6 @@
+import logger, { logError } from '@/lib/logger';
+
+
 /**
  * Servicio de Automatización con IA
  * Procesa intenciones del usuario y proporciona asistencia inteligente
@@ -64,7 +67,7 @@ export async function detectUserIntent(userMessage: string, context?: any): Prom
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error detecting intent:', error);
+    logger.error('Error detecting intent:', error);
     // Fallback a intención básica
     return {
       intent: 'other',
@@ -95,7 +98,7 @@ export async function getProactiveSuggestions(
     const data = await response.json();
     return data.suggestions || [];
   } catch (error) {
-    console.error('Error getting suggestions:', error);
+    logger.error('Error getting suggestions:', error);
     return [];
   }
 }
@@ -114,7 +117,7 @@ export async function getOnboardingProgress(userId: string): Promise<OnboardingP
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error getting onboarding progress:', error);
+    logger.error('Error getting onboarding progress:', error);
     return {
       userId,
       completedSteps: [],
@@ -135,7 +138,7 @@ export async function markOnboardingStep(userId: string, stepId: string): Promis
       body: JSON.stringify({ userId, stepId, completed: true }),
     });
   } catch (error) {
-    console.error('Error marking step:', error);
+    logger.error('Error marking step:', error);
   }
 }
 
@@ -161,7 +164,7 @@ export async function detectBusinessModel(userData: any): Promise<{
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error detecting business model:', error);
+    logger.error('Error detecting business model:', error);
     return {
       model: 'general',
       confidence: 0,
@@ -198,7 +201,7 @@ export async function categorizeTicket(ticketData: {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error categorizing ticket:', error);
+    logger.error('Error categorizing ticket:', error);
     return {
       category: 'general',
       priority: 'medium',
@@ -231,7 +234,7 @@ export async function searchKnowledgeBase(query: string): Promise<Array<{
     const data = await response.json();
     return data.results || [];
   } catch (error) {
-    console.error('Error searching knowledge base:', error);
+    logger.error('Error searching knowledge base:', error);
     return [];
   }
 }

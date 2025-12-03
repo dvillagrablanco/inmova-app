@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Calendar, Clock, Plus, Check, X, Building2, Home as HomeIcon, AlertCircle, Edit, Trash2, ArrowLeft } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import logger, { logError } from '@/lib/logger';
 
 interface MaintenanceSchedule {
   id: string;
@@ -85,7 +86,7 @@ export default function MantenimientoPreventivoPage() {
         if (buildRes.ok) setBuildings(await buildRes.json());
         if (provRes.ok) setProviders(await provRes.json());
       } catch (error) {
-        console.error('Error fetching data:', error);
+        logger.error('Error fetching data:', error);
         toast.error('Error al cargar datos');
       } finally {
         setIsLoading(false);
@@ -139,7 +140,7 @@ export default function MantenimientoPreventivoPage() {
         toast.error('Error al guardar');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al guardar');
     }
   };
@@ -158,7 +159,7 @@ export default function MantenimientoPreventivoPage() {
         toast.error('Error al completar mantenimiento');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al completar mantenimiento');
     }
   };
@@ -178,7 +179,7 @@ export default function MantenimientoPreventivoPage() {
         toast.error('Error al eliminar');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al eliminar');
     }
   };

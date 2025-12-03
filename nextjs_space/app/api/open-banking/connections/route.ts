@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { conectarCuentaBancaria, sincronizarTransacciones } from '@/lib/open-banking-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(connections);
   } catch (error) {
-    console.error('Error:', error);
+    logger.error('Error:', error);
     return NextResponse.json({ error: 'Error obteniendo conexiones' }, { status: 500 });
   }
 }
@@ -46,7 +47,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
-    console.error('Error:', error);
+    logger.error('Error:', error);
     return NextResponse.json({ error: 'Error conectando cuenta' }, { status: 500 });
   }
 }

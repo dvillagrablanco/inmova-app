@@ -20,6 +20,7 @@ import {
   Save
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import logger, { logError } from '@/lib/logger';
 
 interface NotificationPreferences {
   // Notificaciones Push
@@ -112,7 +113,7 @@ export default function ConfiguracionNotificacionesPage() {
         setPreferences({ ...defaultPreferences, ...data });
       }
     } catch (error) {
-      console.error('Error fetching preferences:', error);
+      logger.error('Error fetching preferences:', error);
       toast.error('Error al cargar preferencias');
     } finally {
       setLoading(false);
@@ -134,7 +135,7 @@ export default function ConfiguracionNotificacionesPage() {
         toast.error('Error al guardar preferencias');
       }
     } catch (error) {
-      console.error('Error saving preferences:', error);
+      logger.error('Error saving preferences:', error);
       toast.error('Error al guardar preferencias');
     } finally {
       setSaving(false);
@@ -154,7 +155,7 @@ export default function ConfiguracionNotificacionesPage() {
         toast.error('Permisos de notificaciones denegados');
       }
     } catch (error) {
-      console.error('Error requesting push permission:', error);
+      logger.error('Error requesting push permission:', error);
       toast.error('Error al solicitar permisos');
     }
   };
@@ -179,7 +180,7 @@ export default function ConfiguracionNotificacionesPage() {
         body: JSON.stringify(subscription)
       });
     } catch (error) {
-      console.error('Error subscribing to push:', error);
+      logger.error('Error subscribing to push:', error);
     }
   };
 

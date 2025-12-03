@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,7 +37,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(ordenes);
   } catch (error) {
-    console.error('Error fetching ordenes:', error);
+    logger.error('Error fetching ordenes:', error);
     return NextResponse.json(
       { error: 'Error al obtener órdenes de trabajo' },
       { status: 500 }
@@ -92,7 +93,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(orden, { status: 201 });
   } catch (error) {
-    console.error('Error creating orden:', error);
+    logger.error('Error creating orden:', error);
     return NextResponse.json(
       { error: 'Error al crear orden de trabajo' },
       { status: 500 }

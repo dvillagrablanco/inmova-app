@@ -6,6 +6,7 @@ import {
   type TicketCategory
 } from '@/lib/intelligent-support-service';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export async function GET(request: Request) {
   try {
@@ -42,7 +43,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ tickets });
   } catch (error) {
-    console.error('Error fetching tickets:', error);
+    logger.error('Error fetching tickets:', error);
     return NextResponse.json(
       { error: 'Error al obtener tickets' },
       { status: 500 }
@@ -78,7 +79,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ticket });
   } catch (error) {
-    console.error('Error creating ticket:', error);
+    logger.error('Error creating ticket:', error);
     return NextResponse.json(
       { error: 'Error al crear ticket' },
       { status: 500 }

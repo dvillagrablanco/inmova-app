@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(conversations);
   } catch (error: any) {
-    console.error('Error al obtener conversaciones:', error);
+    logger.error('Error al obtener conversaciones:', error);
     return NextResponse.json(
       { error: 'Error al obtener conversaciones' },
       { status: 500 }
@@ -91,7 +92,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(conversation, { status: 201 });
   } catch (error: any) {
-    console.error('Error al crear conversación:', error);
+    logger.error('Error al crear conversación:', error);
     return NextResponse.json(
       { error: 'Error al crear conversación' },
       { status: 500 }

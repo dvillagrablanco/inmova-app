@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { User, Mail, Building2, Shield, Save, ArrowLeft, Home, Lock } from 'lucide-react';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import logger, { logError } from '@/lib/logger';
 
 export default function PerfilPage() {
   const router = useRouter();
@@ -92,7 +93,7 @@ export default function PerfilPage() {
         toast.error(error.error || 'Error al actualizar perfil');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al actualizar perfil');
     } finally {
       setLoading(false);

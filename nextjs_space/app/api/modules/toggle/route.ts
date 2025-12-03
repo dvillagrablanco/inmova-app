@@ -6,6 +6,7 @@ import {
   deactivateModuleForCompany 
 } from '@/lib/modules-service';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -73,7 +74,7 @@ export async function POST(req: NextRequest) {
       message: activo ? 'Módulo activado' : 'Módulo desactivado'
     });
   } catch (error: any) {
-    console.error('Error al modificar módulo:', error);
+    logger.error('Error al modificar módulo:', error);
     return NextResponse.json(
       { error: error.message || 'Error al modificar módulo' },
       { status: 500 }

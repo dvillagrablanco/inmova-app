@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,7 +24,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(widgets);
   } catch (error) {
-    console.error('Error fetching widgets:', error);
+    logger.error('Error fetching widgets:', error);
     return NextResponse.json(
       { error: 'Error al obtener widgets' },
       { status: 500 }
@@ -57,7 +58,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(widget, { status: 201 });
   } catch (error) {
-    console.error('Error creating widget:', error);
+    logger.error('Error creating widget:', error);
     return NextResponse.json(
       { error: 'Error al crear widget' },
       { status: 500 }

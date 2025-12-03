@@ -38,6 +38,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { FilterChips } from '@/components/ui/filter-chips';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ViewModeToggle, ViewMode } from '@/components/ui/view-mode-toggle';
+import logger, { logError } from '@/lib/logger';
 
 interface Unit {
   id: string;
@@ -99,7 +100,7 @@ export default function UnidadesPage() {
           setFilteredUnits(data);
         }
       } catch (error) {
-        console.error('Error fetching units:', error);
+        logger.error('Error fetching units:', error);
       } finally {
         setIsLoading(false);
       }

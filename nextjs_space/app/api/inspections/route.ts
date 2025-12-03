@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -64,7 +65,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(enrichedInspections);
   } catch (error) {
-    console.error('Error al obtener inspecciones:', error);
+    logger.error('Error al obtener inspecciones:', error);
     return NextResponse.json(
       { error: 'Error al obtener inspecciones' },
       { status: 500 }
@@ -108,7 +109,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(inspection, { status: 201 });
   } catch (error) {
-    console.error('Error al crear inspección:', error);
+    logger.error('Error al crear inspección:', error);
     return NextResponse.json(
       { error: 'Error al crear inspección' },
       { status: 500 }

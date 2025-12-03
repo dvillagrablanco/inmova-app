@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getPublicVapidKey } from '@/lib/push-notifications';
+import logger, { logError } from '@/lib/logger';
 
 export async function GET() {
   try {
@@ -7,7 +8,7 @@ export async function GET() {
     
     return NextResponse.json({ publicKey });
   } catch (error: any) {
-    console.error('Error getting public key:', error);
+    logger.error('Error getting public key:', error);
     return NextResponse.json(
       { error: 'Error al obtener la clave pública', details: error.message },
       { status: 500 }

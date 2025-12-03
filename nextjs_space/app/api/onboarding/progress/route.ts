@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import logger, { logError } from '@/lib/logger';
 import {
   getOrCreateOnboardingProgress,
   completeOnboardingStep,
@@ -33,7 +34,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(progress);
   } catch (error) {
-    console.error('Error getting onboarding progress:', error);
+    logger.error('Error getting onboarding progress:', error);
     return NextResponse.json(
       { error: 'Error al obtener progreso de onboarding' },
       { status: 500 }
@@ -81,7 +82,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Error managing onboarding:', error);
+    logger.error('Error managing onboarding:', error);
     return NextResponse.json(
       { error: 'Error al gestionar onboarding' },
       { status: 500 }

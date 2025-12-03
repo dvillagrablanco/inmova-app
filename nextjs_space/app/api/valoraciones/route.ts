@@ -7,6 +7,7 @@ import {
   guardarValoracion
 } from '@/lib/valoracion-service';
 import { ValoracionMetodo, ValoracionFinalidad } from '@prisma/client';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,7 +52,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(valoraciones);
   } catch (error: any) {
-    console.error('Error al obtener valoraciones:', error);
+    logger.error('Error al obtener valoraciones:', error);
     return NextResponse.json(
       { error: 'Error al obtener valoraciones' },
       { status: 500 }
@@ -168,7 +169,7 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
     
   } catch (error: any) {
-    console.error('Error al crear valoración:', error);
+    logger.error('Error al crear valoración:', error);
     return NextResponse.json(
       { error: error.message || 'Error al crear valoración' },
       { status: 500 }

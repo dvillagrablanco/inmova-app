@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export async function PUT(
   request: NextRequest,
@@ -56,7 +57,7 @@ export async function PUT(
       message: 'Plantilla actualizada exitosamente' 
     });
   } catch (error: any) {
-    console.error('Error updating SMS template:', error);
+    logger.error('Error updating SMS template:', error);
     return NextResponse.json(
       { error: 'Error al actualizar plantilla', details: error.message },
       { status: 500 }
@@ -104,7 +105,7 @@ export async function DELETE(
       message: 'Plantilla eliminada exitosamente' 
     });
   } catch (error: any) {
-    console.error('Error deleting SMS template:', error);
+    logger.error('Error deleting SMS template:', error);
     return NextResponse.json(
       { error: 'Error al eliminar plantilla', details: error.message },
       { status: 500 }

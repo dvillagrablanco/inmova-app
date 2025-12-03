@@ -9,6 +9,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { generatePaymentReceiptPDF } from '@/lib/pdf-generator';
 import { downloadFile } from '@/lib/s3';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -73,7 +74,7 @@ export async function GET(
       try {
         pdfBuffer = await downloadFile(payment.reciboPdfPath);
       } catch (error) {
-        console.log('PDF no encontrado en S3, generando nuevo...');
+        logger.info('PDF no encontrado en S3, generando nuevo...');
         // Si falla, generar nuevo PDF
         pdfBuffer = await generatePaymentReceiptPDF({
           id: payment.id,
@@ -146,7 +147,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('Error generando recibo:', error);
+    logger.error('Error generando recibo:', error);
     return NextResponse.json(
       { error: 'Error al generar recibo' },
       { status: 500 }

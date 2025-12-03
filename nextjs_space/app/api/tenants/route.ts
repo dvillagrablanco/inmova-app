@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth, requirePermission, forbiddenResponse, badRequestResponse } from '@/lib/permissions';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +26,7 @@ export async function GET() {
 
     return NextResponse.json(tenants);
   } catch (error: any) {
-    console.error('Error fetching tenants:', error);
+    logger.error('Error fetching tenants:', error);
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
@@ -60,7 +61,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(tenant, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating tenant:', error);
+    logger.error('Error creating tenant:', error);
     if (error.message?.includes('permiso')) {
       return forbiddenResponse(error.message);
     }

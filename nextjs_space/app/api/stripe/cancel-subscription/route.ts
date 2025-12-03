@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { stripe } from '@/lib/stripe-config';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -68,7 +69,7 @@ export async function POST(request: NextRequest) {
         : 'Suscripción se cancelará al final del período actual',
     });
   } catch (error: any) {
-    console.error('Error canceling subscription:', error);
+    logger.error('Error canceling subscription:', error);
     return NextResponse.json(
       { error: error.message || 'Error al cancelar suscripción' },
       { status: 500 }

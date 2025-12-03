@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 import {
   LineChart,
   Line,
@@ -78,7 +79,7 @@ export default function PortalPropietarioPage() {
       if (paymentsRes.ok) setPayments(await paymentsRes.json());
       if (expensesRes.ok) setExpenses(await expensesRes.json());
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
     } finally {
       setLoading(false);
     }

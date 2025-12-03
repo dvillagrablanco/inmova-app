@@ -7,6 +7,7 @@ import {
   validateCoupon,
 } from '@/lib/coupon-service';
 import { CouponType, CouponStatus } from '@prisma/client';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(coupons);
   } catch (error) {
-    console.error('Error al obtener cupones:', error);
+    logger.error('Error al obtener cupones:', error);
     return NextResponse.json(
       { error: 'Error al obtener cupones' },
       { status: 500 }
@@ -116,7 +117,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(coupon, { status: 201 });
   } catch (error: any) {
-    console.error('Error al crear cupón:', error);
+    logger.error('Error al crear cupón:', error);
     return NextResponse.json(
       { error: error.message || 'Error al crear cupón' },
       { status: 500 }

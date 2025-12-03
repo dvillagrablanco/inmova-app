@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { searchArticles } from '@/lib/knowledge-base-data';
+import logger, { logError } from '@/lib/logger';
 
 /**
  * API para categorizar automáticamente tickets de soporte usando IA
@@ -81,7 +82,7 @@ Respond with raw JSON only. Do not include code blocks, markdown, or any other f
       relatedArticles,
     });
   } catch (error) {
-    console.error('Error categorizing ticket:', error);
+    logger.error('Error categorizing ticket:', error);
     return NextResponse.json(
       {
         category: 'general',

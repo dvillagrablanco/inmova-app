@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth, requirePermission } from '@/lib/permissions';
 import { sendScheduledReport } from '@/lib/report-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,7 +33,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(reports);
   } catch (error: any) {
-    console.error('Error al obtener reportes programados:', error);
+    logger.error('Error al obtener reportes programados:', error);
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
@@ -107,7 +108,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(report, { status: 201 });
   } catch (error: any) {
-    console.error('Error al crear reporte programado:', error);
+    logger.error('Error al crear reporte programado:', error);
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }

@@ -12,6 +12,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import { Home, ArrowLeft, Star, ThumbsUp, ThumbsDown, CheckCircle, XCircle, Clock } from 'lucide-react';
+import logger, { logError } from '@/lib/logger';
 
 interface Review {
   id: string;
@@ -54,7 +55,7 @@ export default function ReviewsPage() {
         setReviews(Array.isArray(data) ? data : []);
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cargar calificaciones');
     } finally {
       setLoading(false);

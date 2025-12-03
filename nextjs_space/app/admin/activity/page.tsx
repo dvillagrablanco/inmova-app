@@ -22,6 +22,7 @@ import {
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
+import logger, { logError } from '@/lib/logger';
 
 interface ActivityItem {
   id: string;
@@ -72,7 +73,7 @@ export default function ActivityTimelinePage() {
       const data = await response.json();
       setTimeline(data);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cargar el timeline de actividad');
     } finally {
       setLoading(false);

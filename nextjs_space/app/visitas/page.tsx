@@ -44,6 +44,7 @@ import { toast } from 'sonner';
 import { format, parseISO, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { usePermissions } from '@/lib/hooks/usePermissions';
+import logger, { logError } from '@/lib/logger';
 
 interface Visit {
   id: string;
@@ -120,7 +121,7 @@ export default function VisitasPage() {
       const data = await res.json();
       setVisits(data);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cargar las visitas');
     } finally {
       setIsLoading(false);
@@ -136,7 +137,7 @@ export default function VisitasPage() {
       const availableCandidates = data.filter((c: any) => c.estado !== 'rechazado');
       setCandidates(availableCandidates);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
     }
   };
 
@@ -165,7 +166,7 @@ export default function VisitasPage() {
       setFormData({ candidateId: '', fechaVisita: '', hora: '10:00', notas: '' });
       fetchVisits();
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al programar la visita');
     }
   };
@@ -183,7 +184,7 @@ export default function VisitasPage() {
       toast.success(confirmada ? 'Visita confirmada' : 'Confirmación cancelada');
       fetchVisits();
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al actualizar la visita');
     }
   };
@@ -201,7 +202,7 @@ export default function VisitasPage() {
       toast.success('Visita marcada como realizada');
       fetchVisits();
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al actualizar la visita');
     }
   };

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,7 +41,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
     return NextResponse.json(tenant);
   } catch (error) {
-    console.error('Error fetching tenant:', error);
+    logger.error('Error fetching tenant:', error);
     return NextResponse.json({ error: 'Error al obtener inquilino' }, { status: 500 });
   }
 }
@@ -71,7 +72,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     return NextResponse.json(tenant);
   } catch (error) {
-    console.error('Error updating tenant:', error);
+    logger.error('Error updating tenant:', error);
     return NextResponse.json({ error: 'Error al actualizar inquilino' }, { status: 500 });
   }
 }
@@ -89,7 +90,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
     return NextResponse.json({ message: 'Inquilino eliminado' });
   } catch (error) {
-    console.error('Error deleting tenant:', error);
+    logger.error('Error deleting tenant:', error);
     return NextResponse.json({ error: 'Error al eliminar inquilino' }, { status: 500 });
   }
 }

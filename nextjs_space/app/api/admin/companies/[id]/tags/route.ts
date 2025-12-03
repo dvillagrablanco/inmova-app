@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,7 +46,7 @@ export async function PATCH(
       tags: company.tags,
     });
   } catch (error) {
-    console.error('Error updating company tags:', error);
+    logger.error('Error updating company tags:', error);
     return NextResponse.json(
       { error: 'Error al actualizar tags' },
       { status: 500 }

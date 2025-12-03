@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { calculateLeadScoring, calculateProbabilidadCierre, determinarTemperatura } from '@/lib/crm-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -129,7 +130,7 @@ export async function POST(req: NextRequest) {
       message: 'Lead capturado correctamente',
     }, { status: 201 });
   } catch (error) {
-    console.error('Error capturing lead:', error);
+    logger.error('Error capturing lead:', error);
     return NextResponse.json(
       { error: 'Error al capturar lead', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

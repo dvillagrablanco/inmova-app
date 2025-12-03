@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import logger, { logError } from '@/lib/logger';
 
 /**
  * API para detectar la intención del usuario usando IA
@@ -77,7 +78,7 @@ Respond with raw JSON only. Do not include code blocks, markdown, or any other f
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Error detecting intent:', error);
+    logger.error('Error detecting intent:', error);
     return NextResponse.json(
       { error: 'Failed to detect intent' },
       { status: 500 }

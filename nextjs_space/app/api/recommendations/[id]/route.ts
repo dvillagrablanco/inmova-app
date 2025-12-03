@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,7 +28,7 @@ export async function PATCH(
 
     return NextResponse.json({ recommendation });
   } catch (error: any) {
-    console.error('Error updating recommendation:', error);
+    logger.error('Error updating recommendation:', error);
     return NextResponse.json(
       { error: error.message || 'Error al actualizar recomendación' },
       { status: 500 }

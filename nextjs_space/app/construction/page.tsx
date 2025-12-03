@@ -23,6 +23,7 @@ import {
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 interface ConstructionProject {
   id: string;
@@ -65,7 +66,7 @@ export default function ConstructionPage() {
         toast.error('Error al cargar proyectos de construcción');
       }
     } catch (error) {
-      console.error('Error loading construction projects:', error);
+      logger.error('Error loading construction projects:', error);
       toast.error('Error al cargar proyectos');
     } finally {
       setLoading(false);

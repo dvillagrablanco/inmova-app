@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
+import logger, { logError } from '@/lib/logger';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -93,7 +94,7 @@ export default function KnowledgeBasePage() {
         setFilteredArticles(results);
       }
     } catch (error) {
-      console.error('Error searching articles:', error);
+      logger.error('Error searching articles:', error);
       toast.error('Error al buscar artículos');
     } finally {
       setLoading(false);
@@ -135,7 +136,7 @@ export default function KnowledgeBasePage() {
         setSelectedArticle(fullArticle);
       }
     } catch (error) {
-      console.error('Error fetching article:', error);
+      logger.error('Error fetching article:', error);
       toast.error('Error al cargar artículo');
     }
   };

@@ -21,6 +21,7 @@ import { usePermissions } from '@/lib/hooks/usePermissions';
 import { LoadingState } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
 import { FilterChips } from '@/components/ui/filter-chips';
+import logger, { logError } from '@/lib/logger';
 
 interface WorkOrder {
   id: string;
@@ -93,7 +94,7 @@ export default function OrdenesTrabajoPage() {
       const data = await res.json();
       setOrdenes(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cargar órdenes de trabajo');
       setOrdenes([]);
     } finally {
@@ -119,7 +120,7 @@ export default function OrdenesTrabajoPage() {
         }
       }
     } catch (error) {
-      console.error('Error loading aux data:', error);
+      logger.error('Error loading aux data:', error);
     }
   };
 
@@ -197,7 +198,7 @@ export default function OrdenesTrabajoPage() {
       setOpenDialog(false);
       fetchData();
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al guardar la orden');
     }
   };
@@ -212,7 +213,7 @@ export default function OrdenesTrabajoPage() {
       toast.success('Orden eliminada correctamente');
       fetchData();
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al eliminar la orden');
     }
   };

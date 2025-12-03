@@ -12,6 +12,7 @@ import { CreditCard, Calendar, DollarSign, CheckCircle, Clock, AlertCircle } fro
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import StripePaymentForm from './components/StripePaymentForm';
+import logger, { logError } from '@/lib/logger';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
@@ -63,7 +64,7 @@ export default function TenantPaymentsPage() {
       const data = await response.json();
       setPayments(data.payments || []);
     } catch (error) {
-      console.error('Error fetching payments:', error);
+      logger.error('Error fetching payments:', error);
       toast.error('Error al cargar los pagos');
     } finally {
       setLoading(false);
@@ -88,7 +89,7 @@ export default function TenantPaymentsPage() {
       setClientSecret(data.clientSecret);
       setSelectedPayment(payment);
     } catch (error: any) {
-      console.error('Error creating payment intent:', error);
+      logger.error('Error creating payment intent:', error);
       toast.error(error.message || 'Error al procesar el pago');
     } finally {
       setProcessingPayment(false);

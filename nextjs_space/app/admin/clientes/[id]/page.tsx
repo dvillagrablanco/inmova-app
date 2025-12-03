@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, Building2, Users, TrendingUp, Save, AlertCircle, CheckCircle2, Palette, Settings } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 interface CompanyDetail {
   id: string;
@@ -143,7 +144,7 @@ export default function ClienteDetailPage() {
         setPlans(data);
       }
     } catch (error) {
-      console.error('Error loading data:', error);
+      logger.error('Error loading data:', error);
       toast.error('Error al cargar datos');
     } finally {
       setLoading(false);
@@ -168,7 +169,7 @@ export default function ClienteDetailPage() {
         toast.error(error.error || 'Error al guardar cambios');
       }
     } catch (error) {
-      console.error('Error saving:', error);
+      logger.error('Error saving:', error);
       toast.error('Error al guardar cambios');
     } finally {
       setSaving(false);

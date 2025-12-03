@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,7 +61,7 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    console.error('Error en login de inquilino:', error);
+    logger.error('Error en login de inquilino:', error);
     return NextResponse.json(
       { error: 'Error al iniciar sesión' },
       { status: 500 }

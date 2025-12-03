@@ -22,6 +22,7 @@ import {
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
+import logger, { logError } from '@/lib/logger';
 
 interface CompanyComparison {
   id: string;
@@ -99,7 +100,7 @@ function CompareCompaniesPageContent() {
       const data = await response.json();
       setCompanies(data.companies);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al comparar empresas');
       router.push('/admin/clientes');
     } finally {

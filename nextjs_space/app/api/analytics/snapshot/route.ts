@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { generateAnalyticsSnapshot } from '@/lib/analytics-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,7 +18,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ snapshot }, { status: 201 });
   } catch (error: any) {
-    console.error('Error generating snapshot:', error);
+    logger.error('Error generating snapshot:', error);
     return NextResponse.json(
       { error: error.message || 'Error al generar snapshot' },
       { status: 500 }

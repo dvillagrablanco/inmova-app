@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +26,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ history });
   } catch (error: any) {
-    console.error('Error al obtener historial:', error);
+    logger.error('Error al obtener historial:', error);
     return NextResponse.json(
       { error: 'Error al obtener historial' },
       { status: 500 }
@@ -51,7 +52,7 @@ export async function DELETE(req: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('Error al limpiar historial:', error);
+    logger.error('Error al limpiar historial:', error);
     return NextResponse.json(
       { error: 'Error al limpiar historial' },
       { status: 500 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -128,7 +129,7 @@ export async function POST(
       message: 'Voto registrado correctamente',
     });
   } catch (error) {
-    console.error('Error al registrar voto:', error);
+    logger.error('Error al registrar voto:', error);
     return NextResponse.json(
       { error: 'Error al registrar voto' },
       { status: 500 }

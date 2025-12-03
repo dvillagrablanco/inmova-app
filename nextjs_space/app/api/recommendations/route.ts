@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { generateRecommendations } from '@/lib/prediction-service';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ recommendations });
   } catch (error: any) {
-    console.error('Error fetching recommendations:', error);
+    logger.error('Error fetching recommendations:', error);
     return NextResponse.json(
       { error: error.message || 'Error al cargar recomendaciones' },
       { status: 500 }
@@ -49,7 +50,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ recommendations }, { status: 201 });
   } catch (error: any) {
-    console.error('Error generating recommendations:', error);
+    logger.error('Error generating recommendations:', error);
     return NextResponse.json(
       { error: error.message || 'Error al generar recomendaciones' },
       { status: 500 }

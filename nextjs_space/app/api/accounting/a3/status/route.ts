@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { isA3Configured } from '@/lib/a3-integration-service';
+import logger, { logError } from '@/lib/logger';
 
 export async function GET(req: NextRequest) {
   try {
@@ -28,7 +29,7 @@ export async function GET(req: NextRequest) {
       status: isConfigured ? 'active' : 'demo'
     });
   } catch (error) {
-    console.error('Error checking A3 status:', error);
+    logger.error('Error checking A3 status:', error);
     return NextResponse.json(
       { error: 'Error al verificar estado de A3' },
       { status: 500 }

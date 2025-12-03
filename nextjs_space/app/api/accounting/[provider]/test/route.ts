@@ -7,6 +7,7 @@ import { getA3Service } from '@/lib/a3-integration-service';
 import { getAlegraService } from '@/lib/alegra-integration-service';
 import { getZucchettiService } from '@/lib/zucchetti-integration-service';
 import { getContaSimpleService } from '@/lib/contasimple-integration-service';
+import logger, { logError } from '@/lib/logger';
 
 export async function POST(
   request: NextRequest,
@@ -54,7 +55,7 @@ export async function POST(
 
     return NextResponse.json(result);
   } catch (error: any) {
-    console.error('Error testing integration:', error);
+    logger.error('Error testing integration:', error);
     return NextResponse.json(
       { success: false, message: error.message || 'Error al probar la conexión' },
       { status: 500 }

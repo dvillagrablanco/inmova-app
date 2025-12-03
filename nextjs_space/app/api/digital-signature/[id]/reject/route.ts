@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rechazarDocumento } from '@/lib/digital-signature-service';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,7 +39,7 @@ export async function POST(
     const result = await rechazarDocumento(documentoId, firmanteId, motivo);
     return NextResponse.json(result);
   } catch (error: any) {
-    console.error('Error rechazando documento:', error);
+    logger.error('Error rechazando documento:', error);
     return NextResponse.json(
       { error: error.message || 'Error rechazando documento' },
       { status: 500 }

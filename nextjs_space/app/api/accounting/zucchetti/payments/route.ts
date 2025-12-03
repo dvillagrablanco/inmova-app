@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getZucchettiService } from '@/lib/zucchetti-integration-service';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -66,7 +67,7 @@ export async function POST(request: NextRequest) {
       data: result,
     });
   } catch (error) {
-    console.error('Error al registrar pago en Zucchetti:', error);
+    logger.error('Error al registrar pago en Zucchetti:', error);
     return NextResponse.json(
       { error: 'Error al registrar pago' },
       { status: 500 }

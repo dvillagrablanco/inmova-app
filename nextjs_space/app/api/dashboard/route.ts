@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/permissions';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -208,7 +209,7 @@ export async function GET() {
       unidadesDisponibles,
     });
   } catch (error: any) {
-    console.error('Error fetching dashboard data:', error);
+    logger.error('Error fetching dashboard data:', error);
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }

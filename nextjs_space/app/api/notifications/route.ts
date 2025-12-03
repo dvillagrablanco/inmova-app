@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { generateAutomaticNotifications } from '@/lib/notification-generator';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -63,7 +64,7 @@ export async function GET(req: NextRequest) {
       unreadCount,
     });
   } catch (error) {
-    console.error('Error fetching notifications:', error);
+    logger.error('Error fetching notifications:', error);
     return NextResponse.json({ error: 'Error al obtener notificaciones' }, { status: 500 });
   }
 }
@@ -100,7 +101,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(notification, { status: 201 });
   } catch (error) {
-    console.error('Error creating notification:', error);
+    logger.error('Error creating notification:', error);
     return NextResponse.json({ error: 'Error al crear notificación' }, { status: 500 });
   }
 }

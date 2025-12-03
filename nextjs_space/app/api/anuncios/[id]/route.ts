@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,7 +39,7 @@ export async function GET(
 
     return NextResponse.json(anuncio);
   } catch (error) {
-    console.error('Error al obtener anuncio:', error);
+    logger.error('Error al obtener anuncio:', error);
     return NextResponse.json(
       { error: 'Error al obtener anuncio' },
       { status: 500 }
@@ -102,7 +103,7 @@ export async function PATCH(
 
     return NextResponse.json(anuncio);
   } catch (error) {
-    console.error('Error al actualizar anuncio:', error);
+    logger.error('Error al actualizar anuncio:', error);
     return NextResponse.json(
       { error: 'Error al actualizar anuncio' },
       { status: 500 }
@@ -155,7 +156,7 @@ export async function DELETE(
 
     return NextResponse.json(anuncio);
   } catch (error) {
-    console.error('Error al eliminar anuncio:', error);
+    logger.error('Error al eliminar anuncio:', error);
     return NextResponse.json(
       { error: 'Error al eliminar anuncio' },
       { status: 500 }

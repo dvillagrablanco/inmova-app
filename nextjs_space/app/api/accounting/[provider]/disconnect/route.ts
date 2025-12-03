@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import logger, { logError } from '@/lib/logger';
 
 export async function POST(
   request: NextRequest,
@@ -70,7 +71,7 @@ export async function POST(
       message: 'Integración desconectada exitosamente'
     });
   } catch (error: any) {
-    console.error('Error disconnecting integration:', error);
+    logger.error('Error disconnecting integration:', error);
     return NextResponse.json(
       { error: 'Error al desconectar la integración', details: error.message },
       { status: 500 }

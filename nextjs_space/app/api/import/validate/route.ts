@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { parseCSV, validateImportData, ImportableEntity, SYSTEM_MAPPINGS } from '@/lib/import-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
       totalRecords: data.length
     });
   } catch (error: any) {
-    console.error('Error validating import:', error);
+    logger.error('Error validating import:', error);
     return NextResponse.json(
       { error: error.message || 'Error al validar el archivo' },
       { status: 500 }

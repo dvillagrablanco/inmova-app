@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -88,7 +89,7 @@ export async function PUT(request: Request) {
       user: updatedUser,
     });
   } catch (error) {
-    console.error('Error updating profile:', error);
+    logger.error('Error updating profile:', error);
     return NextResponse.json(
       { error: 'Error al actualizar el perfil' },
       { status: 500 }

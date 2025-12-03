@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ budgets });
   } catch (error: any) {
-    console.error('Error fetching budgets:', error);
+    logger.error('Error fetching budgets:', error);
     return NextResponse.json(
       { error: error.message || 'Error al cargar presupuestos' },
       { status: 500 }
@@ -58,7 +59,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ budget }, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating budget:', error);
+    logger.error('Error creating budget:', error);
     return NextResponse.json(
       { error: error.message || 'Error al crear presupuesto' },
       { status: 500 }

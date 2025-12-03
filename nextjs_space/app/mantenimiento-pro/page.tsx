@@ -35,6 +35,7 @@ import { toast } from 'sonner';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 interface InventoryItem {
   id: string;
@@ -149,7 +150,7 @@ export default function MantenimientoProPage() {
         setBudgets(data.budgets || []);
       }
     } catch (error) {
-      console.error('Error fetching data:', error);
+      logger.error('Error fetching data:', error);
       toast.error('Error al cargar datos');
     } finally {
       setIsLoading(false);
@@ -170,7 +171,7 @@ export default function MantenimientoProPage() {
         toast.error('Error al generar predicciones');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al generar predicciones');
     } finally {
       setIsGenerating(false);
@@ -193,7 +194,7 @@ export default function MantenimientoProPage() {
         toast.error('Error al calcular métricas');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al calcular métricas');
     } finally {
       setIsGenerating(false);
@@ -226,7 +227,7 @@ export default function MantenimientoProPage() {
         toast.error('Error al agregar item');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al agregar item');
     }
   };

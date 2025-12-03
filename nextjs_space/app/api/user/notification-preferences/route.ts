@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(preferences.notificationPreferences || {});
   } catch (error: any) {
-    console.error('Error fetching notification preferences:', error);
+    logger.error('Error fetching notification preferences:', error);
     return NextResponse.json(
       { error: 'Error al obtener preferencias', details: error.message },
       { status: 500 }
@@ -75,7 +76,7 @@ export async function PUT(request: NextRequest) {
       message: 'Preferencias actualizadas exitosamente' 
     });
   } catch (error: any) {
-    console.error('Error updating notification preferences:', error);
+    logger.error('Error updating notification preferences:', error);
     return NextResponse.json(
       { error: 'Error al actualizar preferencias', details: error.message },
       { status: 500 }

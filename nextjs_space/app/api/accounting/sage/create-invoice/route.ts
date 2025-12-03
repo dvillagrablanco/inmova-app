@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getSageService } from '@/lib/sage-integration-service';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -65,7 +66,7 @@ export async function POST(req: NextRequest) {
       results,
     });
   } catch (error) {
-    console.error('Error creating invoices in Sage:', error);
+    logger.error('Error creating invoices in Sage:', error);
     return NextResponse.json(
       { error: 'Error al crear facturas en Sage' },
       { status: 500 }

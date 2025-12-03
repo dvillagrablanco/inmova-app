@@ -22,6 +22,7 @@
  */
 
 import axios, { AxiosInstance } from 'axios';
+import logger, { logError } from '@/lib/logger';
 
 /**
  * TIPOS DE DATOS CONTASIMPLE
@@ -123,7 +124,7 @@ export class ContaSimpleIntegrationService {
       },
     });
 
-    console.log('✅ ContaSimple Integration Service: Inicializado correctamente');
+    logger.info('✅ ContaSimple Integration Service: Inicializado correctamente');
   }
 
   /**
@@ -160,10 +161,10 @@ export class ContaSimpleIntegrationService {
       // Establecer la fecha de expiración del token
       this.tokenExpiry = new Date(Date.now() + (this.tokens.expires_in * 1000));
 
-      console.log('✅ ContaSimple: Autenticación exitosa');
+      logger.info('✅ ContaSimple: Autenticación exitosa');
       return this.tokens;
     } catch (error: any) {
-      console.error('❌ Error al autenticar con ContaSimple:', error.response?.data || error.message);
+      logger.error('❌ Error al autenticar con ContaSimple:', error.response?.data || error.message);
       throw new Error('Error al autenticar con ContaSimple');
     }
   }
@@ -202,10 +203,10 @@ export class ContaSimpleIntegrationService {
           'Content-Type': 'application/json',
         },
       });
-      console.log('✅ ContaSimple: Cliente creado:', response.data.id);
+      logger.info('✅ ContaSimple: Cliente creado:', response.data.id);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Error al crear cliente en ContaSimple:', error.response?.data || error.message);
+      logger.error('❌ Error al crear cliente en ContaSimple:', error.response?.data || error.message);
       throw new Error('Error al crear cliente en ContaSimple');
     }
   }
@@ -220,7 +221,7 @@ export class ContaSimpleIntegrationService {
       });
       return response.data;
     } catch (error: any) {
-      console.error('❌ Error al obtener cliente de ContaSimple:', error.response?.data || error.message);
+      logger.error('❌ Error al obtener cliente de ContaSimple:', error.response?.data || error.message);
       throw new Error('Error al obtener cliente de ContaSimple');
     }
   }
@@ -234,10 +235,10 @@ export class ContaSimpleIntegrationService {
           'Content-Type': 'application/json',
         },
       });
-      console.log('✅ ContaSimple: Cliente actualizado:', customerId);
+      logger.info('✅ ContaSimple: Cliente actualizado:', customerId);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Error al actualizar cliente en ContaSimple:', error.response?.data || error.message);
+      logger.error('❌ Error al actualizar cliente en ContaSimple:', error.response?.data || error.message);
       throw new Error('Error al actualizar cliente en ContaSimple');
     }
   }
@@ -255,10 +256,10 @@ export class ContaSimpleIntegrationService {
           'Content-Type': 'application/json',
         },
       });
-      console.log('✅ ContaSimple: Factura creada:', response.data.number);
+      logger.info('✅ ContaSimple: Factura creada:', response.data.number);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Error al crear factura en ContaSimple:', error.response?.data || error.message);
+      logger.error('❌ Error al crear factura en ContaSimple:', error.response?.data || error.message);
       throw new Error('Error al crear factura en ContaSimple');
     }
   }
@@ -273,7 +274,7 @@ export class ContaSimpleIntegrationService {
       });
       return response.data;
     } catch (error: any) {
-      console.error('❌ Error al obtener factura de ContaSimple:', error.response?.data || error.message);
+      logger.error('❌ Error al obtener factura de ContaSimple:', error.response?.data || error.message);
       throw new Error('Error al obtener factura de ContaSimple');
     }
   }
@@ -291,10 +292,10 @@ export class ContaSimpleIntegrationService {
           },
         }
       );
-      console.log('✅ ContaSimple: Factura enviada a', recipientEmail);
+      logger.info('✅ ContaSimple: Factura enviada a', recipientEmail);
       return response.status === 200;
     } catch (error: any) {
-      console.error('❌ Error al enviar factura de ContaSimple:', error.response?.data || error.message);
+      logger.error('❌ Error al enviar factura de ContaSimple:', error.response?.data || error.message);
       throw new Error('Error al enviar factura de ContaSimple');
     }
   }
@@ -311,10 +312,10 @@ export class ContaSimpleIntegrationService {
           },
         }
       );
-      console.log('✅ ContaSimple: Factura cancelada:', invoiceId);
+      logger.info('✅ ContaSimple: Factura cancelada:', invoiceId);
       return response.status === 200;
     } catch (error: any) {
-      console.error('❌ Error al cancelar factura de ContaSimple:', error.response?.data || error.message);
+      logger.error('❌ Error al cancelar factura de ContaSimple:', error.response?.data || error.message);
       throw new Error('Error al cancelar factura de ContaSimple');
     }
   }
@@ -332,10 +333,10 @@ export class ContaSimpleIntegrationService {
           'Content-Type': 'application/json',
         },
       });
-      console.log('✅ ContaSimple: Pago registrado:', response.data.amount);
+      logger.info('✅ ContaSimple: Pago registrado:', response.data.amount);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Error al registrar pago en ContaSimple:', error.response?.data || error.message);
+      logger.error('❌ Error al registrar pago en ContaSimple:', error.response?.data || error.message);
       throw new Error('Error al registrar pago en ContaSimple');
     }
   }
@@ -353,10 +354,10 @@ export class ContaSimpleIntegrationService {
           'Content-Type': 'application/json',
         },
       });
-      console.log('✅ ContaSimple: Gasto registrado:', response.data.amount);
+      logger.info('✅ ContaSimple: Gasto registrado:', response.data.amount);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Error al crear gasto en ContaSimple:', error.response?.data || error.message);
+      logger.error('❌ Error al crear gasto en ContaSimple:', error.response?.data || error.message);
       throw new Error('Error al crear gasto en ContaSimple');
     }
   }
@@ -376,7 +377,7 @@ export class ContaSimpleIntegrationService {
       });
       return response.data;
     } catch (error: any) {
-      console.error('❌ Error al obtener gastos de ContaSimple:', error.response?.data || error.message);
+      logger.error('❌ Error al obtener gastos de ContaSimple:', error.response?.data || error.message);
       throw new Error('Error al obtener gastos de ContaSimple');
     }
   }

@@ -8,6 +8,7 @@ import {
   simularEstadisticas
 } from '@/lib/publicacion-service';
 import { PublicacionEstado } from '@prisma/client';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(publicaciones);
   } catch (error: any) {
-    console.error('Error al obtener publicaciones:', error);
+    logger.error('Error al obtener publicaciones:', error);
     return NextResponse.json(
       { error: 'Error al obtener publicaciones' },
       { status: 500 }
@@ -104,7 +105,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error: any) {
-    console.error('Error al crear publicación:', error);
+    logger.error('Error al crear publicación:', error);
     return NextResponse.json(
       { error: error.message || 'Error al crear publicación' },
       { status: 500 }
@@ -158,7 +159,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json(publicacion);
   } catch (error: any) {
-    console.error('Error al actualizar publicación:', error);
+    logger.error('Error al actualizar publicación:', error);
     return NextResponse.json(
       { error: 'Error al actualizar publicación' },
       { status: 500 }

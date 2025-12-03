@@ -20,6 +20,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
+import logger, { logError } from '@/lib/logger';
 
 interface Building {
   id: string;
@@ -50,7 +51,7 @@ export default function NuevaUnidadPage() {
           setBuildings(data);
         }
       } catch (error) {
-        console.error('Error fetching buildings:', error);
+        logger.error('Error fetching buildings:', error);
       }
     };
 
@@ -87,7 +88,7 @@ export default function NuevaUnidadPage() {
         toast.error(error.error || 'Error al crear la unidad');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al crear la unidad');
     } finally {
       setIsLoading(false);

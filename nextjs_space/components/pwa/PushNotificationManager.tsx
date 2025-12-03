@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Bell, BellOff, CheckCircle2, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import logger, { logError } from '@/lib/logger';
 
 export function PushNotificationManager() {
   const [permission, setPermission] = useState<NotificationPermission>('default');
@@ -30,7 +31,7 @@ export function PushNotificationManager() {
       const subscription = await registration.pushManager.getSubscription();
       setIsSubscribed(!!subscription);
     } catch (error) {
-      console.error('Error checking subscription:', error);
+      logger.error('Error checking subscription:', error);
     }
   };
 
@@ -74,7 +75,7 @@ export function PushNotificationManager() {
         toast.error('Error al activar notificaciones');
       }
     } catch (error: any) {
-      console.error('Error subscribing to push:', error);
+      logger.error('Error subscribing to push:', error);
       toast.error(error.message || 'Error al activar notificaciones');
     } finally {
       setIsLoading(false);
@@ -102,7 +103,7 @@ export function PushNotificationManager() {
         toast.success('Notificaciones desactivadas');
       }
     } catch (error: any) {
-      console.error('Error unsubscribing from push:', error);
+      logger.error('Error unsubscribing from push:', error);
       toast.error(error.message || 'Error al desactivar notificaciones');
     } finally {
       setIsLoading(false);

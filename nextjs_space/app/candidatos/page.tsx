@@ -54,6 +54,7 @@ import {
 import { LoadingState } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
 import { FilterChips } from '@/components/ui/filter-chips';
+import logger, { logError } from '@/lib/logger';
 
 interface Candidate {
   id: string;
@@ -110,7 +111,7 @@ export default function CandidatosPage() {
         setCandidates(data);
       }
     } catch (error) {
-      console.error('Error fetching candidates:', error);
+      logger.error('Error fetching candidates:', error);
     } finally {
       setLoading(false);
     }

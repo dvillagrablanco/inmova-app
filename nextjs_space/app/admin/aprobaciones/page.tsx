@@ -44,6 +44,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import logger, { logError } from '@/lib/logger';
 
 interface Approval {
   id: string;
@@ -92,7 +93,7 @@ export default function AprobacionesPage() {
       const data = await res.json();
       setApprovals(data);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cargar aprobaciones');
     } finally {
       setIsLoading(false);
@@ -113,7 +114,7 @@ export default function AprobacionesPage() {
       toast.success('Solicitud aprobada correctamente');
       fetchApprovals(selectedTab);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al aprobar solicitud');
     } finally {
       setIsProcessing(false);
@@ -142,7 +143,7 @@ export default function AprobacionesPage() {
       setSelectedApproval(null);
       fetchApprovals(selectedTab);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al rechazar solicitud');
     } finally {
       setIsProcessing(false);

@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { crearSolicitudFirma } from '@/lib/digital-signature-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,7 +61,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(documentos);
   } catch (error) {
-    console.error('Error obteniendo documentos de firma:', error);
+    logger.error('Error obteniendo documentos de firma:', error);
     return NextResponse.json(
       { error: 'Error obteniendo documentos' },
       { status: 500 }
@@ -121,7 +122,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
-    console.error('Error creando solicitud de firma:', error);
+    logger.error('Error creando solicitud de firma:', error);
     return NextResponse.json(
       { error: 'Error creando solicitud de firma' },
       { status: 500 }

@@ -6,6 +6,7 @@
 import { prisma } from './db';
 import { CommonSpaceType, ReservationStatus } from '@prisma/client';
 import { addHours, format, isAfter, isBefore, parseISO } from 'date-fns';
+import logger, { logError } from '@/lib/logger';
 
 /**
  * Valida si un horario está disponible para reserva
@@ -159,7 +160,7 @@ export async function enviarRecordatoriosReservas(): Promise<void> {
 
   for (const reserva of reservas) {
     // Aquí se integraría con el servicio de notificaciones o email
-    console.log(`Recordatorio: ${reserva.tenant.nombreCompleto} - ${reserva.space.nombre} - ${format(reserva.fechaReserva, 'dd/MM/yyyy')} ${reserva.horaInicio}`);
+    logger.info(`Recordatorio: ${reserva.tenant.nombreCompleto} - ${reserva.space.nombre} - ${format(reserva.fechaReserva, 'dd/MM/yyyy')} ${reserva.horaInicio}`);
   }
 }
 

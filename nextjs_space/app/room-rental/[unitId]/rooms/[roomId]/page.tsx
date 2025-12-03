@@ -21,6 +21,7 @@ import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 export default function RoomDetailPage() {
   const router = useRouter();
@@ -95,7 +96,7 @@ export default function RoomDetailPage() {
 
       if (tenantsRes.ok) setTenants(await tenantsRes.json());
     } catch (error) {
-      console.error('Error loading data:', error);
+      logger.error('Error loading data:', error);
       toast.error('Error al cargar los datos');
     } finally {
       setLoading(false);
@@ -120,7 +121,7 @@ export default function RoomDetailPage() {
         toast.error(error.error || 'Error al actualizar habitación');
       }
     } catch (error) {
-      console.error('Error updating room:', error);
+      logger.error('Error updating room:', error);
       toast.error('Error al actualizar habitación');
     }
   }
@@ -152,7 +153,7 @@ export default function RoomDetailPage() {
         toast.error(error.error || 'Error al crear contrato');
       }
     } catch (error) {
-      console.error('Error creating contract:', error);
+      logger.error('Error creating contract:', error);
       toast.error('Error al crear contrato');
     }
   }
@@ -173,7 +174,7 @@ export default function RoomDetailPage() {
         toast.error(error.error || 'Error al eliminar habitación');
       }
     } catch (error) {
-      console.error('Error deleting room:', error);
+      logger.error('Error deleting room:', error);
       toast.error('Error al eliminar habitación');
     }
   }

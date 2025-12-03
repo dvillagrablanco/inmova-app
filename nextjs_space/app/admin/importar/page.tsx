@@ -22,6 +22,7 @@ import {
   AlertTriangle, CheckCircle2, Info, ArrowRight
 } from 'lucide-react';
 import { toast } from 'sonner';
+import logger, { logError } from '@/lib/logger';
 
 type ImportStep = 'select' | 'validate' | 'preview' | 'import' | 'results';
 
@@ -120,7 +121,7 @@ export default function ImportarPage() {
         setBuildings(data);
       }
     } catch (error) {
-      console.error('Error fetching buildings:', error);
+      logger.error('Error fetching buildings:', error);
     }
   };
 
@@ -182,7 +183,7 @@ export default function ImportarPage() {
         toast.error(data.error || 'Error al validar el archivo');
       }
     } catch (error) {
-      console.error('Error validating:', error);
+      logger.error('Error validating:', error);
       toast.error('Error al validar el archivo');
     } finally {
       setValidating(false);
@@ -226,7 +227,7 @@ export default function ImportarPage() {
         setCurrentStep('preview');
       }
     } catch (error) {
-      console.error('Error importing:', error);
+      logger.error('Error importing:', error);
       toast.error('Error al importar datos');
       setCurrentStep('preview');
     } finally {

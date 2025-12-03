@@ -28,6 +28,7 @@ import {
   Upload,
 } from 'lucide-react';
 import { usePermissions } from '@/lib/hooks/usePermissions';
+import logger, { logError } from '@/lib/logger';
 
 interface Unit {
   id: string;
@@ -97,7 +98,7 @@ export default function GaleriasPage() {
       setGalerias(Array.isArray(galeriasData) ? galeriasData : []);
       setUnits(Array.isArray(unitsData) ? unitsData : []);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      logger.error('Error fetching data:', error);
       toast.error('Error al cargar datos');
       setGalerias([]);
       setUnits([]);
@@ -125,7 +126,7 @@ export default function GaleriasPage() {
         embedCode: '',
       });
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al crear galería');
     }
   };

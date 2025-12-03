@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { checkRoomAvailability } from '@/lib/room-rental-service';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,7 +50,7 @@ export async function GET(
 
     return NextResponse.json(room);
   } catch (error: any) {
-    console.error('Error fetching room:', error);
+    logger.error('Error fetching room:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -108,7 +109,7 @@ export async function PATCH(
 
     return NextResponse.json(room);
   } catch (error: any) {
-    console.error('Error updating room:', error);
+    logger.error('Error updating room:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -151,7 +152,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Habitación eliminada correctamente' });
   } catch (error: any) {
-    console.error('Error deleting room:', error);
+    logger.error('Error deleting room:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

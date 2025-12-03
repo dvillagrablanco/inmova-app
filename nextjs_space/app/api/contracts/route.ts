@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,7 +40,7 @@ export async function GET() {
 
     return NextResponse.json(contractsWithExpiration);
   } catch (error) {
-    console.error('Error fetching contracts:', error);
+    logger.error('Error fetching contracts:', error);
     return NextResponse.json({ error: 'Error al obtener contratos' }, { status: 500 });
   }
 }
@@ -82,7 +83,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(contract, { status: 201 });
   } catch (error) {
-    console.error('Error creating contract:', error);
+    logger.error('Error creating contract:', error);
     return NextResponse.json({ error: 'Error al crear contrato' }, { status: 500 });
   }
 }

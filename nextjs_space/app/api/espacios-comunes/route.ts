@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { CommonSpaceType } from '@prisma/client';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,7 +48,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(espacios);
   } catch (error) {
-    console.error('Error fetching espacios comunes:', error);
+    logger.error('Error fetching espacios comunes:', error);
     return NextResponse.json(
       { error: 'Error al obtener espacios comunes' },
       { status: 500 }
@@ -122,7 +123,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(espacio, { status: 201 });
   } catch (error) {
-    console.error('Error creating espacio común:', error);
+    logger.error('Error creating espacio común:', error);
     return NextResponse.json(
       { error: 'Error al crear espacio común' },
       { status: 500 }

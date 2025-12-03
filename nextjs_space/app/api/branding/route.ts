@@ -7,6 +7,7 @@ import {
   BrandingConfigData
 } from '@/lib/branding-service';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json(config);
   } catch (error) {
-    console.error('[API Branding GET] Error:', error);
+    logger.error('[API Branding GET] Error:', error);
     return NextResponse.json(
       { error: 'Error al obtener configuración de branding' },
       { status: 500 }
@@ -89,7 +90,7 @@ export async function POST(request: NextRequest) {
       config
     });
   } catch (error) {
-    console.error('[API Branding POST] Error:', error);
+    logger.error('[API Branding POST] Error:', error);
     return NextResponse.json(
       { error: 'Error al actualizar configuración de branding' },
       { status: 500 }

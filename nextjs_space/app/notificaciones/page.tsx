@@ -31,6 +31,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import logger, { logError } from '@/lib/logger';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -87,7 +88,7 @@ export default function NotificacionesPage() {
         setNotifications(data);
       }
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      logger.error('Error fetching notifications:', error);
       toast.error('Error al cargar notificaciones');
     } finally {
       setLoading(false);
@@ -132,7 +133,7 @@ export default function NotificacionesPage() {
         toast.success('Notificación marcada como leída');
       }
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      logger.error('Error marking notification as read:', error);
       toast.error('Error al marcar como leída');
     }
   };
@@ -148,7 +149,7 @@ export default function NotificacionesPage() {
         toast.success('Todas las notificaciones marcadas como leídas');
       }
     } catch (error) {
-      console.error('Error marking all as read:', error);
+      logger.error('Error marking all as read:', error);
       toast.error('Error al marcar todas como leídas');
     }
   };
@@ -164,7 +165,7 @@ export default function NotificacionesPage() {
         toast.success('Notificación eliminada');
       }
     } catch (error) {
-      console.error('Error deleting notification:', error);
+      logger.error('Error deleting notification:', error);
       toast.error('Error al eliminar notificación');
     }
   };
@@ -192,7 +193,7 @@ export default function NotificacionesPage() {
       setSelectedNotifications(new Set());
       toast.success(`${selectedNotifications.size} notificaciones eliminadas`);
     } catch (error) {
-      console.error('Error deleting notifications:', error);
+      logger.error('Error deleting notifications:', error);
       toast.error('Error al eliminar notificaciones');
     }
   };

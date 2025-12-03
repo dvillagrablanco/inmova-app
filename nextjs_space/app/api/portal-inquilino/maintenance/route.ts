@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import jwt from 'jsonwebtoken';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,7 +61,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(maintenanceRequest);
   } catch (error) {
-    console.error('Error al crear solicitud de mantenimiento:', error);
+    logger.error('Error al crear solicitud de mantenimiento:', error);
     return NextResponse.json(
       { error: 'Error al crear solicitud' },
       { status: 500 }

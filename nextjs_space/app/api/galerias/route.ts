@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,7 +37,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(galerias);
   } catch (error) {
-    console.error('Error fetching galerias:', error);
+    logger.error('Error fetching galerias:', error);
     return NextResponse.json(
       { error: 'Error al obtener galerías' },
       { status: 500 }
@@ -76,7 +77,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(galeria, { status: 201 });
   } catch (error) {
-    console.error('Error creating galeria:', error);
+    logger.error('Error creating galeria:', error);
     return NextResponse.json(
       { error: 'Error al crear galería' },
       { status: 500 }

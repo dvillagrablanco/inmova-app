@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, BookOpen, Download } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import logger, { logError } from '@/lib/logger';
 
 // @ts-ignore - SwaggerUI types conflict with Next.js dynamic
 const SwaggerUI = dynamic(() => import('swagger-ui-react'), { ssr: false });
@@ -23,7 +24,7 @@ export default function ApiDocsPage() {
         const data = await response.json();
         setSpec(data);
       } catch (error) {
-        console.error('Error fetching API spec:', error);
+        logger.error('Error fetching API spec:', error);
       } finally {
         setLoading(false);
       }

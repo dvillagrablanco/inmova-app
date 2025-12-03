@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -211,7 +212,7 @@ export async function GET(req: NextRequest) {
       type
     });
   } catch (error: any) {
-    console.error('Error en búsqueda global:', error);
+    logger.error('Error en búsqueda global:', error);
     return NextResponse.json(
       { error: 'Error al realizar búsqueda', details: error.message },
       { status: 500 }

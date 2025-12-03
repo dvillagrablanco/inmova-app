@@ -29,6 +29,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { usePermissions } from '@/lib/hooks/usePermissions';
+import logger, { logError } from '@/lib/logger';
 
 interface Building {
   id: string;
@@ -79,7 +80,7 @@ export default function EdificioDetallePage() {
       const data = await res.json();
       setBuilding(data);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cargar el edificio');
     } finally {
       setIsLoading(false);

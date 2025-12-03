@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/permissions';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -77,7 +78,7 @@ export async function GET() {
       totalGastos: expenses.reduce((sum, e) => sum + e.monto, 0),
     });
   } catch (error: any) {
-    console.error('Error fetching analytics:', error);
+    logger.error('Error fetching analytics:', error);
     if (error.message === 'No autorizado') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }

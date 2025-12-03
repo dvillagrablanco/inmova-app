@@ -60,6 +60,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 interface InvoiceItem {
   descripcion: string;
@@ -141,7 +142,7 @@ export default function InvoiceDetailPage() {
         toast.error('Error al cargar la factura');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cargar la factura');
     } finally {
       setLoading(false);
@@ -172,7 +173,7 @@ export default function InvoiceDetailPage() {
         toast.error('Error al registrar el pago');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al registrar el pago');
     } finally {
       setIsProcessingPayment(false);

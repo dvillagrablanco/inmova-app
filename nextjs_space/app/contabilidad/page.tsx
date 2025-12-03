@@ -23,6 +23,7 @@ import {
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { Line, Bar, Pie } from 'react-chartjs-2';
+import logger, { logError } from '@/lib/logger';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -87,7 +88,7 @@ export default function ContabilidadPage() {
         setZucchettiStatus(data);
       }
     } catch (error) {
-      console.error('Error al cargar estado de Zucchetti:', error);
+      logger.error('Error al cargar estado de Zucchetti:', error);
     }
   };
 
@@ -99,7 +100,7 @@ export default function ContabilidadPage() {
         setContaSimpleStatus(data);
       }
     } catch (error) {
-      console.error('Error al cargar estado de ContaSimple:', error);
+      logger.error('Error al cargar estado de ContaSimple:', error);
     }
   };
 
@@ -111,7 +112,7 @@ export default function ContabilidadPage() {
         setSageStatus(data);
       }
     } catch (error) {
-      console.error('Error al cargar estado de Sage:', error);
+      logger.error('Error al cargar estado de Sage:', error);
     }
   };
 
@@ -123,7 +124,7 @@ export default function ContabilidadPage() {
         setHoldedStatus(data);
       }
     } catch (error) {
-      console.error('Error al cargar estado de Holded:', error);
+      logger.error('Error al cargar estado de Holded:', error);
     }
   };
 
@@ -135,7 +136,7 @@ export default function ContabilidadPage() {
         setA3Status(data);
       }
     } catch (error) {
-      console.error('Error al cargar estado de A3:', error);
+      logger.error('Error al cargar estado de A3:', error);
     }
   };
 
@@ -147,7 +148,7 @@ export default function ContabilidadPage() {
         setAlegraStatus(data);
       }
     } catch (error) {
-      console.error('Error al cargar estado de Alegra:', error);
+      logger.error('Error al cargar estado de Alegra:', error);
     }
   };
 
@@ -191,7 +192,7 @@ export default function ContabilidadPage() {
       }
 
     } catch (error) {
-      console.error('Error al cargar datos financieros:', error);
+      logger.error('Error al cargar datos financieros:', error);
       toast.error('Error al cargar datos financieros');
     } finally {
       setLoading(false);
@@ -227,7 +228,7 @@ export default function ContabilidadPage() {
         toast.error('Error al sincronizar con Zucchetti');
       }
     } catch (error) {
-      console.error('Error al sincronizar con Zucchetti:', error);
+      logger.error('Error al sincronizar con Zucchetti:', error);
       toast.error('Error al sincronizar con Zucchetti');
     } finally {
       setLoading(false);
@@ -253,7 +254,7 @@ export default function ContabilidadPage() {
       );
       
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al sincronizar clientes');
     } finally {
       setLoading(false);
@@ -279,7 +280,7 @@ export default function ContabilidadPage() {
       );
       
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al crear facturas');
     } finally {
       setLoading(false);
@@ -305,7 +306,7 @@ export default function ContabilidadPage() {
       );
       
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al registrar pagos');
     } finally {
       setLoading(false);
@@ -329,7 +330,7 @@ export default function ContabilidadPage() {
       const data = await res.json();
       toast.success(data.message || 'Clientes sincronizados exitosamente');
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error(`Error al sincronizar clientes con ${system.toUpperCase()}`);
     } finally {
       setLoading(false);
@@ -352,7 +353,7 @@ export default function ContabilidadPage() {
       const data = await res.json();
       toast.success(data.message || 'Facturas creadas exitosamente');
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error(`Error al crear facturas en ${system.toUpperCase()}`);
     } finally {
       setLoading(false);
@@ -375,7 +376,7 @@ export default function ContabilidadPage() {
       const data = await res.json();
       toast.success(data.message || 'Pagos registrados exitosamente');
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error(`Error al registrar pagos en ${system.toUpperCase()}`);
     } finally {
       setLoading(false);

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -110,7 +111,7 @@ export async function GET(req: NextRequest) {
       ordenesRecientes,
     });
   } catch (error) {
-    console.error('Error al obtener dashboard de proveedor:', error);
+    logger.error('Error al obtener dashboard de proveedor:', error);
     return NextResponse.json(
       { error: 'Error al obtener dashboard' },
       { status: 500 }

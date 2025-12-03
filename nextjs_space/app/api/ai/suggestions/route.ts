@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 /**
  * API para generar sugerencias proactivas usando IA
@@ -107,7 +108,7 @@ Genera sugerencias relevantes para ayudar al usuario.`;
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Error generating suggestions:', error);
+    logger.error('Error generating suggestions:', error);
     return NextResponse.json({ suggestions: [] }, { status: 200 });
   }
 }

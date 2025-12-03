@@ -18,6 +18,7 @@ import {
   Link as LinkIcon, Recycle, Phone, Mail, MapPin, Sparkles, HelpCircle
 } from 'lucide-react';
 import Link from 'next/link';
+import logger, { logError } from '@/lib/logger';
 
 // Mapeo de códigos de módulos a información visual
 const MODULE_INFO: Record<string, { icon: any; title: string; description: string; gradient: string; route: string }> = {
@@ -98,7 +99,7 @@ export default function HomePage() {
           });
         }
       } catch (error) {
-        console.error('Error fetching data:', error);
+        logger.error('Error fetching data:', error);
         // En caso de error, asegurarse de que activeModules sea un array vacío
         setActiveModules([]);
       } finally {

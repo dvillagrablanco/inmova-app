@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,7 +55,7 @@ export async function GET(
 
     return NextResponse.json(history);
   } catch (error) {
-    console.error('Error al obtener historial:', error);
+    logger.error('Error al obtener historial:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,7 +33,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(reviews);
   } catch (error) {
-    console.error('Error al obtener reviews:', error);
+    logger.error('Error al obtener reviews:', error);
     return NextResponse.json({ error: 'Error al obtener reviews' }, { status: 500 });
   }
 }
@@ -69,7 +70,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(review, { status: 201 });
   } catch (error) {
-    console.error('Error al crear review:', error);
+    logger.error('Error al crear review:', error);
     return NextResponse.json({ error: 'Error al crear review' }, { status: 500 });
   }
 }
@@ -105,7 +106,7 @@ export async function PATCH(req: NextRequest) {
 
     return NextResponse.json(review);
   } catch (error) {
-    console.error('Error al actualizar review:', error);
+    logger.error('Error al actualizar review:', error);
     return NextResponse.json({ error: 'Error al actualizar review' }, { status: 500 });
   }
 }

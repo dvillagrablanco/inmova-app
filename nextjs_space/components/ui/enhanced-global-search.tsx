@@ -27,6 +27,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import logger, { logError } from '@/lib/logger';
 
 interface SearchResult {
   id: string;
@@ -82,7 +83,7 @@ export function EnhancedGlobalSearch() {
       try {
         setRecentSearches(JSON.parse(stored));
       } catch (e) {
-        console.error('Error loading recent searches:', e);
+        logger.error('Error loading recent searches:', e);
       }
     }
   }, []);
@@ -131,7 +132,7 @@ export function EnhancedGlobalSearch() {
       // Guardar en búsquedas recientes
       saveRecentSearch(searchQuery);
     } catch (error) {
-      console.error('Error searching:', error);
+      logger.error('Error searching:', error);
       toast.error('Error al buscar');
     } finally {
       setIsLoading(false);

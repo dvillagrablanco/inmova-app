@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import jwt from 'jsonwebtoken';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -123,7 +124,7 @@ export async function GET(request: Request) {
       },
     });
   } catch (error) {
-    console.error('Error al obtener dashboard:', error);
+    logger.error('Error al obtener dashboard:', error);
     return NextResponse.json(
       { error: 'Error al obtener dashboard' },
       { status: 500 }

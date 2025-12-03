@@ -26,6 +26,7 @@ import {
   Settings
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import logger, { logError } from '@/lib/logger';
 import {
   Dialog,
   DialogContent,
@@ -109,7 +110,7 @@ export default function PlantillasSMSPage() {
         setPlantillas(data.plantillas || []);
       }
     } catch (error) {
-      console.error('Error fetching templates:', error);
+      logger.error('Error fetching templates:', error);
       toast.error('Error al cargar plantillas');
     } finally {
       setLoading(false);
@@ -139,7 +140,7 @@ export default function PlantillasSMSPage() {
         toast.error(data.error || 'Error al guardar plantilla');
       }
     } catch (error) {
-      console.error('Error saving template:', error);
+      logger.error('Error saving template:', error);
       toast.error('Error al guardar plantilla');
     }
   };
@@ -176,7 +177,7 @@ export default function PlantillasSMSPage() {
         toast.error('Error al eliminar plantilla');
       }
     } catch (error) {
-      console.error('Error deleting template:', error);
+      logger.error('Error deleting template:', error);
       toast.error('Error al eliminar plantilla');
     }
   };

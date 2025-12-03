@@ -21,6 +21,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowUp, ArrowDown, Check, X, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import logger, { logError } from '@/lib/logger';
 
 interface SubscriptionPlan {
   id: string;
@@ -80,7 +81,7 @@ export function ChangePlanDialog({
         setPlans(data.filter((p: SubscriptionPlan) => p.activo));
       }
     } catch (error) {
-      console.error('Error fetching plans:', error);
+      logger.error('Error fetching plans:', error);
       toast.error('Error al cargar los planes');
     } finally {
       setIsFetchingPlans(false);
@@ -114,7 +115,7 @@ export function ChangePlanDialog({
         toast.error(error.error || 'Error al cambiar el plan');
       }
     } catch (error) {
-      console.error('Error changing plan:', error);
+      logger.error('Error changing plan:', error);
       toast.error('Error al cambiar el plan');
     } finally {
       setIsLoading(false);

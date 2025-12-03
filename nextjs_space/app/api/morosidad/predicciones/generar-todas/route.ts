@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { calcularPrediccionMorosidad } from '@/lib/morosidad-prediction-service';
 import { addDays } from 'date-fns';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -102,7 +103,7 @@ export async function POST(request: NextRequest) {
       resultados
     });
   } catch (error: any) {
-    console.error('Error al generar predicciones:', error);
+    logger.error('Error al generar predicciones:', error);
     return NextResponse.json(
       { error: 'Error al generar predicciones', details: error.message },
       { status: 500 }

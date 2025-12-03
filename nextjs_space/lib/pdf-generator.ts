@@ -7,6 +7,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 interface CompanyInfo {
   nombre: string;
@@ -61,7 +62,7 @@ export const generatePaymentReceiptPDF = async (
       // En producción, aquí se cargaría el logo desde S3
       // doc.addImage(logoData, 'PNG', 15, 15, 40, 20);
     } catch (error) {
-      console.log('No se pudo cargar el logo');
+      logger.info('No se pudo cargar el logo');
     }
   }
 

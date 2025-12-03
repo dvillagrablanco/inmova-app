@@ -10,6 +10,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { InvoiceStatus } from '@prisma/client';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -61,7 +62,7 @@ export async function GET(
       payments,
     });
   } catch (error: any) {
-    console.error('Error al obtener factura:', error);
+    logger.error('Error al obtener factura:', error);
     return NextResponse.json(
       { error: 'Error al obtener factura', details: error.message },
       { status: 500 }
@@ -106,7 +107,7 @@ export async function PUT(
 
     return NextResponse.json(invoice);
   } catch (error: any) {
-    console.error('Error al actualizar factura:', error);
+    logger.error('Error al actualizar factura:', error);
     return NextResponse.json(
       { error: 'Error al actualizar factura', details: error.message },
       { status: 500 }
@@ -142,7 +143,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Factura cancelada', invoice });
   } catch (error: any) {
-    console.error('Error al cancelar factura:', error);
+    logger.error('Error al cancelar factura:', error);
     return NextResponse.json(
       { error: 'Error al cancelar factura', details: error.message },
       { status: 500 }

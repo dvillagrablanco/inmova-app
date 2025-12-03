@@ -8,6 +8,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { uploadFile } from '@/lib/s3';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -104,7 +105,7 @@ export async function POST(
       maintenance: updatedMaintenance,
     });
   } catch (error) {
-    console.error('Error subiendo fotos de mantenimiento:', error);
+    logger.error('Error subiendo fotos de mantenimiento:', error);
     return NextResponse.json(
       { error: 'Error al subir fotos' },
       { status: 500 }
@@ -166,7 +167,7 @@ export async function DELETE(
       maintenance: updatedMaintenance,
     });
   } catch (error) {
-    console.error('Error eliminando foto de mantenimiento:', error);
+    logger.error('Error eliminando foto de mantenimiento:', error);
     return NextResponse.json(
       { error: 'Error al eliminar foto' },
       { status: 500 }

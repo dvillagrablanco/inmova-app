@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { uploadFile } from '@/lib/s3';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,7 +24,7 @@ export async function GET(
 
     return NextResponse.json({ versions });
   } catch (error: any) {
-    console.error('Error fetching versions:', error);
+    logger.error('Error fetching versions:', error);
     return NextResponse.json(
       { error: error.message || 'Error al cargar versiones' },
       { status: 500 }
@@ -99,7 +100,7 @@ export async function POST(
 
     return NextResponse.json({ version }, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating version:', error);
+    logger.error('Error creating version:', error);
     return NextResponse.json(
       { error: error.message || 'Error al crear versión' },
       { status: 500 }

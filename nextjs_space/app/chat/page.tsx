@@ -16,6 +16,7 @@ import { LoadingState } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
 import { SkeletonCard } from '@/components/ui/skeleton-card';
 import { MessageSquare, Send, Home, ArrowLeft, CheckCircle2, Clock } from 'lucide-react';
+import logger, { logError } from '@/lib/logger';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -95,7 +96,7 @@ export default function AdminChatPage() {
       const data = await response.json();
       setMessages(data.messages || []);
     } catch (error) {
-      console.error(error);
+      logger.error('Failed to fetch messages', { error });
     }
   };
 

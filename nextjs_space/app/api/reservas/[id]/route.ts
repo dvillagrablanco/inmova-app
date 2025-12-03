@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { ReservationStatus } from '@prisma/client';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,7 +55,7 @@ export async function GET(
 
     return NextResponse.json(reserva);
   } catch (error) {
-    console.error('Error fetching reserva:', error);
+    logger.error('Error fetching reserva:', error);
     return NextResponse.json(
       { error: 'Error al obtener reserva' },
       { status: 500 }
@@ -140,7 +141,7 @@ export async function PATCH(
 
     return NextResponse.json(reserva);
   } catch (error) {
-    console.error('Error updating reserva:', error);
+    logger.error('Error updating reserva:', error);
     return NextResponse.json(
       { error: 'Error al actualizar reserva' },
       { status: 500 }
@@ -185,7 +186,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Reserva eliminada exitosamente' });
   } catch (error) {
-    console.error('Error deleting reserva:', error);
+    logger.error('Error deleting reserva:', error);
     return NextResponse.json(
       { error: 'Error al eliminar reserva' },
       { status: 500 }

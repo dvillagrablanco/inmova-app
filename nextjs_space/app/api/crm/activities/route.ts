@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,7 +44,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(activities);
   } catch (error) {
-    console.error('Error al obtener actividades CRM:', error);
+    logger.error('Error al obtener actividades CRM:', error);
     return NextResponse.json(
       { error: 'Error al obtener actividades' },
       { status: 500 }
@@ -112,7 +113,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(activity, { status: 201 });
   } catch (error) {
-    console.error('Error al crear actividad CRM:', error);
+    logger.error('Error al crear actividad CRM:', error);
     return NextResponse.json(
       { error: 'Error al crear actividad' },
       { status: 500 }

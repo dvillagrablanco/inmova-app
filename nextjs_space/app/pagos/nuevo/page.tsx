@@ -20,6 +20,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
+import logger, { logError } from '@/lib/logger';
 
 interface Contract {
   id: string;
@@ -51,7 +52,7 @@ export default function NuevoPagoPage() {
           setContracts(data.filter((c: any) => c.estado === 'activo'));
         }
       } catch (error) {
-        console.error('Error fetching contracts:', error);
+        logger.error('Error fetching contracts:', error);
       }
     };
 
@@ -87,7 +88,7 @@ export default function NuevoPagoPage() {
         toast.error(error.error || 'Error al registrar el pago');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al registrar el pago');
     } finally {
       setIsLoading(false);

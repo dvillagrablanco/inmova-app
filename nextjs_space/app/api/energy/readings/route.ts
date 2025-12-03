@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { detectAbnormalConsumption } from '@/lib/energy-service';
 import { format } from 'date-fns';
+import logger, { logError } from '@/lib/logger';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -40,7 +41,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(readings);
   } catch (error) {
-    console.error('Error fetching energy readings:', error);
+    logger.error('Error fetching energy readings:', error);
     return NextResponse.json(
       { error: 'Error al obtener lecturas' },
       { status: 500 }
@@ -100,13 +101,13 @@ export async function POST(req: NextRequest) {
     try {
       await detectAbnormalConsumption(session.user.companyId, reading.id);
     } catch (error) {
-      console.error('Error detecting abnormal consumption:', error);
+      logger.error('Error detecting abnormal consumption:', error);
       // No fallar la creación de la lectura si falla la detección
     }
 
     return NextResponse.json(reading, { status: 201 });
   } catch (error) {
-    console.error('Error creating energy reading:', error);
+    logger.error('Error creating energy reading:', error);
     return NextResponse.json(
       { error: 'Error al crear lectura' },
       { status: 500 }

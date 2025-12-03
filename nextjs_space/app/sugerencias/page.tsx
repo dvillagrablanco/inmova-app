@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { Lightbulb, Bug, Plus, ArrowLeft, Send } from 'lucide-react';
 import { PageHeader } from '@/components/ui/page-header';
+import logger, { logError } from '@/lib/logger';
 
 export default function SugerenciasPage() {
   const router = useRouter();
@@ -80,7 +81,7 @@ export default function SugerenciasPage() {
         prioridad: 'media',
       });
     } catch (error: any) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al enviar sugerencia', {
         description: error.message || 'Ocurrió un error al procesar tu solicitud',
       });

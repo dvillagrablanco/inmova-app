@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { isZucchettiConfigured } from '@/lib/zucchetti-integration-service';
+import logger, { logError } from '@/lib/logger';
 
 /**
  * GET /api/accounting/zucchetti/status
@@ -33,7 +34,7 @@ export async function GET(request: NextRequest) {
         : 'Para activar la integración, configure las credenciales en variables de entorno.',
     });
   } catch (error) {
-    console.error('Error al verificar estado de Zucchetti:', error);
+    logger.error('Error al verificar estado de Zucchetti:', error);
     return NextResponse.json(
       { error: 'Error al verificar el estado' },
       { status: 500 }

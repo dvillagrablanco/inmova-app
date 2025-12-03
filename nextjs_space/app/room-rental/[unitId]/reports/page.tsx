@@ -26,6 +26,7 @@ import {
 import { toast } from 'sonner';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 interface OccupancyReport {
   unit: {
@@ -95,7 +96,7 @@ export default function OccupancyReportsPage() {
         toast.error('Error al cargar reporte');
       }
     } catch (error) {
-      console.error('Error loading report:', error);
+      logger.error('Error loading report:', error);
       toast.error('Error al cargar reporte');
     } finally {
       setLoading(false);
@@ -120,7 +121,7 @@ export default function OccupancyReportsPage() {
         toast.error('Error al exportar reporte');
       }
     } catch (error) {
-      console.error('Error exporting report:', error);
+      logger.error('Error exporting report:', error);
       toast.error('Error al exportar reporte');
     }
   };

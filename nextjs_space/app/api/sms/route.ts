@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { enviarSMS, crearPlantilla } from '@/lib/sms-service';
 import { SMSTipo, SMSEstado } from '@prisma/client';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,7 +46,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(smsLogs);
   } catch (error: any) {
-    console.error('Error al obtener logs de SMS:', error);
+    logger.error('Error al obtener logs de SMS:', error);
     return NextResponse.json(
       { error: 'Error al obtener logs de SMS' },
       { status: 500 }
@@ -101,7 +102,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(smsLog, { status: 201 });
     
   } catch (error: any) {
-    console.error('Error al enviar SMS:', error);
+    logger.error('Error al enviar SMS:', error);
     return NextResponse.json(
       { error: error.message || 'Error al enviar SMS' },
       { status: 500 }

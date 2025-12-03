@@ -15,6 +15,7 @@ import { Home, ArrowLeft, Calendar, TrendingUp, DollarSign, CheckCircle, User, B
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 interface STRBooking {
   id: string;
@@ -85,7 +86,7 @@ export default function STRBookingsPage() {
       const data = await response.json();
       setBookings(data);
     } catch (error) {
-      console.error('Error fetching bookings:', error);
+      logger.error('Error fetching bookings:', error);
       toast.error('Error al cargar las reservas');
       setBookings([]);
     } finally {

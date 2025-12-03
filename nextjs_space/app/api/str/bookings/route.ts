@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,7 +61,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(bookings);
   } catch (error) {
-    console.error('Error fetching STR bookings:', error);
+    logger.error('Error fetching STR bookings:', error);
     return NextResponse.json(
       { error: 'Failed to fetch bookings' },
       { status: 500 }
@@ -119,7 +120,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(booking, { status: 201 });
   } catch (error) {
-    console.error('Error creating STR booking:', error);
+    logger.error('Error creating STR booking:', error);
     return NextResponse.json(
       { error: 'Failed to create booking' },
       { status: 500 }

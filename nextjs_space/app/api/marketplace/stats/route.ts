@@ -1,12 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
-// import {
-//   getMarketplaceStats,
-//   getTopProviders,
-//   checkExpiredQuotes,
 // } from '@/lib/marketplace-service';
 
 // GET /api/marketplace/stats - Obtener estadísticas del marketplace
@@ -33,7 +30,7 @@ export async function GET(req: NextRequest) {
       topProviders,
     });
   } catch (error) {
-    console.error('Error fetching marketplace stats:', error);
+    logger.error('Error fetching marketplace stats:', error);
     return NextResponse.json(
       { error: 'Error al obtener estadísticas' },
       { status: 500 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,7 +53,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(payments);
   } catch (error: any) {
-    console.error('Error fetching payments:', error);
+    logger.error('Error fetching payments:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -116,7 +117,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(payment, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating payment:', error);
+    logger.error('Error creating payment:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

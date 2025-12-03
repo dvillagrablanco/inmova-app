@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   try {
@@ -137,7 +138,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error changing subscription plan:', error);
+    logger.error('Error changing subscription plan:', error);
     return NextResponse.json(
       { error: 'Error al cambiar el plan de suscripción' },
       { status: 500 }

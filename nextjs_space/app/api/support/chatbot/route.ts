@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import logger, { logError } from '@/lib/logger';
 import {
   processUserQuestion,
   searchKnowledgeBase,
@@ -45,7 +46,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ error: 'Acción no válida' }, { status: 400 });
   } catch (error) {
-    console.error('Error in chatbot:', error);
+    logger.error('Error in chatbot:', error);
     return NextResponse.json(
       { error: 'Error al procesar solicitud' },
       { status: 500 }

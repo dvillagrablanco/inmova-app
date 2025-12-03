@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { writeFile } from 'fs/promises';
 import { join } from 'path';
+import logger, { logError } from '@/lib/logger';
 
 export async function POST(
   request: NextRequest,
@@ -64,7 +65,7 @@ export async function POST(
       message: 'Configuración guardada exitosamente'
     });
   } catch (error: any) {
-    console.error('Error saving config:', error);
+    logger.error('Error saving config:', error);
     return NextResponse.json(
       { error: 'Error al guardar la configuración', details: error.message },
       { status: 500 }

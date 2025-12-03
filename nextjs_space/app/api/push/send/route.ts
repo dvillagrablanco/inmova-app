@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { sendPushNotificationToUser, sendPushNotificationToUsers, sendPushNotificationToCompany } from '@/lib/push-notifications';
+import logger, { logError } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   try {
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
       ...result
     });
   } catch (error: any) {
-    console.error('Error sending push notification:', error);
+    logger.error('Error sending push notification:', error);
     return NextResponse.json(
       { error: 'Error al enviar notificación', details: error.message },
       { status: 500 }

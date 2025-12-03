@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { startOfDay, endOfDay } from 'date-fns';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,7 +33,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(reports);
   } catch (error) {
-    console.error('Error al obtener reportes de auditoría:', error);
+    logger.error('Error al obtener reportes de auditoría:', error);
     return NextResponse.json(
       { error: 'Error al obtener reportes' },
       { status: 500 }
@@ -110,7 +111,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(report, { status: 201 });
   } catch (error) {
-    console.error('Error al crear reporte:', error);
+    logger.error('Error al crear reporte:', error);
     return NextResponse.json({ error: 'Error al crear reporte' }, { status: 500 });
   }
 }

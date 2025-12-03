@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { DoorOpen, Plus, Edit, Users, Euro, Calendar, Calculator, Trash2, Home } from 'lucide-react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
+import logger, { logError } from '@/lib/logger';
 
 export default function UnitRoomsPage() {
   const router = useRouter();
@@ -59,7 +60,7 @@ export default function UnitRoomsPage() {
       if (unitRes.ok) setUnit(await unitRes.json());
       if (roomsRes.ok) setRooms(await roomsRes.json());
     } catch (error) {
-      console.error('Error loading data:', error);
+      logger.error('Error loading data:', error);
       toast.error('Error al cargar los datos');
     } finally {
       setLoading(false);
@@ -93,7 +94,7 @@ export default function UnitRoomsPage() {
         toast.error(error.error || 'Error al crear habitación');
       }
     } catch (error) {
-      console.error('Error creating room:', error);
+      logger.error('Error creating room:', error);
       toast.error('Error al crear habitación');
     }
   }

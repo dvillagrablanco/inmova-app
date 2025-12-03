@@ -63,6 +63,7 @@ import { cn } from '@/lib/utils';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import logger, { logError } from '@/lib/logger';
 
 // Mapeo de rutas a códigos de módulos para sistema modular
 const ROUTE_TO_MODULE: Record<string, string> = {
@@ -320,7 +321,7 @@ export function Sidebar() {
       try {
         setExpandedSections(JSON.parse(storedExpanded));
       } catch (error) {
-        console.error('Error loading expanded sections:', error);
+        logger.error('Error loading expanded sections:', error);
       }
     }
   }, []);
@@ -353,7 +354,7 @@ export function Sidebar() {
           setActiveModules(data.activeModules || data || []);
         }
       } catch (error) {
-        console.error('Error loading active modules:', error);
+        logger.error('Error loading active modules:', error);
       } finally {
         setModulesLoaded(true);
       }
@@ -368,7 +369,7 @@ export function Sidebar() {
       try {
         setFavorites(JSON.parse(storedFavorites));
       } catch (error) {
-        console.error('Error loading favorites:', error);
+        logger.error('Error loading favorites:', error);
       }
     }
   }, []);

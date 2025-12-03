@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -64,7 +65,7 @@ export async function POST(
 
     return NextResponse.json({ shares }, { status: 201 });
   } catch (error: any) {
-    console.error('Error sharing document:', error);
+    logger.error('Error sharing document:', error);
     return NextResponse.json(
       { error: error.message || 'Error al compartir documento' },
       { status: 500 }
@@ -97,7 +98,7 @@ export async function GET(
 
     return NextResponse.json({ shares });
   } catch (error: any) {
-    console.error('Error fetching shares:', error);
+    logger.error('Error fetching shares:', error);
     return NextResponse.json(
       { error: error.message || 'Error al cargar permisos' },
       { status: 500 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,7 +38,7 @@ export async function GET(
 
     return NextResponse.json(schedule);
   } catch (error) {
-    console.error('Error fetching maintenance schedule:', error);
+    logger.error('Error fetching maintenance schedule:', error);
     return NextResponse.json(
       { error: 'Error al obtener mantenimiento programado' },
       { status: 500 }
@@ -103,7 +104,7 @@ export async function PUT(
 
     return NextResponse.json(schedule);
   } catch (error) {
-    console.error('Error updating maintenance schedule:', error);
+    logger.error('Error updating maintenance schedule:', error);
     return NextResponse.json(
       { error: 'Error al actualizar mantenimiento programado' },
       { status: 500 }
@@ -127,7 +128,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Mantenimiento programado eliminado exitosamente' });
   } catch (error) {
-    console.error('Error deleting maintenance schedule:', error);
+    logger.error('Error deleting maintenance schedule:', error);
     return NextResponse.json(
       { error: 'Error al eliminar mantenimiento programado' },
       { status: 500 }

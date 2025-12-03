@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,7 +47,7 @@ export async function POST(request: NextRequest) {
       subscriptionId: pushSubscription.id,
     });
   } catch (error: any) {
-    console.error('Error subscribing to push notifications:', error);
+    logger.error('Error subscribing to push notifications:', error);
     return NextResponse.json(
       { error: error.message || 'Error al suscribirse' },
       { status: 500 }

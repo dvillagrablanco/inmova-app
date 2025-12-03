@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { uploadFile, downloadFile } from '@/lib/s3';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -74,7 +75,7 @@ export async function POST(req: NextRequest) {
       message: 'Foto subida correctamente' 
     });
   } catch (error) {
-    console.error('Error uploading photo:', error);
+    logger.error('Error uploading photo:', error);
     return NextResponse.json(
       { error: 'Error al subir la foto' },
       { status: 500 }
@@ -128,7 +129,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ photos });
   } catch (error) {
-    console.error('Error fetching photos:', error);
+    logger.error('Error fetching photos:', error);
     return NextResponse.json(
       { error: 'Error al obtener las fotos' },
       { status: 500 }
@@ -192,7 +193,7 @@ export async function DELETE(req: NextRequest) {
       message: 'Foto eliminada correctamente' 
     });
   } catch (error) {
-    console.error('Error deleting photo:', error);
+    logger.error('Error deleting photo:', error);
     return NextResponse.json(
       { error: 'Error al eliminar la foto' },
       { status: 500 }

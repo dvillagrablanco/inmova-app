@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import logger, { logError } from '@/lib/logger';
 
 interface Message {
   id: string;
@@ -278,7 +279,7 @@ export function LandingChatbot() {
 
       toast.success('¡Gracias! Te contactaremos pronto.');
     } catch (error) {
-      console.error('Error capturing lead:', error);
+      logger.error('Error capturing lead:', error);
       toast.success('¡Gracias! Te contactaremos pronto.');
     }
 

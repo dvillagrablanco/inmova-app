@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getAlegraService } from '@/lib/alegra-integration-service';
 import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,7 +53,7 @@ export async function POST(req: NextRequest) {
       results,
     });
   } catch (error) {
-    console.error('Error syncing customers to Alegra:', error);
+    logger.error('Error syncing customers to Alegra:', error);
     return NextResponse.json(
       { error: 'Error al sincronizar clientes con Alegra' },
       { status: 500 }

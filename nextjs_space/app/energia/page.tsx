@@ -34,6 +34,7 @@ import {
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { format } from 'date-fns';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import logger, { logError } from '@/lib/logger';
 
 interface Building {
   id: string;
@@ -152,7 +153,7 @@ export default function EnergiaPage() {
       setBuildings(Array.isArray(buildingsData) ? buildingsData : []);
       setUnits(Array.isArray(unitsData) ? unitsData : []);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      logger.error('Error fetching data:', error);
       toast.error('Error al cargar los datos');
     } finally {
       setLoading(false);
@@ -184,7 +185,7 @@ export default function EnergiaPage() {
       });
       fetchData();
     } catch (error) {
-      console.error('Error creating reading:', error);
+      logger.error('Error creating reading:', error);
       toast.error('Error al registrar la lectura');
     }
   };
@@ -202,7 +203,7 @@ export default function EnergiaPage() {
       toast.success('Alerta resuelta exitosamente');
       fetchData();
     } catch (error) {
-      console.error('Error resolving alert:', error);
+      logger.error('Error resolving alert:', error);
       toast.error('Error al resolver la alerta');
     }
   };

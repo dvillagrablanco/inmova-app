@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth, requirePermission, forbiddenResponse } from '@/lib/permissions';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -206,7 +207,7 @@ export async function GET(request: Request) {
       periodo: meses,
     });
   } catch (error: any) {
-    console.error('Error al generar reportes:', error);
+    logger.error('Error al generar reportes:', error);
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }

@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Building2, DoorOpen, Users, Euro, TrendingUp, Plus, Eye, BarChart3 } from 'lucide-react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
+import logger, { logError } from '@/lib/logger';
 
 export default function RoomRentalPage() {
   const router = useRouter();
@@ -40,7 +41,7 @@ export default function RoomRentalPage() {
       if (unitsRes.ok) setUnits(await unitsRes.json());
       if (analyticsRes.ok) setAnalytics(await analyticsRes.json());
     } catch (error) {
-      console.error('Error loading data:', error);
+      logger.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }

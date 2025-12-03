@@ -18,6 +18,7 @@ import { ClipboardCheck, Home, ArrowLeft, Plus, Calendar, Building2, MapPin, Use
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { usePermissions } from '@/lib/hooks/usePermissions';
+import logger, { logError } from '@/lib/logger';
 
 interface Inspection {
   id: string;
@@ -89,7 +90,7 @@ export default function InspeccionesPage() {
       const data = await res.json();
       setInspections(data);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al cargar inspecciones');
     } finally {
       setLoading(false);
@@ -102,7 +103,7 @@ export default function InspeccionesPage() {
       const data = await res.json();
       setBuildings(data);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
     }
   };
 
@@ -112,7 +113,7 @@ export default function InspeccionesPage() {
       const data = await res.json();
       setUnits(data);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
     }
   };
 
@@ -152,7 +153,7 @@ export default function InspeccionesPage() {
         toast.error('Error al programar inspección');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Error al programar inspección');
     }
   };

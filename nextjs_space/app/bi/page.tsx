@@ -22,6 +22,7 @@ import {
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import logger, { logError } from '@/lib/logger';
 
 interface BIData {
   ingresos: any[];
@@ -67,7 +68,7 @@ export default function BIPage() {
       const result = await response.json();
       setData(result);
     } catch (error: any) {
-      console.error('Error loading BI data:', error);
+      logger.error('Error loading BI data:', error);
       toast.error('Error al cargar datos de Business Intelligence');
     } finally {
       setLoading(false);
@@ -81,7 +82,7 @@ export default function BIPage() {
       const result = await response.json();
       setBuildings(Array.isArray(result) ? result : []);
     } catch (error) {
-      console.error('Error loading buildings:', error);
+      logger.error('Error loading buildings:', error);
     }
   }
 
@@ -108,7 +109,7 @@ export default function BIPage() {
       
       toast.success('Reporte exportado exitosamente');
     } catch (error: any) {
-      console.error('Error exporting data:', error);
+      logger.error('Error exporting data:', error);
       toast.error('Error al exportar reporte');
     }
   }

@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth-options';
 import { getSageService } from '@/lib/sage-integration-service';
 import { prisma } from '@/lib/db';
 import { startOfMonth, endOfMonth } from 'date-fns';
+import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -72,7 +73,7 @@ export async function POST(req: NextRequest) {
       results,
     });
   } catch (error) {
-    console.error('Error registering payments in Sage:', error);
+    logger.error('Error registering payments in Sage:', error);
     return NextResponse.json(
       { error: 'Error al registrar pagos en Sage' },
       { status: 500 }

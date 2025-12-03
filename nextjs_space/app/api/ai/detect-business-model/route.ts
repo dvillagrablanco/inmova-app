@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import logger, { logError } from '@/lib/logger';
 
 /**
  * API para detectar automáticamente el modelo de negocio del usuario
@@ -64,7 +65,7 @@ Respond with raw JSON only. Do not include code blocks, markdown, or any other f
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Error detecting business model:', error);
+    logger.error('Error detecting business model:', error);
     return NextResponse.json(
       {
         model: 'general',
