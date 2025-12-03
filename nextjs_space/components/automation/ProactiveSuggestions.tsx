@@ -4,201 +4,219 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
   Lightbulb,
-  Zap,
-  AlertTriangle,
   X,
-  ChevronRight,
-  Wand2,
+  TrendingUp,
+  AlertTriangle,
+  CheckCircle,
+  Sparkles,
+  ArrowRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { getProactiveSuggestions, type AutomationSuggestion } from '@/lib/ai-automation-service';
 import { toast } from 'sonner';
 
-interface ProactiveSuggestionsProps {
-  userId: string;
-  context?: any;
+interface Suggestion {
+  id: string;
+  type: 'optimization' | 'warning' | 'opportunity';
+  title: string;
+  description: string;
+  action?: string;
+  actionLabel?: string;
+  priority: 'low' | 'medium' | 'high';
+  category: string;
 }
 
-export function ProactiveSuggestions({ userId, context }: ProactiveSuggestionsProps) {
-  const [suggestions, setSuggestions] = useState<AutomationSuggestion[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [dismissedIds, setDismissedIds] = useState<string[]>([]);
+const MOCK_SUGGESTIONS: Suggestion[] = [
+  {
+    id: '1',
+    type: 'opportunity',
+    title: 'Activa pagos recurrentes',
+    description: 'Tienes 8 contratos activos sin pagos automatizados. Actívalos para reducir morosidad en un 40%.',
+    action: '/contratos',
+    actionLabel: 'Configurar ahora',
+    priority: 'high',
+    category: 'payments'
+  },
+  {
+    id: '2',
+    type: 'warning',
+    title: 'Contratos próximos a vencer',
+    description: '3 contratos vencen en los próximos 30 días. Contacta a tus inquilinos para renovación.',
+    action: '/contratos?filter=expiring',
+    actionLabel: 'Ver contratos',
+    priority: 'high',
+    category: 'contracts'
+  },
+  {
+    id: '3',
+    type: 'optimization',
+    title: 'Completa datos de edificios',
+    description: '5 edificios no tienen fotos. Añade imágenes para mejorar tu presentación profesional.',
+    action: '/edificios',
+    actionLabel: 'Añadir fotos',
+    priority: 'medium',
+    category: 'buildings'
+  },
+  {
+    id: '4',
+    type: 'opportunity',
+    title: 'Programa mantenimiento preventivo',
+    description: 'Evita averías costosas. Configura revisiones automáticas de ascensores y calderas.',
+    action: '/mantenimiento-preventivo',
+    actionLabel: 'Configurar',
+    priority: 'medium',
+    category: 'maintenance'
+  },
+  {
+    id: '5',
+    type: 'optimization',
+    title: 'Integra tu contabilidad',
+    description: 'Sincroniza con Sage, Holded o A3 y ahorra 10h/mes en gestión contable.',
+    action: '/contabilidad',
+    actionLabel: 'Ver integraciones',
+    priority: 'low',
+    category: 'accounting'
+  }
+];
+
+export default function ProactiveSuggestions() {
   const router = useRouter();
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [dismissed, setDismissed] = useState<string[]>([]);
 
   useEffect(() => {
-    loadSuggestions();
-    // Load dismissed suggestions from localStorage
-    const dismissed = localStorage.getItem('dismissedSuggestions');
-    if (dismissed) {
-      setDismissedIds(JSON.parse(dismissed));
-    }
-  }, [userId]);
+    // En producción, esto vendría de la API
+    // Por ahora usamos sugerencias mock
+    const stored = localStorage.getItem('dismissed_suggestions');
+    const dismissedIds = stored ? JSON.parse(stored) : [];
+    setDismissed(dismissedIds);
+    
+    const filtered = MOCK_SUGGESTIONS.filter(s => !dismissedIds.includes(s.id));
+    setSuggestions(filtered);
+  }, []);
 
-  const loadSuggestions = async () => {
-    try {
-      const data = await getProactiveSuggestions(userId, context);
-      setSuggestions(data);
-    } catch (error) {
-      console.error('Error loading suggestions:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleDismiss = (suggestionId: string) => {
-    const newDismissed = [...dismissedIds, suggestionId];
-    setDismissedIds(newDismissed);
-    localStorage.setItem('dismissedSuggestions', JSON.stringify(newDismissed));
+  const handleDismiss = (id: string) => {
+    const newDismissed = [...dismissed, id];
+    setDismissed(newDismissed);
+    localStorage.setItem('dismissed_suggestions', JSON.stringify(newDismissed));
+    setSuggestions(prev => prev.filter(s => s.id !== id));
     toast.success('Sugerencia descartada');
   };
 
-  const handleAction = (suggestion: AutomationSuggestion) => {
-    if (suggestion.action?.route) {
-      router.push(suggestion.action.route);
-    } else if (suggestion.action?.callback) {
-      // Handle callback
-      toast.info('Ejecutando acción...');
+  const handleAction = (suggestion: Suggestion) => {
+    if (suggestion.action) {
+      router.push(suggestion.action);
+      handleDismiss(suggestion.id);
     }
   };
 
   const getIcon = (type: string) => {
     switch (type) {
-      case 'wizard':
-        return <Wand2 className="h-5 w-5" />;
-      case 'action':
-        return <Zap className="h-5 w-5" />;
-      case 'tip':
-        return <Lightbulb className="h-5 w-5" />;
+      case 'opportunity':
+        return <Sparkles className="h-5 w-5 text-green-600" />;
       case 'warning':
-        return <AlertTriangle className="h-5 w-5" />;
+        return <AlertTriangle className="h-5 w-5 text-orange-600" />;
+      case 'optimization':
+        return <TrendingUp className="h-5 w-5 text-blue-600" />;
       default:
-        return <Lightbulb className="h-5 w-5" />;
+        return <Lightbulb className="h-5 w-5 text-yellow-600" />;
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high':
-        return 'border-red-300 bg-red-50';
+        return 'destructive';
       case 'medium':
-        return 'border-yellow-300 bg-yellow-50';
+        return 'default';
       case 'low':
-        return 'border-blue-300 bg-blue-50';
+        return 'secondary';
       default:
-        return 'border-gray-300 bg-gray-50';
+        return 'default';
     }
   };
 
-  const getPriorityBadge = (priority: string) => {
-    const variants: Record<string, any> = {
-      high: { label: 'Alta', className: 'bg-red-100 text-red-800' },
-      medium: { label: 'Media', className: 'bg-yellow-100 text-yellow-800' },
-      low: { label: 'Baja', className: 'bg-blue-100 text-blue-800' },
-    };
-    const variant = variants[priority] || variants.low;
-    return (
-      <Badge variant="secondary" className={variant.className}>
-        {variant.label}
-      </Badge>
-    );
-  };
-
-  if (isLoading) return null;
-
-  // Filter out dismissed suggestions
-  const visibleSuggestions = suggestions.filter(
-    suggestion => !dismissedIds.includes(suggestion.id)
-  );
-
-  if (visibleSuggestions.length === 0) return null;
-
-  // Sort by priority
-  const sortedSuggestions = [...visibleSuggestions].sort((a, b) => {
-    const priorityOrder = { high: 0, medium: 1, low: 2 };
-    return priorityOrder[a.priority] - priorityOrder[b.priority];
-  });
+  if (suggestions.length === 0) {
+    return null;
+  }
 
   return (
-    <div className="space-y-4 mb-6">
-      <div className="flex items-center gap-2">
-        <Lightbulb className="h-5 w-5 text-yellow-500" />
-        <h3 className="text-lg font-semibold">Sugerencias para ti</h3>
-      </div>
-
-      <AnimatePresence>
-        {sortedSuggestions.map(suggestion => (
-          <motion.div
-            key={suggestion.id}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            className="relative"
-          >
-            <Card
-              className={`border-2 transition-all hover:shadow-lg ${getPriorityColor(suggestion.priority)}`}
-            >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-3">
-                    <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                        suggestion.priority === 'high'
-                          ? 'bg-red-100 text-red-600'
-                          : suggestion.priority === 'medium'
-                            ? 'bg-yellow-100 text-yellow-600'
-                            : 'bg-blue-100 text-blue-600'
-                      }`}
-                    >
-                      {getIcon(suggestion.type)}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <CardTitle className="text-base">{suggestion.title}</CardTitle>
-                        {getPriorityBadge(suggestion.priority)}
+    <Card className="mb-6 border-2 border-primary/20">
+      <CardHeader>
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <Lightbulb className="h-5 w-5 text-primary" />
+          </div>
+          <div className="flex-1">
+            <CardTitle className="text-lg">Sugerencias Inteligentes</CardTitle>
+            <CardDescription>
+              Recomendaciones personalizadas para optimizar tu gestión
+            </CardDescription>
+          </div>
+          <Badge variant="outline">
+            {suggestions.length} pendientes
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          <AnimatePresence>
+            {suggestions.map((suggestion, index) => (
+              <motion.div
+                key={suggestion.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <Card className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 mt-0.5">
+                        {getIcon(suggestion.type)}
                       </div>
-                      <CardDescription className="text-sm">
-                        {suggestion.description}
-                      </CardDescription>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <h4 className="font-semibold text-sm">{suggestion.title}</h4>
+                          <div className="flex items-center gap-1">
+                            <Badge variant={getPriorityColor(suggestion.priority) as any} className="text-xs">
+                              {suggestion.priority === 'high' ? 'Alta' : suggestion.priority === 'medium' ? 'Media' : 'Baja'}
+                            </Badge>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6"
+                              onClick={() => handleDismiss(suggestion.id)}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-3">
+                          {suggestion.description}
+                        </p>
+                        {suggestion.action && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleAction(suggestion)}
+                            className="text-xs"
+                          >
+                            {suggestion.actionLabel || 'Ver más'}
+                            <ArrowRight className="ml-2 h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  {suggestion.dismissable && (
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8 -mt-1 -mr-1"
-                      onClick={() => handleDismiss(suggestion.id)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              </CardHeader>
-
-              {suggestion.action && (
-                <CardContent className="pt-0">
-                  <Button
-                    onClick={() => handleAction(suggestion)}
-                    className={`w-full ${
-                      suggestion.type === 'wizard'
-                        ? 'gradient-primary'
-                        : suggestion.priority === 'high'
-                          ? 'bg-red-600 hover:bg-red-700 text-white'
-                          : 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                    }`}
-                  >
-                    {suggestion.action.label}
-                    <ChevronRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </CardContent>
-              )}
-            </Card>
-          </motion.div>
-        ))}
-      </AnimatePresence>
-    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

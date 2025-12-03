@@ -1,159 +1,126 @@
 'use client';
 
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { CheckCircle2, ArrowRight, ArrowLeft, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import type { WizardStep } from '@/lib/wizard-config';
+
+interface WizardStep {
+  id: string;
+  title: string;
+  description: string;
+  fields: WizardField[];
+}
+
+interface WizardField {
+  name: string;
+  label: string;
+  type: 'text' | 'select' | 'number' | 'date';
+  placeholder?: string;
+  required?: boolean;
+  options?: { value: string; label: string }[];
+}
 
 interface WizardDialogProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onClose: () => void;
   title: string;
-  description?: string;
+  description: string;
   steps: WizardStep[];
   onComplete: (data: any) => Promise<void>;
 }
 
-export function WizardDialog({
+export default function WizardDialog({
   open,
-  onOpenChange,
+  onClose,
   title,
   description,
   steps,
-  onComplete,
+  onComplete
 }: WizardDialogProps) {
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<Record<string, any>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const currentStep = steps[currentStepIndex];
-  const progress = ((currentStepIndex + 1) / steps.length) * 100;
-  const isLastStep = currentStepIndex === steps.length - 1;
+  const currentStepData = steps[currentStep];
+  const isLastStep = currentStep === steps.length - 1;
+  const progress = ((currentStep + 1) / steps.length) * 100;
 
   const handleFieldChange = (fieldName: string, value: any) => {
     setFormData(prev => ({
       ...prev,
-      [fieldName]: value,
+      [fieldName]: value
     }));
   };
 
-  const validateCurrentStep = (): boolean => {
-    const step = currentStep;
-
-    // Validar campos requeridos
-    for (const field of step.fields) {
-      if (field.required && !formData[field.name]) {
+  const validateCurrentStep = () => {
+    const requiredFields = currentStepData.fields.filter(f => f.required);
+    for (const field of requiredFields) {
+      if (!formData[field.name]) {
         toast.error(`El campo "${field.label}" es obligatorio`);
         return false;
       }
-
-      // Validación personalizada del campo
-      if (field.validation && formData[field.name]) {
-        const error = field.validation(formData[field.name]);
-        if (error) {
-          toast.error(error);
-          return false;
-        }
-      }
     }
-
-    // Validación personalizada del paso
-    if (step.validation) {
-      const error = step.validation(formData);
-      if (error) {
-        toast.error(error);
-        return false;
-      }
-    }
-
     return true;
   };
 
-  const handleNext = async () => {
+  const handleNext = () => {
     if (!validateCurrentStep()) return;
-
-    // Auto-fill siguiente paso si aplica
-    if (currentStepIndex < steps.length - 1) {
-      const nextStep = steps[currentStepIndex + 1];
-      if (nextStep.autoFill) {
-        const autoFilledData = nextStep.autoFill(formData);
-        setFormData(prev => ({ ...prev, ...autoFilledData }));
-      }
-    }
-
+    
     if (isLastStep) {
-      // Último paso: completar wizard
-      setIsSubmitting(true);
-      try {
-        await onComplete(formData);
-        toast.success('¡Completado exitosamente!');
-        onOpenChange(false);
-        // Reset
-        setCurrentStepIndex(0);
-        setFormData({});
-      } catch (error: any) {
-        toast.error(error.message || 'Error al completar');
-      } finally {
-        setIsSubmitting(false);
-      }
+      handleSubmit();
     } else {
-      setCurrentStepIndex(prev => prev + 1);
+      setCurrentStep(prev => prev + 1);
     }
   };
 
-  const handlePrevious = () => {
-    if (currentStepIndex > 0) {
-      setCurrentStepIndex(prev => prev - 1);
+  const handleBack = () => {
+    setCurrentStep(prev => Math.max(0, prev - 1));
+  };
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    try {
+      await onComplete(formData);
+      toast.success('¡Completado con éxito!');
+      onClose();
+      setCurrentStep(0);
+      setFormData({});
+    } catch (error) {
+      console.error('Error completing wizard:', error);
+      toast.error('Hubo un error. Por favor, inténtalo de nuevo.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const renderField = (field: any) => {
-    const value = formData[field.name];
-
+  const renderField = (field: WizardField) => {
     switch (field.type) {
-      case 'text':
-      case 'email':
-      case 'number':
-        return (
-          <Input
-            type={field.type}
-            value={value || ''}
-            onChange={e => handleFieldChange(field.name, e.target.value)}
-            placeholder={field.placeholder}
-            required={field.required}
-          />
-        );
-
-      case 'textarea':
-        return (
-          <Textarea
-            value={value || ''}
-            onChange={e => handleFieldChange(field.name, e.target.value)}
-            placeholder={field.placeholder}
-            required={field.required}
-            rows={4}
-          />
-        );
-
       case 'select':
         return (
           <Select
-            value={value || ''}
-            onValueChange={val => handleFieldChange(field.name, val)}
+            value={formData[field.name] || ''}
+            onValueChange={(value) => handleFieldChange(field.name, value)}
           >
             <SelectTrigger>
-              <SelectValue placeholder={field.placeholder || 'Selecciona una opción'} />
+              <SelectValue placeholder={field.placeholder || `Selecciona ${field.label}`} />
             </SelectTrigger>
             <SelectContent>
-              {field.options?.map((option: any) => (
+              {field.options?.map(option => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
                 </SelectItem>
@@ -161,158 +128,132 @@ export function WizardDialog({
             </SelectContent>
           </Select>
         );
-
-      case 'multiselect':
+      
+      case 'number':
         return (
-          <div className="space-y-2">
-            {field.options?.map((option: any) => {
-              const isSelected = Array.isArray(value) && value.includes(option.value);
-              return (
-                <div key={option.value} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`${field.name}-${option.value}`}
-                    checked={isSelected}
-                    onCheckedChange={checked => {
-                      const currentValues = Array.isArray(value) ? value : [];
-                      if (checked) {
-                        handleFieldChange(field.name, [...currentValues, option.value]);
-                      } else {
-                        handleFieldChange(
-                          field.name,
-                          currentValues.filter((v: string) => v !== option.value)
-                        );
-                      }
-                    }}
-                  />
-                  <label
-                    htmlFor={`${field.name}-${option.value}`}
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                  >
-                    {option.label}
-                  </label>
-                </div>
-              );
-            })}
-          </div>
+          <Input
+            type="number"
+            placeholder={field.placeholder}
+            value={formData[field.name] || ''}
+            onChange={(e) => handleFieldChange(field.name, e.target.value)}
+          />
         );
-
-      case 'checkbox':
-        return (
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id={field.name}
-              checked={value || false}
-              onCheckedChange={checked => handleFieldChange(field.name, checked)}
-            />
-            <label
-              htmlFor={field.name}
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-            >
-              {field.label}
-            </label>
-          </div>
-        );
-
+      
       case 'date':
         return (
           <Input
             type="date"
-            value={value || ''}
-            onChange={e => handleFieldChange(field.name, e.target.value)}
-            required={field.required}
+            value={formData[field.name] || ''}
+            onChange={(e) => handleFieldChange(field.name, e.target.value)}
           />
         );
-
-      case 'file':
+      
+      default:
         return (
           <Input
-            type="file"
-            onChange={e => handleFieldChange(field.name, e.target.files?.[0])}
-            required={field.required}
-            accept=".pdf,.jpg,.jpeg,.png"
+            type="text"
+            placeholder={field.placeholder}
+            value={formData[field.name] || ''}
+            onChange={(e) => handleFieldChange(field.name, e.target.value)}
           />
         );
-
-      default:
-        return null;
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          {description && <DialogDescription>{description}</DialogDescription>}
-        </DialogHeader>
-
-        <div className="space-y-6">
-          {/* Progress Bar */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm text-muted-foreground">
-              <span>
-                Paso {currentStepIndex + 1} de {steps.length}
-              </span>
-              <span>{Math.round(progress)}%</span>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Sparkles className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1">
+              <DialogTitle className="text-xl">{title}</DialogTitle>
+              <DialogDescription>{description}</DialogDescription>
+            </div>
+          </div>
+          
+          {/* Progress bar */}
+          <div className="space-y-2 pt-4">
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-medium">Paso {currentStep + 1} de {steps.length}</span>
+              <span className="text-muted-foreground">{Math.round(progress)}% completado</span>
             </div>
             <Progress value={progress} className="h-2" />
           </div>
 
-          {/* Step Title & Description */}
-          <div>
-            <h3 className="text-lg font-semibold">{currentStep.title}</h3>
-            <p className="text-sm text-muted-foreground mt-1">{currentStep.description}</p>
-          </div>
-
-          {/* Fields */}
-          <div className="space-y-4">
-            {currentStep.fields.map(field => (
-              <div key={field.name} className="space-y-2">
-                {field.type !== 'checkbox' && (
-                  <Label htmlFor={field.name}>
-                    {field.label}
-                    {field.required && <span className="text-destructive ml-1">*</span>}
-                  </Label>
-                )}
-                {renderField(field)}
-                {field.helpText && (
-                  <p className="text-xs text-muted-foreground">{field.helpText}</p>
+          {/* Steps indicator */}
+          <div className="flex items-center gap-2 pt-4">
+            {steps.map((step, index) => (
+              <div key={step.id} className="flex items-center flex-1">
+                <div className={`flex items-center justify-center h-8 w-8 rounded-full border-2 transition-all ${
+                  index < currentStep
+                    ? 'bg-primary border-primary text-primary-foreground'
+                    : index === currentStep
+                    ? 'border-primary text-primary'
+                    : 'border-muted text-muted-foreground'
+                }`}>
+                  {index < currentStep ? (
+                    <CheckCircle2 className="h-4 w-4" />
+                  ) : (
+                    <span className="text-xs font-medium">{index + 1}</span>
+                  )}
+                </div>
+                {index < steps.length - 1 && (
+                  <div className={`h-0.5 flex-1 mx-1 ${
+                    index < currentStep ? 'bg-primary' : 'bg-muted'
+                  }`} />
                 )}
               </div>
             ))}
           </div>
-        </div>
+        </DialogHeader>
 
-        <DialogFooter className="flex justify-between sm:justify-between">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentStep}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.2 }}
+            className="py-6 space-y-4"
+          >
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold mb-1">{currentStepData.title}</h3>
+              <p className="text-sm text-muted-foreground">{currentStepData.description}</p>
+            </div>
+
+            {currentStepData.fields.map((field) => (
+              <div key={field.name} className="space-y-2">
+                <Label htmlFor={field.name}>
+                  {field.label}
+                  {field.required && <span className="text-destructive ml-1">*</span>}
+                </Label>
+                {renderField(field)}
+              </div>
+            ))}
+          </motion.div>
+        </AnimatePresence>
+
+        <DialogFooter className="flex items-center justify-between">
           <Button
-            type="button"
             variant="outline"
-            onClick={handlePrevious}
-            disabled={currentStepIndex === 0 || isSubmitting}
+            onClick={handleBack}
+            disabled={currentStep === 0 || loading}
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Anterior
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Atrás
           </Button>
-          <Button
-            type="button"
-            onClick={handleNext}
-            disabled={isSubmitting}
-            className="gradient-primary"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Procesando...
-              </>
+          <Button onClick={handleNext} disabled={loading}>
+            {loading ? (
+              'Procesando...'
             ) : isLastStep ? (
-              <>
-                <Check className="h-4 w-4 mr-2" />
-                Completar
-              </>
+              'Finalizar'
             ) : (
               <>
                 Siguiente
-                <ArrowRight className="h-4 w-4 ml-2" />
+                <ArrowRight className="ml-2 h-4 w-4" />
               </>
             )}
           </Button>

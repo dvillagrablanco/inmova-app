@@ -237,6 +237,10 @@ model User {
   pushSubscriptions    PushSubscription[]
 
   @@index([email])
+  
+  // Automatización de onboarding y soporte
+  onboardingProgress   OnboardingProgress[]
+  supportTickets       SupportTicket[]
   @@index([companyId])
   @@index([role, companyId])
   @@index([activo])
@@ -1073,6 +1077,10 @@ model Company {
   
   // CRM - Leads
   leads               Lead[]
+  
+  // Automatización de onboarding y soporte
+  onboardingProgress   OnboardingProgress[]
+  supportTickets       SupportTicket[]
 
   @@map("company")
 }
@@ -7381,3 +7389,66 @@ model LeadDocument {
 // ===========================
 
 // Suscripciones a notificaciones push
+
+// ============================================
+// MODELOS PARA AUTOMATIZACIÓN DE ONBOARDING Y SOPORTE
+// ============================================
+
+model OnboardingProgress {
+  id              String   @id @default(cuid())
+  userId          String
+  companyId       String
+  vertical        String   @default("residencial") // residencial, vacacional, coliving, comercial, etc.
+  currentStep     Int      @default(0)
+  totalSteps      Int      @default(0)
+  completedSteps  Json     @default("[]") // Array de IDs de pasos completados
+  startedAt       DateTime @default(now())
+  lastActivityAt  DateTime @default(now())
+  completedAt     DateTime?
+  
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, companyId])
+  @@index([userId])
+  @@index([companyId])
+}
+
+model SupportTicket {
+  id              String   @id @default(cuid())
+  userId          String
+  companyId       String
+  category        String   // technical, billing, feature_request, bug_report, question, onboarding
+  priority        String   // low, medium, high, critical
+  status          String   @default("open") // open, in_progress, waiting_user, resolved, closed
+  subject         String
+  description     String   @db.Text
+  tags            Json     @default("[]")
+  autoResolved    Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  resolvedAt      DateTime?
+  
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company         Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  messages        TicketMessage[]
+  
+  @@index([userId])
+  @@index([companyId])
+  @@index([status])
+  @@index([category])
+  @@index([priority])
+}
+
+model TicketMessage {
+  id              String   @id @default(cuid())
+  ticketId        String
+  sender          String   // user, system, ai
+  message         String   @db.Text
+  isAutomatic     Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  
+  ticket          SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  
+  @@index([ticketId])
+}

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { Home, Wand2, CheckCircle, Zap, Bot, BookOpen, MessageSquare, Sparkles } from 'lucide-react';
-import { WizardDialog } from '@/components/automation/WizardDialog';
+import WizardDialog from '@/components/automation/WizardDialog';
 import { AIAssistant } from '@/components/automation/AIAssistant';
 import { initialSetupWizard, createBuildingWizard, createTenantWizard } from '@/lib/wizard-config';
 import { toast } from 'sonner';
@@ -255,7 +255,7 @@ export default function AutomatizacionPage() {
       {/* Wizards */}
       <WizardDialog
         open={activeWizard === 'setup'}
-        onOpenChange={open => !open && setActiveWizard(null)}
+        onClose={() => setActiveWizard(null)}
         title="Configuración Inicial"
         description="Completa la configuración de tu cuenta en pocos minutos"
         steps={initialSetupWizard}
@@ -264,7 +264,7 @@ export default function AutomatizacionPage() {
 
       <WizardDialog
         open={activeWizard === 'building'}
-        onOpenChange={open => !open && setActiveWizard(null)}
+        onClose={() => setActiveWizard(null)}
         title="Crear Edificio"
         description="Registra un nuevo edificio con el asistente"
         steps={createBuildingWizard}
@@ -273,7 +273,7 @@ export default function AutomatizacionPage() {
 
       <WizardDialog
         open={activeWizard === 'tenant'}
-        onOpenChange={open => !open && setActiveWizard(null)}
+        onClose={() => setActiveWizard(null)}
         title="Registrar Inquilino"
         description="Añade un nuevo inquilino al sistema"
         steps={createTenantWizard}

@@ -24,8 +24,9 @@ import { PendingApprovals } from './components/pending-approvals';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import Link from 'next/link';
 import { AIAssistant } from '@/components/automation/AIAssistant';
-import { OnboardingChecklist } from '@/components/automation/OnboardingChecklist';
-import { ProactiveSuggestions } from '@/components/automation/ProactiveSuggestions';
+import SmartOnboardingWizard from '@/components/automation/SmartOnboardingWizard';
+import ProactiveSuggestions from '@/components/automation/ProactiveSuggestions';
+import IntelligentSupportChatbot from '@/components/automation/IntelligentSupportChatbot';
 
 interface DashboardData {
   kpis: {
@@ -121,11 +122,11 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          {/* Onboarding Checklist */}
-          {session?.user?.id && <OnboardingChecklist userId={session.user.id} />}
+          {/* Smart Onboarding Wizard - Sistema automatizado de configuraci\u00f3n inicial */}
+          <SmartOnboardingWizard />
 
-          {/* Proactive Suggestions */}
-          {session?.user?.id && <ProactiveSuggestions userId={session.user.id} />}
+          {/* Proactive Suggestions - Sugerencias inteligentes personalizadas */}
+          <ProactiveSuggestions />
 
           {/* KPIs Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -437,6 +438,8 @@ export default function DashboardPage() {
         </main>
       </div>
       <AIAssistant />
+      {/* Chatbot inteligente de soporte 24/7 - Sistema automatizado sin intervenci\u00f3n humana */}
+      <IntelligentSupportChatbot />
     </div>
   );
 }
