@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
-import { OnboardingTour } from '@/components/OnboardingTour';
+import { OnboardingTourEnhanced } from '@/components/OnboardingTourEnhanced';
 import { QuickAccessMenu } from '@/components/ui/quick-access-menu';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -136,7 +136,7 @@ export default function HomePage() {
 
   return (
     <>
-      {showOnboarding && <OnboardingTour onComplete={handleOnboardingComplete} />}
+      {showOnboarding && <OnboardingTourEnhanced onComplete={handleOnboardingComplete} />}
       <div className="flex h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
         <Sidebar />
         <div className="flex-1 flex flex-col ml-0 lg:ml-64">
