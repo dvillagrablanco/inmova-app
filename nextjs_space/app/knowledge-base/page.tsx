@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Sidebar } from '@/components/layout/sidebar';
+import { Header } from '@/components/layout/header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -16,10 +18,20 @@ import {
   TrendingUp,
   Star,
   Clock,
-  Sparkles
+  Sparkles,
+  ArrowLeft,
+  Home
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 
 interface KnowledgeArticle {
   id: string;
@@ -134,14 +146,42 @@ export default function KnowledgeBasePage() {
 
   if (selectedArticle) {
     return (
-      <div className="container mx-auto py-8 px-4 max-w-4xl">
-        <Button
-          variant="ghost"
-          onClick={() => setSelectedArticle(null)}
-          className="mb-4"
-        >
-          ← Volver a la base de conocimientos
-        </Button>
+      <div className="flex h-screen overflow-hidden bg-muted/30">
+        <Sidebar />
+        <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
+          <Header />
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <div className="max-w-4xl mx-auto space-y-6">
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedArticle(null)}
+                  className="gap-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Volver a Base de Conocimientos
+                </Button>
+                <Breadcrumb>
+                  <BreadcrumbList>
+                    <BreadcrumbItem>
+                      <BreadcrumbLink href="/dashboard">
+                        <Home className="h-4 w-4" />
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                      <BreadcrumbLink onClick={() => setSelectedArticle(null)}>
+                        Base de Conocimientos
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                      <BreadcrumbPage>{selectedArticle.title.substring(0, 30)}...</BreadcrumbPage>
+                    </BreadcrumbItem>
+                  </BreadcrumbList>
+                </Breadcrumb>
+              </div>
 
         <Card>
           <CardHeader>
@@ -216,12 +256,45 @@ export default function KnowledgeBasePage() {
             </div>
           </CardContent>
         </Card>
+            </div>
+          </main>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="flex h-screen overflow-hidden bg-muted/30">
+      <Sidebar />
+      <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
+        <Header />
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto space-y-6">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.location.href = '/dashboard'}
+                className="gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Volver al Dashboard
+              </Button>
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink href="/dashboard">
+                      <Home className="h-4 w-4" />
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>Base de Conocimientos</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
+            </div>
+
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">Base de Conocimientos</h1>
         <p className="text-muted-foreground text-lg">
@@ -332,6 +405,9 @@ export default function KnowledgeBasePage() {
             </motion.div>
           ))
         )}
+      </div>
+          </div>
+        </main>
       </div>
     </div>
   );

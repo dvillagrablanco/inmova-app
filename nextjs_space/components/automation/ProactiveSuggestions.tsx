@@ -85,6 +85,7 @@ export default function ProactiveSuggestions() {
   const router = useRouter();
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [dismissed, setDismissed] = useState<string[]>([]);
+  const [isWidgetVisible, setIsWidgetVisible] = useState(true);
 
   useEffect(() => {
     // En producción, esto vendría de la API
@@ -92,6 +93,13 @@ export default function ProactiveSuggestions() {
     const stored = localStorage.getItem('dismissed_suggestions');
     const dismissedIds = stored ? JSON.parse(stored) : [];
     setDismissed(dismissedIds);
+    
+    // Check if widget was hidden
+    const widgetHidden = localStorage.getItem('suggestions_widget_hidden');
+    if (widgetHidden === 'true') {
+      setIsWidgetVisible(false);
+      return;
+    }
     
     const filtered = MOCK_SUGGESTIONS.filter(s => !dismissedIds.includes(s.id));
     setSuggestions(filtered);
@@ -103,6 +111,12 @@ export default function ProactiveSuggestions() {
     localStorage.setItem('dismissed_suggestions', JSON.stringify(newDismissed));
     setSuggestions(prev => prev.filter(s => s.id !== id));
     toast.success('Sugerencia descartada');
+  };
+
+  const handleHideWidget = () => {
+    localStorage.setItem('suggestions_widget_hidden', 'true');
+    setIsWidgetVisible(false);
+    toast.success('Panel de sugerencias ocultado. Puedes reactivarlo desde Configuración.');
   };
 
   const handleAction = (suggestion: Suggestion) => {
@@ -138,7 +152,7 @@ export default function ProactiveSuggestions() {
     }
   };
 
-  if (suggestions.length === 0) {
+  if (!isWidgetVisible || suggestions.length === 0) {
     return null;
   }
 
@@ -158,6 +172,14 @@ export default function ProactiveSuggestions() {
           <Badge variant="outline">
             {suggestions.length} pendientes
           </Badge>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleHideWidget}
+            title="Ocultar panel de sugerencias"
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
       </CardHeader>
       <CardContent>
