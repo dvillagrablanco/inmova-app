@@ -9,7 +9,7 @@ import { prisma } from './db';
 // Configuración de VAPID keys
 // Para generar keys nuevas: `npx web-push generate-vapid-keys`
 const vapidKeys = {
-  publicKey: process.env.VAPID_PUBLIC_KEY,
+  publicKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || process.env.VAPID_PUBLIC_KEY,
   privateKey: process.env.VAPID_PRIVATE_KEY
 };
 

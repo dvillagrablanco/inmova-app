@@ -8,6 +8,8 @@ import { getAlegraService } from '@/lib/alegra-integration-service';
 import { getZucchettiService } from '@/lib/zucchetti-integration-service';
 import { getContaSimpleService } from '@/lib/contasimple-integration-service';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
