@@ -387,6 +387,26 @@ export async function getOrCreateOnboardingProgress(
   vertical: BusinessVertical = 'residencial'
 ): Promise<OnboardingProgress> {
   try {
+    // TEMPORALMENTE DESHABILITADO: Tabla no existe en el esquema
+    // TODO: Agregar modelo OnboardingProgress al schema.prisma
+    
+    // Retornar progreso por defecto
+    const steps = ONBOARDING_FLOWS[vertical] || ONBOARDING_FLOWS.residencial;
+    const defaultProgress: OnboardingProgress = {
+      userId,
+      companyId,
+      vertical,
+      currentStep: 0,
+      totalSteps: steps.length,
+      completedSteps: 0,
+      percentageComplete: 0,
+      steps: steps,
+      startedAt: new Date(),
+      lastActivityAt: new Date(),
+    };
+    return defaultProgress;
+    
+    /* CODIGO ORIGINAL COMENTADO:
     // Buscar progreso existente
     const existing = await prisma.onboardingProgress.findUnique({
       where: {
@@ -426,7 +446,12 @@ export async function getOrCreateOnboardingProgress(
 
     // Crear nuevo progreso
     const steps = ONBOARDING_FLOWS[vertical] || ONBOARDING_FLOWS.residencial;
-    const newProgress = await prisma.onboardingProgress.create({
+    
+    // Lanzar error para usar el catch block
+    throw new Error('OnboardingProgress table not available');
+    */ // FIN CODIGO ORIGINAL COMENTADO
+    
+    /*const newProgress = await prisma.onboardingProgress.create({
       data: {
         userId,
         companyId,
@@ -450,7 +475,7 @@ export async function getOrCreateOnboardingProgress(
       steps: steps,
       startedAt: newProgress.startedAt,
       lastActivityAt: newProgress.lastActivityAt
-    };
+    };*/
   } catch (error) {
     // Si la tabla no existe, devolver progreso por defecto
     console.error('Error accessing OnboardingProgress table:', error);
@@ -480,6 +505,9 @@ export async function completeOnboardingStep(
   companyId: string,
   stepId: string
 ): Promise<OnboardingProgress> {
+  // TEMPORALMENTE DESHABILITADO: Tabla no existe
+  return getOrCreateOnboardingProgress(userId, companyId);
+  
   try {
     const progress = await prisma.onboardingProgress.findUnique({
       where: {
@@ -542,6 +570,9 @@ export async function skipOnboarding(
   userId: string,
   companyId: string
 ): Promise<void> {
+  // TEMPORALMENTE DESHABILITADO: Tabla no existe
+  return;
+  
   await prisma.onboardingProgress.upsert({
     where: {
       userId_companyId: {
@@ -575,6 +606,9 @@ export async function restartOnboarding(
   companyId: string,
   vertical?: BusinessVertical
 ): Promise<OnboardingProgress> {
+  // TEMPORALMENTE DESHABILITADO: Tabla no existe
+  return getOrCreateOnboardingProgress(userId, companyId, vertical);
+  
   // Eliminar progreso existente
   await prisma.onboardingProgress.deleteMany({
     where: {
