@@ -2782,10 +2782,14 @@ model BankConnection {
   tenantId          String?
   tenant            Tenant?              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   
-  // Proveedor (Plaid, Tink, Yapily)
-  proveedor         String               // "plaid", "tink", "yapily"
+  // Proveedor (Plaid, Tink, Yapily, Bankinter/Redsys)
+  proveedor         String               // "plaid", "tink", "yapily", "bankinter_redsys"
   proveedorItemId   String?              @unique  // ID del item en el proveedor
   accessToken       String?              // Token encriptado
+  
+  // Open Banking PSD2 (Bankinter/Redsys)
+  consentId         String?              @unique  // ID del consentimiento AIS/PIS
+  consentValidUntil DateTime?            // Fecha de expiración del consentimiento
   
   // Datos del banco
   nombreBanco       String
@@ -2814,6 +2818,7 @@ model BankConnection {
   @@index([tenantId])
   @@index([estado])
   @@index([proveedorItemId])
+  @@index([consentId])
   @@map("bank_connections")
 }
 
@@ -2837,6 +2842,13 @@ model BankTransaction {
   beneficiario      String?
   referencia        String?
   tipoTransaccion   String?             // "transfer", "card_payment", "direct_debit"
+  
+  // Open Banking PSD2 (Bankinter/Redsys) - Datos adicionales
+  creditorName      String?             // Nombre del acreedor
+  creditorIban      String?             // IBAN del acreedor
+  debtorName        String?             // Nombre del deudor
+  debtorIban        String?             // IBAN del deudor
+  rawData           Json?               // Datos originales de la transacción (completo)
   
   // Conciliación
   estado            TransactionStatus   @default(pendiente_revision)
