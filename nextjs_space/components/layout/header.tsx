@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import { GlobalSearch } from '@/components/ui/global-search';
+import { EnhancedGlobalSearch } from '@/components/ui/enhanced-global-search';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useBranding } from '@/lib/hooks/useBranding';
@@ -168,7 +168,7 @@ export function Header() {
 
         {/* Global Search */}
         <div className="hidden flex-1 md:flex md:max-w-md">
-          <GlobalSearch />
+          <EnhancedGlobalSearch />
         </div>
 
         {/* Right Side Actions */}

@@ -15,6 +15,7 @@ import { Building2, CreditCard, Home, ArrowLeft, RefreshCw, TrendingUp, DollarSi
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { logError } from '@/lib/logger';
 
 interface BankConnection {
   id: string;
@@ -85,8 +86,10 @@ export default function OpenBankingPage() {
       const data = await res.json();
       setTransacciones(Array.isArray(data.transacciones) ? data.transacciones : []);
     } catch (error) {
-      console.error('Error al cargar transacciones:', error);
+      const err = error instanceof Error ? error : new Error('Error al cargar transacciones en Open Banking');
+      logError(err, { context: 'OpenBanking.loadTransactions' });
       setTransacciones([]);
+      toast.error('Error al cargar transacciones');
     }
   };
 
