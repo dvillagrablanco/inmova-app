@@ -1,62 +1,119 @@
-'use client';
+"use client";
 
-import { useEffect, useRef, RefObject } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 
-interface UseFocusTrapOptions {
-  active?: boolean;
-  initialFocus?: RefObject<HTMLElement>;
-}
+/**
+ * Hook to trap focus within a container (useful for modals, dialogs)
+ */
+export function useFocusTrap(enabled = true) {
+  const containerRef = useRef<HTMLElement>(null);
 
-export function useFocusTrap<T extends HTMLElement>(
-  options: UseFocusTrapOptions = {}
-): RefObject<T> {
-  const { active = true, initialFocus } = options;
-  const containerRef = useRef<T>(null);
+  const getFocusableElements = useCallback(() => {
+    if (!containerRef.current) return [];
+
+    const focusableSelectors = [
+      'a[href]',
+      'button:not([disabled])',
+      'textarea:not([disabled])',
+      'input:not([disabled])',
+      'select:not([disabled])',
+      '[tabindex]:not([tabindex="-1"])',
+    ].join(', ');
+
+    return Array.from(
+      containerRef.current.querySelectorAll<HTMLElement>(focusableSelectors)
+    );
+  }, []);
 
   useEffect(() => {
-    if (!active || !containerRef.current) return;
+    if (!enabled || !containerRef.current) return;
 
     const container = containerRef.current;
-    const focusableElements = container.querySelectorAll<HTMLElement>(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
+    const focusableElements = getFocusableElements();
 
     if (focusableElements.length === 0) return;
 
     const firstElement = focusableElements[0];
     const lastElement = focusableElements[focusableElements.length - 1];
 
-    // Enfocar el elemento inicial o el primer elemento
-    if (initialFocus?.current) {
-      initialFocus.current.focus();
-    } else {
-      firstElement.focus();
-    }
+    // Store the element that had focus before trap was activated
+    const previouslyFocusedElement = document.activeElement as HTMLElement;
 
-    const handleTabKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return;
+    // Focus the first element
+    firstElement.focus();
 
-      if (e.shiftKey) {
-        // Si estamos en el primer elemento, ir al último
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') return;
+
+      const focusableElements = getFocusableElements();
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      if (event.shiftKey) {
+        // Shift + Tab
         if (document.activeElement === firstElement) {
-          e.preventDefault();
+          event.preventDefault();
           lastElement.focus();
         }
       } else {
-        // Si estamos en el último elemento, ir al primero
+        // Tab
         if (document.activeElement === lastElement) {
-          e.preventDefault();
+          event.preventDefault();
           firstElement.focus();
         }
       }
     };
 
-    container.addEventListener('keydown', handleTabKey);
+    container.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      container.removeEventListener('keydown', handleTabKey);
+      container.removeEventListener('keydown', handleKeyDown);
+      // Restore focus to previously focused element
+      previouslyFocusedElement?.focus();
     };
-  }, [active, initialFocus]);
+  }, [enabled, getFocusableElements]);
 
   return containerRef;
+}
+
+/**
+ * Hook to manage focus for a roving tabindex pattern
+ * (useful for lists, toolbars, etc.)
+ */
+export function useRovingTabIndex(itemsCount: number) {
+  const itemsRef = useRef<(HTMLElement | null)[]>([]);
+  const currentIndexRef = useRef(0);
+
+  const setItemRef = useCallback((index: number, element: HTMLElement | null) => {
+    itemsRef.current[index] = element;
+    
+    // Update tabindex
+    itemsRef.current.forEach((item, i) => {
+      if (item) {
+        item.tabIndex = i === currentIndexRef.current ? 0 : -1;
+      }
+    });
+  }, []);
+
+  const focusItem = useCallback((index: number) => {
+    if (index < 0 || index >= itemsCount) return;
+
+    currentIndexRef.current = index;
+    
+    // Update tabindex for all items
+    itemsRef.current.forEach((item, i) => {
+      if (item) {
+        item.tabIndex = i === index ? 0 : -1;
+      }
+    });
+
+    // Focus the item
+    itemsRef.current[index]?.focus();
+  }, [itemsCount]);
+
+  return {
+    setItemRef,
+    focusItem,
+    currentIndex: currentIndexRef.current,
+  };
 }

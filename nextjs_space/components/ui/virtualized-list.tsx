@@ -1,69 +1,147 @@
-'use client';
+"use client";
 
-import { useRef, useState, useEffect, ReactNode, CSSProperties } from 'react';
-import { cn } from '@/lib/utils';
+import React from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 
 interface VirtualizedListProps<T> {
   items: T[];
-  renderItem: (item: T, index: number) => ReactNode;
-  itemHeight: number;
-  containerHeight: number;
+  renderItem: (item: T, index: number) => React.ReactNode;
+  estimateSize?: number;
   overscan?: number;
   className?: string;
-  gap?: number;
 }
 
+/**
+ * Virtualized list component for rendering large lists efficiently
+ * Only renders visible items + overscan buffer
+ */
 export function VirtualizedList<T>({
   items,
   renderItem,
-  itemHeight,
-  containerHeight,
-  overscan = 3,
+  estimateSize = 50,
+  overscan = 5,
   className,
-  gap = 0,
 }: VirtualizedListProps<T>) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [scrollTop, setScrollTop] = useState(0);
+  const parentRef = React.useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const handleScroll = () => {
-      setScrollTop(container.scrollTop);
-    };
-
-    container.addEventListener('scroll', handleScroll);
-    return () => container.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const totalHeight = items.length * (itemHeight + gap);
-  const startIndex = Math.max(0, Math.floor(scrollTop / (itemHeight + gap)) - overscan);
-  const endIndex = Math.min(
-    items.length - 1,
-    Math.ceil((scrollTop + containerHeight) / (itemHeight + gap)) + overscan
-  );
-
-  const visibleItems = items.slice(startIndex, endIndex + 1);
-  const offsetY = startIndex * (itemHeight + gap);
+  const virtualizer = useVirtualizer({
+    count: items.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => estimateSize,
+    overscan,
+  });
 
   return (
     <div
-      ref={containerRef}
-      className={cn('overflow-auto', className)}
-      style={{ height: containerHeight }}
+      ref={parentRef}
+      className={className}
+      style={{
+        height: '100%',
+        overflow: 'auto',
+      }}
     >
-      <div style={{ height: totalHeight, position: 'relative' }}>
-        <div style={{ transform: `translateY(${offsetY}px)` }}>
-          {visibleItems.map((item, i) => (
+      <div
+        style={{
+          height: `${virtualizer.getTotalSize()}px`,
+          width: '100%',
+          position: 'relative',
+        }}
+      >
+        {virtualizer.getVirtualItems().map((virtualRow) => (
+          <div
+            key={virtualRow.index}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: `${virtualRow.size}px`,
+              transform: `translateY(${virtualRow.start}px)`,
+            }}
+          >
+            {renderItem(items[virtualRow.index], virtualRow.index)}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+interface VirtualizedTableProps<T> {
+  items: T[];
+  columns: {
+    header: string;
+    accessor: (item: T) => React.ReactNode;
+    width?: string;
+  }[];
+  estimateSize?: number;
+  overscan?: number;
+  className?: string;
+}
+
+/**
+ * Virtualized table component for large datasets
+ */
+export function VirtualizedTable<T>({
+  items,
+  columns,
+  estimateSize = 48,
+  overscan = 10,
+  className,
+}: VirtualizedTableProps<T>) {
+  const parentRef = React.useRef<HTMLDivElement>(null);
+
+  const virtualizer = useVirtualizer({
+    count: items.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => estimateSize,
+    overscan,
+  });
+
+  return (
+    <div className={className}>
+      {/* Table Header */}
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(0,1fr))] gap-4 p-4 bg-muted font-medium border-b">
+        {columns.map((column, index) => (
+          <div key={index} style={{ width: column.width }}>
+            {column.header}
+          </div>
+        ))}
+      </div>
+
+      {/* Virtualized Table Body */}
+      <div
+        ref={parentRef}
+        style={{
+          height: '600px',
+          overflow: 'auto',
+        }}
+      >
+        <div
+          style={{
+            height: `${virtualizer.getTotalSize()}px`,
+            width: '100%',
+            position: 'relative',
+          }}
+        >
+          {virtualizer.getVirtualItems().map((virtualRow) => (
             <div
-              key={startIndex + i}
+              key={virtualRow.index}
+              className="grid grid-cols-[repeat(auto-fit,minmax(0,1fr))] gap-4 p-4 border-b hover:bg-muted/50"
               style={{
-                height: itemHeight,
-                marginBottom: gap,
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: `${virtualRow.size}px`,
+                transform: `translateY(${virtualRow.start}px)`,
               }}
             >
-              {renderItem(item, startIndex + i)}
+              {columns.map((column, colIndex) => (
+                <div key={colIndex} style={{ width: column.width }}>
+                  {column.accessor(items[virtualRow.index])}
+                </div>
+              ))}
             </div>
           ))}
         </div>
@@ -72,55 +150,82 @@ export function VirtualizedList<T>({
   );
 }
 
-// Versión simplificada para listas con altura variable
-interface SimpleVirtualListProps<T> {
+interface VirtualizedGridProps<T> {
   items: T[];
-  renderItem: (item: T, index: number) => ReactNode;
-  estimatedItemHeight?: number;
-  containerHeight: number;
+  renderItem: (item: T, index: number) => React.ReactNode;
+  columns?: number;
+  gap?: number;
+  estimateSize?: number;
+  overscan?: number;
   className?: string;
 }
 
-export function SimpleVirtualList<T>({
+/**
+ * Virtualized grid component for rendering items in a grid layout
+ */
+export function VirtualizedGrid<T>({
   items,
   renderItem,
-  estimatedItemHeight = 100,
-  containerHeight,
+  columns = 3,
+  gap = 16,
+  estimateSize = 200,
+  overscan = 5,
   className,
-}: SimpleVirtualListProps<T>) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [visibleRange, setVisibleRange] = useState({ start: 0, end: 20 });
+}: VirtualizedGridProps<T>) {
+  const parentRef = React.useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+  // Calculate rows
+  const rows = Math.ceil(items.length / columns);
 
-    const handleScroll = () => {
-      const scrollTop = container.scrollTop;
-      const start = Math.floor(scrollTop / estimatedItemHeight);
-      const end = Math.ceil((scrollTop + containerHeight) / estimatedItemHeight) + 5;
-
-      setVisibleRange({ start, end });
-    };
-
-    container.addEventListener('scroll', handleScroll);
-    return () => container.removeEventListener('scroll', handleScroll);
-  }, [containerHeight, estimatedItemHeight]);
-
-  const visibleItems = items.slice(visibleRange.start, visibleRange.end);
+  const virtualizer = useVirtualizer({
+    count: rows,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => estimateSize,
+    overscan,
+  });
 
   return (
     <div
-      ref={containerRef}
-      className={cn('overflow-auto', className)}
-      style={{ height: containerHeight }}
+      ref={parentRef}
+      className={className}
+      style={{
+        height: '100%',
+        overflow: 'auto',
+      }}
     >
-      <div style={{ paddingTop: visibleRange.start * estimatedItemHeight }}>
-        {visibleItems.map((item, i) => (
-          <div key={visibleRange.start + i}>
-            {renderItem(item, visibleRange.start + i)}
-          </div>
-        ))}
+      <div
+        style={{
+          height: `${virtualizer.getTotalSize()}px`,
+          width: '100%',
+          position: 'relative',
+        }}
+      >
+        {virtualizer.getVirtualItems().map((virtualRow) => {
+          const startIndex = virtualRow.index * columns;
+          const rowItems = items.slice(startIndex, startIndex + columns);
+
+          return (
+            <div
+              key={virtualRow.index}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: `${virtualRow.size}px`,
+                transform: `translateY(${virtualRow.start}px)`,
+                display: 'grid',
+                gridTemplateColumns: `repeat(${columns}, 1fr)`,
+                gap: `${gap}px`,
+                padding: `0 ${gap}px`,
+              }}
+            >
+              {rowItems.map((item, index) =>
+                renderItem(item, startIndex + index)
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
