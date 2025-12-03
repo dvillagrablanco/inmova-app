@@ -2,6 +2,22 @@ import { prisma } from './db';
 import { SignatureStatus, SignerStatus } from '@prisma/client';
 import logger, { logError } from '@/lib/logger';
 
+// ============================================================================
+// CONFIGURACIÓN - Variables de Entorno
+// ============================================================================
+const DOCUSIGN_INTEGRATION_KEY = process.env.DOCUSIGN_INTEGRATION_KEY;
+const DOCUSIGN_USER_ID = process.env.DOCUSIGN_USER_ID;
+const DOCUSIGN_ACCOUNT_ID = process.env.DOCUSIGN_ACCOUNT_ID;
+const DOCUSIGN_PRIVATE_KEY = process.env.DOCUSIGN_PRIVATE_KEY;
+const DOCUSIGN_BASE_PATH = process.env.DOCUSIGN_BASE_PATH || 'https://demo.docusign.net/restapi';
+
+const SIGNATURIT_API_KEY = process.env.SIGNATURIT_API_KEY;
+const SIGNATURIT_SANDBOX = process.env.SIGNATURIT_SANDBOX === 'true';
+
+// Detectar si hay credenciales configuradas
+const isDocuSignConfigured = !!(DOCUSIGN_INTEGRATION_KEY && DOCUSIGN_USER_ID && DOCUSIGN_ACCOUNT_ID);
+const isSignaturitConfigured = !!SIGNATURIT_API_KEY;
+
 interface FirmanteData {
   email: string;
   nombre: string;
@@ -20,8 +36,69 @@ interface CrearDocumentoFirmaParams {
   firmantes: FirmanteData[];
   creadoPor: string;
   diasExpiracion?: number;
+  provider?: 'docusign' | 'signaturit' | 'demo';
 }
 
+// ============================================================================
+// FUNCIONES AUXILIARES - Integración con Proveedores
+// ============================================================================
+
+/**
+ * Determina qué proveedor usar basándose en la configuración y preferencias
+ */
+export function getActiveProvider(): 'docusign' | 'signaturit' | 'demo' {
+  if (isDocuSignConfigured) return 'docusign';
+  if (isSignaturitConfigured) return 'signaturit';
+  return 'demo';
+}
+
+/**
+ * Envia documento a DocuSign (cuando esté configurado)
+ */
+async function enviarDocuSignEnvelope(params: {
+  titulo: string;
+  documentUrl: string;
+  mensaje?: string;
+  firmantes: FirmanteData[];
+  diasExpiracion: number;
+}) {
+  // TODO: Implementar integración real con DocuSign API
+  // Referencia: https://developers.docusign.com/docs/esign-rest-api/
+  
+  logger.info('📧 [DocuSign] Envío de documento (preparado para integración real)');
+  
+  return {
+    envelopeId: `DS_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    status: 'sent',
+    message: 'Documento enviado via DocuSign (simulado - configure credenciales)'
+  };
+}
+
+/**
+ * Envia documento a Signaturit (cuando esté configurado)
+ */
+async function enviarSignaturitDocument(params: {
+  titulo: string;
+  documentUrl: string;
+  mensaje?: string;
+  firmantes: FirmanteData[];
+  diasExpiracion: number;
+}) {
+  // TODO: Implementar integración real con Signaturit API
+  // Referencia: https://docs.signaturit.com/
+  
+  logger.info('📧 [Signaturit] Envío de documento (preparado para integración real)');
+  
+  return {
+    documentId: `SIG_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    status: 'sent',
+    message: 'Documento enviado via Signaturit (simulado - configure credenciales)'
+  };
+}
+
+/**
+ * Crea una solicitud de firma digital
+ */
 export async function crearSolicitudFirma(params: CrearDocumentoFirmaParams) {
   const {
     companyId,
@@ -33,13 +110,44 @@ export async function crearSolicitudFirma(params: CrearDocumentoFirmaParams) {
     mensaje,
     firmantes,
     creadoPor,
-    diasExpiracion = 30
+    diasExpiracion = 30,
+    provider: requestedProvider
   } = params;
 
   const fechaExpiracion = new Date();
   fechaExpiracion.setDate(fechaExpiracion.getDate() + diasExpiracion);
 
-  const signaturitRequestId = `DEMO_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  // Determinar proveedor a usar
+  const provider = requestedProvider || getActiveProvider();
+  let externalId: string;
+  let providerMessage: string;
+
+  // Enviar a proveedor externo si está configurado
+  if (provider === 'docusign' && isDocuSignConfigured) {
+    const result = await enviarDocuSignEnvelope({
+      titulo,
+      documentUrl,
+      mensaje,
+      firmantes,
+      diasExpiracion
+    });
+    externalId = result.envelopeId;
+    providerMessage = result.message;
+  } else if (provider === 'signaturit' && isSignaturitConfigured) {
+    const result = await enviarSignaturitDocument({
+      titulo,
+      documentUrl,
+      mensaje,
+      firmantes,
+      diasExpiracion
+    });
+    externalId = result.documentId;
+    providerMessage = result.message;
+  } else {
+    // Modo demo
+    externalId = `DEMO_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    providerMessage = '[MODO DEMO] Documento enviado para firma (simulado)';
+  }
 
   const documento = await prisma.documentoFirma.create({
     data: {
@@ -49,7 +157,7 @@ export async function crearSolicitudFirma(params: CrearDocumentoFirmaParams) {
       titulo,
       tipoDocumento,
       urlDocumento: documentUrl,
-      signaturitId: signaturitRequestId,
+      signaturitId: externalId,
       estado: SignatureStatus.pendiente,
       diasExpiracion,
       fechaExpiracion,
@@ -71,12 +179,13 @@ export async function crearSolicitudFirma(params: CrearDocumentoFirmaParams) {
     }
   });
 
-  logger.info(`📧 [MODO DEMO] Envío simulado de ${firmantes.length} invitaciones de firma`);
+  logger.info(`✍️ Solicitud de firma creada: ${documento.id} via ${provider}`);
 
   return {
     success: true,
     documento,
-    message: '[MODO DEMO] Documento enviado para firma (simulado)'
+    provider,
+    message: providerMessage
   };
 }
 

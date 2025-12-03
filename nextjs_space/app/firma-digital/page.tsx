@@ -24,10 +24,24 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   FileText, 
   Plus, 
@@ -38,7 +52,14 @@ import {
   XCircle,
   Users,
   Send,
-  RefreshCw
+  RefreshCw,
+  Search,
+  Filter,
+  Download,
+  Mail,
+  Eye,
+  Calendar,
+  AlertCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -78,10 +99,17 @@ export default function FirmaDigitalPage() {
   const router = useRouter();
   
   const [documentos, setDocumentos] = useState<DocumentoFirma[]>([]);
+  const [documentosFiltrados, setDocumentosFiltrados] = useState<DocumentoFirma[]>([]);
   const [loading, setLoading] = useState(true);
   const [mostrarDialogoNuevo, setMostrarDialogoNuevo] = useState(false);
   const [mostrarDialogoDetalle, setMostrarDialogoDetalle] = useState(false);
   const [documentoSeleccionado, setDocumentoSeleccionado] = useState<DocumentoFirma | null>(null);
+
+  // Estados de filtros
+  const [filtroEstado, setFiltroEstado] = useState<string>('todos');
+  const [filtroTipo, setFiltroTipo] = useState<string>('todos');
+  const [busqueda, setBusqueda] = useState('');
+  const [vistaActual, setVistaActual] = useState<'cards' | 'tabla'>('cards');
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -94,6 +122,10 @@ export default function FirmaDigitalPage() {
       cargarDocumentos();
     }
   }, [session]);
+
+  useEffect(() => {
+    aplicarFiltros();
+  }, [documentos, filtroEstado, filtroTipo, busqueda]);
 
   const cargarDocumentos = async () => {
     try {
@@ -111,6 +143,32 @@ export default function FirmaDigitalPage() {
     }
   };
 
+  const aplicarFiltros = () => {
+    let resultado = [...documentos];
+
+    // Filtrar por estado
+    if (filtroEstado !== 'todos') {
+      resultado = resultado.filter(doc => doc.estado === filtroEstado);
+    }
+
+    // Filtrar por tipo
+    if (filtroTipo !== 'todos') {
+      resultado = resultado.filter(doc => doc.tipoDocumento === filtroTipo);
+    }
+
+    // Buscar por texto
+    if (busqueda) {
+      const busquedaLower = busqueda.toLowerCase();
+      resultado = resultado.filter(doc => 
+        doc.titulo.toLowerCase().includes(busquedaLower) ||
+        doc.tenant?.nombreCompleto.toLowerCase().includes(busquedaLower) ||
+        doc.firmantes.some(f => f.nombre.toLowerCase().includes(busquedaLower))
+      );
+    }
+
+    setDocumentosFiltrados(resultado);
+  };
+
   const verDetalle = async (documentoId: string) => {
     try {
       const response = await fetch(`/api/digital-signature/${documentoId}`);
@@ -125,13 +183,50 @@ export default function FirmaDigitalPage() {
     }
   };
 
+  const enviarRecordatorio = async (documentoId: string) => {
+    try {
+      const response = await fetch(`/api/digital-signature/${documentoId}/reminder`, {
+        method: 'POST'
+      });
+
+      if (!response.ok) throw new Error('Error enviando recordatorio');
+
+      toast.success('✅ Recordatorio enviado a firmantes pendientes');
+    } catch (error) {
+      logger.error('Error:', error);
+      toast.error('Error al enviar recordatorio');
+    }
+  };
+
+  const cancelarDocumento = async (documentoId: string) => {
+    if (!confirm('¿Está seguro de que desea cancelar esta solicitud de firma?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/digital-signature/${documentoId}/cancel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ motivo: 'Cancelado por el usuario' })
+      });
+
+      if (!response.ok) throw new Error('Error cancelando documento');
+
+      toast.success('✅ Solicitud de firma cancelada');
+      cargarDocumentos();
+    } catch (error) {
+      logger.error('Error:', error);
+      toast.error('Error al cancelar solicitud');
+    }
+  };
+
   const getEstadoBadge = (estado: string) => {
     const estados: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-      'borrador': { label: 'Borrador', variant: 'secondary' },
+      'pendiente': { label: 'Pendiente', variant: 'secondary' },
       'enviado': { label: 'Enviado', variant: 'default' },
-      'firmado_parcial': { label: 'Firmado Parcial', variant: 'outline' },
-      'firmado_completo': { label: 'Completado', variant: 'default' },
+      'firmado': { label: 'Completado', variant: 'default' },
       'rechazado': { label: 'Rechazado', variant: 'destructive' },
+      'cancelado': { label: 'Cancelado', variant: 'outline' },
       'expirado': { label: 'Expirado', variant: 'destructive' }
     };
 
@@ -141,10 +236,12 @@ export default function FirmaDigitalPage() {
 
   const kpis = {
     total: documentos.length,
-    pendientes: documentos.filter(d => d.estado === 'enviado').length,
-    completados: documentos.filter(d => d.estado === 'firmado_completo').length,
+    pendientes: documentos.filter(d => d.estado === 'pendiente' || d.estado === 'enviado').length,
+    completados: documentos.filter(d => d.estado === 'firmado').length,
     rechazados: documentos.filter(d => d.estado === 'rechazado').length
   };
+
+  const tiposDocumento = Array.from(new Set(documentos.map(d => d.tipoDocumento)));
 
   if (status === 'loading' || loading) {
     return (
@@ -258,26 +355,124 @@ export default function FirmaDigitalPage() {
             </Card>
           </div>
 
+          {/* Filtros y búsqueda */}
+          <Card className="mb-6">
+            <CardContent className="pt-6">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="flex flex-1 gap-4">
+                  {/* Búsqueda */}
+                  <div className="relative flex-1 max-w-md">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      placeholder="Buscar por título, inquilino o firmante..."
+                      value={busqueda}
+                      onChange={(e) => setBusqueda(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+
+                  {/* Filtro por estado */}
+                  <Select value={filtroEstado} onValueChange={setFiltroEstado}>
+                    <SelectTrigger className="w-[180px]">
+                      <Filter className="mr-2 h-4 w-4" />
+                      <SelectValue placeholder="Estado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="todos">Todos los estados</SelectItem>
+                      <SelectItem value="pendiente">Pendiente</SelectItem>
+                      <SelectItem value="firmado">Completado</SelectItem>
+                      <SelectItem value="rechazado">Rechazado</SelectItem>
+                      <SelectItem value="cancelado">Cancelado</SelectItem>
+                      <SelectItem value="expirado">Expirado</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  {/* Filtro por tipo */}
+                  <Select value={filtroTipo} onValueChange={setFiltroTipo}>
+                    <SelectTrigger className="w-[180px]">
+                      <FileText className="mr-2 h-4 w-4" />
+                      <SelectValue placeholder="Tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="todos">Todos los tipos</SelectItem>
+                      {tiposDocumento.map(tipo => (
+                        <SelectItem key={tipo} value={tipo}>
+                          {tipo.charAt(0).toUpperCase() + tipo.slice(1)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button
+                    variant={vistaActual === 'cards' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setVistaActual('cards')}
+                  >
+                    Cards
+                  </Button>
+                  <Button
+                    variant={vistaActual === 'tabla' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setVistaActual('tabla')}
+                  >
+                    Tabla
+                  </Button>
+                </div>
+              </div>
+
+              {(filtroEstado !== 'todos' || filtroTipo !== 'todos' || busqueda) && (
+                <div className="mt-4 flex items-center gap-2">
+                  <Badge variant="outline">
+                    {documentosFiltrados.length} de {documentos.length} documentos
+                  </Badge>
+                  {(filtroEstado !== 'todos' || filtroTipo !== 'todos' || busqueda) && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setFiltroEstado('todos');
+                        setFiltroTipo('todos');
+                        setBusqueda('');
+                      }}
+                      className="h-7 px-2"
+                    >
+                      Limpiar filtros
+                    </Button>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Lista de documentos */}
           <div className="space-y-4">
-            {documentos.length === 0 ? (
+            {documentosFiltrados.length === 0 ? (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <FileText className="h-12 w-12 text-muted-foreground/50" />
-                  <p className="mt-4 text-muted-foreground">No hay documentos de firma</p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setMostrarDialogoNuevo(true)}
-                    className="mt-4 gap-2"
-                  >
-                    <Plus className="h-4 w-4" />
-                    Crear Primera Solicitud
-                  </Button>
+                  <p className="mt-4 text-muted-foreground">
+                    {documentos.length === 0 
+                      ? 'No hay documentos de firma' 
+                      : 'No se encontraron documentos con los filtros aplicados'}
+                  </p>
+                  {documentos.length === 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setMostrarDialogoNuevo(true)}
+                      className="mt-4 gap-2"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Crear Primera Solicitud
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
-            ) : (
-              documentos.map((doc) => {
+            ) : vistaActual === 'cards' ? (
+              // Vista de Cards
+              documentosFiltrados.map((doc) => {
                 const firmantesCompletados = doc.firmantes.filter(f => f.estado === 'firmado').length;
                 const totalFirmantes = doc.firmantes.length;
 
@@ -318,25 +513,134 @@ export default function FirmaDigitalPage() {
                               📅 Creado: {format(new Date(doc.createdAt), 'PPP', { locale: es })}
                             </p>
                             {doc.fechaExpiracion && (
-                              <p>
-                                ⏰ Expira: {format(new Date(doc.fechaExpiracion), 'PPP', { locale: es })}
+                              <p className={
+                                new Date(doc.fechaExpiracion) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                                  ? 'text-orange-600 font-medium'
+                                  : ''
+                              }>
+                                <Calendar className="inline h-4 w-4 mr-1" />
+                                Expira: {format(new Date(doc.fechaExpiracion), 'PPP', { locale: es })}
                               </p>
                             )}
                           </div>
                         </div>
 
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => verDetalle(doc.id)}
-                        >
-                          Ver Detalle
-                        </Button>
+                        <div className="flex flex-col gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => verDetalle(doc.id)}
+                            className="gap-2"
+                          >
+                            <Eye className="h-4 w-4" />
+                            Ver Detalle
+                          </Button>
+                          
+                          {doc.estado === 'pendiente' && (
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => enviarRecordatorio(doc.id)}
+                                className="gap-2"
+                              >
+                                <Mail className="h-4 w-4" />
+                                Recordatorio
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => cancelarDocumento(doc.id)}
+                                className="gap-2 text-destructive hover:text-destructive"
+                              >
+                                <XCircle className="h-4 w-4" />
+                                Cancelar
+                              </Button>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
                 );
               })
+            ) : (
+              // Vista de Tabla
+              <Card>
+                <CardContent className="p-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Documento</TableHead>
+                        <TableHead>Tipo</TableHead>
+                        <TableHead>Estado</TableHead>
+                        <TableHead>Firmantes</TableHead>
+                        <TableHead>Fecha</TableHead>
+                        <TableHead className="text-right">Acciones</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {documentosFiltrados.map((doc) => {
+                        const firmantesCompletados = doc.firmantes.filter(f => f.estado === 'firmado').length;
+                        const totalFirmantes = doc.firmantes.length;
+
+                        return (
+                          <TableRow key={doc.id}>
+                            <TableCell>
+                              <div>
+                                <p className="font-medium">{doc.titulo}</p>
+                                {doc.tenant && (
+                                  <p className="text-sm text-muted-foreground">
+                                    {doc.tenant.nombreCompleto}
+                                  </p>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell className="capitalize">{doc.tipoDocumento}</TableCell>
+                            <TableCell>{getEstadoBadge(doc.estado)}</TableCell>
+                            <TableCell>
+                              {firmantesCompletados}/{totalFirmantes}
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground">
+                              {format(new Date(doc.createdAt), 'PP', { locale: es })}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => verDetalle(doc.id)}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                {doc.estado === 'pendiente' && (
+                                  <>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => enviarRecordatorio(doc.id)}
+                                    >
+                                      <Mail className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => cancelarDocumento(doc.id)}
+                                      className="text-destructive hover:text-destructive"
+                                    >
+                                      <XCircle className="h-4 w-4" />
+                                    </Button>
+                                  </>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
             )}
           </div>
 
