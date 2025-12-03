@@ -101,13 +101,17 @@ export default function HouseFlippingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white text-lg h-14 px-8">
-              <ArrowRight className="mr-2 h-5 w-5" />
-              Probar Gratis con LAUNCH2025
-            </Button>
-            <Button size="lg" variant="outline" className="border-orange-600 text-orange-600 hover:bg-orange-50 text-lg h-14 px-8">
-              Ver Demo en Vivo
-            </Button>
+            <Link href="/register?coupon=LAUNCH2025">
+              <Button size="lg" className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white text-lg h-14 px-8">
+                <ArrowRight className="mr-2 h-5 w-5" />
+                Probar Gratis con LAUNCH2025
+              </Button>
+            </Link>
+            <Link href="/landing/demo?module=house-flipping">
+              <Button size="lg" variant="outline" className="border-orange-600 text-orange-600 hover:bg-orange-50 text-lg h-14 px-8">
+                Ver Demo en Vivo
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

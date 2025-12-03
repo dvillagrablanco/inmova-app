@@ -508,6 +508,7 @@ export async function completeOnboardingStep(
   // TEMPORALMENTE DESHABILITADO: Tabla no existe
   return getOrCreateOnboardingProgress(userId, companyId);
   
+  /* CÓDIGO DESHABILITADO - La tabla OnboardingProgress no existe aún
   try {
     const progress = await prisma.onboardingProgress.findUnique({
       where: {
@@ -561,6 +562,7 @@ export async function completeOnboardingStep(
     // Si hay error, devolver progreso por defecto
     return getOrCreateOnboardingProgress(userId, companyId, 'residencial');
   }
+  */
 }
 
 /**

@@ -161,13 +161,17 @@ export default function ColivingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white text-lg h-14 px-8">
-              <ArrowRight className="mr-2 h-5 w-5" />
-              Probar Gratis con COLIVING50
-            </Button>
-            <Button size="lg" variant="outline" className="border-cyan-600 text-cyan-600 hover:bg-cyan-50 text-lg h-14 px-8">
-              Ver Demo en Vivo
-            </Button>
+            <Link href="/register?coupon=COLIVING50">
+              <Button size="lg" className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white text-lg h-14 px-8">
+                <ArrowRight className="mr-2 h-5 w-5" />
+                Probar Gratis con COLIVING50
+              </Button>
+            </Link>
+            <Link href="/landing/demo?module=coliving">
+              <Button size="lg" variant="outline" className="border-cyan-600 text-cyan-600 hover:bg-cyan-50 text-lg h-14 px-8">
+                Ver Demo en Vivo
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

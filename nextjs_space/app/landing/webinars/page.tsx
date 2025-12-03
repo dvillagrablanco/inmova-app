@@ -174,10 +174,12 @@ export default function WebinarsPage() {
               <Calendar className="mr-2 h-5 w-5" />
               Ver Próximos Webinars
             </Button>
-            <Button size="lg" variant="outline" className="border-indigo-600 text-indigo-600 hover:bg-indigo-50 text-lg h-14 px-8">
-              <PlayCircle className="mr-2 h-5 w-5" />
-              Ver Grabaciones Anteriores
-            </Button>
+            <Link href="/landing/webinars?section=grabaciones">
+              <Button size="lg" variant="outline" className="border-indigo-600 text-indigo-600 hover:bg-indigo-50 text-lg h-14 px-8">
+                <PlayCircle className="mr-2 h-5 w-5" />
+                Ver Grabaciones Anteriores
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

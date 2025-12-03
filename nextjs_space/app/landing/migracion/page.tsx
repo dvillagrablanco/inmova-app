@@ -63,11 +63,24 @@ export default function MigracionPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <Button size="lg" className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white text-lg h-14 px-8">
+            <Button 
+              size="lg" 
+              className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white text-lg h-14 px-8"
+              onClick={() => {
+                window.open('/landing/contacto?subject=Plantilla%20Excel', '_blank');
+              }}
+            >
               <Download className="mr-2 h-5 w-5" />
               Descargar Plantilla Excel
             </Button>
-            <Button size="lg" variant="outline" className="border-indigo-600 text-indigo-600 hover:bg-indigo-50 text-lg h-14 px-8">
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="border-indigo-600 text-indigo-600 hover:bg-indigo-50 text-lg h-14 px-8"
+              onClick={() => {
+                window.open('/landing/contacto?subject=Video%20Tutorial', '_blank');
+              }}
+            >
               <PlayCircle className="mr-2 h-5 w-5" />
               Ver Video Tutorial
             </Button>
@@ -165,7 +178,13 @@ export default function MigracionPage() {
                   </div>
 
                   <div className="flex justify-center">
-                    <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white">
+                    <Button 
+                      size="lg" 
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                      onClick={() => {
+                        window.open('/landing/contacto?subject=Plantilla%20Excel%20INMOVA', '_blank');
+                      }}
+                    >
                       <Download className="mr-2 h-5 w-5" />
                       Descargar Plantilla Excel INMOVA
                     </Button>
