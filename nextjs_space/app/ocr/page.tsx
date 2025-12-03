@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
-import { processImageOCR, extractDNIData, extractContractData } from '@/lib/ocr-service';
+import { processImageOCR, processDocument, extractDNIData, extractContractData, isFileTypeSupported, getSupportedFileTypes } from '@/lib/ocr-service';
 import logger, { logError } from '@/lib/logger';
 
 interface OCRResult {
@@ -53,40 +53,45 @@ export default function OCRPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Validar tipo de archivo
-      if (!file.type.startsWith('image/')) {
-        toast.error('Por favor selecciona una imagen válida');
+      // Validar tipo de archivo usando la función del servicio
+      if (!isFileTypeSupported(file.type)) {
+        toast.error('Tipo de archivo no soportado. Se permiten: Imágenes (JPG, PNG, GIF, BMP, TIFF), PDF, DOC, DOCX');
         return;
       }
 
-      // Validar tamaño (max 10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error('La imagen no puede superar los 10MB');
+      // Validar tamaño (max 20MB para PDFs/DOCs, 10MB para imágenes)
+      const maxSize = file.type.startsWith('image/') ? 10 * 1024 * 1024 : 20 * 1024 * 1024;
+      if (file.size > maxSize) {
+        toast.error(`El archivo no puede superar los ${maxSize / (1024 * 1024)}MB`);
         return;
       }
 
       setSelectedFile(file);
       setResult(null);
 
-      // Crear preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      // Crear preview solo para imágenes
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setPreviewUrl(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        setPreviewUrl('');
+      }
     }
   };
 
   const processOCR = async () => {
     if (!selectedFile) {
-      toast.error('Por favor selecciona una imagen primero');
+      toast.error('Por favor selecciona un archivo primero');
       return;
     }
 
     setProcessing(true);
     try {
-      // Procesar la imagen con OCR
-      const ocrResult = await processImageOCR(selectedFile);
+      // Procesar el documento con OCR (detecta automáticamente el tipo)
+      const ocrResult = await processDocument(selectedFile);
 
       let extractedData: any = {};
 
@@ -182,11 +187,11 @@ export default function OCRPage() {
                   <CardContent>
                     <div className="space-y-4">
                       <div>
-                        <Label htmlFor="file-general">Seleccionar Imagen</Label>
+                        <Label htmlFor="file-general">Seleccionar Archivo (Imagen, PDF o DOC)</Label>
                         <Input
                           id="file-general"
                           type="file"
-                          accept="image/*"
+                          accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                           onChange={handleFileChange}
                           className="mt-2"
                         />
@@ -208,11 +213,11 @@ export default function OCRPage() {
                   <CardContent>
                     <div className="space-y-4">
                       <div>
-                        <Label htmlFor="file-dni">Seleccionar Imagen del DNI</Label>
+                        <Label htmlFor="file-dni">Seleccionar Archivo (Imagen, PDF o DOC) del DNI</Label>
                         <Input
                           id="file-dni"
                           type="file"
-                          accept="image/*"
+                          accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                           onChange={handleFileChange}
                           className="mt-2"
                         />
@@ -234,11 +239,11 @@ export default function OCRPage() {
                   <CardContent>
                     <div className="space-y-4">
                       <div>
-                        <Label htmlFor="file-contract">Seleccionar Imagen del Contrato</Label>
+                        <Label htmlFor="file-contract">Seleccionar Archivo (Imagen, PDF o DOC) del Contrato</Label>
                         <Input
                           id="file-contract"
                           type="file"
-                          accept="image/*"
+                          accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                           onChange={handleFileChange}
                           className="mt-2"
                         />
@@ -449,10 +454,10 @@ export default function OCRPage() {
                 <CardContent className="pt-12 pb-12 text-center">
                   <Upload className="h-16 w-16 mx-auto text-gray-400 mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    Sube una imagen para comenzar
+                    Sube un archivo (imagen, PDF o DOC) para comenzar
                   </h3>
                   <p className="text-gray-600">
-                    Selecciona el tipo de documento arriba y luego sube la imagen
+                    Selecciona el tipo de documento arriba y luego sube el archivo
                   </p>
                 </CardContent>
               </Card>
