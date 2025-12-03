@@ -1,232 +1,174 @@
-"use client";
+'use client';
 
-import React from 'react';
-import { useVirtualizer } from '@tanstack/react-virtual';
+import { memo, CSSProperties } from 'react';
+// @ts-ignore - tipos de react-window pueden no estar disponibles
+import { FixedSizeList as List } from 'react-window';
+// @ts-ignore - tipos de react-virtualized-auto-sizer pueden no estar disponibles
+import AutoSizer from 'react-virtualized-auto-sizer';
+import { cn } from '@/lib/utils';
+
+// Tipo para las props de cada fila en la lista virtualizada
+interface RowProps {
+  index: number;
+  style: CSSProperties;
+}
 
 interface VirtualizedListProps<T> {
   items: T[];
+  itemHeight: number;
   renderItem: (item: T, index: number) => React.ReactNode;
-  estimateSize?: number;
-  overscan?: number;
   className?: string;
+  emptyMessage?: string;
+  onItemClick?: (item: T, index: number) => void;
 }
 
 /**
- * Virtualized list component for rendering large lists efficiently
- * Only renders visible items + overscan buffer
+ * Componente de lista virtualizada para mejorar el rendimiento con listas largas
+ * Solo renderiza los items visibles en el viewport
+ * 
+ * Beneficios:
+ * - Renderiza solo items visibles (~10-20 items en lugar de 1000+)
+ * - Scroll suave incluso con miles de items
+ * - Reduce significativamente el uso de memoria
+ * - Mejora el tiempo de carga inicial
  */
-export function VirtualizedList<T>({
+function VirtualizedListInner<T>({
   items,
+  itemHeight,
   renderItem,
-  estimateSize = 50,
-  overscan = 5,
-  className,
+  className = '',
+  emptyMessage = 'No hay elementos para mostrar',
+  onItemClick,
 }: VirtualizedListProps<T>) {
-  const parentRef = React.useRef<HTMLDivElement>(null);
+  // Si no hay items, mostrar mensaje vacío
+  if (items.length === 0) {
+    return (
+      <div className={cn('flex items-center justify-center p-8 text-gray-500', className)}>
+        <p>{emptyMessage}</p>
+      </div>
+    );
+  }
 
-  const virtualizer = useVirtualizer({
-    count: items.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => estimateSize,
-    overscan,
-  });
+  // Componente Row para cada item
+  const Row = ({ index, style }: RowProps) => {
+    const item = items[index];
+    
+    return (
+      <div
+        style={style}
+        className={cn(
+          'border-b border-gray-100 last:border-0',
+          onItemClick && 'cursor-pointer hover:bg-gray-50 transition-colors'
+        )}
+        onClick={() => onItemClick?.(item, index)}
+      >
+        {renderItem(item, index)}
+      </div>
+    );
+  };
 
   return (
-    <div
-      ref={parentRef}
-      className={className}
-      style={{
-        height: '100%',
-        overflow: 'auto',
-      }}
-    >
-      <div
-        style={{
-          height: `${virtualizer.getTotalSize()}px`,
-          width: '100%',
-          position: 'relative',
-        }}
-      >
-        {virtualizer.getVirtualItems().map((virtualRow) => (
-          <div
-            key={virtualRow.index}
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: `${virtualRow.size}px`,
-              transform: `translateY(${virtualRow.start}px)`,
-            }}
+    <div className={cn('h-full w-full', className)}>
+      <AutoSizer>
+        {({ height, width }: { height: number; width: number }) => (
+          <List
+            height={height}
+            itemCount={items.length}
+            itemSize={itemHeight}
+            width={width}
+            className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
           >
-            {renderItem(items[virtualRow.index], virtualRow.index)}
-          </div>
-        ))}
-      </div>
+            {Row}
+          </List>
+        )}
+      </AutoSizer>
     </div>
   );
 }
 
-interface VirtualizedTableProps<T> {
-  items: T[];
-  columns: {
-    header: string;
-    accessor: (item: T) => React.ReactNode;
-    width?: string;
-  }[];
-  estimateSize?: number;
-  overscan?: number;
-  className?: string;
-}
+// Memoizado para evitar re-renders innecesarios
+export const VirtualizedList = memo(VirtualizedListInner) as typeof VirtualizedListInner;
 
 /**
- * Virtualized table component for large datasets
+ * Hook para usar con VirtualizedList
+ * Proporciona métodos útiles para manejar listas largas
  */
-export function VirtualizedTable<T>({
-  items,
-  columns,
-  estimateSize = 48,
-  overscan = 10,
-  className,
-}: VirtualizedTableProps<T>) {
-  const parentRef = React.useRef<HTMLDivElement>(null);
-
-  const virtualizer = useVirtualizer({
+export function useVirtualizedList<T>(items: T[]) {
+  return {
+    items,
     count: items.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => estimateSize,
-    overscan,
-  });
-
-  return (
-    <div className={className}>
-      {/* Table Header */}
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(0,1fr))] gap-4 p-4 bg-muted font-medium border-b">
-        {columns.map((column, index) => (
-          <div key={index} style={{ width: column.width }}>
-            {column.header}
-          </div>
-        ))}
-      </div>
-
-      {/* Virtualized Table Body */}
-      <div
-        ref={parentRef}
-        style={{
-          height: '600px',
-          overflow: 'auto',
-        }}
-      >
-        <div
-          style={{
-            height: `${virtualizer.getTotalSize()}px`,
-            width: '100%',
-            position: 'relative',
-          }}
-        >
-          {virtualizer.getVirtualItems().map((virtualRow) => (
-            <div
-              key={virtualRow.index}
-              className="grid grid-cols-[repeat(auto-fit,minmax(0,1fr))] gap-4 p-4 border-b hover:bg-muted/50"
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: `${virtualRow.size}px`,
-                transform: `translateY(${virtualRow.start}px)`,
-              }}
-            >
-              {columns.map((column, colIndex) => (
-                <div key={colIndex} style={{ width: column.width }}>
-                  {column.accessor(items[virtualRow.index])}
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-interface VirtualizedGridProps<T> {
-  items: T[];
-  renderItem: (item: T, index: number) => React.ReactNode;
-  columns?: number;
-  gap?: number;
-  estimateSize?: number;
-  overscan?: number;
-  className?: string;
+    isEmpty: items.length === 0,
+    // Calcular altura total estimada
+    estimatedHeight: (itemHeight: number) => items.length * itemHeight,
+  };
 }
 
 /**
- * Virtualized grid component for rendering items in a grid layout
+ * Variante con altura variable (más compleja pero más flexible)
+ * Usar cuando los items tienen alturas diferentes
  */
-export function VirtualizedGrid<T>({
+export interface VariableHeightItem {
+  height: number;
+  data: any;
+}
+
+interface VariableVirtualizedListProps {
+  items: VariableHeightItem[];
+  renderItem: (item: any, index: number) => React.ReactNode;
+  className?: string;
+  emptyMessage?: string;
+  onItemClick?: (item: any, index: number) => void;
+}
+
+export function VariableVirtualizedList({
   items,
   renderItem,
-  columns = 3,
-  gap = 16,
-  estimateSize = 200,
-  overscan = 5,
-  className,
-}: VirtualizedGridProps<T>) {
-  const parentRef = React.useRef<HTMLDivElement>(null);
+  className = '',
+  emptyMessage = 'No hay elementos para mostrar',
+  onItemClick,
+}: VariableVirtualizedListProps) {
+  if (items.length === 0) {
+    return (
+      <div className={cn('flex items-center justify-center p-8 text-gray-500', className)}>
+        <p>{emptyMessage}</p>
+      </div>
+    );
+  }
 
-  // Calculate rows
-  const rows = Math.ceil(items.length / columns);
+  const getItemSize = (index: number) => items[index]?.height || 50;
 
-  const virtualizer = useVirtualizer({
-    count: rows,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => estimateSize,
-    overscan,
-  });
+  const Row = ({ index, style }: RowProps) => {
+    const item = items[index]?.data;
+    
+    return (
+      <div
+        style={style}
+        className={cn(
+          'border-b border-gray-100 last:border-0',
+          onItemClick && 'cursor-pointer hover:bg-gray-50 transition-colors'
+        )}
+        onClick={() => onItemClick?.(item, index)}
+      >
+        {renderItem(item, index)}
+      </div>
+    );
+  };
 
   return (
-    <div
-      ref={parentRef}
-      className={className}
-      style={{
-        height: '100%',
-        overflow: 'auto',
-      }}
-    >
-      <div
-        style={{
-          height: `${virtualizer.getTotalSize()}px`,
-          width: '100%',
-          position: 'relative',
-        }}
-      >
-        {virtualizer.getVirtualItems().map((virtualRow) => {
-          const startIndex = virtualRow.index * columns;
-          const rowItems = items.slice(startIndex, startIndex + columns);
-
-          return (
-            <div
-              key={virtualRow.index}
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: `${virtualRow.size}px`,
-                transform: `translateY(${virtualRow.start}px)`,
-                display: 'grid',
-                gridTemplateColumns: `repeat(${columns}, 1fr)`,
-                gap: `${gap}px`,
-                padding: `0 ${gap}px`,
-              }}
-            >
-              {rowItems.map((item, index) =>
-                renderItem(item, startIndex + index)
-              )}
-            </div>
-          );
-        })}
-      </div>
+    <div className={cn('h-full w-full', className)}>
+      <AutoSizer>
+        {({ height, width }: { height: number; width: number }) => (
+          <List
+            height={height}
+            itemCount={items.length}
+            itemSize={getItemSize}
+            width={width}
+            className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
+          >
+            {Row}
+          </List>
+        )}
+      </AutoSizer>
     </div>
   );
 }

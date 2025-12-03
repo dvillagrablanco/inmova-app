@@ -2,6 +2,7 @@
 
 import { LucideIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { memo } from 'react';
 
 interface KPICardProps {
   title: string;
@@ -15,7 +16,15 @@ interface KPICardProps {
   className?: string;
 }
 
-export function KPICard({ title, value, icon: Icon, trend, suffix = '', className = '' }: KPICardProps) {
+// Optimizado con React.memo para evitar re-renders innecesarios
+export const KPICard = memo(function KPICard({ 
+  title, 
+  value, 
+  icon: Icon, 
+  trend, 
+  suffix = '', 
+  className = '' 
+}: KPICardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -48,4 +57,4 @@ export function KPICard({ title, value, icon: Icon, trend, suffix = '', classNam
       </div>
     </motion.div>
   );
-}
+});
