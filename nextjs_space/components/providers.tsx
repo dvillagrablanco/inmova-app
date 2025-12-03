@@ -10,30 +10,33 @@ import { I18nProvider } from '@/lib/i18n-context';
 import { BrandingProvider } from '@/components/BrandingProvider';
 import { DesignSystemProvider } from '@/components/DesignSystemProvider';
 import { QueryProvider } from '@/components/QueryProvider';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <SessionProvider>
-      <QueryProvider>
-        <DesignSystemProvider>
-          <BrandingProvider>
-            <I18nProvider>
-              <ThemeProvider
-                attribute="class"
-                defaultTheme="light"
-                enableSystem
-                disableTransitionOnChange
-              >
-                <ServiceWorkerRegister />
-                {children}
-                <InstallPrompt />
-                <ConnectivityIndicator />
-                <Toaster />
-              </ThemeProvider>
-            </I18nProvider>
-          </BrandingProvider>
-        </DesignSystemProvider>
-      </QueryProvider>
-    </SessionProvider>
+    <ErrorBoundary>
+      <SessionProvider>
+        <QueryProvider>
+          <DesignSystemProvider>
+            <BrandingProvider>
+              <I18nProvider>
+                <ThemeProvider
+                  attribute="class"
+                  defaultTheme="light"
+                  enableSystem
+                  disableTransitionOnChange
+                >
+                  <ServiceWorkerRegister />
+                  {children}
+                  <InstallPrompt />
+                  <ConnectivityIndicator />
+                  <Toaster />
+                </ThemeProvider>
+              </I18nProvider>
+            </BrandingProvider>
+          </DesignSystemProvider>
+        </QueryProvider>
+      </SessionProvider>
+    </ErrorBoundary>
   );
 }
