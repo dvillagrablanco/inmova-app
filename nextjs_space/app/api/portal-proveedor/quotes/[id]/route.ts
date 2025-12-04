@@ -5,8 +5,8 @@ import { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 /**
- * GET /api/portal-proveedor/invoices/[id]
- * Obtiene los detalles de una factura específica
+ * GET /api/portal-proveedor/quotes/[id]
+ * Obtiene los detalles de un presupuesto específico
  */
 export async function GET(
   request: NextRequest,
@@ -22,7 +22,7 @@ export async function GET(
       );
     }
 
-    const invoice = await prisma.providerInvoice.findUnique({
+    const quote = await prisma.providerQuote.findUnique({
       where: { id: params.id },
       include: {
         workOrder: {
@@ -30,6 +30,7 @@ export async function GET(
             id: true,
             titulo: true,
             descripcion: true,
+            prioridad: true,
             building: {
               select: {
                 id: true,
@@ -37,11 +38,12 @@ export async function GET(
                 direccion: true,
               },
             },
-          },
-        },
-        payments: {
-          orderBy: {
-            fechaPago: 'desc',
+            unit: {
+              select: {
+                id: true,
+                numero: true,
+              },
+            },
           },
         },
         provider: {
@@ -56,36 +58,36 @@ export async function GET(
       },
     });
 
-    if (!invoice) {
+    if (!quote) {
       return NextResponse.json(
-        { error: 'Factura no encontrada' },
+        { error: 'Presupuesto no encontrado' },
         { status: 404 }
       );
     }
 
-    // Verificar que la factura pertenece al proveedor
-    if (invoice.providerId !== providerId) {
+    // Verificar que el presupuesto pertenece al proveedor
+    if (quote.providerId !== providerId) {
       return NextResponse.json(
-        { error: 'No tienes permisos para ver esta factura' },
+        { error: 'No tienes permisos para ver este presupuesto' },
         { status: 403 }
       );
     }
 
-    return NextResponse.json(invoice);
+    return NextResponse.json(quote);
   } catch (error) {
     logError(error instanceof Error ? error : new Error(String(error)), {
-      context: 'GET /api/portal-proveedor/invoices/[id]',
+      context: 'GET /api/portal-proveedor/quotes/[id]',
     });
     return NextResponse.json(
-      { error: 'Error al obtener factura' },
+      { error: 'Error al obtener presupuesto' },
       { status: 500 }
     );
   }
 }
 
 /**
- * PATCH /api/portal-proveedor/invoices/[id]
- * Actualiza una factura (enviarla, por ejemplo)
+ * PATCH /api/portal-proveedor/quotes/[id]
+ * Actualiza un presupuesto (editar, enviar, retirar)
  */
 export async function PATCH(
   request: NextRequest,
@@ -101,48 +103,58 @@ export async function PATCH(
       );
     }
 
-    // Verificar que la factura existe y pertenece al proveedor
-    const invoice = await prisma.providerInvoice.findUnique({
+    // Verificar que el presupuesto existe y pertenece al proveedor
+    const quote = await prisma.providerQuote.findUnique({
       where: { id: params.id },
     });
 
-    if (!invoice) {
+    if (!quote) {
       return NextResponse.json(
-        { error: 'Factura no encontrada' },
+        { error: 'Presupuesto no encontrado' },
         { status: 404 }
       );
     }
 
-    if (invoice.providerId !== providerId) {
+    if (quote.providerId !== providerId) {
       return NextResponse.json(
-        { error: 'No tienes permisos para modificar esta factura' },
+        { error: 'No tienes permisos para modificar este presupuesto' },
         { status: 403 }
       );
     }
 
     const body = await request.json();
-    const { estado, notas } = body;
-
-    // Validar transición de estados
-    if (estado && estado !== 'enviada' && invoice.estado === 'borrador') {
-      return NextResponse.json(
-        { error: 'Solo puedes enviar facturas en borrador' },
-        { status: 400 }
-      );
-    }
+    const { conceptos, notas, tiempoEjecucion, condicionesPago } = body;
 
     const updateData: any = {};
 
-    if (estado === 'enviada' && invoice.estado === 'borrador') {
-      updateData.estado = 'enviada';
-      updateData.fechaEnvio = new Date();
+    // Si se actualizan conceptos, recalcular totales
+    if (conceptos && Array.isArray(conceptos)) {
+      const subtotal = conceptos.reduce(
+        (sum: number, item: any) => sum + (item.cantidad * item.precioUnitario),
+        0
+      );
+      const iva = subtotal * 0.21;
+      const total = subtotal + iva;
+
+      updateData.conceptos = conceptos;
+      updateData.subtotal = subtotal;
+      updateData.iva = iva;
+      updateData.total = total;
     }
 
     if (notas !== undefined) {
       updateData.notas = notas;
     }
 
-    const updatedInvoice = await prisma.providerInvoice.update({
+    if (tiempoEjecucion !== undefined) {
+      updateData.tiempoEjecucion = tiempoEjecucion;
+    }
+
+    if (condicionesPago !== undefined) {
+      updateData.condicionesPago = condicionesPago;
+    }
+
+    const updatedQuote = await prisma.providerQuote.update({
       where: { id: params.id },
       data: updateData,
       include: {
@@ -158,17 +170,16 @@ export async function PATCH(
             },
           },
         },
-        payments: true,
       },
     });
 
-    return NextResponse.json(updatedInvoice);
+    return NextResponse.json(updatedQuote);
   } catch (error) {
     logError(error instanceof Error ? error : new Error(String(error)), {
-      context: 'PATCH /api/portal-proveedor/invoices/[id]',
+      context: 'PATCH /api/portal-proveedor/quotes/[id]',
     });
     return NextResponse.json(
-      { error: 'Error al actualizar factura' },
+      { error: 'Error al actualizar presupuesto' },
       { status: 500 }
     );
   }

@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Briefcase, Clock, CheckCircle, TrendingUp, Euro, Star, LogOut, ClipboardList } from 'lucide-react';
+import { Briefcase, Clock, CheckCircle, TrendingUp, Euro, Star, LogOut, ClipboardList, FileText, DollarSign, MessageCircle, Award } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -85,7 +85,6 @@ export default function ProveedorDashboardPage() {
         <div className="flex items-center justify-between mb-6">
           <div><h1 className="text-3xl font-bold">Portal del Proveedor</h1><p className="text-muted-foreground mt-1">Bienvenido, {data.proveedor.nombre}</p></div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => router.push('/portal-proveedor/ordenes')}><ClipboardList className="h-4 w-4 mr-2" />Ver Órdenes</Button>
             <Button variant="outline" onClick={handleLogout}><LogOut className="h-4 w-4 mr-2" />Cerrar Sesión</Button>
           </div>
         </div>
@@ -97,6 +96,57 @@ export default function ProveedorDashboardPage() {
           <div><p className="text-sm text-muted-foreground">Rating</p><div className="flex items-center gap-1"><Star className="h-4 w-4 fill-amber-400 text-amber-400" /><span className="font-medium">{data.proveedor.rating.toFixed(1)}</span></div></div>
           <div><p className="text-sm text-muted-foreground">Rating Promedio</p><div className="flex items-center gap-1"><Star className="h-4 w-4 fill-amber-400 text-amber-400" /><span className="font-medium">{data.kpis.ratingPromedio.toFixed(1)}</span></div></div>
         </div></CardContent></Card>
+
+        {/* Men\u00fa de Navegaci\u00f3n */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Acceso R\u00e1pido</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+              <Button
+                variant="outline"
+                className="h-auto py-4 flex flex-col items-center gap-2"
+                onClick={() => router.push('/portal-proveedor/ordenes')}
+              >
+                <ClipboardList className="h-6 w-6" />
+                <span className="text-sm font-medium">\u00d3rdenes de Trabajo</span>
+              </Button>
+              <Button
+                variant="outline"
+                className="h-auto py-4 flex flex-col items-center gap-2"
+                onClick={() => router.push('/portal-proveedor/facturas')}
+              >
+                <FileText className="h-6 w-6" />
+                <span className="text-sm font-medium">Facturas</span>
+              </Button>
+              <Button
+                variant="outline"
+                className="h-auto py-4 flex flex-col items-center gap-2"
+                onClick={() => router.push('/portal-proveedor/presupuestos')}
+              >
+                <DollarSign className="h-6 w-6" />
+                <span className="text-sm font-medium">Presupuestos</span>
+              </Button>
+              <Button
+                variant="outline"
+                className="h-auto py-4 flex flex-col items-center gap-2"
+                onClick={() => router.push('/portal-proveedor/rese\u00f1as')}
+              >
+                <Award className="h-6 w-6" />
+                <span className="text-sm font-medium">Rese\u00f1as</span>
+              </Button>
+              <Button
+                variant="outline"
+                className="h-auto py-4 flex flex-col items-center gap-2"
+                onClick={() => router.push('/portal-proveedor/chat')}
+              >
+                <MessageCircle className="h-6 w-6" />
+                <span className="text-sm font-medium">Mensajer\u00eda</span>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Total Órdenes</CardTitle><Briefcase className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{data.kpis.totalOrdenes}</div></CardContent></Card>

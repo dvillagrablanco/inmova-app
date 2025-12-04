@@ -29,7 +29,7 @@ export default function ProveedorOrdenesPage() {
   const [proveedor, setProveedor] = useState<any>(null);
   const [filterEstado, setFilterEstado] = useState('todas');
   const [rechazarDialogOpen, setRechazarDialogOpen] = useState(false);
-  const [ordenARechazan, setOrdenARechazar] = useState<string | null>(null);
+  const [ordenARechazar, setOrdenARechazar] = useState<string | null>(null);
   const [motivoRechazo, setMotivoRechazo] = useState('');
   const [processingAction, setProcessingAction] = useState<string | null>(null);
 

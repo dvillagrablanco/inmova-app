@@ -5,8 +5,8 @@ import { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 /**
- * GET /api/portal-proveedor/invoices
- * Obtiene las facturas del proveedor autenticado
+ * GET /api/portal-proveedor/quotes
+ * Obtiene los presupuestos del proveedor autenticado
  */
 export async function GET(request: NextRequest) {
   try {
@@ -51,48 +51,50 @@ export async function GET(request: NextRequest) {
       where.workOrderId = workOrderId;
     }
 
-    // Obtener facturas
-    const invoices = await prisma.providerInvoice.findMany({
+    // Obtener presupuestos
+    const quotes = await prisma.providerQuote.findMany({
       where,
       include: {
         workOrder: {
           select: {
             id: true,
             titulo: true,
+            descripcion: true,
             building: {
               select: {
                 id: true,
                 nombre: true,
               },
             },
-          },
-        },
-        payments: {
-          orderBy: {
-            fechaPago: 'desc',
+            unit: {
+              select: {
+                id: true,
+                numero: true,
+              },
+            },
           },
         },
       },
       orderBy: {
-        fechaEmision: 'desc',
+        createdAt: 'desc',
       },
     });
 
-    return NextResponse.json(invoices);
+    return NextResponse.json(quotes);
   } catch (error) {
     logError(error instanceof Error ? error : new Error(String(error)), {
-      context: 'GET /api/portal-proveedor/invoices',
+      context: 'GET /api/portal-proveedor/quotes',
     });
     return NextResponse.json(
-      { error: 'Error al obtener facturas' },
+      { error: 'Error al obtener presupuestos' },
       { status: 500 }
     );
   }
 }
 
 /**
- * POST /api/portal-proveedor/invoices
- * Crea una nueva factura para una orden de trabajo
+ * POST /api/portal-proveedor/quotes
+ * Crea un nuevo presupuesto para una orden de trabajo
  */
 export async function POST(request: NextRequest) {
   try {
@@ -121,20 +123,22 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const {
       workOrderId,
-      numeroFactura,
+      titulo,
+      descripcion,
       conceptos, // Array de { descripcion, cantidad, precioUnitario }
+      validezDias,
       notas,
     } = body;
 
     // Validar campos requeridos
-    if (!workOrderId || !numeroFactura || !conceptos || !Array.isArray(conceptos) || conceptos.length === 0) {
+    if (!workOrderId || !titulo || !conceptos || !Array.isArray(conceptos) || conceptos.length === 0) {
       return NextResponse.json(
         { error: 'Faltan campos requeridos' },
         { status: 400 }
       );
     }
 
-    // Verificar que la orden de trabajo existe y pertenece al proveedor
+    // Verificar que la orden de trabajo existe
     const workOrder = await prisma.providerWorkOrder.findUnique({
       where: { id: workOrderId },
     });
@@ -143,13 +147,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Orden de trabajo no encontrada' },
         { status: 404 }
-      );
-    }
-
-    if (workOrder.providerId !== providerId) {
-      return NextResponse.json(
-        { error: 'No tienes permisos para facturar esta orden' },
-        { status: 403 }
       );
     }
 
@@ -162,24 +159,28 @@ export async function POST(request: NextRequest) {
     const montoIva = subtotal * (iva / 100);
     const total = subtotal + montoIva;
 
-    // Calcular fecha de vencimiento (30 días por defecto)
+    // Calcular fecha de vencimiento
     const fechaVencimiento = new Date();
-    fechaVencimiento.setDate(fechaVencimiento.getDate() + 30);
+    if (validezDias) {
+      fechaVencimiento.setDate(fechaVencimiento.getDate() + parseInt(validezDias));
+    } else {
+      fechaVencimiento.setDate(fechaVencimiento.getDate() + 30); // 30 días por defecto
+    }
 
-    // Crear la factura
-    const invoice = await prisma.providerInvoice.create({
+    // Crear el presupuesto
+    const quote = await prisma.providerQuote.create({
       data: {
-        numeroFactura,
         workOrderId,
         providerId,
         companyId: provider.companyId,
+        titulo,
+        descripcion: descripcion || '',
         conceptos: conceptos,
         subtotal,
         iva,
         montoIva,
         total,
-        estado: 'borrador',
-        fechaEmision: new Date(),
+        estado: 'pendiente',
         fechaVencimiento,
         notas,
       },
@@ -199,13 +200,13 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(invoice, { status: 201 });
+    return NextResponse.json(quote, { status: 201 });
   } catch (error) {
     logError(error instanceof Error ? error : new Error(String(error)), {
-      context: 'POST /api/portal-proveedor/invoices',
+      context: 'POST /api/portal-proveedor/quotes',
     });
     return NextResponse.json(
-      { error: 'Error al crear factura' },
+      { error: 'Error al crear presupuesto' },
       { status: 500 }
     );
   }
