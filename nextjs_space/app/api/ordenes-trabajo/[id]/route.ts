@@ -19,44 +19,75 @@ export async function PATCH(
 
     const body = await req.json();
     const {
+      titulo,
+      descripcion,
+      tipo,
       estado,
+      prioridad,
+      providerId,
+      buildingId,
+      unitId,
+      fechaAsignacion,
+      fechaEstimada,
       fechaInicio,
       fechaCompletado,
+      presupuestoInicial,
+      costoTotal,
+      notas,
       fotosAntes,
       fotosDespues,
       materialesUsados,
       horasTrabajadas,
       costoMateriales,
       costoManoObra,
-      costoTotal,
       firmadoPor,
       firmaDigital,
       valoracion,
       comentarios,
     } = body;
 
-    const updateData: any = {
-      ...(estado && {
-        estado,
-        ...(estado === 'en_progreso' && fechaInicio
-          ? { fechaInicio: new Date(fechaInicio) }
-          : {}),
-        ...(estado === 'completada' && fechaCompletado
-          ? { fechaCompletado: new Date(fechaCompletado), fechaFirma: new Date() }
-          : {}),
-      }),
-      ...(fotosAntes && { fotosAntes }),
-      ...(fotosDespues && { fotosDespues }),
-      ...(materialesUsados && { materialesUsados }),
-      ...(horasTrabajadas !== undefined && { horasTrabajadas }),
-      ...(costoMateriales !== undefined && { costoMateriales }),
-      ...(costoManoObra !== undefined && { costoManoObra }),
-      ...(costoTotal !== undefined && { costoTotal }),
-      ...(firmadoPor && { firmadoPor }),
-      ...(firmaDigital && { firmaDigital }),
-      ...(valoracion !== undefined && { valoracion }),
-      ...(comentarios && { comentarios }),
-    };
+    const updateData: any = {};
+    
+    // Campos básicos editables
+    if (titulo !== undefined) updateData.titulo = titulo;
+    if (descripcion !== undefined) updateData.descripcion = descripcion;
+    if (tipo !== undefined) updateData.tipo = tipo;
+    if (prioridad !== undefined) updateData.prioridad = prioridad;
+    if (providerId !== undefined) updateData.providerId = providerId;
+    if (buildingId !== undefined) updateData.buildingId = buildingId;
+    if (unitId !== undefined) updateData.unitId = unitId;
+    if (notas !== undefined) updateData.notas = notas;
+    
+    // Fechas
+    if (fechaAsignacion) updateData.fechaAsignacion = new Date(fechaAsignacion);
+    if (fechaEstimada) updateData.fechaEstimada = new Date(fechaEstimada);
+    if (fechaInicio) updateData.fechaInicio = new Date(fechaInicio);
+    if (fechaCompletado) updateData.fechaCompletado = new Date(fechaCompletado);
+    
+    // Estado con lógica especial
+    if (estado) {
+      updateData.estado = estado;
+      if (estado === 'completada' && !fechaCompletado) {
+        updateData.fechaCompletado = new Date();
+        updateData.fechaFirma = new Date();
+      }
+    }
+    
+    // Costos
+    if (presupuestoInicial !== undefined) updateData.presupuestoInicial = presupuestoInicial;
+    if (costoTotal !== undefined) updateData.costoTotal = costoTotal;
+    if (costoMateriales !== undefined) updateData.costoMateriales = costoMateriales;
+    if (costoManoObra !== undefined) updateData.costoManoObra = costoManoObra;
+    
+    // Otros campos
+    if (fotosAntes) updateData.fotosAntes = fotosAntes;
+    if (fotosDespues) updateData.fotosDespues = fotosDespues;
+    if (materialesUsados) updateData.materialesUsados = materialesUsados;
+    if (horasTrabajadas !== undefined) updateData.horasTrabajadas = horasTrabajadas;
+    if (firmadoPor) updateData.firmadoPor = firmadoPor;
+    if (firmaDigital) updateData.firmaDigital = firmaDigital;
+    if (valoracion !== undefined) updateData.valoracion = valoracion;
+    if (comentarios) updateData.comentarios = comentarios;
 
     const orden = await prisma.providerWorkOrder.update({
       where: { id: params.id },

@@ -610,8 +610,6 @@ function InquilinosPageContent() {
             ? `Se eliminará a ${tenantToDelete.nombreCompleto} y todos sus datos asociados. Esta acción no se puede deshacer.`
             : undefined
         }
-        confirmText="Sí, eliminar"
-        isLoading={isDeleting}
       />
     </div>
   );

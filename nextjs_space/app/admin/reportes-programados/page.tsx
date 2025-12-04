@@ -1024,7 +1024,7 @@ export default function ReportesProgramadosPage() {
         description={`¿Estás seguro de que deseas eliminar el reporte "${deletingReport?.nombre}"? Esta acción no se puede deshacer.`}
         onConfirm={handleDelete}
         confirmText="Eliminar"
-        isLoading={isDeleting}
+        loading={isDeleting}
       />
 
       {/* ConfirmDialog para enviar reporte */}

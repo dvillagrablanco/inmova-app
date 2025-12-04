@@ -551,8 +551,6 @@ function ContratosPageContent() {
             ? `Se eliminará el contrato de ${contractToDelete.tenant.nombreCompleto} para la unidad ${contractToDelete.unit.numero}. Esta acción no se puede deshacer.`
             : 'Se eliminará el contrato y todos sus datos asociados.'
         }
-        confirmText="Sí, eliminar"
-        isLoading={isDeleting}
       />
     </div>
   );

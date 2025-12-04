@@ -616,7 +616,7 @@ export default function PlantillasSMSPage() {
         description={`¿Estás seguro de que deseas eliminar la plantilla "${deletingTemplate?.nombre}"? Esta acción no se puede deshacer.`}
         onConfirm={handleDelete}
         confirmText="Eliminar"
-        isLoading={isDeleting}
+        loading={isDeleting}
       />
     </div>
   );

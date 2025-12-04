@@ -62,24 +62,39 @@ export async function POST(req: NextRequest) {
       titulo,
       descripcion,
       tipo,
+      estado,
       prioridad,
+      fechaAsignacion,
       fechaEstimada,
       presupuestoInicial,
+      costoTotal,
+      notas,
     } = body;
+
+    // Validaciones básicas
+    if (!titulo || !providerId || !buildingId) {
+      return NextResponse.json(
+        { error: 'Título, proveedor y edificio son requeridos' },
+        { status: 400 }
+      );
+    }
 
     const orden = await prisma.providerWorkOrder.create({
       data: {
         companyId: session.user.companyId,
         providerId,
         buildingId,
-        unitId,
-        maintenanceRequestId,
+        unitId: unitId || null,
+        maintenanceRequestId: maintenanceRequestId || null,
         titulo,
-        descripcion,
+        descripcion: descripcion || '',
         tipo: tipo || 'correctivo',
+        estado: estado || 'asignada',
         prioridad: prioridad || 'media',
+        fechaAsignacion: fechaAsignacion ? new Date(fechaAsignacion) : new Date(),
         fechaEstimada: fechaEstimada ? new Date(fechaEstimada) : null,
         presupuestoInicial: presupuestoInicial || null,
+        costoTotal: costoTotal || null,
         fotosAntes: [],
         fotosDespues: [],
         asignadoPor: session.user.id!,

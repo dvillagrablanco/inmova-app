@@ -14,7 +14,8 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { 
   Home, ArrowLeft, Package, CheckCircle, XCircle, AlertCircle,
   Building2, DollarSign, MessageSquare, TrendingUp, Shield, Users,
-  Zap, RefreshCw
+  Zap, RefreshCw, Star
+} from 'lucide-react';
 } from 'lucide-react';
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';

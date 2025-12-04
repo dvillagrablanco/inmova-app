@@ -596,8 +596,6 @@ function EdificiosPageContent() {
             ? `Se eliminará el edificio "${buildingToDelete.nombre}" y todos sus datos asociados. Esta acción no se puede deshacer.`
             : undefined
         }
-        confirmText="Sí, eliminar"
-        isLoading={isDeleting}
       />
     </div>
   );
