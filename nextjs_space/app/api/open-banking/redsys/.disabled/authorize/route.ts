@@ -11,7 +11,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+
 import {
+
   buildAuthorizationUrl,
   generateCodeVerifier,
   generateCodeChallenge,
@@ -21,7 +23,12 @@ import {
   type OAuthAuthorizationParams,
 } from '@/lib/redsys-psd2-service';
 import { getServerSession } from 'next-auth';
+
 import { authOptions } from '@/lib/auth-options';
+
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic';
+
 
 // Almacenamiento temporal para code_verifier y state
 // En producción, esto debería estar en Redis o base de datos

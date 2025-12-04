@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import { Shield, CheckCircle, AlertTriangle, Key, Mail } from 'lucide-react';
 import logger from '@/lib/logger';
 import { toast } from 'sonner';
 
-export default function RecuperarContrasenaPage() {
+function RecuperarContrasenaContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams?.get('token');
@@ -241,5 +241,20 @@ export default function RecuperarContrasenaPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function RecuperarContrasenaPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-cyan-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Cargando...</p>
+        </div>
+      </div>
+    }>
+      <RecuperarContrasenaContent />
+    </Suspense>
   );
 }

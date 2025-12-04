@@ -10,15 +10,23 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+
 import {
+
   createAISConsent,
   getConsentStatus,
   getConsentExpirationDate,
   type ConsentRequest,
 } from '@/lib/redsys-psd2-service';
 import { getServerSession } from 'next-auth';
+
 import { authOptions } from '@/lib/auth-options';
+
 import { prisma } from '@/lib/db';
+
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic';
+
 
 export async function POST(request: NextRequest) {
   try {

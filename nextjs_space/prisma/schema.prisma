@@ -17,6 +17,16 @@ enum UserRole {
   soporte
 }
 
+enum BusinessVertical {
+  alquiler_tradicional
+  str_vacacional
+  coliving
+  construccion
+  flipping
+  servicios_profesionales
+  mixto
+}
+
 enum CompanyCategory {
   enterprise
   pyme
@@ -199,6 +209,7 @@ model User {
   role          UserRole        @default(gestor)
   companyId     String
   activo        Boolean         @default(true)
+  businessVertical BusinessVertical?
   resetToken    String?         @unique
   resetTokenExpiry DateTime?
   createdAt     DateTime        @default(now())

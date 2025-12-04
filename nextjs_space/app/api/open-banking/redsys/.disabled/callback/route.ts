@@ -19,6 +19,10 @@ import { prisma } from '@/lib/db';
 // Importar el storage de PKCE del endpoint authorize
 import { pkceStorage } from '../authorize/route';
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic';
+
+
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
