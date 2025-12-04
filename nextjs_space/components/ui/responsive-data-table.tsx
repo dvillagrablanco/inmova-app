@@ -1,287 +1,366 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { ReactNode, useState, useMemo } from 'react';
 import {
   Table,
   TableBody,
+  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ChevronLeft, ChevronRight, Search, ChevronsLeft, ChevronsRight } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Columns3, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface Column<T> {
+export interface ResponsiveColumn<T> {
   key: string;
-  label: string;
-  render?: (item: T) => React.ReactNode;
-  sortable?: boolean;
+  header: string;
+  render: (item: T, index: number) => ReactNode;
   className?: string;
-  mobileLabel?: string; // Etiqueta personalizada para vista móvil
+  sortable?: boolean;
+  /** Prioridad de la columna para móvil (1 = más importante, se muestra siempre) */
+  mobilePriority?: number;
+  /** Si es true, la columna estará fija al hacer scroll horizontal */
+  sticky?: 'left' | 'right';
+  /** Ancho mínimo de la columna */
+  minWidth?: string;
 }
 
 interface ResponsiveDataTableProps<T> {
   data: T[];
-  columns: Column<T>[];
-  searchable?: boolean;
-  searchKeys?: string[];
-  itemsPerPage?: number;
-  onRowClick?: (item: T) => void;
-  isLoading?: boolean;
+  columns: ResponsiveColumn<T>[];
+  caption?: string;
+  onRowClick?: (item: T, index: number) => void;
   emptyMessage?: string;
-  mobileCardRender?: (item: T) => React.ReactNode; // Renderizado personalizado para móvil
+  className?: string;
+  ariaLabel?: string;
+  rowClassName?: (item: T, index: number) => string;
+  /** Número de columnas a mostrar en móvil (basado en mobilePriority) */
+  mobileColumnsCount?: number;
+  /** Permitir selección de columnas visibles */
+  allowColumnSelection?: boolean;
+  /** Persistir la selección de columnas en localStorage */
+  persistColumnSelection?: boolean;
+  /** Key para localStorage (requerido si persistColumnSelection es true) */
+  storageKey?: string;
 }
 
-export function ResponsiveDataTable<T extends Record<string, any>>({
+function getInitialVisibleColumns<T>(
+  columns: ResponsiveColumn<T>[],
+  storageKey?: string
+): Set<string> {
+  if (storageKey && typeof window !== 'undefined') {
+    try {
+      const stored = localStorage.getItem(`${storageKey}-visible-columns`);
+      if (stored) {
+        return new Set(JSON.parse(stored));
+      }
+    } catch (e) {
+      console.error('Error loading column preferences:', e);
+    }
+  }
+  return new Set(columns.map((c) => c.key));
+}
+
+export function ResponsiveDataTable<T extends { id?: string | number }>({
   data,
   columns,
-  searchable = true,
-  searchKeys = [],
-  itemsPerPage = 10,
+  caption,
   onRowClick,
-  isLoading = false,
   emptyMessage = 'No hay datos disponibles',
-  mobileCardRender,
+  className,
+  ariaLabel,
+  rowClassName,
+  mobileColumnsCount = 3,
+  allowColumnSelection = true,
+  persistColumnSelection = false,
+  storageKey,
 }: ResponsiveDataTableProps<T>) {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortConfig, setSortConfig] = useState<{
-    key: string;
-    direction: 'asc' | 'desc';
-  } | null>(null);
-
-  // Filtrado
-  const filteredData = searchable
-    ? data.filter((item) => {
-        if (!searchTerm) return true;
-        const searchLower = searchTerm.toLowerCase();
-        return searchKeys.some((key) => {
-          const value = key.split('.').reduce((obj, k) => obj?.[k], item);
-          return String(value || '').toLowerCase().includes(searchLower);
-        });
-      })
-    : data;
-
-  // Ordenamiento
-  const sortedData = sortConfig
-    ? [...filteredData].sort((a, b) => {
-        const aValue = a[sortConfig.key];
-        const bValue = b[sortConfig.key];
-        if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
-        if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
-        return 0;
-      })
-    : filteredData;
-
-  // Paginación
-  const totalPages = Math.ceil(sortedData.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedData = sortedData.slice(startIndex, endIndex);
-
-  const handleSort = (key: string) => {
-    setSortConfig((current) => {
-      if (current?.key === key) {
-        return {
-          key,
-          direction: current.direction === 'asc' ? 'desc' : 'asc',
-        };
-      }
-      return { key, direction: 'asc' };
-    });
-  };
-
-  // Componente de carga
-  const LoadingSkeleton = () => (
-    <div className="space-y-4">
-      <Skeleton className="h-10 w-full max-w-sm" />
-      <div className="hidden md:block">
-        <div className="rounded-md border">
-          <div className="p-4 space-y-3">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} className="h-12 w-full" />
-            ))}
-          </div>
-        </div>
-      </div>
-      <div className="md:hidden space-y-3">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <Skeleton key={i} className="h-32 w-full" />
-        ))}
-      </div>
-    </div>
+  const [visibleColumns, setVisibleColumns] = useState<Set<string>>(() =>
+    getInitialVisibleColumns(columns, persistColumnSelection ? storageKey : undefined)
   );
 
-  if (isLoading) {
-    return <LoadingSkeleton />;
-  }
+  // Ordenar columnas por mobilePriority para móvil
+  const sortedColumns = useMemo(() => {
+    return [...columns].sort((a, b) => {
+      const priorityA = a.mobilePriority ?? 999;
+      const priorityB = b.mobilePriority ?? 999;
+      return priorityA - priorityB;
+    });
+  }, [columns]);
+
+  // Columnas a mostrar en móvil (basadas en mobilePriority)
+  const mobileColumns = useMemo(() => {
+    return sortedColumns.slice(0, mobileColumnsCount);
+  }, [sortedColumns, mobileColumnsCount]);
+
+  // Columnas finales a renderizar (respetando visibleColumns)
+  const displayColumns = useMemo(() => {
+    return columns.filter((col) => visibleColumns.has(col.key));
+  }, [columns, visibleColumns]);
+
+  const toggleColumn = (columnKey: string) => {
+    const newVisibleColumns = new Set(visibleColumns);
+    if (newVisibleColumns.has(columnKey)) {
+      // Prevent hiding all columns
+      if (newVisibleColumns.size > 1) {
+        newVisibleColumns.delete(columnKey);
+      }
+    } else {
+      newVisibleColumns.add(columnKey);
+    }
+    setVisibleColumns(newVisibleColumns);
+
+    // Persist to localStorage
+    if (persistColumnSelection && storageKey && typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(
+          `${storageKey}-visible-columns`,
+          JSON.stringify(Array.from(newVisibleColumns))
+        );
+      } catch (e) {
+        console.error('Error saving column preferences:', e);
+      }
+    }
+  };
+
+  const resetColumns = () => {
+    const allColumns = new Set(columns.map((c) => c.key));
+    setVisibleColumns(allColumns);
+    if (persistColumnSelection && storageKey && typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem(`${storageKey}-visible-columns`);
+      } catch (e) {
+        console.error('Error resetting column preferences:', e);
+      }
+    }
+  };
 
   return (
     <div className="space-y-4">
-      {/* Barra de Búsqueda */}
-      {searchable && (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <div className="relative flex-1 w-full sm:max-w-sm">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Buscar..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="pl-9"
-            />
+      {/* Column Selection Toolbar */}
+      {allowColumnSelection && (
+        <div className="flex items-center justify-between px-2">
+          <div className="text-sm text-muted-foreground">
+            Mostrando {displayColumns.length} de {columns.length} columnas
           </div>
-          <div className="text-sm text-muted-foreground whitespace-nowrap">
-            {filteredData.length} resultado{filteredData.length !== 1 ? 's' : ''}
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="ml-auto">
+                <Columns3 className="mr-2 h-4 w-4" />
+                Columnas
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[200px]">
+              <DropdownMenuLabel>Columnas Visibles</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {columns.map((column) => (
+                <DropdownMenuCheckboxItem
+                  key={column.key}
+                  checked={visibleColumns.has(column.key)}
+                  onCheckedChange={() => toggleColumn(column.key)}
+                >
+                  {column.header}
+                </DropdownMenuCheckboxItem>
+              ))}
+              <DropdownMenuSeparator />
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start text-sm"
+                onClick={resetColumns}
+              >
+                Restablecer
+              </Button>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       )}
 
-      {/* Vista Desktop - Tabla */}
-      <div className="hidden md:block rounded-md border overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              {columns.map((column) => (
-                <TableHead
-                  key={column.key}
-                  className={cn(
-                    column.sortable ? 'cursor-pointer select-none hover:bg-muted/50' : '',
-                    column.className
-                  )}
-                  onClick={() => column.sortable && handleSort(column.key)}
-                >
-                  <div className="flex items-center gap-2">
-                    {column.label}
-                    {column.sortable && sortConfig?.key === column.key && (
-                      <span className="text-xs">
-                        {sortConfig.direction === 'asc' ? '↑' : '↓'}
-                      </span>
-                    )}
-                  </div>
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {paginatedData.length === 0 ? (
+      {/* Desktop Table - Full columns with horizontal scroll */}
+      <div className="hidden md:block">
+        <div className={cn('relative w-full overflow-x-auto', className)}>
+          <Table aria-label={ariaLabel}>
+            {caption && <TableCaption>{caption}</TableCaption>}
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={columns.length} className="text-center text-muted-foreground py-12">
-                  {emptyMessage}
-                </TableCell>
+                {displayColumns.map((column) => (
+                  <TableHead
+                    key={column.key}
+                    className={cn(
+                      column.className,
+                      column.sticky === 'left' && 'sticky left-0 z-10 bg-background',
+                      column.sticky === 'right' && 'sticky right-0 z-10 bg-background'
+                    )}
+                    scope="col"
+                    style={{ minWidth: column.minWidth }}
+                  >
+                    {column.header}
+                  </TableHead>
+                ))}
               </TableRow>
-            ) : (
-              paginatedData.map((item, index) => (
-                <TableRow
-                  key={index}
-                  className={onRowClick ? 'cursor-pointer hover:bg-muted/50' : ''}
-                  onClick={() => onRowClick?.(item)}
-                >
-                  {columns.map((column) => (
-                    <TableCell key={column.key} className={column.className}>
-                      {column.render ? column.render(item) : item[column.key]}
-                    </TableCell>
-                  ))}
+            </TableHeader>
+            <TableBody>
+              {data.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={displayColumns.length}
+                    className="text-center py-8 text-muted-foreground"
+                  >
+                    {emptyMessage}
+                  </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ) : (
+                data.map((item, index) => (
+                  <TableRow
+                    key={item.id ?? index}
+                    onClick={() => onRowClick?.(item, index)}
+                    className={cn(
+                      onRowClick && 'cursor-pointer hover:bg-muted/50',
+                      rowClassName?.(item, index)
+                    )}
+                    tabIndex={onRowClick ? 0 : undefined}
+                    onKeyDown={
+                      onRowClick
+                        ? (e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              onRowClick(item, index);
+                            }
+                          }
+                        : undefined
+                    }
+                    role={onRowClick ? 'button' : undefined}
+                  >
+                    {displayColumns.map((column) => (
+                      <TableCell
+                        key={column.key}
+                        className={cn(
+                          column.className,
+                          column.sticky === 'left' && 'sticky left-0 z-10 bg-background',
+                          column.sticky === 'right' && 'sticky right-0 z-10 bg-background'
+                        )}
+                        style={{ minWidth: column.minWidth }}
+                      >
+                        {column.render(item, index)}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
-      {/* Vista Móvil - Tarjetas */}
-      <div className="md:hidden space-y-3">
-        {paginatedData.length === 0 ? (
-          <div className="text-center text-muted-foreground py-12 border rounded-md">
-            {emptyMessage}
-          </div>
-        ) : (
-          paginatedData.map((item, index) => (
-            <Card
-              key={index}
-              className={cn(
-                'transition-all',
-                onRowClick && 'cursor-pointer hover:shadow-md active:scale-[0.98]'
-              )}
-              onClick={() => onRowClick?.(item)}
-            >
-              <CardContent className="p-4">
-                {mobileCardRender ? (
-                  mobileCardRender(item)
-                ) : (
-                  <div className="space-y-2">
-                    {columns.map((column) => (
-                      <div key={column.key} className="flex justify-between items-start gap-4">
-                        <span className="text-sm font-medium text-muted-foreground flex-shrink-0">
-                          {column.mobileLabel || column.label}:
-                        </span>
-                        <span className="text-sm text-right">
-                          {column.render ? column.render(item) : item[column.key]}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+      {/* Mobile Table - Compact view with priority columns */}
+      <div className="md:hidden">
+        <div className={cn('relative w-full overflow-x-auto', className)}>
+          <Table aria-label={ariaLabel} className="text-sm">
+            {caption && <TableCaption>{caption}</TableCaption>}
+            <TableHeader>
+              <TableRow>
+                {mobileColumns
+                  .filter((col) => visibleColumns.has(col.key))
+                  .map((column) => (
+                    <TableHead
+                      key={column.key}
+                      className={cn(
+                        'text-xs px-2 py-2',
+                        column.className,
+                        column.sticky === 'left' && 'sticky left-0 z-10 bg-background',
+                        column.sticky === 'right' && 'sticky right-0 z-10 bg-background'
+                      )}
+                      scope="col"
+                      style={{ minWidth: column.minWidth }}
+                    >
+                      {column.header}
+                    </TableHead>
+                  ))}
+                {onRowClick && (
+                  <TableHead className="text-xs px-2 py-2 sticky right-0 z-10 bg-background">
+                    <span className="sr-only">Acciones</span>
+                  </TableHead>
                 )}
-              </CardContent>
-            </Card>
-          ))
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={mobileColumns.length + (onRowClick ? 1 : 0)}
+                    className="text-center py-8 text-muted-foreground text-sm"
+                  >
+                    {emptyMessage}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                data.map((item, index) => (
+                  <TableRow
+                    key={item.id ?? index}
+                    className={cn(
+                      onRowClick && 'cursor-pointer hover:bg-muted/50',
+                      rowClassName?.(item, index)
+                    )}
+                    tabIndex={onRowClick ? 0 : undefined}
+                  >
+                    {mobileColumns
+                      .filter((col) => visibleColumns.has(col.key))
+                      .map((column) => (
+                        <TableCell
+                          key={column.key}
+                          className={cn(
+                            'text-xs px-2 py-2',
+                            column.className,
+                            column.sticky === 'left' && 'sticky left-0 z-10 bg-background',
+                            column.sticky === 'right' && 'sticky right-0 z-10 bg-background'
+                          )}
+                          style={{ minWidth: column.minWidth }}
+                        >
+                          {column.render(item, index)}
+                        </TableCell>
+                      ))}
+                    {onRowClick && (
+                      <TableCell className="text-xs px-2 py-2 sticky right-0 z-10 bg-background">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onRowClick(item, index);
+                          }}
+                          className="h-8 w-8 p-0"
+                        >
+                          <ChevronRight className="h-4 w-4" />
+                          <span className="sr-only">Ver detalles</span>
+                        </Button>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+        {data.length > 0 && (
+          <div className="mt-2 px-2 text-xs text-muted-foreground flex items-center gap-1">
+            <ChevronLeft className="h-3 w-3" />
+            Desliza horizontalmente para ver más columnas
+            <ChevronRight className="h-3 w-3" />
+          </div>
         )}
       </div>
-
-      {/* Paginación */}
-      {totalPages > 1 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-sm text-muted-foreground">
-            Mostrando {startIndex + 1}-{Math.min(endIndex, sortedData.length)} de {sortedData.length}
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(1)}
-              disabled={currentPage === 1}
-              className="hidden sm:inline-flex"
-            >
-              <ChevronsLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <span className="text-sm px-2">
-              {currentPage} / {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(totalPages)}
-              disabled={currentPage === totalPages}
-              className="hidden sm:inline-flex"
-            >
-              <ChevronsRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

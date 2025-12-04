@@ -286,6 +286,63 @@ export default function PortalPropietarioPage() {
   
   const notificacionesNoLeidas = notifications.filter((n: any) => !n.leida).length;
 
+  // Datos para gráficos
+  const ingresosHistoricos = Array.from({ length: 6 }, (_, i) => {
+    const date = subMonths(new Date(), 5 - i);
+    const start = startOfMonth(date);
+    const end = endOfMonth(date);
+    
+    const monthPayments = payments.filter(p => {
+      const paymentDate = new Date(p.fechaPago);
+      return isWithinInterval(paymentDate, { start, end }) && p.estado === 'pagado';
+    });
+    
+    const monthExpenses = expenses.filter(e => {
+      const expenseDate = new Date(e.fecha);
+      return isWithinInterval(expenseDate, { start, end });
+    });
+    
+    return {
+      mes: format(date, 'MMM', { locale: es }),
+      ingresos: monthPayments.reduce((sum, p) => sum + (p.monto || 0), 0),
+      gastos: monthExpenses.reduce((sum, e) => sum + (e.monto || 0), 0),
+    };
+  });
+
+  const ocupacionPorPropiedad = buildings.map(building => {
+    const buildingUnits = units.filter(u => u.buildingId === building.id);
+    const occupiedUnits = buildingUnits.filter(u => u.estado === 'ocupada').length;
+    const occupancyRate = buildingUnits.length > 0 
+      ? (occupiedUnits / buildingUnits.length) * 100 
+      : 0;
+    
+    return {
+      nombre: building.nombre,
+      ocupacion: Math.round(occupancyRate),
+    };
+  });
+
+  const distribucionIngresos = [
+    {
+      nombre: 'Alquileres',
+      valor: payments
+        .filter(p => p.tipo === 'alquiler' && p.estado === 'pagado')
+        .reduce((sum, p) => sum + (p.monto || 0), 0),
+    },
+    {
+      nombre: 'Servicios',
+      valor: payments
+        .filter(p => p.tipo === 'servicio' && p.estado === 'pagado')
+        .reduce((sum, p) => sum + (p.monto || 0), 0),
+    },
+    {
+      nombre: 'Otros',
+      valor: payments
+        .filter(p => p.tipo !== 'alquiler' && p.tipo !== 'servicio' && p.estado === 'pagado')
+        .reduce((sum, p) => sum + (p.monto || 0), 0),
+    },
+  ].filter(item => item.valor > 0);
+
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(value);
 
