@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { logError } from '@/lib/logger';
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -74,7 +75,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     return NextResponse.json(service);
   } catch (error) {
-    console.error('Error al actualizar servicio:', error);
+    logError(new Error(error instanceof Error ? error.message : 'Error updating marketplace service'), {
+      context: 'PUT /api/admin/marketplace/services/[id]',
+      serviceId: params?.id,
+      companyId: session?.user?.companyId,
+    });
     return NextResponse.json(
       { error: 'Error al actualizar servicio' },
       { status: 500 }
@@ -116,7 +121,11 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
     return NextResponse.json({ message: 'Servicio eliminado correctamente' });
   } catch (error) {
-    console.error('Error al eliminar servicio:', error);
+    logError(new Error(error instanceof Error ? error.message : 'Error deleting marketplace service'), {
+      context: 'DELETE /api/admin/marketplace/services/[id]',
+      serviceId: params?.id,
+      companyId: session?.user?.companyId,
+    });
     return NextResponse.json(
       { error: 'Error al eliminar servicio' },
       { status: 500 }

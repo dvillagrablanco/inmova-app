@@ -146,8 +146,8 @@ export async function getUserCompany() {
 export async function canAccessCompanyResource(companyId: string) {
   const user = await requireAuth();
   
-  // Super_admin puede acceder a cualquier empresa
-  if (user.role === 'super_admin') {
+  // Super_admin y soporte pueden acceder a cualquier empresa
+  if (user.role === 'super_admin' || user.role === 'soporte') {
     return true;
   }
   

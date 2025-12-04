@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { logError } from '@/lib/logger';
 
 export async function GET(req: NextRequest) {
   try {
@@ -32,7 +33,10 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(services);
   } catch (error) {
-    console.error('Error al obtener servicios:', error);
+    logError(new Error(error instanceof Error ? error.message : 'Error fetching marketplace services'), {
+      context: 'GET /api/admin/marketplace/services',
+      companyId: session?.user?.companyId,
+    });
     return NextResponse.json(
       { error: 'Error al obtener servicios' },
       { status: 500 }
@@ -102,7 +106,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(service, { status: 201 });
   } catch (error) {
-    console.error('Error al crear servicio:', error);
+    logError(new Error(error instanceof Error ? error.message : 'Error creating marketplace service'), {
+      context: 'POST /api/admin/marketplace/services',
+      nombre: body?.nombre,
+      companyId: session?.user?.companyId,
+    });
     return NextResponse.json(
       { error: 'Error al crear servicio' },
       { status: 500 }

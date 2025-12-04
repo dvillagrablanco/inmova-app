@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { addDays } from 'date-fns';
+import { logError } from '@/lib/logger';
 
 export async function GET(req: NextRequest) {
   try {
@@ -33,7 +34,10 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(documentos);
   } catch (error) {
-    console.error('Error al obtener documentos:', error);
+    logError(new Error(error instanceof Error ? error.message : 'Error fetching documents'), {
+      context: 'GET /api/admin/firma-digital/documentos',
+      companyId: session?.user?.companyId,
+    });
     return NextResponse.json(
       { error: 'Error al obtener documentos' },
       { status: 500 }
@@ -111,7 +115,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(documento, { status: 201 });
   } catch (error) {
-    console.error('Error al crear documento:', error);
+    logError(new Error(error instanceof Error ? error.message : 'Error creating document'), {
+      context: 'POST /api/admin/firma-digital/documentos',
+      titulo: body?.titulo,
+      companyId: session?.user?.companyId,
+    });
     return NextResponse.json(
       { error: 'Error al crear documento' },
       { status: 500 }

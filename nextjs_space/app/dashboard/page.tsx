@@ -28,6 +28,7 @@ import SmartOnboardingWizard from '@/components/automation/SmartOnboardingWizard
 import ProactiveSuggestions from '@/components/automation/ProactiveSuggestions';
 import IntelligentSupportChatbot from '@/components/automation/IntelligentSupportChatbot';
 import InactiveModules from './components/InactiveModules';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { VerticalSpecificWidgets } from '@/components/dashboard/VerticalSpecificWidgets';
 import logger, { logError } from '@/lib/logger';
 
@@ -52,7 +53,7 @@ interface DashboardData {
 
 const COLORS = ['#4F46E5', '#7C3AED', '#EC4899', '#8B5CF6', '#A78BFA']; // Indigo, Violet, Pink gradients
 
-export default function DashboardPage() {
+function DashboardPageContent() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
   const [data, setData] = useState<DashboardData | null>(null);
@@ -518,5 +519,13 @@ export default function DashboardPage() {
       {/* Chatbot inteligente de soporte 24/7 - Sistema automatizado sin intervenci\u00f3n humana */}
       <IntelligentSupportChatbot />
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <ErrorBoundary>
+      <DashboardPageContent />
+    </ErrorBoundary>
   );
 }

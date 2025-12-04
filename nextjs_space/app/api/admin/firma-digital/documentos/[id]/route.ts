@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { addDays } from 'date-fns';
+import { logError } from '@/lib/logger';
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -93,7 +94,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     return NextResponse.json(documento);
   } catch (error) {
-    console.error('Error al actualizar documento:', error);
+    logError(new Error(error instanceof Error ? error.message : 'Error updating document'), {
+      context: 'PUT /api/admin/firma-digital/documentos/[id]',
+      documentId: params?.id,
+      companyId: session?.user?.companyId,
+    });
     return NextResponse.json(
       { error: 'Error al actualizar documento' },
       { status: 500 }
@@ -141,7 +146,11 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
     return NextResponse.json({ message: 'Documento eliminado correctamente' });
   } catch (error) {
-    console.error('Error al eliminar documento:', error);
+    logError(new Error(error instanceof Error ? error.message : 'Error deleting document'), {
+      context: 'DELETE /api/admin/firma-digital/documentos/[id]',
+      documentId: params?.id,
+      companyId: session?.user?.companyId,
+    });
     return NextResponse.json(
       { error: 'Error al eliminar documento' },
       { status: 500 }

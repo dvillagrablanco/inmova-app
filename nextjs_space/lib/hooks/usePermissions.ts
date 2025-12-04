@@ -1,7 +1,7 @@
 import { useSession } from 'next-auth/react';
 import { UserRole } from '@prisma/client';
 
-type Permission = 'read' | 'create' | 'update' | 'delete' | 'manageUsers' | 'manageCompany' | 'viewReports' | 'manageClients';
+type Permission = 'read' | 'create' | 'update' | 'delete' | 'manageUsers' | 'manageCompany' | 'viewReports' | 'manageClients' | 'impersonateClients';
 
 const PERMISSIONS = {
   super_admin: {
@@ -13,6 +13,7 @@ const PERMISSIONS = {
     manageCompany: true,
     viewReports: true,
     manageClients: true,
+    impersonateClients: true,
   },
   administrador: {
     read: true,
@@ -23,6 +24,7 @@ const PERMISSIONS = {
     manageCompany: true,
     viewReports: true,
     manageClients: false,
+    impersonateClients: false,
   },
   gestor: {
     read: true,
@@ -33,6 +35,7 @@ const PERMISSIONS = {
     manageCompany: false,
     viewReports: true,
     manageClients: false,
+    impersonateClients: false,
   },
   operador: {
     read: true,
@@ -43,6 +46,7 @@ const PERMISSIONS = {
     manageCompany: false,
     viewReports: true, // Puede ver reportes de sus trabajos
     manageClients: false,
+    impersonateClients: false,
   },
   tenant: {
     read: true,
@@ -53,6 +57,7 @@ const PERMISSIONS = {
     manageCompany: false,
     viewReports: true,
     manageClients: false,
+    impersonateClients: false,
   },
   soporte: {
     read: true,
@@ -63,6 +68,7 @@ const PERMISSIONS = {
     manageCompany: true,
     viewReports: true,
     manageClients: true,
+    impersonateClients: true,
   },
 } as const;
 

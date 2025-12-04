@@ -9,6 +9,7 @@ import { KPICard } from '@/components/ui/kpi-card';
 import { LoadingState } from '@/components/ui/loading-state';
 import { Button } from '@/components/ui/button';
 import logger, { logError } from '@/lib/logger';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -75,7 +76,7 @@ interface FlujoCajaItem {
   neto: number;
 }
 
-export default function ReportesPage() {
+function ReportesPageContent() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
   const [tipoReporte, setTipoReporte] = useState<'global' | 'por_propiedad' | 'flujo_caja'>('global');
@@ -480,5 +481,14 @@ export default function ReportesPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+
+export default function ReportesPage() {
+  return (
+    <ErrorBoundary>
+      <ReportesPageContent />
+    </ErrorBoundary>
   );
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getPrioritizedTasks } from '@/lib/task-prioritization-service';
+import { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,7 +42,11 @@ export async function GET(req: NextRequest) {
       count: tasks.length,
     });
   } catch (error) {
-    console.error('Error fetching prioritized tasks:', error);
+    logError(new Error(error instanceof Error ? error.message : 'Error fetching prioritized tasks'), {
+      context: 'GET /api/tasks/prioritized',
+      userId,
+      companyId,
+    });
     return NextResponse.json(
       { error: 'Error al obtener tareas priorizadas' },
       { status: 500 }

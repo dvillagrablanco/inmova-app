@@ -53,6 +53,7 @@ import { LoadingState } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
 import { FilterChips } from '@/components/ui/filter-chips';
 import logger, { logError } from '@/lib/logger';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 
 interface Task {
   id: string;

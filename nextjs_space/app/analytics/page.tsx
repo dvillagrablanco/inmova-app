@@ -25,6 +25,7 @@ import {
   LineChart as LineChartIcon,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { 
   AreaChart, 
   Area, 
@@ -70,7 +71,7 @@ interface Recommendation {
   aplicada: boolean;
 }
 
-export default function AnalyticsPage() {
+function AnalyticsPageContent() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
   const [trends, setTrends] = useState<Trend[]>([]);
@@ -512,5 +513,14 @@ export default function AnalyticsPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+
+export default function AnalyticsPage() {
+  return (
+    <ErrorBoundary>
+      <AnalyticsPageContent />
+    </ErrorBoundary>
   );
 }

@@ -16,6 +16,7 @@ import { Home, MessageSquare, Send, Loader2, CheckCircle, Clock, BookOpen, HelpC
 import { toast } from 'sonner';
 import { categorizeTicket } from '@/lib/ai-automation-service';
 import { AIAssistant } from '@/components/automation/AIAssistant';
+import { logError } from '@/lib/logger';
 
 export default function SoportePage() {
   const { data: session, status } = useSession() || {};
@@ -109,7 +110,10 @@ export default function SoportePage() {
       }, 3000);
     } catch (error) {
       toast.error('Error al crear el ticket');
-      console.error('Error:', error);
+      logError(new Error(error instanceof Error ? error.message : 'Error creating support ticket'), {
+        context: 'SoportePage - handleAnalyze',
+        subject: formData.subject,
+      });
     } finally {
       setIsSubmitting(false);
     }
