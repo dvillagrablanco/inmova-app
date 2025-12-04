@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { ButtonWithLoading } from '@/components/ui/button-with-loading';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,7 +24,10 @@ import {
   AlertCircle,
   CheckCircle2,
   Eye,
-  Settings
+  Settings,
+  Save,
+  Search,
+  Filter
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import logger, { logError } from '@/lib/logger';
@@ -35,6 +39,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface SMSTemplate {
   id: string;
@@ -82,6 +87,9 @@ export default function PlantillasSMSPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletingTemplate, setDeletingTemplate] = useState<{ id: string; nombre: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterTipo, setFilterTipo] = useState<string>('todos');
+  const [filterActiva, setFilterActiva] = useState<string>('todos');
   const [formData, setFormData] = useState({
     nombre: '',
     descripcion: '',
@@ -150,6 +158,8 @@ export default function PlantillasSMSPage() {
     } catch (error) {
       logger.error('Error saving template:', error);
       toast.error('Error al guardar plantilla');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -168,13 +178,17 @@ export default function PlantillasSMSPage() {
     });
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('¿Estás seguro de que quieres eliminar esta plantilla?')) {
-      return;
-    }
+  const confirmDelete = (id: string, nombre: string) => {
+    setDeletingTemplate({ id, nombre });
+    setShowDeleteDialog(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deletingTemplate) return;
 
     try {
-      const response = await fetch(`/api/sms/templates/${id}`, {
+      setIsDeleting(true);
+      const response = await fetch(`/api/sms/templates/${deletingTemplate.id}`, {
         method: 'DELETE'
       });
 
@@ -187,6 +201,10 @@ export default function PlantillasSMSPage() {
     } catch (error) {
       logger.error('Error deleting template:', error);
       toast.error('Error al eliminar plantilla');
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
+      setDeletingTemplate(null);
     }
   };
 
@@ -225,6 +243,24 @@ export default function PlantillasSMSPage() {
       mensaje: prev.mensaje + variable
     }));
   };
+
+  // Filtrar plantillas
+  const plantillasFiltradas = plantillas.filter(plantilla => {
+    // Filtro por búsqueda (nombre o descripción)
+    const matchesSearch = searchTerm === '' || 
+      plantilla.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (plantilla.descripcion && plantilla.descripcion.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    // Filtro por tipo
+    const matchesTipo = filterTipo === 'todos' || plantilla.tipo === filterTipo;
+    
+    // Filtro por estado activo
+    const matchesActiva = filterActiva === 'todos' || 
+      (filterActiva === 'activas' && plantilla.activa) ||
+      (filterActiva === 'inactivas' && !plantilla.activa);
+    
+    return matchesSearch && matchesTipo && matchesActiva;
+  });
 
   if (status === 'loading' || loading) {
     return (
@@ -362,9 +398,15 @@ export default function PlantillasSMSPage() {
               )}
 
               <div className="flex gap-2">
-                <Button type="submit" className="flex-1">
+                <ButtonWithLoading
+                  type="submit"
+                  className="flex-1"
+                  isLoading={isSaving}
+                  loadingText={editando ? 'Actualizando...' : 'Creando...'}
+                  icon={Save}
+                >
                   {editando ? 'Actualizar' : 'Crear'} Plantilla
-                </Button>
+                </ButtonWithLoading>
                 <Button type="button" variant="outline" onClick={() => {
                   setEditando(null);
                   resetForm();
@@ -377,8 +419,73 @@ export default function PlantillasSMSPage() {
         </Dialog>
       </div>
 
+      {/* Filtros de búsqueda */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="grid gap-4 md:grid-cols-3">
+            {/* Búsqueda por nombre/descripción */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Buscar plantillas..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
+            {/* Filtro por tipo */}
+            <Select value={filterTipo} onValueChange={setFilterTipo}>
+              <SelectTrigger>
+                <SelectValue placeholder="Filtrar por tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos los tipos</SelectItem>
+                {tiposSMS.map(tipo => (
+                  <SelectItem key={tipo.value} value={tipo.value}>
+                    {tipo.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Filtro por estado */}
+            <Select value={filterActiva} onValueChange={setFilterActiva}>
+              <SelectTrigger>
+                <SelectValue placeholder="Filtrar por estado" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos los estados</SelectItem>
+                <SelectItem value="activas">Activas</SelectItem>
+                <SelectItem value="inactivas">Inactivas</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Contador de resultados */}
+          <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+            <span>
+              Mostrando {plantillasFiltradas.length} de {plantillas.length} plantillas
+            </span>
+            {(searchTerm || filterTipo !== 'todos' || filterActiva !== 'todos') && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setSearchTerm('');
+                  setFilterTipo('todos');
+                  setFilterActiva('todos');
+                }}
+              >
+                Limpiar filtros
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {plantillas.map(plantilla => (
+        {plantillasFiltradas.map(plantilla => (
           <Card key={plantilla.id} className="relative">
             <CardHeader>
               <div className="flex items-start justify-between">
@@ -420,7 +527,7 @@ export default function PlantillasSMSPage() {
                 <Button size="sm" variant="outline" onClick={() => setVistaPrevia(plantilla)}>
                   <Eye className="w-3 h-3" />
                 </Button>
-                <Button size="sm" variant="destructive" onClick={() => handleDelete(plantilla.id)}>
+                <Button size="sm" variant="destructive" onClick={() => confirmDelete(plantilla.id, plantilla.nombre)}>
                   <Trash2 className="w-3 h-3" />
                 </Button>
               </div>
@@ -429,7 +536,7 @@ export default function PlantillasSMSPage() {
         ))}
       </div>
 
-      {plantillas.length === 0 && (
+      {plantillasFiltradas.length === 0 && plantillas.length === 0 && (
         <Card>
           <CardContent className="py-12 text-center">
             <MessageSquare className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
@@ -440,6 +547,28 @@ export default function PlantillasSMSPage() {
             <Button onClick={resetForm}>
               <Plus className="w-4 h-4 mr-2" />
               Crear Primera Plantilla
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {plantillasFiltradas.length === 0 && plantillas.length > 0 && (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <Search className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+            <h3 className="text-lg font-semibold mb-2">No se encontraron plantillas</h3>
+            <p className="text-muted-foreground mb-4">
+              No hay plantillas que coincidan con los filtros aplicados.
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSearchTerm('');
+                setFilterTipo('todos');
+                setFilterActiva('todos');
+              }}
+            >
+              Limpiar filtros
             </Button>
           </CardContent>
         </Card>
@@ -478,6 +607,17 @@ export default function PlantillasSMSPage() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* ConfirmDialog para eliminar plantilla */}
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="¿Eliminar plantilla SMS?"
+        description={`¿Estás seguro de que deseas eliminar la plantilla "${deletingTemplate?.nombre}"? Esta acción no se puede deshacer.`}
+        onConfirm={handleDelete}
+        confirmText="Eliminar"
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

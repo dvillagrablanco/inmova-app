@@ -7,6 +7,7 @@ import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { ButtonWithLoading } from '@/components/ui/button-with-loading';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -298,17 +299,14 @@ export default function PersonalizacionPage() {
                     Descartar
                   </Button>
                   
-                  <Button
+                  <ButtonWithLoading
                     onClick={handleSave}
-                    disabled={saving}
+                    isLoading={saving}
+                    loadingText="Guardando..."
+                    icon={Save}
                   >
-                    {saving ? (
-                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Save className="h-4 w-4 mr-2" />
-                    )}
                     Guardar Cambios
-                  </Button>
+                  </ButtonWithLoading>
                 </div>
               </div>
             </div>

@@ -26,6 +26,7 @@ import {
 import { Header } from '@/components/layout/header';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import {
   Card,
   CardContent,
@@ -102,6 +103,12 @@ export default function ReportesProgramadosPage() {
   const [editingReport, setEditingReport] = useState<ScheduledReport | null>(null);
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
   const [sending, setSending] = useState<string | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deletingReport, setDeletingReport] = useState<{ id: string; nombre: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showSendDialog, setShowSendDialog] = useState(false);
+  const [sendingReport, setSendingReport] = useState<{ id: string; nombre: string } | null>(null);
+  const [isSending, setIsSending] = useState(false);
   
   const [formData, setFormData] = useState<{
     nombre: string;
@@ -222,11 +229,17 @@ export default function ReportesProgramadosPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('¿Estás seguro de eliminar este reporte programado?')) return;
+  const confirmDelete = (report: ScheduledReport) => {
+    setDeletingReport({ id: report.id, nombre: report.nombre });
+    setShowDeleteDialog(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deletingReport) return;
 
     try {
-      const response = await fetch(`/api/scheduled-reports/${id}`, {
+      setIsDeleting(true);
+      const response = await fetch(`/api/scheduled-reports/${deletingReport.id}`, {
         method: 'DELETE',
       });
 
@@ -237,6 +250,10 @@ export default function ReportesProgramadosPage() {
     } catch (error) {
       logger.error('Error:', error);
       toast.error('Error al eliminar reporte');
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
+      setDeletingReport(null);
     }
   };
 
@@ -263,12 +280,18 @@ export default function ReportesProgramadosPage() {
     }
   };
 
-  const handleSendNow = async (id: string) => {
-    if (!confirm('¿Enviar este reporte ahora a todos los destinatarios?')) return;
+  const confirmSendNow = (report: ScheduledReport) => {
+    setSendingReport({ id: report.id, nombre: report.nombre });
+    setShowSendDialog(true);
+  };
 
-    setSending(id);
+  const handleSendNow = async () => {
+    if (!sendingReport) return;
+
     try {
-      const response = await fetch(`/api/scheduled-reports/${id}/send`, {
+      setIsSending(true);
+      setSending(sendingReport.id);
+      const response = await fetch(`/api/scheduled-reports/${sendingReport.id}/send`, {
         method: 'POST',
       });
 
@@ -280,7 +303,10 @@ export default function ReportesProgramadosPage() {
       logger.error('Error:', error);
       toast.error('Error al enviar reporte');
     } finally {
+      setIsSending(false);
       setSending(null);
+      setShowSendDialog(false);
+      setSendingReport(null);
     }
   };
 
@@ -589,7 +615,7 @@ export default function ReportesProgramadosPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleSendNow(report.id)}
+                            onClick={() => confirmSendNow(report)}
                             disabled={sending === report.id}
                           >
                             {sending === report.id ? (
@@ -640,7 +666,7 @@ export default function ReportesProgramadosPage() {
                                 Ver historial
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onClick={() => handleDelete(report.id)}
+                                onClick={() => confirmDelete(report)}
                                 className="text-red-600"
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
@@ -989,6 +1015,28 @@ export default function ReportesProgramadosPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* ConfirmDialog para eliminar reporte */}
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="¿Eliminar reporte programado?"
+        description={`¿Estás seguro de que deseas eliminar el reporte "${deletingReport?.nombre}"? Esta acción no se puede deshacer.`}
+        onConfirm={handleDelete}
+        confirmText="Eliminar"
+        isLoading={isDeleting}
+      />
+
+      {/* ConfirmDialog para enviar reporte */}
+      <ConfirmDialog
+        open={showSendDialog}
+        onOpenChange={setShowSendDialog}
+        title="¿Enviar reporte ahora?"
+        description={`¿Estás seguro de que deseas enviar el reporte "${sendingReport?.nombre}" a todos los destinatarios configurados?`}
+        onConfirm={handleSendNow}
+        confirmText="Enviar"
+        isLoading={isSending}
+      />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
 import { Building2, Home, ArrowLeft, Save, Mail, Phone, Globe, MapPin, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ButtonWithLoading } from '@/components/ui/button-with-loading';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -371,19 +372,14 @@ export default function ConfiguracionPage() {
                   {/* Botones */}
                   {isAdmin && (
                     <div className="flex gap-3 pt-4">
-                      <Button type="submit" disabled={isSaving}>
-                        {isSaving ? (
-                          <>
-                            <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
-                            Guardando...
-                          </>
-                        ) : (
-                          <>
-                            <Save className="mr-2 h-4 w-4" />
-                            Guardar Cambios
-                          </>
-                        )}
-                      </Button>
+                      <ButtonWithLoading
+                        type="submit"
+                        isLoading={isSaving}
+                        loadingText="Guardando..."
+                        icon={Save}
+                      >
+                        Guardar Cambios
+                      </ButtonWithLoading>
                       <Button
                         type="button"
                         variant="outline"
