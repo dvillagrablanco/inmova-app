@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
-import logger, { logError } from '@/lib/logger';
+import logger from '@/lib/logger';
+import { generateProviderToken, setProviderAuthCookie } from '@/lib/provider-auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,6 +21,15 @@ export async function POST(req: NextRequest) {
     // Buscar proveedor por email
     const proveedor = await prisma.provider.findFirst({
       where: { email },
+      include: {
+        company: {
+          select: {
+            id: true,
+            nombre: true,
+            logoUrl: true,
+          },
+        },
+      },
     });
 
     if (!proveedor) {
@@ -59,6 +69,17 @@ export async function POST(req: NextRequest) {
       where: { id: proveedor.id },
       data: { ultimoAcceso: new Date() },
     });
+
+    // Generar token JWT
+    const token = generateProviderToken({
+      providerId: proveedor.id,
+      email: proveedor.email || '',
+      companyId: proveedor.companyId,
+      nombre: proveedor.nombre,
+    });
+
+    // Establecer cookie httpOnly
+    setProviderAuthCookie(token);
 
     // Devolver datos del proveedor (sin password)
     const { password: _, ...proveedorSinPassword } = proveedor;

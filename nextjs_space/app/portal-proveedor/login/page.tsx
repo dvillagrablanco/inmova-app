@@ -9,7 +9,8 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Briefcase, Loader2 } from 'lucide-react';
 import Image from 'next/image';
-import logger, { logError } from '@/lib/logger';
+import Link from 'next/link';
+import logger from '@/lib/logger';
 
 export default function ProveedorLoginPage() {
   const router = useRouter();
@@ -28,15 +29,17 @@ export default function ProveedorLoginPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
+        credentials: 'include', // Importante para incluir cookies
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        // Guardar datos del proveedor en localStorage
-        localStorage.setItem('proveedor', JSON.stringify(data.proveedor));
+        // La autenticación ahora se maneja con cookies httpOnly
+        // No se guarda nada en localStorage
         toast.success(data.message || 'Inicio de sesión exitoso');
         router.push('/portal-proveedor/dashboard');
+        router.refresh(); // Forzar recarga para obtener datos actualizados
       } else {
         toast.error(data.error || 'Error al iniciar sesión');
       }
@@ -100,9 +103,22 @@ export default function ProveedorLoginPage() {
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            <p>¿Olvidaste tu contraseña?</p>
-            <p className="mt-1">Contacta con administración</p>
+          <div className="mt-6 space-y-3 text-center text-sm">
+            <Link 
+              href="/portal-proveedor/forgot-password" 
+              className="block text-primary hover:underline"
+            >
+              ¿Olvidaste tu contraseña?
+            </Link>
+            <div className="text-muted-foreground">
+              ¿No tienes cuenta?{' '}
+              <Link 
+                href="/portal-proveedor/register" 
+                className="text-primary hover:underline font-medium"
+              >
+                Regístrate aquí
+              </Link>
+            </div>
           </div>
         </CardContent>
       </Card>

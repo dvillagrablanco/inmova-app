@@ -23,12 +23,27 @@ export default function ProveedorDashboardPage() {
   const [proveedor, setProveedor] = useState<any>(null);
 
   useEffect(() => {
-    const proveedorData = localStorage.getItem('proveedor');
-    if (!proveedorData) { router.push('/portal-proveedor/login'); return; }
-    const p = JSON.parse(proveedorData);
-    setProveedor(p);
-    loadDashboard(p.id);
+    checkAuthAndLoadDashboard();
   }, [router]);
+
+  const checkAuthAndLoadDashboard = async () => {
+    try {
+      const res = await fetch('/api/auth-proveedor/me', {
+        credentials: 'include',
+      });
+
+      if (!res.ok) {
+        router.push('/portal-proveedor/login');
+        return;
+      }
+
+      const { proveedor: p } = await res.json();
+      setProveedor(p);
+      loadDashboard(p.id);
+    } catch (error) {
+      router.push('/portal-proveedor/login');
+    }
+  };
 
   const loadDashboard = async (providerId: string) => {
     try {
@@ -42,7 +57,18 @@ export default function ProveedorDashboardPage() {
     }
   };
 
-  const handleLogout = () => { localStorage.removeItem('proveedor'); router.push('/portal-proveedor/login'); };
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth-proveedor/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      toast.success('Sesión cerrada exitosamente');
+      router.push('/portal-proveedor/login');
+    } catch (error) {
+      toast.error('Error al cerrar sesión');
+    }
+  };
 
   const getEstadoBadge = (estado: string) => {
     const variants: { [key: string]: any } = { asignada: 'outline', aceptada: 'default', en_progreso: 'default', completada: 'secondary', cancelada: 'destructive' };
