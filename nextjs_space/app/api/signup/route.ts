@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/db';
-import { UserRole } from '@prisma/client';
+import { UserRole, BusinessVertical } from '@prisma/client';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { email, password, name, role } = body;
+    const { email, password, name, role, businessVertical } = body;
 
     if (!email || !password || !name) {
       return NextResponse.json(
@@ -35,6 +35,20 @@ export async function POST(req: NextRequest) {
       ? (role as UserRole) 
       : 'gestor';
 
+    // Validar que el businessVertical sea un valor válido del enum BusinessVertical
+    const validVerticals: BusinessVertical[] = [
+      'alquiler_tradicional', 
+      'str_vacacional', 
+      'coliving', 
+      'construccion', 
+      'flipping', 
+      'servicios_profesionales', 
+      'mixto'
+    ];
+    const userVertical: BusinessVertical | undefined = businessVertical && validVerticals.includes(businessVertical as BusinessVertical) 
+      ? (businessVertical as BusinessVertical) 
+      : undefined;
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Obtener la primera empresa disponible (o crear una por defecto)
@@ -58,6 +72,7 @@ export async function POST(req: NextRequest) {
         name,
         role: userRole,
         companyId: company.id,
+        businessVertical: userVertical,
       },
     });
 

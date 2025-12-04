@@ -5,8 +5,10 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { signIn } from 'next-auth/react';
-import { Mail, Lock, User, AlertCircle, ArrowLeft, Building2 } from 'lucide-react';
+import { Mail, Lock, User, AlertCircle, ArrowLeft, Building2, Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+
+type BusinessVertical = 'alquiler_tradicional' | 'str_vacacional' | 'coliving' | 'construccion' | 'flipping' | 'servicios_profesionales' | 'mixto';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -14,6 +16,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [businessVertical, setBusinessVertical] = useState<BusinessVertical>('alquiler_tradicional');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -37,7 +40,7 @@ export default function RegisterPage() {
       const response = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, role: 'gestor' }),
+        body: JSON.stringify({ name, email, password, role: 'gestor', businessVertical }),
       });
 
       const data = await response.json();
@@ -133,6 +136,31 @@ export default function RegisterPage() {
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                   placeholder="Juan Pérez"
                 />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Tipo de Negocio
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Briefcase size={20} className="text-gray-400" />
+                </div>
+                <select
+                  value={businessVertical}
+                  onChange={(e) => setBusinessVertical(e.target.value as BusinessVertical)}
+                  required
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent appearance-none bg-white cursor-pointer"
+                >
+                  <option value="alquiler_tradicional">Alquiler Tradicional (Residencial/Comercial)</option>
+                  <option value="str_vacacional">STR / Alquiler Vacacional (Airbnb, Booking)</option>
+                  <option value="coliving">Coliving / Alquiler por Habitaciones</option>
+                  <option value="flipping">Inversión Inmobiliaria (Flipping)</option>
+                  <option value="construccion">Construcción / Promoción</option>
+                  <option value="servicios_profesionales">Servicios Profesionales (Arquitectura, Asesoría)</option>
+                  <option value="mixto">Mixto / Varios Tipos</option>
+                </select>
               </div>
             </div>
 

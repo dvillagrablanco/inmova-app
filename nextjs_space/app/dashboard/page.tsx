@@ -28,6 +28,7 @@ import SmartOnboardingWizard from '@/components/automation/SmartOnboardingWizard
 import ProactiveSuggestions from '@/components/automation/ProactiveSuggestions';
 import IntelligentSupportChatbot from '@/components/automation/IntelligentSupportChatbot';
 import InactiveModules from './components/InactiveModules';
+import { VerticalSpecificWidgets } from '@/components/dashboard/VerticalSpecificWidgets';
 import logger, { logError } from '@/lib/logger';
 
 interface DashboardData {
@@ -127,6 +128,9 @@ export default function DashboardPage() {
           {/* Smart Onboarding Wizard - Sistema automatizado de configuraci\u00f3n inicial */}
           <SmartOnboardingWizard />
 
+          {/* Vertical-Specific Widgets - Accesos rápidos personalizados por tipo de negocio */}
+          <VerticalSpecificWidgets className="mb-8" />
+
           {/* Proactive Suggestions - Sugerencias inteligentes personalizadas */}
 
           {/* Inactive Modules - Módulos disponibles para activar */}
@@ -179,75 +183,143 @@ export default function DashboardPage() {
             />
           </div>
 
-          {/* Monthly Income Chart */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">Ingresos Mensuales</h2>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={data.monthlyIncome}>
+          {/* Monthly Income Chart - Optimizado para móvil */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-4 md:p-6 mb-6 sm:mb-8">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Ingresos Mensuales</h2>
+            <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
+              <BarChart 
+                data={data.monthlyIncome}
+                margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
+              >
                 <XAxis
                   dataKey="mes"
                   tickLine={false}
-                  tick={{ fontSize: 10 }}
-                  label={{ value: 'Mes', position: 'insideBottom', offset: -15, style: { textAnchor: 'middle', fontSize: 11 } }}
+                  tick={{ fontSize: 9, fill: '#666' }}
+                  className="sm:text-xs"
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
                 />
                 <YAxis
                   tickLine={false}
-                  tick={{ fontSize: 10 }}
-                  label={{ value: 'Ingresos (€)', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fontSize: 11 } }}
+                  tick={{ fontSize: 9, fill: '#666' }}
+                  className="sm:text-xs"
+                  width={40}
                 />
-                <Tooltip wrapperStyle={{ fontSize: 11 }} />
-                <Legend verticalAlign="top" wrapperStyle={{ fontSize: 11 }} />
-                <Bar dataKey="ingresos" fill="#000000" name="Ingresos" />
+                <Tooltip 
+                  wrapperStyle={{ fontSize: 11 }}
+                  cursor={{ fill: 'rgba(0, 0, 0, 0.1)' }}
+                  contentStyle={{ 
+                    borderRadius: '8px',
+                    border: '1px solid #e5e7eb',
+                    fontSize: '12px'
+                  }}
+                />
+                <Legend 
+                  verticalAlign="top" 
+                  wrapperStyle={{ fontSize: 10, paddingBottom: 10 }}
+                  className="sm:text-xs"
+                />
+                <Bar 
+                  dataKey="ingresos" 
+                  fill="#000000" 
+                  name="Ingresos"
+                  radius={[4, 4, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
 
           {/* Additional Charts Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            {/* Occupancy by Unit Type */}
+            {/* Occupancy by Unit Type - Optimizado para móvil */}
             {data.occupancyChartData && data.occupancyChartData.length > 0 && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-6">Ocupación por Tipo de Unidad</h2>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={data.occupancyChartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" tickLine={false} tick={{ fontSize: 10 }} />
-                    <YAxis tickLine={false} tick={{ fontSize: 10 }} />
-                    <Tooltip wrapperStyle={{ fontSize: 11 }} />
-                    <Legend verticalAlign="top" wrapperStyle={{ fontSize: 11 }} />
-                    <Bar dataKey="ocupadas" fill="#000000" name="Ocupadas" stackId="a" />
-                    <Bar dataKey="disponibles" fill="#9CA3AF" name="Disponibles" stackId="a" />
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-4 md:p-6">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Ocupación por Tipo</h2>
+                <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
+                  <BarChart 
+                    data={data.occupancyChartData}
+                    margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis 
+                      dataKey="name" 
+                      tickLine={false} 
+                      tick={{ fontSize: 9, fill: '#666' }}
+                      angle={-45}
+                      textAnchor="end"
+                      height={60}
+                    />
+                    <YAxis 
+                      tickLine={false} 
+                      tick={{ fontSize: 9, fill: '#666' }}
+                      width={35}
+                    />
+                    <Tooltip 
+                      wrapperStyle={{ fontSize: 11 }}
+                      contentStyle={{ 
+                        borderRadius: '8px',
+                        border: '1px solid #e5e7eb',
+                        fontSize: '12px'
+                      }}
+                    />
+                    <Legend 
+                      verticalAlign="top" 
+                      wrapperStyle={{ fontSize: 10, paddingBottom: 10 }}
+                    />
+                    <Bar 
+                      dataKey="ocupadas" 
+                      fill="#000000" 
+                      name="Ocupadas" 
+                      stackId="a"
+                      radius={[4, 4, 0, 0]}
+                    />
+                    <Bar 
+                      dataKey="disponibles" 
+                      fill="#9CA3AF" 
+                      name="Disponibles" 
+                      stackId="a"
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             )}
 
-            {/* Expenses by Category */}
+            {/* Expenses by Category - Optimizado para móvil */}
             {data.expensesChartData && data.expensesChartData.length > 0 && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-6">Gastos por Categoría</h2>
-                <ResponsiveContainer width="100%" height={300}>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-4 md:p-6">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Gastos por Categoría</h2>
+                <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
                   <PieChart>
                     <Pie
                       data={data.expensesChartData}
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percent }: any) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
-                      outerRadius={80}
+                      label={false}
+                      outerRadius={70}
+                      innerRadius={30}
                       fill="#8884d8"
                       dataKey="value"
+                      paddingAngle={2}
                     >
                       {data.expensesChartData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip wrapperStyle={{ fontSize: 11 }} />
+                    <Tooltip 
+                      wrapperStyle={{ fontSize: 11 }}
+                      contentStyle={{ 
+                        borderRadius: '8px',
+                        border: '1px solid #e5e7eb',
+                        fontSize: '12px'
+                      }}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
-                <div className="mt-4 space-y-2">
+                <div className="mt-3 sm:mt-4 space-y-1.5 sm:space-y-2">
                   {data.expensesChartData.map((item, index) => (
-                    <div key={index} className="flex items-center justify-between text-sm">
+                    <div key={index} className="flex items-center justify-between text-xs sm:text-sm">
                       <div className="flex items-center gap-2">
                         <div
                           className="w-3 h-3 rounded-full"

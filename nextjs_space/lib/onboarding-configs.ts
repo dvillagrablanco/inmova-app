@@ -406,13 +406,33 @@ export function getOnboardingSteps(modelo: ModeloNegocio): OnboardingStep[] {
 }
 
 export function getModeloFromUserPreferences(user: any): ModeloNegocio {
-  // Lógica para detectar modelo de negocio preferido del usuario
-  // Puede basarse en módulos activos, tipo de empresa, etc.
+  // Primero intentar obtener el businessVertical directamente del usuario
+  if (user?.businessVertical) {
+    return mapBusinessVerticalToModelo(user.businessVertical);
+  }
   
+  // Luego intentar obtener de preferencias
   if (user?.preferences?.modeloNegocio) {
     return user.preferences.modeloNegocio as ModeloNegocio;
   }
   
   // Si no hay preferencia, usar general
   return 'general';
+}
+
+/**
+ * Mapea el enum BusinessVertical de Prisma al tipo ModeloNegocio del onboarding
+ */
+function mapBusinessVerticalToModelo(vertical: string): ModeloNegocio {
+  const mapping: Record<string, ModeloNegocio> = {
+    'alquiler_tradicional': 'alquiler_tradicional',
+    'str_vacacional': 'str',
+    'coliving': 'room_rental',
+    'construccion': 'construccion',
+    'flipping': 'flipping',
+    'servicios_profesionales': 'profesional',
+    'mixto': 'general',
+  };
+  
+  return mapping[vertical] || 'general';
 }
