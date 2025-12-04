@@ -72,7 +72,6 @@ async function processPreventiveMaintenance() {
           mensaje: `La tarea "${schedule.titulo}" está programada para ${format(schedule.proximaFecha, "d 'de' MMMM", { locale: es })} (en ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''}). Edificio: ${schedule.building.nombre}.`,
           tipo: prioridad === 'alto' ? 'mantenimiento_urgente' : 'mantenimiento_preventivo',
           prioridad,
-          buildingId: schedule.buildingId,
           entityType: 'MaintenanceSchedule',
           entityId: schedule.id
         }
@@ -96,7 +95,7 @@ async function processPreventiveMaintenance() {
                     .header { background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); padding: 32px 24px; text-align: center; }
                     .header h1 { color: #ffffff; margin: 0; font-size: 24px; font-weight: 700; }
                     .content { padding: 32px 24px; }
-                    .alert-badge { display: inline-block; padding: 8px 16px; background-color: ${prioridad === 'alta' ? '#FEE2E2' : '#FEF3C7'}; color: ${prioridad === 'alta' ? '#991B1B' : '#92400E'}; border-radius: 6px; font-weight: 600; font-size: 14px; margin-bottom: 16px; }
+                    .alert-badge { display: inline-block; padding: 8px 16px; background-color: ${prioridad === 'alto' ? '#FEE2E2' : '#FEF3C7'}; color: ${prioridad === 'alto' ? '#991B1B' : '#92400E'}; border-radius: 6px; font-weight: 600; font-size: 14px; margin-bottom: 16px; }
                     .info-box { background-color: #F3F4F6; border-left: 4px solid #4F46E5; padding: 16px; margin: 20px 0; border-radius: 6px; }
                     .info-box strong { color: #4F46E5; }
                     .button { display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; margin-top: 20px; }
@@ -123,7 +122,7 @@ async function processPreventiveMaintenance() {
                       </div>
 
                       <p style="color: #6B7280; font-size: 14px; margin-top: 24px;">
-                        ${prioridad === 'alta' ? '⚠️ <strong>Es importante que coordine esta tarea con anticipación para evitar interrupciones en el servicio.</strong>' : 'Por favor, coordine esta tarea con el proveedor correspondiente.'}
+                        ${prioridad === 'alto' ? '⚠️ <strong>Es importante que coordine esta tarea con anticipación para evitar interrupciones en el servicio.</strong>' : 'Por favor, coordine esta tarea con el proveedor correspondiente.'}
                       </p>
 
                       <div style="text-align: center;">
