@@ -18,6 +18,7 @@ import { SkeletonCard } from '@/components/ui/skeleton-card';
 import { MessageSquare, Send, Home, ArrowLeft, CheckCircle2, Clock } from 'lucide-react';
 import logger, { logError } from '@/lib/logger';
 import {
+import { ErrorBoundary } from '@/components/ui/error-boundary';
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -44,7 +45,7 @@ interface Message {
   leido: boolean;
 }
 
-export default function AdminChatPage() {
+function AdminChatPage() {
   const { data: session, status } = useSession() || {};
   const router = useRouter();
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -375,5 +376,13 @@ export default function AdminChatPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function AdminChatPageWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <AdminChatPage />
+    </ErrorBoundary>
   );
 }

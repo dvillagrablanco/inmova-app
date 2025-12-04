@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { ReactNode } from 'react';
+import { ReactNode, memo } from 'react';
 import { cn } from '@/lib/utils';
 
 interface AnimatedListProps {
@@ -26,8 +26,9 @@ const directionVariants = {
 
 /**
  * Lista animada con efectos de entrada escalonados
+ * Memoizado para evitar re-renders innecesarios
  */
-export function AnimatedList({
+export const AnimatedList = memo(function AnimatedList({
   children,
   className,
   staggerDelay = 0.05,
@@ -57,7 +58,7 @@ export function AnimatedList({
       </AnimatePresence>
     </div>
   );
-}
+});
 
 interface AnimatedGridProps {
   children: ReactNode[];
@@ -75,8 +76,9 @@ const gridClasses = {
 
 /**
  * Grid animado con efectos de entrada escalonados
+ * Memoizado para evitar re-renders innecesarios
  */
-export function AnimatedGrid({
+export const AnimatedGrid = memo(function AnimatedGrid({
   children,
   className,
   staggerDelay = 0.05,
@@ -100,7 +102,7 @@ export function AnimatedGrid({
               layout
             >
               {child}
-            </motion.div>
+});
           ))}
       </AnimatePresence>
     </div>

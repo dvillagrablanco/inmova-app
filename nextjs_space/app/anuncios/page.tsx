@@ -38,6 +38,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 import logger, { logError } from '@/lib/logger';
 
 interface Anuncio {
@@ -60,7 +61,7 @@ interface Anuncio {
   createdAt: string;
 }
 
-export default function AnunciosPage() {
+function AnunciosPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [anuncios, setAnuncios] = useState<Anuncio[]>([]);
@@ -742,5 +743,13 @@ export default function AnunciosPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function AnunciosPageWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <AnunciosPage />
+    </ErrorBoundary>
   );
 }

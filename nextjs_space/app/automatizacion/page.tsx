@@ -14,8 +14,9 @@ import { AIAssistant } from '@/components/automation/AIAssistant';
 import { initialSetupWizard, createBuildingWizard, createTenantWizard } from '@/lib/wizard-config';
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 
-export default function AutomatizacionPage() {
+function AutomatizacionPage() {
   const router = useRouter();
   const [activeWizard, setActiveWizard] = useState<string | null>(null);
 
@@ -283,5 +284,13 @@ export default function AutomatizacionPage() {
 
       <AIAssistant />
     </div>
+  );
+}
+
+export default function AutomatizacionPageWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <AutomatizacionPage />
+    </ErrorBoundary>
   );
 }

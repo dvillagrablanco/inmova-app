@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import logger, { logError } from '@/lib/logger';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 
 interface Unit {
   id: string;
@@ -59,7 +60,7 @@ interface Gallery {
   items: GalleryItem[];
 }
 
-export default function GaleriasPage() {
+function GaleriasPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const { canCreate } = usePermissions();
@@ -392,5 +393,13 @@ export default function GaleriasPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function GaleriasPageWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <GaleriasPage />
+    </ErrorBoundary>
   );
 }

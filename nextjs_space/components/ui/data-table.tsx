@@ -1,9 +1,10 @@
 /**
  * Accessible data table component with proper ARIA attributes
  * Provides better experience for screen readers and keyboard navigation
+ * Optimizado con React.memo para evitar re-renders innecesarios
  */
 
-import { ReactNode } from 'react';
+import { ReactNode, memo } from 'react';
 import {
   Table,
   TableBody,
@@ -33,6 +34,61 @@ interface DataTableProps<T> {
   ariaLabel?: string;
   rowClassName?: (item: T, index: number) => string;
 }
+
+/**
+ * Fila de tabla memoizada para optimizar el rendimiento
+ */
+const MemoizedTableRow = memo(function MemoizedTableRow<T>({
+  item,
+  index,
+  columns,
+  onRowClick,
+  rowClassName,
+  id,
+}: {
+  item: T;
+  index: number;
+  columns: Column<T>[];
+  onRowClick?: (item: T, index: number) => void;
+  rowClassName?: string;
+  id: string | number;
+}) {
+  return (
+    <TableRow
+      key={id}
+      onClick={() => onRowClick?.(item, index)}
+      className={cn(
+        onRowClick && 'cursor-pointer hover:bg-muted/50',
+        rowClassName
+      )}
+      tabIndex={onRowClick ? 0 : undefined}
+      onKeyDown={
+        onRowClick
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onRowClick(item, index);
+              }
+            }
+          : undefined
+      }
+      role={onRowClick ? 'button' : undefined}
+    >
+      {columns.map((column) => (
+        <TableCell key={column.key} className={column.className}>
+          {column.render(item, index)}
+        </TableCell>
+      ))}
+    </TableRow>
+  );
+}) as <T>(props: {
+  item: T;
+  index: number;
+  columns: Column<T>[];
+  onRowClick?: (item: T, index: number) => void;
+  rowClassName?: string;
+  id: string | number;
+}) => JSX.Element;
 
 export function DataTable<T extends { id?: string | number }>({
   data,
@@ -73,32 +129,15 @@ export function DataTable<T extends { id?: string | number }>({
             </TableRow>
           ) : (
             data.map((item, index) => (
-              <TableRow
+              <MemoizedTableRow
                 key={item.id ?? index}
-                onClick={() => onRowClick?.(item, index)}
-                className={cn(
-                  onRowClick && 'cursor-pointer hover:bg-muted/50',
-                  rowClassName?.(item, index)
-                )}
-                tabIndex={onRowClick ? 0 : undefined}
-                onKeyDown={
-                  onRowClick
-                    ? (e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          onRowClick(item, index);
-                        }
-                      }
-                    : undefined
-                }
-                role={onRowClick ? 'button' : undefined}
-              >
-                {columns.map((column) => (
-                  <TableCell key={column.key} className={column.className}>
-                    {column.render(item, index)}
-                  </TableCell>
-                ))}
-              </TableRow>
+                id={item.id ?? index}
+                item={item}
+                index={index}
+                columns={columns}
+                onRowClick={onRowClick}
+                rowClassName={rowClassName?.(item, index)}
+              />
             ))
           )}
         </TableBody>

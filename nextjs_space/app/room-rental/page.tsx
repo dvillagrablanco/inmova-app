@@ -10,9 +10,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Building2, DoorOpen, Users, Euro, TrendingUp, Plus, Eye, BarChart3 } from 'lucide-react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 import logger, { logError } from '@/lib/logger';
 
-export default function RoomRentalPage() {
+function RoomRentalPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [units, setUnits] = useState<any[]>([]);
@@ -180,5 +181,13 @@ export default function RoomRentalPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function RoomRentalPageWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <RoomRentalPage />
+    </ErrorBoundary>
   );
 }

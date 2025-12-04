@@ -58,6 +58,7 @@ import { toast } from 'react-hot-toast';
 import { LoadingState } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
 import { FilterChips } from '@/components/ui/filter-chips';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 import logger, { logError } from '@/lib/logger';
 
 interface MaintenanceRequest {
@@ -98,7 +99,7 @@ interface MaintenanceSchedule {
   createdAt: string;
 }
 
-export default function MantenimientoPage() {
+function MantenimientoPage() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
   const { canCreate } = usePermissions();
@@ -1216,5 +1217,13 @@ export default function MantenimientoPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function MantenimientoPageWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <MantenimientoPage />
+    </ErrorBoundary>
   );
 }

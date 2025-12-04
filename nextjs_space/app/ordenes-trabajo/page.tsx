@@ -22,6 +22,7 @@ import { LoadingState } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
 import { FilterChips } from '@/components/ui/filter-chips';
 import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 import logger, { logError } from '@/lib/logger';
 
 interface WorkOrder {
@@ -39,7 +40,7 @@ interface WorkOrder {
   costoTotal?: number;
 }
 
-export default function OrdenesTrabajoPage() {
+function OrdenesTrabajoPage() {
   const { data: session, status } = useSession() || {};
   const router = useRouter();
   const { canCreate, canUpdate, canDelete } = usePermissions();
@@ -778,5 +779,13 @@ export default function OrdenesTrabajoPage() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+export default function OrdenesTrabajoPageWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <OrdenesTrabajoPage />
+    </ErrorBoundary>
   );
 }

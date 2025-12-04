@@ -30,6 +30,7 @@ import { SkeletonList, SkeletonCard } from '@/components/ui/skeleton-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { FilterChips } from '@/components/ui/filter-chips';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 import logger, { logError } from '@/lib/logger';
 
 interface Payment {
@@ -53,7 +54,7 @@ interface Payment {
   };
 }
 
-export default function PagosPage() {
+function PagosPage() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
   const { canCreate } = usePermissions();
@@ -557,5 +558,13 @@ export default function PagosPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function PagosPageWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <PagosPage />
+    </ErrorBoundary>
   );
 }

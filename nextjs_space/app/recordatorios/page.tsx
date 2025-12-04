@@ -17,6 +17,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { Home, ArrowLeft, Bell, Plus, Mail, MessageSquare, Calendar, Clock } from 'lucide-react';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 import logger, { logError } from '@/lib/logger';
 
 interface Reminder {
@@ -34,7 +35,7 @@ interface Reminder {
   proximoEnvio?: string;
 }
 
-export default function RecordatoriosPage() {
+function RecordatoriosPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [reminders, setReminders] = useState<Reminder[]>([]);
@@ -444,5 +445,13 @@ export default function RecordatoriosPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function RecordatoriosPageWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <RecordatoriosPage />
+    </ErrorBoundary>
   );
 }
