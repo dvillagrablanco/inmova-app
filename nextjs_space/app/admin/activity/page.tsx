@@ -115,7 +115,36 @@ export default function ActivityTimelinePage() {
     );
   }
 
-  if (!timeline) return null;
+  if (!timeline) {
+    return (
+      <div className="flex h-screen overflow-hidden bg-gradient-bg">
+        <Sidebar />
+        <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
+          <Header />
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <div className="max-w-7xl mx-auto">
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center py-8">
+                    <Activity className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                    <p className="text-muted-foreground">No se pudo cargar la actividad del sistema</p>
+                    <Button
+                      variant="outline"
+                      className="mt-4"
+                      onClick={fetchTimeline}
+                    >
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Reintentar
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   const actionColors: Record<string, string> = {
     CREATE: 'bg-green-100 text-green-800',
@@ -199,85 +228,99 @@ export default function ActivityTimelinePage() {
 
             {/* Timeline */}
             <div className="space-y-6">
-              {Object.entries(timeline.groupedByDate)
-                .sort(([dateA], [dateB]) => dateB.localeCompare(dateA))
-                .map(([date, activities]) => {
-                  const dateActivities = activities.filter((activity) =>
-                    filteredActivities.some((fa) => fa.id === activity.id)
-                  );
+              {filteredActivities.length === 0 ? (
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-center py-8">
+                      <Activity className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                      <p className="text-muted-foreground">No hay actividad registrada</p>
+                      <p className="text-sm text-gray-500 mt-2">
+                        Las acciones del sistema se registrarán aquí automáticamente
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                Object.entries(timeline.groupedByDate)
+                  .sort(([dateA], [dateB]) => dateB.localeCompare(dateA))
+                  .map(([date, activities]) => {
+                    const dateActivities = activities.filter((activity) =>
+                      filteredActivities.some((fa) => fa.id === activity.id)
+                    );
 
-                  if (dateActivities.length === 0) return null;
+                    if (dateActivities.length === 0) return null;
 
-                  return (
-                    <div key={date}>
-                      <div className="flex items-center mb-4">
-                        <Clock className="h-4 w-4 mr-2 text-gray-500" />
-                        <h3 className="text-lg font-semibold text-gray-700">
-                          {format(new Date(date), "EEEE, d 'de' MMMM 'de' yyyy", {
-                            locale: es,
-                          })}
-                        </h3>
-                        <Badge variant="secondary" className="ml-3">
-                          {dateActivities.length} eventos
-                        </Badge>
-                      </div>
+                    return (
+                      <div key={date}>
+                        <div className="flex items-center mb-4">
+                          <Clock className="h-4 w-4 mr-2 text-gray-500" />
+                          <h3 className="text-lg font-semibold text-gray-700">
+                            {format(new Date(date), "EEEE, d 'de' MMMM 'de' yyyy", {
+                              locale: es,
+                            })}
+                          </h3>
+                          <Badge variant="secondary" className="ml-3">
+                            {dateActivities.length} eventos
+                          </Badge>
+                        </div>
 
-                      <div className="space-y-3">
-                        {dateActivities.map((activity) => (
-                          <Card
-                            key={activity.id}
-                            className="border-l-4 border-l-indigo-600 hover:shadow-md transition-shadow"
-                          >
-                            <CardContent className="pt-4">
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                  <div className="flex items-center space-x-2 mb-2">
-                                    <Badge
-                                      className={actionColors[activity.action] || 'bg-gray-100 text-gray-800'}
-                                    >
-                                      {activity.action}
-                                    </Badge>
-                                    <Badge variant="outline">
-                                      {activity.entityType}
-                                    </Badge>
-                                    {activity.entityName && (
-                                      <span className="text-sm font-medium text-gray-700">
-                                        {activity.entityName}
-                                      </span>
+                        <div className="space-y-3">
+                          {dateActivities.map((activity) => (
+                            <Card
+                              key={activity.id}
+                              className="border-l-4 border-l-indigo-600 hover:shadow-md transition-shadow"
+                            >
+                              <CardContent className="pt-4">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <div className="flex items-center space-x-2 mb-2">
+                                      <Badge
+                                        className={actionColors[activity.action] || 'bg-gray-100 text-gray-800'}
+                                      >
+                                        {activity.action}
+                                      </Badge>
+                                      <Badge variant="outline">
+                                        {activity.entityType}
+                                      </Badge>
+                                      {activity.entityName && (
+                                        <span className="text-sm font-medium text-gray-700">
+                                          {activity.entityName}
+                                        </span>
+                                      )}
+                                    </div>
+
+                                    <div className="flex items-center space-x-4 text-sm text-gray-600">
+                                      <div className="flex items-center">
+                                        <User className="h-4 w-4 mr-1" />
+                                        {activity.user.name || activity.user.email}
+                                      </div>
+                                      <div className="flex items-center">
+                                        <Building2 className="h-4 w-4 mr-1" />
+                                        {activity.company.nombre}
+                                      </div>
+                                      <div className="flex items-center">
+                                        <Clock className="h-4 w-4 mr-1" />
+                                        {format(new Date(activity.createdAt), 'HH:mm:ss')}
+                                      </div>
+                                    </div>
+
+                                    {activity.changes && (
+                                      <div className="mt-2 p-2 bg-gray-50 rounded text-xs font-mono overflow-x-auto">
+                                        <pre className="whitespace-pre-wrap">
+                                          {JSON.stringify(JSON.parse(activity.changes), null, 2)}
+                                        </pre>
+                                      </div>
                                     )}
                                   </div>
-
-                                  <div className="flex items-center space-x-4 text-sm text-gray-600">
-                                    <div className="flex items-center">
-                                      <User className="h-4 w-4 mr-1" />
-                                      {activity.user.name || activity.user.email}
-                                    </div>
-                                    <div className="flex items-center">
-                                      <Building2 className="h-4 w-4 mr-1" />
-                                      {activity.company.nombre}
-                                    </div>
-                                    <div className="flex items-center">
-                                      <Clock className="h-4 w-4 mr-1" />
-                                      {format(new Date(activity.createdAt), 'HH:mm:ss')}
-                                    </div>
-                                  </div>
-
-                                  {activity.changes && (
-                                    <div className="mt-2 p-2 bg-gray-50 rounded text-xs font-mono overflow-x-auto">
-                                      <pre className="whitespace-pre-wrap">
-                                        {JSON.stringify(JSON.parse(activity.changes), null, 2)}
-                                      </pre>
-                                    </div>
-                                  )}
                                 </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+              )}
             </div>
           </div>
         </main>

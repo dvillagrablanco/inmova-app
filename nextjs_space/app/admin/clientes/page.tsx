@@ -220,13 +220,18 @@ export default function ClientesAdminPage() {
       return;
     }
 
+    if (!newCompany.subscriptionPlanId) {
+      toast.error('Debe seleccionar un plan de suscripción');
+      return;
+    }
+
     try {
       setCreating(true);
       
       // Preparar datos, quitando campos vacíos
       const companyData = {
         ...newCompany,
-        subscriptionPlanId: newCompany.subscriptionPlanId || undefined,
+        subscriptionPlanId: newCompany.subscriptionPlanId,
         parentCompanyId: newCompany.parentCompanyId || undefined,
         dominioPersonalizado: newCompany.dominioPersonalizado || undefined,
         contactoPrincipal: newCompany.contactoPrincipal || undefined,
@@ -646,21 +651,20 @@ export default function ClientesAdminPage() {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <div className="flex items-center gap-2 mb-2">
-                            <Label htmlFor="plan">Plan de Suscripción</Label>
+                            <Label htmlFor="plan">Plan de Suscripción <span className="text-red-500">*</span></Label>
                             <InfoTooltip content="Define los módulos y funcionalidades disponibles para la empresa. Puedes cambiarlo más adelante." />
                           </div>
                           <Select
-                            value={newCompany.subscriptionPlanId || "none"}
-                            onValueChange={value => setNewCompany({ ...newCompany, subscriptionPlanId: value === "none" ? "" : value })}
+                            value={newCompany.subscriptionPlanId || ""}
+                            onValueChange={value => setNewCompany({ ...newCompany, subscriptionPlanId: value })}
                           >
                             <SelectTrigger>
-                              <SelectValue placeholder="Seleccionar plan" />
+                              <SelectValue placeholder="Seleccionar plan (requerido)" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="none">Sin plan</SelectItem>
                               {plans.map(plan => (
                                 <SelectItem key={plan.id} value={plan.id}>
-                                  {plan.nombre} - {plan.precioMensual}€/mes
+                                  {plan.nombre} - €{plan.precioMensual}/mes
                                 </SelectItem>
                               ))}
                             </SelectContent>

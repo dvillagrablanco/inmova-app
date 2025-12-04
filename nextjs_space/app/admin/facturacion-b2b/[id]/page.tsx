@@ -36,6 +36,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -57,6 +58,8 @@ import {
   AlertCircle,
   Clock,
   XCircle,
+  Edit,
+  Trash2,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -123,6 +126,15 @@ export default function InvoiceDetailPage() {
     referencia: '',
   });
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [editData, setEditData] = useState({
+    notas: '',
+    terminosPago: '',
+    fechaVencimiento: '',
+  });
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   useEffect(() => {
     if (params.id) {
@@ -138,6 +150,11 @@ export default function InvoiceDetailPage() {
         const data = await res.json();
         setInvoice(data);
         setPaymentData(prev => ({ ...prev, monto: data.total.toString() }));
+        setEditData({
+          notas: data.notas || '',
+          terminosPago: data.terminosPago || '',
+          fechaVencimiento: data.fechaVencimiento ? new Date(data.fechaVencimiento).toISOString().split('T')[0] : '',
+        });
       } else {
         toast.error('Error al cargar la factura');
       }
@@ -177,6 +194,85 @@ export default function InvoiceDetailPage() {
       toast.error('Error al registrar el pago');
     } finally {
       setIsProcessingPayment(false);
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!invoice) return;
+
+    try {
+      const res = await fetch(`/api/b2b-billing/invoices/${invoice.id}/pdf`);
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Factura_${invoice.numeroFactura.replace(/\//g, '-')}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        toast.success('PDF descargado correctamente');
+      } else {
+        toast.error('Error al descargar el PDF');
+      }
+    } catch (error) {
+      logger.error('Error:', error);
+      toast.error('Error al descargar el PDF');
+    }
+  };
+
+  const handleUpdateInvoice = async () => {
+    if (!invoice) return;
+
+    try {
+      setIsUpdating(true);
+      const res = await fetch(`/api/b2b-billing/invoices/${invoice.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          notas: editData.notas || undefined,
+          terminosPago: editData.terminosPago || undefined,
+          fechaVencimiento: editData.fechaVencimiento || undefined,
+        }),
+      });
+
+      if (res.ok) {
+        toast.success('Factura actualizada correctamente');
+        setShowEditDialog(false);
+        loadInvoice();
+      } else {
+        toast.error('Error al actualizar la factura');
+      }
+    } catch (error) {
+      logger.error('Error:', error);
+      toast.error('Error al actualizar la factura');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleCancelInvoice = async () => {
+    if (!invoice) return;
+
+    try {
+      setIsCancelling(true);
+      const res = await fetch(`/api/b2b-billing/invoices/${invoice.id}`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        toast.success('Factura cancelada correctamente');
+        setShowCancelDialog(false);
+        loadInvoice();
+      } else {
+        toast.error('Error al cancelar la factura');
+      }
+    } catch (error) {
+      logger.error('Error:', error);
+      toast.error('Error al cancelar la factura');
+    } finally {
+      setIsCancelling(false);
     }
   };
 
@@ -255,16 +351,28 @@ export default function InvoiceDetailPage() {
           </div>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={handleDownloadPDF}>
+            <Download className="w-4 h-4 mr-2" />
+            Descargar PDF
+          </Button>
+          {invoice.estado !== 'CANCELADA' && invoice.estado !== 'PAGADA' && (
+            <>
+              <Button variant="outline" onClick={() => setShowEditDialog(true)}>
+                <Edit className="w-4 h-4 mr-2" />
+                Editar
+              </Button>
+              <Button variant="outline" onClick={() => setShowCancelDialog(true)} className="text-red-600 hover:text-red-700">
+                <Trash2 className="w-4 h-4 mr-2" />
+                Cancelar
+              </Button>
+            </>
+          )}
           {(invoice.estado === 'PENDIENTE' || invoice.estado === 'PARCIALMENTE_PAGADA' || invoice.estado === 'VENCIDA') && (
             <Button onClick={() => setShowPaymentDialog(true)}>
               <DollarSign className="w-4 h-4 mr-2" />
               Registrar Pago
             </Button>
           )}
-          <Button variant="outline">
-            <Download className="w-4 h-4 mr-2" />
-            Descargar PDF
-          </Button>
         </div>
       </div>
 
@@ -556,6 +664,103 @@ export default function InvoiceDetailPage() {
               disabled={isProcessingPayment || !paymentData.monto}
             >
               {isProcessingPayment ? 'Procesando...' : 'Registrar Pago'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Diálogo de Edición */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Factura</DialogTitle>
+            <DialogDescription>
+              Actualiza los detalles de la factura {invoice.numeroFactura}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="fechaVencimiento">Fecha de Vencimiento</Label>
+              <Input
+                id="fechaVencimiento"
+                type="date"
+                value={editData.fechaVencimiento}
+                onChange={(e) => setEditData({ ...editData, fechaVencimiento: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="terminosPago">Términos de Pago</Label>
+              <Textarea
+                id="terminosPago"
+                value={editData.terminosPago}
+                onChange={(e) => setEditData({ ...editData, terminosPago: e.target.value })}
+                placeholder="Ej: Pago a 30 días desde la fecha de emisión"
+                rows={3}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="notas">Notas</Label>
+              <Textarea
+                id="notas"
+                value={editData.notas}
+                onChange={(e) => setEditData({ ...editData, notas: e.target.value })}
+                placeholder="Notas adicionales sobre la factura"
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowEditDialog(false)}
+              disabled={isUpdating}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleUpdateInvoice}
+              disabled={isUpdating}
+            >
+              {isUpdating ? 'Actualizando...' : 'Guardar Cambios'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Diálogo de Cancelación */}
+      <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancelar Factura</DialogTitle>
+            <DialogDescription>
+              ¿Estás seguro de que deseas cancelar la factura {invoice.numeroFactura}? Esta acción no se puede deshacer.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="bg-red-50 border border-red-200 rounded-md p-4">
+              <div className="flex gap-3">
+                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-red-800">
+                  <p className="font-semibold mb-1">Advertencia</p>
+                  <p>Al cancelar esta factura, se marcará como cancelada y no podrá ser reactivada. Los registros de pago asociados se mantendrán para fines de auditoría.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowCancelDialog(false)}
+              disabled={isCancelling}
+            >
+              No, mantener factura
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleCancelInvoice}
+              disabled={isCancelling}
+            >
+              {isCancelling ? 'Cancelando...' : 'Sí, cancelar factura'}
             </Button>
           </DialogFooter>
         </DialogContent>
