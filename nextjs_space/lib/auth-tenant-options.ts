@@ -51,6 +51,7 @@ export const authTenantOptions: NextAuthOptions = {
           id: tenant.id,
           email: tenant.email,
           name: tenant.nombreCompleto,
+          role: 'tenant',
           type: 'tenant',
           companyId: tenant.companyId,
           companyName: tenant.company.nombre,

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { acceptInvitation } from '@/lib/tenant-invitation-service';
-import { logger } from '@/lib/logger';
+import logger from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   try {

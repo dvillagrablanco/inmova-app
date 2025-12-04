@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import { CreditCard, Calendar, DollarSign, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { CreditCard, Calendar, DollarSign, CheckCircle, Clock, AlertCircle, Download, Eye } from 'lucide-react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import StripePaymentForm from './components/StripePaymentForm';
@@ -106,6 +106,60 @@ export default function TenantPaymentsPage() {
   const handlePaymentCancel = () => {
     setClientSecret(null);
     setSelectedPayment(null);
+  };
+
+  const handleDownloadReceipt = async (paymentId: string, periodo: string) => {
+    try {
+      const response = await fetch(`/api/payments/${paymentId}/receipt`);
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Error al descargar recibo');
+      }
+
+      // Crear un blob del PDF
+      const blob = await response.blob();
+      
+      // Crear un link temporal y hacer click para descargar
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `recibo_${periodo.replace(/\s+/g, '_')}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Limpiar
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success('Recibo descargado exitosamente');
+    } catch (error: any) {
+      logger.error('Error downloading receipt:', error);
+      toast.error(error.message || 'Error al descargar el recibo');
+    }
+  };
+
+  const handleViewReceipt = async (paymentId: string) => {
+    try {
+      const response = await fetch(`/api/payments/${paymentId}/receipt`);
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Error al cargar recibo');
+      }
+
+      // Crear un blob del PDF
+      const blob = await response.blob();
+      
+      // Abrir en nueva pestaña
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      
+      // El URL se limpiará automáticamente cuando se cierre la pestaña
+    } catch (error: any) {
+      logger.error('Error viewing receipt:', error);
+      toast.error(error.message || 'Error al visualizar el recibo');
+    }
   };
 
   const getStatusBadge = (estado: string, stripeStatus?: string | null) => {
@@ -264,7 +318,7 @@ export default function TenantPaymentsPage() {
           </h2>
           <div className="grid gap-4">
             {paidPayments.map((payment) => (
-              <Card key={payment.id} className="opacity-75">
+              <Card key={payment.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-6">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div className="flex-1">
@@ -275,7 +329,7 @@ export default function TenantPaymentsPage() {
                       <p className="text-sm text-gray-600 mb-1">
                         {payment.contract.unit.building.nombre} - Unidad {payment.contract.unit.numero}
                       </p>
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
                         <span className="flex items-center gap-1">
                           <Calendar className="w-4 h-4" />
                           Pagado: {payment.fechaPago ? new Date(payment.fechaPago).toLocaleDateString('es-ES') : 'N/A'}
@@ -291,6 +345,26 @@ export default function TenantPaymentsPage() {
                           </span>
                         )}
                       </div>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleViewReceipt(payment.id)}
+                        className="flex items-center justify-center gap-2"
+                      >
+                        <Eye className="w-4 h-4" />
+                        Ver Recibo
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDownloadReceipt(payment.id, payment.periodo)}
+                        className="flex items-center justify-center gap-2"
+                      >
+                        <Download className="w-4 h-4" />
+                        Descargar PDF
+                      </Button>
                     </div>
                   </div>
                 </CardContent>

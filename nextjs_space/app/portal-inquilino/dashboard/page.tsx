@@ -19,6 +19,8 @@ import {
   Bot,
   Sparkles,
   Loader2,
+  Star,
+  MessageSquare,
 } from 'lucide-react';
 import Link from 'next/link';
 import logger from '@/lib/logger';
@@ -238,6 +240,33 @@ export default function PortalInquilinoDashboardPage() {
                 <Button size="lg" className="gap-2">
                   <Bot className="h-5 w-5" />
                   Abrir Chat
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+        {/* Valoraciones y Feedback */}
+        <Card className="mb-6 bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center justify-center w-14 h-14 bg-yellow-100 rounded-full">
+                  <Star className="h-8 w-8 text-yellow-600" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="text-lg font-bold">Tu Opinión Importa</h3>
+                    <MessageSquare className="h-4 w-4 text-yellow-600" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Comparte tu experiencia • Ayuda a mejorar el servicio • Tu feedback es valioso
+                  </p>
+                </div>
+              </div>
+              <Link href="/portal-inquilino/valoraciones">
+                <Button size="lg" className="gap-2 bg-yellow-600 hover:bg-yellow-700">
+                  <Star className="h-5 w-5" />
+                  Valorar
                 </Button>
               </Link>
             </div>
