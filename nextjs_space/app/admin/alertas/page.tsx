@@ -15,9 +15,18 @@ import {
   RefreshCw,
   ExternalLink,
   CheckCircle,
+  X,
+  Filter,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface Alert {
   id: string;
@@ -45,6 +54,9 @@ export default function AlertsPage() {
   const { data: session, status } = useSession();
   const [alertsData, setAlertsData] = useState<AlertsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [filterType, setFilterType] = useState<string>('all');
+  const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set());
+  const [autoRefresh, setAutoRefresh] = useState(false);
 
   const fetchAlerts = async () => {
     try {
@@ -72,6 +84,28 @@ export default function AlertsPage() {
       }
     }
   }, [status, session, router]);
+
+  // Auto-refresh effect
+  useEffect(() => {
+    if (!autoRefresh) return;
+
+    const interval = setInterval(() => {
+      fetchAlerts();
+    }, 30000); // Refresh every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [autoRefresh]);
+
+  const handleDismissAlert = (alertId: string) => {
+    setDismissedAlerts((prev) => new Set([...prev, alertId]));
+    toast.success('Alerta desestimada');
+  };
+
+  const filteredAlerts = alertsData?.alerts.filter((alert) => {
+    if (dismissedAlerts.has(alert.id)) return false;
+    if (filterType === 'all') return true;
+    return alert.type === filterType;
+  }) || [];
 
   if (loading || status === 'loading') {
     return (
@@ -122,7 +156,7 @@ export default function AlertsPage() {
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
               <div>
                 <h1 className="text-3xl font-bold gradient-text flex items-center">
                   <AlertTriangle className="h-8 w-8 mr-3" />
@@ -132,10 +166,32 @@ export default function AlertsPage() {
                   Notificaciones automáticas de eventos importantes
                 </p>
               </div>
-              <Button onClick={fetchAlerts} variant="outline" size="sm">
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Actualizar
-              </Button>
+              <div className="flex items-center gap-3">
+                <Select value={filterType} onValueChange={setFilterType}>
+                  <SelectTrigger className="w-[160px]">
+                    <Filter className="h-4 w-4 mr-2" />
+                    <SelectValue placeholder="Filtrar" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas</SelectItem>
+                    <SelectItem value="error">Errores</SelectItem>
+                    <SelectItem value="warning">Advertencias</SelectItem>
+                    <SelectItem value="info">Informativas</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  onClick={() => setAutoRefresh(!autoRefresh)}
+                  variant={autoRefresh ? 'default' : 'outline'}
+                  size="sm"
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${autoRefresh ? 'animate-spin' : ''}`} />
+                  Auto
+                </Button>
+                <Button onClick={fetchAlerts} variant="outline" size="sm">
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Actualizar
+                </Button>
+              </div>
             </div>
 
             {/* Summary Cards */}
@@ -191,23 +247,26 @@ export default function AlertsPage() {
             </div>
 
             {/* Alerts List */}
-            {alerts.length === 0 ? (
+            {filteredAlerts.length === 0 ? (
               <Card>
                 <CardContent className="py-12">
                   <div className="text-center">
                     <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
                     <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                      ¡Todo en orden!
+                      {filterType === 'all' ? '¡Todo en orden!' : 'Sin alertas de este tipo'}
                     </h3>
                     <p className="text-gray-600">
-                      No hay alertas activas en este momento
+                      {filterType === 'all' 
+                        ? 'No hay alertas activas en este momento'
+                        : `No hay alertas de tipo "${filterType}" en este momento`
+                      }
                     </p>
                   </div>
                 </CardContent>
               </Card>
             ) : (
               <div className="space-y-4">
-                {alerts.map((alert) => (
+                {filteredAlerts.map((alert) => (
                   <Card
                     key={alert.id}
                     className={`border ${getAlertBgColor(alert.type)}`}
@@ -235,16 +294,25 @@ export default function AlertsPage() {
                             )}
                           </div>
                         </div>
-                        {alert.actionUrl && (
+                        <div className="flex items-center gap-2 ml-4">
+                          {alert.actionUrl && (
+                            <Button
+                              size="sm"
+                              onClick={() => router.push(alert.actionUrl!)}
+                            >
+                              {alert.action || 'Ver'}
+                              <ExternalLink className="h-4 w-4 ml-2" />
+                            </Button>
+                          )}
                           <Button
                             size="sm"
-                            onClick={() => router.push(alert.actionUrl!)}
-                            className="ml-4"
+                            variant="ghost"
+                            onClick={() => handleDismissAlert(alert.id)}
+                            title="Desestimar alerta"
                           >
-                            {alert.action || 'Ver'}
-                            <ExternalLink className="h-4 w-4 ml-2" />
+                            <X className="h-4 w-4" />
                           </Button>
-                        )}
+                        </div>
                       </div>
                     </CardContent>
                   </Card>

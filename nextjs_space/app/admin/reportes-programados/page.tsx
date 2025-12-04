@@ -511,6 +511,37 @@ export default function ReportesProgramadosPage() {
               </Card>
             </div>
 
+            {/* Información de Configuración Cron */}
+            {session?.user?.role === 'super_admin' && (
+              <Card className="border-blue-200 bg-blue-50">
+                <CardHeader>
+                  <CardTitle className="text-blue-900 flex items-center gap-2">
+                    <Clock className="h-5 w-5" />
+                    Configuración del Procesador Automático
+                  </CardTitle>
+                  <CardDescription className="text-blue-700">
+                    Para que los reportes se envíen automáticamente, configura un cron job
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="bg-white rounded-md p-4 space-y-2">
+                    <p className="text-sm font-medium text-gray-900">Endpoint del cron:</p>
+                    <code className="block bg-gray-100 p-2 rounded text-xs break-all">
+                      {typeof window !== 'undefined' ? window.location.origin : ''}/api/cron/process-scheduled-reports
+                    </code>
+                    <p className="text-sm font-medium text-gray-900 mt-3">Header de autorización:</p>
+                    <code className="block bg-gray-100 p-2 rounded text-xs">
+                      Authorization: Bearer inmova-cron-secret-2024-secure-key-xyz789
+                    </code>
+                    <p className="text-xs text-gray-600 mt-3">
+                      <strong>Recomendación:</strong> Configura el cron para ejecutarse cada hora.
+                      El sistema procesará automáticamente los reportes que estén programados para enviarse.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Lista de Reportes */}
             <Card>
               <CardHeader>

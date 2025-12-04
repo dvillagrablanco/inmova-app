@@ -57,6 +57,7 @@ import {
   Clock,
   Zap,
   BookOpen,
+  Scan,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -100,6 +101,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/admin/aprobaciones': 'admin_aprobaciones',
   '/admin/reportes-programados': 'admin_reportes_programados',
   '/admin/importar': 'admin_importar',
+  '/admin/ocr-import': 'admin_ocr_import',
   '/api-docs': 'api_docs',
   '/admin/configuracion': 'configuracion',
   '/admin/usuarios': 'usuarios',

@@ -25,7 +25,7 @@ export async function GET(
       return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
-    const insurance = await prisma.legalInsurance.findFirst({
+    const insurance = await prisma.insurance.findFirst({
       where: {
         id: params.id,
         companyId: user.companyId,
@@ -74,7 +74,7 @@ export async function PATCH(
     const body = await req.json();
 
     // Verificar que la póliza existe y pertenece a la compañía
-    const existingInsurance = await prisma.legalInsurance.findFirst({
+    const existingInsurance = await prisma.insurance.findFirst({
       where: {
         id: params.id,
         companyId: user.companyId,
@@ -103,7 +103,7 @@ export async function PATCH(
     if (body.contactoAgente !== undefined) updateData.contactoAgente = body.contactoAgente;
     if (body.notas !== undefined) updateData.notas = body.notas;
 
-    const insurance = await prisma.legalInsurance.update({
+    const insurance = await prisma.insurance.update({
       where: { id: params.id },
       data: updateData,
       include: {
@@ -141,7 +141,7 @@ export async function DELETE(
     }
 
     // Verificar que la póliza existe y pertenece a la compañía
-    const existingInsurance = await prisma.legalInsurance.findFirst({
+    const existingInsurance = await prisma.insurance.findFirst({
       where: {
         id: params.id,
         companyId: user.companyId,
@@ -155,7 +155,7 @@ export async function DELETE(
       );
     }
 
-    await prisma.legalInsurance.delete({
+    await prisma.insurance.delete({
       where: { id: params.id },
     });
 
