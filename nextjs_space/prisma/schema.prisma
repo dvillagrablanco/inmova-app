@@ -341,6 +341,9 @@ model Building {
   
   flippingProjects   FlippingProject[] @relation
   constructionProjects ConstructionProject[] @relation
+  
+  // Portal Propietario - Asignación de Edificios
+  ownerBuildings     OwnerBuilding[]
 
   // Índices optimizados para consultas frecuentes
   @@index([companyId])
@@ -1128,6 +1131,12 @@ model Company {
   providerReviews         ProviderReview[]
   providerChatConversations ProviderChatConversation[]
   providerChatMessages    ProviderChatMessage[]
+  
+  // Portal Propietario - Sistema Dedicado
+  owners                  Owner[]
+  ownerBuildings          OwnerBuilding[]
+  ownerNotifications      OwnerNotification[]
+  ownerAlerts             OwnerAlert[]
 
   @@map("company")
 }
@@ -7978,4 +7987,160 @@ model ProviderChatMessage {
   @@index([leido])
   @@index([createdAt])
   @@map("provider_chat_messages")
+}
+
+// ============================================================================
+// PORTAL DE PROPIETARIOS - MODELOS DEDICADOS
+// ============================================================================
+
+// Propietarios Externos - Acceso dedicado al portal de propietarios
+model Owner {
+  id                   String                 @id @default(cuid())
+  companyId            String
+  
+  // Información Personal
+  nombreCompleto       String
+  email                String                 @unique
+  telefono             String?
+  dni                  String?                @unique
+  direccion            String?
+  
+  // Autenticación (independiente de NextAuth)
+  password             String                 // Contraseña hasheada con bcrypt
+  
+  // Estado y Configuración
+  activo               Boolean                @default(true)
+  emailVerificado      Boolean                @default(false)
+  
+  // Preferencias de Notificaciones
+  notificarPagos       Boolean                @default(true)
+  notificarOcupacion   Boolean                @default(true)
+  notificarMantenimiento Boolean              @default(true)
+  notificarVencimientos Boolean                @default(true)
+  
+  // Configuración de Portal
+  idioma               String                 @default("es")
+  zona                 String?                // Zona horaria
+  
+  // Seguridad
+  lastLogin            DateTime?
+  resetToken           String?                @unique
+  resetTokenExpiry     DateTime?
+  loginAttempts        Int                    @default(0)
+  lockoutUntil         DateTime?
+  
+  // Auditoría
+  createdAt            DateTime               @default(now())
+  createdBy            String?                // ID del usuario admin que lo creó
+  updatedAt            DateTime               @updatedAt
+  
+  // Relaciones
+  company              Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  ownerBuildings       OwnerBuilding[]        // Edificios asignados
+  ownerNotifications   OwnerNotification[]    // Notificaciones específicas
+  ownerAlerts          OwnerAlert[]           // Alertas personalizadas
+  
+  @@index([companyId])
+  @@index([email])
+  @@index([activo])
+  @@index([companyId, activo])
+  @@map("owners")
+}
+
+// Relación Many-to-Many entre Propietarios y Edificios
+model OwnerBuilding {
+  id                String              @id @default(cuid())
+  ownerId           String
+  buildingId        String
+  companyId         String
+  
+  // Porcentaje de Propiedad (para casos de copropiedad)
+  porcentajePropiedad Float             @default(100) // 0-100
+  
+  // Configuración de Acceso
+  verIngresos       Boolean             @default(true)
+  verGastos         Boolean             @default(true)
+  verOcupacion      Boolean             @default(true)
+  verMantenimiento  Boolean             @default(true)
+  verDocumentos     Boolean             @default(false)
+  
+  // Auditoría
+  asignadoEn        DateTime            @default(now())
+  asignadoPor       String?             // ID del usuario admin
+  
+  owner             Owner               @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  building          Building            @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  company           Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  @@unique([ownerId, buildingId])
+  @@index([ownerId])
+  @@index([buildingId])
+  @@index([companyId])
+  @@map("owner_buildings")
+}
+
+// Notificaciones Específicas para Propietarios
+model OwnerNotification {
+  id                String              @id @default(cuid())
+  ownerId           String
+  companyId         String
+  
+  // Contenido
+  titulo            String
+  mensaje           String              @db.Text
+  tipo              NotificationType
+  
+  // Datos Relacionados (opcional)
+  buildingId        String?
+  paymentId         String?
+  contractId        String?
+  
+  // Estado
+  leida             Boolean             @default(false)
+  fechaLeida        DateTime?
+  
+  // Auditoría
+  createdAt         DateTime            @default(now())
+  
+  owner             Owner               @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  company           Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  @@index([ownerId, leida])
+  @@index([companyId])
+  @@index([createdAt])
+  @@map("owner_notifications")
+}
+
+// Alertas Personalizadas para Propietarios
+model OwnerAlert {
+  id                String              @id @default(cuid())
+  ownerId           String
+  companyId         String
+  buildingId        String?
+  
+  // Configuración de Alerta
+  nombre            String
+  descripcion       String?             @db.Text
+  tipo              String              // 'ocupacion_baja', 'gasto_alto', 'morosidad', 'mantenimiento_pendiente'
+  
+  // Umbrales
+  umbralValor       Float?              // Valor que dispara la alerta
+  umbralPorcentaje  Float?              // Porcentaje que dispara la alerta
+  
+  // Estado
+  activa            Boolean             @default(true)
+  ultimaActivacion  DateTime?
+  vecesActivada     Int                 @default(0)
+  
+  // Auditoría
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  owner             Owner               @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  company           Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  @@index([ownerId, activa])
+  @@index([companyId])
+  @@index([buildingId])
+  @@map("owner_alerts")
 }
