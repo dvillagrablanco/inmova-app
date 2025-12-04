@@ -225,6 +225,16 @@ export default function PortalPropietarioPage() {
   const unidadesOcupadas = units.filter((u) => u.estado === 'ocupada').length;
   const tasaOcupacion = totalUnidades > 0 ? (unidadesOcupadas / totalUnidades) * 100 : 0;
   
+  const ingresosMensual = payments
+    .filter((p) => p.estado === 'pagado')
+    .reduce((sum, p) => sum + (p.monto || 0), 0);
+  
+  const gastosMensual = expenses
+    .reduce((sum, e) => sum + (e.monto || 0), 0);
+  
+  const beneficioNeto = ingresosMensual - gastosMensual;
+  const margenBeneficio = ingresosMensual > 0 ? (beneficioNeto / ingresosMensual) * 100 : 0;
+  
   const contratosActivos = contracts.filter((c) => c.estado === 'activo').length;
   const contratosPorVencer = contracts.filter((c) => {
     if (c.fechaFin) {
@@ -233,6 +243,41 @@ export default function PortalPropietarioPage() {
     }
     return false;
   }).length;
+
+  // Datos para gráficos (simulados - en producción vendrían del backend)
+  const ingresosHistoricos = [
+    { mes: 'Ene', ingresos: 12500, gastos: 3200 },
+    { mes: 'Feb', ingresos: 13200, gastos: 3400 },
+    { mes: 'Mar', ingresos: 12800, gastos: 3100 },
+    { mes: 'Abr', ingresos: 14100, gastos: 3600 },
+    { mes: 'May', ingresos: 13900, gastos: 3300 },
+    { mes: 'Jun', ingresos: 14500, gastos: 3500 },
+  ];
+
+  const ocupacionPorPropiedad = buildings.map((building) => {
+    const buildingUnits = units.filter((u) => u.buildingId === building.id);
+    const occupied = buildingUnits.filter((u) => u.estado === 'ocupada').length;
+    const total = buildingUnits.length;
+    return {
+      nombre: building.nombre,
+      ocupacion: total > 0 ? Math.round((occupied / total) * 100) : 0,
+      unidades: total,
+    };
+  });
+
+  const distribucionIngresos = [
+    { nombre: 'Alquileres', valor: ingresosMensual * 0.85 },
+    { nombre: 'Servicios', valor: ingresosMensual * 0.10 },
+    { nombre: 'Otros', valor: ingresosMensual * 0.05 },
+  ];
+
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(value);
+
+  const handleExportReport = () => {
+    // En producción, esto llamaría a un endpoint que genere el PDF
+    alert('Funcionalidad de exportación de reporte - Por implementar endpoint');
+  };
 
   // Filtrar datos por periodo
   const getPeriodData = (data: any[], dateField: string, period: string) => {
@@ -834,5 +879,6 @@ export default function PortalPropietarioPage() {
           </div>
         </main>
       </div>
+    </div>
   );
 }
