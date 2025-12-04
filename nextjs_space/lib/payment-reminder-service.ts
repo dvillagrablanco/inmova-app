@@ -372,58 +372,324 @@ function generateTenantEmailHTML(payment: any, reminder: PaymentReminder): strin
 
   return `
     <!DOCTYPE html>
-    <html>
+    <html lang="es">
     <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <title>${tone} - Pago Pendiente | INMOVA</title>
       <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background-color: ${urgencyColor}; color: white; padding: 20px; border-radius: 8px 8px 0 0; }
-        .content { background-color: #f9fafb; padding: 20px; }
-        .details { background-color: white; padding: 15px; margin: 15px 0; border-radius: 4px; }
-        .amount { font-size: 24px; font-weight: bold; color: ${urgencyColor}; }
-        .button { background-color: ${urgencyColor}; color: white; padding: 12px 24px; 
-                  text-decoration: none; border-radius: 4px; display: inline-block; margin: 10px 0; }
-        .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #6b7280; 
-                  background-color: white; padding: 15px; border-radius: 0 0 8px 8px; }
+        /* Reset y estilos base */
+        body {
+          margin: 0;
+          padding: 0;
+          font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          background-color: #f3f4f6;
+        }
+        table {
+          border-spacing: 0;
+          width: 100%;
+        }
+        td {
+          padding: 0;
+        }
+        img {
+          border: 0;
+          display: block;
+          max-width: 100%;
+          height: auto;
+        }
+        /* Estilos principales */
+        .container {
+          max-width: 600px;
+          margin: 0 auto;
+          background-color: #ffffff;
+        }
+        .header {
+          background: linear-gradient(135deg, ${urgencyColor} 0%, ${reminder.stage === 'legal' ? '#991B1B' : reminder.stage === 'urgent' ? '#DC2626' : reminder.stage === 'formal' ? '#D97706' : '#2563EB'} 100%);
+          padding: 40px 32px;
+          text-align: center;
+        }
+        .header-logo {
+          font-size: 32px;
+          font-weight: 800;
+          color: #ffffff;
+          letter-spacing: -0.5px;
+          margin: 0;
+          text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header-subtitle {
+          font-size: 14px;
+          color: rgba(255,255,255,0.9);
+          margin: 8px 0 0;
+          font-weight: 500;
+        }
+        .content {
+          padding: 40px 32px;
+        }
+        .alert-badge {
+          display: inline-block;
+          padding: 10px 20px;
+          border-radius: 8px;
+          font-weight: 700;
+          font-size: 14px;
+          letter-spacing: 0.5px;
+          margin-bottom: 24px;
+          text-transform: uppercase;
+          background: linear-gradient(135deg, ${urgencyColor} 0%, ${reminder.stage === 'legal' ? '#991B1B' : reminder.stage === 'urgent' ? '#DC2626' : reminder.stage === 'formal' ? '#D97706' : '#2563EB'} 100%);
+          color: #ffffff;
+          ${reminder.stage === 'legal' || reminder.stage === 'urgent' ? 'box-shadow: 0 4px 8px rgba(0,0,0,0.2); animation: pulse 2s infinite;' : ''}
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.85; }
+        }
+        h1 {
+          color: #111827;
+          font-size: 28px;
+          font-weight: 700;
+          margin: 0 0 16px;
+          line-height: 1.3;
+        }
+        h2 {
+          color: #1F2937;
+          font-size: 20px;
+          font-weight: 600;
+          margin: 0 0 12px;
+        }
+        h3 {
+          color: #374151;
+          font-size: 18px;
+          font-weight: 600;
+          margin: 20px 0 12px;
+        }
+        p {
+          color: #4B5563;
+          font-size: 16px;
+          line-height: 1.6;
+          margin: 0 0 16px;
+        }
+        .info-box {
+          background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%);
+          border-left: 4px solid #4F46E5;
+          padding: 24px;
+          margin: 24px 0;
+          border-radius: 8px;
+        }
+        .info-row {
+          margin-bottom: 12px;
+        }
+        .info-row:last-child {
+          margin-bottom: 0;
+        }
+        .info-label {
+          font-weight: 700;
+          color: #4F46E5;
+          font-size: 14px;
+          display: block;
+          margin-bottom: 4px;
+        }
+        .info-value {
+          color: #1F2937;
+          font-size: 16px;
+        }
+        .amount-box {
+          background: linear-gradient(135deg, ${urgencyColor}15 0%, ${urgencyColor}25 100%);
+          border: 2px solid ${urgencyColor};
+          padding: 24px;
+          margin: 24px 0;
+          border-radius: 12px;
+          text-align: center;
+        }
+        .amount {
+          font-size: 36px;
+          font-weight: 800;
+          color: ${urgencyColor};
+          margin: 8px 0;
+          text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .button {
+          display: inline-block;
+          padding: 16px 32px;
+          background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+          color: #ffffff !important;
+          text-decoration: none;
+          border-radius: 10px;
+          font-weight: 600;
+          font-size: 16px;
+          margin-top: 24px;
+          box-shadow: 0 4px 6px rgba(79, 70, 229, 0.3);
+          transition: all 0.3s ease;
+        }
+        .warning-box {
+          background: linear-gradient(135deg, #FEE2E2 0%, #FEF2F2 100%);
+          border-left: 4px solid #EF4444;
+          padding: 20px;
+          margin: 24px 0;
+          border-radius: 8px;
+        }
+        .warning-box p {
+          color: #991B1B;
+          margin: 0;
+          font-weight: 500;
+        }
+        .late-fee-box {
+          background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+          border-left: 4px solid #F59E0B;
+          padding: 20px;
+          margin: 16px 0;
+          border-radius: 8px;
+        }
+        .late-fee-box p {
+          color: #78350F;
+          margin: 0;
+          font-weight: 600;
+        }
+        .payment-options {
+          background-color: #F9FAFB;
+          border: 2px dashed #D1D5DB;
+          padding: 24px;
+          margin: 24px 0;
+          border-radius: 8px;
+        }
+        .footer {
+          background: linear-gradient(135deg, #1F2937 0%, #111827 100%);
+          padding: 32px;
+          text-align: center;
+          border-top: 1px solid #E5E7EB;
+        }
+        .footer-text {
+          color: #9CA3AF;
+          font-size: 13px;
+          line-height: 1.6;
+          margin: 8px 0;
+        }
+        .footer-link {
+          color: #A78BFA;
+          text-decoration: none;
+        }
+        .footer-logo {
+          font-size: 20px;
+          font-weight: 700;
+          background: linear-gradient(135deg, #4F46E5, #7C3AED, #EC4899);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          margin-bottom: 12px;
+        }
+        /* Responsive */
+        @media only screen and (max-width: 600px) {
+          .content { padding: 32px 20px !important; }
+          .header { padding: 32px 20px !important; }
+          .header-logo { font-size: 28px !important; }
+          h1 { font-size: 24px !important; }
+          .amount { font-size: 28px !important; }
+        }
       </style>
     </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h1>💳 ${tone}: Pago Pendiente</h1>
-        </div>
-        <div class="content">
-          <div class="details">
-            <h2>Estimado/a ${payment.contract?.tenant?.nombreCompleto},</h2>
-            <p>${actionMessage}</p>
-            
-            <h3>📋 Detalles del Pago</h3>
-            <p><strong>Propiedad:</strong> ${building} - Unidad ${unit}</p>
-            <p><strong>Período:</strong> ${payment.periodo}</p>
-            <p><strong>Fecha de vencimiento:</strong> ${dueDate}</p>
-            <p><strong>Días de atraso:</strong> ${reminder.daysOverdue} días</p>
-            <p class="amount">Monto adeudado: ${amount}</p>
-            
-            ${reminder.stage !== 'friendly' ? `
-            <div style="background-color: #fee2e2; padding: 10px; border-radius: 4px; margin-top: 15px;">
-              <p><strong>⚠️ Recargo por mora:</strong> ${calculateLateFee(reminder.amount, reminder.daysOverdue)}</p>
-            </div>
-            ` : ''}
-          </div>
-          
-          <div class="details">
-            <h3>💳 Opciones de Pago</h3>
-            <p>Por favor, realice el pago a través de su método habitual o contacte con nosotros para coordinar.</p>
-            <p><strong>Teléfono:</strong> ${payment.contract?.unit?.building?.telefono || 'Ver contrato'}</p>
-            <p><strong>Email:</strong> ${payment.contract?.unit?.building?.email || 'administracion@inmova.com'}</p>
-          </div>
-        </div>
-        
-        <div class="footer">
-          <p>Gracias por su atención.</p>
-          <p>Este es un email automático. Para consultas, responda a este correo o contacte con su administrador.</p>
-        </div>
-      </div>
+    <body style="margin: 0; padding: 0; background-color: #f3f4f6;">
+      <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="width: 100%; background-color: #f3f4f6;">
+        <tr>
+          <td style="padding: 20px 0;">
+            <table class="container" role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
+              <!-- Header -->
+              <tr>
+                <td class="header">
+                  <h2 class="header-logo">🏢 INMOVA</h2>
+                  <p class="header-subtitle">Gestión Inmobiliaria Inteligente</p>
+                </td>
+              </tr>
+              
+              <!-- Content -->
+              <tr>
+                <td class="content">
+                  <div class="alert-badge">${tone.toUpperCase()}</div>
+                  
+                  <h1>💳 ${tone}: Pago Pendiente</h1>
+                  
+                  <h2>Estimado/a ${payment.contract?.tenant?.nombreCompleto},</h2>
+                  <p>${actionMessage}</p>
+                  
+                  <div class="amount-box">
+                    <p style="color: #6B7280; font-size: 14px; font-weight: 600; margin: 0 0 8px; text-transform: uppercase;">Monto Adeudado</p>
+                    <div class="amount">${amount}</div>
+                    <p style="color: #6B7280; font-size: 14px; margin: 8px 0 0;">Período: ${payment.periodo}</p>
+                  </div>
+                  
+                  <div class="info-box">
+                    <h3 style="margin-top: 0; color: #4F46E5;">📋 Detalles del Pago</h3>
+                    <div class="info-row">
+                      <span class="info-label">🏠 Propiedad:</span>
+                      <span class="info-value">${building} - Unidad ${unit}</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label">📅 Período:</span>
+                      <span class="info-value">${payment.periodo}</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label">📆 Fecha de vencimiento:</span>
+                      <span class="info-value" style="font-weight: 700;">${dueDate}</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label">⏰ Días de atraso:</span>
+                      <span class="info-value" style="font-weight: 700; color: ${urgencyColor};">${reminder.daysOverdue} día${reminder.daysOverdue !== 1 ? 's' : ''}</span>
+                    </div>
+                  </div>
+                  
+                  ${reminder.stage !== 'friendly' ? `
+                  <div class="late-fee-box">
+                    <p><strong>⚠️ Recargo por mora aplicable:</strong> ${calculateLateFee(reminder.amount, reminder.daysOverdue)}</p>
+                    <p style="margin-top: 8px; font-size: 13px; color: #92400E;">Este recargo se añadirá al monto adeudado según los términos del contrato.</p>
+                  </div>
+                  ` : ''}
+                  
+                  ${reminder.stage === 'legal' || reminder.stage === 'urgent' ? `
+                  <div class="warning-box">
+                    <p><strong>⚠️ Acción Inmediata Requerida:</strong> ${reminder.stage === 'legal' ? 'Este pago está significativamente atrasado. Si no se recibe el pago en los próximos días, nos veremos obligados a iniciar procedimientos legales según lo establecido en el contrato.' : 'Este pago está atrasado y requiere su atención inmediata para evitar recargos adicionales.'}</p>
+                  </div>
+                  ` : ''}
+                  
+                  <div class="payment-options">
+                    <h3 style="margin-top: 0; color: #374151;">💳 Opciones de Pago</h3>
+                    <p>Por favor, realice el pago a través de su método habitual o contacte con nosotros para coordinar alternativas de pago:</p>
+                    <p style="margin-top: 16px;"><strong>📞 Teléfono:</strong> ${payment.contract?.unit?.building?.telefono || 'Consulte su contrato'}</p>
+                    <p><strong>📧 Email:</strong> ${payment.contract?.unit?.building?.email || payment.contract?.unit?.building?.company?.emailContacto || 'administracion@inmova.app'}</p>
+                  </div>
+                  
+                  <div style="text-align: center;">
+                    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://inmova.app'}/pagos" class="button">
+                      💳 Ver Mis Pagos en INMOVA
+                    </a>
+                  </div>
+                  
+                  <p style="margin-top: 32px; color: #6B7280; font-size: 14px;">
+                    Si ya ha realizado este pago, por favor ignore este mensaje y disculpe las molestias. Si tiene alguna duda, no dude en contactarnos.
+                  </p>
+                </td>
+              </tr>
+              
+              <!-- Footer -->
+              <tr>
+                <td class="footer">
+                  <div class="footer-logo">INMOVA</div>
+                  <p class="footer-text">
+                    Gestión Inmobiliaria Inteligente<br>
+                    Automatizamos, optimizamos, innovamos
+                  </p>
+                  <p class="footer-text" style="margin-top: 16px;">
+                    Este es un mensaje automático del sistema INMOVA.<br>
+                    © ${new Date().getFullYear()} INMOVA. Todos los derechos reservados.
+                  </p>
+                  <p class="footer-text" style="margin-top: 12px;">
+                    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://inmova.app'}" class="footer-link">Acceder a INMOVA</a>
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
     </body>
     </html>
   `;

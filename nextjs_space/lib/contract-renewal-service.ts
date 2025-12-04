@@ -230,117 +230,292 @@ async function sendRenewalEmail(contract: any, alert: RenewalAlert): Promise<voi
   const subject = getAlertTitle(alert, contract);
   const htmlContent = `
     <!DOCTYPE html>
-    <html>
-    <head>
-      <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background-color: #2563eb; color: white; padding: 20px; border-radius: 8px 8px 0 0; }
-        .content { background-color: #f9fafb; padding: 20px; border-radius: 0 0 8px 8px; }
-        .alert-box { background-color: ${alert.stage === 'critical' ? '#fee2e2' : '#fef3c7'}; 
-                     border-left: 4px solid ${alert.stage === 'critical' ? '#dc2626' : '#f59e0b'}; 
-                     padding: 15px; margin: 15px 0; border-radius: 4px; }
-        .details { background-color: white; padding: 15px; margin: 15px 0; border-radius: 4px; }
-        .button { background-color: #2563eb; color: white; padding: 12px 24px; 
-                  text-decoration: none; border-radius: 4px; display: inline-block; margin: 10px 0; }
-        .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #6b7280; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h1>🏠 Alerta de Renovación de Contrato</h1>
-        </div>
-        <div class="content">
-          <div class="alert-box">
-            <h2>${subject}</h2>
-          </div>
-          
-          <div class="details">
-            <h3>📋 Información del Contrato</h3>
-            <p><strong>Inquilino:</strong> ${contract.tenant?.nombreCompleto}</p>
-            <p><strong>Ubicación:</strong> ${contract.unit?.building?.nombre} - ${contract.unit?.numero}</p>
-            <p><strong>Renta mensual:</strong> €${contract.rentaMensual?.toLocaleString('es-ES')}</p>
-            <p><strong>Fecha de vencimiento:</strong> ${format(new Date(contract.fechaFin), 'dd/MM/yyyy', { locale: es })}</p>
-            <p><strong>Días restantes:</strong> ${alert.daysUntilExpiry} días</p>
-          </div>
-          
-          <div class="details">
-            <h3>✅ Acciones Recomendadas</h3>
-            <pre>${getAlertMessage(alert, contract)}</pre>
-          </div>
-          
-          <div style="text-align: center;">
-            <a href="${process.env.NEXTAUTH_URL}/contratos" class="button">Ver Contrato en INMOVA</a>
-          </div>
-          
-          <div class="footer">
-            <p>Este es un email automático del sistema INMOVA.</p>
-            <p>No responder a este correo.</p>
-          </div>
-        </div>
-      </div>
-    </body>
-    </html>
+    <html lang="es">
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Renovación de Contrato - INMOVA</title>
+        <!--[if mso]>
+        <noscript>
+          <xml>
+            <o:OfficeDocumentSettings>
+              <o:PixelsPerInch>96</o:PixelsPerInch>
+            </o:OfficeDocumentSettings>
+          </xml>
+        </noscript>
+        <![endif]-->
+        <style>
+          /* Reset y estilos base */
+          body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: #f3f4f6;
+          }
+          table {
+            border-spacing: 0;
+            width: 100%;
+          }
+          td {
+            padding: 0;
+          }
+          img {
+            border: 0;
+            display: block;
+            max-width: 100%;
+            height: auto;
+          }
+          /* Estilos principales */
+          .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+          }
+          .header {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #EC4899 100%);
+            padding: 40px 32px;
+            text-align: center;
+          }
+          .header-logo {
+            font-size: 32px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          }
+          .header-subtitle {
+            font-size: 14px;
+            color: rgba(255,255,255,0.9);
+            margin: 8px 0 0;
+            font-weight: 500;
+          }
+          .content {
+            padding: 40px 32px;
+          }
+          .alert-badge {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            margin-bottom: 24px;
+            text-transform: uppercase;
+          }
+          .badge-inicial { background: linear-gradient(135deg, #3B82F6, #2563EB); color: #ffffff; }
+          .badge-seguimiento { background: linear-gradient(135deg, #F59E0B, #D97706); color: #ffffff; }
+          .badge-urgente { background: linear-gradient(135deg, #EF4444, #DC2626); color: #ffffff; box-shadow: 0 4px 6px rgba(239, 68, 68, 0.3); }
+          .badge-critico { background: linear-gradient(135deg, #DC2626, #991B1B); color: #ffffff; box-shadow: 0 4px 6px rgba(220, 38, 38, 0.4); animation: pulse 2s infinite; }
+          @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+          }
+          h1 {
+            color: #111827;
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 16px;
+            line-height: 1.3;
+          }
+          p {
+            color: #4B5563;
+            font-size: 16px;
+            line-height: 1.6;
+            margin: 0 0 16px;
+          }
+          .info-box {
+            background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%);
+            border-left: 4px solid #4F46E5;
+            padding: 24px;
+            margin: 24px 0;
+            border-radius: 8px;
+          }
+          .info-row {
+            display: flex;
+            margin-bottom: 12px;
+            align-items: flex-start;
+          }
+          .info-row:last-child {
+            margin-bottom: 0;
+          }
+          .info-label {
+            font-weight: 700;
+            color: #4F46E5;
+            min-width: 140px;
+            font-size: 14px;
+          }
+          .info-value {
+            color: #1F2937;
+            font-size: 14px;
+            flex: 1;
+          }
+          .button {
+            display: inline-block;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            color: #ffffff !important;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 16px;
+            margin-top: 24px;
+            box-shadow: 0 4px 6px rgba(79, 70, 229, 0.3);
+            transition: all 0.3s ease;
+          }
+          .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(79, 70, 229, 0.4);
+          }
+          .warning-box {
+            background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+            border-left: 4px solid #F59E0B;
+            padding: 20px;
+            margin: 24px 0;
+            border-radius: 8px;
+          }
+          .warning-box p {
+            color: #78350F;
+            margin: 0;
+            font-weight: 500;
+          }
+          .footer {
+            background: linear-gradient(135deg, #1F2937 0%, #111827 100%);
+            padding: 32px;
+            text-align: center;
+            border-top: 1px solid #E5E7EB;
+          }
+          .footer-text {
+            color: #9CA3AF;
+            font-size: 13px;
+            line-height: 1.6;
+            margin: 8px 0;
+          }
+          .footer-link {
+            color: #A78BFA;
+            text-decoration: none;
+          }
+          .footer-logo {
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4F46E5, #7C3AED, #EC4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+          }
+          /* Responsive */
+          @media only screen and (max-width: 600px) {
+            .content { padding: 32px 20px !important; }
+            .header { padding: 32px 20px !important; }
+            .header-logo { font-size: 28px !important; }
+            h1 { font-size: 24px !important; }
+            .info-row { flex-direction: column; }
+            .info-label { margin-bottom: 4px; }
+          }
+        </style>
+      </head>
+      <body style="margin: 0; padding: 0; background-color: #f3f4f6;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="width: 100%; background-color: #f3f4f6;">
+          <tr>
+            <td style="padding: 20px 0;">
+              <table class="container" role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
+                <!-- Header -->
+                <tr>
+                  <td class="header">
+                    <h2 class="header-logo">🏢 INMOVA</h2>
+                    <p class="header-subtitle">Gestión Inmobiliaria Inteligente</p>
+                  </td>
+                </tr>
+                
+                <!-- Content -->
+                <tr>
+                  <td class="content">
+                    <div class="alert-badge ${badgeClass}">${etapaTexto.toUpperCase()}</div>
+                    
+                    <h1>Renovación de Contrato Próxima</h1>
+                    
+                    <p>Estimado/a,</p>
+                    
+                    <p>Le informamos que tiene un contrato próximo a vencer que requiere su atención:</p>
+                    
+                    <div class="info-box">
+                      <div class="info-row">
+                        <span class="info-label">📋 Contrato:</span>
+                        <span class="info-value">#${contract.id.substring(0, 8).toUpperCase()}</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="info-label">👤 Inquilino:</span>
+                        <span class="info-value">${contract.tenant.nombreCompleto}</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="info-label">🏠 Unidad:</span>
+                        <span class="info-value">${contract.unit.numero} - ${contract.unit.building.nombre}</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="info-label">📅 Fecha de Vencimiento:</span>
+                        <span class="info-value" style="font-weight: 700;">${format(contract.fechaFin, "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })}</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="info-label">⏰ Días Restantes:</span>
+                        <span class="info-value" style="font-weight: 700; color: ${etapa === 'critico' ? '#DC2626' : etapa === 'urgente' ? '#F59E0B' : '#4F46E5'};">${diasRestantes} día${diasRestantes !== 1 ? 's' : ''}</span>
+                      </div>
+                      <div class="info-row">
+                        <span class="info-label">💰 Renta Actual:</span>
+                        <span class="info-value">${contract.rentaMensual.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}/mes</span>
+                      </div>
+                    </div>
+
+                    ${accionesRecomendadas}
+                    
+                    ${etapa === 'critico' || etapa === 'urgente' ? `
+                    <div class="warning-box">
+                      <p><strong>⚠️ Acción Inmediata Requerida:</strong> Este contrato vence en ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''}. Es fundamental tomar una decisión lo antes posible para evitar situaciones de incertidumbre legal.</p>
+                    </div>
+                    ` : ''}
+                    
+                    <div style="text-align: center;">
+                      <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://inmova.app'}/contratos/${contract.id}" class="button">
+                        📋 Ver Contrato en INMOVA
+                      </a>
+                    </div>
+                    
+                    <p style="margin-top: 32px; color: #6B7280; font-size: 14px;">
+                      Si tiene alguna duda o necesita asistencia, nuestro equipo está disponible para ayudarle.
+                    </p>
+                  </td>
+                </tr>
+                
+                <!-- Footer -->
+                <tr>
+                  <td class="footer">
+                    <div class="footer-logo">INMOVA</div>
+                    <p class="footer-text">
+                      Gestión Inmobiliaria Inteligente<br>
+                      Automatizamos, optimizamos, innovamos
+                    </p>
+                    <p class="footer-text" style="margin-top: 16px;">
+                      Este es un mensaje automático del sistema INMOVA.<br>
+                      © ${new Date().getFullYear()} INMOVA. Todos los derechos reservados.
+                    </p>
+                    <p class="footer-text" style="margin-top: 12px;">
+                      <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://inmova.app'}" class="footer-link">Acceder a INMOVA</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
   `;
 
-  for (const admin of admins) {
-    try {
-      await sendEmail({
-        to: admin.email,
-        subject,
-        html: htmlContent,
-      });
-      logger.info(`Email de renovación enviado a ${admin.email}`);
-    } catch (error) {
-      logger.error(`Error enviando email a ${admin.email}:`, error);
-    }
-  }
-}
-
-/**
- * Genera informe de contratos próximos a vencer
- */
-export async function generateRenewalReport(companyId: string): Promise<any> {
-  const alerts = await detectContractsForRenewal(companyId);
-  
-  const contracts = await Promise.all(
-    alerts.map(async (alert) => {
-      const contract = await prisma.contract.findUnique({
-        where: { id: alert.contractId },
-        include: {
-          tenant: true,
-          unit: {
-            include: {
-              building: true,
-            },
-          },
-        },
-      });
-      return { ...contract, alert };
-    })
-  );
-
-  const critical = contracts.filter(c => c.alert.stage === 'critical');
-  const urgent = contracts.filter(c => c.alert.stage === 'urgent');
-  const followup = contracts.filter(c => c.alert.stage === 'followup');
-  const initial = contracts.filter(c => c.alert.stage === 'initial');
-
-  return {
-    total: contracts.length,
-    critical: critical.length,
-    urgent: urgent.length,
-    followup: followup.length,
-    initial: initial.length,
-    contracts: contracts.map(c => ({
-      id: c.id,
-      tenant: c.tenant?.nombreCompleto,
-      unit: `${c.unit?.building?.nombre} ${c.unit?.numero}`,
-      rent: c.rentaMensual,
-      expiryDate: c.fechaFin,
-      daysUntilExpiry: c.alert.daysUntilExpiry,
-      stage: c.alert.stage,
-      priority: c.alert.priority,
-    })),
-  };
-}
+  // Enviar el email
+  await sendEmail({
+    to: contract.unit.building.company.emailContacto!,
+    subject,
+    html: htmlContent
+  });
+    </html>
