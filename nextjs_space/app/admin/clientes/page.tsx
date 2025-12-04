@@ -27,6 +27,7 @@ import { BackButton } from '@/components/ui/back-button';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { LoadingState } from '@/components/ui/loading-state';
 import { ChangePlanDialog } from '@/components/admin/ChangePlanDialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import logger, { logError } from '@/lib/logger';
 
 interface CompanyData {
@@ -95,6 +96,11 @@ export default function ClientesAdminPage() {
   // Estado para diálogo de cambio de plan
   const [showChangePlanDialog, setShowChangePlanDialog] = useState(false);
   const [selectedCompanyForPlanChange, setSelectedCompanyForPlanChange] = useState<CompanyData | null>(null);
+  
+  // Estado para diálogo de eliminación
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deletingCompany, setDeletingCompany] = useState<{ id: string; nombre: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const [newCompany, setNewCompany] = useState({
     nombre: '',
@@ -260,18 +266,24 @@ export default function ClientesAdminPage() {
     }
   };
 
-  const handleDeleteCompany = async (id: string, nombre: string) => {
-    if (!confirm(`¿Estás seguro de eliminar la empresa "${nombre}"? Esta acción no se puede deshacer.`)) {
-      return;
-    }
+  const openDeleteDialog = (id: string, nombre: string) => {
+    setDeletingCompany({ id, nombre });
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteCompany = async () => {
+    if (!deletingCompany) return;
 
     try {
-      const response = await fetch(`/api/admin/companies/${id}`, {
+      setIsDeleting(true);
+      const response = await fetch(`/api/admin/companies/${deletingCompany.id}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
         toast.success('Empresa eliminada exitosamente');
+        setShowDeleteDialog(false);
+        setDeletingCompany(null);
         loadData();
       } else {
         const error = await response.json();
@@ -280,6 +292,8 @@ export default function ClientesAdminPage() {
     } catch (error) {
       logger.error('Error deleting company:', error);
       toast.error('Error al eliminar empresa');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -1087,7 +1101,7 @@ export default function ClientesAdminPage() {
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
-                                      onClick={() => handleDeleteCompany(company.id, company.nombre)}
+                                      onClick={() => openDeleteDialog(company.id, company.nombre)}
                                       className="text-destructive"
                                     >
                                       <Trash2 className="w-4 h-4 mr-2" />
@@ -1216,7 +1230,7 @@ export default function ClientesAdminPage() {
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
-                                onClick={() => handleDeleteCompany(company.id, company.nombre)}
+                                onClick={() => openDeleteDialog(company.id, company.nombre)}
                                 className="text-red-600"
                               >
                                 <Trash2 className="w-4 h-4 mr-2" />
@@ -1323,6 +1337,24 @@ export default function ClientesAdminPage() {
           onSuccess={loadData}
         />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Confirmar Eliminación"
+        description={
+          <>
+            ¿Estás seguro de que deseas eliminar la empresa <strong>{deletingCompany?.nombre}</strong>?
+            <br /><br />
+            Esta acción no se puede deshacer y eliminará todos los datos asociados a esta empresa.
+          </>
+        }
+        onConfirm={handleDeleteCompany}
+        confirmText="Eliminar"
+        variant="destructive"
+        loading={isDeleting}
+      />
     </ErrorBoundary>
   );
 }

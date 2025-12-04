@@ -60,7 +60,10 @@ export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [companies, setCompanies] = useState<Array<{ id: string; nombre: string }>>([]);
   const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deletingUser, setDeletingUser] = useState<User | null>(null);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [formData, setFormData] = useState({
     email: '',
@@ -145,6 +148,8 @@ export default function UsersPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (isSaving) return;
+
     try {
       // Validar contraseña si se proporciona
       if (formData.password) {
@@ -157,6 +162,8 @@ export default function UsersPage() {
         toast.error('La contraseña es requerida para crear un usuario');
         return;
       }
+
+      setIsSaving(true);
 
       if (editingUser) {
         // Actualizar usuario
@@ -204,20 +211,29 @@ export default function UsersPage() {
     } catch (error) {
       logger.error('Error:', error);
       toast.error('Error al guardar usuario');
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const handleDelete = async (userId: string) => {
-    if (!confirm('¿Estás seguro de eliminar este usuario?')) return;
+  const openDeleteDialog = (user: User) => {
+    setDeletingUser(user);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deletingUser) return;
 
     try {
-      const res = await fetch(`/api/users/${userId}`, {
+      const res = await fetch(`/api/users/${deletingUser.id}`, {
         method: 'DELETE',
       });
 
       if (res.ok) {
         toast.success('Usuario eliminado correctamente');
         fetchUsers();
+        setShowDeleteDialog(false);
+        setDeletingUser(null);
       } else {
         const error = await res.json();
         toast.error(error.error || 'Error al eliminar usuario');
@@ -374,7 +390,7 @@ export default function UsersPage() {
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
-              handleDelete(user.id);
+              openDeleteDialog(user);
             }}
           >
             <Trash2 className="h-4 w-4 text-red-600" />
@@ -602,14 +618,54 @@ export default function UsersPage() {
               <Button type="button" variant="outline" onClick={() => {
                 setShowDialog(false);
                 resetForm();
-              }}>
+              }} disabled={isSaving}>
                 Cancelar
               </Button>
-              <Button type="submit">
-                {editingUser ? 'Actualizar' : 'Crear'}
+              <Button type="submit" disabled={isSaving}>
+                {isSaving ? (
+                  <>
+                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
+                    Guardando...
+                  </>
+                ) : (
+                  editingUser ? 'Actualizar' : 'Crear'
+                )}
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Diálogo de Confirmación de Eliminación */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Eliminación</DialogTitle>
+            <DialogDescription>
+              ¿Estás seguro de que deseas eliminar al usuario <strong>{deletingUser?.name}</strong> ({deletingUser?.email})?
+              <br /><br />
+              Esta acción no se puede deshacer.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => {
+                setShowDeleteDialog(false);
+                setDeletingUser(null);
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              type="button" 
+              variant="destructive"
+              onClick={handleDelete}
+            >
+              Eliminar
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
           </div>

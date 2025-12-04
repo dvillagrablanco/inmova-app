@@ -31,6 +31,15 @@ interface Company {
   email: string;
   ciudad?: string;
   codigoPostal?: string;
+  parentCompanyId?: string | null;
+  parentCompany?: {
+    id: string;
+    nombre: string;
+  } | null;
+  childCompanies?: Array<{
+    id: string;
+    nombre: string;
+  }>;
 }
 
 export default function ConfiguracionPage() {
@@ -322,6 +331,42 @@ export default function ConfiguracionPage() {
                       />
                     </div>
                   </div>
+
+                  {/* Información de Jerarquía de Empresa */}
+                  {(company.parentCompany || (company.childCompanies && company.childCompanies.length > 0)) && (
+                    <div className="space-y-4 p-4 border rounded-lg bg-blue-50/50 dark:bg-blue-950/20">
+                      <h3 className="font-semibold text-sm text-blue-900 dark:text-blue-100">
+                        Jerarquía de Empresa
+                      </h3>
+                      
+                      {company.parentCompany && (
+                        <div className="space-y-2">
+                          <Label className="text-sm text-muted-foreground">Empresa Madre</Label>
+                          <div className="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-md border">
+                            <Building2 className="h-4 w-4 text-blue-600" />
+                            <span className="font-medium">{company.parentCompany.nombre}</span>
+                            <Badge variant="secondary" className="ml-auto">Grupo</Badge>
+                          </div>
+                        </div>
+                      )}
+
+                      {company.childCompanies && company.childCompanies.length > 0 && (
+                        <div className="space-y-2">
+                          <Label className="text-sm text-muted-foreground">
+                            Empresas Hijas ({company.childCompanies.length})
+                          </Label>
+                          <div className="space-y-2">
+                            {company.childCompanies.map(child => (
+                              <div key={child.id} className="flex items-center gap-2 p-2 bg-white dark:bg-gray-800 rounded-md border text-sm">
+                                <Building2 className="h-3 w-3 text-blue-600" />
+                                <span>{child.nombre}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* Botones */}
                   {isAdmin && (

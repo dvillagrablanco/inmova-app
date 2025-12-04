@@ -1,26 +1,26 @@
 'use client';
 
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { AlertTriangle } from 'lucide-react';
 
 interface ConfirmDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
-  description: string;
-  onConfirm: () => void | Promise<void>;
-  onCancel?: () => void;
+  description: string | React.ReactNode;
+  onConfirm: () => void;
   confirmText?: string;
   cancelText?: string;
   variant?: 'default' | 'destructive';
+  loading?: boolean;
 }
 
 export function ConfirmDialog({
@@ -29,44 +29,53 @@ export function ConfirmDialog({
   title,
   description,
   onConfirm,
-  onCancel,
   confirmText = 'Confirmar',
   cancelText = 'Cancelar',
-  variant = 'default',
+  variant = 'destructive',
+  loading = false,
 }: ConfirmDialogProps) {
-  const handleConfirm = async () => {
-    await onConfirm();
-    onOpenChange(false);
-  };
-
-  const handleCancel = () => {
-    onCancel?.();
-    onOpenChange(false);
-  };
-
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={handleCancel}>
-            {cancelText}
-          </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={handleConfirm}
-            className={
-              variant === 'destructive'
-                ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
-                : ''
-            }
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <div className="flex items-center gap-3">
+            {variant === 'destructive' && (
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
+                <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
+              </div>
+            )}
+            <DialogTitle>{title}</DialogTitle>
+          </div>
+          <DialogDescription className="pt-2">
+            {description}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={loading}
           >
-            {confirmText}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+            {cancelText}
+          </Button>
+          <Button
+            type="button"
+            variant={variant}
+            onClick={onConfirm}
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
+                Procesando...
+              </>
+            ) : (
+              confirmText
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { InfoTooltip } from '@/components/ui/info-tooltip';
 import { BackButton } from '@/components/ui/back-button';
 import { toast } from 'sonner';
@@ -53,8 +54,12 @@ export default function PlanesPage() {
   const { data: session, status } = useSession();
   const [planes, setPlanes] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deletingPlan, setDeletingPlan] = useState<{ id: string; nombre: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [formData, setFormData] = useState({
     nombre: '',
     descripcion: '',
@@ -128,7 +133,10 @@ export default function PlanesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    
+    if (isSaving) return;
+    
+    setIsSaving(true);
 
     try {
       const url = editingPlan 
@@ -154,20 +162,28 @@ export default function PlanesPage() {
       logger.error('Error saving plan:', error);
       toast.error('Error de conexión');
     } finally {
-      setLoading(false);
+      setIsSaving(false);
     }
   };
 
-  const handleDelete = async (id: string, nombre: string) => {
-    if (!confirm(`¿Estás seguro de eliminar el plan "${nombre}"?`)) return;
+  const openDeleteDialog = (id: string, nombre: string) => {
+    setDeletingPlan({ id, nombre });
+    setShowDeleteDialog(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deletingPlan) return;
 
     try {
-      const response = await fetch(`/api/admin/subscription-plans/${id}`, {
+      setIsDeleting(true);
+      const response = await fetch(`/api/admin/subscription-plans/${deletingPlan.id}`, {
         method: 'DELETE'
       });
 
       if (response.ok) {
         toast.success('Plan eliminado');
+        setShowDeleteDialog(false);
+        setDeletingPlan(null);
         loadPlanes();
       } else {
         const data = await response.json();
@@ -176,6 +192,8 @@ export default function PlanesPage() {
     } catch (error) {
       logger.error('Error deleting plan:', error);
       toast.error('Error de conexión');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -255,7 +273,7 @@ export default function PlanesPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleDelete(plan.id, plan.nombre)}
+                          onClick={() => openDeleteDialog(plan.id, plan.nombre)}
                         >
                           <Trash2 className="h-4 w-4 text-red-600" />
                         </Button>
@@ -449,16 +467,41 @@ export default function PlanesPage() {
               </div>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setOpenDialog(false)}>
+              <Button type="button" variant="outline" onClick={() => setOpenDialog(false)} disabled={isSaving}>
                 Cancelar
               </Button>
-              <Button type="submit" className="gradient-primary" disabled={loading}>
-                {loading ? 'Guardando...' : editingPlan ? 'Actualizar' : 'Crear Plan'}
+              <Button type="submit" className="gradient-primary" disabled={isSaving}>
+                {isSaving ? (
+                  <>
+                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
+                    Guardando...
+                  </>
+                ) : (
+                  editingPlan ? 'Actualizar' : 'Crear Plan'
+                )}
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Confirmar Eliminación"
+        description={
+          <>
+            ¿Estás seguro de que deseas eliminar el plan <strong>{deletingPlan?.nombre}</strong>?
+            <br /><br />
+            Esta acción no se puede deshacer. Las empresas con este plan asignado deberán ser reasignadas a otro plan.
+          </>
+        }
+        onConfirm={handleDelete}
+        confirmText="Eliminar"
+        variant="destructive"
+        loading={isDeleting}
+      />
     </div>
   );
 }

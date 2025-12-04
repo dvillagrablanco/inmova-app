@@ -75,9 +75,13 @@ export default function PlantillasSMSPage() {
   const { data: session, status } = useSession() || {};
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [plantillas, setPlantillas] = useState<SMSTemplate[]>([]);
   const [editando, setEditando] = useState<SMSTemplate | null>(null);
   const [vistaPrevia, setVistaPrevia] = useState<SMSTemplate | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deletingTemplate, setDeletingTemplate] = useState<{ id: string; nombre: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [formData, setFormData] = useState({
     nombre: '',
     descripcion: '',
@@ -119,6 +123,10 @@ export default function PlantillasSMSPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (isSaving) return;
+    
+    setIsSaving(true);
 
     try {
       const url = editando ? `/api/sms/templates/${editando.id}` : '/api/sms/templates';
