@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession, signOut } from 'next-auth/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,9 +18,11 @@ import {
   XCircle,
   Bot,
   Sparkles,
+  Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
-import logger, { logError } from '@/lib/logger';
+import logger from '@/lib/logger';
+import { TenantOnboarding } from '@/components/portal-inquilino/TenantOnboarding';
 
 interface DashboardData {
   tenant: {
@@ -43,34 +46,32 @@ interface DashboardData {
 
 export default function PortalInquilinoDashboardPage() {
   const router = useRouter();
+  const { data: session, status } = useSession() || {};
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Redirigir si no está autenticado
   useEffect(() => {
-    fetchDashboard();
-  }, []);
+    if (status === 'unauthenticated') {
+      router.push('/portal-inquilino/login');
+    }
+  }, [status, router]);
+
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user) {
+      fetchDashboard();
+    }
+  }, [status, session]);
 
   const fetchDashboard = async () => {
     try {
-      const token = localStorage.getItem('tenant_token');
-      if (!token) {
-        router.push('/portal-inquilino/login');
-        return;
-      }
-
-      const res = await fetch('/api/portal-inquilino/dashboard', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await fetch('/api/portal-inquilino/dashboard');
 
       if (res.ok) {
         const dashboardData = await res.json();
         setData(dashboardData);
       } else {
-        toast.error('Sesión expirada');
-        localStorage.removeItem('tenant_token');
-        router.push('/portal-inquilino/login');
+        toast.error('Error al cargar el dashboard');
       }
     } catch (error) {
       logger.error('Error al cargar dashboard:', error);
@@ -80,11 +81,28 @@ export default function PortalInquilinoDashboardPage() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('tenant_token');
+  const handleLogout = async () => {
+    await signOut({ redirect: false });
     router.push('/portal-inquilino/login');
     toast.success('Sesión cerrada');
   };
+
+  // Mostrar loader mientras se autentica
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground">Cargando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // No mostrar nada si no está autenticado (se redirigirá)
+  if (status === 'unauthenticated') {
+    return null;
+  }
 
   const getPaymentBadge = (estado: string) => {
     switch (estado) {
@@ -113,9 +131,18 @@ export default function PortalInquilinoDashboardPage() {
   if (!data) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b">
+    <>
+      {/* Onboarding para nuevos inquilinos */}
+      {session?.user && (
+        <TenantOnboarding
+          tenantId={(session.user as any).id}
+          tenantName={(session.user as any).name || 'Inquilino'}
+        />
+      )}
+      
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <header className="bg-white border-b">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -338,5 +365,6 @@ export default function PortalInquilinoDashboardPage() {
         </Card>
       </main>
     </div>
+    </>
   );
 }

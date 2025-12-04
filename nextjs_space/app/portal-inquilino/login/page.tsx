@@ -1,43 +1,48 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import { Home, Lock, Mail } from 'lucide-react';
-import logger, { logError } from '@/lib/logger';
 
 export default function PortalInquilinoLoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams?.get('callbackUrl') || '/portal-inquilino/dashboard';
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
 
     try {
-      const res = await fetch('/api/portal-inquilino/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+      const result = await signIn('tenant-credentials', {
+        email,
+        password,
+        redirect: false,
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        localStorage.setItem('tenant_token', data.token);
+      if (result?.error) {
+        setError(result.error);
+        toast.error(result.error);
+      } else if (result?.ok) {
         toast.success('¡Bienvenido!');
-        router.push('/portal-inquilino/dashboard');
-      } else {
-        const error = await res.json();
-        toast.error(error.error || 'Credenciales inválidas');
+        router.push(callbackUrl);
+        router.refresh();
       }
     } catch (error) {
-      logger.error('Error en login:', error);
+      setError('Error al iniciar sesión');
       toast.error('Error al iniciar sesión');
     } finally {
       setLoading(false);
@@ -64,6 +69,11 @@ export default function PortalInquilinoLoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {error && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
                 <Label htmlFor="email">Email</Label>
@@ -100,9 +110,34 @@ export default function PortalInquilinoLoginPage() {
               </Button>
             </form>
 
-            <div className="mt-6 text-center text-sm text-muted-foreground">
-              <p>¿Olvidaste tu contraseña?</p>
-              <p>Contacta con tu administrador de propiedades</p>
+            <div className="mt-6 space-y-3">
+              <div className="text-center">
+                <a
+                  href="/portal-inquilino/password-reset"
+                  className="text-sm text-primary hover:underline font-medium"
+                >
+                  ¿Olvidaste tu contraseña?
+                </a>
+              </div>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white px-2 text-muted-foreground">o</span>
+                </div>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground mb-2">
+                  ¿Primera vez aquí?
+                </p>
+                <a
+                  href="/portal-inquilino/register"
+                  className="text-sm text-primary hover:underline font-medium"
+                >
+                  Regístrate con tu código de invitación
+                </a>
+              </div>
             </div>
           </CardContent>
         </Card>

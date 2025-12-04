@@ -256,6 +256,10 @@ model User {
   // Automatización de onboarding y soporte
   onboardingProgress   OnboardingProgress[]
   supportTickets       SupportTicket[]
+  
+  // Portal Inquilino - Mejoras Críticas
+  tenantInvitations    TenantInvitation[]
+  
   @@index([companyId])
   @@index([role, companyId])
   @@index([activo])
@@ -419,6 +423,12 @@ model Tenant {
   
   // Room Rental Module
   roomContracts       RoomContract[]
+  
+  // Portal Inquilino - Mejoras Críticas
+  invitation          TenantInvitation?
+  passwordResetTokens PasswordResetToken[]
+  serviceRatings      ServiceRating[]
+  onboarding          TenantOnboarding?
 
   // Índices optimizados para consultas frecuentes
   @@index([companyId])
@@ -1096,6 +1106,10 @@ model Company {
   // Automatización de onboarding y soporte
   onboardingProgress   OnboardingProgress[]
   supportTickets       SupportTicket[]
+  
+  // Portal Inquilino - Mejoras Críticas
+  tenantInvitations    TenantInvitation[]
+  serviceRatings       ServiceRating[]
 
   @@map("company")
 }
@@ -7534,4 +7548,103 @@ model BankPayment {
   
   @@index([connectionId])
   @@index([status])
+}
+
+// ===================================
+// PORTAL INQUILINO - MEJORAS CRÍTICAS
+// ===================================
+
+// Sistema de Invitaciones para Registro Self-Service
+enum InvitationStatus {
+  pendiente
+  aceptada
+  expirada
+  cancelada
+}
+
+model TenantInvitation {
+  id              String           @id @default(cuid())
+  companyId       String
+  tenantId        String           @unique
+  email           String
+  invitationCode  String           @unique
+  status          InvitationStatus @default(pendiente)
+  expiresAt       DateTime
+  createdBy       String
+  createdAt       DateTime         @default(now())
+  acceptedAt      DateTime?
+  
+  company         Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  tenant          Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user            User             @relation(fields: [createdBy], references: [id])
+  
+  @@index([companyId])
+  @@index([tenantId])
+  @@index([invitationCode])
+  @@index([email])
+  @@index([status])
+}
+
+// Recuperación de Contraseña
+model PasswordResetToken {
+  id              String    @id @default(cuid())
+  tenantId        String
+  token           String    @unique
+  expiresAt       DateTime
+  used            Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  usedAt          DateTime?
+  
+  tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  @@index([tenantId])
+  @@index([token])
+  @@index([expiresAt])
+}
+
+// Valoraciones del Servicio
+enum ServiceRatingType {
+  mantenimiento
+  atencion_cliente
+  plataforma
+  comunicacion
+  general
+}
+
+model ServiceRating {
+  id              String             @id @default(cuid())
+  companyId       String
+  tenantId        String
+  tipo            ServiceRatingType
+  puntuacion      Int                // 1-5 estrellas
+  comentario      String?            @db.Text
+  visible         Boolean            @default(true)
+  respuestaAdmin  String?            @db.Text
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  
+  company         Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  tenant          Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  @@index([companyId])
+  @@index([tenantId])
+  @@index([tipo])
+  @@index([puntuacion])
+}
+
+// Onboarding del Inquilino
+model TenantOnboarding {
+  id              String    @id @default(cuid())
+  tenantId        String    @unique
+  completed       Boolean   @default(false)
+  currentStep     Int       @default(0)
+  totalSteps      Int       @default(5)
+  steps           Json      // Array de pasos completados
+  createdAt       DateTime  @default(now())
+  completedAt     DateTime?
+  
+  tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  @@index([tenantId])
+  @@index([completed])
 }
