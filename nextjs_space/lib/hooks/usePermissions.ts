@@ -46,12 +46,12 @@ const PERMISSIONS = {
   },
   operador: {
     read: true,
-    create: false,
-    update: true,
+    create: true, // Puede crear reportes de trabajo y adjuntar fotos
+    update: true, // Puede actualizar órdenes de trabajo y mantenimiento
     delete: false,
     manageUsers: false,
     manageCompany: false,
-    viewReports: false,
+    viewReports: true, // Puede ver reportes de sus trabajos
     manageClients: false,
   },
 } as const;

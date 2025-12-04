@@ -207,6 +207,14 @@ const automatizacionNavItems = [
   { name: 'Base de Conocimientos', href: '/knowledge-base', icon: BookOpen, roles: ['administrador', 'gestor', 'operador'] },
 ];
 
+// Módulos específicos de Operador
+const operadorNavItems = [
+  { name: 'Dashboard Operador', href: '/operador/dashboard', icon: LayoutDashboard, roles: ['operador'] },
+  { name: 'Órdenes del Día', href: '/operador/dashboard', icon: ClipboardList, roles: ['operador'] },
+  { name: 'Historial de Trabajos', href: '/operador/work-orders/history', icon: Clock, roles: ['operador'] },
+  { name: 'Historial Mantenimiento', href: '/operador/maintenance-history', icon: Wrench, roles: ['operador'] },
+];
+
 // Módulos de Gestión Operativa
 const gestionNavItems = [
   { name: 'Proveedores', href: '/proveedores', icon: Package, roles: ['administrador', 'gestor'] },
@@ -305,6 +313,7 @@ export function Sidebar() {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     favorites: true,
     core: true,
+    operador: true,
     gestion: true,
     advanced: false,
     multivertical: false,
@@ -419,6 +428,7 @@ export function Sidebar() {
 
   const filteredCoreItems = filterItems(coreNavItems);
   const filteredAutomatizacionItems = filterItems(automatizacionNavItems);
+  const filteredOperadorItems = filterItems(operadorNavItems);
   const filteredGestionItems = filterItems(gestionNavItems);
   const filteredAdvancedItems = filterItems(advancedNavItems);
   const filteredMultiVerticalItems = filterItems(multiVerticalItems);
@@ -431,6 +441,7 @@ export function Sidebar() {
   const allItems = [
     ...coreNavItems,
     ...automatizacionNavItems,
+    ...operadorNavItems,
     ...gestionNavItems, 
     ...advancedNavItems, 
     ...multiVerticalItems, 
@@ -621,6 +632,26 @@ export function Sidebar() {
                 {expandedSections.automatizacion && (
                   <div className="space-y-1 mt-1">
                     {filteredAutomatizacionItems.map((item) => (
+                      <NavItem key={item.href} item={item} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Operador Section */}
+            {filteredOperadorItems.length > 0 && (
+              <div className="mb-4">
+                <button
+                  onClick={() => toggleSection('operador')}
+                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
+                >
+                  <span>Operador de Campo</span>
+                  {expandedSections.operador ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                </button>
+                {expandedSections.operador && (
+                  <div className="space-y-1 mt-1">
+                    {filteredOperadorItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
                   </div>
