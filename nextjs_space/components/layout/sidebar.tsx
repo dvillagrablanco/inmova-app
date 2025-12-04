@@ -325,7 +325,7 @@ export function Sidebar() {
     comunidad: false,
     propiedadesAvanzado: false,
     serviciosProfesionales: false,
-    admin: false,
+    admin: true, // Expandida por defecto para mostrar Usuarios, Configuración, etc.
   });
 
   // Cargar estado expandido desde localStorage
