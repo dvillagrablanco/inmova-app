@@ -48,6 +48,26 @@ export const PERMISSIONS = {
     viewMaintenanceHistory: true, // Puede ver historial completo de mantenimiento
     checkInOut: true, // Puede hacer check-in/check-out en trabajos
   },
+  tenant: {
+    read: true,
+    create: false,
+    update: false,
+    delete: false,
+    manageUsers: false,
+    manageCompany: false,
+    viewReports: true,
+  },
+  soporte: {
+    read: true,
+    create: true,
+    update: true,
+    delete: true,
+    manageUsers: true,
+    manageCompany: true,
+    viewReports: true,
+    manageClients: true,
+    impersonateClients: true,
+  },
 } as const;
 
 /**

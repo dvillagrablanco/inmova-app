@@ -211,7 +211,7 @@ export default function LandingPage() {
                           className="w-full h-full"
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                           allowFullScreen
-                          title="INMOVA Demo Video - 90 segundos"
+                          title="INMOVA Demo Video - 30 segundos"
                         />
                       ) : (
                         <video 
@@ -229,7 +229,7 @@ export default function LandingPage() {
                           <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/20 mb-4 animate-pulse">
                             <Play className="h-10 w-10 text-white" />
                           </div>
-                          <h3 className="text-xl font-bold text-white mb-2">Demo Video 90s</h3>
+                          <h3 className="text-xl font-bold text-white mb-2">Demo Video 30s</h3>
                           <p className="text-white/90 text-sm">
                             Descubre INMOVA en acción
                           </p>
@@ -242,7 +242,7 @@ export default function LandingPage() {
                   <div className="absolute -top-3 -right-3 z-20">
                     <Badge className="bg-gradient-to-r from-amber-400 to-orange-400 text-white border-0 shadow-lg px-3 py-1.5 text-xs font-bold">
                       <Play className="h-3 w-3 mr-1 inline animate-pulse" />
-                      90 SEGUNDOS
+                      30 SEGUNDOS
                     </Badge>
                   </div>
                 </div>
@@ -1418,7 +1418,7 @@ export default function LandingPage() {
               Planes para Cada Necesidad
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              <strong className="text-indigo-600">€3.32 por módulo</strong> vs €6.96 de Buildium. Ahorra hasta un 70% consolidando 5-8 herramientas en una sola.
+              <strong className="text-indigo-600">Desde €2.48 por módulo</strong> vs €6.96 de Buildium. Ahorra hasta un 70% consolidando 5-8 herramientas en una sola.
             </p>
           </div>
 
@@ -1435,7 +1435,7 @@ export default function LandingPage() {
                   '30 módulos básicos',
                   'Hasta 25 propiedades',
                   'Gestión residencial + coliving',
-                  '5 usuarios',
+                  '3 usuarios',
                   'Soporte email 48h',
                   'Dashboard BI básico'
                 ],
@@ -1443,55 +1443,54 @@ export default function LandingPage() {
               },
               {
                 name: 'Profesional',
-                price: '€199',
+                price: '€149',
                 period: '/mes',
                 modules: '60 módulos',
-                properties: '26-200 propiedades',
-                costPerModule: '€3.32/módulo',
+                properties: '26-50 propiedades',
+                costPerModule: '€2.48/módulo',
                 popular: true,
                 features: [
                   '60 módulos profesionales',
-                  '26-200 propiedades',
-                  'Todos los verticales (STR, Flipping, etc.)',
-                  'Stripe + CRM + Firma Digital',
-                  'Mantenimiento Predictivo IA',
-                  'Soporte chat 24h',
-                  'White Label básico'
+                  '26-50 propiedades',
+                  'Gestión completa residencial',
+                  'Portal inquilino + propietario',
+                  'Firma Digital + CRM básico',
+                  '5 usuarios',
+                  'Soporte chat 24h'
                 ],
                 cta: 'Gestoras en crecimiento'
               },
               {
                 name: 'Empresarial',
-                price: '€499',
+                price: '€349',
                 period: '/mes',
                 modules: '88 módulos',
-                properties: '201-1000 propiedades',
-                costPerModule: '€5.67/módulo',
+                properties: '51-200 propiedades',
+                costPerModule: '€3.97/módulo',
                 features: [
                   'TODOS los 88 módulos',
-                  '201-1000 propiedades',
-                  '7 verticales completos',
-                  'Blockchain + Tokenización Web3',
-                  'IoT + Edificios Inteligentes',
-                  'IA GPT-4 completa',
-                  'White Label TOTAL (App propia)',
-                  'Soporte teléfono + Account Manager'
+                  '51-200 propiedades',
+                  'Todos los verticales (STR, Flipping, etc.)',
+                  'IA + Mantenimiento Predictivo',
+                  'Blockchain + IoT',
+                  '15 usuarios',
+                  'White Label + Account Manager'
                 ],
                 cta: 'Empresas consolidadas'
               },
               {
                 name: 'Enterprise+',
-                price: '€1,999+',
+                price: '€899',
                 period: '/mes',
                 modules: '88+ módulos',
-                properties: '+1000 propiedades',
+                properties: '+200 propiedades',
                 costPerModule: 'Personalizado',
                 features: [
                   'Propiedades ilimitadas',
+                  'Usuarios ilimitados',
                   'Todos los módulos + Custom',
                   'Infraestructura dedicada',
                   'SLA 99.95%',
-                  'Desarrollos a medida',
                   'Integraciones ERP (SAP, Sage)',
                   'Multi-región + Multi-moneda',
                   'Account Manager dedicado 24/7'

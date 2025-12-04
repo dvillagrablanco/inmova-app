@@ -123,10 +123,41 @@ export default function UsersPage() {
     }
   }, [status, session]);
 
+  const validatePassword = (password: string): string | null => {
+    if (password.length < 8) {
+      return 'La contraseña debe tener al menos 8 caracteres';
+    }
+    if (!/[A-Z]/.test(password)) {
+      return 'La contraseña debe contener al menos una mayúscula';
+    }
+    if (!/[a-z]/.test(password)) {
+      return 'La contraseña debe contener al menos una minúscula';
+    }
+    if (!/[0-9]/.test(password)) {
+      return 'La contraseña debe contener al menos un número';
+    }
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+      return 'La contraseña debe contener al menos un carácter especial';
+    }
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
+      // Validar contraseña si se proporciona
+      if (formData.password) {
+        const passwordError = validatePassword(formData.password);
+        if (passwordError) {
+          toast.error(passwordError);
+          return;
+        }
+      } else if (!editingUser) {
+        toast.error('La contraseña es requerida para crear un usuario');
+        return;
+      }
+
       if (editingUser) {
         // Actualizar usuario
         const updateData: any = {
@@ -507,7 +538,7 @@ export default function UsersPage() {
                   <Label htmlFor="password">
                     Contraseña {editingUser && '(dejar vacío para no cambiar)'}
                   </Label>
-                  <InfoTooltip content="La contraseña debe tener al menos 6 caracteres. El usuario podrá cambiarla desde su perfil." />
+                  <InfoTooltip content="La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y caracteres especiales." />
                 </div>
                 <Input
                   id="password"
@@ -515,8 +546,8 @@ export default function UsersPage() {
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   required={!editingUser}
-                  minLength={6}
-                  placeholder="Mínimo 6 caracteres"
+                  minLength={8}
+                  placeholder="Mín. 8 caracteres (Aa1!)"
                 />
               </div>
               <div className="space-y-2">

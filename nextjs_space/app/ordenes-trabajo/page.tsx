@@ -21,6 +21,7 @@ import { usePermissions } from '@/lib/hooks/usePermissions';
 import { LoadingState } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
 import { FilterChips } from '@/components/ui/filter-chips';
+import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
 import logger, { logError } from '@/lib/logger';
 
 interface WorkOrder {

@@ -41,12 +41,25 @@ export default function SMSPage() {
         fetch('/api/sms/templates'),
         fetch('/api/tenants')
       ]);
-      setSmsLogs(await smsRes.json());
-      setTemplates(await templatesRes.json());
-      setTenants(await tenantsRes.json());
+
+      // Verificar que todas las respuestas sean exitosas
+      if (!smsRes.ok || !templatesRes.ok || !tenantsRes.ok) {
+        throw new Error('Error al cargar datos del servidor');
+      }
+
+      const [smsData, templatesData, tenantsData] = await Promise.all([
+        smsRes.json(),
+        templatesRes.json(),
+        tenantsRes.json()
+      ]);
+
+      setSmsLogs(Array.isArray(smsData) ? smsData : []);
+      setTemplates(Array.isArray(templatesData) ? templatesData : []);
+      setTenants(Array.isArray(tenantsData) ? tenantsData : []);
       setLoading(false);
     } catch (error) {
-      toast.error('Error al cargar datos');
+      console.error('Error al cargar datos de SMS:', error);
+      toast.error('Error al cargar datos. Por favor, intenta de nuevo.');
       setLoading(false);
     }
   };
