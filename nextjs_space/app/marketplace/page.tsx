@@ -12,6 +12,23 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
@@ -30,6 +47,9 @@ import {
   CheckCircle2,
   Clock,
   AlertCircle,
+  Edit,
+  Trash2,
+  MoreVertical,
 } from 'lucide-react';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { format } from 'date-fns';
@@ -121,6 +141,9 @@ export default function MarketplacePage() {
 
   const [openQuoteDialog, setOpenQuoteDialog] = useState(false);
   const [openJobDialog, setOpenJobDialog] = useState(false);
+  const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
+  const [editingJob, setEditingJob] = useState<Job | null>(null);
+  const [deletingItem, setDeletingItem] = useState<{ type: string; id: string; name: string } | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   const [quoteForm, setQuoteForm] = useState({
@@ -252,6 +275,165 @@ export default function MarketplacePage() {
     } catch (error) {
       logger.error('Error creating job:', error);
       toast.error('Error al crear el trabajo');
+    }
+  };
+
+  const handleEditQuote = (quote: Quote) => {
+    setEditingQuote(quote);
+    setQuoteForm({
+      providerId: quote.provider.id,
+      buildingId: quote.building?.id || '',
+      unitId: quote.unit?.id || '',
+      titulo: quote.titulo,
+      descripcion: quote.descripcion,
+      servicioRequerido: quote.servicioRequerido,
+      urgencia: quote.urgencia,
+    });
+    setOpenQuoteDialog(true);
+  };
+
+  const handleUpdateQuote = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingQuote) return;
+    
+    try {
+      const res = await fetch(`/api/marketplace/quotes/${editingQuote.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(quoteForm),
+      });
+
+      if (!res.ok) throw new Error('Error al actualizar cotización');
+
+      toast.success('Cotización actualizada exitosamente');
+      setOpenQuoteDialog(false);
+      setEditingQuote(null);
+      setQuoteForm({
+        providerId: '',
+        buildingId: '',
+        unitId: '',
+        titulo: '',
+        descripcion: '',
+        servicioRequerido: '',
+        urgencia: 'media',
+      });
+      fetchData();
+    } catch (error) {
+      logger.error('Error updating quote:', error);
+      toast.error('Error al actualizar la cotización');
+    }
+  };
+
+  const handleEditJob = (job: Job) => {
+    setEditingJob(job);
+    setJobForm({
+      providerId: job.provider.id,
+      quoteId: '',
+      buildingId: job.building?.id || '',
+      unitId: job.unit?.id || '',
+      titulo: job.titulo,
+      descripcion: job.descripcion,
+      fechaInicio: job.fechaInicio ? new Date(job.fechaInicio).toISOString().split('T')[0] : '',
+      montoTotal: job.montoTotal.toString(),
+      garantiaMeses: '',
+      notasTrabajo: '',
+    });
+    setOpenJobDialog(true);
+  };
+
+  const handleUpdateJob = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingJob) return;
+    
+    try {
+      const res = await fetch(`/api/marketplace/jobs/${editingJob.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(jobForm),
+      });
+
+      if (!res.ok) throw new Error('Error al actualizar trabajo');
+
+      toast.success('Trabajo actualizado exitosamente');
+      setOpenJobDialog(false);
+      setEditingJob(null);
+      setJobForm({
+        providerId: '',
+        quoteId: '',
+        buildingId: '',
+        unitId: '',
+        titulo: '',
+        descripcion: '',
+        fechaInicio: '',
+        montoTotal: '',
+        garantiaMeses: '',
+        notasTrabajo: '',
+      });
+      fetchData();
+    } catch (error) {
+      logger.error('Error updating job:', error);
+      toast.error('Error al actualizar el trabajo');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deletingItem) return;
+
+    try {
+      const endpoint = deletingItem.type === 'quote' 
+        ? `/api/marketplace/quotes/${deletingItem.id}`
+        : deletingItem.type === 'job'
+        ? `/api/marketplace/jobs/${deletingItem.id}`
+        : `/api/marketplace/reviews/${deletingItem.id}`;
+
+      const res = await fetch(endpoint, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) throw new Error(`Error al eliminar ${deletingItem.type}`);
+
+      toast.success(`${deletingItem.type === 'quote' ? 'Cotización' : deletingItem.type === 'job' ? 'Trabajo' : 'Reseña'} eliminado exitosamente`);
+      setDeletingItem(null);
+      fetchData();
+    } catch (error) {
+      logger.error(`Error deleting ${deletingItem.type}:`, error);
+      toast.error(`Error al eliminar ${deletingItem.type}`);
+    }
+  };
+
+  const handleDialogClose = (open: boolean, type: 'quote' | 'job') => {
+    if (!open) {
+      if (type === 'quote') {
+        setEditingQuote(null);
+        setQuoteForm({
+          providerId: '',
+          buildingId: '',
+          unitId: '',
+          titulo: '',
+          descripcion: '',
+          servicioRequerido: '',
+          urgencia: 'media',
+        });
+      } else {
+        setEditingJob(null);
+        setJobForm({
+          providerId: '',
+          quoteId: '',
+          buildingId: '',
+          unitId: '',
+          titulo: '',
+          descripcion: '',
+          fechaInicio: '',
+          montoTotal: '',
+          garantiaMeses: '',
+          notasTrabajo: '',
+        });
+      }
+    }
+    if (type === 'quote') {
+      setOpenQuoteDialog(open);
+    } else {
+      setOpenJobDialog(open);
     }
   };
 
@@ -442,7 +624,7 @@ export default function MarketplacePage() {
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-semibold">Cotizaciones Solicitadas</h2>
                 {canCreate && (
-                  <Dialog open={openQuoteDialog} onOpenChange={setOpenQuoteDialog}>
+                  <Dialog open={openQuoteDialog} onOpenChange={(open) => handleDialogClose(open, 'quote')}>
                     <DialogTrigger asChild>
                       <Button className="gap-2">
                         <Plus className="h-4 w-4" />
@@ -451,12 +633,12 @@ export default function MarketplacePage() {
                     </DialogTrigger>
                     <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                       <DialogHeader>
-                        <DialogTitle>Solicitar Cotización</DialogTitle>
+                        <DialogTitle>{editingQuote ? 'Editar Cotización' : 'Solicitar Cotización'}</DialogTitle>
                         <DialogDescription>
                           Solicita una cotización de servicio a un proveedor
                         </DialogDescription>
                       </DialogHeader>
-                      <form onSubmit={handleCreateQuote} className="space-y-4">
+                      <form onSubmit={editingQuote ? handleUpdateQuote : handleCreateQuote} className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label htmlFor="titulo">Título *</Label>
@@ -599,7 +781,7 @@ export default function MarketplacePage() {
                           >
                             Cancelar
                           </Button>
-                          <Button type="submit">Solicitar Cotización</Button>
+                          <Button type="submit">{editingQuote ? 'Actualizar Cotización' : 'Solicitar Cotización'}</Button>
                         </div>
                       </form>
                     </DialogContent>
@@ -703,7 +885,7 @@ export default function MarketplacePage() {
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-semibold">Trabajos</h2>
                 {canCreate && (
-                  <Dialog open={openJobDialog} onOpenChange={setOpenJobDialog}>
+                  <Dialog open={openJobDialog} onOpenChange={(open) => handleDialogClose(open, 'job')}>
                     <DialogTrigger asChild>
                       <Button className="gap-2">
                         <Plus className="h-4 w-4" />
@@ -712,12 +894,12 @@ export default function MarketplacePage() {
                     </DialogTrigger>
                     <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                       <DialogHeader>
-                        <DialogTitle>Registrar Trabajo</DialogTitle>
+                        <DialogTitle>{editingJob ? 'Editar Trabajo' : 'Registrar Trabajo'}</DialogTitle>
                         <DialogDescription>
                           Registra un nuevo trabajo de servicio
                         </DialogDescription>
                       </DialogHeader>
-                      <form onSubmit={handleCreateJob} className="space-y-4">
+                      <form onSubmit={editingJob ? handleUpdateJob : handleCreateJob} className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label htmlFor="job-titulo">Título *</Label>
@@ -824,7 +1006,7 @@ export default function MarketplacePage() {
                           >
                             Cancelar
                           </Button>
-                          <Button type="submit">Crear Trabajo</Button>
+                          <Button type="submit">{editingJob ? 'Actualizar Trabajo' : 'Crear Trabajo'}</Button>
                         </div>
                       </form>
                     </DialogContent>
@@ -853,9 +1035,34 @@ export default function MarketplacePage() {
                               {job.provider.nombre}
                             </CardDescription>
                           </div>
-                          <Badge className={getJobStatusBadge(job.estado)}>
-                            {job.estado.replace('_', ' ')}
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <Badge className={getJobStatusBadge(job.estado)}>
+                              {job.estado.replace('_', ' ')}
+                            </Badge>
+                            {canCreate && (
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => handleEditJob(job)}>
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    Editar
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem 
+                                    onClick={() => setDeletingItem({ type: 'job', id: job.id, name: job.titulo })}
+                                    className="text-red-600"
+                                  >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Eliminar
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            )}
+                          </div>
                         </div>
                       </CardHeader>
                       <CardContent className="space-y-3">

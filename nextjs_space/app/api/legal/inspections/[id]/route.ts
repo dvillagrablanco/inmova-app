@@ -76,3 +76,50 @@ export async function PATCH(
     );
   }
 }
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
+    }
+
+    // Verificar que la inspección existe y pertenece a la compañía
+    const existingInspection = await prisma.legalInspection.findFirst({
+      where: {
+        id: params.id,
+        companyId: user.companyId,
+      },
+    });
+
+    if (!existingInspection) {
+      return NextResponse.json(
+        { error: 'Inspección no encontrada' },
+        { status: 404 }
+      );
+    }
+
+    await prisma.legalInspection.delete({
+      where: { id: params.id },
+    });
+
+    return NextResponse.json({ success: true, message: 'Inspección eliminada correctamente' });
+  } catch (error) {
+    logger.error('Error deleting inspection:', error);
+    return NextResponse.json(
+      { error: 'Error al eliminar inspección' },
+      { status: 500 }
+    );
+  }
+}
