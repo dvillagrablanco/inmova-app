@@ -16,8 +16,8 @@ export async function POST(request: NextRequest) {
     const user = await requireAuth();
     const body = await request.json();
 
-    // Solo super_admin o soporte pueden cambiar de empresa
-    if (user.role !== 'super_admin' && user.role !== 'soporte') {
+    // Solo super_admin puede cambiar de empresa
+    if (user.role !== 'super_admin') {
       return NextResponse.json(
         { error: 'No tienes permisos para cambiar de empresa' },
         { status: 403 }

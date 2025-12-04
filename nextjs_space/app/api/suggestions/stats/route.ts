@@ -9,8 +9,8 @@ export async function GET(request: NextRequest) {
   try {
     const user = await requireAuth();
 
-    // Solo super_admin o soporte pueden ver estadísticas
-    if (user.role !== 'super_admin' && user.role !== 'soporte') {
+    // Solo super_admin puede ver estadísticas
+    if (user.role !== 'super_admin') {
       return NextResponse.json(
         { error: 'No tienes permisos para ver estadísticas' },
         { status: 403 }

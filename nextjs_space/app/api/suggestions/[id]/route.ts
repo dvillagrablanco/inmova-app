@@ -46,10 +46,9 @@ export async function GET(
       );
     }
 
-    // Solo super_admin, soporte o el usuario que creó la sugerencia pueden verla
+    // Solo super_admin o el usuario que creó la sugerencia pueden verla
     if (
       user.role !== 'super_admin' &&
-      user.role !== 'soporte' &&
       suggestion.userId !== user.id
     ) {
       return NextResponse.json(
@@ -78,8 +77,8 @@ export async function PATCH(
     const { id } = params;
     const body = await request.json();
 
-    // Solo super_admin o soporte pueden actualizar sugerencias
-    if (user.role !== 'super_admin' && user.role !== 'soporte') {
+    // Solo super_admin puede actualizar sugerencias
+    if (user.role !== 'super_admin') {
       return NextResponse.json(
         { error: 'No tienes permisos para actualizar sugerencias' },
         { status: 403 }

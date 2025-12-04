@@ -20,8 +20,8 @@ export async function GET(request: NextRequest) {
     const user = await requireAuth();
     const { searchParams } = new URL(request.url);
     
-    // Solo super_admin o soporte pueden ver todas las sugerencias
-    if (user.role !== 'super_admin' && user.role !== 'soporte') {
+    // Solo super_admin puede ver todas las sugerencias
+    if (user.role !== 'super_admin') {
       return NextResponse.json(
         { error: 'No tienes permisos para ver las sugerencias' },
         { status: 403 }

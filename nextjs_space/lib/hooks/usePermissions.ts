@@ -14,16 +14,6 @@ const PERMISSIONS = {
     viewReports: true,
     manageClients: true,
   },
-  soporte: {
-    read: true,
-    create: true,
-    update: true,
-    delete: true, // Sincronizado con backend - rol de soporte interno
-    manageUsers: true, // Sincronizado con backend - rol de soporte interno
-    manageCompany: true, // Sincronizado con backend - rol de soporte interno
-    viewReports: true,
-    manageClients: true,
-  },
   administrador: {
     read: true,
     create: true,
