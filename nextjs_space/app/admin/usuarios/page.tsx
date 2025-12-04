@@ -36,6 +36,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { InfoTooltip } from '@/components/ui/info-tooltip';
+import { PasswordGenerator } from '@/components/ui/password-generator';
 import { toast } from 'sonner';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import logger, { logError } from '@/lib/logger';
@@ -550,20 +551,11 @@ export default function UsersPage() {
                 />
               </div>
               <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="password">
-                    Contraseña {editingUser && '(dejar vacío para no cambiar)'}
-                  </Label>
-                  <InfoTooltip content="La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y caracteres especiales." />
-                </div>
-                <Input
-                  id="password"
-                  type="password"
+                <PasswordGenerator
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  onChange={(password) => setFormData({ ...formData, password })}
+                  label={`Contraseña${editingUser ? ' (dejar vacío para no cambiar)' : ''}`}
                   required={!editingUser}
-                  minLength={8}
-                  placeholder="Mín. 8 caracteres (Aa1!)"
                 />
               </div>
               <div className="space-y-2">

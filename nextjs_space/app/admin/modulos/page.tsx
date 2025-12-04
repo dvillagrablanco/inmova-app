@@ -53,6 +53,16 @@ interface CompanyModule {
   esCore: boolean;
 }
 
+interface CurrentPlan {
+  id: string;
+  nombre: string;
+  tier: string;
+  precioMensual: number;
+  maxUsuarios: number;
+  maxPropiedades: number;
+  modulosIncluidos: string[];
+}
+
 const CATEGORIAS = {
   core: { nombre: 'Módulos Esenciales', icono: Package, color: 'bg-blue-100 text-blue-800' },
   gestion: { nombre: 'Gestión Básica', icono: Building2, color: 'bg-green-100 text-green-800' },
@@ -71,6 +81,7 @@ export default function ModulosAdminPage() {
   const [modulos, setModulos] = useState<ModuloDefinicion[]>([]);
   const [companyModules, setCompanyModules] = useState<CompanyModule[]>([]);
   const [packs, setPacks] = useState<SubscriptionPack[]>([]);
+  const [currentPlan, setCurrentPlan] = useState<CurrentPlan | null>(null);
   const [updating, setUpdating] = useState<string | null>(null);
 
   useEffect(() => {
@@ -107,6 +118,13 @@ export default function ModulosAdminPage() {
       if (companyRes.ok) {
         const companyData = await companyRes.json();
         setCompanyModules(companyData.modules || []);
+      }
+
+      // Cargar plan actual
+      const planRes = await fetch('/api/modules/current-plan');
+      if (planRes.ok) {
+        const planData = await planRes.json();
+        setCurrentPlan(planData.currentPlan);
       }
     } catch (error: any) {
       logger.error('Error loading modules:', error);
@@ -211,6 +229,108 @@ export default function ModulosAdminPage() {
               </Button>
             </div>
           </div>
+
+          {/* Plan Actual */}
+          {currentPlan && (
+            <Card className="mb-6 border-2 border-primary/20 bg-gradient-to-r from-indigo-50 to-purple-50">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Star className="h-5 w-5 text-yellow-500" />
+                      <CardTitle className="text-2xl">Plan Actual</CardTitle>
+                    </div>
+                    <CardDescription>
+                      Información de tu suscripción y opciones de mejora
+                    </CardDescription>
+                  </div>
+                  <Badge className={`text-lg px-4 py-2 ${
+                    currentPlan.tier === 'basico' ? 'bg-blue-500' :
+                    currentPlan.tier === 'profesional' ? 'bg-purple-500' :
+                    currentPlan.tier === 'empresarial' ? 'bg-orange-500' :
+                    'bg-gradient-to-r from-orange-500 to-red-500'
+                  }`}>
+                    {currentPlan.nombre}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">Precio Mensual</p>
+                    <p className="text-3xl font-bold text-primary">€{currentPlan.precioMensual}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">Usuarios Máximos</p>
+                    <p className="text-2xl font-semibold">
+                      {currentPlan.maxUsuarios === -1 ? 'Ilimitados' : currentPlan.maxUsuarios}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">Propiedades Máximas</p>
+                    <p className="text-2xl font-semibold">
+                      {currentPlan.maxPropiedades === -1 ? 'Ilimitadas' : currentPlan.maxPropiedades}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">Módulos Incluidos</p>
+                    <p className="text-2xl font-semibold">{currentPlan.modulosIncluidos.length}</p>
+                  </div>
+                </div>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  {currentPlan.tier !== 'premium' && currentPlan.tier !== 'empresarial' && (
+                    <Button 
+                      size="lg" 
+                      className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+                      onClick={() => router.push('/admin/clientes')}
+                    >
+                      <TrendingUp className="h-4 w-4 mr-2" />
+                      Mejorar Plan (Upgrade)
+                    </Button>
+                  )}
+                  <Button 
+                    size="lg" 
+                    variant="outline"
+                    onClick={() => router.push('/admin/clientes')}
+                  >
+                    <Package className="h-4 w-4 mr-2" />
+                    Cambiar Plan
+                  </Button>
+                  <Button 
+                    size="lg" 
+                    variant="outline"
+                    onClick={() => router.push('/contacto')}
+                  >
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Contactar Soporte
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {!currentPlan && (
+            <Card className="mb-6 border-2 border-orange-200 bg-orange-50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-orange-800">
+                  <AlertCircle className="h-5 w-5" />
+                  Sin Plan de Suscripción
+                </CardTitle>
+                <CardDescription className="text-orange-700">
+                  No tienes un plan de suscripción asignado. Contacta con el administrador para configurar tu plan.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button 
+                  onClick={() => router.push('/admin/clientes')}
+                  className="bg-orange-500 hover:bg-orange-600"
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Contactar Administrador
+                </Button>
+              </CardContent>
+            </Card>
+          )}
 
           <Tabs defaultValue="modulos" className="space-y-6">
             <TabsList>
