@@ -494,7 +494,7 @@ export default function SuperAdminDashboardPage() {
                             cx="50%"
                             cy="50%"
                             outerRadius={100}
-                            label={(entry) => `${entry.planName}: ${entry.count}`}
+                            label={(entry: any) => `${entry.planName}: ${entry.count}`}
                           >
                             {subscriptionBreakdown.map((entry, index) => (
                               <Cell

@@ -341,7 +341,7 @@ export default function BIPage() {
                           cx="50%"
                           cy="50%"
                           labelLine={false}
-                          label={(entry) => `${entry.categoria}: ${entry.porcentaje}%`}
+                          label={(entry: any) => `${entry.categoria}: ${entry.porcentaje}%`}
                           outerRadius={80}
                           fill="#8884d8"
                           dataKey="monto"

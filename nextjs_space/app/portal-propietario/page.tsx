@@ -343,7 +343,7 @@ export default function PortalPropietarioPage() {
                             cx="50%"
                             cy="50%"
                             outerRadius={100}
-                            label={(entry) => `${entry.nombre}: ${formatCurrency(entry.valor)}`}
+                            label={(entry: any) => `${entry.nombre}: ${formatCurrency(entry.valor)}`}
                           >
                             {distribucionIngresos.map((entry, index) => (
                               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

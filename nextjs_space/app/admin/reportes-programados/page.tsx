@@ -20,6 +20,8 @@ import {
   CheckCircle,
   AlertCircle,
   Filter,
+  FileSpreadsheet,
+  Database,
 } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { Sidebar } from '@/components/layout/sidebar';
@@ -92,9 +94,11 @@ export default function ReportesProgramadosPage() {
   
   const [reports, setReports] = useState<ScheduledReport[]>([]);
   const [history, setHistory] = useState<ReportHistory[]>([]);
+  const [templates, setTemplates] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
   const [openHistoryDialog, setOpenHistoryDialog] = useState(false);
+  const [showTemplatesDialog, setShowTemplatesDialog] = useState(false);
   const [editingReport, setEditingReport] = useState<ScheduledReport | null>(null);
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
   const [sending, setSending] = useState<string | null>(null);
@@ -142,6 +146,18 @@ export default function ReportesProgramadosPage() {
       toast.error('Error al cargar reportes programados');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchTemplates = async () => {
+    try {
+      const response = await fetch('/api/scheduled-reports/templates');
+      if (response.ok) {
+        const data = await response.json();
+        setTemplates(data);
+      }
+    } catch (error) {
+      logger.error('Error:', error);
     }
   };
 
@@ -280,6 +296,27 @@ export default function ReportesProgramadosPage() {
     setOpenDialog(true);
   };
 
+  const openTemplatesDialogHandler = () => {
+    fetchTemplates();
+    setShowTemplatesDialog(true);
+  };
+
+  const useTemplate = (template: any) => {
+    setFormData({
+      nombre: template.nombre,
+      tipo: template.tipo,
+      frecuencia: template.frecuenciaSugerida,
+      destinatarios: '',
+      activo: true,
+      incluirPdf: template.incluirPdf,
+      incluirCsv: template.incluirCsv,
+      filtros: template.filtros || '',
+    });
+    setShowTemplatesDialog(false);
+    setEditingReport(null);
+    setOpenDialog(true);
+  };
+
   const openEditDialog = (report: ScheduledReport) => {
     setFormData({
       nombre: report.nombre,
@@ -373,10 +410,16 @@ export default function ReportesProgramadosPage() {
                   Configura reportes automáticos por email
                 </p>
               </div>
-              <Button onClick={openNewDialog} className="gap-2">
-                <Plus className="h-4 w-4" />
-                Nuevo Reporte
-              </Button>
+              <div className="flex gap-2">
+                <Button onClick={openTemplatesDialogHandler} variant="outline" className="gap-2">
+                  <FileText className="h-4 w-4" />
+                  Plantillas
+                </Button>
+                <Button onClick={openNewDialog} className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  Nuevo Reporte
+                </Button>
+              </div>
             </div>
 
             {/* Estadísticas Rápidas */}
@@ -823,6 +866,123 @@ export default function ReportesProgramadosPage() {
             <Button
               variant="outline"
               onClick={() => setOpenHistoryDialog(false)}
+            >
+              Cerrar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog Plantillas */}
+      <Dialog open={showTemplatesDialog} onOpenChange={setShowTemplatesDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Plantillas de Reportes</DialogTitle>
+            <DialogDescription>
+              Selecciona una plantilla predefinida para crear tu reporte r\u00e1pidamente
+            </DialogDescription>
+          </DialogHeader>
+
+          <Tabs defaultValue="all" className="mt-4">
+            <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7">
+              <TabsTrigger value="all">Todas</TabsTrigger>
+              <TabsTrigger value="morosidad">Morosidad</TabsTrigger>
+              <TabsTrigger value="ocupacion">Ocupaci\u00f3n</TabsTrigger>
+              <TabsTrigger value="ingresos">Ingresos</TabsTrigger>
+              <TabsTrigger value="gastos">Gastos</TabsTrigger>
+              <TabsTrigger value="mantenimiento">Mantenimiento</TabsTrigger>
+              <TabsTrigger value="general">General</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="all" className="space-y-3 mt-4">
+              {templates.map((template) => (
+                <Card key={template.id} className="hover:shadow-md transition cursor-pointer" onClick={() => useTemplate(template)}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">{template.nombre}</CardTitle>
+                      <div className="flex gap-2">
+                        <Badge className={getTipoBadgeColor(template.tipo)}>
+                          {getTipoLabel(template.tipo)}
+                        </Badge>
+                        <Badge variant="outline">
+                          {getFrecuenciaLabel(template.frecuenciaSugerida)}
+                        </Badge>
+                      </div>
+                    </div>
+                    <CardDescription>{template.descripcion}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      {template.incluirPdf && (
+                        <div className="flex items-center gap-1">
+                          <FileText className="h-4 w-4" />
+                          PDF
+                        </div>
+                      )}
+                      {template.incluirCsv && (
+                        <div className="flex items-center gap-1">
+                          <FileSpreadsheet className="h-4 w-4" />
+                          CSV
+                        </div>
+                      )}
+                      <div className="flex items-center gap-1">
+                        <Database className="h-4 w-4" />
+                        {template.campos.length} campos
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </TabsContent>
+
+            {['morosidad', 'ocupacion', 'ingresos', 'gastos', 'mantenimiento', 'general'].map((tipo) => (
+              <TabsContent key={tipo} value={tipo} className="space-y-3 mt-4">
+                {templates.filter(t => t.tipo === tipo).map((template) => (
+                  <Card key={template.id} className="hover:shadow-md transition cursor-pointer" onClick={() => useTemplate(template)}>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg">{template.nombre}</CardTitle>
+                        <Badge variant="outline">
+                          {getFrecuenciaLabel(template.frecuenciaSugerida)}
+                        </Badge>
+                      </div>
+                      <CardDescription>{template.descripcion}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        {template.incluirPdf && (
+                          <div className="flex items-center gap-1">
+                            <FileText className="h-4 w-4" />
+                            PDF
+                          </div>
+                        )}
+                        {template.incluirCsv && (
+                          <div className="flex items-center gap-1">
+                            <FileSpreadsheet className="h-4 w-4" />
+                            CSV
+                          </div>
+                        )}
+                        <div className="flex items-center gap-1">
+                          <Database className="h-4 w-4" />
+                          {template.campos.length} campos
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+                {templates.filter(t => t.tipo === tipo).length === 0 && (
+                  <p className="text-center text-muted-foreground py-8">
+                    No hay plantillas para esta categor\u00eda
+                  </p>
+                )}
+              </TabsContent>
+            ))}
+          </Tabs>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowTemplatesDialog(false)}
             >
               Cerrar
             </Button>
