@@ -292,6 +292,9 @@ const adminNavItems = [
   { name: 'Reportes Programados', href: '/admin/reportes-programados', icon: Clock, roles: ['super_admin'] },
   { name: 'Importar Datos', href: '/admin/importar', icon: Upload, roles: ['super_admin'] },
   { name: 'Documentación API', href: '/api-docs', icon: Code, roles: ['super_admin'] },
+  { name: 'Marketplace', href: '/admin/marketplace', icon: ShoppingCart, roles: ['super_admin', 'administrador'] },
+  { name: 'Legal', href: '/admin/legal', icon: BookOpen, roles: ['super_admin', 'administrador'] },
+  { name: 'Firma Digital', href: '/admin/firma-digital', icon: FileSignature, roles: ['super_admin', 'administrador'] },
   
   // Administrador - Gestión de Empresa
   { name: 'Configuración', href: '/admin/configuracion', icon: Settings, roles: ['administrador'] },

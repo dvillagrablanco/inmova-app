@@ -16,7 +16,6 @@ import {
   Building2, DollarSign, MessageSquare, TrendingUp, Shield, Users,
   Zap, RefreshCw, Star
 } from 'lucide-react';
-} from 'lucide-react';
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
 

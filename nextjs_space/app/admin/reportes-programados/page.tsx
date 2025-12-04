@@ -1035,7 +1035,7 @@ export default function ReportesProgramadosPage() {
         description={`¿Estás seguro de que deseas enviar el reporte "${sendingReport?.nombre}" a todos los destinatarios configurados?`}
         onConfirm={handleSendNow}
         confirmText="Enviar"
-        isLoading={isSending}
+        loading={isSending}
       />
     </div>
   );
