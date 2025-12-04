@@ -510,6 +510,7 @@ async function sendRenewalEmail(contract: any, alert: RenewalAlert): Promise<voi
           </tr>
         </table>
       </body>
+    </html>
   `;
 
   // Enviar el email
@@ -518,4 +519,4 @@ async function sendRenewalEmail(contract: any, alert: RenewalAlert): Promise<voi
     subject,
     html: htmlContent
   });
-    </html>
+}

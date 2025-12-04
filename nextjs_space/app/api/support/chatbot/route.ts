@@ -7,6 +7,7 @@ import {
   searchKnowledgeBase,
   getArticleById
 } from '@/lib/intelligent-support-service';
+import { analyzeSentiment, ConversationContext } from '@/lib/sentiment-analysis-service';
 
 export async function POST(request: Request) {
   try {
@@ -17,16 +18,44 @@ export async function POST(request: Request) {
 
     const companyId = session.user.companyId || '';
     const body = await request.json();
-    const { question, action, articleId, query } = body;
+    const { question, action, articleId, query, conversationHistory } = body;
 
     // Procesar pregunta del usuario
     if (action === 'ask') {
+      // Analizar sentimiento del mensaje
+      const context: ConversationContext = {};
+      if (conversationHistory && Array.isArray(conversationHistory)) {
+        context.previousMessages = conversationHistory.slice(-5); // últimos 5 mensajes
+      }
+
+      const sentimentAnalysis = await analyzeSentiment(question, context);
+      
+      logger.info('Análisis de sentimiento completado', {
+        userId: session.user.id,
+        sentiment: sentimentAnalysis.sentiment,
+        urgency: sentimentAnalysis.urgency,
+        emotions: sentimentAnalysis.emotions,
+      });
+
+      // Procesar respuesta del chatbot
       const response = await processUserQuestion(
         question,
         session.user.id,
-        companyId
+        companyId,
+        sentimentAnalysis
       );
-      return NextResponse.json(response);
+
+      // Incluir análisis de sentimiento en la respuesta
+      return NextResponse.json({
+        ...response,
+        sentimentAnalysis: {
+          sentiment: sentimentAnalysis.sentiment,
+          score: sentimentAnalysis.score,
+          urgency: sentimentAnalysis.urgency,
+          emotions: sentimentAnalysis.emotions,
+          suggestedTone: sentimentAnalysis.suggestedTone,
+        },
+      });
     }
 
     // Buscar en base de conocimientos

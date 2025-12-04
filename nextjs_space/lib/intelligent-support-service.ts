@@ -557,9 +557,22 @@ const FAQ_PATTERNS = [
 export async function processUserQuestion(
   question: string,
   userId: string,
-  companyId: string
+  companyId: string,
+  sentimentAnalysis?: any
 ): Promise<ChatbotResponse> {
   const lowerQuestion = question.toLowerCase();
+  
+  // Adaptar el tono de respuesta según el sentimiento
+  let responsePrefix = '';
+  if (sentimentAnalysis) {
+    if (sentimentAnalysis.sentiment === 'negative' && sentimentAnalysis.urgency === 'critical') {
+      responsePrefix = 'Entiendo tu frustración y la urgencia de tu consulta. ';
+    } else if (sentimentAnalysis.sentiment === 'negative') {
+      responsePrefix = 'Lamento que estés teniendo problemas. ';
+    } else if (sentimentAnalysis.urgency === 'high' || sentimentAnalysis.urgency === 'critical') {
+      responsePrefix = 'Veo que es urgente. ';
+    }
+  }
   
   // Buscar coincidencias en patrones FAQ
   for (const faq of FAQ_PATTERNS) {
@@ -568,11 +581,11 @@ export async function processUserQuestion(
         const article = KNOWLEDGE_BASE.find(a => a.id === faq.articleId);
         
         return {
-          message: faq.quickAnswer,
+          message: responsePrefix + faq.quickAnswer,
           confidence: faq.confidence,
-          suggestedActions: generateSuggestedActions(faq.articleId),
+          suggestedActions: generateSuggestedActions(faq.articleId, sentimentAnalysis),
           relatedArticles: article ? [article] : [],
-          requiresHumanSupport: false
+          requiresHumanSupport: sentimentAnalysis?.urgency === 'critical'
         };
       }
     }
@@ -583,7 +596,7 @@ export async function processUserQuestion(
   
   if (searchResults.length > 0) {
     return {
-      message: `He encontrado ${searchResults.length} artículos relacionados con tu consulta. ¿Te ayudan estos recursos?`,
+      message: responsePrefix + `He encontrado ${searchResults.length} artículos relacionados con tu consulta. ¿Te ayudan estos recursos?`,
       confidence: 0.70,
       relatedArticles: searchResults.slice(0, 3),
       requiresHumanSupport: false
@@ -663,7 +676,7 @@ export function getArticlesByCategory(category: string): KnowledgeArticle[] {
 /**
  * Genera acciones sugeridas basadas en el artículo
  */
-function generateSuggestedActions(articleId: string): SuggestedAction[] {
+function generateSuggestedActions(articleId: string, sentimentAnalysis?: any): SuggestedAction[] {
   const actions: Record<string, SuggestedAction[]> = {
     'kb-001': [
       {

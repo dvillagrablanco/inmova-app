@@ -17,12 +17,27 @@ import {
   Loader2,
   Sparkles,
   BookOpen,
-  Ticket
+  Ticket,
+  Smile,
+  Meh,
+  Frown,
+  AlertTriangle,
+  Zap,
+  Heart,
+  ThumbsUp
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import logger, { logError } from '@/lib/logger';
+
+interface SentimentInfo {
+  sentiment: 'positive' | 'neutral' | 'negative';
+  score: number;
+  urgency: 'low' | 'medium' | 'high' | 'critical';
+  emotions: string[];
+  suggestedTone?: string;
+}
 
 interface Message {
   id: string;
@@ -32,6 +47,7 @@ interface Message {
   confidence?: number;
   suggestedActions?: SuggestedAction[];
   relatedArticles?: KnowledgeArticle[];
+  sentimentAnalysis?: SentimentInfo;
 }
 
 interface SuggestedAction {
@@ -86,12 +102,19 @@ export default function IntelligentSupportChatbot() {
     setIsTyping(true);
 
     try {
+      // Preparar historial de conversación para análisis de contexto
+      const conversationHistory = messages.map(msg => ({
+        sender: msg.sender,
+        text: msg.text
+      }));
+
       const res = await fetch('/api/support/chatbot', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'ask',
-          question: inputValue
+          question: inputValue,
+          conversationHistory
         })
       });
 
@@ -105,7 +128,8 @@ export default function IntelligentSupportChatbot() {
           timestamp: new Date(),
           confidence: data.confidence,
           suggestedActions: data.suggestedActions,
-          relatedArticles: data.relatedArticles
+          relatedArticles: data.relatedArticles,
+          sentimentAnalysis: data.sentimentAnalysis
         };
 
         setMessages(prev => [...prev, botMessage]);
@@ -274,6 +298,63 @@ export default function IntelligentSupportChatbot() {
                             </Badge>
                           )}
                         </div>
+
+                        {/* Análisis de Sentimiento */}
+                        {message.sentimentAnalysis && message.sender === 'bot' && (
+                          <div className="mt-2 p-2 bg-white border rounded-lg shadow-sm">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-xs font-medium text-muted-foreground">
+                                Análisis de Sentimiento:
+                              </span>
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                              {/* Sentimiento */}
+                              <Badge 
+                                variant={
+                                  message.sentimentAnalysis.sentiment === 'positive' 
+                                    ? 'default' 
+                                    : message.sentimentAnalysis.sentiment === 'negative' 
+                                    ? 'destructive' 
+                                    : 'secondary'
+                                }
+                                className="text-xs flex items-center gap-1"
+                              >
+                                {message.sentimentAnalysis.sentiment === 'positive' && <Smile className="h-3 w-3" />}
+                                {message.sentimentAnalysis.sentiment === 'neutral' && <Meh className="h-3 w-3" />}
+                                {message.sentimentAnalysis.sentiment === 'negative' && <Frown className="h-3 w-3" />}
+                                {message.sentimentAnalysis.sentiment === 'positive' ? 'Positivo' : 
+                                 message.sentimentAnalysis.sentiment === 'negative' ? 'Negativo' : 'Neutral'}
+                              </Badge>
+                              
+                              {/* Urgencia */}
+                              {message.sentimentAnalysis.urgency !== 'low' && (
+                                <Badge 
+                                  variant={
+                                    message.sentimentAnalysis.urgency === 'critical' 
+                                      ? 'destructive' 
+                                      : message.sentimentAnalysis.urgency === 'high'
+                                      ? 'default'
+                                      : 'outline'
+                                  }
+                                  className="text-xs flex items-center gap-1"
+                                >
+                                  {(message.sentimentAnalysis.urgency === 'critical' || 
+                                    message.sentimentAnalysis.urgency === 'high') && 
+                                    <AlertTriangle className="h-3 w-3" />}
+                                  {message.sentimentAnalysis.urgency === 'critical' ? 'Crítico' :
+                                   message.sentimentAnalysis.urgency === 'high' ? 'Alta Urgencia' : 'Moderado'}
+                                </Badge>
+                              )}
+                              
+                              {/* Emociones detectadas */}
+                              {message.sentimentAnalysis.emotions && message.sentimentAnalysis.emotions.length > 0 && (
+                                <Badge variant="outline" className="text-xs">
+                                  {message.sentimentAnalysis.emotions.slice(0, 2).join(', ')}
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        )}
                         
                         {/* Acciones sugeridas */}
                         {message.suggestedActions && message.suggestedActions.length > 0 && (
