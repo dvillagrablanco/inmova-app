@@ -62,22 +62,54 @@ export default function SoportePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!categorization) {
-      await handleAnalyze();
+    if (!formData.subject || !formData.description) {
+      toast.error('Por favor completa el asunto y la descripción');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      // Aquí se guardaría el ticket en la base de datos
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulación
-      toast.success('¡Ticket creado exitosamente! Te contactaremos pronto.');
-      // Reset
-      setFormData({ subject: '', description: '' });
-      setCategorization(null);
-      setShowAutoResponse(false);
+      // Crear el ticket con respuesta automática de IA
+      const response = await fetch('/api/support/ai-ticket', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          subject: formData.subject,
+          description: formData.description,
+          category: categorization?.category || 'question',
+          priority: categorization?.priority || 'medium',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al crear el ticket');
+      }
+
+      const data = await response.json();
+      
+      // Mostrar la respuesta de IA
+      if (data.aiResponse) {
+        setCategorization(data.aiResponse);
+        setShowAutoResponse(true);
+      }
+
+      toast.success(
+        data.aiResponse?.canAutoResolve
+          ? '¡Tu consulta ha sido resuelta automáticamente!'
+          : '¡Ticket creado exitosamente! Te contactaremos pronto.'
+      );
+      
+      // Reset después de 3 segundos para que el usuario pueda ver la respuesta
+      setTimeout(() => {
+        setFormData({ subject: '', description: '' });
+        setCategorization(null);
+        setShowAutoResponse(false);
+      }, 3000);
     } catch (error) {
       toast.error('Error al crear el ticket');
+      console.error('Error:', error);
     } finally {
       setIsSubmitting(false);
     }

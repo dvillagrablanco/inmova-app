@@ -203,7 +203,7 @@ export async function processAISupportRequest(
       
       return {
         message: faqMatch.answer,
-        category: faqMatch.category,
+        category: faqMatch.category as 'technical' | 'billing' | 'feature_help' | 'bug_report' | 'account' | 'general' | 'tutorial',
         confidence: faqMatch.confidence,
         relatedDocs: getRelatedDocumentation(faqMatch.category),
         needsHumanEscalation: false,
@@ -430,11 +430,14 @@ async function createSupportTicket(
         priority,
         subject: request.message.substring(0, 100),
         description: request.message,
-        status: 'abierto',
-        aiProcessed: true,
-        aiConfidence: llmResponse.confidence,
-        conversationHistory: JSON.stringify(request.conversationHistory || []),
-        metadata: JSON.stringify(request.metadata || {})
+        status: 'open',
+        autoResolved: false,
+        tags: JSON.stringify({
+          aiProcessed: true,
+          aiConfidence: llmResponse.confidence,
+          conversationHistory: request.conversationHistory || [],
+          metadata: request.metadata || {}
+        })
       }
     });
 
