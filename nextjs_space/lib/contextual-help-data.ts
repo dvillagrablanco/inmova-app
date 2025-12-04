@@ -259,6 +259,114 @@ export const helpData = {
           'Guarda plantillas para reutilizar',
           'Comparte reportes con tu equipo'
         ]
+      },
+      {
+        title: 'Programación de reportes',
+        content: 'Configura el envío automático de reportes por email en los intervalos que necesites.',
+        tips: [
+          'Elige frecuencia: diaria, semanal, mensual o personalizada',
+          'Define múltiples destinatarios para cada reporte',
+          'Los reportes se generan y envían automáticamente en segundo plano',
+          'Incluye gráficos y visualizaciones en formato PDF'
+        ]
+      },
+      {
+        title: 'Análisis comparativo',
+        content: 'Compara métricas entre diferentes períodos para identificar tendencias.',
+        tips: [
+          'Compara mes actual vs mes anterior automáticamente',
+          'Visualiza crecimiento o decrecimiento con indicadores claros',
+          'Identifica patrones estacionales en tu negocio',
+          'Exporta análisis comparativos para presentaciones'
+        ]
+      }
+    ]
+  },
+  
+  bi: {
+    module: 'Business Intelligence',
+    title: 'Inteligencia de Negocio',
+    description: 'Herramientas avanzadas de análisis y visualización de datos para tomar decisiones estratégicas.',
+    sections: [
+      {
+        title: '¿Qué es Business Intelligence?',
+        content: 'BI transforma tus datos operativos en información estratégica mediante dashboards interactivos, análisis predictivo y visualizaciones avanzadas.',
+        tips: [
+          'Accede a métricas clave como ROI, cash flow, y ocupación',
+          'Visualiza tendencias históricas y proyecciones futuras',
+          'Identifica oportunidades de optimización en tu negocio',
+          'Toma decisiones basadas en datos reales, no intuiciones'
+        ]
+      },
+      {
+        title: 'Dashboard ejecutivo',
+        content: 'Vista consolidada de los KPIs más importantes de tu negocio inmobiliario.',
+        tips: [
+          'Métricas financieras: ingresos totales, gastos, margen neto',
+          'Métricas operativas: tasa de ocupación, tiempo medio de alquiler',
+          'Métricas de cliente: satisfacción, retención, NPS',
+          'Alertas inteligentes sobre desviaciones importantes'
+        ]
+      },
+      {
+        title: 'Análisis predictivo',
+        content: 'Utiliza inteligencia artificial para predecir comportamientos futuros y anticiparte a problemas.',
+        tips: [
+          'Predicción de morosidad: identifica inquilinos con riesgo de impago',
+          'Forecast de ingresos: proyecta tus ingresos futuros con precisión',
+          'Análisis de rotación: predice cuándo es probable que un inquilino se vaya',
+          'Optimización de precios: sugerencias de ajuste de rentas según mercado'
+        ]
+      },
+      {
+        title: 'Segmentación de portafolio',
+        content: 'Analiza tu cartera de propiedades segmentada por diferentes criterios.',
+        tips: [
+          'Agrupa por rentabilidad, ubicación, tipo de propiedad',
+          'Identifica las propiedades más y menos rentables',
+          'Compara performance entre diferentes segmentos',
+          'Toma decisiones de inversión basadas en datos históricos'
+        ]
+      },
+      {
+        title: 'Benchmarking de mercado',
+        content: 'Compara tu performance con el mercado inmobiliario de tu zona.',
+        tips: [
+          'Precios de alquiler vs competencia local',
+          'Tiempo de vacancia comparado con el promedio del mercado',
+          'Rentabilidad vs estándares del sector',
+          'Identifica oportunidades de mejora competitiva'
+        ]
+      },
+      {
+        title: 'Visualizaciones interactivas',
+        content: 'Gráficos y dashboards que puedes explorar y personalizar según tus necesidades.',
+        tips: [
+          'Haz clic en cualquier elemento para profundizar (drill-down)',
+          'Aplica filtros dinámicos para analizar segmentos específicos',
+          'Cambia entre diferentes tipos de visualización (barras, líneas, mapas)',
+          'Exporta visualizaciones para presentaciones o reportes'
+        ]
+      },
+      {
+        title: 'Alertas inteligentes',
+        content: 'Recibe notificaciones automáticas sobre eventos importantes en tus métricas.',
+        tips: [
+          'Configura umbrales personalizados para cada KPI',
+          'Recibe alertas cuando se detecten anomalías o tendencias preocupantes',
+          'Notificaciones por email, SMS o push en la app',
+          'Prioriza alertas críticas vs informativas'
+        ]
+      },
+      {
+        title: 'Exportación y compartición',
+        content: 'Comparte insights con tu equipo o stakeholders de manera sencilla.',
+        tips: [
+          'Exporta dashboards completos en PDF de alta calidad',
+          'Genera links compartibles con acceso temporal',
+          'Programa envíos automáticos de reportes BI',
+          'Presenta datos en reuniones con modo presentación'
+        ]
       }
     ]
   }

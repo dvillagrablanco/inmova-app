@@ -27,6 +27,7 @@ import { AIAssistant } from '@/components/automation/AIAssistant';
 import SmartOnboardingWizard from '@/components/automation/SmartOnboardingWizard';
 import ProactiveSuggestions from '@/components/automation/ProactiveSuggestions';
 import IntelligentSupportChatbot from '@/components/automation/IntelligentSupportChatbot';
+import InactiveModules from './components/InactiveModules';
 import logger, { logError } from '@/lib/logger';
 
 interface DashboardData {
@@ -127,6 +128,9 @@ export default function DashboardPage() {
           <SmartOnboardingWizard />
 
           {/* Proactive Suggestions - Sugerencias inteligentes personalizadas */}
+
+          {/* Inactive Modules - Módulos disponibles para activar */}
+          <InactiveModules />
           <ProactiveSuggestions />
 
           {/* KPIs Grid */}
