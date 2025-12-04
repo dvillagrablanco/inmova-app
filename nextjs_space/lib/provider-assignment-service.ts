@@ -432,7 +432,7 @@ export async function getProviderRecommendations(
 
         scores.push(score);
       } catch (error) {
-        logError(error as Error, `Error calculando score para proveedor ${provider.id}`);
+        logError(error as Error, { context: 'calculateProviderScore', providerId: provider.id });
         // Continuar con el siguiente proveedor
       }
     }

@@ -408,7 +408,7 @@ function generateTenantEmailHTML(payment: any, reminder: PaymentReminder): strin
           background-color: #ffffff;
         }
         .header {
-          background: linear-gradient(135deg, ${urgencyColor} 0%, ${reminder.stage === 'legal' ? '#991B1B' : reminder.stage === 'urgent' ? '#DC2626' : reminder.stage === 'formal' ? '#D97706' : '#2563EB'} 100%);
+          background: linear-gradient(135deg, ${urgencyColor} 0%, ${reminder.stage === 'legal' ? '#991B1B' : reminder.stage === 'urgent' ? '#DC2626' : reminder.stage === 'firm' ? '#D97706' : '#2563EB'} 100%);
           padding: 40px 32px;
           text-align: center;
         }
@@ -438,7 +438,7 @@ function generateTenantEmailHTML(payment: any, reminder: PaymentReminder): strin
           letter-spacing: 0.5px;
           margin-bottom: 24px;
           text-transform: uppercase;
-          background: linear-gradient(135deg, ${urgencyColor} 0%, ${reminder.stage === 'legal' ? '#991B1B' : reminder.stage === 'urgent' ? '#DC2626' : reminder.stage === 'formal' ? '#D97706' : '#2563EB'} 100%);
+          background: linear-gradient(135deg, ${urgencyColor} 0%, ${reminder.stage === 'legal' ? '#991B1B' : reminder.stage === 'urgent' ? '#DC2626' : reminder.stage === 'firm' ? '#D97706' : '#2563EB'} 100%);
           color: #ffffff;
           ${reminder.stage === 'legal' || reminder.stage === 'urgent' ? 'box-shadow: 0 4px 8px rgba(0,0,0,0.2); animation: pulse 2s infinite;' : ''}
         }

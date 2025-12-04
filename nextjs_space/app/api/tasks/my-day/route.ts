@@ -11,13 +11,17 @@ export const dynamic = 'force-dynamic';
  * Get prioritized tasks for "My Day" view
  */
 export async function GET(req: NextRequest) {
+  let userId: string | undefined;
+  let companyId: string | undefined;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const { id: userId, companyId } = session.user;
+    userId = session.user.id;
+    companyId = session.user.companyId;
+    
     if (!companyId) {
       return NextResponse.json({ error: 'companyId no encontrado' }, { status: 400 });
     }

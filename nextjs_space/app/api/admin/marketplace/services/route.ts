@@ -5,8 +5,9 @@ import { prisma } from '@/lib/db';
 import { logError } from '@/lib/logger';
 
 export async function GET(req: NextRequest) {
+  let session: any;
   try {
-    const session = await getServerSession(authOptions);
+    session = await getServerSession(authOptions);
 
     if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
       return NextResponse.json(
@@ -45,8 +46,10 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  let session: any;
+  let body: any;
   try {
-    const session = await getServerSession(authOptions);
+    session = await getServerSession(authOptions);
 
     if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
       return NextResponse.json(
@@ -55,7 +58,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const body = await req.json();
+    body = await req.json();
 
     const {
       nombre,

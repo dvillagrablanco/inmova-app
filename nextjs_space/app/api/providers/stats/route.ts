@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
       stats,
     });
   } catch (error: any) {
-    logError(error, 'Error obteniendo estadísticas');
+    logError(new Error(error.message || 'Error obteniendo estadísticas'), { context: 'GET /api/providers/stats' });
 
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });

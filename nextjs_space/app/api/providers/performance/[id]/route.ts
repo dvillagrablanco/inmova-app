@@ -75,7 +75,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       ...response,
     });
   } catch (error: any) {
-    logError(error, 'Error obteniendo métricas de rendimiento');
+    logError(new Error(error.message || 'Error obteniendo métricas de rendimiento'), { context: 'GET /api/providers/performance/[id]' });
 
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });

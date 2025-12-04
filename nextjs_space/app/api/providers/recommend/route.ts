@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error: any) {
-    logError(error, 'Error obteniendo recomendaciones de proveedores');
+    logError(new Error(error.message || 'Error obteniendo recomendaciones de proveedores'), { context: 'GET /api/providers/recommend' });
 
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });

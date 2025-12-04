@@ -228,6 +228,86 @@ async function sendRenewalEmail(contract: any, alert: RenewalAlert): Promise<voi
   });
 
   const subject = getAlertTitle(alert, contract);
+  
+  // Variables para el template del email
+  const diasRestantes = alert.daysUntilExpiry;
+  const etapa = alert.stage;
+  
+  // Definir badge class según etapa
+  let badgeClass = 'alert-badge-normal';
+  let etapaTexto = 'INFORMACIÓN';
+  
+  switch (etapa) {
+    case 'critical':
+      badgeClass = 'alert-badge-critical';
+      etapaTexto = 'URGENTE';
+      break;
+    case 'urgent':
+      badgeClass = 'alert-badge-urgent';
+      etapaTexto = 'IMPORTANTE';
+      break;
+    case 'followup':
+      badgeClass = 'alert-badge-followup';
+      etapaTexto = 'SEGUIMIENTO';
+      break;
+    case 'initial':
+      badgeClass = 'alert-badge-initial';
+      etapaTexto = 'PLANIFICACIÓN';
+      break;
+  }
+  
+  // Generar acciones recomendadas según etapa
+  let accionesRecomendadas = '';
+  switch (etapa) {
+    case 'critical':
+      accionesRecomendadas = `
+        <div class="warning-box" style="background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%); border-left-color: #DC2626;">
+          <p style="color: #991B1B;"><strong>⚠️ ACCIÓN INMEDIATA REQUERIDA</strong></p>
+          <ul style="color: #991B1B; margin: 12px 0 0 20px;">
+            <li>Contactar al inquilino HOY</li>
+            <li>Confirmar intención de renovación</li>
+            <li>Iniciar búsqueda de nuevo inquilino si no renueva</li>
+          </ul>
+        </div>
+      `;
+      break;
+    case 'urgent':
+      accionesRecomendadas = `
+        <div class="warning-box">
+          <p><strong>🔔 Acciones Recomendadas</strong></p>
+          <ul style="color: #78350F; margin: 12px 0 0 20px;">
+            <li>Contactar al inquilino esta semana</li>
+            <li>Negociar términos de renovación</li>
+            <li>Preparar documentación necesaria</li>
+          </ul>
+        </div>
+      `;
+      break;
+    case 'followup':
+      accionesRecomendadas = `
+        <div class="info-box">
+          <p><strong>📋 Próximos Pasos</strong></p>
+          <ul style="color: #1F2937; margin: 12px 0 0 20px;">
+            <li>Evaluar renovación o buscar nuevo inquilino</li>
+            <li>Revisar condiciones del mercado</li>
+            <li>Planificar posibles mejoras a la unidad</li>
+          </ul>
+        </div>
+      `;
+      break;
+    case 'initial':
+      accionesRecomendadas = `
+        <div class="info-box">
+          <p><strong>📅 Recordatorio</strong></p>
+          <ul style="color: #1F2937; margin: 12px 0 0 20px;">
+            <li>Comenzar planificación de renovación</li>
+            <li>Evaluar historial del inquilino</li>
+            <li>Considerar ajuste de renta según mercado</li>
+          </ul>
+        </div>
+      `;
+      break;
+  }
   const htmlContent = `
     <!DOCTYPE html>
     <html lang="es">
@@ -460,7 +540,7 @@ async function sendRenewalEmail(contract: any, alert: RenewalAlert): Promise<voi
                       </div>
                       <div class="info-row">
                         <span class="info-label">⏰ Días Restantes:</span>
-                        <span class="info-value" style="font-weight: 700; color: ${etapa === 'critico' ? '#DC2626' : etapa === 'urgente' ? '#F59E0B' : '#4F46E5'};">${diasRestantes} día${diasRestantes !== 1 ? 's' : ''}</span>
+                        <span class="info-value" style="font-weight: 700; color: ${etapa === 'critical' ? '#DC2626' : etapa === 'urgent' ? '#F59E0B' : '#4F46E5'};">${diasRestantes} día${diasRestantes !== 1 ? 's' : ''}</span>
                       </div>
                       <div class="info-row">
                         <span class="info-label">💰 Renta Actual:</span>
@@ -470,7 +550,7 @@ async function sendRenewalEmail(contract: any, alert: RenewalAlert): Promise<voi
 
                     ${accionesRecomendadas}
                     
-                    ${etapa === 'critico' || etapa === 'urgente' ? `
+                    ${etapa === 'critical' || etapa === 'urgent' ? `
                     <div class="warning-box">
                       <p><strong>⚠️ Acción Inmediata Requerida:</strong> Este contrato vence en ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''}. Es fundamental tomar una decisión lo antes posible para evitar situaciones de incertidumbre legal.</p>
                     </div>
@@ -519,4 +599,56 @@ async function sendRenewalEmail(contract: any, alert: RenewalAlert): Promise<voi
     subject,
     html: htmlContent
   });
+}
+
+
+/**
+ * Genera reporte de renovaciones de contratos
+ * Usado por enhanced-report-service
+ */
+export async function generateRenewalReport(companyId: string): Promise<any> {
+  const alerts = await detectContractsForRenewal(companyId);
+  
+  // Agrupar por etapa
+  const grouped = {
+    critical: alerts.filter(a => a.stage === 'critical'),
+    urgent: alerts.filter(a => a.stage === 'urgent'),
+    followup: alerts.filter(a => a.stage === 'followup'),
+    initial: alerts.filter(a => a.stage === 'initial'),
+  };
+  
+  // Obtener contratos completos
+  const contractIds = alerts.map(a => a.contractId);
+  const contracts = await prisma.contract.findMany({
+    where: {
+      id: { in: contractIds },
+      unit: {
+        building: {
+          companyId,
+        },
+      },
+    },
+    include: {
+      tenant: true,
+      unit: {
+        include: {
+          building: true,
+        },
+      },
+    },
+  });
+  
+  return {
+    summary: {
+      total: alerts.length,
+      critical: grouped.critical.length,
+      urgent: grouped.urgent.length,
+      followup: grouped.followup.length,
+      initial: grouped.initial.length,
+    },
+    alerts,
+    contracts,
+    grouped,
+    generatedAt: new Date(),
+  };
 }

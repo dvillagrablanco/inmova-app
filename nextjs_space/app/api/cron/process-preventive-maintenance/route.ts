@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/db';
-import { sendEmail } from '@/lib/email-service';
+import { prisma } from '@/lib/db';
+import { sendEmail } from '@/lib/email-config';
 import logger from '@/lib/logger';
 import { addDays, format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -46,17 +46,22 @@ async function processPreventiveMaintenance() {
         (schedule.proximaFecha.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
       );
 
-      let prioridad: 'alta' | 'media' | 'normal' = 'normal';
+      let prioridad: 'alto' | 'medio' | 'bajo' = 'bajo';
       let urgencia = '';
 
       if (diasRestantes <= 1) {
-        prioridad = 'alta';
+        prioridad = 'alto';
         urgencia = '¡URGENTE! ';
       } else if (diasRestantes <= 3) {
-        prioridad = 'alta';
+        prioridad = 'alto';
         urgencia = 'IMPORTANTE: ';
       } else if (diasRestantes <= 7) {
-        prioridad = 'media';
+        prioridad = 'medio';
+      }
+
+      // Skip if building is null
+      if (!schedule.building) {
+        continue;
       }
 
       // Crear notificación en el sistema
@@ -65,8 +70,7 @@ async function processPreventiveMaintenance() {
           companyId: schedule.building.companyId,
           titulo: `${urgencia}Mantenimiento Preventivo Próximo`,
           mensaje: `La tarea "${schedule.titulo}" está programada para ${format(schedule.proximaFecha, "d 'de' MMMM", { locale: es })} (en ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''}). Edificio: ${schedule.building.nombre}.`,
-          tipo: prioridad === 'alta' ? 'alerta' : 'info',
-          categoria: 'mantenimiento',
+          tipo: prioridad === 'alto' ? 'mantenimiento_urgente' : 'mantenimiento_preventivo',
           prioridad,
           buildingId: schedule.buildingId,
           entityType: 'MaintenanceSchedule',
@@ -75,7 +79,7 @@ async function processPreventiveMaintenance() {
       });
 
       // Enviar email al contacto del edificio o administradores
-      if (schedule.building.company.emailContacto) {
+      if (schedule.building?.company?.emailContacto) {
         try {
           await sendEmail({
             to: schedule.building.company.emailContacto,
