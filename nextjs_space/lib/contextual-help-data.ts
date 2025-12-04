@@ -369,5 +369,183 @@ export const helpData = {
         ]
       }
     ]
+  },
+  calendario: {
+    module: 'Calendario Unificado',
+    title: '¿Cómo usar el Calendario Unificado?',
+    description: 'Gestiona todos tus eventos, visitas, inspecciones y reuniones en un solo lugar centralizado.',
+    sections: [
+      {
+        title: 'Sincronización automática',
+        content: 'El calendario se sincroniza automáticamente con eventos de todos los módulos del sistema.',
+        tips: [
+          'Los pagos pendientes se muestran automáticamente',
+          'Los vencimientos de contratos aparecen como eventos',
+          'El mantenimiento programado se integra en el calendario',
+          'Las visitas de candidatos se añaden automáticamente'
+        ]
+      },
+      {
+        title: 'Crear eventos personalizados',
+        content: 'Añade reuniones, inspecciones, visitas y recordatorios personalizados.',
+        tips: [
+          'Asigna eventos a edificios y unidades específicas',
+          'Configura recordatorios para eventos importantes',
+          'Marca eventos como completados o cancelados',
+          'Añade notas y detalles relevantes a cada evento'
+        ]
+      },
+      {
+        title: 'Vistas y filtros',
+        content: 'Visualiza tu agenda en diferentes formatos y filtra por tipo de evento.',
+        tips: [
+          'Cambia entre vista mensual, semanal, diaria o agenda',
+          'Filtra por tipo de evento (pagos, contratos, mantenimiento)',
+          'Exporta tu calendario para compartir con el equipo',
+          'Sincroniza con calendarios externos (próximamente)'
+        ]
+      }
+    ]
+  },
+  'room-rental': {
+    module: 'Alquiler por Habitaciones',
+    title: '¿Cómo gestionar el Alquiler por Habitaciones?',
+    description: 'Administra habitaciones individuales con contratos independientes, prorrateo de gastos y convivencia.',
+    sections: [
+      {
+        title: 'Crear y gestionar habitaciones',
+        content: 'Configura habitaciones dentro de unidades para alquileres compartidos.',
+        tips: [
+          'Divide unidades en múltiples habitaciones alquilables',
+          'Asigna características únicas a cada habitación',
+          'Controla disponibilidad y precios por habitación',
+          'Gestiona contratos independientes por habitación'
+        ]
+      },
+      {
+        title: 'Prorrateo automático de gastos',
+        content: 'Distribuye gastos comunes entre inquilinos de forma justa y automatizada.',
+        tips: [
+          'Configura métodos de prorrateo (por partes iguales, por uso, por m²)',
+          'Previsualiza cálculos antes de aplicarlos',
+          'Genera pagos automáticos de servicios prorrateados',
+          'Mantén un registro claro y transparente de costos'
+        ]
+      },
+      {
+        title: 'Calendarios de limpieza',
+        content: 'Organiza turnos rotativos de limpieza para espacios compartidos.',
+        tips: [
+          'Crea calendarios automáticos de limpieza',
+          'Notifica a inquilinos sobre sus turnos asignados',
+          'Registra cumplimiento de tareas de limpieza',
+          'Personaliza frecuencia y áreas a limpiar'
+        ]
+      },
+      {
+        title: 'Reglas de convivencia',
+        content: 'Establece y comunica normas claras para la convivencia compartida.',
+        tips: [
+          'Define horarios de silencio y uso de espacios comunes',
+          'Establece políticas de visitas y mascotas',
+          'Comunica reglas al firmar contratos',
+          'Gestiona infracciones y resolución de conflictos'
+        ]
+      }
+    ]
+  },
+  marketplace: {
+    module: 'Marketplace de Servicios',
+    title: '¿Cómo usar el Marketplace de Servicios?',
+    description: 'Conecta a tus inquilinos con servicios adicionales y proveedores verificados.',
+    sections: [
+      {
+        title: 'Gestionar cotizaciones',
+        content: 'Recibe, procesa y responde a solicitudes de cotización de servicios.',
+        tips: [
+          'Revisa solicitudes de inquilinos en tiempo real',
+          'Asigna proveedores adecuados para cada servicio',
+          'Envía cotizaciones detalladas y profesionales',
+          'Haz seguimiento del estado de cada solicitud'
+        ]
+      },
+      {
+        title: 'Administrar trabajos',
+        content: 'Coordina la ejecución de servicios contratados por inquilinos.',
+        tips: [
+          'Programa fechas de servicio con proveedores',
+          'Monitorea el progreso de trabajos activos',
+          'Confirma finalización y calidad del servicio',
+          'Procesa pagos y comisiones automáticamente'
+        ]
+      },
+      {
+        title: 'Sistema de reseñas',
+        content: 'Gestiona la reputación de proveedores mediante valoraciones de inquilinos.',
+        tips: [
+          'Solicita reseñas a inquilinos tras cada servicio',
+          'Modera comentarios para mantener calidad',
+          'Identifica proveedores top por sus valoraciones',
+          'Usa feedback para mejorar la red de servicios'
+        ]
+      },
+      {
+        title: 'Programa de fidelización',
+        content: 'Recompensa a inquilinos frecuentes con descuentos y beneficios.',
+        tips: [
+          'Configura niveles de fidelidad (bronce, plata, oro)',
+          'Otorga descuentos progresivos por uso',
+          'Ofrece cashback en servicios premium',
+          'Genera lealtad y satisfacción de inquilinos'
+        ]
+      }
+    ]
+  },
+  crm: {
+    module: 'CRM y Ventas',
+    title: '¿Cómo usar el CRM de INMOVA?',
+    description: 'Gestiona tu pipeline de ventas y convierte leads en clientes con un sistema CRM integrado.',
+    sections: [
+      {
+        title: 'Pipeline visual Kanban',
+        content: 'Visualiza y gestiona el proceso de ventas de forma intuitiva.',
+        tips: [
+          'Arrastra leads entre etapas del pipeline',
+          'Prioriza por scoring y probabilidad de cierre',
+          'Identifica cuellos de botella en el proceso',
+          'Mide conversión por cada etapa del embudo'
+        ]
+      },
+      {
+        title: 'Scoring automático',
+        content: 'El sistema calcula automáticamente la calidad de cada lead.',
+        tips: [
+          'Factores: presupuesto, urgencia, fit con servicios',
+          'Prioriza leads de alto valor',
+          'Identifica oportunidades más prometedoras',
+          'Optimiza el tiempo de tu equipo comercial'
+        ]
+      },
+      {
+        title: 'Gestión de leads',
+        content: 'Captura, califica y nutre leads de múltiples fuentes.',
+        tips: [
+          'Importa leads desde landing page o formularios',
+          'Asigna leads automáticamente a comerciales',
+          'Programa seguimientos y recordatorios',
+          'Registra todas las interacciones con el lead'
+        ]
+      },
+      {
+        title: 'Análisis y reportes',
+        content: 'Mide el rendimiento de tu equipo y del proceso de ventas.',
+        tips: [
+          'Analiza tasas de conversión por etapa',
+          'Calcula valor promedio del pipeline',
+          'Identifica comerciales top performers',
+          'Genera informes para la dirección comercial'
+        ]
+      }
+    ]
   }
 };

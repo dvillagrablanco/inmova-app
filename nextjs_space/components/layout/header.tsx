@@ -180,10 +180,13 @@ export function Header() {
               size="icon"
               className="relative h-10 w-10"
               onClick={() => setShowNotifications(!showNotifications)}
+              aria-label={unreadCount > 0 ? `Notificaciones (${unreadCount} sin leer)` : "Notificaciones"}
+              aria-expanded={showNotifications}
+              aria-haspopup="true"
             >
               <Bell className="h-5 w-5" />
               {unreadCount > 0 && (
-                <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-semibold text-white">
+                <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-semibold text-white" aria-hidden="true">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
@@ -270,7 +273,11 @@ export function Header() {
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2 pl-2 pr-3 h-10">
+              <Button 
+                variant="ghost" 
+                className="flex items-center gap-2 pl-2 pr-3 h-10"
+                aria-label={`Menú de usuario: ${userName}`}
+              >
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
                   <User className="h-4 w-4" />
                 </div>

@@ -102,9 +102,9 @@ export const AnimatedGrid = memo(function AnimatedGrid({
               layout
             >
               {child}
-});
+            </motion.div>
           ))}
       </AnimatePresence>
     </div>
   );
-}
+});

@@ -251,11 +251,13 @@ export function EnhancedGlobalSearch() {
           "sm:pr-12 md:w-40 lg:w-64 xl:w-80"
         )}
         onClick={() => setOpen(true)}
+        aria-label="Abrir búsqueda global (⌘K)"
+        aria-keyshortcuts="Meta+K Control+K"
       >
-        <Search className="mr-2 h-4 w-4 shrink-0" />
+        <Search className="mr-2 h-4 w-4 shrink-0" aria-hidden="true" />
         <span className="hidden lg:inline-flex truncate">Buscar en Inmova...</span>
         <span className="inline-flex lg:hidden">Buscar...</span>
-        <kbd className="pointer-events-none absolute right-1.5 top-2 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+        <kbd className="pointer-events-none absolute right-1.5 top-2 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex" aria-hidden="true">
           <span className="text-xs">⌘</span>K
         </kbd>
       </Button>

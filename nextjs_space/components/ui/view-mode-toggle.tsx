@@ -20,7 +20,11 @@ export function ViewModeToggle({ value, onChange, className }: ViewModeTogglePro
   ];
 
   return (
-    <div className={cn('inline-flex rounded-lg border bg-background p-1', className)}>
+    <div 
+      className={cn('inline-flex rounded-lg border bg-background p-1', className)}
+      role="group"
+      aria-label="Seleccionar modo de visualización"
+    >
       {modes.map(({ mode, icon, label }) => (
         <Button
           key={mode}
@@ -32,8 +36,10 @@ export function ViewModeToggle({ value, onChange, className }: ViewModeTogglePro
             value === mode && 'gradient-primary text-white shadow-primary'
           )}
           title={label}
+          aria-label={`Vista ${label.toLowerCase()}`}
+          aria-pressed={value === mode}
         >
-          {icon}
+          <span aria-hidden="true">{icon}</span>
           <span className="hidden sm:inline">{label}</span>
         </Button>
       ))}

@@ -6,16 +6,16 @@ import { addDays } from 'date-fns';
 import { logError } from '@/lib/logger';
 
 export async function GET(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
+    return NextResponse.json(
+      { error: 'No autorizado' },
+      { status: 401 }
+    );
+  }
+
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
-    }
-
     const documentos = await prisma.documentoFirma.findMany({
       where: {
         companyId: session.user.companyId
@@ -46,16 +46,16 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
+    return NextResponse.json(
+      { error: 'No autorizado' },
+      { status: 401 }
+    );
+  }
+
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
-    }
-
     const body = await req.json();
 
     const {

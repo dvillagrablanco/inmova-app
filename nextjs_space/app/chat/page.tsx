@@ -17,8 +17,8 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { SkeletonCard } from '@/components/ui/skeleton-card';
 import { MessageSquare, Send, Home, ArrowLeft, CheckCircle2, Clock } from 'lucide-react';
 import logger, { logError } from '@/lib/logger';
-import {
 import { ErrorBoundary } from '@/components/ui/error-boundary';
+import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
