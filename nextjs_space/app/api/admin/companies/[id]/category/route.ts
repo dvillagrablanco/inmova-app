@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { requireAuth } from '@/lib/permissions';
+import logger from '@/lib/logger';
 import { z } from 'zod';
+
+export const dynamic = 'force-dynamic';
 
 const updateCategorySchema = z.object({
   category: z.enum(['enterprise', 'pyme', 'startup', 'trial', 'premium', 'standard']),
@@ -13,18 +17,22 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const user = await requireAuth();
-    const { id } = params;
-    const body = await request.json();
+    const session = await getServerSession(authOptions);
+    
+    if (!session || !session.user) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
 
     // Solo super_admin puede cambiar categorías
-    if (user.role !== 'super_admin') {
+    if (session.user.role !== 'super_admin') {
       return NextResponse.json(
         { error: 'No tienes permisos para cambiar categorías de clientes' },
         { status: 403 }
       );
     }
 
+    const { id } = params;
+    const body = await request.json();
     const validatedData = updateCategorySchema.parse(body);
 
     const company = await prisma.company.update({
@@ -36,7 +44,7 @@ export async function PATCH(
 
     return NextResponse.json(company);
   } catch (error: any) {
-    console.error('Error al actualizar categoría:', error);
+    logger.error('Error al actualizar categoría:', error);
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(

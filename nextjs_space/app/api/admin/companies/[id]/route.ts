@@ -149,6 +149,7 @@ export async function PATCH(
         ...(data.maxEdificios !== undefined && { maxEdificios: data.maxEdificios }),
         ...(data.subscriptionPlanId !== undefined && { subscriptionPlanId: data.subscriptionPlanId }),
         ...(data.activo !== undefined && { activo: data.activo }),
+        ...(data.category !== undefined && { category: data.category }),
       },
       include: {
         subscriptionPlan: true,

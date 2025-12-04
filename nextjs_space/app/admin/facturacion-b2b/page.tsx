@@ -8,6 +8,8 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { Sidebar } from '@/components/layout/sidebar';
+import { Header } from '@/components/layout/header';
 import {
   Card,
   CardContent,
@@ -214,15 +216,20 @@ export default function B2BBillingDashboard() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Facturación B2B</h1>
-          <p className="text-muted-foreground">
-            Gestión de facturación de INMOVA a empresas clientes
-          </p>
-        </div>
+    <div className="flex h-screen overflow-hidden">
+      <Sidebar />
+      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
+        <Header />
+        <main className="flex-1 overflow-y-auto p-6 bg-gradient-bg">
+          <div className="container mx-auto space-y-6">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold">Facturación B2B</h1>
+                <p className="text-muted-foreground">
+                  Gestión de facturación de INMOVA a empresas clientes
+                </p>
+              </div>
         <div className="flex gap-2">
           <Button
             onClick={handleGenerateMonthlyInvoices}
@@ -422,6 +429,9 @@ export default function B2BBillingDashboard() {
           )}
         </CardContent>
       </Card>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

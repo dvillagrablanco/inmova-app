@@ -974,7 +974,7 @@ model Company {
   
   // Sistema de tags para organización
   tags              String[]         @default([])
-  // category          CompanyCategory? @default(standard)  // Deshabilitado temporalmente - requiere migración
+  category          CompanyCategory? @default(standard)
   
   // Stripe
   stripeCustomerId  String?          @unique

@@ -370,9 +370,9 @@ export default function ModulosAdminPage() {
                                 activo ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
                               }`}
                             >
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-2">
+                              <div className="flex items-start justify-between gap-4">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-2 flex-wrap">
                                     <h4 className="font-semibold">{modulo.nombre}</h4>
                                     {modulo.esCore && (
                                       <Badge variant="secondary" className="text-xs">
@@ -390,7 +390,7 @@ export default function ModulosAdminPage() {
                                   <p className="text-sm text-muted-foreground mb-3">
                                     {modulo.descripcion}
                                   </p>
-                                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                                     <code className="bg-gray-100 px-2 py-1 rounded">{modulo.ruta}</code>
                                     {modulo.requiereModulos.length > 0 && (
                                       <div className="flex items-center gap-1">
@@ -405,12 +405,16 @@ export default function ModulosAdminPage() {
                                     </Badge>
                                   </div>
                                 </div>
-                                <div className="ml-4">
+                                <div className="flex flex-col items-center gap-2 flex-shrink-0">
                                   <Switch
                                     checked={activo}
                                     disabled={isDisabled}
                                     onCheckedChange={(checked) => toggleModule(modulo.codigo, checked)}
+                                    className="data-[state=checked]:bg-green-600"
                                   />
+                                  <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">
+                                    {activo ? 'Activo' : 'Inactivo'}
+                                  </span>
                                 </div>
                               </div>
                             </div>
