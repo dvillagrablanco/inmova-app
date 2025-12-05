@@ -1,226 +1,449 @@
-# Guía de Deployment en Vercel - INMOVA
+# 📦 Guía de Deployment Manual en Vercel para INMOVA
 
-## 📋 Requisitos Previos
+## 🎯 Resumen Ejecutivo
 
-1. **Cuenta Vercel Pro**: Confirmado ✅
-   - Email: dvillagra@vidaroinversiones.com
-   - Password: Pucela00
+Esta guía te permitirá deployar manualmente el proyecto INMOVA en Vercel. El proyecto está completamente preparado y configurado para funcionar en Vercel sin modificaciones adicionales.
 
-2. **Base de Datos PostgreSQL**
-   - La app necesita una base de datos PostgreSQL
-   - Puede ser externa (recomendado) o usar Vercel Postgres
+---
 
-3. **Bucket S3 de AWS** (para archivos subidos)
-   - Necesario para almacenar imágenes, documentos, etc.
+## ✅ Pre-requisitos
 
-## 🚀 Pasos para Deployment
+### 1. Cuenta de Vercel
+- Crea una cuenta gratuita en [vercel.com](https://vercel.com)
+- Conecta tu cuenta de GitHub/GitLab/Bitbucket
 
-### 1. Preparar el Repositorio
+### 2. Base de Datos PostgreSQL
+- **Opción A (Recomendada)**: Usar Vercel Postgres
+- **Opción B**: Usar Neon, Supabase, o cualquier proveedor PostgreSQL
 
-Si aún no tienes el código en GitHub/GitLab:
+### 3. Dominio (Opcional)
+- Para usar `inmova.app`, necesitarás configurar el dominio en Vercel
+
+---
+
+## 📋 Paso a Paso: Deployment Manual
+
+### PASO 1: Preparar el Repositorio
 
 ```bash
-cd /home/ubuntu/homming_vidaro/nextjs_space
+# 1. Asegúrate de estar en el directorio correcto
+cd /home/ubuntu/homming_vidaro
 
-# Inicializar git si no existe
+# 2. Inicializar git si no está inicializado
 git init
 
-# Crear .gitignore si no existe
-echo "node_modules\n.next\n.env\n.env.local\ncore\n*.log" > .gitignore
+# 3. Crear .gitignore (si no existe)
+echo "node_modules
+.next
+.env.local
+.env
+.DS_Store
+*.log
+dist
+build
+.vercel" > .gitignore
 
-# Commit inicial
+# 4. Hacer commit de todos los archivos
 git add .
 git commit -m "Initial commit for Vercel deployment"
 
-# Añadir remote (crea un repo en GitHub primero)
-git remote add origin https://github.com/tu-usuario/inmova.git
+# 5. Crear repositorio en GitHub y hacer push
+# Ve a github.com y crea un nuevo repositorio llamado 'inmova-app'
+# Luego ejecuta:
+git remote add origin https://github.com/TU_USUARIO/inmova-app.git
 git branch -M main
 git push -u origin main
 ```
 
-### 2. Configurar Variables de Entorno en Vercel
+### PASO 2: Configurar Base de Datos
 
-1. Ve a [vercel.com](https://vercel.com) e inicia sesión
-2. Crea un nuevo proyecto desde tu repositorio Git
-3. En **Settings → Environment Variables**, añade las siguientes:
+#### Opción A: Vercel Postgres (Recomendada)
 
-#### Variables CRÍTICAS (sin estas, la app no funcionará):
+1. Ve a tu dashboard de Vercel
+2. Click en "Storage" → "Create Database" → "Postgres"
+3. Sigue el wizard de creación
+4. Guarda las credenciales que te proporcionen
 
-```bash
-# Database
-DATABASE_URL=postgresql://role_587683780:5kWw7vKJBDp9ZA2Jfkt5BdWrAjR0XDe5@db-587683780.db003.hosteddb.reai.io:5432/587683780?connect_timeout=15
+#### Opción B: Proveedor Externo (Neon, Supabase, etc.)
 
-# Authentication
-NEXTAUTH_SECRET=wJqizZO73C6pU4tjLTNwzjeoGLaMWvr9
-NEXTAUTH_URL=https://tu-proyecto.vercel.app  # Actualizar después del primer deploy
+1. Crea una base de datos en tu proveedor preferido
+2. Obtén la connection string (formato: `postgresql://user:password@host:port/database`)
 
-# AWS S3
-AWS_REGION=us-west-2
-AWS_BUCKET_NAME=abacusai-apps-030d8be4269891ba0e758624-us-west-2
-AWS_FOLDER_PREFIX=12952/
+### PASO 3: Import del Proyecto en Vercel
 
-# Stripe
-STRIPE_SECRET_KEY=sk_test_placeholder
-STRIPE_PUBLISHABLE_KEY=pk_test_placeholder
-STRIPE_WEBHOOK_SECRET=whsec_placeholder
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_placeholder
+1. **Ir a Vercel Dashboard**
+   - Ve a [vercel.com/new](https://vercel.com/new)
 
-# Push Notifications
-NEXT_PUBLIC_VAPID_PUBLIC_KEY=BEl62iUYgUivxIkv69yViEuiBIa-Ib27SzV9p3F-Jq-6-kxq9RwD9qdL4U3JfYxSh_Vu_WG2cEg8u7kJ7-vQTmE
-VAPID_PRIVATE_KEY=p-K-PxeghWxVyGxvxHYVsT3xhp5fKWvUqNfNqN-J4XM
+2. **Import Git Repository**
+   - Click en "Import Project"
+   - Selecciona tu repositorio de GitHub
+   - Click en "Import"
 
-# Abacus AI
-ABACUSAI_API_KEY=a66d474df9e547058d3b977b3771d53b
+3. **Configurar el Proyecto**
+   ```
+   Framework Preset: Next.js
+   Root Directory: nextjs_space
+   Build Command: yarn build
+   Output Directory: .next
+   Install Command: yarn install
+   ```
 
-# Security
-CRON_SECRET=inmova-cron-secret-2024-secure-key-xyz789
-ENCRYPTION_KEY=151b21e7b3a0ebb00a2ff5288f3575c9d4167305d3a84ccd385564955adefd2b
-```
+### PASO 4: Configurar Variables de Entorno
 
-#### Variables OPCIONALES:
+En la sección "Environment Variables" de Vercel, agrega las siguientes variables:
+
+#### 🔐 Variables Esenciales (OBLIGATORIAS)
 
 ```bash
-# Video URL
-NEXT_PUBLIC_VIDEO_URL=https://www.youtube.com/embed/zm55Gdl5G1Q
+# Base de Datos
+DATABASE_URL="postgresql://usuario:password@host:5432/database?sslmode=require"
 
-# DocuSign (solo si usas firmas digitales)
-DOCUSIGN_ACCOUNT_ID=tu_account_id
-DOCUSIGN_BASE_PATH=https://demo.docusign.net/restapi
+# NextAuth (Genera secret con: openssl rand -base64 32)
+NEXTAUTH_SECRET="tu_secret_aleatorio_muy_seguro_aqui"
+NEXTAUTH_URL="https://inmova.app"  # Cambia por tu dominio
 
-# Redsys Open Banking (solo si usas integración bancaria)
-REDSYS_API_URL=https://apis-i.redsys.es:20443/psd2/xs2a/api-entrada-xs2a/services
-REDSYS_OAUTH_URL=https://apis-i.redsys.es:20443/psd2/xs2a/api-oauth-xs2a
+# AWS S3 para almacenamiento de archivos
+AWS_REGION="eu-west-1"
+AWS_ACCESS_KEY_ID="tu_aws_access_key"
+AWS_SECRET_ACCESS_KEY="tu_aws_secret_key"
+AWS_BUCKET_NAME="inmova-uploads"
+AWS_FOLDER_PREFIX="production/"
+
+# Abacus AI (para LLM APIs - opcional pero recomendado)
+ABACUSAI_API_KEY="tu_abacus_api_key"
 ```
 
-### 3. Configurar Build Settings en Vercel
+#### 🎨 Variables Opcionales (Funcionalidades Adicionales)
 
-En **Settings → General**:
+```bash
+# Stripe (Pagos)
+STRIPE_SECRET_KEY="sk_live_..."
+STRIPE_PUBLISHABLE_KEY="pk_live_..."
+STRIPE_WEBHOOK_SECRET="whsec_..."
 
-- **Framework Preset**: Next.js
-- **Build Command**: `yarn prisma generate && yarn build`
-- **Output Directory**: `.next`
-- **Install Command**: `yarn install`
-- **Root Directory**: `nextjs_space` (si tu proyecto está en un subdirectorio)
+# Google Analytics
+NEXT_PUBLIC_GA_MEASUREMENT_ID="G-XXXXXXXXXX"
 
-### 4. Deploy
+# Redsys/Open Banking (Opcional)
+REDSYS_API_URL="https://api.redsys.com"
+REDSYS_CLIENT_ID="tu_client_id"
+REDSYS_CLIENT_SECRET="tu_client_secret"
 
-1. Click en **Deploy** en Vercel
-2. Espera a que termine el build (puede tardar 5-10 minutos)
-3. Una vez completado, Vercel te dará una URL como: `https://tu-proyecto.vercel.app`
+# Zucchetti (Contabilidad - Opcional)
+ZUCCHETTI_CLIENT_ID="tu_client_id"
+ZUCCHETTI_CLIENT_SECRET="tu_client_secret"
+ZUCCHETTI_API_URL="https://api.zucchetti.com"
 
-### 5. Configurar Dominio Custom (inmova.app)
-
-1. En Vercel, ve a **Settings → Domains**
-2. Añade tu dominio: `inmova.app`
-3. Vercel te dará registros DNS para configurar:
-
-```
-Type: A
-Name: @
-Value: 76.76.21.21
-
-Type: CNAME
-Name: www
-Value: cname.vercel-dns.com
+# ContaSimple (Contabilidad - Opcional)
+CONTASIMPLE_AUTH_KEY="tu_auth_key"
+CONTASIMPLE_API_URL="https://api.contasimple.com"
 ```
 
-4. Ve a tu proveedor de DNS (donde compraste inmova.app) y añade estos registros
-5. Espera 5-10 minutos para la propagación DNS
+### PASO 5: Deploy y Migración de Base de Datos
 
-### 6. Actualizar NEXTAUTH_URL
+1. **Hacer el Deploy Inicial**
+   - Click en "Deploy"
+   - Espera a que termine el build (puede tardar 5-10 minutos)
 
-**IMPORTANTE**: Después del primer deploy exitoso:
+2. **Ejecutar Migraciones de Prisma**
+   ```bash
+   # Instalar Vercel CLI
+   npm i -g vercel
+   
+   # Login
+   vercel login
+   
+   # Vincular proyecto
+   vercel link
+   
+   # Ejecutar migraciones
+   vercel env pull .env.local
+   cd nextjs_space
+   yarn prisma generate
+   yarn prisma db push
+   
+   # Seed inicial (opcional pero recomendado)
+   yarn prisma db seed
+   ```
 
-1. Ve a **Settings → Environment Variables**
-2. Edita `NEXTAUTH_URL` y actualiza a tu URL de producción:
-   - Si usas dominio custom: `https://inmova.app`
-   - Si usas URL de Vercel: `https://tu-proyecto.vercel.app`
-3. Re-deploy la aplicación
+3. **Crear Usuario Super Admin**
+   ```bash
+   # Ejecutar script de creación
+   yarn tsx scripts/create-super-admin.ts
+   
+   # Credenciales por defecto:
+   # Email: superadmin@inmova.com
+   # Password: superadmin123
+   ```
 
-### 7. Configurar Webhooks de Stripe
+### PASO 6: Configurar Dominio Personalizado
 
-Si usas Stripe para pagos:
+1. **En Vercel Dashboard**
+   - Ve a tu proyecto → Settings → Domains
+   - Click en "Add Domain"
+   - Ingresa: `inmova.app` y `www.inmova.app`
 
-1. Ve a tu Dashboard de Stripe
-2. En **Developers → Webhooks**, añade un nuevo endpoint:
-   - URL: `https://inmova.app/api/stripe/webhook`
-3. Selecciona estos eventos:
+2. **En tu Proveedor de DNS**
+   - Agrega los registros que Vercel te indique
+   - Típicamente será un registro `A` o `CNAME`
+
+3. **Esperar Propagación DNS** (puede tardar hasta 24 horas)
+
+4. **Actualizar NEXTAUTH_URL**
+   ```bash
+   NEXTAUTH_URL="https://inmova.app"
+   ```
+
+---
+
+## 🔧 Configuraciones Especiales
+
+### Webhook de Stripe
+
+Si usas Stripe, necesitas configurar el webhook endpoint:
+
+1. Ve a [Stripe Dashboard](https://dashboard.stripe.com/webhooks)
+2. Click en "Add endpoint"
+3. URL: `https://inmova.app/api/stripe/webhook`
+4. Selecciona eventos:
    - `payment_intent.succeeded`
    - `payment_intent.payment_failed`
    - `customer.subscription.created`
    - `customer.subscription.updated`
    - `customer.subscription.deleted`
    - `invoice.payment_succeeded`
-   - `invoice.payment_failed`
-4. Copia el **Signing secret** y actualiza `STRIPE_WEBHOOK_SECRET` en Vercel
+5. Guarda el `STRIPE_WEBHOOK_SECRET` en Vercel
 
-## 🔧 Troubleshooting
+### Cron Jobs (Tareas Programadas)
 
-### Build Fails
+Vercel soporta cron jobs mediante su archivo `vercel.json`. Ya está configurado en el proyecto:
 
-1. **Error de TypeScript**: Revisa los logs, puede que falten tipos
-2. **Error de Prisma**: Asegúrate de que `DATABASE_URL` esté correcta
-3. **Timeout**: En Settings → Functions, aumenta el timeout a 60s
-
-### App no carga
-
-1. Verifica que `NEXTAUTH_URL` apunte a tu URL de producción
-2. Revisa los **Runtime Logs** en Vercel para ver errores
-3. Asegúrate de que la base de datos esté accesible desde internet
-
-### Imágenes no cargan
-
-1. Verifica las credenciales de AWS S3
-2. Asegúrate de que el bucket tenga políticas de acceso correctas
-3. Revisa que `AWS_REGION` y `AWS_BUCKET_NAME` sean correctos
-
-## 📊 Monitoreo
-
-### Analytics en Vercel
-
-1. Ve a tu proyecto → **Analytics**
-2. Verás métricas de:
-   - Visitantes únicos
-   - Pageviews
-   - Top páginas
-   - Performance (Web Vitals)
-
-### Logs en Tiempo Real
-
-1. Ve a **Deployments** → Click en el último deployment
-2. Selecciona **Runtime Logs** para ver logs en vivo
-3. Útil para debugging de errores en producción
-
-## 🔐 Seguridad
-
-### HTTPS
-
-- ✅ Vercel proporciona HTTPS automático con certificados SSL
-- ✅ Redirige automáticamente HTTP → HTTPS
-
-### Variables de Entorno
-
-- ✅ Las variables sensibles están encriptadas en Vercel
-- ✅ No son visibles en los logs ni en el código del cliente
-- ✅ Solo accesibles en el servidor
-
-## 🎯 Próximos Pasos
-
-1. **Configurar dominio custom** (inmova.app)
-2. **Actualizar NEXTAUTH_URL** después del primer deploy
-3. **Configurar webhooks de Stripe** si usas pagos
-4. **Monitorear logs** durante las primeras horas
-5. **Hacer pruebas completas** de login, pagos, subida de archivos
-
-## 📞 Soporte
-
-Si tienes problemas:
-
-1. Revisa los **Runtime Logs** en Vercel
-2. Verifica que todas las variables de entorno estén configuradas
-3. Consulta la [documentación de Vercel](https://vercel.com/docs)
-4. Contacta a soporte de Vercel (responden rápido en el plan Pro)
+```json
+{
+  "crons": [
+    {
+      "path": "/api/cron/notifications",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/calendar-sync",
+      "schedule": "0 */6 * * *"
+    }
+  ]
+}
+```
 
 ---
 
-**¡Listo!** Tu aplicación INMOVA debería estar corriendo en Vercel 🚀
+## 🧪 Verificación Post-Deployment
+
+### Checklist de Funcionalidad
+
+- [ ] La página principal carga correctamente
+- [ ] Puedes hacer login con las credenciales del super-admin
+- [ ] El dashboard se muestra sin errores
+- [ ] Puedes crear una nueva empresa
+- [ ] Puedes subir imágenes (verifica S3)
+- [ ] Los pagos funcionan (si configuraste Stripe)
+- [ ] Las notificaciones se envían correctamente
+
+### Endpoints de Verificación
+
+```bash
+# Health check
+curl https://inmova.app/api/health
+
+# Verificar autenticación
+curl https://inmova.app/api/auth/session
+```
+
+---
+
+## 📊 Monitoreo y Logs
+
+### Ver Logs en Tiempo Real
+
+```bash
+# Con Vercel CLI
+vercel logs https://inmova.app --follow
+```
+
+### En Vercel Dashboard
+
+1. Ve a tu proyecto
+2. Click en "Deployments"
+3. Selecciona el deployment activo
+4. Click en "Function Logs"
+
+---
+
+## 🚨 Troubleshooting
+
+### Error: "Database connection failed"
+
+**Solución:**
+```bash
+# Verifica la DATABASE_URL
+vercel env ls
+
+# Asegúrate de que incluye ?sslmode=require
+DATABASE_URL="postgresql://...?sslmode=require"
+```
+
+### Error: "Module not found"
+
+**Solución:**
+```bash
+# Limpia cache y redeploy
+vercel --prod --force
+```
+
+### Error: "NextAuth configuration error"
+
+**Solución:**
+```bash
+# Regenera NEXTAUTH_SECRET
+openssl rand -base64 32
+
+# Actualiza en Vercel
+vercel env add NEXTAUTH_SECRET
+```
+
+### Error: "S3 Upload Failed"
+
+**Solución:**
+```bash
+# Verifica permisos de IAM en AWS
+# La política debe incluir:
+# - s3:PutObject
+# - s3:GetObject
+# - s3:DeleteObject
+```
+
+---
+
+## 🔄 Actualizaciones y Redeploys
+
+### Deploy Automático (Recomendado)
+
+```bash
+# Cada push a main triggerea un deploy automático
+git add .
+git commit -m "Update: descripción del cambio"
+git push origin main
+```
+
+### Deploy Manual desde CLI
+
+```bash
+# Deploy a producción
+vercel --prod
+
+# Deploy a preview
+vercel
+```
+
+---
+
+## 📈 Optimizaciones de Performance
+
+### 1. Edge Functions
+
+Vercel automáticamente optimiza las funciones API para Edge. Asegúrate de que las rutas críticas están marcadas:
+
+```typescript
+export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+```
+
+### 2. Image Optimization
+
+Next.js Image component ya está configurado. Vercel lo optimiza automáticamente.
+
+### 3. Caching
+
+Vercel cachea automáticamente assets estáticos. Para APIs, configura headers:
+
+```typescript
+export async function GET() {
+  return NextResponse.json(data, {
+    headers: {
+      'Cache-Control': 's-maxage=3600, stale-while-revalidate'
+    }
+  });
+}
+```
+
+---
+
+## 💰 Costos Estimados
+
+### Vercel (Plan Pro recomendado)
+- **Pro**: $20/mes por usuario
+- Incluye:
+  - Bandwidth ilimitado
+  - Build time ilimitado
+  - Dominios personalizados
+  - Web Analytics
+  - Password Protection
+
+### Vercel Postgres
+- **Starter**: Gratis (hasta 60 horas de compute/mes)
+- **Pro**: $20/mes (256 MB RAM, 10 GB storage)
+
+### AWS S3
+- **Almacenamiento**: ~$0.023 por GB/mes
+- **Transferencia**: Primeros 1 GB gratis, luego $0.09 por GB
+
+### Total Estimado Mensual
+- **Mínimo**: $20-40/mes (Plan Pro + Postgres Starter)
+- **Recomendado**: $60-100/mes (Pro + Postgres Pro + S3)
+
+---
+
+## 🎓 Recursos Adicionales
+
+- [Vercel Documentation](https://vercel.com/docs)
+- [Next.js on Vercel](https://vercel.com/docs/frameworks/nextjs)
+- [Vercel CLI Reference](https://vercel.com/docs/cli)
+- [Prisma with Vercel](https://www.prisma.io/docs/guides/deployment/deployment-guides/deploying-to-vercel)
+
+---
+
+## 📞 Soporte
+
+### Errores de Deployment
+- Revisa logs en Vercel Dashboard
+- Consulta la documentación oficial de Vercel
+- Verifica que todas las variables de entorno estén configuradas
+
+### Problemas de Base de Datos
+- Usa `yarn prisma studio` para inspeccionar datos
+- Verifica connection string con `yarn prisma db pull`
+- Revisa logs de Postgres en tu proveedor
+
+---
+
+## ✅ Checklist Final
+
+- [ ] Repositorio en GitHub creado y pusheado
+- [ ] Proyecto importado en Vercel
+- [ ] Variables de entorno configuradas
+- [ ] Base de datos creada y migrada
+- [ ] Super admin creado
+- [ ] Dominio personalizado configurado (opcional)
+- [ ] Webhooks configurados (si aplica)
+- [ ] Primera prueba de login exitosa
+- [ ] Funcionalidades principales verificadas
+- [ ] Monitoreo configurado
+
+---
+
+🎉 **¡Deployment Completado!**
+
+Tu aplicación INMOVA ahora está desplegada en Vercel y lista para producción.
+
+**URL de acceso**: https://inmova.app (o tu dominio personalizado)
+**Super Admin**: superadmin@inmova.com / superadmin123
+
+¡Recuerda cambiar las credenciales por defecto después del primer login!

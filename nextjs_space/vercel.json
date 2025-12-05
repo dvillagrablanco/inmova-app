@@ -1,49 +1,80 @@
 {
-  "buildCommand": "yarn prisma generate && yarn build",
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "cd nextjs_space && yarn build",
+  "devCommand": "cd nextjs_space && yarn dev",
+  "installCommand": "cd nextjs_space && yarn install",
   "framework": "nextjs",
+  "outputDirectory": "nextjs_space/.next",
   "regions": ["iad1"],
-  "env": {
-    "DATABASE_URL": "@database-url",
-    "NEXTAUTH_SECRET": "@nextauth-secret",
-    "NEXTAUTH_URL": "@nextauth-url",
-    "AWS_REGION": "us-west-2",
-    "AWS_BUCKET_NAME": "@aws-bucket-name",
-    "AWS_FOLDER_PREFIX": "@aws-folder-prefix",
-    "STRIPE_SECRET_KEY": "@stripe-secret-key",
-    "STRIPE_PUBLISHABLE_KEY": "@stripe-publishable-key",
-    "STRIPE_WEBHOOK_SECRET": "@stripe-webhook-secret",
-    "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY": "@stripe-publishable-key",
-    "NEXT_PUBLIC_VAPID_PUBLIC_KEY": "@vapid-public-key",
-    "VAPID_PRIVATE_KEY": "@vapid-private-key",
-    "ABACUSAI_API_KEY": "@abacusai-api-key",
-    "CRON_SECRET": "@cron-secret",
-    "ENCRYPTION_KEY": "@encryption-key"
+  "functions": {
+    "app/api/**/*.ts": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
   },
+  "crons": [
+    {
+      "path": "/api/cron/notifications",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/calendar-sync",
+      "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/cleanup",
+      "schedule": "0 2 * * 0"
+    }
+  ],
   "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "s-maxage=1, stale-while-revalidate"
+        }
+      ]
+    },
     {
       "source": "/(.*)",
       "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
         {
           "key": "X-Content-Type-Options",
           "value": "nosniff"
         },
         {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "X-XSS-Protection",
-          "value": "1; mode=block"
-        },
-        {
           "key": "Referrer-Policy",
-          "value": "origin-when-cross-origin"
+          "value": "strict-origin-when-cross-origin"
         },
         {
           "key": "Permissions-Policy",
           "value": "camera=(), microphone=(), geolocation=()"
         }
       ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/dashboard",
+      "has": [
+        {
+          "type": "host",
+          "value": "(?<customdomain>.*)"
+        }
+      ],
+      "destination": "https://$customdomain/home",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/health",
+      "destination": "/api/health"
     }
   ]
 }
