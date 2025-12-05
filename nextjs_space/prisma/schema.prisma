@@ -362,6 +362,14 @@ model Building {
   // Portal Propietario - Asignación de Edificios
   ownerBuildings OwnerBuilding[]
 
+  // Gestión de Comunidades
+  communityMinutes     CommunityMinute[]
+  communityFees        CommunityFee[]
+  communityFunds       CommunityFund[]
+  financialAlerts      FinancialAlert[]
+  cashFlowForecasts    CashFlowForecast[]
+  buildingInspections  BuildingInspection[]
+
   // Índices optimizados para consultas frecuentes
   @@index([companyId])
   @@index([tipo, companyId])
@@ -531,6 +539,10 @@ model Unit {
   rooms            Room[]
   roomSharedSpaces RoomSharedSpace[]
 
+  // Gestión de Comunidades
+  communityFees              CommunityFee[]
+  habitabilityCertificates   HabitabilityCertificate[]
+
   @@unique([buildingId, numero])
   // Índices optimizados para consultas frecuentes
   @@index([buildingId, estado])
@@ -575,6 +587,9 @@ model Contract {
 
   // Fase 1
   calendarEvents CalendarEvent[]
+
+  // Gestión de Comunidades
+  depositManagement DepositManagement?
 
   // Índices optimizados para consultas frecuentes
   @@index([tenantId, estado])
@@ -626,6 +641,9 @@ model Payment {
 
   // Fase 1
   calendarEvents CalendarEvent[]
+
+  // Gestión de Comunidades
+  badDebtProvision BadDebtProvision?
 
   // Índices optimizados para consultas frecuentes
   @@index([contractId, estado])
@@ -1157,6 +1175,19 @@ model Company {
   notificationRules     NotificationRule[]
   notificationTemplates NotificationTemplate[]
   notificationLogs      NotificationLog[]
+
+  // Gestión de Comunidades
+  communityMinutes            CommunityMinute[]
+  communityFees               CommunityFee[]
+  communityFunds              CommunityFund[]
+  financialAlerts             FinancialAlert[]
+  cashFlowForecasts           CashFlowForecast[]
+  depositManagements          DepositManagement[]
+  badDebtProvisions           BadDebtProvision[]
+  habitabilityCertificates    HabitabilityCertificate[]
+  modelo347Records            Modelo347Record[]
+  modelo180Records            Modelo180Record[]
+  buildingInspections         BuildingInspection[]
 
   @@map("company")
 }
@@ -8472,3 +8503,433 @@ model SupportInteraction {
   @@index([urgency])
   @@map("support_interactions")
 }
+
+// ============================================
+// GESTIÓN DE COMUNIDADES - MODELOS ADICIONALES
+// ============================================
+
+enum ActaEstado {
+  borrador
+  aprobada
+  rechazada
+}
+
+enum CuotaTipo {
+  ordinaria
+  extraordinaria
+  derrama
+}
+
+enum FondoTipo {
+  reserva
+  obras
+  contingencia
+}
+
+// Libro de actas digital
+model CommunityMinute {
+  id            String      @id @default(uuid())
+  companyId     String
+  company       Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  buildingId    String
+  building      Building    @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  
+  numeroActa    Int
+  fecha         DateTime
+  convocatoria  String      @db.Text
+  asistentes    Json        // Array de propietarios presentes
+  ordenDia      Json        // Array de puntos del orden del día
+  acuerdos      Json        // Array de acuerdos alcanzados
+  estado        ActaEstado  @default(borrador)
+  
+  // Adjuntos y firmas simuladas
+  documentos    Json?       // Array de URLs de documentos adjuntos
+  firmasDigitales Json?     // Simulación de firmas (no real)
+  
+  creadoPor     String
+  aprobadoPor   String?
+  fechaAprobacion DateTime?
+  observaciones String?     @db.Text
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  @@unique([companyId, buildingId, numeroActa])
+  @@index([companyId, buildingId])
+  @@index([fecha])
+  @@map("community_minutes")
+}
+
+// Gestión de cuotas de comunidad
+model CommunityFee {
+  id            String      @id @default(uuid())
+  companyId     String
+  company       Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  buildingId    String
+  building      Building    @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  unitId        String?
+  unit          Unit?       @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  
+  tipo          CuotaTipo
+  periodo       String      // "2024-Q1", "2024-01", etc
+  concepto      String
+  importeBase   Float
+  coeficiente   Float       @default(1.0) // Coeficiente de participación
+  importeTotal  Float
+  
+  fechaVencimiento DateTime
+  fechaPago     DateTime?
+  estado        PaymentStatus @default(pendiente)
+  metodoPago    String?
+  referenciaPago String?
+  
+  // Desglose de la cuota
+  gastosCorrientes Float @default(0)
+  fondoReserva    Float @default(0)
+  seguros         Float @default(0)
+  mantenimiento   Float @default(0)
+  otros           Float @default(0)
+  
+  notas         String?     @db.Text
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  @@index([companyId, buildingId])
+  @@index([unitId])
+  @@index([periodo, estado])
+  @@map("community_fees")
+}
+
+// Fondos de reserva y derramas
+model CommunityFund {
+  id            String      @id @default(uuid())
+  companyId     String
+  company       Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  buildingId    String
+  building      Building    @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  
+  tipo          FondoTipo
+  nombre        String
+  descripcion   String?     @db.Text
+  
+  saldoActual   Float       @default(0)
+  saldoObjetivo Float?
+  
+  // Movimientos y contribuciones
+  aportacionMensual Float   @default(0)
+  totalAportaciones Float   @default(0)
+  totalGastos       Float   @default(0)
+  
+  movimientos   Json        // Array de movimientos del fondo
+  
+  fechaCreacion DateTime    @default(now())
+  activo        Boolean     @default(true)
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  @@index([companyId, buildingId])
+  @@index([tipo, activo])
+  @@map("community_funds")
+}
+
+// Alertas financieras y contables
+model FinancialAlert {
+  id            String      @id @default(uuid())
+  companyId     String
+  company       Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  buildingId    String?
+  building      Building?   @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  
+  tipo          String      // 'cash_flow', 'descuadre', 'impago', 'fianza'
+  titulo        String
+  descripcion   String      @db.Text
+  severidad     RiskLevel
+  
+  monto         Float?
+  fechaDeteccion DateTime   @default(now())
+  fechaResolucion DateTime?
+  
+  estado        String      @default("pendiente") // pendiente, revisando, resuelto
+  responsable   String?
+  accionTomada  String?     @db.Text
+  
+  metadata      Json?       // Datos adicionales
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  @@index([companyId, tipo, estado])
+  @@index([severidad, fechaDeteccion])
+  @@map("financial_alerts")
+}
+
+// Previsión de cash flow
+model CashFlowForecast {
+  id            String      @id @default(uuid())
+  companyId     String
+  company       Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  buildingId    String?
+  building      Building?   @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  
+  mes           String      // "2024-06"
+  
+  // Ingresos previstos
+  ingresosPrevistos    Float @default(0)
+  ingresosRecurrentes  Float @default(0)
+  ingresosVariables    Float @default(0)
+  
+  // Gastos previstos
+  gastosPrevistos      Float @default(0)
+  gastosRecurrentes    Float @default(0)
+  gastosVariables      Float @default(0)
+  
+  // Resultado
+  saldoFinal           Float @default(0)
+  confianza            Float @default(0.8) // 0-1
+  
+  // Escenarios
+  escenarioOptimista   Float @default(0)
+  escenarioPesimista   Float @default(0)
+  
+  calculadoEn          DateTime @default(now())
+  basadoEnDatos        Json?   // Fuentes de datos utilizadas
+  
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  
+  @@unique([companyId, buildingId, mes])
+  @@index([companyId, mes])
+  @@map("cash_flow_forecasts")
+}
+
+// Gestión de fianzas
+model DepositManagement {
+  id            String      @id @default(uuid())
+  companyId     String
+  company       Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  contractId    String      @unique
+  contract      Contract    @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  
+  importeFianza         Float
+  tipoFianza            String // 'legal', 'adicional', 'aval'
+  
+  // Depósito legal
+  depositadoOficialmente Boolean @default(false)
+  entidadDeposito        String?
+  numeroDeposito         String?
+  fechaDeposito          DateTime?
+  
+  // Devolución
+  devuelto              Boolean @default(false)
+  importeDevuelto       Float?
+  deducciones           Float   @default(0)
+  motivoDeducciones     String? @db.Text
+  fechaDevolucion       DateTime?
+  
+  documentos            Json?   // URLs de documentos
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@index([companyId])
+  @@index([depositadoOficialmente, devuelto])
+  @@map("deposit_management")
+}
+
+// Provisión de impagos
+model BadDebtProvision {
+  id            String      @id @default(uuid())
+  companyId     String
+  company       Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  paymentId     String      @unique
+  payment       Payment     @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  
+  montoOriginal         Float
+  diasRetraso           Int
+  categoriaRiesgo       RiskLevel
+  
+  // Provisión automática según antigüedad
+  porcentajeProvision   Float // 0-100
+  montoProvision        Float
+  
+  // Seguimiento
+  gestionado            Boolean @default(false)
+  recuperado            Boolean @default(false)
+  montoRecuperado       Float   @default(0)
+  fechaRecuperacion     DateTime?
+  
+  metodosGestion        Json?   // Array de acciones tomadas
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@index([companyId, categoriaRiesgo])
+  @@index([gestionado, recuperado])
+  @@map("bad_debt_provisions")
+}
+
+// Cédulas de habitabilidad
+model HabitabilityCertificate {
+  id                String      @id @default(uuid())
+  companyId         String
+  company           Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  unitId            String
+  unit              Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  
+  numeroCedula      String
+  tipo              String      // 'primera_ocupacion', 'segunda_ocupacion'
+  estado            String      // 'vigente', 'vencida', 'renovacion_pendiente'
+  
+  fechaEmision      DateTime
+  fechaVencimiento  DateTime?
+  vigenciaIndefinida Boolean   @default(false)
+  
+  superficieUtil    Float?
+  numeroHabitaciones Int?
+  
+  organismoExpedidor String
+  registroNumero    String?
+  
+  documentoURL      String?
+  documentoStorage  String?
+  
+  alertaEnviada     Boolean   @default(false)
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  @@unique([unitId, numeroCedula])
+  @@index([companyId, estado])
+  @@index([fechaVencimiento, alertaEnviada])
+  @@map("habitability_certificates")
+}
+
+// Modelo 347 - Declaración anual de operaciones
+model Modelo347Record {
+  id                String      @id @default(uuid())
+  companyId         String
+  company           Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  ejercicio         Int         // Año fiscal
+  trimestre         Int?        // 1-4, null para anual
+  
+  // Datos de la operación
+  nifDeclarante     String
+  razonSocialDeclarante String
+  
+  nifDeclarado      String
+  razonSocialDeclarado String
+  tipoOperacion     String      // 'A' compras, 'B' ventas
+  
+  importeAnual      Float
+  importeTrimestre1 Float       @default(0)
+  importeTrimestre2 Float       @default(0)
+  importeTrimestre3 Float       @default(0)
+  importeTrimestre4 Float       @default(0)
+  
+  // Metadata
+  generadoAutomaticamente Boolean @default(true)
+  revisado              Boolean @default(false)
+  revisadoPor           String?
+  fechaRevision         DateTime?
+  
+  // Presentación
+  presentado            Boolean @default(false)
+  fechaPresentacion     DateTime?
+  numeroJustificante    String?
+  
+  archivoGenerado       String? // Path del fichero generado
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@unique([companyId, ejercicio, nifDeclarado])
+  @@index([companyId, ejercicio])
+  @@index([presentado])
+  @@map("modelo_347_records")
+}
+
+// Modelo 180 - Retenciones e ingresos a cuenta
+model Modelo180Record {
+  id                String      @id @default(uuid())
+  companyId         String
+  company           Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  ejercicio         Int
+  trimestre         Int         // 1-4
+  
+  // Arrendador (propietario)
+  nifArrendador     String
+  nombreArrendador  String
+  
+  // Arrendatario (inquilino)
+  nifArrendatario   String
+  nombreArrendatario String
+  
+  // Importes
+  baseImponible     Float
+  tipoRetencion     Float       // Porcentaje (19%, 24%, etc)
+  importeRetenido   Float
+  
+  // Inmueble
+  situacionInmueble String      // Provincia/municipio
+  referencialCatastral String?
+  
+  // Procesamiento
+  incluidoDeclaracion Boolean   @default(false)
+  revisado            Boolean   @default(false)
+  
+  presentado          Boolean   @default(false)
+  fechaPresentacion   DateTime?
+  numeroJustificante  String?
+  
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  
+  @@unique([companyId, ejercicio, trimestre, nifArrendatario])
+  @@index([companyId, ejercicio, trimestre])
+  @@index([presentado])
+  @@map("modelo_180_records")
+}
+
+
+// Inspecciones Técnicas de Edificios (ITE)
+model BuildingInspection {
+  id                String      @id @default(uuid())
+  companyId         String
+  company           Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  buildingId        String
+  building          Building    @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  
+  tipo              String      // 'ITE', 'IEE', 'ITEEVA'
+  estado            String      // 'vigente', 'vencida', 'pendiente'
+  
+  fechaInspeccion   DateTime
+  fechaVencimiento  DateTime
+  proximaInspeccion DateTime?
+  
+  resultado         String      // 'favorable', 'desfavorable', 'condicionado'
+  
+  tecnicoNombre     String
+  tecnicoColegio    String
+  numeroRegistro    String?
+  
+  deficienciasEncontradas Json? // Array de deficiencias
+  accionesRequeridas     Json? // Array de acciones correctivas
+  
+  certificadoURL    String?
+  documentos        Json?     // URLs de documentos adjuntos
+  
+  alertasEnviadas   Boolean   @default(false)
+  recordatorios     Json?     // Array de recordatorios enviados
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  @@index([companyId, buildingId])
+  @@index([fechaVencimiento, estado])
+  @@index([alertasEnviadas])
+  @@map("building_inspections")
+}
+
