@@ -117,6 +117,11 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/votaciones': 'votaciones',
   '/reuniones': 'reuniones',
   '/reservas': 'reservas',
+  '/admin-fincas': 'admin_fincas',
+  '/admin-fincas/comunidades': 'admin_fincas',
+  '/admin-fincas/facturas': 'admin_fincas',
+  '/admin-fincas/libro-caja': 'admin_fincas',
+  '/admin-fincas/informes': 'admin_fincas',
   '/valoraciones': 'valoraciones',
   '/publicaciones': 'publicaciones',
   '/screening': 'screening',
@@ -260,6 +265,15 @@ const comunidadItems = [
   { name: 'Reservas Espacios', href: '/reservas', icon: CalendarCheck, roles: ['administrador', 'gestor', 'operador'] },
 ];
 
+// Administrador de Fincas
+const adminFincasItems = [
+  { name: 'Portal Admin Fincas', href: '/admin-fincas', icon: Building2, roles: ['administrador', 'gestor'] },
+  { name: 'Comunidades', href: '/admin-fincas/comunidades', icon: Building2, roles: ['administrador', 'gestor'] },
+  { name: 'Facturación', href: '/admin-fincas/facturas', icon: FileText, roles: ['administrador', 'gestor'] },
+  { name: 'Libro de Caja', href: '/admin-fincas/libro-caja', icon: Euro, roles: ['administrador', 'gestor'] },
+  { name: 'Informes', href: '/admin-fincas/informes', icon: BarChart2, roles: ['administrador', 'gestor'] },
+];
+
 // Módulos Propiedades Avanzado
 const propiedadesAvanzadoItems = [
   { name: 'Valoraciones', href: '/valoraciones', icon: Award, roles: ['administrador', 'gestor'] },
@@ -325,6 +339,7 @@ export function Sidebar() {
     advanced: false,
     multivertical: false,
     comunidad: false,
+    adminFincas: false,
     propiedadesAvanzado: false,
     serviciosProfesionales: false,
     admin: true, // Expandida por defecto para mostrar Usuarios, Configuración, etc.
@@ -440,6 +455,7 @@ export function Sidebar() {
   const filteredAdvancedItems = filterItems(advancedNavItems);
   const filteredMultiVerticalItems = filterItems(multiVerticalItems);
   const filteredComunidadItems = filterItems(comunidadItems);
+  const filteredAdminFincasItems = filterItems(adminFincasItems);
   const filteredPropiedadesAvanzadoItems = filterItems(propiedadesAvanzadoItems);
   const filteredServiciosProfesionalesItems = filterItems(serviciosProfesionalesItems);
   const filteredAdminItems = filterItems(adminNavItems);
@@ -453,6 +469,7 @@ export function Sidebar() {
     ...advancedNavItems, 
     ...multiVerticalItems, 
     ...comunidadItems,
+    ...adminFincasItems,
     ...propiedadesAvanzadoItems,
     ...serviciosProfesionalesItems,
     ...adminNavItems
@@ -739,6 +756,26 @@ export function Sidebar() {
                 {expandedSections.comunidad && (
                   <div className="space-y-1 mt-1">
                     {filteredComunidadItems.map((item) => (
+                      <NavItem key={item.href} item={item} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Administrador de Fincas Section */}
+            {filteredAdminFincasItems.length > 0 && (
+              <div className="mb-4">
+                <button
+                  onClick={() => toggleSection('adminFincas')}
+                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
+                >
+                  <span>Admin de Fincas</span>
+                  {expandedSections.adminFincas ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                </button>
+                {expandedSections.adminFincas && (
+                  <div className="space-y-1 mt-1">
+                    {filteredAdminFincasItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
                   </div>

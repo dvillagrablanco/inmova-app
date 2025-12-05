@@ -375,6 +375,8 @@ model Building {
   @@index([tipo, companyId])
   @@index([companyId, createdAt])
   @@map("buildings")
+  // Administrador de Fincas
+  communityManagement CommunityManagement?
 }
 
 model Tenant {
@@ -1115,6 +1117,12 @@ model Company {
   strChannelSyncs      STRChannelSync[]       @relation
   flippingProjects     FlippingProject[]      @relation
   constructionProjects ConstructionProject[]  @relation
+
+  // Administrador de Fincas
+  communityManagements CommunityManagement[] @relation
+  communityInvoices    CommunityInvoice[]    @relation
+  cashBookEntries      CashBookEntry[]       @relation
+  communityReports     CommunityReport[]     @relation
   professionalProjects ProfessionalProject[]  @relation
 
   // Room Rental Module
@@ -8933,3 +8941,196 @@ model BuildingInspection {
   @@map("building_inspections")
 }
 
+
+
+// ============================================
+// ADMINISTRADOR DE FINCAS (Community Property Manager)
+// ============================================
+
+enum TipoMovimientoCaja {
+  ingreso
+  gasto
+  traspaso
+}
+
+enum EstadoFacturaComunidad {
+  borrador
+  emitida
+  pagada
+  vencida
+  cancelada
+}
+
+enum TipoInformeComunidad {
+  trimestral
+  anual
+  extraordinario
+}
+
+// Comunidades gestionadas por el administrador
+model CommunityManagement {
+  id                    String   @id @default(uuid())
+  companyId             String
+  company               Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  buildingId            String   @unique
+  building              Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  
+  // Datos de la comunidad
+  nombreComunidad       String
+  cif                   String?
+  direccion             String
+  codigoPostal          String?
+  ciudad                String?
+  provincia             String?
+  
+  // Configuración de honorarios
+  honorariosFijos       Float?   // € mensuales
+  honorariosPorcentaje  Float?   // % sobre presupuesto
+  
+  // Estado
+  activa                Boolean  @default(true)
+  fechaInicio           DateTime @default(now())
+  fechaFin              DateTime?
+  
+  // Relaciones
+  facturas              CommunityInvoice[]
+  movimientosCaja       CashBookEntry[]
+  informes              CommunityReport[]
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@index([companyId])
+  @@index([buildingId])
+  @@map("community_management")
+}
+
+// Facturación por comunidad
+model CommunityInvoice {
+  id                    String   @id @default(uuid())
+  companyId             String
+  company               Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  communityId           String
+  community             CommunityManagement @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  
+  // Datos de la factura
+  numeroFactura         String   @unique
+  fechaEmision          DateTime @default(now())
+  fechaVencimiento      DateTime
+  periodo               String   // "2024-Q1", "2024-12", etc
+  
+  // Conceptos
+  honorarios            Float    @default(0)
+  gastosGestion         Float    @default(0)
+  otrosConceptos        Json?    // Array de conceptos adicionales
+  
+  // Importes
+  baseImponible         Float
+  iva                   Float
+  totalFactura          Float
+  
+  // Estado
+  estado                EstadoFacturaComunidad @default(borrador)
+  fechaPago             DateTime?
+  metodoPago            String?
+  
+  // Documento
+  documentoUrl          String?
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@index([companyId])
+  @@index([communityId])
+  @@index([numeroFactura])
+  @@index([estado])
+  @@map("community_invoices")
+}
+
+// Libro de caja digital por comunidad
+model CashBookEntry {
+  id                    String   @id @default(uuid())
+  companyId             String
+  company               Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  communityId           String
+  community             CommunityManagement @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  
+  // Datos del movimiento
+  fecha                 DateTime @default(now())
+  tipo                  TipoMovimientoCaja
+  concepto              String
+  descripcion           String?
+  
+  // Importes
+  importe               Float
+  saldoAnterior         Float
+  saldoActual           Float
+  
+  // Categorización
+  categoria             String   // cuotas, reparaciones, suministros, honorarios, etc
+  subcategoria          String?
+  
+  // Referencias
+  facturaId             String?  // Referencia a factura si aplica
+  pagoId                String?  // Referencia a pago si aplica
+  
+  // Documento justificativo
+  documentoUrl          String?
+  
+  // Usuario que registra
+  registradoPor         String
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@index([companyId])
+  @@index([communityId])
+  @@index([fecha])
+  @@index([tipo])
+  @@index([categoria])
+  @@map("cash_book_entries")
+}
+
+// Informes trimestrales/anuales
+model CommunityReport {
+  id                    String   @id @default(uuid())
+  companyId             String
+  company               Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  communityId           String
+  community             CommunityManagement @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  
+  // Tipo y período
+  tipo                  TipoInformeComunidad
+  periodo               String   // "2024-Q1", "2024", etc
+  fechaInicio           DateTime
+  fechaFin              DateTime
+  
+  // Resumen financiero
+  totalIngresos         Float    @default(0)
+  totalGastos           Float    @default(0)
+  saldoInicial          Float    @default(0)
+  saldoFinal            Float    @default(0)
+  
+  // Desglose
+  detalleIngresos       Json?    // Desglose de ingresos por categoría
+  detalleGastos         Json?    // Desglose de gastos por categoría
+  
+  // Datos adicionales
+  morosos               Json?    // Lista de morosos y deudas
+  fondosReserva         Float    @default(0)
+  observaciones         String?
+  
+  // Documento generado
+  documentoUrl          String?
+  generadoEn            DateTime @default(now())
+  generadoPor           String
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@index([companyId])
+  @@index([communityId])
+  @@index([tipo])
+  @@index([periodo])
+  @@map("community_reports")
+}
