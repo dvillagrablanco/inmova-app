@@ -1,0 +1,204 @@
+═══════════════════════════════════════════════════════════════════
+  INMOVA - COMANDOS RÁPIDOS DE DEPLOYMENT
+═══════════════════════════════════════════════════════════════════
+
+🚀 OPCIÓN 1: QUICK FIX (Cuando todo falla)
+───────────────────────────────────────────────────────────────────
+cd /home/ubuntu/homming_vidaro
+./scripts/quick-fix.sh
+
+📝 Qué hace:
+  • Limpia cachés y builds anteriores
+  • Reinstala dependencias
+  • Aplica configuración optimizada
+  • Ejecuta build de prueba
+⏱️  Tiempo: ~10 minutos
+
+
+🛠️  OPCIÓN 2: BUILD OPTIMIZADO (Deployment manual)
+───────────────────────────────────────────────────────────────────
+cd /home/ubuntu/homming_vidaro
+./scripts/deploy-optimized.sh
+
+📝 Qué hace:
+  • Verifica memoria del sistema
+  • Limpia cachés
+  • Build con estrategia incremental (6GB → 8GB → 10GB)
+  • Análisis opcional del bundle
+⏱️  Tiempo: ~8 minutos
+
+
+⭐ OPCIÓN 3: VERCEL (RECOMENDADO)
+───────────────────────────────────────────────────────────────────
+cd /home/ubuntu/homming_vidaro
+./scripts/setup-vercel.sh
+
+📝 Qué hace:
+  • Instala Vercel CLI (si no está)
+  • Login en Vercel
+  • Configura proyecto
+  • Deploy automático
+⏱️  Tiempo: ~3-5 minutos
+💰 Costo: $20/mes (Pro) o Gratis (Hobby)
+
+
+📊 ANALIZAR BUNDLE
+───────────────────────────────────────────────────────────────────
+cd /home/ubuntu/homming_vidaro
+./scripts/analyze-bundle.sh
+
+📝 Qué hace:
+  • Instala bundle-analyzer
+  • Ejecuta build con análisis
+  • Genera reportes HTML
+⏱️  Tiempo: ~8 minutos
+
+
+🧪 TEST LOCAL
+───────────────────────────────────────────────────────────────────
+cd /home/ubuntu/homming_vidaro
+./scripts/test-build-local.sh
+
+📝 Qué hace:
+  • Limpia build anterior
+  • Ejecuta build
+  • Inicia servidor de producción
+⏱️  Tiempo: ~5 minutos
+
+
+🔧 APLICAR CONFIGURACIÓN OPTIMIZADA (Manual)
+───────────────────────────────────────────────────────────────────
+cd /home/ubuntu/homming_vidaro/nextjs_space
+cp next.config.js next.config.js.backup
+cp next.config.optimized.js next.config.js
+NODE_OPTIONS="--max-old-space-size=6144" yarn build
+
+
+🧹 LIMPIAR TODO (Manual)
+───────────────────────────────────────────────────────────────────
+cd /home/ubuntu/homming_vidaro/nextjs_space
+rm -rf .next .build node_modules/.cache
+NODE_OPTIONS="--max-old-space-size=6144" yarn build
+
+
+📦 REINSTALAR DEPENDENCIAS (Manual)
+───────────────────────────────────────────────────────────────────
+cd /home/ubuntu/homming_vidaro/nextjs_space
+rm -rf node_modules yarn.lock
+yarn install
+yarn prisma generate
+NODE_OPTIONS="--max-old-space-size=6144" yarn build
+
+
+🔍 TROUBLESHOOTING
+───────────────────────────────────────────────────────────────────
+
+❌ Error: "JavaScript heap out of memory"
+→ Solución:
+  cd /home/ubuntu/homming_vidaro/nextjs_space
+  NODE_OPTIONS="--max-old-space-size=8192" yarn build
+
+❌ Error: "Module parse failed"
+→ Solución:
+  cd /home/ubuntu/homming_vidaro/nextjs_space
+  yarn add null-loader -D
+  NODE_OPTIONS="--max-old-space-size=6144" yarn build
+
+❌ Build muy lento
+→ Solución:
+  cd /home/ubuntu/homming_vidaro
+  ./scripts/quick-fix.sh
+
+❌ Problemas con Prisma
+→ Solución:
+  cd /home/ubuntu/homming_vidaro/nextjs_space
+  yarn prisma generate
+  NODE_OPTIONS="--max-old-space-size=6144" yarn build
+
+
+📚 DOCUMENTACIÓN
+───────────────────────────────────────────────────────────────────
+cat /home/ubuntu/homming_vidaro/INDEX.md
+cat /home/ubuntu/homming_vidaro/README_DEPLOYMENT.md
+cat /home/ubuntu/homming_vidaro/RESUMEN_EJECUTIVO.md
+cat /home/ubuntu/homming_vidaro/SOLUCION_DEPLOYMENT_MEMORIA.md
+cat /home/ubuntu/homming_vidaro/COMPARACION_PLATAFORMAS.md
+
+
+🌐 VERCEL - COMANDOS ADICIONALES
+───────────────────────────────────────────────────────────────────
+
+# Instalar CLI
+npm i -g vercel
+
+# Login
+vercel login
+
+# Deploy a preview
+cd /home/ubuntu/homming_vidaro/nextjs_space
+vercel
+
+# Deploy a producción
+vercel --prod
+
+# Ver logs
+vercel logs <deployment-url>
+
+# Listar deployments
+vercel ls
+
+# Configurar dominio
+vercel domains add inmova.app
+
+# Variables de entorno
+vercel env add DATABASE_URL
+vercel env add NEXTAUTH_SECRET
+vercel env add NEXTAUTH_URL
+# ... etc
+
+
+💻 COMANDOS DE DESARROLLO
+───────────────────────────────────────────────────────────────────
+
+# Desarrollo local
+cd /home/ubuntu/homming_vidaro/nextjs_space
+yarn dev
+
+# Build local
+yarn build
+
+# Start producción local
+yarn start
+
+# Lint
+yarn lint
+
+# Prisma Studio
+yarn prisma studio
+
+# Prisma Migrations
+yarn prisma migrate dev
+yarn prisma migrate deploy
+
+
+📊 MÉTRICAS Y ANÁLISIS
+───────────────────────────────────────────────────────────────────
+
+# Ver tamaño del build
+cd /home/ubuntu/homming_vidaro/nextjs_space
+du -sh .next
+
+# Ver dependencias
+yarn list --depth=0
+
+# Buscar duplicados
+yarn dedupe
+
+# Verificar dependencias no usadas
+npx depcheck
+
+
+═══════════════════════════════════════════════════════════════════
+Última actualización: Diciembre 5, 2025
+Proyecto: INMOVA
+═══════════════════════════════════════════════════════════════════
