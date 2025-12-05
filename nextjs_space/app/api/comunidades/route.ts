@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { getCommunityStats } from '@/lib/services/community-management-service';
+import { authOptions } from '@/lib/auth-options';
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,20 +8,32 @@ export async function GET(request: NextRequest) {
     if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
+    
+    // Funcionalidad pendiente de implementación
+    return NextResponse.json({ message: 'En desarrollo', data: [] });
+  } catch (error) {
+    console.error('Error en GET:', error);
+    return NextResponse.json(
+      { error: 'Error interno del servidor' },
+      { status: 500 }
+    );
+  }
+}
 
-    const { searchParams } = new URL(request.url);
-    const buildingId = searchParams.get('buildingId');
-
-    if (!buildingId) {
-      return NextResponse.json({ error: 'buildingId requerido' }, { status: 400 });
+export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
-
-    const companyId = (session.user as any).companyId;
-    const stats = await getCommunityStats(companyId, buildingId);
-
-    return NextResponse.json(stats);
-  } catch (error: any) {
-    console.error('Error en GET /api/comunidades:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    
+    // Funcionalidad pendiente de implementación
+    return NextResponse.json({ message: 'En desarrollo' });
+  } catch (error) {
+    console.error('Error en POST:', error);
+    return NextResponse.json(
+      { error: 'Error interno del servidor' },
+      { status: 500 }
+    );
   }
 }

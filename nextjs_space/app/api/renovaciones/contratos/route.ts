@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { authOptions } from '@/lib/auth-options';
 import {
-  getContractRenewals,
-  createContractRenewal,
-  checkUpcomingRenewals,
+  analyzeContractForRenewal,
+  getRenewalStats,
 } from '@/lib/services/renewal-service';
 
 export async function GET(request: NextRequest) {
@@ -14,22 +13,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const estado = searchParams.get('estado') || undefined;
-    const accion = searchParams.get('accion');
-
-    const companyId = (session.user as any).companyId;
-
-    if (accion === 'check_upcoming') {
-      const renovaciones = await checkUpcomingRenewals(companyId, 90);
-      return NextResponse.json(renovaciones);
-    }
-
-    const renovaciones = await getContractRenewals(companyId, estado);
-    return NextResponse.json(renovaciones);
-  } catch (error: any) {
-    console.error('Error en GET /api/renovaciones/contratos:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const stats = await getRenewalStats(session.user.companyId);
+    return NextResponse.json(stats);
+  } catch (error) {
+    console.error('Error en GET renovaciones/contratos:', error);
+    return NextResponse.json(
+      { error: 'Error interno del servidor' },
+      { status: 500 }
+    );
   }
 }
 
@@ -41,11 +32,22 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const renovacion = await createContractRenewal(body.contractId);
+    const { contractId } = body;
 
-    return NextResponse.json(renovacion, { status: 201 });
-  } catch (error: any) {
-    console.error('Error en POST /api/renovaciones/contratos:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    if (!contractId) {
+      return NextResponse.json(
+        { error: 'contractId es requerido' },
+        { status: 400 }
+      );
+    }
+
+    const analysis = await analyzeContractForRenewal(contractId);
+    return NextResponse.json(analysis);
+  } catch (error) {
+    console.error('Error en POST renovaciones/contratos:', error);
+    return NextResponse.json(
+      { error: 'Error interno del servidor' },
+      { status: 500 }
+    );
   }
 }
