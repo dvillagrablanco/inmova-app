@@ -165,7 +165,7 @@ export default function LandingPage() {
               </h1>
               
               <p className="text-xl text-gray-600 leading-relaxed">
-                Gestiona tu negocio inmobiliario completo desde una sola plataforma. <span className="font-semibold text-indigo-600">88 módulos profesionales</span> para alquileres, coliving, STR turístico, flipping y construcción. <span className="font-bold text-green-600">Ahorra tiempo y aumenta tu rentabilidad.</span>
+                Gestiona tu negocio inmobiliario completo desde una sola plataforma. <span className="font-semibold text-indigo-600">56 módulos profesionales</span> para alquileres, coliving, STR turístico, flipping y construcción. <span className="font-bold text-green-600">Ahorra tiempo y aumenta tu rentabilidad.</span>
               </p>
               
               <div className="flex flex-wrap gap-4">
@@ -311,7 +311,7 @@ export default function LandingPage() {
                   50% DE DESCUENTO<br />Primer Mes
                 </h2>
                 <p className="text-xl text-indigo-100 mb-6">
-                  Únete a la campaña <strong className="text-yellow-300">LAUNCH2025</strong> y obtén acceso completo a los 88 módulos profesionales.
+                  Únete a la campaña <strong className="text-yellow-300">LAUNCH2025</strong> y obtén acceso completo a los 56 módulos profesionales.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Link href="/landing/campanas/launch2025">
@@ -336,7 +336,7 @@ export default function LandingPage() {
                 <div className="space-y-3 text-white">
                   <div className="flex items-start gap-3">
                     <CheckCircle className="h-5 w-5 text-green-400 flex-shrink-0 mt-0.5" />
-                    <p>Acceso a los <strong>88 módulos profesionales</strong></p>
+                    <p>Acceso a los <strong>56 módulos profesionales</strong></p>
                   </div>
                   <div className="flex items-start gap-3">
                     <CheckCircle className="h-5 w-5 text-green-400 flex-shrink-0 mt-0.5" />
@@ -505,7 +505,7 @@ export default function LandingPage() {
               <CardContent className="space-y-2">
                 <div className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
-                  <p className="text-sm"><strong>Precio/Valor:</strong> €3.32/módulo vs €6.96/módulo</p>
+                  <p className="text-sm"><strong>Precio/Valor:</strong> 56 módulos incluidos vs pago por módulo en competencia</p>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
@@ -556,13 +556,13 @@ export default function LandingPage() {
                 <div className="p-3 bg-violet-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2">
                   <DollarSign className="h-8 w-8 text-white" />
                 </div>
-                <CardTitle className="text-3xl font-black text-violet-600">€3.32</CardTitle>
+                <CardTitle className="text-3xl font-black text-violet-600">56</CardTitle>
                 <CardDescription className="text-gray-700 font-semibold">
-                  Coste por Módulo
+                  Módulos Incluidos
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-gray-600">vs €6.96 de Buildium. 88 módulos incluidos en todos los planes</p>
+                <p className="text-sm text-gray-600">Todos los módulos en todos los planes. Paga solo por tus propiedades, no por funcionalidades</p>
               </CardContent>
             </Card>
           </div>
@@ -1332,7 +1332,7 @@ export default function LandingPage() {
                   { feature: 'White Label Completo', inmova: '✓', homming: '⚠️', rentger: '✗', nester: '✗', buildium: '⚠️' },
                   { feature: 'IoT & Smart Buildings', inmova: '✓', homming: '✗', rentger: '✗', nester: '⚠️', buildium: '✗' },
                   { feature: 'ESG & Sostenibilidad', inmova: '✓', homming: '✗', rentger: '✗', nester: '✗', buildium: '✗' },
-                  { feature: 'Precio/Módulo (€)', inmova: '€3.32', homming: '€5-7', rentger: '€6-8', nester: '€5-9', buildium: '€6.96' },
+                  { feature: 'Modelo de Pricing', inmova: 'Por propiedades', homming: 'Por módulo', rentger: 'Por módulo', nester: 'Por módulo', buildium: 'Por unidad' },
                   { feature: 'Fiscalidad España', inmova: '✓ AEAT', homming: '✓', rentger: '✓', nester: '✓', buildium: '✗' },
                 ].map((row, i) => (
                   <tr key={i} className="border-b hover:bg-indigo-50/50 transition-colors">
@@ -1421,10 +1421,10 @@ export default function LandingPage() {
               Mejor Precio/Valor del Mercado
             </Badge>
             <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-              Planes para Cada Necesidad
+              Una Plataforma. Todo Incluido.
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              <strong className="text-indigo-600">Desde €2.48 por módulo</strong> vs €6.96 de Buildium. Ahorra hasta un 70% consolidando 5-8 herramientas en una sola.
+              <strong className="text-indigo-600">Todos los 56 módulos incluidos en todos los planes.</strong> Paga solo por tus propiedades, no por funcionalidades. Ahorra hasta un 70% consolidando 5-8 herramientas en una sola.
             </p>
           </div>
 
@@ -1432,74 +1432,73 @@ export default function LandingPage() {
             {[
               {
                 name: 'Starter',
-                price: '€89',
+                price: '€99',
                 period: '/mes',
-                modules: '30 módulos',
+                modules: '56 módulos',
                 properties: 'Hasta 25 propiedades',
-                costPerModule: '€2.97/módulo',
+                costPerProperty: '€3.96/propiedad',
                 features: [
-                  '30 módulos básicos',
+                  'Todos los 56 módulos incluidos',
                   'Hasta 25 propiedades',
-                  'Gestión residencial + coliving',
+                  'Todos los verticales de negocio',
                   '3 usuarios',
                   'Soporte email 48h',
-                  'Dashboard BI básico'
+                  'Onboarding básico'
                 ],
                 cta: 'Ideal para emprendedores'
               },
               {
                 name: 'Profesional',
-                price: '€149',
+                price: '€199',
                 period: '/mes',
-                modules: '60 módulos',
-                properties: '26-50 propiedades',
-                costPerModule: '€2.48/módulo',
+                modules: '56 módulos',
+                properties: '26-100 propiedades',
+                costPerProperty: '€1.99/propiedad (max)',
                 popular: true,
                 features: [
-                  '60 módulos profesionales',
-                  '26-50 propiedades',
-                  'Gestión completa residencial',
+                  'Todos los 56 módulos incluidos',
+                  '26-100 propiedades',
+                  'Todos los verticales de negocio',
                   'Portal inquilino + propietario',
-                  'Firma Digital + CRM básico',
-                  '5 usuarios',
-                  'Soporte chat 24h'
+                  'Firma Digital + CRM',
+                  '10 usuarios',
+                  'Soporte chat 24h + Account Manager'
                 ],
                 cta: 'Gestoras en crecimiento'
               },
               {
-                name: 'Empresarial',
-                price: '€349',
+                name: 'Enterprise',
+                price: '€499',
                 period: '/mes',
-                modules: '88 módulos',
-                properties: '51-200 propiedades',
-                costPerModule: '€3.97/módulo',
+                modules: '56 módulos',
+                properties: '101-300 propiedades',
+                costPerProperty: '€1.66/propiedad (max)',
                 features: [
-                  'TODOS los 88 módulos',
-                  '51-200 propiedades',
-                  'Todos los verticales (STR, Flipping, etc.)',
-                  'IA + Mantenimiento Predictivo',
-                  'Blockchain + IoT',
-                  '15 usuarios',
-                  'White Label + Account Manager'
+                  'Todos los 56 módulos incluidos',
+                  '101-300 propiedades',
+                  'Todos los verticales de negocio',
+                  'White Label personalizado',
+                  'Integraciones ERP (SAP, Zucchetti)',
+                  '30 usuarios',
+                  'SLA 99.9% + Infraestructura dedicada'
                 ],
                 cta: 'Empresas consolidadas'
               },
               {
-                name: 'Enterprise+',
-                price: '€899',
-                period: '/mes',
-                modules: '88+ módulos',
-                properties: '+200 propiedades',
-                costPerModule: 'Personalizado',
+                name: 'Corporate',
+                price: 'A medida',
+                period: '',
+                modules: '56+ módulos',
+                properties: '+300 propiedades',
+                costPerProperty: 'Personalizado',
                 features: [
+                  'Todos los módulos + desarrollos custom',
                   'Propiedades ilimitadas',
                   'Usuarios ilimitados',
-                  'Todos los módulos + Custom',
-                  'Infraestructura dedicada',
-                  'SLA 99.95%',
-                  'Integraciones ERP (SAP, Sage)',
                   'Multi-región + Multi-moneda',
-                  'Account Manager dedicado 24/7'
+                  'SLA 99.95% + Soporte 24/7',
+                  'Account Manager dedicado',
+                  'Consultoría estratégica incluida'
                 ],
                 cta: 'Grandes corporaciones'
               }
@@ -1517,7 +1516,7 @@ export default function LandingPage() {
                       <span className="text-4xl font-black bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">{plan.price}</span>
                       <span className="text-gray-500 text-sm">{plan.period}</span>
                     </div>
-                    <div className="text-xs text-gray-500 font-semibold">{plan.costPerModule}</div>
+                    <div className="text-xs text-gray-500 font-semibold">{plan.costPerProperty}</div>
                   </div>
                   <Badge variant="secondary" className="mt-3 w-fit text-xs">{plan.modules}</Badge>
                   <div className="text-sm text-indigo-600 font-semibold mt-2">{plan.properties}</div>
