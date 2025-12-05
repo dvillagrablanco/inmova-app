@@ -47,7 +47,7 @@ import {
   Cell,
   PieChart as RePieChart,
   Pie,
-} from 'recharts';
+} from '@/components/ui/lazy-charts-extended';
 
 interface DashboardStats {
   overview: {

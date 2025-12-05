@@ -14,7 +14,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-} from 'recharts';
+} from '@/components/ui/lazy-charts-extended';
 import { TrendingUp, TrendingDown, Calendar, Euro } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
