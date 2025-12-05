@@ -255,7 +255,6 @@ export default function NotificationRulesPage() {
       asunto: rule.asunto,
       mensaje: rule.mensaje,
       prioridad: rule.prioridad,
-      templateId: rule.template?.id,
     });
     setIsDialogOpen(true);
   };

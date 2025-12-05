@@ -40,46 +40,51 @@ export async function GET(request: NextRequest) {
       .filter(ob => ob.verMantenimiento)
       .map(ob => ob.buildingId);
 
-    const maintenanceRecords = await prisma.maintenance.findMany({
+    // Get units for these buildings
+    const units = await prisma.unit.findMany({
       where: {
         buildingId: { in: buildingIds },
-        companyId: owner.companyId,
+      },
+      select: { id: true },
+    });
+    const unitIds = units.map(u => u.id);
+
+    const maintenanceRecords = await prisma.maintenanceRequest.findMany({
+      where: {
+        unitId: { in: unitIds },
       },
       include: {
-        building: {
+        unit: {
+          include: {
+            building: {
+              select: {
+                id: true,
+                nombre: true,
+                direccion: true,
+              },
+            },
+          },
+        },
+        provider: {
           select: {
             id: true,
             nombre: true,
-            direccion: true,
-          },
-        },
-        unit: {
-          select: {
-            id: true,
-            numero: true,
-            piso: true,
-          },
-        },
-        assignedTo: {
-          select: {
-            id: true,
-            name: true,
             email: true,
           },
         },
       },
       orderBy: {
-        fecha: 'desc',
+        fechaSolicitud: 'desc',
       },
     });
 
     // Get maintenance statistics
     const stats = {
       total: maintenanceRecords.length,
-      pendiente: maintenanceRecords.filter(m => m.estado === 'pendiente').length,
-      en_progreso: maintenanceRecords.filter(m => m.estado === 'en_progreso').length,
-      completado: maintenanceRecords.filter(m => m.estado === 'completado').length,
-      urgente: maintenanceRecords.filter(m => m.prioridad === 'critico' || m.prioridad === 'alto').length,
+      pendiente: maintenanceRecords.filter((m: any) => m.estado === 'pendiente').length,
+      en_progreso: maintenanceRecords.filter((m: any) => m.estado === 'en_progreso').length,
+      completado: maintenanceRecords.filter((m: any) => m.estado === 'completado').length,
+      urgente: maintenanceRecords.filter((m: any) => m.prioridad === 'critico' || m.prioridad === 'alto').length,
     };
 
     return NextResponse.json({

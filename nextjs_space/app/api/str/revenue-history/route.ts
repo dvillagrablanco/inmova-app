@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
       const bookings = await prisma.sTRBooking.findMany({
         where: {
           listing: { companyId },
-          fechaCheckIn: {
+          checkInDate: {
             gte: monthStart,
             lte: monthEnd,
           },

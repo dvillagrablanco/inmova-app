@@ -42,30 +42,35 @@ export async function GET(request: NextRequest) {
       .filter(ob => ob.verDocumentos)
       .map(ob => ob.buildingId);
 
+    // Get units for these buildings
+    const units = await prisma.unit.findMany({
+      where: {
+        buildingId: { in: buildingIds },
+      },
+      select: { id: true },
+    });
+    const unitIds = units.map(u => u.id);
+
     // Get contracts and related documents
     const contracts = await prisma.contract.findMany({
       where: {
-        buildingId: { in: buildingIds },
-        companyId: owner.companyId,
+        unitId: { in: unitIds },
       },
       include: {
-        building: {
-          select: {
-            id: true,
-            nombre: true,
-          },
-        },
         unit: {
-          select: {
-            id: true,
-            numero: true,
+          include: {
+            building: {
+              select: {
+                id: true,
+                nombre: true,
+              },
+            },
           },
         },
         tenant: {
           select: {
             id: true,
-            nombre: true,
-            apellido: true,
+            nombreCompleto: true,
           },
         },
       },
@@ -75,47 +80,18 @@ export async function GET(request: NextRequest) {
     });
 
     // Get maintenance documents
-    const maintenanceRecords = await prisma.maintenance.findMany({
+    const maintenanceRecords = await prisma.maintenanceRequest.findMany({
       where: {
-        buildingId: { in: buildingIds },
-        companyId: owner.companyId,
+        unitId: { in: unitIds },
       },
       select: {
         id: true,
         titulo: true,
         descripcion: true,
-        fecha: true,
+        fechaSolicitud: true,
         estado: true,
         prioridad: true,
-        building: {
-          select: {
-            id: true,
-            nombre: true,
-          },
-        },
         unit: {
-          select: {
-            id: true,
-            numero: true,
-          },
-        },
-      },
-      orderBy: {
-        fecha: 'desc',
-      },
-      take: 50,
-    });
-
-    // Get financial documents (invoices, receipts)
-    const payments = await prisma.payment.findMany({
-      where: {
-        companyId: owner.companyId,
-        contract: {
-          buildingId: { in: buildingIds },
-        },
-      },
-      include: {
-        contract: {
           include: {
             building: {
               select: {
@@ -123,17 +99,40 @@ export async function GET(request: NextRequest) {
                 nombre: true,
               },
             },
+          },
+        },
+      },
+      orderBy: {
+        fechaSolicitud: 'desc',
+      },
+      take: 50,
+    });
+
+    // Get contract IDs for payments
+    const contractIds = contracts.map(c => c.id);
+
+    // Get financial documents (invoices, receipts)
+    const payments = await prisma.payment.findMany({
+      where: {
+        contractId: { in: contractIds },
+      },
+      include: {
+        contract: {
+          include: {
             unit: {
-              select: {
-                id: true,
-                numero: true,
+              include: {
+                building: {
+                  select: {
+                    id: true,
+                    nombre: true,
+                  },
+                },
               },
             },
             tenant: {
               select: {
                 id: true,
-                nombre: true,
-                apellido: true,
+                nombreCompleto: true,
               },
             },
           },
