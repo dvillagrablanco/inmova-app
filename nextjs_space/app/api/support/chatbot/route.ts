@@ -1,294 +1,439 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { searchKnowledgeBase, searchFAQs, getArticleById, knowledgeBase, faqs } from '@/lib/knowledge-base';
-import logger from '@/lib/logger';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
-interface ConversationMessage {
-  sender: 'user' | 'bot';
-  text: string;
+export const dynamic = 'force-dynamic';
+
+// Base de conocimientos simplificada (en producción vendría de la BD)
+const KNOWLEDGE_BASE: Record<string, any> = {
+  'crear_edificio': {
+    id: 'crear_edificio',
+    title: '¿Cómo crear un edificio?',
+    excerpt: 'Aprende a registrar tu primera propiedad en INMOVA',
+    content: `Para crear un edificio:
+1. Ve a Edificios > Nuevo Edificio
+2. Completa los datos básicos (nombre, dirección, tipo)
+3. Añade detalles como número de plantas, año de construcción
+4. Opcionalmente sube fotos y documentos
+5. Guarda y comienza a añadir unidades`,
+    keywords: ['edificio', 'propiedad', 'inmueble', 'crear', 'nuevo', 'registrar'],
+    videoUrl: 'https://www.youtube.com/embed/zm55Gdl5G1Q',
+    relatedArticles: ['crear_unidad', 'gestionar_propiedades']
+  },
+  'crear_unidad': {
+    id: 'crear_unidad',
+    title: '¿Cómo añadir unidades?',
+    excerpt: 'Configura apartamentos, locales y habitaciones',
+    content: `Para añadir unidades a un edificio:
+1. Entra al edificio desde la lista
+2. Haz clic en "Añadir Unidad"
+3. Define el tipo (apartamento, local, habitación)
+4. Establece características (m², habitaciones, baños)
+5. Configura precio de renta
+6. Guarda la unidad`,
+    keywords: ['unidad', 'apartamento', 'piso', 'habitación', 'local', 'añadir', 'crear'],
+    relatedArticles: ['crear_edificio', 'asignar_inquilino']
+  },
+  'asignar_inquilino': {
+    id: 'asignar_inquilino',
+    title: '¿Cómo gestionar inquilinos?',
+    excerpt: 'Registra y administra tus inquilinos',
+    content: `Para gestionar inquilinos:
+1. Ve a Inquilinos > Nuevo Inquilino
+2. Completa datos personales y contacto
+3. Realiza el screening de solvencia (opcional)
+4. Asigna a una unidad disponible
+5. Crea un contrato de alquiler
+6. Configura métodos de pago`,
+    keywords: ['inquilino', 'arrendatario', 'tenant', 'asignar', 'registrar', 'screening'],
+    videoUrl: 'https://www.youtube.com/embed/zm55Gdl5G1Q',
+    relatedArticles: ['crear_contrato', 'pagos_online']
+  },
+  'crear_contrato': {
+    id: 'crear_contrato',
+    title: '¿Cómo crear contratos?',
+    excerpt: 'Genera contratos de alquiler automáticamente',
+    content: `Para crear un contrato:
+1. Ve a Contratos > Nuevo Contrato
+2. Selecciona inquilino y unidad
+3. Define fechas de inicio y fin
+4. Establece renta mensual y depósito
+5. Añade cláusulas personalizadas (opcional)
+6. Genera el PDF automáticamente
+7. Envía para firma digital`,
+    keywords: ['contrato', 'alquiler', 'arrendamiento', 'crear', 'generar', 'pdf'],
+    videoUrl: 'https://www.youtube.com/embed/zm55Gdl5G1Q',
+    relatedArticles: ['firma_digital', 'pagos_online']
+  },
+  'pagos_online': {
+    id: 'pagos_online',
+    title: 'Pagos online con Stripe',
+    excerpt: 'Cobra rentas automáticamente',
+    content: `INMOVA incluye integración con Stripe para pagos:
+1. Los inquilinos pueden pagar desde su portal
+2. Configura pagos recurrentes automáticos
+3. Recibe notificaciones de pagos exitosos
+4. Registra todos los movimientos automáticamente
+5. Exporta a tu software contable`,
+    keywords: ['pago', 'renta', 'cobro', 'stripe', 'automático', 'recurrente'],
+    relatedArticles: ['crear_contrato', 'portal_inquilino']
+  },
+  'portal_inquilino': {
+    id: 'portal_inquilino',
+    title: 'Portal del Inquilino',
+    excerpt: 'Autoservicio para tus inquilinos',
+    content: `El portal del inquilino permite:
+1. Ver pagos pendientes y realizados
+2. Pagar online con tarjeta
+3. Reportar incidencias de mantenimiento
+4. Descargar documentos y recibos
+5. Comunicarse con la administración
+6. Ver información de su contrato`,
+    keywords: ['portal', 'inquilino', 'autoservicio', 'pago', 'incidencia'],
+    relatedArticles: ['pagos_online', 'mantenimiento']
+  },
+  'mantenimiento': {
+    id: 'mantenimiento',
+    title: 'Gestión de mantenimiento',
+    excerpt: 'Mantenimiento correctivo y preventivo',
+    content: `Sistema de mantenimiento:
+1. Inquilinos pueden reportar incidencias
+2. Asigna tareas a proveedores
+3. Trackea estado en tiempo real
+4. Programa mantenimiento preventivo
+5. Registra costos y materiales
+6. Histórico completo por unidad`,
+    keywords: ['mantenimiento', 'reparación', 'incidencia', 'preventivo', 'correctivo'],
+    videoUrl: 'https://www.youtube.com/embed/zm55Gdl5G1Q',
+    relatedArticles: ['proveedores', 'ordenes_trabajo']
+  },
+  'pricing': {
+    id: 'pricing',
+    title: 'Precios de INMOVA',
+    excerpt: 'Planes y tarifas',
+    content: `INMOVA ofrece un plan único todo incluido:
+- €149/mes - Empresas (todas las funciones)
+- €49/mes - Propietarios individuales
+- Sin límite de propiedades
+- Sin límite de usuarios
+- 88 módulos incluidos
+- Soporte 24/7
+- Prueba gratis 30 días`,
+    keywords: ['precio', 'tarifa', 'plan', 'costo', 'suscripción', 'prueba'],
+    relatedArticles: ['comparativa', 'demo']
+  },
+  'comparativa': {
+    id: 'comparativa',
+    title: 'INMOVA vs Competencia',
+    excerpt: 'Por qué elegir INMOVA',
+    content: `Ventajas de INMOVA:
+- 88 módulos vs 15-30 de la competencia
+- Precio 60% más bajo
+- Multi-vertical (7 modelos de negocio)
+- IA integrada en todos los módulos
+- Sin cobros por usuario adicional
+- Sin límites artificiales
+- Soporte en español 24/7`,
+    keywords: ['comparar', 'ventaja', 'competencia', 'mejor', 'diferencia'],
+    relatedArticles: ['pricing', 'demo']
+  },
+  'demo': {
+    id: 'demo',
+    title: 'Solicitar demo',
+    excerpt: 'Agenda una demostración personalizada',
+    content: `Para agendar una demo:
+1. Visita https://inmova.app/landing/contacto
+2. Completa el formulario de contacto
+3. Nuestro equipo te contactará en <24h
+4. Agenda la demo en el horario que prefieras
+5. Recibe acceso de prueba 30 días gratis
+
+O escríbenos a: contacto@inmova.app`,
+    keywords: ['demo', 'demostración', 'prueba', 'test', 'contacto', 'agendar'],
+    relatedArticles: ['pricing', 'soporte']
+  }
+};
+
+// Análisis de sentimiento simplificado
+function analyzeSentiment(text: string): any {
+  const lowerText = text.toLowerCase();
+  
+  // Palabras clave para urgencia
+  const criticalWords = ['urgente', 'inmediato', 'crítico', 'emergencia', 'ya', 'ahora'];
+  const highWords = ['problema', 'error', 'fallo', 'no funciona', 'ayuda'];
+  const negativeWords = ['no puedo', 'mal', 'malo', 'terrible', 'pésimo', 'difícil'];
+  const positiveWords = ['gracias', 'excelente', 'perfecto', 'genial', 'bien', 'bueno'];
+  
+  let urgency = 'low';
+  let sentiment = 'neutral';
+  let score = 0.5;
+  let emotions: string[] = [];
+  
+  // Detectar urgencia
+  if (criticalWords.some(word => lowerText.includes(word))) {
+    urgency = 'critical';
+    emotions.push('Preocupado');
+  } else if (highWords.some(word => lowerText.includes(word))) {
+    urgency = 'high';
+    emotions.push('Frustrado');
+  } else if (lowerText.includes('cuando') || lowerText.includes('cómo')) {
+    urgency = 'medium';
+    emotions.push('Curioso');
+  }
+  
+  // Detectar sentimiento
+  const negCount = negativeWords.filter(word => lowerText.includes(word)).length;
+  const posCount = positiveWords.filter(word => lowerText.includes(word)).length;
+  
+  if (posCount > negCount) {
+    sentiment = 'positive';
+    score = 0.8;
+    emotions.push('Satisfecho');
+  } else if (negCount > posCount) {
+    sentiment = 'negative';
+    score = 0.2;
+    emotions.push('Insatisfecho');
+  }
+  
+  return {
+    sentiment,
+    score,
+    urgency,
+    emotions,
+    suggestedTone: sentiment === 'negative' ? 'Empático y proactivo' : 'Amigable y eficiente'
+  };
 }
 
-interface SentimentAnalysis {
-  sentiment: 'positive' | 'neutral' | 'negative';
-  score: number;
-  urgency: 'low' | 'medium' | 'high' | 'critical';
-  emotions: string[];
-  suggestedTone?: string;
-}
-
-// Función para analizar el sentimiento usando LLM
-async function analyzeSentiment(userMessage: string): Promise<SentimentAnalysis> {
-  try {
-    const response = await fetch('https://apps.abacus.ai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-4.1-mini',
-        messages: [
-          {
-            role: 'system',
-            content: `Eres un experto en análisis de sentimientos. Analiza el tono emocional del mensaje del usuario y responde SOLO con JSON puro, sin bloques de código ni markdown.
-
-Formato exacto de respuesta:
-{
-  "sentiment": "positive" | "neutral" | "negative",
-  "score": 0.0 a 1.0,
-  "urgency": "low" | "medium" | "high" | "critical",
-  "emotions": ["feliz", "frustrado", etc],
-  "suggestedTone": "empathetic" | "professional" | "casual"
-}`
-          },
-          {
-            role: 'user',
-            content: `Analiza este mensaje: "${userMessage}"`
-          }
-        ],
-        response_format: { type: "json_object" },
-        temperature: 0.3,
-        max_tokens: 300
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error('Error al analizar sentimiento');
-    }
-
-    const data = await response.json();
-    const analysis = JSON.parse(data.choices[0].message.content);
+// Buscar en la base de conocimientos
+function searchKnowledgeBase(query: string): any[] {
+  const lowerQuery = query.toLowerCase();
+  const results: any[] = [];
+  
+  for (const [key, article] of Object.entries(KNOWLEDGE_BASE)) {
+    let score = 0;
     
-    return analysis;
-  } catch (error) {
-    logger.error('Error analyzing sentiment:', error);
-    // Retornar análisis neutral por defecto
-    return {
-      sentiment: 'neutral',
-      score: 0.5,
-      urgency: 'low',
-      emotions: [],
-      suggestedTone: 'professional'
-    };
-  }
-}
-
-// Función para categorizar la pregunta
-function categorizeQuestion(question: string): string {
-  const lowerQ = question.toLowerCase();
-  
-  if (lowerQ.includes('pago') || lowerQ.includes('cobro') || lowerQ.includes('dinero')) return 'Pagos';
-  if (lowerQ.includes('contrato') || lowerQ.includes('firma')) return 'Contratos';
-  if (lowerQ.includes('edificio') || lowerQ.includes('propiedad')) return 'Edificios';
-  if (lowerQ.includes('inquilino') || lowerQ.includes('arrendatario')) return 'Inquilinos';
-  if (lowerQ.includes('mantenimiento') || lowerQ.includes('reparación') || lowerQ.includes('avería')) return 'Mantenimiento';
-  if (lowerQ.includes('reporte') || lowerQ.includes('informe') || lowerQ.includes('estadística')) return 'Reportes';
-  if (lowerQ.includes('habitación') || lowerQ.includes('compartido')) return 'Habitaciones';
-  if (lowerQ.includes('seguridad') || lowerQ.includes('privacidad') || lowerQ.includes('datos')) return 'Seguridad';
-  if (lowerQ.includes('api') || lowerQ.includes('integración')) return 'Integraciones';
-  if (lowerQ.includes('automatizar') || lowerQ.includes('automático')) return 'Automatización';
-  
-  return 'General';
-}
-
-// Función para generar acciones sugeridas basadas en la categoría
-function generateSuggestedActions(category: string, sentiment: SentimentAnalysis) {
-  const actions = [];
-  
-  switch (category) {
-    case 'Pagos':
-      actions.push(
-        { id: 'act-1', label: 'Ver Pagos Pendientes', action: 'navigate:/pagos', icon: 'ExternalLink' },
-        { id: 'act-2', label: 'Configurar Pago Automático', action: 'navigate:/pagos/configurar', icon: 'ExternalLink' }
-      );
-      break;
-    case 'Contratos':
-      actions.push(
-        { id: 'act-3', label: 'Crear Nuevo Contrato', action: 'navigate:/contratos/nuevo', icon: 'ExternalLink' },
-        { id: 'act-4', label: 'Ver Mis Contratos', action: 'navigate:/contratos', icon: 'ExternalLink' }
-      );
-      break;
-    case 'Edificios':
-      actions.push(
-        { id: 'act-5', label: 'Añadir Edificio', action: 'navigate:/edificios/nuevo', icon: 'ExternalLink' },
-        { id: 'act-6', label: 'Ver Edificios', action: 'navigate:/edificios', icon: 'ExternalLink' }
-      );
-      break;
-    case 'Inquilinos':
-      actions.push(
-        { id: 'act-7', label: 'Registrar Inquilino', action: 'navigate:/inquilinos/nuevo', icon: 'ExternalLink' },
-        { id: 'act-8', label: 'Ver Inquilinos', action: 'navigate:/inquilinos', icon: 'ExternalLink' }
-      );
-      break;
-    case 'Mantenimiento':
-      actions.push(
-        { id: 'act-9', label: 'Reportar Incidencia', action: 'navigate:/mantenimiento/nuevo', icon: 'ExternalLink' },
-        { id: 'act-10', label: 'Ver Incidencias', action: 'navigate:/mantenimiento', icon: 'ExternalLink' }
-      );
-      break;
-    case 'Reportes':
-      actions.push(
-        { id: 'act-11', label: 'Ver Dashboard BI', action: 'navigate:/bi', icon: 'ExternalLink' },
-        { id: 'act-12', label: 'Generar Reporte', action: 'navigate:/reportes', icon: 'ExternalLink' }
-      );
-      break;
+    // Buscar en keywords
+    for (const keyword of article.keywords) {
+      if (lowerQuery.includes(keyword)) {
+        score += 2;
+      }
+    }
+    
+    // Buscar en título
+    if (article.title.toLowerCase().includes(lowerQuery) || 
+        lowerQuery.includes(article.title.toLowerCase())) {
+      score += 3;
+    }
+    
+    if (score > 0) {
+      results.push({ ...article, relevanceScore: score });
+    }
   }
   
-  // Si la urgencia es alta o crítica, sugerir crear ticket
+  // Ordenar por relevancia
+  results.sort((a, b) => b.relevanceScore - a.relevanceScore);
+  
+  return results.slice(0, 3);
+}
+
+// Generar respuesta inteligente
+function generateResponse(query: string, results: any[], sentiment: any): any {
+  const lowerQuery = query.toLowerCase();
+  
+  // Detectar intención
+  let intent = 'general';
+  let response = '';
+  let confidence = 0.5;
+  const suggestedActions: any[] = [];
+  
+  // Saludos
+  if (lowerQuery.match(/hola|buenos días|buenas tardes|hey|hi/)) {
+    response = '¡Hola! 👋 Estoy aquí para ayudarte. ¿En qué puedo asistirte hoy?';
+    confidence = 1.0;
+    intent = 'greeting';
+    
+    suggestedActions.push(
+      { id: '1', label: 'Ver tutoriales', action: 'navigate:/help', icon: 'BookOpen' },
+      { id: '2', label: 'Contactar soporte', action: 'create_ticket', icon: 'Ticket' }
+    );
+  }
+  // Pricing
+  else if (lowerQuery.match(/precio|costo|tarifa|plan|cuanto|pagar/)) {
+    response = 'INMOVA tiene un plan único de €149/mes para empresas con TODO incluido: 88 módulos, usuarios ilimitados, propiedades ilimitadas y soporte 24/7. También ofrecemos €49/mes para propietarios individuales. ¡Prueba gratis 30 días!';
+    confidence = 0.95;
+    intent = 'pricing';
+    
+    suggestedActions.push(
+      { id: '1', label: 'Ver detalles de precios', action: 'navigate:/landing', icon: 'ExternalLink' },
+      { id: '2', label: 'Iniciar prueba gratis', action: 'navigate:/register', icon: 'Ticket' }
+    );
+  }
+  // Crear/Añadir
+  else if (lowerQuery.match(/crear|añadir|agregar|nuevo|registrar/)) {
+    if (lowerQuery.includes('edificio') || lowerQuery.includes('propiedad') || lowerQuery.includes('inmueble')) {
+      response = 'Para crear un edificio, ve a Edificios > Nuevo Edificio. Completa los datos básicos y ¡listo! Te recomiendo ver el video tutorial para una guía paso a paso.';
+      confidence = 0.9;
+      intent = 'how_to';
+      
+      suggestedActions.push(
+        { id: '1', label: 'Crear edificio ahora', action: 'navigate:/edificios/nuevo', icon: 'ExternalLink' },
+        { id: '2', label: 'Ver tutorial', action: 'play_video:https://www.youtube.com/embed/zm55Gdl5G1Q', icon: 'BookOpen' }
+      );
+    } else if (lowerQuery.includes('unidad') || lowerQuery.includes('apartamento') || lowerQuery.includes('piso')) {
+      response = 'Para añadir unidades, primero debes tener un edificio creado. Luego ve a Unidades > Nueva Unidad, selecciona el edificio y completa los datos.';
+      confidence = 0.9;
+      intent = 'how_to';
+      
+      suggestedActions.push(
+        { id: '1', label: 'Crear unidad', action: 'navigate:/unidades/nuevo', icon: 'ExternalLink' },
+        { id: '2', label: 'Ver mis edificios', action: 'navigate:/edificios', icon: 'BookOpen' }
+      );
+    } else if (lowerQuery.includes('inquilino') || lowerQuery.includes('tenant')) {
+      response = 'Para registrar un inquilino, ve a Inquilinos > Nuevo Inquilino. Completa sus datos personales y podrás asignarlo a una unidad disponible.';
+      confidence = 0.9;
+      intent = 'how_to';
+      
+      suggestedActions.push(
+        { id: '1', label: 'Registrar inquilino', action: 'navigate:/inquilinos/nuevo', icon: 'ExternalLink' },
+        { id: '2', label: 'Ver screening', action: 'navigate:/screening', icon: 'BookOpen' }
+      );
+    } else if (lowerQuery.includes('contrato')) {
+      response = 'Para crear un contrato, ve a Contratos > Nuevo Contrato. Selecciona el inquilino y la unidad, define las condiciones y genera el PDF automáticamente.';
+      confidence = 0.9;
+      intent = 'how_to';
+      
+      suggestedActions.push(
+        { id: '1', label: 'Crear contrato', action: 'navigate:/contratos/nuevo', icon: 'ExternalLink' },
+        { id: '2', label: 'Ver firma digital', action: 'navigate:/firma-digital', icon: 'BookOpen' }
+      );
+    } else {
+      response = 'Puedo ayudarte a crear edificios, unidades, inquilinos, contratos y más. ¿Qué te gustaría crear específicamente?';
+      confidence = 0.6;
+    }
+  }
+  // Problemas/Errores
+  else if (lowerQuery.match(/problema|error|fallo|no funciona|no puedo|ayuda/)) {
+    response = 'Lamento que estés teniendo problemas. Para ayudarte mejor, ¿podrías especificar qué funcionalidad no está funcionando? Mientras tanto, revisa si tu sesión está activa y los permisos de tu usuario.';
+    confidence = 0.7;
+    intent = 'support';
+    
+    suggestedActions.push(
+      { id: '1', label: 'Crear ticket de soporte', action: 'create_ticket', icon: 'Ticket' },
+      { id: '2', label: 'Ver FAQs', action: 'navigate:/help', icon: 'BookOpen' },
+      { id: '3', label: 'Hablar con humano', action: 'navigate:/chat', icon: 'MessageCircle' }
+    );
+  }
+  // Respuesta basada en búsqueda
+  else if (results.length > 0) {
+    const topResult = results[0];
+    response = `Encontré información relevante: ${topResult.content.substring(0, 300)}...\n\nPuedes ver más detalles en los artículos relacionados.`;
+    confidence = Math.min(0.8, topResult.relevanceScore / 5);
+    intent = 'knowledge_base';
+    
+    if (topResult.videoUrl) {
+      suggestedActions.push(
+        { id: '1', label: 'Ver tutorial en video', action: `play_video:${topResult.videoUrl}`, icon: 'BookOpen' }
+      );
+    }
+  }
+  // Respuesta genérica
+  else {
+    response = 'No estoy seguro de cómo responder a eso específicamente. Te recomiendo:\n\n1. Consultar la sección de Ayuda\n2. Ver los tutoriales en video\n3. Crear un ticket de soporte para asistencia personalizada';
+    confidence = 0.3;
+    
+    suggestedActions.push(
+      { id: '1', label: 'Ver ayuda', action: 'navigate:/help', icon: 'BookOpen' },
+      { id: '2', label: 'Crear ticket', action: 'create_ticket', icon: 'Ticket' },
+      { id: '3', label: 'Contactar equipo', action: 'navigate:/chat', icon: 'ExternalLink' }
+    );
+  }
+  
+  // Si la urgencia es alta, añadir acción de escalamiento
   if (sentiment.urgency === 'high' || sentiment.urgency === 'critical') {
-    actions.push({
-      id: 'act-ticket',
-      label: 'Crear Ticket de Soporte',
-      action: 'create_ticket',
-      icon: 'Ticket'
-    });
+    suggestedActions.unshift(
+      { id: '0', label: 'Hablar con un humano AHORA', action: 'navigate:/chat', icon: 'AlertTriangle' }
+    );
+    
+    response = `⚠️ Detecto que es urgente. ${response}\n\nTe sugiero contactar directamente con nuestro equipo para resolverlo rápidamente.`;
   }
   
-  // Siempre ofrecer la base de conocimiento
-  actions.push({
-    id: 'act-kb',
-    label: 'Ver Base de Conocimiento',
-    action: 'navigate:/knowledge-base',
-    icon: 'BookOpen'
-  });
-  
-  return actions.slice(0, 3); // Máximo 3 acciones
+  return {
+    message: response,
+    confidence,
+    intent,
+    suggestedActions,
+    relatedArticles: results.map(r => ({
+      id: r.id,
+      title: r.title,
+      excerpt: r.excerpt,
+      videoUrl: r.videoUrl
+    })),
+    sentimentAnalysis: sentiment
+  };
 }
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { action, question, conversationHistory, articleId } = body;
 
-    // Acción: Obtener artículo completo
-    if (action === 'get_article' && articleId) {
-      const article = getArticleById(articleId);
+    if (action === 'ask') {
+      // Analizar sentimiento
+      const sentiment = analyzeSentiment(question);
+      
+      // Buscar en base de conocimientos
+      const results = searchKnowledgeBase(question);
+      
+      // Generar respuesta
+      const response = generateResponse(question, results, sentiment);
+      
+      // Registrar conversación para análisis (opcional)
+      try {
+        await prisma.supportInteraction.create({
+          data: {
+            userId: session.user.id,
+            type: 'chatbot',
+            question,
+            response: response.message,
+            confidence: response.confidence,
+            intent: response.intent,
+            sentiment: sentiment.sentiment,
+            urgency: sentiment.urgency
+          }
+        });
+      } catch (err) {
+        // No fallar si no se puede registrar
+        logger.error('Error logging support interaction:', err);
+      }
+      
+      return NextResponse.json(response);
+    } else if (action === 'get_article' && articleId) {
+      const article = KNOWLEDGE_BASE[articleId];
+      
       if (!article) {
         return NextResponse.json({ error: 'Artículo no encontrado' }, { status: 404 });
       }
+      
       return NextResponse.json({ article });
-    }
-
-    // Acción: Responder pregunta
-    if (action === 'ask' && question) {
-      // 1. Analizar sentimiento en paralelo con búsqueda
-      const [sentimentAnalysis, relevantArticles, relevantFAQs] = await Promise.all([
-        analyzeSentiment(question),
-        Promise.resolve(searchKnowledgeBase(question, 3)),
-        Promise.resolve(searchFAQs(question, 2))
-      ]);
-
-      // 2. Categorizar la pregunta
-      const category = categorizeQuestion(question);
-
-      // 3. Construir contexto para el LLM
-      const context = [
-        '# Información de la base de conocimiento relevante:',
-        '',
-        ...relevantArticles.map(article => 
-          `## ${article.title}\n${article.excerpt}`
-        ),
-        '',
-        '# FAQs relevantes:',
-        '',
-        ...relevantFAQs.map(faq => 
-          `P: ${faq.question}\nR: ${faq.answer}`
-        ),
-        '',
-        `# Categoría detectada: ${category}`,
-        `# Sentimiento: ${sentimentAnalysis.sentiment} (Urgencia: ${sentimentAnalysis.urgency})`
-      ].join('\n');
-
-      // 4. Construir historial de conversación
-      const conversationContext = conversationHistory
-        ? conversationHistory.map((msg: ConversationMessage) => ({
-            role: msg.sender === 'user' ? 'user' : 'assistant',
-            content: msg.text
-          }))
-        : [];
-
-      // 5. Determinar el tono de respuesta
-      const tone = sentimentAnalysis.sentiment === 'negative' || sentimentAnalysis.urgency === 'high' 
-        ? 'empático y comprensivo' 
-        : sentimentAnalysis.sentiment === 'positive'
-        ? 'entusiasta y amigable'
-        : 'profesional y claro';
-
-      // 6. Llamar al LLM para generar respuesta
-      const llmResponse = await fetch('https://apps.abacus.ai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: 'gpt-4.1-mini',
-          messages: [
-            {
-              role: 'system',
-              content: `Eres el asistente inteligente de INMOVA, una plataforma de gestión inmobiliaria.
-
-Tu objetivo es ayudar a los usuarios a resolver sus dudas de forma clara y efectiva.
-
-Directrices:
-- Usa un tono ${tone}
-- Sé conciso pero completo (máximo 200 palabras)
-- Usa la información del contexto proporcionado
-- Si no sabes algo, reconocélo y sugiere crear un ticket de soporte
-- Usa emojis ocasionalmente para hacer la conversación más amigable
-- Estructura tu respuesta con saltos de línea para mejor legibilidad
-- Si detectas frustación, muestra empatía y ofrece ayuda personalizada
-
-Contexto disponible:
-${context}`
-            },
-            ...conversationContext,
-            {
-              role: 'user',
-              content: question
-            }
-          ],
-          temperature: 0.7,
-          max_tokens: 500
-        })
-      });
-
-      if (!llmResponse.ok) {
-        throw new Error('Error al generar respuesta');
-      }
-
-      const llmData = await llmResponse.json();
-      const botMessage = llmData.choices[0].message.content;
-
-      // 7. Calcular confianza basada en la relevancia de los artículos encontrados
-      const confidence = relevantArticles.length > 0 || relevantFAQs.length > 0 ? 0.85 : 0.60;
-
-      // 8. Generar acciones sugeridas
-      const suggestedActions = generateSuggestedActions(category, sentimentAnalysis);
-
-      // 9. Preparar artículos relacionados
-      const relatedArticles = relevantArticles.map(article => ({
-        id: article.id,
-        title: article.title,
-        excerpt: article.excerpt,
-        videoUrl: article.videoUrl
-      }));
-
-      return NextResponse.json({
-        message: botMessage,
-        confidence,
-        suggestedActions,
-        relatedArticles: relatedArticles.length > 0 ? relatedArticles : undefined,
-        sentimentAnalysis,
-        category
-      });
     }
 
     return NextResponse.json({ error: 'Acción no válida' }, { status: 400 });
   } catch (error) {
-    logger.error('Error in chatbot API:', error);
-    return NextResponse.json(
-      { error: 'Error procesando tu solicitud' },
-      { status: 500 }
-    );
+    logger.error('Error in chatbot:', error);
+    return NextResponse.json({ 
+      message: 'Lo siento, he tenido un problema técnico. Por favor, intenta de nuevo o contacta con el soporte.',
+      confidence: 0,
+      suggestedActions: [
+        { id: '1', label: 'Crear ticket de soporte', action: 'create_ticket', icon: 'Ticket' },
+        { id: '2', label: 'Hablar con humano', action: 'navigate:/chat', icon: 'ExternalLink' }
+      ]
+    });
   }
 }

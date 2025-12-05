@@ -273,6 +273,9 @@ model User {
   // Sistema de Notificaciones Avanzado - Fase 2
   notificationLogs         NotificationLog[]
   userNotificationSettings UserNotificationSettings?
+  
+  // Soporte e interacciones de ayuda
+  supportInteractions SupportInteraction[]
 
   @@index([email])
   @@index([companyId])
@@ -8443,4 +8446,29 @@ model UserNotificationSettings {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_notification_settings")
+}
+
+// Interacciones de Soporte para análisis de chatbot y asistencia
+model SupportInteraction {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // 'chatbot', 'ticket', 'email', 'phone'
+  question  String   @db.Text
+  response  String   @db.Text
+  confidence Float?
+  intent    String?  // 'greeting', 'how_to', 'pricing', 'support', 'knowledge_base'
+  sentiment String?  // 'positive', 'neutral', 'negative'
+  urgency   String?  // 'low', 'medium', 'high', 'critical'
+  resolved  Boolean  @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, createdAt])
+  @@index([type])
+  @@index([sentiment])
+  @@index([urgency])
+  @@map("support_interactions")
 }

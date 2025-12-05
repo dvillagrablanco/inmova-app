@@ -30,6 +30,7 @@ import IntelligentSupportChatbot from '@/components/automation/IntelligentSuppor
 import InactiveModules from './components/InactiveModules';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { VerticalSpecificWidgets } from '@/components/dashboard/VerticalSpecificWidgets';
+import DemoDataGenerator from '@/components/automation/DemoDataGenerator';
 import logger, { logError } from '@/lib/logger';
 
 interface DashboardData {
@@ -128,6 +129,9 @@ function DashboardPageContent() {
 
           {/* Smart Onboarding Wizard - Sistema automatizado de configuraci\u00f3n inicial */}
           <SmartOnboardingWizard />
+          {/* Demo Data Generator - Generación automática de datos de prueba */}
+          {data?.kpis?.numeroPropiedades === 0 && <DemoDataGenerator />}
+
 
           {/* Vertical-Specific Widgets - Accesos rápidos personalizados por tipo de negocio */}
           <VerticalSpecificWidgets className="mb-8" />
