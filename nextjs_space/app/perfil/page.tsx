@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { User, Mail, Building2, Shield, Save, ArrowLeft, Home, Lock } from 'lucide-react';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import logger, { logError } from '@/lib/logger';
+import { MFASetup } from '@/components/security/mfa-setup';
 
 export default function PerfilPage() {
   const router = useRouter();
@@ -285,6 +286,11 @@ export default function PerfilPage() {
                         </div>
                       )}
                     </div>
+                  </div>
+
+                  {/* Sección de MFA */}
+                  <div className="pt-6 mt-6 border-t">
+                    <MFASetup />
                   </div>
 
                   <div className="flex justify-end gap-3 pt-4">

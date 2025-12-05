@@ -1,6 +1,6 @@
 import { withAuth } from 'next-auth/middleware';
 import { NextResponse } from 'next/server';
-import { applySecurityHeaders } from '@/lib/csp';
+import { applyStrictCSP, generateNonce } from '@/lib/csp-strict';
 import { rateLimiters, getRateLimitIdentifier, applyRateLimitHeaders } from '@/lib/rate-limit-enhanced';
 
 // Rutas que requieren permisos específicos
@@ -56,13 +56,18 @@ export default withAuth(
     const token = req.nextauth?.token;
     const { pathname } = req.nextUrl;
 
+    // Generar nonce para CSP
+    const nonce = generateNonce();
+
     // Apply rate limiting
     const identifier = getRateLimitIdentifier(req as any);
     const rateLimitResult = await rateLimiters.public.checkLimit(identifier);
 
     // Si no hay token, redirigir a login
     if (!token) {
-      return NextResponse.redirect(new URL('/login', req.url));
+      const response = NextResponse.redirect(new URL('/login', req.url));
+      response.headers.set('x-nonce', nonce);
+      return applyStrictCSP(response, nonce);
     }
 
     const userRole = token.role as keyof typeof ROLE_PERMISSIONS;
@@ -75,9 +80,9 @@ export default withAuth(
       );
       
       applyRateLimitHeaders(response.headers, rateLimitResult);
-      applySecurityHeaders(response.headers);
+      response.headers.set('x-nonce', nonce);
       
-      return response;
+      return applyStrictCSP(response, nonce);
     }
 
     // Super admin tiene acceso a todo
@@ -85,10 +90,10 @@ export default withAuth(
       const response = NextResponse.next();
       
       // Apply security and rate limit headers
-      applySecurityHeaders(response.headers);
+      response.headers.set('x-nonce', nonce);
       applyRateLimitHeaders(response.headers, rateLimitResult);
       
-      return response;
+      return applyStrictCSP(response, nonce);
     }
 
     // Verificar si el usuario tiene permisos para la ruta
@@ -98,16 +103,18 @@ export default withAuth(
     );
 
     if (!hasPermission && pathname !== '/unauthorized') {
-      return NextResponse.redirect(new URL('/unauthorized', req.url));
+      const response = NextResponse.redirect(new URL('/unauthorized', req.url));
+      response.headers.set('x-nonce', nonce);
+      return applyStrictCSP(response, nonce);
     }
 
     const response = NextResponse.next();
     
     // Apply security and rate limit headers
-    applySecurityHeaders(response.headers);
+    response.headers.set('x-nonce', nonce);
     applyRateLimitHeaders(response.headers, rateLimitResult);
 
-    return response;
+    return applyStrictCSP(response, nonce);
   },
   {
     callbacks: {

@@ -1,176 +1,174 @@
-import crypto from 'crypto';
-import logger, { logError } from '@/lib/logger';
+/**
+ * Servicio de Encriptación AES-256-GCM
+ * Utilizado para encriptar datos sensibles (PII) en la base de datos
+ */
 
-// Use AES-256-GCM for encryption
+import crypto from 'crypto';
+
 const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 16;
-const SALT_LENGTH = 64;
-const TAG_LENGTH = 16;
-const KEY_LENGTH = 32;
-const ITERATIONS = 100000;
+const AUTH_TAG_LENGTH = 16;
+const SALT_LENGTH = 32;
 
-/**
- * Derives a key from a password using PBKDF2
- */
-function deriveKey(password: string, salt: Buffer): Buffer {
-  return crypto.pbkdf2Sync(password, salt, ITERATIONS, KEY_LENGTH, 'sha512');
+// Obtener la clave de encriptación desde variables de entorno
+function getEncryptionKey(): Buffer {
+  const key = process.env.ENCRYPTION_KEY;
+  
+  if (!key) {
+    throw new Error(
+      'ENCRYPTION_KEY not found in environment variables. ' +
+      'Generate one with: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"'
+    );
+  }
+  
+  if (key.length !== 64) {
+    throw new Error('ENCRYPTION_KEY must be 64 hex characters (32 bytes)');
+  }
+  
+  return Buffer.from(key, 'hex');
 }
 
 /**
- * Encrypts data using AES-256-GCM
- * @param text - The text to encrypt
- * @param password - The password/key to use for encryption
- * @returns Encrypted string in format: salt:iv:tag:encryptedData
+ * Encripta un campo de texto usando AES-256-GCM
+ * @param text Texto plano a encriptar
+ * @returns Texto encriptado en formato: iv:authTag:encrypted
  */
-export function encrypt(text: string, password?: string): string {
+export function encryptField(text: string): string {
+  if (!text) return text;
+  
   try {
-    const encryptionKey = password || process.env.ENCRYPTION_KEY;
-    
-    if (!encryptionKey) {
-      throw new Error('Encryption key not provided');
-    }
-
-    // Generate random salt and IV
-    const salt = crypto.randomBytes(SALT_LENGTH);
+    const key = getEncryptionKey();
     const iv = crypto.randomBytes(IV_LENGTH);
-    
-    // Derive key from password
-    const key = deriveKey(encryptionKey, salt);
-    
-    // Create cipher
     const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
     
-    // Encrypt
     let encrypted = cipher.update(text, 'utf8', 'hex');
     encrypted += cipher.final('hex');
     
-    // Get authentication tag
-    const tag = cipher.getAuthTag();
+    const authTag = cipher.getAuthTag();
     
-    // Combine salt, iv, tag, and encrypted data
-    return `${salt.toString('hex')}:${iv.toString('hex')}:${tag.toString('hex')}:${encrypted}`;
+    // Formato: iv:authTag:encrypted
+    return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`;
   } catch (error) {
-    logger.error('Encryption error:', error);
-    throw new Error('Failed to encrypt data');
+    console.error('Error encrypting field:', error);
+    throw new Error('Encryption failed');
   }
 }
 
 /**
- * Decrypts data encrypted with the encrypt function
- * @param encryptedData - The encrypted string (salt:iv:tag:encryptedData)
- * @param password - The password/key used for encryption
- * @returns Decrypted string
+ * Desencripta un campo previamente encriptado
+ * @param encryptedText Texto encriptado en formato: iv:authTag:encrypted
+ * @returns Texto plano desencriptado
  */
-export function decrypt(encryptedData: string, password?: string): string {
+export function decryptField(encryptedText: string): string {
+  if (!encryptedText) return encryptedText;
+  
   try {
-    const encryptionKey = password || process.env.ENCRYPTION_KEY;
-    
-    if (!encryptionKey) {
-      throw new Error('Encryption key not provided');
+    const parts = encryptedText.split(':');
+    if (parts.length !== 3) {
+      throw new Error('Invalid encrypted text format');
     }
-
-    // Split the encrypted data
-    const parts = encryptedData.split(':');
-    if (parts.length !== 4) {
-      throw new Error('Invalid encrypted data format');
-    }
-
-    const [saltHex, ivHex, tagHex, encrypted] = parts;
     
-    // Convert from hex
-    const salt = Buffer.from(saltHex, 'hex');
+    const [ivHex, authTagHex, encrypted] = parts;
+    const key = getEncryptionKey();
     const iv = Buffer.from(ivHex, 'hex');
-    const tag = Buffer.from(tagHex, 'hex');
-    
-    // Derive key from password
-    const key = deriveKey(encryptionKey, salt);
-    
-    // Create decipher
+    const authTag = Buffer.from(authTagHex, 'hex');
     const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
-    decipher.setAuthTag(tag);
     
-    // Decrypt
+    decipher.setAuthTag(authTag);
+    
     let decrypted = decipher.update(encrypted, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
     
     return decrypted;
   } catch (error) {
-    logger.error('Decryption error:', error);
-    throw new Error('Failed to decrypt data');
+    console.error('Error decrypting field:', error);
+    throw new Error('Decryption failed');
   }
 }
 
 /**
- * Hashes data using SHA-256
- * @param data - The data to hash
- * @returns Hex string of the hash
- */
-export function hash(data: string): string {
-  return crypto.createHash('sha256').update(data).digest('hex');
-}
-
-/**
- * Compares a plain text string with a hash
- * @param data - The plain text data
- * @param hashedData - The hashed data to compare against
- * @returns True if they match
- */
-export function compareHash(data: string, hashedData: string): boolean {
-  return hash(data) === hashedData;
-}
-
-/**
- * Generates a random token
- * @param length - Length of the token in bytes (will be doubled in hex)
- * @returns Random token as hex string
- */
-export function generateToken(length: number = 32): string {
-  return crypto.randomBytes(length).toString('hex');
-}
-
-/**
- * Encrypts sensitive fields in an object
- * @param data - Object with data to encrypt
- * @param fields - Array of field names to encrypt
- * @returns Object with encrypted fields
+ * Encripta múltiples campos de un objeto
+ * @param obj Objeto con campos a encriptar
+ * @param fields Array de nombres de campos a encriptar
+ * @returns Nuevo objeto con campos encriptados
  */
 export function encryptFields<T extends Record<string, any>>(
-  data: T,
+  obj: T,
   fields: (keyof T)[]
 ): T {
-  const result = { ...data };
+  const encrypted = { ...obj };
   
   for (const field of fields) {
-    if (result[field] && typeof result[field] === 'string') {
-      result[field] = encrypt(result[field] as string) as any;
+    if (obj[field] && typeof obj[field] === 'string') {
+      encrypted[field] = encryptField(obj[field] as string) as T[keyof T];
     }
   }
   
-  return result;
+  return encrypted;
 }
 
 /**
- * Decrypts sensitive fields in an object
- * @param data - Object with encrypted data
- * @param fields - Array of field names to decrypt
- * @returns Object with decrypted fields
+ * Desencripta múltiples campos de un objeto
+ * @param obj Objeto con campos encriptados
+ * @param fields Array de nombres de campos a desencriptar
+ * @returns Nuevo objeto con campos desencriptados
  */
 export function decryptFields<T extends Record<string, any>>(
-  data: T,
+  obj: T,
   fields: (keyof T)[]
 ): T {
-  const result = { ...data };
+  const decrypted = { ...obj };
   
   for (const field of fields) {
-    if (result[field] && typeof result[field] === 'string') {
+    if (obj[field] && typeof obj[field] === 'string') {
       try {
-        result[field] = decrypt(result[field] as string) as any;
+        decrypted[field] = decryptField(obj[field] as string) as T[keyof T];
       } catch (error) {
-        logger.error(`Failed to decrypt field ${String(field)}:`, error);
-        // Keep encrypted value if decryption fails
+        console.error(`Error decrypting field ${String(field)}:`, error);
+        // Mantener el valor encriptado si falla la desencriptación
       }
     }
   }
   
-  return result;
+  return decrypted;
+}
+
+/**
+ * Genera un hash seguro usando PBKDF2
+ * Usado para passwords y backup codes
+ */
+export function hashWithSalt(text: string, salt?: string): { hash: string; salt: string } {
+  const saltBuffer = salt ? Buffer.from(salt, 'hex') : crypto.randomBytes(SALT_LENGTH);
+  const hash = crypto.pbkdf2Sync(text, saltBuffer, 100000, 64, 'sha512');
+  
+  return {
+    hash: hash.toString('hex'),
+    salt: saltBuffer.toString('hex'),
+  };
+}
+
+/**
+ * Verifica un hash PBKDF2
+ */
+export function verifyHash(text: string, hash: string, salt: string): boolean {
+  const { hash: computedHash } = hashWithSalt(text, salt);
+  return crypto.timingSafeEqual(
+    Buffer.from(hash, 'hex'),
+    Buffer.from(computedHash, 'hex')
+  );
+}
+
+/**
+ * Genera códigos de respaldo aleatorios y seguros
+ */
+export function generateBackupCodes(count: number = 10): string[] {
+  const codes: string[] = [];
+  
+  for (let i = 0; i < count; i++) {
+    const code = crypto.randomBytes(4).toString('hex').toUpperCase();
+    // Formato: XXXX-XXXX
+    codes.push(`${code.slice(0, 4)}-${code.slice(4)}`);
+  }
+  
+  return codes;
 }

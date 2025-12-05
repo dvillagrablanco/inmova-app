@@ -212,6 +212,14 @@ model User {
   businessVertical BusinessVertical?
   resetToken       String?           @unique
   resetTokenExpiry DateTime?
+  
+  // Multi-Factor Authentication (MFA)
+  mfaEnabled       Boolean           @default(false)
+  mfaSecret        String?           // Encrypted TOTP secret
+  mfaBackupCodes   String[]          @default([]) // Encrypted backup codes
+  mfaVerifiedAt    DateTime?
+  mfaRecoveryCodes Int               @default(10) // Count of remaining codes
+  
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
 
