@@ -27,31 +27,32 @@ export async function GET(req: NextRequest) {
 
     const searchParams = req.nextUrl.searchParams;
     const companyId = searchParams.get('companyId');
-    const resuelta = searchParams.get('resuelta');
+    const estado = searchParams.get('estado');
 
     const where: any = {};
     if (companyId) where.companyId = companyId;
-    if (resuelta !== null) where.resuelta = resuelta === 'true';
+    if (estado) where.estado = estado;
 
     const alerts = await prisma.financialAlert.findMany({
       where,
       orderBy: { fechaDeteccion: 'desc' },
     });
 
-    // Agrupar por nivel
-    const porNivel = {
-      alto: alerts.filter((a) => a.nivel === 'alto').length,
-      medio: alerts.filter((a) => a.nivel === 'medio').length,
-      bajo: alerts.filter((a) => a.nivel === 'bajo').length,
+    // Agrupar por severidad
+    const porSeveridad = {
+      critico: alerts.filter((a) => a.severidad === 'critico').length,
+      alto: alerts.filter((a) => a.severidad === 'alto').length,
+      medio: alerts.filter((a) => a.severidad === 'medio').length,
+      bajo: alerts.filter((a) => a.severidad === 'bajo').length,
     };
 
     return NextResponse.json({
       alerts,
       summary: {
         total: alerts.length,
-        porNivel,
-        pendientes: alerts.filter((a) => !a.resuelta).length,
-        resueltas: alerts.filter((a) => a.resuelta).length,
+        porSeveridad,
+        pendientes: alerts.filter((a) => a.estado === 'pendiente').length,
+        resueltas: alerts.filter((a) => a.estado === 'resuelto').length,
       },
     });
   } catch (error: any) {
@@ -86,9 +87,9 @@ export async function POST(req: NextRequest) {
       const alert = await prisma.financialAlert.update({
         where: { id: body.alertId },
         data: {
-          resuelta: true,
+          estado: 'resuelto',
           fechaResolucion: new Date(),
-          notasResolucion: body.notas,
+          accionTomada: body.notas,
         },
       });
       return NextResponse.json(alert);

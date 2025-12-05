@@ -7,7 +7,7 @@ import {
   getVotingResults,
   CreateVotingParams,
 } from '@/lib/services/community-management-service';
-import { VotacionTipo } from '@prisma/client';
+import { VoteType } from '@prisma/client';
 import { prisma } from '@/lib/db';
 
 /**
@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
       where,
       include: {
         building: true,
-        voteRecords: true,
+        votos: true,
       },
       orderBy: { fechaInicio: 'desc' },
     });
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
         opciones: body.opciones,
         fechaInicio: new Date(body.fechaInicio),
         fechaFin: new Date(body.fechaFin),
-        tipo: body.tipo as VotacionTipo,
+        tipo: body.tipo as VoteType,
         totalElegibles: body.totalElegibles,
         creadoPor: session.user.id!,
       };

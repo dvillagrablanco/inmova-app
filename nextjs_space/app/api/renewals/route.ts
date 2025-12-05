@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
+// import { prisma } from '@/lib/db';
 
 /**
  * @swagger
@@ -9,6 +9,9 @@ import { prisma } from '@/lib/db';
  *   get:
  *     summary: Obtener renovaciones de contratos
  *     tags: [Renovaciones]
+ * 
+ * NOTE: ContractRenewal model not yet implemented in Prisma schema
+ * This endpoint is temporarily disabled
  */
 
 export async function GET(req: NextRequest) {
@@ -18,6 +21,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
+    // TODO: Implement ContractRenewal model in Prisma schema first
+    return NextResponse.json({ 
+      error: 'ContractRenewal feature not yet implemented',
+      message: 'This endpoint requires the ContractRenewal model to be added to the Prisma schema'
+    }, { status: 501 });
+
+    /* Original code - to be uncommented after ContractRenewal model is added
     const searchParams = req.nextUrl.searchParams;
     const companyId = searchParams.get('companyId');
     const estado = searchParams.get('estado');
@@ -42,9 +52,10 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.json(renewals);
+    */
   } catch (error: any) {
     return NextResponse.json(
-      { error: error.message || 'Error al obtener renovaciones' },
+      { error: error.message || 'Error processing renewal request' },
       { status: 500 }
     );
   }
