@@ -186,6 +186,8 @@ const CORE_MODULES = [
   'admin_reportes_programados',
   'admin_importar',
   'api_docs',
+  'configuracion', // Agregado para que siempre se muestre la configuración de empresa
+  'usuarios', // Agregado para que siempre se muestre la gestión de usuarios
 ];
 
 // Navegación core - Funcionalidades principales
