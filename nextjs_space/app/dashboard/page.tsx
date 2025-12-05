@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { AdvancedAnalytics } from './components/advanced-analytics';
 import { PendingApprovals } from './components/pending-approvals';
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from '@/components/ui/lazy-charts-extended';
 import Link from 'next/link';
 import { AIAssistant } from '@/components/automation/AIAssistant';
 import SmartOnboardingWizard from '@/components/automation/SmartOnboardingWizard';

@@ -1,14 +1,20 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { LandingChatbot } from '@/components/LandingChatbot';
 import { StructuredData } from '@/components/StructuredData';
+
+// Lazy load del chatbot para reducir el bundle inicial
+const LandingChatbot = dynamic(() => import('@/components/LandingChatbot').then(mod => ({ default: mod.LandingChatbot })), {
+  ssr: false,
+  loading: () => null
+});
 import { 
   Building2, Users, TrendingUp, Zap, Shield, Bot, Leaf, 
   CheckCircle, Star, ArrowRight, Play, Hotel, Hammer, Briefcase,

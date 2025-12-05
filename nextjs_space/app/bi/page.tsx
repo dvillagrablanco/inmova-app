@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { 
   BarChart, Bar, LineChart, Line, PieChart, Pie, AreaChart, Area,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell 
-} from 'recharts';
+} from '@/components/ui/lazy-charts-extended';
 import { 
   Home, ArrowLeft, TrendingUp, TrendingDown, Building2, Users, 
   Euro, AlertCircle, Download, RefreshCw, Calendar, Filter

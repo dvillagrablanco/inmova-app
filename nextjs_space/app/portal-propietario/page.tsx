@@ -43,7 +43,7 @@ import {
   Tooltip as RechartsTooltip,
   Legend,
   ResponsiveContainer,
-} from 'recharts';
+} from '@/components/ui/lazy-charts-extended';
 import {
   DropdownMenu,
   DropdownMenuContent,

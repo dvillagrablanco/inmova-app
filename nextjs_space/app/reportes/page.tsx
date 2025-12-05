@@ -40,7 +40,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
-} from 'recharts';
+} from '@/components/ui/lazy-charts-extended';
 
 interface GlobalReport {
   ingresosBrutos: number;

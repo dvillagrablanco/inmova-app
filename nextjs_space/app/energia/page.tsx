@@ -33,7 +33,7 @@ import {
 } from 'lucide-react';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { format } from 'date-fns';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from '@/components/ui/lazy-charts-extended';
 import logger, { logError } from '@/lib/logger';
 
 interface Building {
