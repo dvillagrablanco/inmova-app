@@ -1,7 +1,23 @@
 import { useSession } from 'next-auth/react';
 import { UserRole } from '@prisma/client';
 
-type Permission = 'read' | 'create' | 'update' | 'delete' | 'manageUsers' | 'manageCompany' | 'viewReports' | 'manageClients' | 'impersonateClients';
+type Permission = 
+  | 'read' 
+  | 'create' 
+  | 'update' 
+  | 'delete' 
+  | 'manageUsers' 
+  | 'manageCompany' 
+  | 'viewReports' 
+  | 'manageClients' 
+  | 'impersonateClients'
+  | 'viewFinances'
+  | 'manageEvents'
+  | 'moderateCommunity'
+  | 'viewEngagement'
+  | 'manageSocialPosts'
+  | 'manageAnnouncements'
+  | 'viewCommunityStats';
 
 const PERMISSIONS = {
   super_admin: {
@@ -14,6 +30,13 @@ const PERMISSIONS = {
     viewReports: true,
     manageClients: true,
     impersonateClients: true,
+    viewFinances: true,
+    manageEvents: true,
+    moderateCommunity: true,
+    viewEngagement: true,
+    manageSocialPosts: true,
+    manageAnnouncements: true,
+    viewCommunityStats: true,
   },
   administrador: {
     read: true,
@@ -25,6 +48,13 @@ const PERMISSIONS = {
     viewReports: true,
     manageClients: false,
     impersonateClients: false,
+    viewFinances: true,
+    manageEvents: true,
+    moderateCommunity: true,
+    viewEngagement: true,
+    manageSocialPosts: true,
+    manageAnnouncements: true,
+    viewCommunityStats: true,
   },
   gestor: {
     read: true,
@@ -36,17 +66,31 @@ const PERMISSIONS = {
     viewReports: true,
     manageClients: false,
     impersonateClients: false,
+    viewFinances: true,
+    manageEvents: true,
+    moderateCommunity: false,
+    viewEngagement: true,
+    manageSocialPosts: false,
+    manageAnnouncements: false,
+    viewCommunityStats: true,
   },
   operador: {
     read: true,
-    create: true, // Puede crear reportes de trabajo y adjuntar fotos
-    update: true, // Puede actualizar órdenes de trabajo y mantenimiento
+    create: true,
+    update: true,
     delete: false,
     manageUsers: false,
     manageCompany: false,
-    viewReports: true, // Puede ver reportes de sus trabajos
+    viewReports: true,
     manageClients: false,
     impersonateClients: false,
+    viewFinances: false,
+    manageEvents: false,
+    moderateCommunity: false,
+    viewEngagement: false,
+    manageSocialPosts: false,
+    manageAnnouncements: false,
+    viewCommunityStats: false,
   },
   tenant: {
     read: true,
@@ -58,6 +102,13 @@ const PERMISSIONS = {
     viewReports: true,
     manageClients: false,
     impersonateClients: false,
+    viewFinances: false,
+    manageEvents: false,
+    moderateCommunity: false,
+    viewEngagement: false,
+    manageSocialPosts: false,
+    manageAnnouncements: false,
+    viewCommunityStats: false,
   },
   soporte: {
     read: true,
@@ -69,6 +120,32 @@ const PERMISSIONS = {
     viewReports: true,
     manageClients: true,
     impersonateClients: true,
+    viewFinances: true,
+    manageEvents: true,
+    moderateCommunity: true,
+    viewEngagement: true,
+    manageSocialPosts: true,
+    manageAnnouncements: true,
+    viewCommunityStats: true,
+  },
+  // NUEVO ROL: Community Manager - Gestión de eventos y comunidad sin acceso a finanzas
+  community_manager: {
+    read: true,
+    create: true,
+    update: true,
+    delete: false,
+    manageUsers: false,
+    manageCompany: false,
+    viewReports: true,
+    manageClients: false,
+    impersonateClients: false,
+    viewFinances: false, // ❌ SIN ACCESO a finanzas
+    manageEvents: true, // ✅ Gestión completa de eventos
+    moderateCommunity: true, // ✅ Moderación de comunidad social
+    viewEngagement: true, // ✅ Analytics de engagement
+    manageSocialPosts: true, // ✅ Gestión de posts sociales
+    manageAnnouncements: true, // ✅ Gestión de anuncios
+    viewCommunityStats: true, // ✅ Estadísticas de comunidad
   },
 } as const;
 
@@ -81,6 +158,7 @@ export function usePermissions() {
     return PERMISSIONS[role]?.[permission] ?? false;
   };
 
+  // Permisos básicos
   const canRead = hasPermission('read');
   const canCreate = hasPermission('create');
   const canUpdate = hasPermission('update');
@@ -88,17 +166,30 @@ export function usePermissions() {
   const canManageUsers = hasPermission('manageUsers');
   const canManageCompany = hasPermission('manageCompany');
   const canViewReports = hasPermission('viewReports');
-
   const canManageClients = hasPermission('manageClients');
 
+  // Permisos financieros
+  const canViewFinances = hasPermission('viewFinances');
+
+  // Permisos de Community Manager
+  const canManageEvents = hasPermission('manageEvents');
+  const canModerateCommunity = hasPermission('moderateCommunity');
+  const canViewEngagement = hasPermission('viewEngagement');
+  const canManageSocialPosts = hasPermission('manageSocialPosts');
+  const canManageAnnouncements = hasPermission('manageAnnouncements');
+  const canViewCommunityStats = hasPermission('viewCommunityStats');
+
+  // Roles específicos
   const isSuperAdmin = role === 'super_admin';
-  const isAdmin = role === 'administrador' || role === 'super_admin'; // Super admins también tienen permisos de admin
+  const isAdmin = role === 'administrador' || role === 'super_admin';
   const isGestor = role === 'gestor';
   const isOperador = role === 'operador';
+  const isCommunityManager = role === 'community_manager';
 
   return {
     role,
     hasPermission,
+    // Permisos básicos
     canRead,
     canCreate,
     canUpdate,
@@ -107,10 +198,21 @@ export function usePermissions() {
     canManageCompany,
     canViewReports,
     canManageClients,
+    // Permisos financieros
+    canViewFinances,
+    // Permisos de Community Manager
+    canManageEvents,
+    canModerateCommunity,
+    canViewEngagement,
+    canManageSocialPosts,
+    canManageAnnouncements,
+    canViewCommunityStats,
+    // Roles
     isSuperAdmin,
     isAdmin,
     isGestor,
     isOperador,
+    isCommunityManager,
     isLoading: status === 'loading',
   };
 }

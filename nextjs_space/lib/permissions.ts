@@ -17,6 +17,10 @@ export const PERMISSIONS = {
     viewReports: true,
     manageClients: true, // Gestión de empresas/clientes
     impersonateClients: true, // Acceso a múltiples clientes
+    viewFinances: true, // Acceso a datos financieros
+    manageEvents: true, // Gestión de eventos
+    moderateCommunity: true, // Moderación de comunidad
+    viewEngagement: true, // Analytics de engagement
   },
   administrador: {
     read: true,
@@ -26,6 +30,10 @@ export const PERMISSIONS = {
     manageUsers: true,
     manageCompany: true,
     viewReports: true,
+    viewFinances: true,
+    manageEvents: true,
+    moderateCommunity: true,
+    viewEngagement: true,
   },
   gestor: {
     read: true,
@@ -35,6 +43,10 @@ export const PERMISSIONS = {
     manageUsers: false,
     manageCompany: false,
     viewReports: true,
+    viewFinances: true,
+    manageEvents: true,
+    moderateCommunity: false,
+    viewEngagement: true,
   },
   operador: {
     read: true,
@@ -47,6 +59,10 @@ export const PERMISSIONS = {
     uploadFiles: true, // Puede subir fotos desde campo
     viewMaintenanceHistory: true, // Puede ver historial completo de mantenimiento
     checkInOut: true, // Puede hacer check-in/check-out en trabajos
+    viewFinances: false,
+    manageEvents: false,
+    moderateCommunity: false,
+    viewEngagement: false,
   },
   tenant: {
     read: true,
@@ -56,6 +72,10 @@ export const PERMISSIONS = {
     manageUsers: false,
     manageCompany: false,
     viewReports: true,
+    viewFinances: false,
+    manageEvents: false,
+    moderateCommunity: false,
+    viewEngagement: false,
   },
   soporte: {
     read: true,
@@ -67,6 +87,27 @@ export const PERMISSIONS = {
     viewReports: true,
     manageClients: true,
     impersonateClients: true,
+    viewFinances: true,
+    manageEvents: true,
+    moderateCommunity: true,
+    viewEngagement: true,
+  },
+  // NUEVO ROL: Community Manager - Gestión de eventos y comunidad sin acceso a finanzas
+  community_manager: {
+    read: true,
+    create: true, // Puede crear eventos y contenido
+    update: true, // Puede actualizar eventos y moderación
+    delete: false, // No puede eliminar registros importantes
+    manageUsers: false, // Sin gestión de usuarios
+    manageCompany: false, // Sin gestión de empresa
+    viewReports: true, // Puede ver reportes de engagement
+    viewFinances: false, // ❌ SIN ACCESO a finanzas
+    manageEvents: true, // ✅ Gestión completa de eventos
+    moderateCommunity: true, // ✅ Moderación de comunidad social
+    viewEngagement: true, // ✅ Analytics de engagement
+    manageSocialPosts: true, // ✅ Gestión de posts sociales
+    manageAnnouncements: true, // ✅ Gestión de anuncios
+    viewCommunityStats: true, // ✅ Estadísticas de comunidad
   },
 } as const;
 
