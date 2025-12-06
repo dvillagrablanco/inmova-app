@@ -100,7 +100,7 @@ export default function ImportarPage() {
   const [file, setFile] = useState<File | null>(null);
   const [entityType, setEntityType] = useState('');
   const [sourceSystem, setSourceSystem] = useState('generic_csv');
-  const [buildingId, setBuildingId] = useState('');
+  const [buildingId, setBuildingId] = useState('auto-detect');
   const [buildings, setBuildings] = useState<any[]>([]);
   const [validating, setValidating] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -203,7 +203,7 @@ export default function ImportarPage() {
       formData.append('file', file);
       formData.append('entityType', entityType);
       formData.append('sourceSystem', sourceSystem);
-      if (buildingId) {
+      if (buildingId && buildingId !== 'auto-detect') {
         formData.append('buildingId', buildingId);
       }
 
@@ -239,7 +239,7 @@ export default function ImportarPage() {
     setFile(null);
     setEntityType('');
     setSourceSystem('generic_csv');
-    setBuildingId('');
+    setBuildingId('auto-detect');
     setValidationResult(null);
     setImportResult(null);
     setCurrentStep('select');
@@ -362,7 +362,7 @@ export default function ImportarPage() {
                   <SelectValue placeholder="Selecciona un edificio" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Detectar automáticamente</SelectItem>
+                  <SelectItem value="auto-detect">Detectar automáticamente</SelectItem>
                   {buildings.map((building) => (
                     <SelectItem key={building.id} value={building.id}>
                       {building.nombre} - {building.direccion}

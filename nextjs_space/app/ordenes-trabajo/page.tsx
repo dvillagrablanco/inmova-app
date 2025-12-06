@@ -65,8 +65,8 @@ function OrdenesTrabajoPage() {
     prioridad: 'media',
     providerId: '',
     buildingId: '',
-    unitId: '',
-    fechaAsignacion: new Date().toISOString().split('T')[0],
+    unitId: 'no-unit',
+    fechaAsignacion: '',
     fechaEstimada: '',
     costoTotal: '',
     notas: ''
@@ -127,7 +127,7 @@ function OrdenesTrabajoPage() {
   };
 
   const handleBuildingChange = (buildingId: string) => {
-    setFormData({ ...formData, buildingId, unitId: '' });
+    setFormData({ ...formData, buildingId, unitId: 'no-unit' });
     const building = buildings.find(b => b.id === buildingId);
     setUnits(building?.units || []);
   };
@@ -143,7 +143,7 @@ function OrdenesTrabajoPage() {
         prioridad: orden.prioridad,
         providerId: (orden.provider as any)?.id || '',
         buildingId: (orden.building as any)?.id || '',
-        unitId: orden.unit?.id || '',
+        unitId: orden.unit?.id || 'no-unit',
         fechaAsignacion: orden.fechaAsignacion.split('T')[0],
         fechaEstimada: orden.fechaEstimada ? orden.fechaEstimada.split('T')[0] : '',
         costoTotal: orden.costoTotal?.toString() || '',
@@ -165,8 +165,8 @@ function OrdenesTrabajoPage() {
         prioridad: 'media',
         providerId: '',
         buildingId: '',
-        unitId: '',
-        fechaAsignacion: new Date().toISOString().split('T')[0],
+        unitId: 'no-unit',
+        fechaAsignacion: '',
         fechaEstimada: '',
         costoTotal: '',
         notas: ''
@@ -190,6 +190,7 @@ function OrdenesTrabajoPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
+          unitId: formData.unitId === 'no-unit' ? null : formData.unitId,
           costoTotal: formData.costoTotal ? parseFloat(formData.costoTotal) : null
         })
       });
@@ -722,7 +723,7 @@ function OrdenesTrabajoPage() {
                     <SelectValue placeholder="Selecciona unidad" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Sin unidad</SelectItem>
+                    <SelectItem value="no-unit">Sin unidad</SelectItem>
                     {units.map((unit) => (
                       <SelectItem key={unit.id} value={unit.id}>
                         Unidad {unit.numero}
