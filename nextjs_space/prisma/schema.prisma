@@ -1159,6 +1159,10 @@ model Company {
   // Cupones de descuento
   discountCoupons DiscountCoupon[]
 
+  // Sistema de Partners B2B
+  partnerClients PartnerClient[]
+  partnerCommissions Commission[]
+
   // Facturación B2B
   b2bInvoices            B2BInvoice[]
   b2bPaymentHistory      B2BPaymentHistory[]
@@ -9580,4 +9584,195 @@ model ColivingPackage {
   @@index([companyId])
   @@index([buildingId])
   @@index([estado])
+}
+
+// ============================================
+// SISTEMA DE PARTNERS B2B
+// ============================================
+
+model Partner {
+  id          String   @id @default(cuid())
+  
+  // Información básica
+  nombre      String
+  razonSocial String
+  cif         String   @unique
+  tipo        PartnerType @default(BANCO) // BANCO, MULTIFAMILY_OFFICE, PLATAFORMA_MEMBRESIA, etc.
+  
+  // Contacto principal
+  contactoNombre String
+  contactoEmail String @unique
+  contactoTelefono String?
+  
+  // Autenticación
+  email       String   @unique
+  password    String   // hasheado
+  
+  // Personalización White Label
+  logo        String?
+  coloresPrimarios Json? // {primary, secondary, accent}
+  dominioPersonalizado String? @unique
+  
+  // Comisiones
+  comisionPorcentaje Float @default(20.0) // 20% por defecto
+  umbralComision Int @default(1) // clientes necesarios para tier
+  
+  // Estado
+  estado      PartnerStatus @default(PENDING) // PENDING, ACTIVE, SUSPENDED
+  activo      Boolean  @default(true)
+  fechaActivacion DateTime?
+  
+  // Configuración
+  config      Json @default("{}") // configuraciones adicionales
+  notas       String?  @db.Text
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relaciones
+  clientes    PartnerClient[]
+  invitaciones PartnerInvitation[]
+  comisiones  Commission[]
+
+  @@index([email])
+  @@index([estado])
+  @@index([tipo])
+}
+
+model PartnerClient {
+  id          String   @id @default(cuid())
+  
+  partnerId   String
+  partner     Partner  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Estado
+  estado      String   @default("activo") // activo, suspendido, cancelado
+  fechaActivacion DateTime @default(now())
+  fechaCancelacion DateTime?
+  
+  // Tracking
+  origenInvitacion String? // email, landing, directo
+  codigoReferido String?  // código único de referencia
+  
+  // Comisiones generadas
+  totalComisionGenerada Float @default(0)
+  ultimaComisionFecha DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([partnerId, companyId])
+  @@index([partnerId])
+  @@index([companyId])
+  @@index([estado])
+}
+
+model Commission {
+  id          String   @id @default(cuid())
+  
+  partnerId   String
+  partner     Partner  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+  
+  // Detalles de la comisión
+  periodo     String   // "2025-12" formato año-mes
+  montoBruto  Float    // precio total del cliente
+  porcentaje  Float    // % de comisión aplicado
+  montoComision Float  // cantidad para el partner
+  
+  // Suscripción relacionada
+  planId      String?
+  planNombre  String?
+  
+  // Estado
+  estado      CommissionStatus @default(PENDING) // PENDING, APPROVED, PAID
+  fechaAprobacion DateTime?
+  fechaPago   DateTime?
+  referenciaPago String?
+  
+  // Metadata
+  clientesActivos Int
+  notas       String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([partnerId, companyId, periodo])
+  @@index([partnerId])
+  @@index([companyId])
+  @@index([periodo])
+  @@index([estado])
+}
+
+model PartnerInvitation {
+  id          String   @id @default(cuid())
+  
+  partnerId   String
+  partner     Partner  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  
+  // Destinatario
+  email       String
+  nombre      String?
+  telefono    String?
+  
+  // Invitación
+  token       String   @unique
+  mensaje     String?  @db.Text
+  
+  // Estado
+  estado      PartnerInvitationStatus @default(PENDING) // PENDING, ACCEPTED, EXPIRED, CANCELLED
+  enviadoFecha DateTime @default(now())
+  aceptadoFecha DateTime?
+  expiraFecha DateTime // típicamente +30 días
+  
+  // Resultado
+  companyId   String?  // ID de la company creada si aceptó
+  
+  // Metadata
+  metadata    Json @default("{}") // info adicional
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([partnerId])
+  @@index([email])
+  @@index([token])
+  @@index([estado])
+}
+
+// Enums para Partners
+enum PartnerType {
+  BANCO
+  MULTIFAMILY_OFFICE
+  PLATAFORMA_MEMBRESIA
+  ASOCIACION
+  CONSULTORA
+  INMOBILIARIA
+  OTRO
+}
+
+enum PartnerStatus {
+  PENDING     // En revisión
+  ACTIVE      // Activo y operando
+  SUSPENDED   // Suspendido temporalmente
+  CANCELLED   // Cancelado permanentemente
+}
+
+enum CommissionStatus {
+  PENDING     // Pendiente de aprobación
+  APPROVED    // Aprobada, pendiente de pago
+  PAID        // Pagada
+  CANCELLED   // Cancelada
+}
+
+enum PartnerInvitationStatus {
+  PENDING     // Enviada, esperando respuesta
+  ACCEPTED    // Aceptada por el cliente
+  EXPIRED     // Expirada sin respuesta
+  CANCELLED   // Cancelada por el partner
 }
