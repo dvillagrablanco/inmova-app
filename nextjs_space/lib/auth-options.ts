@@ -18,32 +18,72 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Credenciales inválidas');
         }
 
+        // Intentar autenticar como usuario normal
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
           include: { company: true },
         });
 
-        if (!user || !user?.password) {
+        if (user) {
+          if (!user?.password) {
+            throw new Error('Usuario no encontrado');
+          }
+
+          if (!user.activo) {
+            throw new Error('Usuario inactivo. Contacte al administrador.');
+          }
+
+          const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+
+          if (!isPasswordValid) {
+            throw new Error('Contraseña incorrecta');
+          }
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            companyId: user.companyId,
+            companyName: user.company.nombre,
+            userType: 'user',
+          };
+        }
+
+        // Si no es usuario, intentar autenticar como comercial
+        const salesRep = await prisma.salesRepresentative.findUnique({
+          where: { email: credentials.email },
+          include: { company: true },
+        });
+
+        if (!salesRep) {
           throw new Error('Usuario no encontrado');
         }
 
-        if (!user.activo) {
-          throw new Error('Usuario inactivo. Contacte al administrador.');
+        if (!salesRep.activo) {
+          throw new Error('Comercial inactivo. Contacte al administrador.');
         }
 
-        const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+        const isPasswordValid = await bcrypt.compare(credentials.password, salesRep.password);
 
         if (!isPasswordValid) {
           throw new Error('Contraseña incorrecta');
         }
 
+        // Actualizar último acceso
+        await prisma.salesRepresentative.update({
+          where: { id: salesRep.id },
+          data: { ultimoAcceso: new Date() },
+        });
+
         return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          companyId: user.companyId,
-          companyName: user.company.nombre,
+          id: salesRep.id,
+          email: salesRep.email,
+          name: salesRep.nombreCompleto,
+          role: 'sales_representative',
+          companyId: salesRep.companyId,
+          companyName: salesRep.company.nombre,
+          userType: 'sales_representative',
         };
       },
     }),
@@ -55,6 +95,7 @@ export const authOptions: NextAuthOptions = {
         token.role = (user as any).role;
         token.companyId = (user as any).companyId;
         token.companyName = (user as any).companyName;
+        token.userType = (user as any).userType;
       }
       return token;
     },
@@ -64,6 +105,7 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).role = token.role;
         (session.user as any).companyId = token.companyId;
         (session.user as any).companyName = token.companyName;
+        (session.user as any).userType = token.userType;
       }
       return session;
     },
