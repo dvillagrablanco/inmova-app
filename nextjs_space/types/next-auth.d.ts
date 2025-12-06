@@ -12,6 +12,8 @@ declare module 'next-auth' {
     name: string;
     role: 'super_admin' | 'administrador' | 'gestor' | 'operador' | 'tenant' | 'soporte';
     companyId: string;
+    tenantId?: string;
+    profileId?: string;
   }
 
   interface Session {
@@ -21,6 +23,8 @@ declare module 'next-auth' {
       name: string;
       role: 'super_admin' | 'administrador' | 'gestor' | 'operador' | 'tenant' | 'soporte';
       companyId: string;
+      tenantId?: string;
+      profileId?: string;
     };
   }
 }

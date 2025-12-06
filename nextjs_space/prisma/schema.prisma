@@ -370,6 +370,13 @@ model Building {
   cashFlowForecasts    CashFlowForecast[]
   buildingInspections  BuildingInspection[]
 
+  // Coliving
+  colivingGroups        ColivingGroup[]
+  colivingActivityPosts ColivingActivityPost[]
+  colivingEvents        ColivingEvent[]
+  smartLocks            SmartLock[]
+  colivingPackages      ColivingPackage[]
+
   // Índices optimizados para consultas frecuentes
   @@index([companyId])
   @@index([tipo, companyId])
@@ -460,6 +467,13 @@ model Tenant {
   serviceRatings      ServiceRating[]
   onboarding          TenantOnboarding?
 
+  // Coliving
+  colivingProfile         ColivingProfile?
+  colivingServiceBookings ColivingServiceBooking[]
+  colivingCheckInOuts     ColivingCheckInOut[]
+  smartLockAccesses       SmartLockAccess[]
+  colivingPackages        ColivingPackage[]
+
   // Índices optimizados para consultas frecuentes
   @@index([companyId])
   @@index([email])
@@ -544,6 +558,10 @@ model Unit {
   // Gestión de Comunidades
   communityFees              CommunityFee[]
   habitabilityCertificates   HabitabilityCertificate[]
+
+  // Coliving
+  colivingCheckInOuts ColivingCheckInOut[]
+  smartLocks          SmartLock[]
 
   @@unique([buildingId, numero])
   // Índices optimizados para consultas frecuentes
@@ -1196,6 +1214,18 @@ model Company {
   modelo347Records            Modelo347Record[]
   modelo180Records            Modelo180Record[]
   buildingInspections         BuildingInspection[]
+
+  // Coliving - Red Social y Servicios Premium
+  colivingProfiles            ColivingProfile[]
+  colivingMatches             ColivingMatch[]
+  colivingGroups              ColivingGroup[]
+  colivingActivityPosts       ColivingActivityPost[]
+  colivingEvents              ColivingEvent[]
+  colivingServices            ColivingService[]
+  colivingServiceBookings     ColivingServiceBooking[]
+  colivingCheckInOuts         ColivingCheckInOut[]
+  smartLocks                  SmartLock[]
+  colivingPackages            ColivingPackage[]
 
   @@map("company")
 }
@@ -6906,6 +6936,10 @@ model Room {
   unit      Unit           @relation(fields: [unitId], references: [id], onDelete: Cascade)
   contracts RoomContract[]
 
+  // Coliving
+  colivingCheckInOuts ColivingCheckInOut[]
+  smartLocks          SmartLock[]
+
   @@unique([unitId, numero])
   @@map("rooms")
 }
@@ -9133,4 +9167,417 @@ model CommunityReport {
   @@index([tipo])
   @@index([periodo])
   @@map("community_reports")
+}
+// ========================================
+// 🏘️ COLIVING - RED SOCIAL Y COMUNIDAD
+// ========================================
+
+model ColivingProfile {
+  id                String   @id @default(cuid())
+  tenantId          String   @unique
+  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  companyId         String
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Información del perfil
+  bio               String?  @db.Text
+  intereses         Json     // array de strings: ["yoga", "networking", "cocina"]
+  profesion         String?
+  idiomas           Json     // array de strings: ["es", "en", "fr"]
+  redesSociales     Json?    // {instagram: "@user", linkedin: "profile"}
+  
+  // Preferencias de matching
+  buscoCompañeros   Boolean  @default(true)
+  interesCompartir  Json     // array: ["coche", "recetas", "eventos"]
+  disponibilidad    Json     // {lunes: ["18:00-21:00"], martes: ["19:00-22:00"]}
+  
+  // Gamificación
+  puntosReputacion  Int      @default(0)
+  nivel             String   @default("bronce") // bronce, plata, oro, platino
+  badges            Json     @default("[]") // array de badges ganados
+  
+  // Privacidad
+  perfilPublico     Boolean  @default(true)
+  mostrarContacto   Boolean  @default(false)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  matches           ColivingMatch[]
+  gruposParticipa   ColivingGroupMember[]
+  actividades       ColivingActivityPost[]
+  eventosAsiste     ColivingEventAttendance[]
+
+  @@index([companyId])
+  @@index([tenantId])
+}
+
+model ColivingMatch {
+  id              String   @id @default(cuid())
+  profile1Id      String
+  profile1        ColivingProfile @relation(fields: [profile1Id], references: [id], onDelete: Cascade)
+  profile2Id      String
+  companyId       String
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  scoreCompatibilidad Int  // 0-100
+  interesesComunes    Json // array de intereses compartidos
+  estado              String @default("sugerido") // sugerido, aceptado, rechazado
+  mensajeIntroduccion String? @db.Text
+  
+  fechaMatch      DateTime @default(now())
+  fechaAceptacion DateTime?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([profile1Id])
+  @@index([companyId])
+  @@unique([profile1Id, profile2Id])
+}
+
+model ColivingGroup {
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  buildingId  String?
+  building    Building? @relation(fields: [buildingId], references: [id], onDelete: SetNull)
+  
+  nombre      String
+  descripcion String   @db.Text
+  categoria   String   // yoga, networking, cocina, deportes, cultura, etc.
+  icono       String?  // emoji o nombre de icono
+  imagen      String?  // URL de imagen del grupo
+  
+  esPublico   Boolean  @default(true)
+  maxMiembros Int?     // límite de miembros
+  reglas      String?  @db.Text
+  
+  adminId     String   // tenant que administra
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  miembros    ColivingGroupMember[]
+  eventos     ColivingEvent[]
+
+  @@index([companyId])
+  @@index([buildingId])
+}
+
+model ColivingGroupMember {
+  id        String   @id @default(cuid())
+  groupId   String
+  group     ColivingGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  profileId String
+  profile   ColivingProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  
+  rol       String   @default("miembro") // admin, moderador, miembro
+  fechaUnion DateTime @default(now())
+  activo    Boolean  @default(true)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([groupId])
+  @@index([profileId])
+  @@unique([groupId, profileId])
+}
+
+model ColivingActivityPost {
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  buildingId  String?
+  building    Building? @relation(fields: [buildingId], references: [id], onDelete: SetNull)
+  profileId   String
+  profile     ColivingProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  
+  tipo        String   // post, evento, pregunta, logro
+  contenido   String   @db.Text
+  imagenes    Json?    // array de URLs
+  hashtags    Json?    // array de strings
+  
+  likes       Json     @default("[]") // array de tenantIds
+  comentarios Json     @default("[]") // array de {tenantId, texto, fecha}
+  
+  visibilidad String   @default("comunidad") // comunidad, edificio, publico
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([buildingId])
+  @@index([profileId])
+}
+
+model ColivingEvent {
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  buildingId  String?
+  building    Building? @relation(fields: [buildingId], references: [id], onDelete: SetNull)
+  groupId     String?
+  group       ColivingGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  
+  titulo      String
+  descripcion String   @db.Text
+  tipo        String   // social, deportivo, cultural, networking
+  fecha       DateTime
+  duracion    Int      // minutos
+  ubicacion   String
+  capacidad   Int?
+  
+  requiereInscripcion Boolean @default(false)
+  costo       Float?   @default(0)
+  organizador String   // tenantId
+  
+  imagen      String?
+  etiquetas   Json?    // array de strings
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  asistentes  ColivingEventAttendance[]
+
+  @@index([companyId])
+  @@index([buildingId])
+  @@index([groupId])
+}
+
+model ColivingEventAttendance {
+  id        String   @id @default(cuid())
+  eventId   String
+  event     ColivingEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  profileId String
+  profile   ColivingProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  
+  estado    String   @default("confirmado") // confirmado, pendiente, cancelado
+  notas     String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([eventId])
+  @@index([profileId])
+  @@unique([eventId, profileId])
+}
+
+// ========================================
+// 🛎️ COLIVING - SERVICIOS PREMIUM
+// ========================================
+
+model ColivingService {
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  nombre      String
+  descripcion String   @db.Text
+  categoria   String   // limpieza, lavanderia, chef, trainer, masajes, etc.
+  icono       String?
+  
+  precioBase  Float
+  unidad      String   // por hora, por servicio, por día
+  duracion    Int?     // minutos si aplica
+  
+  disponible  Boolean  @default(true)
+  proveedorExterno String? // nombre del proveedor
+  contactoProveedor String?
+  
+  imagenes    Json?    // array de URLs
+  requisitos  String?  @db.Text
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  reservas    ColivingServiceBooking[]
+
+  @@index([companyId])
+  @@index([categoria])
+}
+
+model ColivingServiceBooking {
+  id          String   @id @default(cuid())
+  serviceId   String
+  service     ColivingService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  fechaServicio DateTime
+  horaInicio  String   // "14:00"
+  duracion    Int      // minutos
+  
+  ubicacion   String   // número de habitación/unidad
+  estado      String   @default("pendiente") // pendiente, confirmado, en_progreso, completado, cancelado
+  
+  precioTotal Float
+  notas       String?  @db.Text
+  instruccionesEspeciales String? @db.Text
+  
+  valoracion  Int?     // 1-5 estrellas
+  comentario  String?  @db.Text
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([serviceId])
+  @@index([tenantId])
+  @@index([companyId])
+  @@index([fechaServicio])
+}
+
+model ColivingCheckInOut {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  unitId      String
+  unit        Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  roomId      String?
+  room        Room?    @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  
+  tipo        String   // check_in, check_out
+  metodo      String   // digital, presencial, automatico
+  
+  fechaProgramada DateTime
+  fechaReal   DateTime?
+  
+  estado      String   @default("pendiente") // pendiente, completado, cancelado
+  
+  // Check-in digital
+  documentosVerificados Boolean @default(false)
+  firmaDigital String?  // URL del documento firmado
+  codigoAcceso String?  // código temporal para SmartLock
+  
+  // Inventario
+  inventarioEntrada Json? // estado de la habitación al entrar
+  inventarioSalida  Json? // estado de la habitación al salir
+  fotosEntrada      Json? // array de URLs
+  fotosSalida       Json? // array de URLs
+  
+  // Llaves
+  llaveDigitalEnviada Boolean @default(false)
+  llaveDigitalActiva  Boolean @default(false)
+  
+  notas       String?  @db.Text
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([companyId])
+  @@index([unitId])
+  @@index([roomId])
+}
+
+model SmartLock {
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  buildingId  String
+  building    Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  unitId      String?
+  unit        Unit?    @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  roomId      String?
+  room        Room?    @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  
+  nombre      String   // "Habitación 101 - Puerta Principal"
+  ubicacion   String
+  
+  // Integración API
+  marca       String   // August, Yale, Schlage, TTLock, etc.
+  modelo      String
+  numeroSerie String   @unique
+  apiEndpoint String?
+  apiKey      String?  // encriptada
+  
+  // Estado
+  estado      String   @default("activo") // activo, inactivo, mantenimiento
+  bateria     Int?     // porcentaje
+  conectado   Boolean  @default(true)
+  ultimaConexion DateTime?
+  
+  // Configuración
+  modoAcceso  String   @default("codigo") // codigo, tarjeta, biometrico, app
+  autoBloqueo Boolean  @default(true)
+  tiempoAutoBloqueo Int @default(30) // segundos
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  accesos     SmartLockAccess[]
+
+  @@index([companyId])
+  @@index([buildingId])
+  @@index([unitId])
+  @@index([roomId])
+}
+
+model SmartLockAccess {
+  id          String   @id @default(cuid())
+  lockId      String
+  lock        SmartLock @relation(fields: [lockId], references: [id], onDelete: Cascade)
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  tipoAcceso  String   // permanente, temporal, invitado
+  codigoAcceso String? // código PIN o token
+  
+  fechaInicio DateTime
+  fechaFin    DateTime?
+  
+  activo      Boolean  @default(true)
+  usosPermitidos Int?  // null = ilimitado
+  usosRealizados Int   @default(0)
+  
+  // Log de accesos
+  ultimoAcceso DateTime?
+  historialAccesos Json @default("[]") // array de {fecha, exito, metodo}
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([lockId])
+  @@index([tenantId])
+}
+
+model ColivingPackage {
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  buildingId  String
+  building    Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  
+  numeroSeguimiento String?
+  remitente   String
+  empresa     String?  // compañía de envío
+  
+  fechaLlegada DateTime @default(now())
+  fechaRecogida DateTime?
+  
+  estado      String   @default("pendiente") // pendiente, notificado, recogido
+  ubicacionAlmacen String? // donde está guardado
+  
+  tamano      String?  // pequeño, mediano, grande
+  requiereRefrigeracion Boolean @default(false)
+  requiereFirma Boolean @default(false)
+  
+  fotoComprobante String? // URL
+  notificado  Boolean  @default(false)
+  
+  notas       String?  @db.Text
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([companyId])
+  @@index([buildingId])
+  @@index([estado])
 }
