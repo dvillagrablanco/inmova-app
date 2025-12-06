@@ -15,6 +15,7 @@ enum UserRole {
   gestor
   operador
   soporte
+  community_manager
 }
 
 enum BusinessVertical {
@@ -480,6 +481,12 @@ model Tenant {
   spaceWaitlists      SpaceWaitlist[]
   reservationCredits  ReservationCredits?
   spaceRatings        SpaceRating[]
+
+  // Community Management - Pack 1
+  eventAttendances        EventAttendee[]
+  eventComments           EventComment[]
+  postReactions           PostReaction[]
+  announcementConfirmations AnnouncementConfirmation[]
 
   // Índices optimizados para consultas frecuentes
   @@index([companyId])
@@ -1247,6 +1254,15 @@ model Company {
   spaceWaitlists              SpaceWaitlist[]
   spaceRatings                SpaceRating[]
   spaceMaintenancePredictions SpaceMaintenancePrediction[]
+
+  // Community Management - Pack 1
+  communityEngagementMetrics CommunityEngagementMetrics[]
+
+  // STR Housekeeping - Pack 3
+  housekeepingTasks      STRHousekeepingTask[]
+  housekeepingStaff      STRHousekeepingStaff[]
+  housekeepingInventory  STRHousekeepingInventory[]
+  housekeepingChecklists STRHousekeepingChecklist[]
 
   @@map("company")
 }
@@ -6414,6 +6430,12 @@ model STRListing {
   reviews       STRReview[]
   seasonPricing STRSeasonPricing[]
 
+  // STR Channel Manager Avanzado - Pack 2
+  channelPricing      STRChannelPricing[]
+  dynamicPricingRules STRDynamicPricingRule[]
+  competitorAnalysis  STRCompetitorAnalysis[]
+  channelMetrics      STRChannelMetrics[]
+
   @@map("str_listings")
 }
 
@@ -6558,6 +6580,427 @@ model STRSeasonPricing {
   listing STRListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   @@map("str_season_pricing")
+}
+
+// ==========================================
+// STR CHANNEL MANAGER AVANZADO - Pack 2
+// ==========================================
+
+enum ChannelSyncDirection {
+  push      // Solo envía datos al canal
+  pull      // Solo recibe datos del canal  
+  bidirectional // Sincronización bidireccional
+}
+
+enum SyncEventType {
+  price_update
+  availability_update
+  booking_new
+  booking_cancel
+  booking_modify
+  content_update
+  review_received
+}
+
+// Historial de sincronizaciones
+model STRSyncHistory {
+  id String @id @default(cuid())
+
+  channelSyncId String
+  
+  tipoEvento    SyncEventType
+  direccion     ChannelSyncDirection @default(push)
+  
+  // Datos del evento
+  payload       Json?
+  respuesta     Json?
+  
+  // Estado
+  exitoso       Boolean @default(false)
+  mensajeError  String? @db.Text
+  codigoError   String?
+  reintentos    Int @default(0)
+  
+  // Timing
+  iniciadoEn    DateTime @default(now())
+  finalizadoEn  DateTime?
+  duracionMs    Int?
+
+  createdAt DateTime @default(now())
+
+  @@index([channelSyncId])
+  @@index([tipoEvento])
+  @@index([exitoso])
+  @@index([iniciadoEn])
+  @@map("str_sync_history")
+}
+
+// Pricing dinámico por canal
+model STRChannelPricing {
+  id String @id @default(cuid())
+
+  listingId String
+  listing   STRListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  canal     ChannelType
+
+  // Ajuste de precios por canal
+  ajusteTipo        String @default("porcentaje") // porcentaje, fijo
+  ajusteValor       Float @default(0) // +10% o +20€
+  
+  // Comisión del canal
+  comisionCanal     Float @default(0) // % de comisión
+  compensarComision Boolean @default(false)
+
+  // Precios mínimos y máximos por canal
+  precioMinimo      Float?
+  precioMaximo      Float?
+
+  // Descuentos específicos del canal
+  descuentoSemana   Float? // % descuento 7+ noches
+  descuentoMes      Float? // % descuento 28+ noches
+  descuentoLastMin  Float? // % descuento última hora
+
+  activo Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([listingId, canal])
+  @@index([listingId])
+  @@map("str_channel_pricing")
+}
+
+// Reglas de pricing inteligente
+model STRDynamicPricingRule {
+  id String @id @default(cuid())
+
+  listingId String
+  listing   STRListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  nombre      String
+  descripcion String?
+  prioridad   Int @default(0) // Mayor prioridad primero
+
+  // Condiciones (JSON para flexibilidad)
+  condiciones Json // {diasAntelacion: {min: 0, max: 7}, ocupacion: {min: 80}}
+  
+  // Acción
+  accionTipo  String // ajuste_porcentaje, precio_fijo, multiplicador
+  accionValor Float
+
+  // Aplicabilidad
+  aplicarCanales  ChannelType[] @default([])
+  diasSemana      Int[] @default([]) // 0=Dom, 6=Sab
+  fechaInicio     DateTime?
+  fechaFin        DateTime?
+
+  activo Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([listingId])
+  @@index([activo])
+  @@map("str_dynamic_pricing_rules")
+}
+
+// Análisis de competencia
+model STRCompetitorAnalysis {
+  id String @id @default(cuid())
+
+  listingId String
+  listing   STRListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  // Competidor
+  competidorUrl     String
+  competidorNombre  String?
+  canal             ChannelType
+
+  // Datos capturados
+  precioCapturado   Float
+  ocupacionEstimada Float?
+  ratingCapturado   Float?
+  
+  fechaCaptura      DateTime @default(now())
+
+  createdAt DateTime @default(now())
+
+  @@index([listingId])
+  @@index([fechaCaptura])
+  @@map("str_competitor_analysis")
+}
+
+// Métricas de rendimiento por canal
+model STRChannelMetrics {
+  id String @id @default(cuid())
+
+  listingId   String
+  listing     STRListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  
+  canal       ChannelType
+  periodo     DateTime @db.Date // Fecha del periodo (día)
+
+  // Métricas de reservas
+  reservasRecibidas     Int @default(0)
+  reservasCanceladas    Int @default(0)
+  reservasModificadas   Int @default(0)
+  nochesReservadas      Int @default(0)
+
+  // Métricas financieras
+  ingresosBrutos        Float @default(0)
+  comisionesCanal       Float @default(0)
+  ingresosNetos         Float @default(0)
+  
+  // ADR (Average Daily Rate)
+  adr                   Float @default(0)
+  
+  // Ocupación
+  tasaOcupacion         Float @default(0)
+  
+  // Calificaciones
+  reviewsRecibidas      Int @default(0)
+  ratingPromedio        Float?
+
+  // Visibilidad (si disponible)
+  impresiones           Int?
+  clics                 Int?
+  conversionRate        Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([listingId, canal, periodo])
+  @@index([listingId])
+  @@index([canal])
+  @@index([periodo])
+  @@map("str_channel_metrics")
+}
+
+// ==========================================
+// STR HOUSEKEEPING & TURNOVER - Pack 3
+// ==========================================
+
+enum HousekeepingStatus {
+  pendiente
+  asignado
+  en_progreso
+  completado
+  verificado
+  incidencia
+}
+
+enum TurnoverType {
+  check_out
+  check_in
+  limpieza_profunda
+  mantenimiento
+  inspeccion
+}
+
+// Tareas de Housekeeping
+model STRHousekeepingTask {
+  id String @id @default(cuid())
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  listingId String
+  bookingId String?
+
+  // Tipo y estado
+  tipo        TurnoverType @default(check_out)
+  status      HousekeepingStatus @default(pendiente)
+
+  // Fechas
+  fechaProgramada DateTime
+  fechaInicio     DateTime?
+  fechaFin        DateTime?
+
+  // Asignación
+  asignadoA       String?
+  asignadoNombre  String?
+  
+  // Detalles
+  notas           String? @db.Text
+  instruccionesEspeciales String? @db.Text
+  prioridad       Int @default(0) // 0=normal, 1=alta, 2=urgente
+
+  // Checklist completado
+  checklistCompletado Json? // {items: [{nombre, completado, notas}]}
+  fotosAntes      String[] @default([])
+  fotosDespues    String[] @default([])
+
+  // Tiempo estimado y real
+  tiempoEstimadoMin Int?
+  tiempoRealMin     Int?
+
+  // Costos
+  costoMateriales Float @default(0)
+  costoManoObra   Float @default(0)
+
+  // Check-in/out del personal
+  checkInTime     DateTime?
+  checkOutTime    DateTime?
+  ubicacionCheckIn Json? // {lat, lng}
+
+  // Incidencias
+  incidencias     String[] @default([])
+  requiereAtencion Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([listingId])
+  @@index([fechaProgramada])
+  @@index([status])
+  @@index([asignadoA])
+  @@map("str_housekeeping_tasks")
+}
+
+// Personal de Housekeeping
+model STRHousekeepingStaff {
+  id String @id @default(cuid())
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Información del personal
+  nombre          String
+  email           String?
+  telefono        String
+  foto            String?
+  
+  // Tipo
+  tipo            String @default("interno") // interno, externo, empresa
+  empresaNombre   String? // Si es empresa externa
+
+  // Disponibilidad
+  activo          Boolean @default(true)
+  diasDisponibles Int[] @default([1, 2, 3, 4, 5]) // 0=Dom, 6=Sab
+  horaInicio      String @default("08:00")
+  horaFin         String @default("18:00")
+
+  // Capacidades
+  capacidadDiaria Int @default(4) // Turnovers por día
+  zonasTrabajo    String[] @default([]) // IDs de edificios o zonas
+
+  // Tarifas
+  tarifaPorTurnover Float?
+  tarifaPorHora     Float?
+
+  // Estadísticas
+  tareasCompletadas   Int @default(0)
+  calificacionPromedio Float?
+  tiempoPromedioMin   Int?
+
+  // Credenciales app móvil
+  pinAcceso       String?
+  appToken        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([activo])
+  @@map("str_housekeeping_staff")
+}
+
+// Inventario de Housekeeping
+model STRHousekeepingInventory {
+  id String @id @default(cuid())
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  listingId String?
+
+  // Artículo
+  nombre          String
+  categoria       String // limpieza, amenities, ropa_cama, cocina
+  sku             String?
+  
+  // Stock
+  stockActual     Int @default(0)
+  stockMinimo     Int @default(5)
+  stockOptimo     Int?
+  
+  // Ubicación
+  ubicacion       String? // Almacén o unidad
+
+  // Costos
+  costoUnitario   Float?
+  proveedorId     String?
+
+  // Control
+  fechaUltimoConteo DateTime?
+  alertaStockBajo   Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Movimientos de inventario
+  movimientos STRInventoryMovement[]
+
+  @@index([companyId])
+  @@index([listingId])
+  @@index([categoria])
+  @@index([alertaStockBajo])
+  @@map("str_housekeeping_inventory")
+}
+
+// Movimientos de inventario
+model STRInventoryMovement {
+  id String @id @default(cuid())
+
+  inventoryId String
+  inventory   STRHousekeepingInventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
+
+  // Movimiento
+  tipo        String // entrada, salida, ajuste
+  cantidad    Int
+  motivo      String? // compra, uso, dañado, perdido
+
+  // Referencia
+  taskId      String? // Tarea de housekeeping relacionada
+
+  // Registro
+  registradoPor String?
+  fecha         DateTime @default(now())
+
+  createdAt DateTime @default(now())
+
+  @@index([inventoryId])
+  @@index([fecha])
+  @@map("str_inventory_movements")
+}
+
+// Checklist Templates
+model STRHousekeepingChecklist {
+  id String @id @default(cuid())
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  nombre        String
+  descripcion   String?
+  tipo          TurnoverType @default(check_out)
+  
+  // Items del checklist
+  items         Json // [{id, nombre, categoria, obligatorio, orden}]
+  
+  // Tiempo estimado
+  tiempoEstimadoMin Int?
+
+  activo Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([tipo])
+  @@map("str_housekeeping_checklists")
 }
 
 // ==========================================
@@ -10481,4 +10924,196 @@ model SpaceMaintenancePrediction {
   @@index([periodo])
   @@index([mantenimientoSugerido])
   @@map("space_maintenance_predictions")
+}
+
+
+// ============================================================================
+// COMMUNITY MANAGEMENT ENHANCEMENTS - Pack 1
+// Nuevos enums y modelos para mejorar el módulo de comunidad existente
+// ============================================================================
+
+enum CommunityEventStatus {
+  borrador
+  publicado
+  en_curso
+  finalizado
+  cancelado
+}
+
+enum CommunityEventType {
+  social
+  formacion
+  networking
+  asamblea
+  fiesta
+  deporte
+  cultural
+  otro
+}
+
+enum AnnouncementPriority {
+  urgente
+  importante
+  normal
+  informativo
+}
+
+enum AnnouncementStatus {
+  borrador
+  activo
+  programado
+  expirado
+  archivado
+}
+
+// Asistentes a eventos (nuevo modelo para gestión de inscripciones)
+model EventAttendee {
+  id String @id @default(cuid())
+
+  eventId String
+
+  // Participante (puede ser tenant o usuario externo)
+  tenantId     String?
+  tenant       Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  nombreExterno String?
+  emailExterno  String?
+
+  // Estado
+  confirmado    Boolean   @default(false)
+  enListaEspera Boolean   @default(false)
+  fechaInscripcion DateTime @default(now())
+  asistio       Boolean   @default(false)
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([eventId, tenantId])
+  @@index([eventId])
+  @@index([tenantId])
+  @@map("event_attendees")
+}
+
+// Comentarios en eventos
+model EventComment {
+  id String @id @default(cuid())
+
+  eventId String
+
+  // Autor
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  autorNombre String?
+
+  // Contenido
+  contenido String @db.Text
+  moderado  Boolean @default(false)
+  visible   Boolean @default(true)
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([eventId])
+  @@index([tenantId])
+  @@map("event_comments")
+}
+
+// Reacciones a posts (mejora del sistema de likes existente)
+model PostReaction {
+  id String @id @default(cuid())
+
+  postId String
+
+  // Usuario
+  userId   String?
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+
+  // Tipo de reacción
+  tipo String @default("like") // like, love, celebrate, support, curious
+
+  // Metadata
+  createdAt DateTime @default(now())
+
+  @@unique([postId, tenantId])
+  @@index([postId])
+  @@map("post_reactions")
+}
+
+// Confirmaciones de lectura de anuncios
+model AnnouncementConfirmation {
+  id String @id @default(cuid())
+
+  announcementId String
+
+  // Usuario
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  userId   String?
+
+  // Confirmación
+  leido     Boolean  @default(false)
+  fechaLectura DateTime?
+  confirmado Boolean  @default(false)
+  fechaConfirmacion DateTime?
+
+  // Metadata
+  createdAt DateTime @default(now())
+
+  @@unique([announcementId, tenantId])
+  @@unique([announcementId, userId])
+  @@index([announcementId])
+  @@map("announcement_confirmations")
+}
+
+// Métricas de Engagement de Comunidad
+model CommunityEngagementMetrics {
+  id String @id @default(cuid())
+
+  // Empresa y ubicación
+  companyId  String
+  company    Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  buildingId String?
+  colivingId String?
+
+  // Periodo
+  periodo    DateTime @default(now())
+  tipoPerido String   @default("diario") // diario, semanal, mensual
+
+  // Métricas de eventos
+  eventosCreados       Int @default(0)
+  eventosRealizados    Int @default(0)
+  asistenciaTotalEventos Int @default(0)
+  tasaAsistenciaPromedio Float @default(0)
+
+  // Métricas de posts
+  postsCreados         Int @default(0)
+  totalLikes           Int @default(0)
+  totalComentarios     Int @default(0)
+  totalCompartidos     Int @default(0)
+  vistasTotales        Int @default(0)
+
+  // Métricas de anuncios
+  anunciosPublicados   Int @default(0)
+  tasaLecturaAnuncios  Float @default(0)
+  tasaConfirmacionAnuncios Float @default(0)
+
+  // Participación general
+  usuariosActivos      Int @default(0)
+  nuevosParticipantes  Int @default(0)
+  interaccionesTotal   Int @default(0)
+
+  // Sentimiento
+  sentimientoPromedio  Float @default(0) // -1 a 1
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([buildingId])
+  @@index([colivingId])
+  @@index([periodo])
+  @@map("community_engagement_metrics")
 }

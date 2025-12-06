@@ -144,6 +144,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/open-banking': 'open_banking',
   '/marketplace': 'marketplace',
   '/sms': 'sms',
+  '/dashboard/community': 'community_management',
 };
 
 // Módulos core que siempre deben mostrarse (esCore: true)
@@ -188,6 +189,7 @@ const CORE_MODULES = [
   'marketplace',
   'sms',
   'room_rental',
+  'community_management',
   'gestion_clientes',
   'admin_dashboard',
   'admin_planes',
@@ -268,10 +270,11 @@ const multiVerticalItems = [
 
 // Módulos de Comunidad
 const comunidadItems = [
-  { name: 'Anuncios', href: '/anuncios', icon: Megaphone, roles: ['administrador', 'gestor'] },
+  { name: 'Panel Comunidad', href: '/dashboard/community', icon: Users2, roles: ['administrador', 'gestor', 'community_manager'] },
+  { name: 'Anuncios', href: '/anuncios', icon: Megaphone, roles: ['administrador', 'gestor', 'community_manager'] },
   { name: 'Votaciones', href: '/votaciones', icon: Vote, roles: ['administrador', 'gestor'] },
   { name: 'Reuniones', href: '/reuniones', icon: Users2, roles: ['administrador', 'gestor'] },
-  { name: 'Reservas Espacios', href: '/reservas', icon: CalendarCheck, roles: ['administrador', 'gestor', 'operador'] },
+  { name: 'Reservas Espacios', href: '/reservas', icon: CalendarCheck, roles: ['administrador', 'gestor', 'operador', 'community_manager'] },
 ];
 
 // Administrador de Fincas
