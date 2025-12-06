@@ -18,6 +18,8 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "tsBuildInfoFile": ".next/tsbuildinfo",
+    "assumeChangesOnlyAffectDirectDependencies": true,
     "plugins": [
       {
         "name": "next"
@@ -42,11 +44,23 @@
   ],
   "exclude": [
     "node_modules",
+    ".next",
+    ".build",
+    "out",
+    "dist",
+    "build",
+    "public",
+    "prisma/migrations",
     "vitest.config.ts",
     "vitest.setup.tsx",
     "__tests__/**/*",
     "**/*.test.ts",
+    "**/*.draft",
+    "**/*.draft/**",
     "scripts/seed-demo-data.ts",
+    "scripts/activate-str-modules.ts",
+    "scripts/create-admin-user.ts",
+    "scripts/create-super-admin.ts",
     "**/*.test.tsx",
     "**/*.spec.ts",
     "**/*.spec.tsx",

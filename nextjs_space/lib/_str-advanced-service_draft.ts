@@ -139,18 +139,22 @@ export async function syncICalFeed(
         });
 
         if (!existing) {
+          const nights = differenceInDays(startOfDay(event.end), startOfDay(event.start));
           await prisma.sTRBooking.create({
             data: {
               listingId: channelSync.listingId,
-              guestName: event.summary,
+              guestNombre: event.summary,
               guestEmail: `guest-${event.uid}@imported.com`,
-              checkIn: startOfDay(event.start),
-              checkOut: startOfDay(event.end),
-              numGuests: 2,
-              totalPrice: 0,
-              estado: 'confirmada',
-              channel: channelSync.channel,
-              externalBookingId: event.uid,
+              checkInDate: startOfDay(event.start),
+              checkOutDate: startOfDay(event.end),
+              numHuespedes: 2,
+              numNoches: nights,
+              precioTotal: 0,
+              tarifaNocturna: 0,
+              ingresoNeto: 0,
+              estado: 'CONFIRMADA',
+              canal: channelSync.canal,
+              reservaExternaId: event.uid,
               companyId: channelSync.listing.companyId
             }
           });
@@ -208,10 +212,10 @@ export async function generateICalFeed(
     icalContent += 'BEGIN:VEVENT\r\n';
     icalContent += `UID:${booking.id}@inmova.app\r\n`;
     icalContent += `DTSTAMP:${format(new Date(), "yyyyMMdd'T'HHmmss'Z'")}\r\n`;
-    icalContent += `DTSTART:${format(booking.checkIn, "yyyyMMdd")}\r\n`;
-    icalContent += `DTEND:${format(booking.checkOut, "yyyyMMdd")}\r\n`;
-    icalContent += `SUMMARY:Reserva - ${booking.guestName}\r\n`;
-    icalContent += `DESCRIPTION:${booking.channel} - ${booking.numGuests} huéspedes\r\n`;
+    icalContent += `DTSTART:${format(booking.checkInDate, "yyyyMMdd")}\r\n`;
+    icalContent += `DTEND:${format(booking.checkOutDate, "yyyyMMdd")}\r\n`;
+    icalContent += `SUMMARY:Reserva - ${booking.guestNombre}\r\n`;
+    icalContent += `DESCRIPTION:${booking.canal} - ${booking.numHuespedes} huéspedes\r\n`;
     icalContent += 'STATUS:CONFIRMED\r\n';
     icalContent += 'TRANSP:OPAQUE\r\n';
     icalContent += 'END:VEVENT\r\n';
@@ -234,7 +238,7 @@ export async function syncToChannels(
     where: { 
       listingId,
       activo: true,
-      estado: 'conectado'
+      estadoSync: 'conectado'
     }
   });
 
