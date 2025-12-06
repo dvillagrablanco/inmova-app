@@ -68,7 +68,7 @@ export default function LoginPage() {
           <div className="relative w-48 h-16 mx-auto mb-4">
             <Image
               src="/inmova-logo-cover.jpg"
-              alt="Plataforma de Gestión"
+              alt="INMOVA - Logotipo de la plataforma integral de gestión inmobiliaria profesional"
               fill
               className="object-contain"
               priority
