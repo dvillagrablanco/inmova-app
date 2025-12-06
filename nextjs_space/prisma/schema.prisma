@@ -1231,6 +1231,9 @@ model Company {
   smartLocks                  SmartLock[]
   colivingPackages            ColivingPackage[]
 
+  // Equipo Comercial Externo
+  salesLeads                  SalesLead[]
+
   @@map("company")
 }
 
@@ -9775,4 +9778,282 @@ enum PartnerInvitationStatus {
   ACCEPTED    // Aceptada por el cliente
   EXPIRED     // Expirada sin respuesta
   CANCELLED   // Cancelada por el partner
+}
+
+// ====================================
+// EQUIPO COMERCIAL EXTERNO
+// ====================================
+
+enum SalesRepStatus {
+  ACTIVO       // Comercial activo
+  INACTIVO     // Temporalmente inactivo
+  SUSPENDIDO   // Suspendido por incumplimiento
+  CANCELADO    // Dado de baja definitivamente
+}
+
+enum LeadStatus {
+  NUEVO          // Lead recién captado
+  CONTACTADO     // Contacto inicial realizado
+  CALIFICADO     // Lead calificado (interés confirmado)
+  DEMO           // Demo programada/realizada
+  PROPUESTA      // Propuesta enviada
+  NEGOCIACION    // En negociación
+  CERRADO_GANADO // Cliente conseguido
+  CERRADO_PERDIDO // Lead perdido
+  DESCARTADO     // Lead descartado (no califica)
+}
+
+enum SalesCommissionType {
+  CAPTACION      // Comisión por captación inicial
+  RECURRENTE     // Comisión recurrente mensual
+  REACTIVACION   // Comisión por reactivación de cliente
+  BONIFICACION   // Bonificación por objetivos
+}
+
+enum SalesCommissionStatus {
+  PENDIENTE      // Pendiente de aprobación
+  APROBADA       // Aprobada, pendiente de pago
+  PAGADA         // Pagada al comercial
+  CANCELADA      // Cancelada
+  RETENIDA       // Retenida por verificación
+}
+
+// Comercial Externo (Autónomo/Freelance)
+model SalesRepresentative {
+  id          String   @id @default(cuid())
+  
+  // Información personal
+  nombre      String
+  apellidos   String
+  nombreCompleto String // nombre + apellidos concatenado
+  dni         String   @unique
+  email       String   @unique
+  telefono    String
+  telefonoSecundario String?
+  
+  // Datos fiscales
+  numeroAutonomo String?  // Nº seguridad social autónomo
+  iban        String?     // Para pagos
+  direccion   String?
+  ciudad      String?
+  codigoPostal String?
+  pais        String @default("España")
+  
+  // Configuración comercial
+  codigoReferido String  @unique // Código único para tracking (ej: "COM-JUAN-2024")
+  comisionCaptacion Float @default(150.0) // Comisión fija por captación exitosa (€)
+  comisionRecurrente Float @default(10.0) // % comisión recurrente mensual
+  bonificacionObjetivo Float @default(500.0) // Bonificación por cumplir objetivos mensuales
+  
+  // Objetivos mensuales
+  objetivoLeadsMes Int @default(10) // Leads esperados al mes
+  objetivoConversionesMes Int @default(2) // Conversiones esperadas al mes
+  
+  // Autenticación (para portal comercial)
+  password    String  // hasheado
+  ultimoAcceso DateTime?
+  
+  // Estado y tracking
+  estado      SalesRepStatus @default(ACTIVO)
+  activo      Boolean  @default(true)
+  fechaAlta   DateTime @default(now())
+  fechaBaja   DateTime?
+  motivoBaja  String?  @db.Text
+  
+  // Métricas acumuladas
+  totalLeadsGenerados Int @default(0)
+  totalConversiones Int @default(0)
+  totalComisionGenerada Float @default(0)
+  tasaConversion Float @default(0) // Calculado automáticamente
+  
+  // Notas internas
+  notas       String?  @db.Text
+  documentacion String? @db.Text // URLs de documentos escaneados
+  
+  // Relaciones
+  leads       SalesLead[]
+  comisiones  SalesCommission[]
+  objetivos   SalesTarget[]
+  
+  // Metadata
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Company asignada (para multi-tenancy interno)
+  companyId   String   @default("global") // "global" para comerciales que trabajan para INMOVA directamente
+  
+  @@index([email])
+  @@index([estado])
+  @@index([codigoReferido])
+  @@index([activo])
+}
+
+// Lead captado por comercial
+model SalesLead {
+  id          String   @id @default(cuid())
+  
+  // Comercial responsable
+  salesRepId  String
+  salesRep    SalesRepresentative @relation(fields: [salesRepId], references: [id], onDelete: Cascade)
+  
+  // Información del lead
+  nombreContacto String
+  emailContacto String
+  telefonoContacto String?
+  nombreEmpresa String
+  sector      String?      // Sector inmobiliario
+  tipoCliente String?      // "alquiler_tradicional", "coliving", "str", etc.
+  
+  // Tamaño del cliente potencial
+  propiedadesEstimadas Int? // Número estimado de propiedades
+  presupuestoMensual Float? // Presupuesto mensual estimado
+  
+  // Estado del lead
+  estado      LeadStatus @default(NUEVO)
+  prioridad   String @default("media") // baja, media, alta
+  probabilidadCierre Int @default(50) // 0-100%
+  
+  // Tracking de seguimiento
+  fechaCaptura DateTime @default(now())
+  fechaPrimerContacto DateTime?
+  fechaUltimoContacto DateTime?
+  proximoSeguimiento DateTime?
+  
+  // Fuente del lead
+  origenCaptura String? // "linkedin", "evento", "referido", "cold_call", etc.
+  codigoRastreo String? // Código de tracking de campaña
+  
+  // Interacciones
+  numeroLlamadas Int @default(0)
+  numeroEmails Int @default(0)
+  numeroReuniones Int @default(0)
+  
+  // Conversión
+  convertido  Boolean @default(false)
+  fechaConversion DateTime?
+  companyId   String? // ID de la company creada si se convirtió
+  company     Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  
+  // Plan suscrito (si se convirtió)
+  planSuscrito String? // Tier del plan contratado
+  valorMensual Float?  // MRR generado
+  
+  // Notas y motivos
+  notas       String?  @db.Text
+  motivoRechazo String? @db.Text // Si estado = CERRADO_PERDIDO
+  
+  // Relaciones
+  comisiones  SalesCommission[]
+  
+  // Metadata
+  metadata    Json @default("{}") // Información adicional
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([salesRepId])
+  @@index([estado])
+  @@index([convertido])
+  @@index([companyId])
+  @@index([fechaCaptura])
+}
+
+// Comisiones del equipo comercial
+model SalesCommission {
+  id          String   @id @default(cuid())
+  
+  // Comercial
+  salesRepId  String
+  salesRep    SalesRepresentative @relation(fields: [salesRepId], references: [id], onDelete: Cascade)
+  
+  // Lead/Cliente relacionado
+  leadId      String?
+  lead        SalesLead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  
+  companyId   String? // Cliente que generó la comisión
+  
+  // Tipo y monto
+  tipo        SalesCommissionType
+  descripcion String
+  periodo     String? // "2024-01" para comisiones recurrentes
+  
+  // Importes
+  montoBase   Float   // Importe base de la operación
+  porcentaje  Float?  // % aplicado (si aplica)
+  montoComision Float // Comisión calculada
+  
+  // Retenciones (impuestos, IRPF)
+  retencionIRPF Float @default(0) // % o monto fijo
+  montoNeto   Float   // Monto después de retenciones
+  
+  // Estado
+  estado      SalesCommissionStatus @default(PENDIENTE)
+  fechaGeneracion DateTime @default(now())
+  fechaAprobacion DateTime?
+  fechaPago   DateTime?
+  
+  // Aprobación
+  aprobadoPor String? // ID del usuario que aprobó
+  notaAprobacion String? @db.Text
+  
+  // Pago
+  referenciaPago String? // Número de transferencia/factura
+  metodoPago  String? // "transferencia", "cheque", etc.
+  comprobantePago String? // URL del comprobante
+  
+  // Metadata
+  metadata    Json @default("{}") // Información adicional
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([salesRepId])
+  @@index([leadId])
+  @@index([estado])
+  @@index([periodo])
+  @@index([fechaGeneracion])
+}
+
+// Objetivos de ventas
+model SalesTarget {
+  id          String   @id @default(cuid())
+  
+  // Comercial
+  salesRepId  String
+  salesRep    SalesRepresentative @relation(fields: [salesRepId], references: [id], onDelete: Cascade)
+  
+  // Período
+  periodo     String  // "2024-01", "Q1-2024", "2024"
+  tipoObjetivo String  // "mensual", "trimestral", "anual"
+  
+  // Objetivos
+  objetivoLeads Int // Número de leads a captar
+  objetivoConversiones Int // Número de conversiones
+  objetivoMRR Float // MRR a generar
+  
+  // Progreso actual
+  leadsGenerados Int @default(0)
+  conversionesLogradas Int @default(0)
+  mrrGenerado Float @default(0)
+  
+  // Porcentajes de cumplimiento
+  porcentajeLeads Float @default(0) // 0-100%
+  porcentajeConversiones Float @default(0)
+  porcentajeMRR Float @default(0)
+  
+  // Estado
+  cumplido    Boolean @default(false)
+  bonificacionPagada Boolean @default(false)
+  montoBonificacion Float?
+  
+  // Fechas
+  fechaInicio DateTime
+  fechaFin    DateTime
+  
+  // Metadata
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([salesRepId])
+  @@index([periodo])
+  @@index([cumplido])
+  @@unique([salesRepId, periodo])
 }

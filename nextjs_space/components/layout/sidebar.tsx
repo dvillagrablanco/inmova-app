@@ -313,6 +313,7 @@ const adminNavItems = [
   { name: 'Marketplace', href: '/admin/marketplace', icon: ShoppingCart, roles: ['super_admin', 'administrador'] },
   { name: 'Legal', href: '/admin/legal', icon: BookOpen, roles: ['super_admin', 'administrador'] },
   { name: 'Firma Digital', href: '/admin/firma-digital', icon: FileSignature, roles: ['super_admin', 'administrador'] },
+  { name: 'Equipo Comercial Externo', href: '/admin/sales-team', icon: Users2, roles: ['super_admin', 'administrador'] },
   
   // Administrador - Gestión de Empresa
   { name: 'Configuración', href: '/admin/configuracion', icon: Settings, roles: ['administrador'] },
