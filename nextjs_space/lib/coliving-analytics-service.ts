@@ -1,4 +1,4 @@
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/db';
 import { addMonths, startOfMonth, endOfMonth, differenceInMonths } from 'date-fns';
 
 export interface ColivingMetrics {
@@ -25,10 +25,7 @@ export class ColivingAnalyticsService {
       where: {
         companyId,
         fechaInicio: { lte: inicioMes },
-        OR: [
-          { fechaFin: { gte: inicioMes } },
-          { fechaFin: null },
-        ],
+        fechaFin: { gte: inicioMes },
         estado: 'activo',
       },
     });
@@ -61,7 +58,6 @@ export class ColivingAnalyticsService {
     const contracts = await prisma.roomContract.findMany({
       where: {
         companyId,
-        fechaFin: { not: null },
       },
       select: {
         fechaInicio: true,
@@ -259,10 +255,7 @@ export class ColivingAnalyticsService {
       where: {
         companyId,
         fechaInicio: { lte: inicioProximoMes },
-        OR: [
-          { fechaFin: { gte: finProximoMes } },
-          { fechaFin: null },
-        ],
+        fechaFin: { gte: finProximoMes },
         estado: 'activo',
       },
     });

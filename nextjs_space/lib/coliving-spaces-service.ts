@@ -1,4 +1,4 @@
-import prisma from './prisma';
+import { prisma } from './db';
 import { addMonths, startOfMonth, endOfMonth, addDays } from 'date-fns';
 
 export class ColivingSpacesService {
@@ -49,8 +49,7 @@ export class ColivingSpacesService {
         tenant: {
           select: {
             id: true,
-            nombre: true,
-            apellidos: true,
+            nombreCompleto: true,
             email: true,
           },
         },
@@ -165,7 +164,7 @@ export class ColivingSpacesService {
   /**
    * Obtener créditos de un tenant
    */
-  static async getCredits(tenantId: string) {
+  static async getCredits(tenantId: string): Promise<any> {
     let credits = await prisma.reservationCredits.findUnique({
       where: { tenantId },
     });
@@ -214,7 +213,7 @@ export class ColivingSpacesService {
   /**
    * Recargar créditos mensualmente
    */
-  static async rechargeCredits(tenantId: string) {
+  static async rechargeCredits(tenantId: string): Promise<any> {
     const credits = await this.getCredits(tenantId);
 
     const updated = await prisma.reservationCredits.update({
@@ -368,8 +367,7 @@ export class ColivingSpacesService {
       include: {
         tenant: {
           select: {
-            nombre: true,
-            apellidos: true,
+            nombreCompleto: true,
           },
         },
       },
