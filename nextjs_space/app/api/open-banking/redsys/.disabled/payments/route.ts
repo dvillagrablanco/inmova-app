@@ -9,6 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import logger from '@/lib/logger';
 
 import {
 
@@ -108,7 +109,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('Error iniciando pago:', error);
+    logger.error('Error iniciando pago:', error);
     return NextResponse.json(
       { error: error.message || 'Error al iniciar pago' },
       { status: 500 }
@@ -176,7 +177,7 @@ export async function GET(request: NextRequest) {
       paymentStatus,
     });
   } catch (error: any) {
-    console.error('Error obteniendo estado de pago:', error);
+    logger.error('Error obteniendo estado de pago:', error);
     return NextResponse.json(
       { error: error.message || 'Error al obtener estado de pago' },
       { status: 500 }

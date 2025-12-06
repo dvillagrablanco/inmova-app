@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import logger from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -116,7 +117,7 @@ export default function MarketplacePage() {
       setServices(data);
     } catch (error) {
       toast.error('Error al cargar los servicios');
-      console.error(error);
+      logger.error(error);
     } finally {
       setLoading(false);
     }
@@ -224,7 +225,7 @@ export default function MarketplacePage() {
       fetchServices();
     } catch (error: any) {
       toast.error(error.message || 'Error al guardar el servicio');
-      console.error(error);
+      logger.error(error);
     }
   };
 
@@ -244,7 +245,7 @@ export default function MarketplacePage() {
       fetchServices();
     } catch (error) {
       toast.error('Error al eliminar el servicio');
-      console.error(error);
+      logger.error(error);
     }
   };
 

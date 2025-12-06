@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import logger from '@/lib/logger';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -42,7 +43,7 @@ export default function PaqueteriaPanel() {
         setPaquetes(data);
       }
     } catch (error) {
-      console.error('Error cargando paquetes:', error);
+      logger.error('Error cargando paquetes:', error);
       toast.error('Error al cargar paquetes');
     } finally {
       setLoading(false);
@@ -60,7 +61,7 @@ export default function PaqueteriaPanel() {
         cargarPaquetes();
       }
     } catch (error) {
-      console.error('Error marcando paquete:', error);
+      logger.error('Error marcando paquete:', error);
       toast.error('Error al marcar paquete');
     }
   };

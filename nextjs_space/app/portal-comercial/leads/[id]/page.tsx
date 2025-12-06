@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import logger from '@/lib/logger';
 import { useSession } from 'next-auth/react';
 import { useRouter, useParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -116,7 +117,7 @@ export default function LeadDetailPage() {
         router.push('/portal-comercial/leads');
       }
     } catch (error) {
-      console.error('Error loading lead:', error);
+      logger.error('Error loading lead:', error);
       toast.error('Error al cargar el lead');
     } finally {
       setLoading(false);
@@ -146,7 +147,7 @@ export default function LeadDetailPage() {
         toast.error('Error al actualizar el lead');
       }
     } catch (error) {
-      console.error('Error saving lead:', error);
+      logger.error('Error saving lead:', error);
       toast.error('Error al guardar cambios');
     } finally {
       setSaving(false);

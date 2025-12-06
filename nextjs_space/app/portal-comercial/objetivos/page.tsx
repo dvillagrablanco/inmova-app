@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import logger from '@/lib/logger';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -68,7 +69,7 @@ export default function ObjetivosPage() {
         toast.error('Error al cargar objetivos');
       }
     } catch (error) {
-      console.error('Error loading targets:', error);
+      logger.error('Error loading targets:', error);
       toast.error('Error al cargar objetivos');
     } finally {
       setLoading(false);

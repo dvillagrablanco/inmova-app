@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import logger from '@/lib/logger';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 export const dynamic = 'force-dynamic';
-
-
 const prisma = new PrismaClient();
-
 // POST /api/partners/register - Registro de nuevo Partner
 export async function POST(request: NextRequest) {
   try {
@@ -22,7 +20,6 @@ export async function POST(request: NextRequest) {
       email,
       password,
     } = data;
-
     // Validaciones básicas
     if (!nombre || !razonSocial || !cif || !email || !password) {
       return NextResponse.json(
@@ -30,7 +27,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
     // Verificar si ya existe el Partner
     const existingPartner = await prisma.partner.findFirst({
       where: {
@@ -41,17 +37,11 @@ export async function POST(request: NextRequest) {
         ]
       }
     });
-
     if (existingPartner) {
-      return NextResponse.json(
         { error: 'Ya existe un Partner con estos datos (email, CIF o contacto)' },
         { status: 409 }
-      );
-    }
-
     // Hash de la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
-
     // Crear el Partner
     const partner = await prisma.partner.create({
       data: {
@@ -68,17 +58,14 @@ export async function POST(request: NextRequest) {
         activo: false,
         comisionPorcentaje: 20.0, // 20% inicial
       },
-    });
-
     // No devolver el password
     const { password: _, ...partnerWithoutPassword } = partner;
-
     return NextResponse.json({
       message: 'Partner registrado correctamente. Pendiente de aprobación.',
       partner: partnerWithoutPassword,
     }, { status: 201 });
   } catch (error: any) {
-    console.error('Error registrando Partner:', error);
+    logger.error('Error registrando Partner:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor', details: error?.message },
       { status: 500 }

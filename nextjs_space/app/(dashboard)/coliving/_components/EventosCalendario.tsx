@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import logger from '@/lib/logger';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -44,7 +45,7 @@ export default function EventosCalendario() {
         setEventos(data);
       }
     } catch (error) {
-      console.error('Error cargando eventos:', error);
+      logger.error('Error cargando eventos:', error);
       toast.error('Error al cargar eventos');
     } finally {
       setLoading(false);
@@ -69,7 +70,7 @@ export default function EventosCalendario() {
         toast.error(error.error || 'Error al inscribirse');
       }
     } catch (error) {
-      console.error('Error asistiendo a evento:', error);
+      logger.error('Error asistiendo a evento:', error);
       toast.error('Error al inscribirse al evento');
     }
   };

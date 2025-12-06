@@ -1,6 +1,7 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
+import logger from '@/lib/logger';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -48,7 +49,7 @@ export default function ComunidadesPage() {
         setCommunities(data);
       }
     } catch (error) {
-      console.error('Error fetching communities:', error);
+      logger.error('Error fetching communities:', error);
     } finally {
       setLoading(false);
     }

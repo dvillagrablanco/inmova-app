@@ -71,7 +71,14 @@ export default function OccupancyReportsPage() {
 
   const [loading, setLoading] = useState(true);
   const [report, setReport] = useState<OccupancyReport | null>(null);
-  const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
+  const [selectedMonth, setSelectedMonth] = useState<string>('');
+
+  // Initialize selectedMonth on client to avoid hydration errors
+  useEffect(() => {
+    if (!selectedMonth) {
+      setSelectedMonth(format(new Date(), 'yyyy-MM'));
+    }
+  }, [selectedMonth]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {

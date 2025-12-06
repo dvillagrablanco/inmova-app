@@ -11,6 +11,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import logger from '@/lib/logger';
 
 import {
 
@@ -97,7 +98,7 @@ export async function POST(request: NextRequest) {
       scope,
     });
   } catch (error: any) {
-    console.error('Error en authorize:', error);
+    logger.error('Error en authorize:', error);
     return NextResponse.json(
       { error: error.message || 'Error al iniciar autorización' },
       { status: 500 }

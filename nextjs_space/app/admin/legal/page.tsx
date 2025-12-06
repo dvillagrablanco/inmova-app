@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import logger from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -102,7 +103,7 @@ export default function LegalPage() {
       setTemplates(data);
     } catch (error) {
       toast.error('Error al cargar las plantillas');
-      console.error(error);
+      logger.error(error);
     } finally {
       setLoading(false);
     }
@@ -207,7 +208,7 @@ export default function LegalPage() {
       fetchTemplates();
     } catch (error: any) {
       toast.error(error.message || 'Error al guardar la plantilla');
-      console.error(error);
+      logger.error(error);
     }
   };
 
@@ -227,7 +228,7 @@ export default function LegalPage() {
       fetchTemplates();
     } catch (error) {
       toast.error('Error al eliminar la plantilla');
-      console.error(error);
+      logger.error(error);
     }
   };
 

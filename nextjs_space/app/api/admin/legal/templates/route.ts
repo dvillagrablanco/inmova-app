@@ -1,22 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
+import logger from '@/lib/logger';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
-
-
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-
     if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 401 }
       );
     }
-
     const templates = await prisma.legalTemplate.findMany({
       where: {
         companyId: session.user.companyId
@@ -25,30 +22,17 @@ export async function GET(req: NextRequest) {
         createdAt: 'desc'
       }
     });
-
     return NextResponse.json(templates);
   } catch (error) {
-    console.error('Error al obtener plantillas:', error);
+    logger.error('Error al obtener plantillas:', error);
     return NextResponse.json(
       { error: 'Error al obtener plantillas' },
       { status: 500 }
     );
   }
 }
-
 export async function POST(req: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions);
-
-    if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
-    }
-
     const body = await req.json();
-
     const {
       nombre,
       categoria,
@@ -59,14 +43,9 @@ export async function POST(req: NextRequest) {
       aplicableA,
       activo
     } = body;
-
     if (!nombre || !categoria || !contenido) {
-      return NextResponse.json(
         { error: 'Faltan campos requeridos' },
         { status: 400 }
-      );
-    }
-
     const template = await prisma.legalTemplate.create({
       data: {
         companyId: session.user.companyId,
@@ -79,15 +58,6 @@ export async function POST(req: NextRequest) {
         aplicableA: Array.isArray(aplicableA) ? aplicableA : [],
         activo: activo !== false,
         ultimaRevision: new Date()
-      }
-    });
-
     return NextResponse.json(template, { status: 201 });
-  } catch (error) {
-    console.error('Error al crear plantilla:', error);
-    return NextResponse.json(
+    logger.error('Error al crear plantilla:', error);
       { error: 'Error al crear plantilla' },
-      { status: 500 }
-    );
-  }
-}

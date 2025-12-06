@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import logger from '@/lib/logger';
 import { useRouter, useParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -87,7 +88,7 @@ export default function DetalleFacturaPage() {
       const data = await response.json();
       setInvoice(data);
     } catch (error) {
-      console.error('Error fetching invoice:', error);
+      logger.error('Error fetching invoice:', error);
       toast.error('Error al cargar la factura');
     } finally {
       setLoading(false);
@@ -114,7 +115,7 @@ export default function DetalleFacturaPage() {
       toast.success('Factura enviada correctamente');
       fetchInvoice();
     } catch (error) {
-      console.error('Error sending invoice:', error);
+      logger.error('Error sending invoice:', error);
       toast.error(
         error instanceof Error ? error.message : 'Error al enviar la factura'
       );

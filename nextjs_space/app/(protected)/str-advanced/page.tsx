@@ -6,6 +6,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import logger from '@/lib/logger';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -70,7 +71,7 @@ export default function STRAdvancedDashboard() {
         setLoading(false);
       }, 500);
     } catch (error) {
-      console.error('Error cargando dashboard:', error);
+      logger.error('Error cargando dashboard:', error);
       setLoading(false);
     }
   };

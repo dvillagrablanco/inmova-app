@@ -11,6 +11,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import logger from '@/lib/logger';
 import { exchangeCodeForToken } from '@/lib/redsys-psd2-service';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
@@ -33,7 +34,7 @@ export async function GET(request: NextRequest) {
 
     // Verificar si hubo un error en la autorización
     if (error) {
-      console.error('Error en autorización OAuth:', error, errorDescription);
+      logger.error('Error en autorización OAuth:', error, errorDescription);
       return NextResponse.redirect(
         new URL(
           `/open-banking?error=${encodeURIComponent(error)}&error_description=${encodeURIComponent(errorDescription || 'Error desconocido')}`,
@@ -95,7 +96,7 @@ export async function GET(request: NextRequest) {
       new URL('/open-banking?success=true', request.url)
     );
   } catch (error: any) {
-    console.error('Error en callback OAuth:', error);
+    logger.error('Error en callback OAuth:', error);
     return NextResponse.redirect(
       new URL(
         `/open-banking?error=token_exchange_failed&error_description=${encodeURIComponent(error.message)}`,

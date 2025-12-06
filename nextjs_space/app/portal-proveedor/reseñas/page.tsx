@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import logger from '@/lib/logger';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Star, TrendingUp, Award, BarChart3 } from 'lucide-react';
@@ -65,7 +66,7 @@ export default function ReseñasPage() {
       const reviewData = await response.json();
       setData(reviewData);
     } catch (error) {
-      console.error('Error fetching reviews:', error);
+      logger.error('Error fetching reviews:', error);
       toast.error('Error al cargar las reseñas');
     } finally {
       setLoading(false);

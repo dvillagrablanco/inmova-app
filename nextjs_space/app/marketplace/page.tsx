@@ -147,9 +147,9 @@ export default function MarketplacePage() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const [quoteForm, setQuoteForm] = useState({
-    providerId: '',
-    buildingId: '',
-    unitId: '',
+    providerId: 'auto-suggest',
+    buildingId: 'no-building',
+    unitId: 'no-unit',
     titulo: '',
     descripcion: '',
     servicioRequerido: '',
@@ -220,10 +220,18 @@ export default function MarketplacePage() {
   const handleCreateQuote = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Map special values to null
+      const formData = {
+        ...quoteForm,
+        providerId: quoteForm.providerId === 'auto-suggest' ? null : quoteForm.providerId,
+        buildingId: quoteForm.buildingId === 'no-building' ? null : quoteForm.buildingId,
+        unitId: quoteForm.unitId === 'no-unit' ? null : quoteForm.unitId,
+      };
+      
       const res = await fetch('/api/marketplace/quotes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(quoteForm),
+        body: JSON.stringify(formData),
       });
 
       if (!res.ok) throw new Error('Error al crear cotización');
@@ -231,9 +239,9 @@ export default function MarketplacePage() {
       toast.success('Cotización creada exitosamente');
       setOpenQuoteDialog(false);
       setQuoteForm({
-        providerId: '',
-        buildingId: '',
-        unitId: '',
+        providerId: 'auto-suggest',
+        buildingId: 'no-building',
+        unitId: 'no-unit',
         titulo: '',
         descripcion: '',
         servicioRequerido: '',
@@ -694,7 +702,7 @@ export default function MarketplacePage() {
                                 <SelectValue placeholder="Seleccionar proveedor" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="">Auto-sugerir</SelectItem>
+                                <SelectItem value="auto-suggest">Auto-sugerir</SelectItem>
                                 {providers.map((provider) => (
                                   <SelectItem key={provider.id} value={provider.id}>
                                     {provider.nombre} - {provider.tipo}
@@ -737,7 +745,7 @@ export default function MarketplacePage() {
                                 <SelectValue placeholder="Seleccionar edificio" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="">Ninguno</SelectItem>
+                                <SelectItem value="no-building">Ninguno</SelectItem>
                                 {buildings.map((building) => (
                                   <SelectItem key={building.id} value={building.id}>
                                     {building.nombre}
@@ -760,7 +768,7 @@ export default function MarketplacePage() {
                                 <SelectValue placeholder="Seleccionar unidad" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="">Ninguna</SelectItem>
+                                <SelectItem value="no-unit">Ninguna</SelectItem>
                                 {units
                                   .filter((u) => u.buildingId === quoteForm.buildingId)
                                   .map((unit) => (

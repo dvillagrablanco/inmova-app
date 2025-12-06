@@ -11,6 +11,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import logger from '@/lib/logger';
 
 import { getTransactions } from '@/lib/redsys-psd2-service';
 
@@ -97,7 +98,7 @@ export async function GET(request: NextRequest) {
       count: transactions.length,
     });
   } catch (error: any) {
-    console.error('Error obteniendo transacciones:', error);
+    logger.error('Error obteniendo transacciones:', error);
     return NextResponse.json(
       { error: error.message || 'Error al obtener transacciones' },
       { status: 500 }

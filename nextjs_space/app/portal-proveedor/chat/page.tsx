@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import logger from '@/lib/logger';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -77,7 +78,7 @@ export default function ChatPage() {
         setConversations(data);
       }
     } catch (error) {
-      console.error('Error fetching conversations:', error);
+      logger.error('Error fetching conversations:', error);
     } finally {
       setLoading(false);
     }
@@ -94,7 +95,7 @@ export default function ChatPage() {
         setMessages(data);
       }
     } catch (error) {
-      console.error('Error fetching messages:', error);
+      logger.error('Error fetching messages:', error);
     }
   };
 
@@ -120,7 +121,7 @@ export default function ChatPage() {
       await fetchMessages(selectedConversation);
       await fetchConversations();
     } catch (error) {
-      console.error('Error sending message:', error);
+      logger.error('Error sending message:', error);
       toast.error('Error al enviar el mensaje');
     } finally {
       setSending(false);
@@ -150,7 +151,7 @@ export default function ChatPage() {
       await fetchConversations();
       setSelectedConversation(conversation.id);
     } catch (error) {
-      console.error('Error creating conversation:', error);
+      logger.error('Error creating conversation:', error);
       toast.error('Error al crear la conversación');
     }
   };
