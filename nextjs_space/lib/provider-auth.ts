@@ -38,8 +38,8 @@ export function verifyProviderToken(token: string): ProviderTokenPayload | null 
 /**
  * Establece el token de autenticación en una cookie httpOnly
  */
-export function setProviderAuthCookie(token: string) {
-  const cookieStore = cookies();
+export async function setProviderAuthCookie(token: string) {
+  const cookieStore = await cookies();
   cookieStore.set(COOKIE_NAME, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -52,8 +52,8 @@ export function setProviderAuthCookie(token: string) {
 /**
  * Elimina la cookie de autenticación
  */
-export function removeProviderAuthCookie() {
-  const cookieStore = cookies();
+export async function removeProviderAuthCookie() {
+  const cookieStore = await cookies();
   cookieStore.delete(COOKIE_NAME);
 }
 
@@ -62,7 +62,7 @@ export function removeProviderAuthCookie() {
  */
 export async function getAuthenticatedProvider() {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const token = cookieStore.get(COOKIE_NAME)?.value;
 
     if (!token) {

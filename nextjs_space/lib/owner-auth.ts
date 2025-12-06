@@ -38,8 +38,8 @@ export function verifyOwnerToken(token: string): OwnerTokenPayload | null {
 /**
  * Establece el token de autenticación en una cookie httpOnly
  */
-export function setOwnerAuthCookie(token: string) {
-  const cookieStore = cookies();
+export async function setOwnerAuthCookie(token: string) {
+  const cookieStore = await cookies();
   cookieStore.set(COOKIE_NAME, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -52,8 +52,8 @@ export function setOwnerAuthCookie(token: string) {
 /**
  * Elimina la cookie de autenticación
  */
-export function removeOwnerAuthCookie() {
-  const cookieStore = cookies();
+export async function removeOwnerAuthCookie() {
+  const cookieStore = await cookies();
   cookieStore.delete(COOKIE_NAME);
 }
 
@@ -62,7 +62,7 @@ export function removeOwnerAuthCookie() {
  */
 export async function getAuthenticatedOwner() {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const token = cookieStore.get(COOKIE_NAME)?.value;
 
     if (!token) {
