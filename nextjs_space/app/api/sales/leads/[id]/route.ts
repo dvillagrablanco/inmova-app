@@ -32,11 +32,6 @@ export async function GET(
             telefono: true,
           },
         },
-        company: {
-          select: {
-            id: true,
-            nombre: true,
-          },
         },
       },
     });

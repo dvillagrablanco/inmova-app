@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
     const commissions = await prisma.salesCommission.findMany({
       where,
       include: {
-        salesRepresentative: {
+        salesRep: {
           select: {
             id: true,
             nombre: true,
@@ -76,11 +76,6 @@ export async function GET(request: NextRequest) {
             email: true,
           },
         },
-        company: {
-          select: {
-            id: true,
-            nombre: true,
-          },
         },
       },
       orderBy: {
@@ -137,7 +132,7 @@ export async function POST(request: NextRequest) {
         baseCalculo: data.baseCalculo || null,
       },
       include: {
-        salesRepresentative: {
+        salesRep: {
           select: {
             id: true,
             nombre: true,

@@ -53,7 +53,6 @@ export const authOptions: NextAuthOptions = {
         // Si no es usuario, intentar autenticar como comercial
         const salesRep = await prisma.salesRepresentative.findUnique({
           where: { email: credentials.email },
-          include: { company: true },
         });
 
         if (!salesRep) {
@@ -80,9 +79,9 @@ export const authOptions: NextAuthOptions = {
           id: salesRep.id,
           email: salesRep.email,
           name: salesRep.nombreCompleto,
-          role: 'sales_representative',
+          role: 'sales_representative' as any,
           companyId: salesRep.companyId,
-          companyName: salesRep.company.nombre,
+          companyName: 'INMOVA Partners',
           userType: 'sales_representative',
         };
       },

@@ -20,21 +20,14 @@ export async function GET(
     const target = await prisma.salesTarget.findUnique({
       where: {
         id: params.id,
-        companyId: session.user.companyId,
       },
       include: {
-        salesRepresentative: {
+        salesRep: {
           select: {
             id: true,
             nombre: true,
             apellidos: true,
             email: true,
-          },
-        },
-        company: {
-          select: {
-            id: true,
-            nombre: true,
           },
         },
       },

@@ -61,11 +61,6 @@ export async function GET(request: NextRequest) {
             email: true,
           },
         },
-        company: {
-          select: {
-            id: true,
-            nombre: true,
-          },
         },
       },
       orderBy: {

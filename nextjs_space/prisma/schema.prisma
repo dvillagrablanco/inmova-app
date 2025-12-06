@@ -9808,6 +9808,7 @@ enum SalesCommissionType {
   RECURRENTE     // Comisión recurrente mensual
   REACTIVACION   // Comisión por reactivación de cliente
   BONIFICACION   // Bonificación por objetivos
+  NIVEL2         // Comisión de nivel 2 (por sub-afiliados)
 }
 
 enum SalesCommissionStatus {
@@ -9870,10 +9871,27 @@ model SalesRepresentative {
   notas       String?  @db.Text
   documentacion String? @db.Text // URLs de documentos escaneados
   
+  // API Keys y configuración avanzada (Fase 2 Partners)
+  apiKey      String?  @unique
+  apiSecret   String?  // Hash del secret
+  apiEnabled  Boolean  @default(false)
+  
+  // White Label (Fase 2 Partners)
+  whiteLabelEnabled Boolean @default(false)
+  whiteLabelConfig  Json?  // Configuración de branding personalizado
+  
+  // Sistema de afiliados nivel 2 (Fase 3 Partners)
+  nivel            Int @default(1) // 1=partner principal, 2=sub-afiliado
+  parentSalesRepId String?
+  parentSalesRep   SalesRepresentative? @relation("SubAffiliates", fields: [parentSalesRepId], references: [id])
+  subAffiliates    SalesRepresentative[] @relation("SubAffiliates")
+  
   // Relaciones
   leads       SalesLead[]
   comisiones  SalesCommission[]
   objetivos   SalesTarget[]
+  certificationsAwarded PartnerCertificationAwarded[]
+  materialsDownloaded   MaterialDownload[]
   
   // Metadata
   createdAt   DateTime @default(now())
@@ -9886,6 +9904,8 @@ model SalesRepresentative {
   @@index([estado])
   @@index([codigoReferido])
   @@index([activo])
+  @@index([apiKey])
+  @@index([parentSalesRepId])
 }
 
 // Lead captado por comercial
@@ -10056,4 +10076,84 @@ model SalesTarget {
   @@index([periodo])
   @@index([cumplido])
   @@unique([salesRepId, periodo])
+}
+
+// ====================================
+// SISTEMA DE PARTNERS AVANZADO
+// ====================================
+
+// Materiales de Marketing para Partners
+model MarketingMaterial {
+  id          String   @id @default(cuid())
+  
+  tipo        String   // "banner", "email_template", "landing_page", "video", "documento"
+  titulo      String
+  descripcion String   @db.Text
+  url         String?  // URL del recurso (imagen, video, etc)
+  contenido   String?  @db.Text // Contenido HTML/texto para templates
+  tags        String[] // Para búsqueda y filtrado
+  
+  activo      Boolean  @default(true)
+  
+  downloads   MaterialDownload[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([tipo])
+  @@index([activo])
+}
+
+// Tracking de descargas de materiales por partners
+model MaterialDownload {
+  id          String   @id @default(cuid())
+  
+  salesRepId  String
+  salesRep    SalesRepresentative @relation(fields: [salesRepId], references: [id], onDelete: Cascade)
+  
+  materialId  String
+  material    MarketingMaterial @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  
+  fechaDescarga DateTime @default(now())
+  
+  @@index([salesRepId])
+  @@index([materialId])
+}
+
+// Certificaciones disponibles para Partners
+model PartnerCertification {
+  id          String   @id @default(cuid())
+  
+  nombre      String
+  descripcion String   @db.Text
+  nivel       String   // "basico", "intermedio", "avanzado", "experto"
+  requisitos  String[] // Lista de requisitos para obtenerla
+  beneficios  String[] // Beneficios de tener esta certificación
+  
+  activo      Boolean  @default(true)
+  
+  awarded     PartnerCertificationAwarded[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([nivel])
+  @@index([activo])
+}
+
+// Certificaciones otorgadas a Partners
+model PartnerCertificationAwarded {
+  id              String   @id @default(cuid())
+  
+  salesRepId      String
+  salesRep        SalesRepresentative @relation(fields: [salesRepId], references: [id], onDelete: Cascade)
+  
+  certificationId String
+  certification   PartnerCertification @relation(fields: [certificationId], references: [id], onDelete: Cascade)
+  
+  fechaObtencion  DateTime @default(now())
+  certificadoNumero String @unique // Número único de certificado
+  
+  @@index([salesRepId])
+  @@index([certificationId])
 }

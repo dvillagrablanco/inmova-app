@@ -48,18 +48,12 @@ export async function GET(request: NextRequest) {
     const targets = await prisma.salesTarget.findMany({
       where,
       include: {
-        salesRepresentative: {
+        salesRep: {
           select: {
             id: true,
             nombre: true,
             apellidos: true,
             email: true,
-          },
-        },
-        company: {
-          select: {
-            id: true,
-            nombre: true,
           },
         },
       },
@@ -87,7 +81,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Solo admins pueden crear objetivos
-    if (session.user.role !== 'super_admin' && session.user.role !== 'admin') {
+    if (session.user.role !== 'super_admin' && session.user.role !== 'administrador') {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 403 }
@@ -111,24 +105,17 @@ export async function POST(request: NextRequest) {
 
     const target = await prisma.salesTarget.create({
       data: {
-        companyId: session.user.companyId,
-        salesRepresentativeId: data.salesRepresentativeId,
+        salesRepId: data.salesRepId || data.salesRepresentativeId,
         periodo: data.periodo,
+        tipoObjetivo: data.tipoObjetivo || 'mensual',
+        objetivoLeads: data.objetivoLeads || data.metaLeads || 10,
+        objetivoConversiones: data.objetivoConversiones || data.metaConversiones || 2,
+        objetivoMRR: data.objetivoMRR || data.metaRevenue || 1000,
         fechaInicio: new Date(data.fechaInicio),
         fechaFin: new Date(data.fechaFin),
-        metaVentas: data.metaVentas || null,
-        metaLeads: data.metaLeads || null,
-        metaConversiones: data.metaConversiones || null,
-        metaRevenue: data.metaRevenue || null,
-        ventasActuales: 0,
-        leadsActuales: 0,
-        conversionesActuales: 0,
-        revenueActual: 0,
-        descripcion: data.descripcion || null,
-        activo: data.activo !== undefined ? data.activo : true,
       },
       include: {
-        salesRepresentative: {
+        salesRep: {
           select: {
             id: true,
             nombre: true,

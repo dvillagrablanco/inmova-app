@@ -23,18 +23,12 @@ export async function GET(
         companyId: session.user.companyId,
       },
       include: {
-        salesRepresentative: {
+        salesRep: {
           select: {
             id: true,
             nombre: true,
             apellidos: true,
             email: true,
-          },
-        },
-        company: {
-          select: {
-            id: true,
-            nombre: true,
           },
         },
       },
@@ -112,7 +106,7 @@ export async function PATCH(
       where: { id: params.id },
       data: updateData,
       include: {
-        salesRepresentative: {
+        salesRep: {
           select: {
             id: true,
             nombre: true,
