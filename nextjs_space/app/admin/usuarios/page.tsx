@@ -71,7 +71,7 @@ export default function UsersPage() {
     name: '',
     password: '',
     role: 'gestor',
-    companyId: '',
+    companyId: 'no-company',
   });
 
   useEffect(() => {
@@ -196,7 +196,10 @@ export default function UsersPage() {
         const res = await fetch('/api/users', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData),
+          body: JSON.stringify({
+            ...formData,
+            companyId: formData.companyId === 'no-company' ? null : formData.companyId,
+          }),
         });
 
         if (res.ok) {
@@ -272,7 +275,7 @@ export default function UsersPage() {
       name: user.name,
       password: '',
       role: user.role,
-      companyId: user.company?.id || '',
+      companyId: user.company?.id || 'no-company',
     });
     setShowDialog(true);
   };
@@ -284,7 +287,7 @@ export default function UsersPage() {
       name: '',
       password: '',
       role: 'gestor',
-      companyId: '',
+      companyId: 'no-company',
     });
   };
 
@@ -592,7 +595,7 @@ export default function UsersPage() {
                       <SelectValue placeholder="Seleccionar empresa (opcional)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Sin empresa (solo para Super Admin)</SelectItem>
+                      <SelectItem value="no-company">Sin empresa (solo para Super Admin)</SelectItem>
                       {companies.map((company) => (
                         <SelectItem key={company.id} value={company.id}>
                           {company.nombre}

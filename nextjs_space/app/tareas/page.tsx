@@ -166,7 +166,7 @@ export default function TareasPage() {
         prioridad: task.prioridad,
         fechaLimite: task.fechaLimite ? format(new Date(task.fechaLimite), 'yyyy-MM-dd') : '',
         fechaInicio: task.fechaInicio ? format(new Date(task.fechaInicio), 'yyyy-MM-dd') : '',
-        asignadoA: task.asignadoA || '',
+        asignadoA: task.asignadoA || 'unassigned',
         notas: task.notas || '',
       });
     } else {
@@ -178,7 +178,7 @@ export default function TareasPage() {
         prioridad: 'media',
         fechaLimite: '',
         fechaInicio: '',
-        asignadoA: '',
+        asignadoA: 'unassigned',
         notas: '',
       });
     }
@@ -202,7 +202,7 @@ export default function TareasPage() {
           ...formData,
           fechaLimite: formData.fechaLimite || null,
           fechaInicio: formData.fechaInicio || null,
-          asignadoA: formData.asignadoA || null,
+          asignadoA: formData.asignadoA === 'unassigned' ? null : formData.asignadoA || null,
         }),
       });
 
@@ -662,7 +662,7 @@ export default function TareasPage() {
                   <SelectValue placeholder="Selecciona un usuario" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Sin asignar</SelectItem>
+                  <SelectItem value="unassigned">Sin asignar</SelectItem>
                   {users.map((user) => (
                     <SelectItem key={user.id} value={user.id}>
                       {user.name} ({user.email})

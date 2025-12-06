@@ -490,7 +490,7 @@ export default function ClienteDetailPage() {
                           <SelectValue placeholder="Seleccionar plan" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Sin plan</SelectItem>
+                          <SelectItem value="no-plan">Sin plan</SelectItem>
                           {plans.map(plan => (
                             <SelectItem key={plan.id} value={plan.id}>
                               {plan.nombre} ({plan.tier}) - {plan.precioMensual}€/mes
