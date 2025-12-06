@@ -113,12 +113,14 @@ export default function ClienteDetailPage() {
 
   // Cargar datos
   useEffect(() => {
-    if (status === 'authenticated' && session?.user?.role === 'super_admin' && params.id) {
+    if (status === 'authenticated' && session?.user?.role === 'super_admin' && params?.id) {
       loadData();
     }
-  }, [status, session, params.id]);
+  }, [status, session, params?.id]);
 
   const loadData = async () => {
+    if (!params?.id) return;
+    
     try {
       setLoading(true);
       
@@ -152,6 +154,8 @@ export default function ClienteDetailPage() {
   };
 
   const handleSave = async () => {
+    if (!params?.id) return;
+    
     try {
       setSaving(true);
       

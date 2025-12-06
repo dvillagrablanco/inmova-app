@@ -51,6 +51,8 @@ export function BreadcrumbAuto({
   const pathname = usePathname();
   
   // Dividir el pathname en segmentos
+  if (!pathname) return null;
+  
   const segments = pathname.split('/').filter(Boolean);
   
   // Si estamos en la raíz, no mostrar breadcrumbs

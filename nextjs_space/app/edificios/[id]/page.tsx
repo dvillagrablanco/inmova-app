@@ -68,12 +68,14 @@ export default function EdificioDetallePage() {
   }, [status, router]);
 
   useEffect(() => {
-    if (session && params.id) {
+    if (session && params?.id) {
       fetchBuilding();
     }
-  }, [session, params.id]);
+  }, [session, params?.id]);
 
   const fetchBuilding = async () => {
+    if (!params?.id) return;
+    
     try {
       const res = await fetch(`/api/buildings/${params.id}`);
       if (!res.ok) throw new Error('Error al cargar edificio');

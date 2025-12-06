@@ -137,12 +137,14 @@ export default function InvoiceDetailPage() {
   const [isCancelling, setIsCancelling] = useState(false);
 
   useEffect(() => {
-    if (params.id) {
+    if (params?.id) {
       loadInvoice();
     }
-  }, [params.id]);
+  }, [params?.id]);
 
   const loadInvoice = async () => {
+    if (!params?.id) return;
+    
     try {
       setLoading(true);
       const res = await fetch(`/api/b2b-billing/invoices/${params.id}`);

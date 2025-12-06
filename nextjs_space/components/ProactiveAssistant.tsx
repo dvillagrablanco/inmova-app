@@ -185,9 +185,11 @@ export default function ProactiveAssistant() {
 
   useEffect(() => {
     // Determinar si mostrar asistente basado en la ruta
+    if (!pathname) return;
+    
     const suggestions = CONTEXTUAL_SUGGESTIONS[pathname] || [];
     const availableSuggestions = suggestions.filter(
-      s => !dismissedSuggestions.has(s.id)
+      (s: ProactiveSuggestion) => !dismissedSuggestions.has(s.id)
     );
 
     if (availableSuggestions.length > 0) {
@@ -214,9 +216,11 @@ export default function ProactiveAssistant() {
   };
 
   const handleDismissAll = () => {
+    if (!pathname) return;
+    
     const suggestions = CONTEXTUAL_SUGGESTIONS[pathname] || [];
     const newDismissed = new Set(dismissedSuggestions);
-    suggestions.forEach(s => newDismissed.add(s.id));
+    suggestions.forEach((s: ProactiveSuggestion) => newDismissed.add(s.id));
     setDismissedSuggestions(newDismissed);
     localStorage.setItem('dismissedSuggestions', JSON.stringify(Array.from(newDismissed)));
     setShowAssistant(false);
