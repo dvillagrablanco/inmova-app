@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import logger from '@/lib/logger';
 import { PrismaClient } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
-
-
 const prisma = new PrismaClient();
-
 // Función para obtener la comisión según el número de clientes
 function getCommissionRate(clientCount: number): number {
   if (clientCount >= 251) return 70.0;
@@ -15,7 +13,6 @@ function getCommissionRate(clientCount: number): number {
   if (clientCount >= 11) return 30.0;
   return 20.0;
 }
-
 // POST /api/partners/calculate-commissions - Calcular comisiones mensuales (CRON)
 export async function POST(request: NextRequest) {
   try {
@@ -24,12 +21,9 @@ export async function POST(request: NextRequest) {
     // if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     //   return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     // }
-
     const now = new Date();
     const periodo = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-
     console.log(`Calculando comisiones para el periodo: ${periodo}`);
-
     // Obtener todos los Partners activos
     const partners = await prisma.partner.findMany({
       where: {
@@ -43,49 +37,36 @@ export async function POST(request: NextRequest) {
           },
           include: {
             company: true,
-          },
         },
-      },
     });
-
     const results = [];
-
     for (const partner of partners) {
       const clientesActivos = partner.clientes.length;
-
       if (clientesActivos === 0) {
         console.log(`Partner ${partner.nombre} no tiene clientes activos.`);
         continue;
       }
-
       // Calcular porcentaje según escala
       const porcentajeComision = getCommissionRate(clientesActivos);
-
       // Precio base por cliente (Plan Profesional: 149€/mes)
       const precioPorCliente = 149.0;
-
       // Procesar cada cliente
       for (const cliente of partner.clientes) {
         // Verificar si ya existe comisión para este periodo
         const existingCommission = await prisma.commission.findUnique({
-          where: {
             partnerId_companyId_periodo: {
               partnerId: partner.id,
               companyId: cliente.companyId,
               periodo,
             },
-          },
         });
-
         if (existingCommission) {
           console.log(`Comisión ya existe para ${cliente.company.nombre} en ${periodo}`);
           continue;
         }
-
         // Calcular comisión
         const montoBruto = precioPorCliente;
         const montoComision = (montoBruto * porcentajeComision) / 100;
-
         // Crear comisión
         const commission = await prisma.commission.create({
           data: {
@@ -99,20 +80,12 @@ export async function POST(request: NextRequest) {
             planNombre: 'Plan Profesional',
             estado: 'PENDING',
             clientesActivos,
-          },
-        });
-
         // Actualizar PartnerClient
         await prisma.partnerClient.update({
           where: { id: cliente.id },
-          data: {
             totalComisionGenerada: {
               increment: montoComision,
-            },
             ultimaComisionFecha: now,
-          },
-        });
-
         results.push({
           partner: partner.nombre,
           cliente: cliente.company.nombre,
@@ -121,59 +94,30 @@ export async function POST(request: NextRequest) {
           porcentaje: porcentajeComision,
           montoComision,
           commissionId: commission.id,
-        });
-      }
     }
-
     return NextResponse.json({
       message: `Comisiones calculadas para ${results.length} clientes`,
       periodo,
       results,
-    });
   } catch (error: any) {
-    console.error('Error calculando comisiones:', error);
+    logger.error('Error calculando comisiones:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor', details: error?.message },
       { status: 500 }
     );
   }
-}
-
 // GET /api/partners/calculate-commissions - Obtener información del último cálculo
 export async function GET(request: NextRequest) {
-  try {
-    const now = new Date();
     const periodoActual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-
     const comisionesDelMes = await prisma.commission.findMany({
       where: { periodo: periodoActual },
-      include: {
         partner: {
           select: {
             nombre: true,
-          },
-        },
         company: {
-          select: {
-            nombre: true,
-          },
-        },
-      },
-    });
-
     const totalComisiones = comisionesDelMes.reduce((sum, c) => sum + c.montoComision, 0);
-
-    return NextResponse.json({
       periodo: periodoActual,
       totalComisiones: comisionesDelMes.length,
       montoTotal: totalComisiones.toFixed(2),
       comisiones: comisionesDelMes,
-    });
-  } catch (error: any) {
-    console.error('Error obteniendo información de comisiones:', error);
-    return NextResponse.json(
-      { error: 'Error interno del servidor', details: error?.message },
-      { status: 500 }
-    );
-  }
-}
+    logger.error('Error obteniendo información de comisiones:', error);

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import logger from '@/lib/logger';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
@@ -140,7 +141,7 @@ export default function AutomatizacionPage() {
       }
 
     } catch (error) {
-      console.error('Error loading automations:', error);
+      logger.error('Error loading automations:', error);
       toast.error('Error al cargar automatizaciones');
     } finally {
       setLoading(false);
@@ -156,7 +157,7 @@ export default function AutomatizacionPage() {
         setShowExecutionsDialog(true);
       }
     } catch (error) {
-      console.error('Error loading executions:', error);
+      logger.error('Error loading executions:', error);
       toast.error('Error al cargar historial');
     }
   };
@@ -186,7 +187,7 @@ export default function AutomatizacionPage() {
         toast.error(error.error || 'Error al crear automatización');
       }
     } catch (error) {
-      console.error('Error creating automation:', error);
+      logger.error('Error creating automation:', error);
       toast.error('Error al crear automatización');
     }
   };
@@ -206,7 +207,7 @@ export default function AutomatizacionPage() {
         toast.error('Error al actualizar automatización');
       }
     } catch (error) {
-      console.error('Error toggling automation:', error);
+      logger.error('Error toggling automation:', error);
       toast.error('Error al actualizar automatización');
     }
   };
@@ -226,7 +227,7 @@ export default function AutomatizacionPage() {
         toast.error('Error al eliminar automatización');
       }
     } catch (error) {
-      console.error('Error deleting automation:', error);
+      logger.error('Error deleting automation:', error);
       toast.error('Error al eliminar automatización');
     }
   };

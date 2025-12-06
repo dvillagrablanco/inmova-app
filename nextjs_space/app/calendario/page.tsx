@@ -126,7 +126,14 @@ export default function CalendarioPage() {
   const [loading, setLoading] = useState(true);
   const [sincronizando, setSincronizando] = useState(false);
   const [currentView, setCurrentView] = useState<View>(Views.MONTH);
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState<Date | null>(null);
+  
+  // Initialize currentDate on client to avoid hydration errors
+  useEffect(() => {
+    if (!currentDate) {
+      setCurrentDate(new Date());
+    }
+  }, [currentDate]);
   
   // Estados de filtros
   const [tiposFiltrados, setTiposFiltrados] = useState<string[]>([]);
@@ -168,6 +175,8 @@ export default function CalendarioPage() {
   }, [session, currentDate, currentView]);
 
   const cargarEventos = async () => {
+    if (!currentDate) return; // Wait for currentDate to be initialized
+    
     try {
       setLoading(true);
       

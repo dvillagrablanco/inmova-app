@@ -1,53 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
+import logger from '@/lib/logger';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
-
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-
     if (!session || !session.user?.companyId) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
-
     const companyId = session.user.companyId;
-
     const automations = await prisma.automation.findMany({
       where: { companyId },
       orderBy: { createdAt: 'desc' },
     });
-
     return NextResponse.json(automations);
   } catch (error) {
-    console.error('Error fetching automations:', error);
+    logger.error('Error fetching automations:', error);
     return NextResponse.json({ error: 'Error al obtener automatizaciones' }, { status: 500 });
   }
 }
-
 export async function POST(request: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions);
-
-    if (!session || !session.user?.companyId) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-    }
-
-    const companyId = session.user.companyId;
     const userId = session.user.id;
     const body = await request.json();
-
     const { nombre, descripcion, tipo, triggerType, prioridad, activa } = body;
-
     if (!nombre || !tipo || !triggerType) {
       return NextResponse.json(
         { error: 'Faltan campos requeridos' },
         { status: 400 }
       );
-    }
-
     // Crear automatización con configuración básica
     const automation = await prisma.automation.create({
       data: {
@@ -62,11 +45,6 @@ export async function POST(request: NextRequest) {
         prioridad: prioridad || 'media',
         activa: activa !== undefined ? activa : true,
       },
-    });
-
     return NextResponse.json(automation, { status: 201 });
-  } catch (error) {
-    console.error('Error creating automation:', error);
+    logger.error('Error creating automation:', error);
     return NextResponse.json({ error: 'Error al crear automatización' }, { status: 500 });
-  }
-}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import logger from '@/lib/logger';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -52,7 +53,7 @@ export default function NuevoPresupuestoPage() {
         setWorkOrders(data.workOrders || data);
       }
     } catch (error) {
-      console.error('Error fetching work orders:', error);
+      logger.error('Error fetching work orders:', error);
     }
   };
 
@@ -115,7 +116,7 @@ export default function NuevoPresupuestoPage() {
       toast.success('Presupuesto creado correctamente');
       router.push(`/portal-proveedor/presupuestos/${quote.id}`);
     } catch (error) {
-      console.error('Error creating quote:', error);
+      logger.error('Error creating quote:', error);
       toast.error(error instanceof Error ? error.message : 'Error al crear el presupuesto');
     } finally {
       setLoading(false);

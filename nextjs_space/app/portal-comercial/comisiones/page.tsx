@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import logger from '@/lib/logger';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -111,7 +112,7 @@ export default function ComisionesPage() {
         toast.error('Error al cargar comisiones');
       }
     } catch (error) {
-      console.error('Error loading commissions:', error);
+      logger.error('Error loading commissions:', error);
       toast.error('Error al cargar comisiones');
     } finally {
       setLoading(false);

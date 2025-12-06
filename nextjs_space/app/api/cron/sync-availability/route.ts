@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import logger from '@/lib/logger';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { syncAvailabilityToChannels } from '@/lib/cron-service';
@@ -10,21 +11,16 @@ import { syncAvailabilityToChannels } from '@/lib/cron-service';
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-
     if (!session?.user) {
       return NextResponse.json(
         { error: 'No autenticado' },
         { status: 401 }
       );
     }
-
     const body = await request.json().catch(() => ({}));
     const companyId = body.companyId || session.user.companyId;
-
     console.log(`[API] Iniciando sincronización de disponibilidad para empresa: ${companyId}`);
-
     const result = await syncAvailabilityToChannels(companyId);
-
     return NextResponse.json({
       success: result.success,
       message: result.success 
@@ -33,7 +29,7 @@ export async function POST(request: NextRequest) {
       data: result
     });
   } catch (error) {
-    console.error('[API] Error en sincronización de disponibilidad:', error);
+    logger.error('[API] Error en sincronización de disponibilidad:', error);
     return NextResponse.json(
       { 
         error: 'Error en sincronización',

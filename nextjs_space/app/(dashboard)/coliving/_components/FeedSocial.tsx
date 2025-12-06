@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import logger from '@/lib/logger';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -44,7 +45,7 @@ export default function FeedSocial() {
         setPosts(data);
       }
     } catch (error) {
-      console.error('Error cargando feed:', error);
+      logger.error('Error cargando feed:', error);
       toast.error('Error al cargar feed');
     } finally {
       setLoading(false);
@@ -75,7 +76,7 @@ export default function FeedSocial() {
         toast.error('Error al crear publicación');
       }
     } catch (error) {
-      console.error('Error creando post:', error);
+      logger.error('Error creando post:', error);
       toast.error('Error al crear publicación');
     } finally {
       setCreatingPost(false);
@@ -96,7 +97,7 @@ export default function FeedSocial() {
         cargarFeed();
       }
     } catch (error) {
-      console.error('Error dando like:', error);
+      logger.error('Error dando like:', error);
     }
   };
 

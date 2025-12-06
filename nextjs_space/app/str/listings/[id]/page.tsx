@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import logger from '@/lib/logger';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -94,7 +95,7 @@ export default function ListingDetailPage() {
       const data = await res.json();
       setListing(data);
     } catch (error) {
-      console.error('Error cargando listing:', error);
+      logger.error('Error cargando listing:', error);
       toast.error('Error al cargar el listing');
     } finally {
       setLoading(false);

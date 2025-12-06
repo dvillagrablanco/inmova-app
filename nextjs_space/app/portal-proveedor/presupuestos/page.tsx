@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import logger from '@/lib/logger';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -69,7 +70,7 @@ export default function PresupuestosPage() {
       const data = await response.json();
       setQuotes(data);
     } catch (error) {
-      console.error('Error fetching quotes:', error);
+      logger.error('Error fetching quotes:', error);
       toast.error('Error al cargar los presupuestos');
     } finally {
       setLoading(false);

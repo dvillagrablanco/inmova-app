@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import logger from '@/lib/logger';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -57,7 +58,7 @@ export default function ServiciosPremium() {
         setServicios(data);
       }
     } catch (error) {
-      console.error('Error cargando servicios:', error);
+      logger.error('Error cargando servicios:', error);
       toast.error('Error al cargar servicios');
     } finally {
       setLoading(false);
@@ -100,7 +101,7 @@ export default function ServiciosPremium() {
         toast.error('Error al reservar servicio');
       }
     } catch (error) {
-      console.error('Error reservando servicio:', error);
+      logger.error('Error reservando servicio:', error);
       toast.error('Error al reservar servicio');
     } finally {
       setReservando(false);

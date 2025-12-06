@@ -62,9 +62,16 @@ function PagosPage() {
   const [filteredPayments, setFilteredPayments] = useState<Payment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState<Date | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'calendar' | 'stripe'>('list');
   const [activeFilters, setActiveFilters] = useState<Array<{ id: string; label: string; value: string }>>([]);
+
+  // Initialize currentDate on client to avoid hydration errors
+  useEffect(() => {
+    if (!currentDate) {
+      setCurrentDate(new Date());
+    }
+  }, [currentDate]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -207,8 +214,8 @@ function PagosPage() {
     .reduce((acc, p) => acc + p.monto, 0);
 
   // Calendar logic
-  const monthStart = startOfMonth(currentDate);
-  const monthEnd = endOfMonth(currentDate);
+  const monthStart = currentDate ? startOfMonth(currentDate) : startOfMonth(new Date());
+  const monthEnd = currentDate ? endOfMonth(currentDate) : endOfMonth(new Date());
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
   const getPaymentsForDay = (day: Date) => {
@@ -372,12 +379,15 @@ function PagosPage() {
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle>{format(currentDate, 'MMMM yyyy', { locale: es })}</CardTitle>
+                    <CardTitle>{currentDate ? format(currentDate, 'MMMM yyyy', { locale: es }) : ''}</CardTitle>
                     <div className="flex gap-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
+                        onClick={() => {
+                          const date = currentDate || new Date();
+                          setCurrentDate(new Date(date.getFullYear(), date.getMonth() - 1));
+                        }}
                       >
                         Anterior
                       </Button>
@@ -391,7 +401,10 @@ function PagosPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
+                        onClick={() => {
+                          const date = currentDate || new Date();
+                          setCurrentDate(new Date(date.getFullYear(), date.getMonth() + 1));
+                        }}
                       >
                         Siguiente
                       </Button>

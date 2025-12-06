@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import logger from '@/lib/logger';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -41,7 +42,7 @@ export default function GruposInteres() {
         setGrupos(data);
       }
     } catch (error) {
-      console.error('Error cargando grupos:', error);
+      logger.error('Error cargando grupos:', error);
       toast.error('Error al cargar grupos');
     } finally {
       setLoading(false);
@@ -66,7 +67,7 @@ export default function GruposInteres() {
         toast.error(error.error || 'Error al unirse al grupo');
       }
     } catch (error) {
-      console.error('Error uniéndose al grupo:', error);
+      logger.error('Error uniéndose al grupo:', error);
       toast.error('Error al unirse al grupo');
     }
   };

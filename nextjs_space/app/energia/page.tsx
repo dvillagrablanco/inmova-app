@@ -101,12 +101,12 @@ export default function EnergiaPage() {
   const [loading, setLoading] = useState(true);
 
   const [openReadingDialog, setOpenReadingDialog] = useState(false);
-  const [filterTipo, setFilterTipo] = useState<string>('');
-  const [filterBuilding, setFilterBuilding] = useState<string>('');
+  const [filterTipo, setFilterTipo] = useState<string>('all-types');
+  const [filterBuilding, setFilterBuilding] = useState<string>('all-buildings');
 
   const [readingForm, setReadingForm] = useState({
-    buildingId: '',
-    unitId: '',
+    buildingId: 'no-building',
+    unitId: 'no-unit',
     tipo: 'electricidad',
     lecturaAnterior: '',
     lecturaActual: '',
@@ -163,10 +163,17 @@ export default function EnergiaPage() {
   const handleCreateReading = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Map special values to null
+      const formData = {
+        ...readingForm,
+        buildingId: readingForm.buildingId === 'no-building' ? null : readingForm.buildingId,
+        unitId: readingForm.unitId === 'no-unit' ? null : readingForm.unitId,
+      };
+      
       const res = await fetch('/api/energy/readings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(readingForm),
+        body: JSON.stringify(formData),
       });
 
       if (!res.ok) throw new Error('Error al crear lectura');
@@ -174,8 +181,8 @@ export default function EnergiaPage() {
       toast.success('Lectura registrada exitosamente');
       setOpenReadingDialog(false);
       setReadingForm({
-        buildingId: '',
-        unitId: '',
+        buildingId: 'no-building',
+        unitId: 'no-unit',
         tipo: 'electricidad',
         lecturaAnterior: '',
         lecturaActual: '',
@@ -210,8 +217,8 @@ export default function EnergiaPage() {
 
   const filteredReadings = useMemo(() => {
     return readings.filter((reading) => {
-      if (filterTipo && reading.tipo !== filterTipo) return false;
-      if (filterBuilding && reading.building?.id !== filterBuilding) return false;
+      if (filterTipo && filterTipo !== 'all-types' && reading.tipo !== filterTipo) return false;
+      if (filterBuilding && filterBuilding !== 'all-buildings' && reading.building?.id !== filterBuilding) return false;
       return true;
     });
   }, [readings, filterTipo, filterBuilding]);
@@ -362,7 +369,7 @@ export default function EnergiaPage() {
                 <SelectValue placeholder="Tipo de energía" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value="all-types">Todos</SelectItem>
                 <SelectItem value="electricidad">Electricidad</SelectItem>
                 <SelectItem value="agua">Agua</SelectItem>
                 <SelectItem value="gas">Gas</SelectItem>
@@ -375,7 +382,7 @@ export default function EnergiaPage() {
                 <SelectValue placeholder="Edificio" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value="all-buildings">Todos</SelectItem>
                 {buildings.map((building) => (
                   <SelectItem key={building.id} value={building.id}>
                     {building.nombre}
@@ -470,7 +477,7 @@ export default function EnergiaPage() {
                                 <SelectValue placeholder="Seleccionar" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="">Ninguno</SelectItem>
+                                <SelectItem value="no-building">Ninguno</SelectItem>
                                 {buildings.map((building) => (
                                   <SelectItem key={building.id} value={building.id}>
                                     {building.nombre}
@@ -493,7 +500,7 @@ export default function EnergiaPage() {
                                 <SelectValue placeholder="Seleccionar" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="">Ninguna</SelectItem>
+                                <SelectItem value="no-unit">Ninguna</SelectItem>
                                 {units
                                   .filter((u) => u.buildingId === readingForm.buildingId)
                                   .map((unit) => (

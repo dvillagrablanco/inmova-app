@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import logger from '@/lib/logger';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/layout/sidebar';
@@ -122,7 +123,7 @@ export default function PortalesExternosPage() {
         toast.error('Error al cargar estadísticas');
       }
     } catch (error) {
-      console.error('Error loading stats:', error);
+      logger.error('Error loading stats:', error);
       toast.error('Error al cargar datos');
     } finally {
       setLoading(false);

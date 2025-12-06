@@ -11,6 +11,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import logger from '@/lib/logger';
 
 import { getAccounts, getBalances } from '@/lib/redsys-psd2-service';
 
@@ -97,7 +98,7 @@ export async function GET(request: NextRequest) {
           );
           return { ...account, balances };
         } catch (error) {
-          console.error(`Error obteniendo saldos para cuenta ${account.id}:`, error);
+          logger.error(`Error obteniendo saldos para cuenta ${account.id}:`, error);
           return account;
         }
       })
@@ -108,7 +109,7 @@ export async function GET(request: NextRequest) {
       accounts: accountsWithBalances,
     });
   } catch (error: any) {
-    console.error('Error obteniendo cuentas:', error);
+    logger.error('Error obteniendo cuentas:', error);
     return NextResponse.json(
       { error: error.message || 'Error al obtener cuentas' },
       { status: 500 }

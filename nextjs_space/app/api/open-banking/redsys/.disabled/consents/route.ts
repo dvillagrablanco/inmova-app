@@ -10,6 +10,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import logger from '@/lib/logger';
 
 import {
 
@@ -101,7 +102,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('Error creando consentimiento:', error);
+    logger.error('Error creando consentimiento:', error);
     return NextResponse.json(
       { error: error.message || 'Error al crear consentimiento' },
       { status: 500 }
@@ -141,7 +142,7 @@ export async function GET(request: NextRequest) {
       consents,
     });
   } catch (error: any) {
-    console.error('Error obteniendo consentimientos:', error);
+    logger.error('Error obteniendo consentimientos:', error);
     return NextResponse.json(
       { error: error.message || 'Error al obtener consentimientos' },
       { status: 500 }

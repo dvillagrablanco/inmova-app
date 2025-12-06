@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import logger from '@/lib/logger';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
@@ -97,7 +98,7 @@ export default function FlippingDashboardPage() {
       }
 
     } catch (error) {
-      console.error('Error loading flipping dashboard:', error);
+      logger.error('Error loading flipping dashboard:', error);
       toast.error('Error al cargar el dashboard de House Flipping');
     } finally {
       setLoading(false);

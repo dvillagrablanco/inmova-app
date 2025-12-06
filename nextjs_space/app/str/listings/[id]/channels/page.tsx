@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import logger from '@/lib/logger';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -138,7 +139,7 @@ export default function ChannelsPage() {
       const channelsData = await channelsRes.json();
       setChannels(channelsData.channels || []);
     } catch (error) {
-      console.error('Error cargando datos:', error);
+      logger.error('Error cargando datos:', error);
       toast.error('Error al cargar los datos');
     } finally {
       setLoading(false);
@@ -174,7 +175,7 @@ export default function ChannelsPage() {
       setConnectDialogOpen(false);
       loadData();
     } catch (error) {
-      console.error('Error conectando canal:', error);
+      logger.error('Error conectando canal:', error);
       toast.error((error as Error).message);
     }
   };
@@ -206,7 +207,7 @@ export default function ChannelsPage() {
       toast.success(`${channel.name} desconectado exitosamente`);
       loadData();
     } catch (error) {
-      console.error('Error desconectando canal:', error);
+      logger.error('Error desconectando canal:', error);
       toast.error((error as Error).message);
     }
   };
@@ -239,7 +240,7 @@ export default function ChannelsPage() {
       );
       loadData();
     } catch (error) {
-      console.error('Error sincronizando:', error);
+      logger.error('Error sincronizando:', error);
       toast.error((error as Error).message);
     } finally {
       setSyncing({ ...syncing, [syncKey]: false });

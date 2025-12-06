@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import logger from '@/lib/logger';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -114,7 +115,7 @@ export default function LeadsPage() {
         toast.error('Error al cargar leads');
       }
     } catch (error) {
-      console.error('Error loading leads:', error);
+      logger.error('Error loading leads:', error);
       toast.error('Error al cargar leads');
     } finally {
       setLoading(false);
