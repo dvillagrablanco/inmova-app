@@ -474,6 +474,13 @@ model Tenant {
   smartLockAccesses       SmartLockAccess[]
   colivingPackages        ColivingPackage[]
 
+  // Coliving - Analytics y Métricas Avanzadas
+  npsSurveys          NPSSurvey[]
+  tenantProfile       TenantProfile?
+  spaceWaitlists      SpaceWaitlist[]
+  reservationCredits  ReservationCredits?
+  spaceRatings        SpaceRating[]
+
   // Índices optimizados para consultas frecuentes
   @@index([companyId])
   @@index([email])
@@ -1233,6 +1240,13 @@ model Company {
 
   // Equipo Comercial Externo
   salesLeads                  SalesLead[]
+
+  // Coliving - Analytics y Métricas Avanzadas
+  colivingAnalytics           ColivingAnalytics[]
+  npsSurveys                  NPSSurvey[]
+  spaceWaitlists              SpaceWaitlist[]
+  spaceRatings                SpaceRating[]
+  spaceMaintenancePredictions SpaceMaintenancePrediction[]
 
   @@map("company")
 }
@@ -3634,7 +3648,10 @@ model CommonSpace {
   activo Boolean @default(true)
 
   // Relaciones
-  reservations SpaceReservation[]
+  reservations               SpaceReservation[]
+  waitlists                  SpaceWaitlist[]
+  ratings                    SpaceRating[]
+  maintenancePredictions     SpaceMaintenancePrediction[]
 
   // Auditoría
   createdAt DateTime @default(now())
@@ -3680,6 +3697,16 @@ model SpaceReservation {
   motivoCancelacion String?
   fechaCancelacion  DateTime?
 
+  // Gestión de No-Shows y Penalizaciones
+  noShow                 Boolean @default(false)
+  penaltyApplied         Boolean @default(false)
+  penaltyCredits         Int?    // Créditos descontados por penalización
+  checkInConfirmado      Boolean @default(false)
+  horaCheckIn            DateTime? // Hora real de check-in
+
+  // Relaciones
+  rating SpaceRating?
+
   // Auditoría
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -3689,6 +3716,7 @@ model SpaceReservation {
   @@index([tenantId])
   @@index([fechaReserva])
   @@index([estado])
+  @@index([noShow])
   @@map("space_reservations")
 }
 
@@ -10156,4 +10184,301 @@ model PartnerCertificationAwarded {
   
   @@index([salesRepId])
   @@index([certificationId])
+}
+
+// ==========================================
+// COLIVING - ANALYTICS Y MÉTRICAS AVANZADAS
+// ==========================================
+
+enum NPSCategory {
+  promotor     // 9-10
+  pasivo       // 7-8
+  detractor    // 0-6
+}
+
+enum PredictionStatus {
+  favorable
+  neutro
+  desfavorable
+}
+
+model ColivingAnalytics {
+  id String @id @default(cuid())
+
+  // Empresa
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Periodo de análisis
+  periodo     DateTime // Primer día del mes analizado
+  mes         Int
+  anio        Int
+
+  // Métricas de Rotación (Churn)
+  totalColivers         Int // Total de colivers activos al inicio del periodo
+  coliversSalieron      Int // Cuántos se fueron durante el periodo
+  churnRate             Float // Porcentaje de rotación (salieron / total * 100)
+  promedioEstanciaMeses Float? // Promedio de meses que permanecen
+
+  // Lifetime Value (LTV)
+  ltvPromedio Float // Valor promedio que genera un coliver durante toda su estancia
+  ltvMinimo   Float
+  ltvMaximo   Float
+
+  // Net Promoter Score (NPS)
+  totalEncuestas Int @default(0)
+  promotores     Int @default(0)
+  pasivos        Int @default(0)
+  detractores    Int @default(0)
+  npsScore       Float? // (promotores - detractores) / total * 100
+
+  // Análisis de perfil ideal
+  perfilIdealEdadMin      Int?
+  perfilIdealEdadMax      Int?
+  perfilIdealOcupacion    String? // estudiante, profesional, freelance
+  perfilIdealIngresoMin   Float?
+  perfilIdealEstanciaMeses Int? // Estancia promedio óptima
+
+  // Predicción de disponibilidad
+  prediccionOcupacionProximoMes   Float? // % estimado de ocupación para el próximo mes
+  prediccionDisponibilidadRoomsProximoMes Int? // Número estimado de habitaciones disponibles
+  nivelConfianzaPrediccion             PredictionStatus @default(neutro)
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([companyId, periodo])
+  @@index([companyId])
+  @@index([periodo])
+  @@map("coliving_analytics")
+}
+
+model NPSSurvey {
+  id String @id @default(cuid())
+
+  // Empresa y Tenant
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Encuesta
+  score         Int // 0-10
+  categoria     NPSCategory
+  comentario    String?      @db.Text
+  fechaEncuesta DateTime
+  respondido    Boolean      @default(false)
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([tenantId])
+  @@index([fechaEncuesta])
+  @@map("nps_surveys")
+}
+
+model TenantProfile {
+  id String @id @default(cuid())
+
+  // Tenant
+  tenantId String @unique
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Perfil demográfico
+  edad       Int?
+  ocupacion  String? // estudiante, profesional, freelance, emprendedor
+  ingresos   Float?
+  idiomas    String[] @default([])
+
+  // Comportamiento
+  horariosActividad       String? @db.Text // Descripción de horarios preferidos
+  nivelSociabilidad       Int?    @default(5) // 1-10
+  estiloVida              String? // tranquilo, social, deportista, workaholic
+  preferenciaLimpieza     Int?    @default(5) // 1-10
+  toleranciaRuido         Int?    @default(5) // 1-10
+  frecuenciaUsoComunes    String? // alta, media, baja
+
+  // Historial
+  numeroConvivientes      Int    @default(0)
+  incidentesReportados    Int    @default(0)
+  puntuacionConvivencia   Float? // Promedio de ratings de convivientes
+  mesesEnColiving         Int    @default(0)
+
+  // Preferencias
+  prefiereHabitacionPrivada Boolean @default(false)
+  prefiereEdificioCentro    Boolean @default(false)
+  interesEventos            Boolean @default(false)
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("tenant_profiles")
+}
+
+// ==========================================
+// ESPACIOS COMPARTIDOS - MEJORAS AVANZADAS
+// ==========================================
+
+enum WaitlistStatus {
+  activa
+  notificado
+  convertida
+  cancelada
+  expirada
+}
+
+model SpaceWaitlist {
+  id String @id @default(cuid())
+
+  // Empresa
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Espacio y Tenant
+  spaceId String
+  space   CommonSpace @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Solicitud
+  fechaSolicitud      DateTime @default(now())
+  fechaDeseada        DateTime
+  horaInicio          String // Formato "HH:mm"
+  horaFin             String // Formato "HH:mm"
+  duracionHoras       Int
+  prioridad           Int      @default(1) // 1-10 (más alto = más prioridad)
+
+  // Estado
+  status          WaitlistStatus @default(activa)
+  fechaNotificado DateTime?
+  notasInternas   String?        @db.Text
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([spaceId])
+  @@index([tenantId])
+  @@index([status])
+  @@index([fechaDeseada])
+  @@map("space_waitlist")
+}
+
+model ReservationCredits {
+  id String @id @default(cuid())
+
+  // Tenant
+  tenantId String @unique
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Créditos
+  creditosActuales   Int   @default(10) // Créditos disponibles
+  creditosMaximos    Int   @default(10) // Máximo de créditos por periodo
+  creditosUsados     Int   @default(0) // Histórico de créditos usados
+  penalizacionesTotal Int   @default(0) // Total de penalizaciones acumuladas
+
+  // Renovación
+  ultimaRecarga      DateTime @default(now())
+  proximaRecarga     DateTime // Se recarga automáticamente cada mes
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("reservation_credits")
+}
+
+enum RatingCategory {
+  excelente    // 5 estrellas
+  muy_bueno    // 4 estrellas
+  bueno        // 3 estrellas
+  regular      // 2 estrellas
+  malo         // 1 estrella
+}
+
+model SpaceRating {
+  id String @id @default(cuid())
+
+  // Empresa
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Espacio y Tenant
+  spaceId String
+  space   CommonSpace @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Reservación relacionada
+  reservationId String          @unique
+  reservation   SpaceReservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  // Valoración
+  puntuacion     Int // 1-5 estrellas
+  categoria      RatingCategory
+  comentario     String?        @db.Text
+  aspectosPositivos String[]    @default([])
+  aspectosNegativos String[]    @default([])
+
+  // Fecha
+  fechaRating DateTime @default(now())
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([spaceId])
+  @@index([tenantId])
+  @@index([puntuacion])
+  @@map("space_ratings")
+}
+
+model SpaceMaintenancePrediction {
+  id String @id @default(cuid())
+
+  // Empresa
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Espacio
+  spaceId String
+  space   CommonSpace @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  // Análisis
+  periodo                     DateTime @default(now())
+  horasUsoEstimadas           Float // Horas de uso en el periodo
+  numeroReservasCompletadas   Int
+  promedioPersonasPorReserva  Float
+  indiceDesgaste              Float // 0-100 (más alto = más desgaste)
+
+  // Predicción
+  mantenimientoSugerido       Boolean @default(false)
+  tipoMantenimientoSugerido   String? // preventivo, correctivo, profunda_limpieza
+  fechaSugeridaMantenimiento  DateTime?
+  descripcionRecomendacion    String? @db.Text
+  costoEstimado               Float?
+
+  // Alertas
+  nivelUrgencia  MaintenancePriority @default(baja)
+  alertaEnviada  Boolean             @default(false)
+  fechaAlerta    DateTime?
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([spaceId])
+  @@index([periodo])
+  @@index([mantenimientoSugerido])
+  @@map("space_maintenance_predictions")
 }

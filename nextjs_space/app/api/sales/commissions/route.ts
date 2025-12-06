@@ -76,7 +76,6 @@ export async function GET(request: NextRequest) {
             email: true,
           },
         },
-        },
       },
       orderBy: {
         fechaCalculo: 'desc',
