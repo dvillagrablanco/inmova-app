@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/components/providers';
 import { SkipLink } from '@/components/ui/skip-link';
+import { WebVitalsInit } from '@/components/WebVitalsInit';
 import { defaultMetadata } from '@/lib/seo-config';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -25,7 +26,10 @@ export default function RootLayout({
     <html lang="es" suppressHydrationWarning>
       <body className={inter.className} suppressHydrationWarning>
         <SkipLink />
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <WebVitalsInit />
+        </Providers>
       </body>
     </html>
   );
