@@ -98,6 +98,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/admin/personalizacion': 'admin_personalizacion',
   '/admin/activity': 'admin_activity',
   '/admin/alertas': 'admin_alertas',
+  '/admin/portales-externos': 'admin_portales_externos',
   '/admin/aprobaciones': 'admin_aprobaciones',
   '/admin/reportes-programados': 'admin_reportes_programados',
   '/admin/importar': 'admin_importar',
@@ -314,6 +315,7 @@ const adminNavItems = [
   { name: 'Legal', href: '/admin/legal', icon: BookOpen, roles: ['super_admin', 'administrador'] },
   { name: 'Firma Digital', href: '/admin/firma-digital', icon: FileSignature, roles: ['super_admin', 'administrador'] },
   { name: 'Equipo Comercial Externo', href: '/admin/sales-team', icon: Users2, roles: ['super_admin', 'administrador'] },
+  { name: 'Portales Externos', href: '/admin/portales-externos', icon: Zap, roles: ['super_admin'] },
   
   // Administrador - Gestión de Empresa
   { name: 'Configuración', href: '/admin/configuracion', icon: Settings, roles: ['administrador'] },

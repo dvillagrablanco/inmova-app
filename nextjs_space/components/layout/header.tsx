@@ -18,6 +18,7 @@ import { useEffect, useState } from 'react';
 import { useBranding } from '@/lib/hooks/useBranding';
 import { cn } from '@/lib/utils';
 import { LanguageSelector } from '@/components/LanguageSelector';
+import { ExternalPortalsNotifications } from '@/components/admin/external-portals-notifications';
 import logger, { logError } from '@/lib/logger';
 
 interface Notification {
@@ -266,6 +267,9 @@ export function Header() {
               </>
             )}
           </div>
+
+          {/* External Portals Notifications (Super Admin only) */}
+          <ExternalPortalsNotifications />
 
           {/* Language Selector */}
           <LanguageSelector />
