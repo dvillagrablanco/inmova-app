@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
+export const dynamic = 'force-dynamic';
+
+
 const prisma = new PrismaClient();
 
 // POST /api/partners/register - Registro de nuevo Partner

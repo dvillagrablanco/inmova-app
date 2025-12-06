@@ -8,6 +8,9 @@ import {
 } from '@/lib/services/community-management-service';
 import { prisma } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
+
 /**
  * @swagger
  * /api/communities/minutes:

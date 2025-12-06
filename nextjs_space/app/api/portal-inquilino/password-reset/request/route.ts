@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createPasswordResetToken } from '@/lib/tenant-invitation-service';
 import logger from '@/lib/logger';
 
+export const dynamic = 'force-dynamic';
+
+
 // Simulación de envío de email (en producción usar un servicio real)
 async function sendPasswordResetEmail(email: string, token: string, tenantName: string) {
   // TODO: Integrar con servicio de email (SendGrid, AWS SES, etc.)

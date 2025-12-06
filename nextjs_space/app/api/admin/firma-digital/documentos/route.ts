@@ -5,6 +5,9 @@ import { prisma } from '@/lib/db';
 import { addDays } from 'date-fns';
 import { logError } from '@/lib/logger';
 
+export const dynamic = 'force-dynamic';
+
+
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
 

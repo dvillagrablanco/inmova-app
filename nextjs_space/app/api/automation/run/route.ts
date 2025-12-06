@@ -13,6 +13,9 @@ import {
 import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 
+export const dynamic = 'force-dynamic';
+
+
 // Token de seguridad para proteger este endpoint
 const AUTOMATION_TOKEN = process.env.AUTOMATION_TOKEN || 'inmova_automation_2024';
 

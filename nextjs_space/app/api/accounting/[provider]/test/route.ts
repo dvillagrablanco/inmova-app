@@ -9,6 +9,9 @@ import { getZucchettiService } from '@/lib/zucchetti-integration-service';
 import { getContaSimpleService } from '@/lib/contasimple-integration-service';
 import logger, { logError } from '@/lib/logger';
 
+export const dynamic = 'force-dynamic';
+
+
 export async function POST(
   request: NextRequest,
   { params }: { params: { provider: string } }

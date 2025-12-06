@@ -10,6 +10,9 @@ import {
 import { VoteType } from '@prisma/client';
 import { prisma } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
+
 /**
  * @swagger
  * /api/communities/votes:

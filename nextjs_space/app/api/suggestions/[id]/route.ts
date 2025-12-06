@@ -4,6 +4,9 @@ import { requireAuth } from '@/lib/permissions';
 import { z } from 'zod';
 import logger, { logError } from '@/lib/logger';
 
+export const dynamic = 'force-dynamic';
+
+
 const updateSuggestionSchema = z.object({
   estado: z.enum(['pendiente', 'en_revision', 'resuelta', 'rechazada']).optional(),
   respuesta: z.string().optional(),

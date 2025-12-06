@@ -5,6 +5,9 @@ import { authOptions } from '@/lib/auth-options';
 import { sendPushNotificationToUser, sendPushNotificationToUsers, sendPushNotificationToCompany } from '@/lib/push-notifications';
 import logger, { logError } from '@/lib/logger';
 
+export const dynamic = 'force-dynamic';
+
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

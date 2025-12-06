@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { searchArticles } from '@/lib/knowledge-base-data';
 import logger, { logError } from '@/lib/logger';
 
+export const dynamic = 'force-dynamic';
+
+
 /**
  * API para categorizar automáticamente tickets de soporte usando IA
  */

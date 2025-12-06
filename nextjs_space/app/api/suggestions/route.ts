@@ -4,6 +4,9 @@ import { requireAuth } from '@/lib/permissions';
 import { z } from 'zod';
 import logger, { logError } from '@/lib/logger';
 
+export const dynamic = 'force-dynamic';
+
+
 const createSuggestionSchema = z.object({
   titulo: z.string().min(3, 'El título debe tener al menos 3 caracteres'),
   descripcion: z.string().min(10, 'La descripción debe tener al menos 10 caracteres'),

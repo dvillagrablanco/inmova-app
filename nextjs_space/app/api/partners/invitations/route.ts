@@ -3,6 +3,9 @@ import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 
+export const dynamic = 'force-dynamic';
+
+
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.NEXTAUTH_SECRET || 'your-secret-key-partners';
 

@@ -6,6 +6,8 @@ import {
   CreateRenewalParams,
 } from '@/lib/services/renewal-service-simple';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * @swagger
  * /api/renewals/create:

@@ -7,6 +7,9 @@ import {
 } from '@/lib/services/treasury-service-simple';
 import { prisma } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
+
 /**
  * @swagger
  * /api/treasury/forecast:

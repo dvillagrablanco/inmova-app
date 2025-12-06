@@ -9,6 +9,9 @@ import {
 import { FondoTipo } from '@prisma/client';
 import { prisma } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
+
 /**
  * @swagger
  * /api/communities/funds:

@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
+
 export async function GET() {
   // VAPID public key - debe generarse con web-push library
   // Por ahora usamos una key de ejemplo

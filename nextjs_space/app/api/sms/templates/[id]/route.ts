@@ -4,6 +4,9 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
 
+export const dynamic = 'force-dynamic';
+
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }

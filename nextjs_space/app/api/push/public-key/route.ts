@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { getPublicVapidKey } from '@/lib/push-notifications';
 import logger, { logError } from '@/lib/logger';
 
+export const dynamic = 'force-dynamic';
+
+
 export async function GET() {
   try {
     const publicKey = getPublicVapidKey();

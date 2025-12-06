@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import logger from '@/lib/logger';
 
+export const dynamic = 'force-dynamic';
+
+
 /**
  * API endpoint para recibir métricas de Web Vitals
  * 

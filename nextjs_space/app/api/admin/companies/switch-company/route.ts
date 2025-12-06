@@ -6,6 +6,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger, { logError } from '@/lib/logger';
 
+export const dynamic = 'force-dynamic';
+
+
 const switchCompanySchema = z.object({
   companyId: z.string(),
 });

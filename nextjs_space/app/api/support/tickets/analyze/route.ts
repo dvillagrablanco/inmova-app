@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { searchKnowledgeBase, searchFAQs } from '@/lib/knowledge-base';
 import logger from '@/lib/logger';
 
+export const dynamic = 'force-dynamic';
+
+
 export async function POST(request: NextRequest) {
   try {
     const { subject, description } = await request.json();

@@ -4,6 +4,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger from '@/lib/logger';
 
+
+
 interface ReportTemplate {
   id: string;
   nombre: string;

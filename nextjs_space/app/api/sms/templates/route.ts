@@ -5,6 +5,9 @@ import { crearPlantilla } from '@/lib/sms-service';
 import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
 
+export const dynamic = 'force-dynamic';
+
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

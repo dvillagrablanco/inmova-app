@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import logger, { logError } from '@/lib/logger';
 
+export const dynamic = 'force-dynamic';
+
+
 /**
  * API para detectar la intención del usuario usando IA
  */

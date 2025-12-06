@@ -7,6 +7,9 @@ import {
 } from '@/lib/services/compliance-service';
 import { prisma } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
+
 /**
  * @swagger
  * /api/compliance/modelo347:

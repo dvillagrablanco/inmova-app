@@ -9,6 +9,9 @@ import {
 } from '@/lib/services/community-management-service';
 import { CuotaTipo } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+
+
 /**
  * @swagger
  * /api/communities/fees:

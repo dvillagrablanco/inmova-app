@@ -5,6 +5,8 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 
+
+
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
