@@ -14,7 +14,7 @@ export function PromoSection() {
             <div>
               <Badge className="mb-4 bg-yellow-400 text-gray-900 border-0 text-base px-4 py-1.5">
                 <Sparkles className="h-4 w-4 mr-2" />
-                OFERTA Q1 2025
+                OFERTA Q1 2026
               </Badge>
               <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-4">
                 50% DE DESCUENTO<br />Primer Mes
@@ -63,7 +63,7 @@ export function PromoSection() {
               <div className="pt-4 border-t border-white/20">
                 <p className="text-sm text-indigo-200">
                   <AlertCircle className="inline h-4 w-4 mr-1" />
-                  Válido hasta el 31 de marzo de 2025
+                  Válido hasta el 31 de marzo de 2026
                 </p>
               </div>
             </div>

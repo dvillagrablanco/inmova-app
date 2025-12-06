@@ -85,18 +85,14 @@ export function HeroSection() {
             <div className="mt-12 max-w-5xl mx-auto">
               <Card className="overflow-hidden shadow-2xl border-4 border-indigo-200">
                 <CardContent className="p-0">
-                  <div className="relative aspect-video bg-gradient-to-br from-indigo-100 to-violet-100">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center space-y-4">
-                        <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 flex items-center justify-center shadow-lg">
-                          <Play className="h-10 w-10 text-white ml-1" />
-                        </div>
-                        <p className="text-lg font-semibold text-gray-700">Demo Interactivo Próximamente</p>
-                        <p className="text-sm text-gray-600 max-w-md mx-auto">
-                          Estamos preparando un video demo profesional para mostrarte todas las capacidades de INMOVA
-                        </p>
-                      </div>
-                    </div>
+                  <div className="relative aspect-video bg-black">
+                    <iframe 
+                      src="https://www.youtube.com/embed/zm55Gdl5G1Q?si=XZe1uSGRtyAUzLGX" 
+                      title="INMOVA Platform Demo" 
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                      allowFullScreen
+                      className="absolute inset-0 w-full h-full"
+                    />
                   </div>
                 </CardContent>
               </Card>

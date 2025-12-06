@@ -63,27 +63,25 @@ export default function MigracionPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <Button 
-              size="lg" 
-              className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white text-lg h-14 px-8"
-              onClick={() => {
-                window.open('/landing/contacto?subject=Plantilla%20Excel', '_blank');
-              }}
-            >
-              <Download className="mr-2 h-5 w-5" />
-              Descargar Plantilla Excel
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="border-indigo-600 text-indigo-600 hover:bg-indigo-50 text-lg h-14 px-8"
-              onClick={() => {
-                window.open('/landing/contacto?subject=Video%20Tutorial', '_blank');
-              }}
-            >
-              <PlayCircle className="mr-2 h-5 w-5" />
-              Ver Video Tutorial
-            </Button>
+            <a href="/templates/plantilla-edificios.csv" download>
+              <Button 
+                size="lg" 
+                className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white text-lg h-14 px-8 w-full"
+              >
+                <Download className="mr-2 h-5 w-5" />
+                Descargar Plantillas Excel
+              </Button>
+            </a>
+            <Link href="https://www.youtube.com/watch?v=zm55Gdl5G1Q" target="_blank" rel="noopener noreferrer">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="border-indigo-600 text-indigo-600 hover:bg-indigo-50 text-lg h-14 px-8 w-full"
+              >
+                <PlayCircle className="mr-2 h-5 w-5" />
+                Ver Video Tutorial
+              </Button>
+            </Link>
           </div>
 
           <Alert className="max-w-2xl mx-auto bg-green-50 border-green-200">
@@ -178,16 +176,15 @@ export default function MigracionPage() {
                   </div>
 
                   <div className="flex justify-center">
-                    <Button 
-                      size="lg" 
-                      className="bg-green-600 hover:bg-green-700 text-white"
-                      onClick={() => {
-                        window.open('/landing/contacto?subject=Plantilla%20Excel%20INMOVA', '_blank');
-                      }}
-                    >
-                      <Download className="mr-2 h-5 w-5" />
-                      Descargar Plantilla Excel INMOVA
-                    </Button>
+                    <a href="/templates/plantilla-completa-inmova.xlsx.txt" download>
+                      <Button 
+                        size="lg" 
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        <Download className="mr-2 h-5 w-5" />
+                        Descargar Plantilla Excel INMOVA
+                      </Button>
+                    </a>
                   </div>
                 </CardContent>
               </Card>
@@ -481,10 +478,12 @@ export default function MigracionPage() {
                   </div>
 
                   <div className="flex justify-center pt-4">
-                    <Button size="lg" className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white">
-                      <Users className="mr-2 h-5 w-5" />
-                      Solicitar Consultoría de Migración
-                    </Button>
+                    <Link href="/landing/contacto?subject=Consultoria%20de%20Migracion">
+                      <Button size="lg" className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white">
+                        <Users className="mr-2 h-5 w-5" />
+                        Solicitar Consultoría de Migración
+                      </Button>
+                    </Link>
                   </div>
                 </CardContent>
               </Card>
@@ -494,64 +493,176 @@ export default function MigracionPage() {
       </section>
 
       {/* TIMELINE */}
-      <section className="py-16 px-4 bg-white">
-        <div className="container mx-auto max-w-4xl">
-          <h2 className="text-4xl font-bold text-center mb-12">
-            <Clock className="inline h-10 w-10 mr-3 text-indigo-600" />
-            Timeline de Migración Típico
-          </h2>
+      <section className="py-20 px-4 bg-gradient-to-b from-white to-gray-50">
+        <div className="container mx-auto max-w-5xl">
+          <div className="text-center mb-16">
+            <Badge className="mb-4 bg-indigo-100 text-indigo-700 border-indigo-200 px-4 py-2">
+              <Clock className="h-4 w-4 mr-2" />
+              Proceso Optimizado
+            </Badge>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+              Timeline de Migración Típico
+            </h2>
+            <p className="text-xl text-gray-600">
+              De tu sistema actual a INMOVA en menos de una semana
+            </p>
+          </div>
           
-          <div className="space-y-6">
-            <div className="flex gap-4">
-              <div className="flex flex-col items-center">
-                <div className="bg-indigo-600 text-white rounded-full h-12 w-12 flex items-center justify-center font-bold text-lg">
-                  Día 1
+          <div className="relative">
+            {/* Línea vertical central */}
+            <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-gradient-to-b from-indigo-200 via-indigo-300 to-green-200"></div>
+            
+            <div className="space-y-12">
+              {/* Día 1 */}
+              <div className="relative">
+                <div className="md:flex md:items-center">
+                  <div className="md:w-1/2 md:pr-12 md:text-right">
+                    <Card className="bg-white border-2 border-indigo-200 hover:shadow-lg transition-shadow">
+                      <CardHeader>
+                        <div className="flex items-center justify-end gap-3">
+                          <div>
+                            <CardTitle className="text-xl text-indigo-600">Día 1</CardTitle>
+                            <CardDescription>Inicio del proceso</CardDescription>
+                          </div>
+                          <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-full p-3">
+                            <Rocket className="h-6 w-6 text-white" />
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <h3 className="font-bold text-lg mb-2">Registro y Configuración Inicial</h3>
+                        <p className="text-gray-600 text-sm">
+                          Te registras con LAUNCH2026, configuras tu empresa y te familiarizas con la plataforma. Nuestro equipo te guía en el onboarding inicial.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                  <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2 bg-indigo-600 rounded-full h-16 w-16 flex items-center justify-center border-4 border-white shadow-lg z-10">
+                    <span className="text-white font-bold text-lg">1</span>
+                  </div>
+                  <div className="md:w-1/2 md:pl-12"></div>
                 </div>
-                <div className="w-1 bg-indigo-200 flex-grow mt-2"></div>
               </div>
-              <div className="pb-8">
-                <h3 className="font-semibold text-xl mb-2">Registro y Configuración Inicial</h3>
-                <p className="text-gray-600">Te registras con LAUNCH2025, configuras tu empresa y te familiarizas con la plataforma.</p>
-              </div>
-            </div>
 
-            <div className="flex gap-4">
-              <div className="flex flex-col items-center">
-                <div className="bg-indigo-600 text-white rounded-full h-12 w-12 flex items-center justify-center font-bold text-lg">
-                  Día 2-3
+              {/* Día 2-3 */}
+              <div className="relative">
+                <div className="md:flex md:items-center">
+                  <div className="md:w-1/2 md:pr-12"></div>
+                  <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2 bg-indigo-600 rounded-full h-16 w-16 flex items-center justify-center border-4 border-white shadow-lg z-10">
+                    <span className="text-white font-bold text-sm">2-3</span>
+                  </div>
+                  <div className="md:w-1/2 md:pl-12">
+                    <Card className="bg-white border-2 border-indigo-200 hover:shadow-lg transition-shadow">
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="bg-gradient-to-br from-violet-500 to-violet-600 rounded-full p-3">
+                            <Database className="h-6 w-6 text-white" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-xl text-indigo-600">Días 2-3</CardTitle>
+                            <CardDescription>Recopilación de datos</CardDescription>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <h3 className="font-bold text-lg mb-2">Preparación de Datos</h3>
+                        <p className="text-gray-600 text-sm">
+                          Exportas datos de tu sistema actual o nos das acceso para migración asistida. Descarga y rellena nuestras plantillas optimizadas.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
                 </div>
-                <div className="w-1 bg-indigo-200 flex-grow mt-2"></div>
               </div>
-              <div className="pb-8">
-                <h3 className="font-semibold text-xl mb-2">Preparación de Datos</h3>
-                <p className="text-gray-600">Exportas datos de tu sistema actual o nos das acceso para migración asistida.</p>
-              </div>
-            </div>
 
-            <div className="flex gap-4">
-              <div className="flex flex-col items-center">
-                <div className="bg-indigo-600 text-white rounded-full h-12 w-12 flex items-center justify-center font-bold text-lg">
-                  Día 4-7
+              {/* Día 4-7 */}
+              <div className="relative">
+                <div className="md:flex md:items-center">
+                  <div className="md:w-1/2 md:pr-12 md:text-right">
+                    <Card className="bg-white border-2 border-indigo-200 hover:shadow-lg transition-shadow">
+                      <CardHeader>
+                        <div className="flex items-center justify-end gap-3">
+                          <div>
+                            <CardTitle className="text-xl text-indigo-600">Días 4-7</CardTitle>
+                            <CardDescription>Transferencia y validación</CardDescription>
+                          </div>
+                          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-full p-3">
+                            <Upload className="h-6 w-6 text-white" />
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <h3 className="font-bold text-lg mb-2">Importación y Validación</h3>
+                        <p className="text-gray-600 text-sm">
+                          Importamos los datos, los validamos automáticamente y tú revisas que todo esté correcto. Ajustes y correcciones en tiempo real.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                  <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2 bg-indigo-600 rounded-full h-16 w-16 flex items-center justify-center border-4 border-white shadow-lg z-10">
+                    <span className="text-white font-bold text-sm">4-7</span>
+                  </div>
+                  <div className="md:w-1/2 md:pl-12"></div>
                 </div>
-                <div className="w-1 bg-indigo-200 flex-grow mt-2"></div>
               </div>
-              <div className="pb-8">
-                <h3 className="font-semibold text-xl mb-2">Importación y Validación</h3>
-                <p className="text-gray-600">Importamos los datos, los validamos y tú revisas que todo esté correcto.</p>
-              </div>
-            </div>
 
-            <div className="flex gap-4">
-              <div className="flex flex-col items-center">
-                <div className="bg-green-600 text-white rounded-full h-12 w-12 flex items-center justify-center font-bold text-lg">
-                  ✓
+              {/* Go Live */}
+              <div className="relative">
+                <div className="md:flex md:items-center">
+                  <div className="md:w-1/2 md:pr-12"></div>
+                  <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2 bg-gradient-to-br from-green-500 to-green-600 rounded-full h-20 w-20 flex items-center justify-center border-4 border-white shadow-xl z-10">
+                    <CheckCircle className="h-10 w-10 text-white" />
+                  </div>
+                  <div className="md:w-1/2 md:pl-12">
+                    <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300 hover:shadow-xl transition-shadow">
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-full p-3">
+                            <Zap className="h-6 w-6 text-white" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-xl text-green-600">¡En Vivo!</CardTitle>
+                            <CardDescription className="text-green-700">Sistema completamente operativo</CardDescription>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <h3 className="font-bold text-lg mb-2 text-green-700">En Vivo y Operando</h3>
+                        <p className="text-gray-700 text-sm mb-3">
+                          Empiezas a gestionar todo desde INMOVA. Soporte continuo 24/7 disponible para cualquier duda o ajuste.
+                        </p>
+                        <div className="flex items-center gap-2 text-green-600 text-sm font-semibold">
+                          <Shield className="h-4 w-4" />
+                          <span>Soporte Premium incluido primeros 30 días</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
                 </div>
               </div>
-              <div>
-                <h3 className="font-semibold text-xl mb-2 text-green-600">En Vivo y Operando</h3>
-                <p className="text-gray-600">Empiezas a gestionar todo desde INMOVA. Soporte continuo disponible.</p>
-              </div>
             </div>
+          </div>
+
+          {/* Stats */}
+          <div className="grid md:grid-cols-3 gap-6 mt-16">
+            <Card className="text-center bg-white hover:shadow-lg transition-shadow">
+              <CardContent className="pt-6">
+                <div className="text-4xl font-bold text-indigo-600 mb-2">24h</div>
+                <p className="text-gray-600 text-sm">Tiempo promedio de migración</p>
+              </CardContent>
+            </Card>
+            <Card className="text-center bg-white hover:shadow-lg transition-shadow">
+              <CardContent className="pt-6">
+                <div className="text-4xl font-bold text-indigo-600 mb-2">100%</div>
+                <p className="text-gray-600 text-sm">Integridad de datos garantizada</p>
+              </CardContent>
+            </Card>
+            <Card className="text-center bg-white hover:shadow-lg transition-shadow">
+              <CardContent className="pt-6">
+                <div className="text-4xl font-bold text-indigo-600 mb-2">0€</div>
+                <p className="text-gray-600 text-sm">Coste migración con LAUNCH2026</p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
