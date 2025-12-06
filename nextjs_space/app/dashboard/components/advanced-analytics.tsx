@@ -107,7 +107,7 @@ export function AdvancedAnalytics({ monthlyData }: AdvancedAnalyticsProps) {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="mes" />
               <YAxis />
-              <Tooltip formatter={(value) => `€${Number(value).toFixed(0)}`} />
+              <Tooltip formatter={(value: number) => `€${Number(value).toFixed(0)}`} />
               <Legend />
               <Area
                 type="monotone"
@@ -149,7 +149,7 @@ export function AdvancedAnalytics({ monthlyData }: AdvancedAnalyticsProps) {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="mes" />
               <YAxis />
-              <Tooltip formatter={(value) => `€${Number(value).toFixed(0)}`} />
+              <Tooltip formatter={(value: number) => `€${Number(value).toFixed(0)}`} />
               <Legend />
               <Bar dataKey="ingresos" fill="#000000" name="Ingresos" />
               <Bar dataKey="gastos" fill="#EF4444" name="Gastos" />
@@ -170,7 +170,7 @@ export function AdvancedAnalytics({ monthlyData }: AdvancedAnalyticsProps) {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="mes" />
               <YAxis />
-              <Tooltip formatter={(value) => `€${Number(value).toFixed(0)}`} />
+              <Tooltip formatter={(value: number) => `€${Number(value).toFixed(0)}`} />
               <Legend />
               <Line
                 type="monotone"
