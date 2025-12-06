@@ -4,13 +4,18 @@
  */
 
 import { NextResponse } from 'next/server';
-import crypto from 'crypto';
 
 /**
  * Genera un nonce aleatorio y seguro para CSP
+ * Compatible con Edge Runtime usando Web Crypto API
  */
 export function generateNonce(): string {
-  return crypto.randomBytes(16).toString('base64');
+  // Generar un UUID y convertirlo a base64 para usarlo como nonce
+  // Esto es compatible con Edge Runtime
+  const uuid = crypto.randomUUID();
+  // Convertir UUID a bytes y luego a base64
+  const buffer = new TextEncoder().encode(uuid);
+  return btoa(String.fromCharCode(...buffer)).substring(0, 24);
 }
 
 /**

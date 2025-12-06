@@ -48,20 +48,38 @@ import {
   FileText,
   Bell
 } from 'lucide-react';
-import { Calendar, momentLocalizer, View, Views } from 'react-big-calendar';
-import moment from 'moment';
-import 'moment/locale/es';
+import { Calendar, dateFnsLocalizer, View, Views } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { toast } from 'sonner';
-import { format as formatDate } from 'date-fns';
+import { 
+  format as formatDate, 
+  parse, 
+  startOfWeek, 
+  getDay, 
+  startOfMonth, 
+  endOfMonth, 
+  addMonths, 
+  subMonths,
+  startOfDay,
+  endOfDay,
+  endOfWeek
+} from 'date-fns';
 import { es } from 'date-fns/locale';
-import { startOfMonth, endOfMonth, addMonths, subMonths } from 'date-fns';
 import { LoadingState } from '@/components/ui/loading-state';
 import logger, { logError } from '@/lib/logger';
 
-// Configurar moment en español
-moment.locale('es');
-const localizer = momentLocalizer(moment);
+// Configurar date-fns localizer para react-big-calendar
+const locales = {
+  'es': es,
+};
+
+const localizer = dateFnsLocalizer({
+  format: formatDate,
+  parse,
+  startOfWeek,
+  getDay,
+  locales,
+});
 
 interface CalendarEvent {
   id: string;
@@ -158,13 +176,13 @@ export default function CalendarioPage() {
       
       if (currentView === Views.MONTH) {
         start = startOfMonth(currentDate);
-        end = endOfMonth(addMonths(currentDate, 0));
+        end = endOfMonth(currentDate);
       } else if (currentView === Views.WEEK) {
-        start = moment(currentDate).startOf('week').toDate();
-        end = moment(currentDate).endOf('week').toDate();
+        start = startOfWeek(currentDate, { locale: es });
+        end = endOfWeek(currentDate, { locale: es });
       } else {
-        start = moment(currentDate).startOf('day').toDate();
-        end = moment(currentDate).endOf('day').toDate();
+        start = startOfDay(currentDate);
+        end = endOfDay(currentDate);
       }
 
       const params = new URLSearchParams({
