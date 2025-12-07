@@ -27,7 +27,12 @@ export async function GET(req: NextRequest) {
     const buildingFilter = buildingId ? { id: buildingId } : { companyId };
 
     // 1. Datos de Ingresos
-    const ingresos = [];
+    const ingresos: Array<{
+      mes: string;
+      rentas: number;
+      servicios: number;
+      otros: number;
+    }> = [];
     for (let i = 0; i < periodo; i++) {
       const monthStart = startOfMonth(subMonths(now, periodo - i - 1));
       const monthEnd = endOfMonth(monthStart);
@@ -125,7 +130,11 @@ export async function GET(req: NextRequest) {
     });
 
     // 4. Datos de Morosidad
-    const morosidad = [];
+    const morosidad: Array<{
+      mes: string;
+      morosidad: number;
+      recuperado: number;
+    }> = [];
     for (let i = 0; i < periodo; i++) {
       const monthStart = startOfMonth(subMonths(now, periodo - i - 1));
       const monthEnd = endOfMonth(monthStart);

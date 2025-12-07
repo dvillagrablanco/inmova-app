@@ -15,7 +15,11 @@ export async function GET(request: NextRequest) {
     }
     const companyId = session.user.companyId;
     // Obtener datos de los últimos 12 meses
-    const revenueData = [];
+    const revenueData: Array<{
+      month: string;
+      revenue: number;
+      bookings: number;
+    }> = [];
     
     for (let i = 11; i >= 0; i--) {
       const monthDate = subMonths(new Date(), i);

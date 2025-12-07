@@ -5,6 +5,19 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { subDays, subHours } from 'date-fns';
 
+interface Notification {
+  id: string;
+  type: string;
+  priority: 'high' | 'normal';
+  title: string;
+  message: string;
+  details: string;
+  timestamp: Date | null;
+  portal: string;
+  actionUrl: string;
+  icon: string;
+}
+
 export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   try {
@@ -21,7 +34,7 @@ export async function GET(request: NextRequest) {
     const companyFilter = companyId ? { companyId } : {};
     const last24Hours = subHours(new Date(), 24);
     const last7Days = subDays(new Date(), 7);
-    const notifications = [];
+    const notifications: Notification[] = [];
     // INQUILINOS - Chats
     const tenantChats = await prisma.chatConversation.findMany({
       where: { ...companyFilter, tenantId: { not: null }, ultimoMensajeFecha: { gte: last24Hours } },

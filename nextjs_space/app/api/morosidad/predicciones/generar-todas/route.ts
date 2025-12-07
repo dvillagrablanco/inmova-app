@@ -37,7 +37,13 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    const resultados = [];
+    const resultados: Array<{
+      tenantId: string;
+      tenantName: string;
+      nivelRiesgo: string;
+      probabilidad: number;
+      status: string;
+    }> = [];
     let generadas = 0;
     let errores = 0;
 

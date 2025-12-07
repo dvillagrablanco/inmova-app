@@ -397,7 +397,7 @@ function CompareCompaniesPageContent() {
                         label="Estado de Límites"
                         icon={<AlertTriangle className="h-4 w-4" />}
                         values={companies.map((c) => {
-                          const warnings = [];
+                          const warnings: string[] = [];
                           if (c.limits.userLimitUsage > 80) {
                             warnings.push('Usuarios');
                           }
