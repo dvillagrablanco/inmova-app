@@ -21,8 +21,10 @@ export async function POST(
       result = await conciergeService.completeCheckIn(checkInOutId, data);
     } else {
       result = await conciergeService.completeCheckOut(checkInOutId, data);
+    }
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
+    }
     return NextResponse.json(result.checkInOut);
   } catch (error) {
     logger.error('Error en POST /api/coliving/checkinout/[id]/complete:', error);

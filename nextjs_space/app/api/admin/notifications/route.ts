@@ -77,12 +77,15 @@ export async function GET(request: NextRequest) {
       filteredPayments = recentPayments.filter(p => {
         const contract = contractMap.get(p.contractId);
         return contract && validUnitIds.has(contract.unitId);
+      });
+    }
     // Obtener nombres de inquilinos
     const paymentTenantIds = filteredPayments
       .map(p => contractMap.get(p.contractId)?.tenantId)
       .filter(Boolean) as string[];
     const paymentTenants = paymentTenantIds.length > 0 ? await prisma.tenant.findMany({
       where: { id: { in: paymentTenantIds } },
+    }) : [];
     const paymentTenantMap = new Map(paymentTenants.map(t => [t.id, t.nombreCompleto]));
     notifications.push(...filteredPayments.slice(0, 10).map(p => {
       const contract = contractMap.get(p.contractId);
@@ -105,6 +108,7 @@ export async function GET(request: NextRequest) {
       where: { ...companyFilter, estado: 'completada', fechaCompletado: { gte: last24Hours } },
       include: { provider: { select: { nombre: true } }, building: { select: { nombre: true } } },
       orderBy: { fechaCompletado: 'desc' },
+    });
     notifications.push(...completedOrders.map(o => ({
       id: `provider_completed_${o.id}`,
       type: 'provider_order_completed',
@@ -116,21 +120,28 @@ export async function GET(request: NextRequest) {
       portal: 'Proveedores',
       actionUrl: `/ordenes-trabajo/${o.id}`,
       icon: 'check',
+    })));
     // PROVEEDORES - Órdenes pendientes de firma
     const pendingOrders = await prisma.providerWorkOrder.findMany({
       where: { ...companyFilter, estado: 'completada', firmadoPor: null, fechaCompletado: { gte: last7Days } },
+    });
     notifications.push(...pendingOrders.map(o => ({
       id: `provider_signature_${o.id}`,
       type: 'provider_order_signature',
       title: 'Orden pendiente de firma',
       message: `"${o.titulo}" requiere firma`,
       details: `${o.provider?.nombre || ''} - ${o.building?.nombre || ''}`,
+      portal: 'Proveedores',
+      actionUrl: `/ordenes-trabajo/${o.id}`,
+      timestamp: o.fechaCompletado,
       icon: 'signature',
+    })));
     // PROPIETARIOS - Notificaciones
     const ownerNotifs = await prisma.ownerNotification.findMany({
       where: { ...companyFilter, leida: false, createdAt: { gte: last7Days } },
       include: { owner: { select: { nombreCompleto: true } } },
       orderBy: { createdAt: 'desc' },
+    });
     notifications.push(...ownerNotifs.map(n => ({
       id: `owner_${n.id}`,
       type: 'owner_notification',
@@ -141,11 +152,13 @@ export async function GET(request: NextRequest) {
       portal: 'Propietarios',
       actionUrl: '/admin/propietarios',
       icon: 'bell',
+    })));
     // COMERCIALES - Nuevos leads
     const newLeads = await prisma.salesLead.findMany({
       where: { salesRep: companyId ? { companyId } : {}, fechaCaptura: { gte: last24Hours } },
       include: { salesRep: { select: { nombre: true } } },
       orderBy: { fechaCaptura: 'desc' },
+    });
     notifications.push(...newLeads.map(l => ({
       id: `lead_new_${l.id}`,
       type: 'sales_lead_new',
@@ -156,10 +169,12 @@ export async function GET(request: NextRequest) {
       portal: 'Comerciales',
       actionUrl: '/crm',
       icon: 'target',
+    })));
     // COMERCIALES - Leads convertidos
     const converted = await prisma.salesLead.findMany({
       where: { salesRep: companyId ? { companyId } : {}, convertido: true, fechaConversion: { gte: last24Hours } },
       orderBy: { fechaConversion: 'desc' },
+    });
     notifications.push(...converted.map(l => ({
       id: `lead_converted_${l.id}`,
       type: 'sales_lead_converted',
@@ -167,7 +182,10 @@ export async function GET(request: NextRequest) {
       message: `${l.salesRep?.nombre || 'Comercial'} convirtió: ${l.nombreContacto} - ${l.nombreEmpresa}`,
       details: `Valor: ${l.presupuestoMensual || 0}€/mes`,
       timestamp: l.fechaConversion,
+      portal: 'Comerciales',
+      actionUrl: '/crm',
       icon: 'trophy',
+    })));
     // COMERCIALES - Comisiones pendientes
     const commissions = await prisma.salesCommission.findMany({
       where: { salesRep: companyId ? { companyId } : {}, estado: 'PENDIENTE', createdAt: { gte: last7Days } },
@@ -175,6 +193,7 @@ export async function GET(request: NextRequest) {
         salesRep: { select: { nombre: true } },
         lead: { select: { nombreContacto: true, nombreEmpresa: true } }
       },
+    });
     notifications.push(...commissions.map(c => ({
       id: `commission_${c.id}`,
       type: 'sales_commission_pending',
@@ -182,13 +201,16 @@ export async function GET(request: NextRequest) {
       message: `${c.salesRep?.nombre || 'Comercial'} - ${c.montoComision}€`,
       details: c.lead ? `${c.lead.nombreContacto} - ${c.lead.nombreEmpresa}` : '',
       timestamp: c.createdAt,
+      portal: 'Comerciales',
       actionUrl: '/admin/sales-team',
       icon: 'dollar',
+    })));
     // Ordenar y limitar
     notifications.sort((a, b) => {
       const dateA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
       const dateB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
       return dateB - dateA;
+    });
     const limitedNotifications = notifications.slice(0, limit);
     const counts = {
       total: notifications.length,
@@ -199,6 +221,7 @@ export async function GET(request: NextRequest) {
         proveedores: notifications.filter(n => n.portal === 'Proveedores').length,
         propietarios: notifications.filter(n => n.portal === 'Propietarios').length,
         comerciales: notifications.filter(n => n.portal === 'Comerciales').length,
+      }
     };
     return NextResponse.json({ notifications: limitedNotifications, counts });
   } catch (error) {

@@ -32,6 +32,14 @@ export async function GET(req: NextRequest) {
   }
 }
 export async function POST(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
+      return NextResponse.json(
+        { error: 'No autorizado' },
+        { status: 401 }
+      );
+    }
     const body = await req.json();
     const {
       nombre,
@@ -61,6 +69,14 @@ export async function POST(req: NextRequest) {
         aplicableA: Array.isArray(aplicableA) ? aplicableA : [],
         activo: activo !== false,
         ultimaRevision: new Date()
+      }
+    });
     return NextResponse.json(template, { status: 201 });
+  } catch (error) {
     logger.error('Error al crear plantilla:', error);
+    return NextResponse.json(
       { error: 'Error al crear plantilla' },
+      { status: 500 }
+    );
+  }
+}

@@ -25,8 +25,10 @@ export async function GET(request: NextRequest) {
     };
     if (communityId) {
       where.communityId = communityId;
+    }
     if (estado) {
       where.estado = estado;
+    }
     const invoices = await prisma.communityInvoice.findMany({
       where,
       include: {

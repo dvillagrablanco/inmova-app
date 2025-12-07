@@ -25,11 +25,13 @@ export async function GET(
         { error: 'Automatización no encontrada' },
         { status: 404 }
       );
+    }
     // Obtener últimas 50 ejecuciones
     const executions = await prisma.automationExecution.findMany({
       where: { automationId: id },
       orderBy: { ejecutadaEn: 'desc' },
       take: 50,
+    });
     return NextResponse.json(executions);
   } catch (error) {
     logger.error('Error fetching executions:', error);

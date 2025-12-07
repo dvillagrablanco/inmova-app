@@ -27,10 +27,12 @@ export async function PATCH(
         { error: 'Automatización no encontrada' },
         { status: 404 }
       );
+    }
     // Actualizar estado
     const updated = await prisma.automation.update({
       where: { id },
       data: { activa },
+    });
     return NextResponse.json(updated);
   } catch (error) {
     logger.error('Error toggling automation:', error);
