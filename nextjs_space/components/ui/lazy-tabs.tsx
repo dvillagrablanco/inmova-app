@@ -1,16 +1,11 @@
-import { lazy, Suspense } from 'react';
+import { Suspense, ComponentType } from 'react';
 import { Loader2 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 
 /**
  * Lazy-loaded Tabs component
  * Optimiza la carga de pestañas con contenido pesado
  */
-
-// Lazy load de componentes Tabs
-const Tabs = lazy(() => import('@/components/ui/tabs').then(mod => ({ default: mod.Tabs })));
-const TabsContent = lazy(() => import('@/components/ui/tabs').then(mod => ({ default: mod.TabsContent })));
-const TabsList = lazy(() => import('@/components/ui/tabs').then(mod => ({ default: mod.TabsList })));
-const TabsTrigger = lazy(() => import('@/components/ui/tabs').then(mod => ({ default: mod.TabsTrigger })));
 
 // Loading fallback
 const TabsLoadingFallback = () => (
@@ -19,35 +14,23 @@ const TabsLoadingFallback = () => (
   </div>
 );
 
-// Wrapped components
-export const LazyTabs = (props: any) => (
-  <Suspense fallback={<TabsLoadingFallback />}>
-    <Tabs {...props} />
-  </Suspense>
+// Lazy load de componentes Tabs usando dynamic con named exports
+export const Tabs = dynamic(
+  () => import('@/components/ui/tabs').then(mod => mod.Tabs as ComponentType<any>),
+  { loading: () => <TabsLoadingFallback />, ssr: true }
 );
 
-export const LazyTabsContent = (props: any) => (
-  <Suspense fallback={<TabsLoadingFallback />}>
-    <TabsContent {...props} />
-  </Suspense>
+export const TabsContent = dynamic(
+  () => import('@/components/ui/tabs').then(mod => mod.TabsContent as ComponentType<any>),
+  { loading: () => <TabsLoadingFallback />, ssr: true }
 );
 
-export const LazyTabsList = (props: any) => (
-  <Suspense fallback={<TabsLoadingFallback />}>
-    <TabsList {...props} />
-  </Suspense>
+export const TabsList = dynamic(
+  () => import('@/components/ui/tabs').then(mod => mod.TabsList as ComponentType<any>),
+  { loading: () => <TabsLoadingFallback />, ssr: true }
 );
 
-export const LazyTabsTrigger = (props: any) => (
-  <Suspense fallback={<TabsLoadingFallback />}>
-    <TabsTrigger {...props} />
-  </Suspense>
+export const TabsTrigger = dynamic(
+  () => import('@/components/ui/tabs').then(mod => mod.TabsTrigger as ComponentType<any>),
+  { loading: () => <TabsLoadingFallback />, ssr: true }
 );
-
-// Re-export
-export {
-  LazyTabs as Tabs,
-  LazyTabsContent as TabsContent,
-  LazyTabsList as TabsList,
-  LazyTabsTrigger as TabsTrigger,
-};
