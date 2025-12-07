@@ -40,6 +40,7 @@ export async function GET(request: NextRequest) {
       },
       orderBy: {
         fechaEmision: 'desc',
+      },
     });
     return NextResponse.json(invoices);
   } catch (error) {
@@ -50,9 +51,17 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+/**
  * POST /api/admin-fincas/invoices
  * Crea una nueva factura de comunidad
+ */
 export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.companyId) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
     const body = await request.json();
     const {
       communityId,
@@ -62,38 +71,55 @@ export async function POST(request: NextRequest) {
       otrosConceptos,
       iva: ivaRate = 21,
     } = body;
+    
     // Validar campos requeridos
     if (!communityId || !periodo) {
       return NextResponse.json(
         { error: 'Faltan campos requeridos' },
         { status: 400 }
       );
+    }
+    
     // Verificar que la comunidad existe y pertenece a la compañía
     const community = await prisma.communityManagement.findFirst({
       where: {
         id: communityId,
         companyId: session.user.companyId,
+      },
+    });
+    
     if (!community) {
+      return NextResponse.json(
         { error: 'Comunidad no encontrada' },
         { status: 404 }
-    // Generar número de facturaúnicamente
+      );
+    }
+    
+    // Generar número de factura únicamente
     const year = new Date().getFullYear();
     const count = await prisma.communityInvoice.count({
+      where: { companyId: session.user.companyId },
+    });
     const numeroFactura = `FC-${year}-${(count + 1).toString().padStart(4, '0')}`;
+    
     // Calcular importes
     const hon = honorarios || 0;
     const gastos = gastosGestion || 0;
     const otros = Array.isArray(otrosConceptos)
-      ? otrosConceptos.reduce((sum, item) => sum + (item.importe || 0), 0)
+      ? otrosConceptos.reduce((sum: number, item: any) => sum + (item.importe || 0), 0)
       : 0;
     const baseImponible = hon + gastos + otros;
     const iva = baseImponible * (ivaRate / 100);
     const totalFactura = baseImponible + iva;
+    
     // Fecha de vencimiento: 30 días desde emisión
     const fechaEmision = new Date();
-    const fechaVencimiento = addMonths(fechaEmision, 1);
+    const fechaVencimiento = new Date(fechaEmision);
+    fechaVencimiento.setDate(fechaVencimiento.getDate() + 30);
+    
     const invoice = await prisma.communityInvoice.create({
       data: {
+        companyId: session.user.companyId,
         communityId,
         numeroFactura,
         fechaEmision,
@@ -106,7 +132,18 @@ export async function POST(request: NextRequest) {
         iva,
         totalFactura,
         estado: 'borrador',
+      },
+      include: {
         community: true,
+      },
+    });
+    
     return NextResponse.json(invoice, { status: 201 });
+  } catch (error) {
     logger.error('Error creating invoice:', error);
+    return NextResponse.json(
       { error: 'Error al crear factura' },
+      { status: 500 }
+    );
+  }
+}

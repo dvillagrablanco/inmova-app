@@ -32,39 +32,82 @@ export async function GET(request: NextRequest) {
     });
     // Facturas pendientes
     const pendingInvoices = await prisma.communityInvoice.count({
+      where: {
+        companyId,
         estado: { in: ['emitida', 'vencida'] },
+      },
+    });
+    
     // Ingresos este mes
     const ingresosMes = await prisma.communityInvoice.aggregate({
+      where: {
+        companyId,
         fechaPago: {
           gte: startOfThisMonth,
           lte: endOfThisMonth,
         },
         estado: 'pagada',
+      },
       _sum: {
         totalFactura: true,
+      },
+    });
+    
     // Ingresos mes anterior
     const ingresosMesAnterior = await prisma.communityInvoice.aggregate({
+      where: {
+        companyId,
+        fechaPago: {
           gte: startOfLastMonth,
           lte: endOfLastMonth,
+        },
+        estado: 'pagada',
+      },
+      _sum: {
+        totalFactura: true,
+      },
+    });
+    
     // Saldo total de todas las comunidades
     const communities = await prisma.communityManagement.findMany({
+      where: {
+        companyId,
+        activa: true,
+      },
       include: {
         movimientosCaja: {
           orderBy: { fecha: 'desc' },
           take: 1,
+        },
+      },
+    });
+    
     const saldoTotal = communities.reduce((sum, community) => {
       const lastEntry = community.movimientosCaja[0];
       return sum + (lastEntry?.saldoActual || 0);
     }, 0);
+    
     // Facturas vencidas
     const vencidas = await prisma.communityInvoice.count({
+      where: {
+        companyId,
         estado: 'vencida',
+      },
+    });
+    
     // Informes pendientes (trimestre actual)
     const currentQuarter = Math.ceil((now.getMonth() + 1) / 3);
     const currentYear = now.getFullYear();
     const periodoActual = `${currentYear}-Q${currentQuarter}`;
+    
     const informesPendientes = await prisma.communityReport.count({
+      where: {
+        companyId,
         periodo: periodoActual,
+        estado: { notIn: ['completado', 'entregado'] },
+      },
+    });
+    
     const informesGenerados = totalCommunities - informesPendientes;
     return NextResponse.json({
       kpis: {
@@ -76,6 +119,8 @@ export async function GET(request: NextRequest) {
         vencidas,
         informesGenerados,
         totalInformes: totalCommunities,
+      },
+    });
   } catch (error) {
     logger.error('Error fetching dashboard data:', error);
     return NextResponse.json(
