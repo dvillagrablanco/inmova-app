@@ -625,7 +625,7 @@ export default function ListingDetailPage() {
             </Card>
         </TabsContent>
       </Tabs>
-            </div>
+    </div>
           </main>
         </div>
       </div>

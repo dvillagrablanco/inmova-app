@@ -173,13 +173,16 @@ export default function ComisionesPage() {
 
   if (status === 'loading' || loading) {
     return (
-    <div className="flex h-screen overflow-hidden bg-gradient-bg">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            <LoadingState message="Cargando comisiones..." />
+      <div className="flex h-screen overflow-hidden bg-gradient-bg">
+        <Sidebar />
+        <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
+          <Header />
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <div className="max-w-7xl mx-auto">
+              <LoadingState message="Cargando comisiones..." />
+            </div>
+          </main>
+        </div>
       </div>
     );
   }
@@ -423,9 +426,8 @@ export default function ComisionesPage() {
             ))}
           </div>
         )}
-            </div>
-          </main>
-        </div>
+      </main>
+    </div>
       </div>
   );
 }
