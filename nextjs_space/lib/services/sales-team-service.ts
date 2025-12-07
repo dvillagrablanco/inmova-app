@@ -4,7 +4,7 @@
  * Gestiona comerciales autónomos, leads, comisiones y objetivos de ventas
  */
 
-import { SalesRepStatus, LeadStatus, SalesCommissionType, SalesCommissionStatus } from '@prisma/client';
+import { SalesRepStatus, LeadStatus, SalesCommissionType, SalesCommissionStatus, SalesCommission } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../db';
 
@@ -563,7 +563,7 @@ export async function generateRecurrentCommissions(periodo: string) {
     },
   });
 
-  const comisiones = [];
+  const comisiones: SalesCommission[] = [];
 
   for (const lead of convertedLeads) {
     if (!lead.company || !lead.company.activo) continue;
@@ -685,7 +685,7 @@ export async function processBonifications(periodo: string) {
     include: { salesRep: true },
   });
 
-  const bonificaciones = [];
+  const bonificaciones: SalesCommission[] = [];
 
   for (const target of targets) {
     const bonificacion = await createCommission({
