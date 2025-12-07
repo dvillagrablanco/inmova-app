@@ -174,14 +174,14 @@ export async function GET(request: NextRequest) {
     const salesLeadsConverted = await prisma.salesLead.count({
       where: {
         ...companyFilter,
-        estado: 'convertido',
+        estado: 'CERRADO_GANADO',
       },
     });
     
     const salesCommissionsPending = await prisma.salesCommission.count({
       where: {
         ...companyFilter,
-        estado: 'pendiente',
+        estado: 'PENDIENTE',
       },
     });
     

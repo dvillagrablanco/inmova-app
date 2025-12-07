@@ -125,10 +125,15 @@ export async function GET(request: NextRequest) {
     // PROVEEDORES - Órdenes pendientes de firma
     const pendingOrders = await prisma.providerWorkOrder.findMany({
       where: { ...companyFilter, estado: 'completada', firmadoPor: null, fechaCompletado: { gte: last7Days } },
+      include: {
+        provider: { select: { nombre: true } },
+        building: { select: { nombre: true } },
+      },
     });
     notifications.push(...pendingOrders.map(o => ({
       id: `provider_signature_${o.id}`,
       type: 'provider_order_signature',
+      priority: 'normal' as const,
       title: 'Orden pendiente de firma',
       message: `"${o.titulo}" requiere firma`,
       details: `${o.provider?.nombre || ''} - ${o.building?.nombre || ''}`,
@@ -146,6 +151,7 @@ export async function GET(request: NextRequest) {
     notifications.push(...ownerNotifs.map(n => ({
       id: `owner_${n.id}`,
       type: 'owner_notification',
+      priority: 'normal' as const,
       title: n.titulo,
       message: n.mensaje,
       details: n.owner?.nombreCompleto || '',
@@ -156,13 +162,14 @@ export async function GET(request: NextRequest) {
     })));
     // COMERCIALES - Nuevos leads
     const newLeads = await prisma.salesLead.findMany({
-      where: { salesRep: companyId ? { companyId } : {}, fechaCaptura: { gte: last24Hours } },
+      where: { ...(companyId ? companyFilter : {}), fechaCaptura: { gte: last24Hours } },
       include: { salesRep: { select: { nombre: true } } },
       orderBy: { fechaCaptura: 'desc' },
     });
     notifications.push(...newLeads.map(l => ({
       id: `lead_new_${l.id}`,
       type: 'sales_lead_new',
+      priority: 'normal' as const,
       title: 'Nuevo lead',
       message: `${l.salesRep?.nombre || 'Comercial'} capturó: ${l.nombreContacto} - ${l.nombreEmpresa}`,
       details: `${l.emailContacto || ''} - ${l.telefonoContacto || ''}`,
@@ -173,12 +180,16 @@ export async function GET(request: NextRequest) {
     })));
     // COMERCIALES - Leads convertidos
     const converted = await prisma.salesLead.findMany({
-      where: { salesRep: companyId ? { companyId } : {}, convertido: true, fechaConversion: { gte: last24Hours } },
+      where: { ...(companyId ? companyFilter : {}), convertido: true, fechaConversion: { gte: last24Hours } },
+      include: {
+        salesRep: { select: { nombre: true } },
+      },
       orderBy: { fechaConversion: 'desc' },
     });
     notifications.push(...converted.map(l => ({
       id: `lead_converted_${l.id}`,
       type: 'sales_lead_converted',
+      priority: 'high' as const,
       title: '¡Lead convertido!',
       message: `${l.salesRep?.nombre || 'Comercial'} convirtió: ${l.nombreContacto} - ${l.nombreEmpresa}`,
       details: `Valor: ${l.presupuestoMensual || 0}€/mes`,
@@ -189,7 +200,7 @@ export async function GET(request: NextRequest) {
     })));
     // COMERCIALES - Comisiones pendientes
     const commissions = await prisma.salesCommission.findMany({
-      where: { salesRep: companyId ? { companyId } : {}, estado: 'PENDIENTE', createdAt: { gte: last7Days } },
+      where: { ...(companyId ? companyFilter : {}), estado: 'PENDIENTE', createdAt: { gte: last7Days } },
       include: {
         salesRep: { select: { nombre: true } },
         lead: { select: { nombreContacto: true, nombreEmpresa: true } }
@@ -198,6 +209,7 @@ export async function GET(request: NextRequest) {
     notifications.push(...commissions.map(c => ({
       id: `commission_${c.id}`,
       type: 'sales_commission_pending',
+      priority: 'normal' as const,
       title: 'Comisión pendiente',
       message: `${c.salesRep?.nombre || 'Comercial'} - ${c.montoComision}€`,
       details: c.lead ? `${c.lead.nombreContacto} - ${c.lead.nombreEmpresa}` : '',
