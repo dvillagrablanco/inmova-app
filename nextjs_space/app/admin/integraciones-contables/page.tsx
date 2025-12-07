@@ -466,7 +466,6 @@ export default function IntegracionesContablesPage() {
         </CardContent>
       </Card>
     </div>
-      </div>
         </main>
       </div>
     </div>

@@ -220,7 +220,6 @@ export default function RevenueManagementPage() {
         </TabsContent>
       </Tabs>
     </div>
-      </div>
         </main>
       </div>
     </div>

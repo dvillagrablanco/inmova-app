@@ -239,7 +239,6 @@ export default function HousekeepingPage() {
         </TabsContent>
       </Tabs>
     </div>
-      </div>
         </main>
       </div>
     </div>

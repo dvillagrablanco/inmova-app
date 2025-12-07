@@ -632,7 +632,6 @@ export default function LegalPage() {
         </DialogContent>
       </Dialog>
     </div>
-      </div>
         </main>
       </div>
     </div>

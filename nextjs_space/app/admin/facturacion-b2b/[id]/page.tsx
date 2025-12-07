@@ -316,6 +316,9 @@ export default function InvoiceDetailPage() {
           </div>
         </div>
       </div>
+        </main>
+      </div>
+    </div>
     );
   }
 
@@ -776,7 +779,6 @@ export default function InvoiceDetailPage() {
         </DialogContent>
       </Dialog>
     </div>
-      </div>
         </main>
       </div>
     </div>

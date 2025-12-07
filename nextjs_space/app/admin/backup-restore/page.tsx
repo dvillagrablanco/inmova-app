@@ -145,6 +145,9 @@ export default function BackupRestorePage() {
           </AlertDescription>
         </Alert>
       </div>
+        </main>
+      </div>
+    </div>
     );
   }
 
@@ -341,7 +344,6 @@ export default function BackupRestorePage() {
         </DialogContent>
       </Dialog>
     </div>
-      </div>
         </main>
       </div>
     </div>

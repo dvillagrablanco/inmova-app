@@ -296,7 +296,6 @@ export default function LegalCompliancePage() {
         </TabsContent>
       </Tabs>
     </div>
-      </div>
         </main>
       </div>
     </div>

@@ -164,9 +164,5 @@ export default function TraditionalRentalDashboard() {
         </main>
       </div>
     </div>
-      </div>
-        </main>
-      </div>
-    </div>
   );
 }
