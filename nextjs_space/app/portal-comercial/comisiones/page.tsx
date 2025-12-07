@@ -428,6 +428,5 @@ export default function ComisionesPage() {
         )}
       </main>
     </div>
-      </div>
   );
 }

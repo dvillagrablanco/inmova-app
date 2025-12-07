@@ -150,7 +150,7 @@ export default function NuevoPresupuestoPage() {
 
             <form onSubmit={handleSubmit}>
               <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2 space-y-6">
+                <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Información del Presupuesto</CardTitle>
@@ -316,8 +316,9 @@ export default function NuevoPresupuestoPage() {
                 </Button>
               </CardContent>
             </Card>
-              </div>
-            </form>
+          </div>
+        </div>
+      </form>
           </div>
         </main>
       </div>
