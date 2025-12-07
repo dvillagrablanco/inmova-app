@@ -103,7 +103,7 @@ export default function LegalPage() {
       setTemplates(data);
     } catch (error) {
       toast.error('Error al cargar las plantillas');
-      logger.error(error);
+      logger.error(error instanceof Error ? error.message : String(error));
     } finally {
       setLoading(false);
     }
@@ -208,7 +208,7 @@ export default function LegalPage() {
       fetchTemplates();
     } catch (error: any) {
       toast.error(error.message || 'Error al guardar la plantilla');
-      logger.error(error);
+      logger.error(error instanceof Error ? error.message : String(error));
     }
   };
 
@@ -228,7 +228,7 @@ export default function LegalPage() {
       fetchTemplates();
     } catch (error) {
       toast.error('Error al eliminar la plantilla');
-      logger.error(error);
+      logger.error(error instanceof Error ? error.message : String(error));
     }
   };
 

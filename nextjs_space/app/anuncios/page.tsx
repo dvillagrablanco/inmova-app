@@ -321,7 +321,7 @@ function AnunciosPage() {
               {isAdmin && (
                 <Dialog
                   open={openDialog}
-                  onOpenChange={(open) => {
+                  onOpenChange={(open: boolean) => {
                     setOpenDialog(open);
                     if (!open) {
                       setEditingAnuncio(null);
