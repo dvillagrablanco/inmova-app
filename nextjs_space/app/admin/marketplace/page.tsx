@@ -612,7 +612,6 @@ export default function MarketplacePage() {
         </DialogContent>
       </Dialog>
     </div>
-      </div>
         </main>
       </div>
     </div>

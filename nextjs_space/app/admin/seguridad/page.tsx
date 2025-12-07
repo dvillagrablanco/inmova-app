@@ -337,7 +337,6 @@ export default function SecurityAlertsPage() {
         </Card>
       )}
     </div>
-      </div>
         </main>
       </div>
     </div>

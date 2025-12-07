@@ -249,7 +249,6 @@ function RecuperarContrasenaContent() {
         </CardContent>
       </Card>
     </div>
-      </div>
         </main>
       </div>
     </div>

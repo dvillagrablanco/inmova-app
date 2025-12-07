@@ -360,7 +360,6 @@ export default function SystemHealthPage() {
         </Card>
       )}
     </div>
-      </div>
         </main>
       </div>
     </div>
