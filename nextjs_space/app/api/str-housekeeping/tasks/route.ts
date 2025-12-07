@@ -1,77 +1,83 @@
-/**
- * API Routes for STR Housekeeping Tasks
- */
-
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import {
-  createHousekeepingTask,
-  getHousekeepingTasks,
-  getHousekeepingStats,
-  generateAutomaticTasks
-} from '@/lib/str-housekeeping-service';
-import { HousekeepingStatus, TurnoverType } from '@prisma/client';
+import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-/**
- * GET - Obtiene tareas de housekeeping
- */
-export async function GET(request: NextRequest) {
+// GET - Obtener tareas de limpieza
+export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const action = searchParams.get('action');
-
-    // Generar tareas automáticas
-    if (action === 'generate-automatic') {
-      const dias = parseInt(searchParams.get('days') || '7');
-      const tasks = await generateAutomaticTasks(session.user.companyId, dias);
-      return NextResponse.json({
-        success: true,
-        message: `${tasks.length} tareas creadas automáticamente`,
-        tasks
-      });
-    }
-
-    // Obtener estadísticas
-    if (action === 'stats') {
-      const fechaInicio = searchParams.get('startDate') ? new Date(searchParams.get('startDate')!) : undefined;
-      const fechaFin = searchParams.get('endDate') ? new Date(searchParams.get('endDate')!) : undefined;
-      const stats = await getHousekeepingStats(session.user.companyId, fechaInicio, fechaFin);
-      return NextResponse.json(stats);
-    }
-
-    // Obtener lista de tareas
-    const filters: any = {};
-
-    const status = searchParams.get('status');
-    if (status) filters.status = status as HousekeepingStatus;
-
-    const staffId = searchParams.get('staffId');
-    if (staffId) filters.staffId = staffId;
-
+    const { searchParams } = new URL(req.url);
     const listingId = searchParams.get('listingId');
-    if (listingId) filters.listingId = listingId;
+    const status = searchParams.get('status');
+    const assignedTo = searchParams.get('assignedTo');
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
 
-    const prioridad = searchParams.get('priority');
-    if (prioridad) filters.prioridad = prioridad;
+    const where: any = {
+      listing: {
+        companyId: session.user.companyId,
+      },
+    };
 
-    const fechaInicio = searchParams.get('startDate');
-    if (fechaInicio) filters.fechaInicio = new Date(fechaInicio);
+    if (listingId) where.listingId = listingId;
+    if (status) where.estado = status;
+    if (assignedTo) where.asignadoA = assignedTo;
+    if (startDate || endDate) {
+      where.fechaTarea = {};
+      if (startDate) where.fechaTarea.gte = new Date(startDate);
+      if (endDate) where.fechaTarea.lte = new Date(endDate);
+    }
 
-    const fechaFin = searchParams.get('endDate');
-    if (fechaFin) filters.fechaFin = new Date(fechaFin);
+    const tasks = await prisma.sTRHousekeepingTask.findMany({
+      where,
+      include: {
+        listing: {
+          select: {
+            id: true,
+            titulo: true,
+            unit: {
+              select: {
+                numero: true,
+                building: {
+                  select: {
+                    nombre: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        booking: {
+          select: {
+            id: true,
+            nombreHuesped: true,
+            fechaEntrada: true,
+            fechaSalida: true,
+          },
+        },
+        staff: {
+          select: {
+            id: true,
+            nombre: true,
+            telefono: true,
+          },
+        },
+      },
+      orderBy: {
+        fechaTarea: 'desc',
+      },
+    });
 
-    const tasks = await getHousekeepingTasks(session.user.companyId, filters);
     return NextResponse.json(tasks);
   } catch (error) {
-    console.error('Error fetching housekeeping tasks:', error);
+    console.error('Error al obtener tareas:', error);
     return NextResponse.json(
       { error: 'Error al obtener tareas' },
       { status: 500 }
@@ -79,46 +85,73 @@ export async function GET(request: NextRequest) {
   }
 }
 
-/**
- * POST - Crea una nueva tarea de housekeeping
- */
-export async function POST(request: NextRequest) {
+// POST - Crear tarea de limpieza
+export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const body = await request.json();
+    const body = await req.json();
+    const {
+      listingId,
+      bookingId,
+      tipo,
+      fechaTarea,
+      horaEstimada,
+      asignadoA,
+      prioridad,
+      instrucciones,
+    } = body;
 
-    // Validar campos requeridos
-    if (!body.listingId || !body.tipoTurnover || !body.fechaProgramada) {
+    // Validar listing pertenece a la company
+    const listing = await prisma.sTRListing.findFirst({
+      where: {
+        id: listingId,
+        companyId: session.user.companyId,
+      },
+    });
+
+    if (!listing) {
       return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
-        { status: 400 }
+        { error: 'Listing no encontrado' },
+        { status: 404 }
       );
     }
 
-    const task = await createHousekeepingTask({
-      companyId: session.user.companyId,
-      listingId: body.listingId,
-      tipoTurnover: body.tipoTurnover as TurnoverType,
-      fechaProgramada: new Date(body.fechaProgramada),
-      horaInicio: body.horaInicio ? new Date(body.horaInicio) : undefined,
-      horaFin: body.horaFin ? new Date(body.horaFin) : undefined,
-      staffId: body.staffId,
-      checklistId: body.checklistId,
-      prioridad: body.prioridad || 'media',
-      instruccionesEspeciales: body.instruccionesEspeciales,
-      bookingCheckOutId: body.bookingCheckOutId,
-      bookingCheckInId: body.bookingCheckInId
+    const task = await prisma.sTRHousekeepingTask.create({
+      data: {
+        listingId,
+        bookingId,
+        tipo,
+        fechaTarea: new Date(fechaTarea),
+        horaEstimada: horaEstimada || null,
+        estado: 'pendiente',
+        asignadoA: asignadoA || null,
+        prioridad: prioridad || 'normal',
+        instrucciones: instrucciones || null,
+        checklistItems: [],
+      },
+      include: {
+        listing: {
+          select: {
+            titulo: true,
+          },
+        },
+        staff: {
+          select: {
+            nombre: true,
+          },
+        },
+      },
     });
 
     return NextResponse.json(task, { status: 201 });
-  } catch (error: any) {
-    console.error('Error creating housekeeping task:', error);
+  } catch (error) {
+    console.error('Error al crear tarea:', error);
     return NextResponse.json(
-      { error: error.message || 'Error al crear tarea' },
+      { error: 'Error al crear tarea' },
       { status: 500 }
     );
   }
