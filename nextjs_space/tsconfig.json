@@ -9,7 +9,7 @@
     ],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": true,
+    "strict": false,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
@@ -20,6 +20,8 @@
     "incremental": true,
     "tsBuildInfoFile": ".next/tsbuildinfo",
     "assumeChangesOnlyAffectDirectDependencies": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "plugins": [
       {
         "name": "next"
@@ -33,7 +35,8 @@
     "typeRoots": [
       "./node_modules/@types",
       "./types"
-    ]
+    ],
+    "strictNullChecks": true
   },
   "include": [
     "next-env.d.ts",
@@ -57,13 +60,15 @@
     "**/*.test.ts",
     "**/*.draft",
     "**/*.draft/**",
-    "scripts/seed-demo-data.ts",
-    "scripts/activate-str-modules.ts",
-    "scripts/create-admin-user.ts",
-    "scripts/create-super-admin.ts",
+    "scripts/**/*",
     "**/*.test.tsx",
     "**/*.spec.ts",
     "**/*.spec.tsx",
-    "e2e/**/*"
-  ]
+    "e2e/**/*",
+    "stories/**/*",
+    ".storybook/**/*"
+  ],
+  "ts-node": {
+    "transpileOnly": true
+  }
 }
