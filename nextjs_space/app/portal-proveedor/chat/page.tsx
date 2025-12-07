@@ -168,10 +168,10 @@ export default function ChatPage() {
         <Header />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
-      <div className="mb-6 flex items-center justify-between">
+            <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Mensajería</h1>
-          <p className="text-gray-600">Comunicate directamente con los gestores</p>
+            <p className="text-gray-600">Comunicate directamente con los gestores</p>
         </div>
         <Dialog open={showNewConversationDialog} onOpenChange={setShowNewConversationDialog}>
           <DialogTrigger asChild>
@@ -183,14 +183,14 @@ export default function ChatPage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Nueva Conversación</DialogTitle>
-              <DialogDescription>
+                <DialogDescription>
                 Inicia una nueva conversación con el equipo de gestión
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div>
                 <Label htmlFor="asunto">Asunto</Label>
-                <Input
+                  <Input
                   id="asunto"
                   value={newConversation.asunto}
                   onChange={(e) =>
@@ -201,7 +201,7 @@ export default function ChatPage() {
               </div>
               <div>
                 <Label htmlFor="mensajeInicial">Mensaje Inicial</Label>
-                <Textarea
+                  <Textarea
                   id="mensajeInicial"
                   value={newConversation.mensajeInicial}
                   onChange={(e) =>
@@ -257,7 +257,7 @@ export default function ChatPage() {
                     >
                       <div className="flex justify-between items-start mb-1">
                         <h4 className="font-medium text-sm">{conv.asunto}</h4>
-                        {conv.mensajesNoLeidosProveedor > 0 && (
+                          {conv.mensajesNoLeidosProveedor > 0 && (
                           <Badge className="bg-blue-500 text-xs">
                             {conv.mensajesNoLeidosProveedor}
                           </Badge>
@@ -284,7 +284,7 @@ export default function ChatPage() {
                   {/* Encabezado */}
                   <div className="p-4 border-b bg-gray-50">
                     <h3 className="font-semibold">{selectedConv.asunto}</h3>
-                    <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500">
                       {selectedConv.estado === 'activa' ? 'Activa' : 'Archivada'}
                     </p>
                   </div>
@@ -312,7 +312,7 @@ export default function ChatPage() {
                               {message.remitenteNombre}
                             </p>
                             <p className="text-sm">{message.contenido}</p>
-                            <p
+                              <p
                               className={`text-xs mt-1 ${
                                 message.remitenteTipo === 'proveedor'
                                   ? 'text-blue-100'
@@ -353,10 +353,11 @@ export default function ChatPage() {
                   </div>
                 </div>
               )}
-            </div>
-          </div>
         </CardContent>
       </Card>
-    </div>
+            </div>
+          </main>
+        </div>
+      </div>
   );
 }

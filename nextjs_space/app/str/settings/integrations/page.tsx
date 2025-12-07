@@ -130,7 +130,7 @@ export default function IntegrationsSettingsPage() {
         <Header />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-center py-12">
+            <div className="flex items-center justify-center py-12">
           <RefreshCw className="h-8 w-8 animate-spin text-primary" />
         </div>
       </div>
@@ -142,7 +142,7 @@ export default function IntegrationsSettingsPage() {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold">Configuración de Integraciones</h1>
-        <p className="text-muted-foreground">
+          <p className="text-muted-foreground">
           Gestiona las integraciones con plataformas externas y configura la
           sincronización automática
         </p>
@@ -159,7 +159,7 @@ export default function IntegrationsSettingsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalListings}</div>
-            <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
               Con integraciones configuradas
             </p>
           </CardContent>
@@ -174,7 +174,7 @@ export default function IntegrationsSettingsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.connectedChannels}</div>
-            <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
               Activos y funcionando
             </p>
           </CardContent>
@@ -189,7 +189,7 @@ export default function IntegrationsSettingsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.activeSync}</div>
-            <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
               En proceso ahora mismo
             </p>
           </CardContent>
@@ -243,7 +243,7 @@ export default function IntegrationsSettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Configuración General</CardTitle>
-              <CardDescription>
+                <CardDescription>
                 Ajusta las preferencias generales de sincronización
               </CardDescription>
             </CardHeader>
@@ -252,7 +252,7 @@ export default function IntegrationsSettingsPage() {
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label>Sincronización automática</Label>
-                  <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                     Sincroniza automáticamente calendario, precios y reservas
                   </p>
                 </div>
@@ -264,15 +264,15 @@ export default function IntegrationsSettingsPage() {
               {/* Intervalo de sincronización */}
               <div className="space-y-2">
                 <Label>Intervalo de sincronización</Label>
-                <Select value={syncInterval} onValueChange={setSyncInterval}>
+                  <Select value={syncInterval} onValueChange={setSyncInterval}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecciona un intervalo" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="1">Cada hora</SelectItem>
-                    <SelectItem value="6">Cada 6 horas</SelectItem>
-                    <SelectItem value="12">Cada 12 horas</SelectItem>
-                    <SelectItem value="24">Cada 24 horas</SelectItem>
+                      <SelectItem value="6">Cada 6 horas</SelectItem>
+                      <SelectItem value="12">Cada 12 horas</SelectItem>
+                      <SelectItem value="24">Cada 24 horas</SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-sm text-muted-foreground">
@@ -286,7 +286,7 @@ export default function IntegrationsSettingsPage() {
               {/* Notificaciones */}
               <div className="space-y-4">
                 <Label>Notificaciones</Label>
-                <div className="space-y-3">
+                  <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <p className="text-sm font-medium">
@@ -302,7 +302,7 @@ export default function IntegrationsSettingsPage() {
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <p className="text-sm font-medium">Nuevas reservas</p>
-                      <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                         Notificar cuando se importe una nueva reserva
                       </p>
                     </div>
@@ -342,7 +342,7 @@ export default function IntegrationsSettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Configuración de Canales</CardTitle>
-              <CardDescription>
+                <CardDescription>
                 Gestiona las credenciales y configuración de cada canal
               </CardDescription>
             </CardHeader>
@@ -365,7 +365,7 @@ export default function IntegrationsSettingsPage() {
                           </div>
                           <div>
                             <p className="font-semibold">{channel}</p>
-                            <p className="text-sm text-muted-foreground">
+                              <p className="text-sm text-muted-foreground">
                               {Math.random() > 0.5 ? (
                                 <span className="flex items-center text-green-600">
                                   <CheckCircle2 className="mr-1 h-3 w-3" />
@@ -413,8 +413,8 @@ export default function IntegrationsSettingsPage() {
                       </p>
                       <ul className="ml-5 mt-2 list-disc space-y-1">
                         <li>Obtener credenciales API de cada plataforma</li>
-                        <li>Configurar las variables de entorno necesarias</li>
-                        <li>Configurar webhooks en cada plataforma</li>
+                          <li>Configurar las variables de entorno necesarias</li>
+                          <li>Configurar webhooks en cada plataforma</li>
                       </ul>
                     </div>
                   </div>
@@ -429,7 +429,7 @@ export default function IntegrationsSettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Configuración de Webhooks</CardTitle>
-              <CardDescription>
+                <CardDescription>
                 Configura los webhooks para recibir notificaciones en tiempo real
               </CardDescription>
             </CardHeader>
@@ -437,7 +437,7 @@ export default function IntegrationsSettingsPage() {
               {/* URL del webhook */}
               <div className="space-y-2">
                 <Label>URL del Webhook</Label>
-                <div className="flex space-x-2">
+                  <div className="flex space-x-2">
                   <Input value={webhookUrl} readOnly className="flex-1" />
                   <Button
                     size="icon"
@@ -458,11 +458,11 @@ export default function IntegrationsSettingsPage() {
               {/* Eventos */}
               <div className="space-y-4">
                 <Label>Eventos a recibir</Label>
-                <div className="space-y-3">
+                  <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <p className="text-sm font-medium">Nuevas reservas</p>
-                      <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                         Notificar cuando se cree una nueva reserva
                       </p>
                     </div>
@@ -484,7 +484,7 @@ export default function IntegrationsSettingsPage() {
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <p className="text-sm font-medium">Cancelaciones</p>
-                      <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                         Cuando una reserva es cancelada
                       </p>
                     </div>
@@ -494,7 +494,7 @@ export default function IntegrationsSettingsPage() {
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <p className="text-sm font-medium">Nuevas reseñas</p>
-                      <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                         Cuando un huésped deja una reseña
                       </p>
                     </div>
@@ -504,7 +504,7 @@ export default function IntegrationsSettingsPage() {
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <p className="text-sm font-medium">Mensajes</p>
-                      <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                         Notificar nuevos mensajes de huéspedes
                       </p>
                     </div>
@@ -518,7 +518,7 @@ export default function IntegrationsSettingsPage() {
               {/* Instrucción por canal */}
               <div className="space-y-4">
                 <Label>Instrucciones por Canal</Label>
-                <div className="space-y-3">
+                  <div className="space-y-3">
                   {['AIRBNB', 'BOOKING', 'VRBO'].map((channel) => (
                     <div
                       key={channel}
@@ -544,7 +544,7 @@ export default function IntegrationsSettingsPage() {
 
               <div className="flex justify-end space-x-2">
                 <Button variant="outline">Cancelar</Button>
-                <Button onClick={handleSaveSettings}>Guardar cambios</Button>
+                  <Button onClick={handleSaveSettings}>Guardar cambios</Button>
               </div>
             </CardContent>
           </Card>
@@ -555,7 +555,7 @@ export default function IntegrationsSettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Configuración Avanzada</CardTitle>
-              <CardDescription>
+                <CardDescription>
                 Opciones avanzadas para usuarios expertos
               </CardDescription>
             </CardHeader>
@@ -563,7 +563,7 @@ export default function IntegrationsSettingsPage() {
               {/* Rate limiting */}
               <div className="space-y-2">
                 <Label>Límite de peticiones (Rate Limiting)</Label>
-                <Input type="number" defaultValue="100" />
+                  <Input type="number" defaultValue="100" />
                 <p className="text-sm text-muted-foreground">
                   Número máximo de peticiones por minuto a cada API externa
                 </p>
@@ -574,7 +574,7 @@ export default function IntegrationsSettingsPage() {
               {/* Timeout */}
               <div className="space-y-2">
                 <Label>Timeout de sincronización (segundos)</Label>
-                <Input type="number" defaultValue="30" />
+                  <Input type="number" defaultValue="30" />
                 <p className="text-sm text-muted-foreground">
                   Tiempo máximo de espera para cada petición de sincronización
                 </p>
@@ -585,7 +585,7 @@ export default function IntegrationsSettingsPage() {
               {/* Reintentos */}
               <div className="space-y-2">
                 <Label>Número de reintentos</Label>
-                <Input type="number" defaultValue="3" />
+                  <Input type="number" defaultValue="3" />
                 <p className="text-sm text-muted-foreground">
                   Cuántas veces reintentar una sincronización fallida antes de
                   reportar error
@@ -598,7 +598,7 @@ export default function IntegrationsSettingsPage() {
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label>Logs detallados</Label>
-                  <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                     Guardar logs detallados de todas las sincronizaciones
                   </p>
                 </div>
@@ -610,7 +610,7 @@ export default function IntegrationsSettingsPage() {
               {/* Limpiar caché */}
               <div className="space-y-2">
                 <Label>Mantenimiento</Label>
-                <div className="space-y-2">
+                  <div className="space-y-2">
                   <Button variant="outline" className="w-full">
                     <RefreshCw className="mr-2 h-4 w-4" />
                     Limpiar caché de sincronización
@@ -626,12 +626,14 @@ export default function IntegrationsSettingsPage() {
 
               <div className="flex justify-end space-x-2">
                 <Button variant="outline">Cancelar</Button>
-                <Button onClick={handleSaveSettings}>Guardar cambios</Button>
-              </div>
+                  <Button onClick={handleSaveSettings}>Guardar cambios</Button>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+            </div>
+          </main>
+        </div>
+      </div>
   );
 }

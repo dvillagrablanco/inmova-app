@@ -299,7 +299,7 @@ export default function ChannelsPage() {
         <Header />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-center py-12">
+            <div className="flex items-center justify-center py-12">
           <RefreshCw className="h-8 w-8 animate-spin text-primary" />
         </div>
       </div>
@@ -334,7 +334,7 @@ export default function ChannelsPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">{listing.titulo}</h1>
-            <p className="text-muted-foreground">
+              <p className="text-muted-foreground">
               Gestiona las integraciones con canales externos
             </p>
           </div>
@@ -421,7 +421,7 @@ export default function ChannelsPage() {
                 {/* Estado */}
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Estado</span>
-                  {getStatusBadge(channel.status.status)}
+                    {getStatusBadge(channel.status.status)}
                 </div>
 
                 {isConnected && (
@@ -432,7 +432,7 @@ export default function ChannelsPage() {
                     {channel.status.lastSync && (
                       <div className="text-sm">
                         <span className="font-medium">  Última sincronización:</span>
-                        <br />
+                          <br />
                         <span className="text-muted-foreground">
                           {format(
                             new Date(channel.status.lastSync),
@@ -606,7 +606,7 @@ export default function ChannelsPage() {
             {/* En modo DEMO, mostramos campos genéricos */}
             <div className="space-y-2">
               <Label htmlFor="apiKey">API Key / Token</Label>
-              <Input
+                <Input
                 id="apiKey"
                 placeholder="Ingresa tu API key"
                 value={credentials.apiKey || ''}
@@ -622,7 +622,7 @@ export default function ChannelsPage() {
 
             <div className="space-y-2">
               <Label htmlFor="listingId">ID de Propiedad/Listing</Label>
-              <Input
+                <Input
                 id="listingId"
                 placeholder="Ej: 12345678"
                 value={credentials.listingId || ''}
@@ -644,21 +644,21 @@ export default function ChannelsPage() {
                   {selectedChannel?.config.supportedFeatures.calendar && (
                     <div className="flex items-center justify-between">
                       <Label htmlFor="syncCalendar">Sincronizar calendario</Label>
-                      <Switch id="syncCalendar" defaultChecked />
+                        <Switch id="syncCalendar" defaultChecked />
                     </div>
                   )}
 
                   {selectedChannel?.config.supportedFeatures.pricing && (
                     <div className="flex items-center justify-between">
                       <Label htmlFor="syncPrices">Sincronizar precios</Label>
-                      <Switch id="syncPrices" defaultChecked />
+                        <Switch id="syncPrices" defaultChecked />
                     </div>
                   )}
 
                   {selectedChannel?.config.supportedFeatures.bookings && (
                     <div className="flex items-center justify-between">
                       <Label htmlFor="syncBookings">Importar reservas</Label>
-                      <Switch id="syncBookings" defaultChecked />
+                        <Switch id="syncBookings" defaultChecked />
                     </div>
                   )}
                 </div>
@@ -681,6 +681,9 @@ export default function ChannelsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+            </div>
+          </main>
+        </div>
+      </div>
   );
 }

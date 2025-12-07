@@ -135,7 +135,7 @@ export default function ProfessionalPage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Cargando proyectos profesionales...</p>
+            <p className="mt-4 text-muted-foreground">Cargando proyectos profesionales...</p>
         </div>
       </div>
     );
@@ -148,11 +148,11 @@ export default function ProfessionalPage() {
         <Header />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
-      {/* Header */}
+            {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Servicios Profesionales</h1>
-          <p className="text-muted-foreground">Gestiona consultoras, asesorías y servicios profesionales</p>
+            <p className="text-muted-foreground">Gestiona consultoras, asesorías y servicios profesionales</p>
         </div>
         <Button onClick={() => router.push('/professional/projects?new=true')}>
           <Plus className="mr-2 h-4 w-4" />
@@ -165,11 +165,11 @@ export default function ProfessionalPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Proyectos Activos</CardTitle>
-            <Briefcase className="h-4 w-4 text-muted-foreground" />
+              <Briefcase className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{projects.length}</div>
-            <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
               {projects.filter(p => p.status === 'active').length} en progreso
             </p>
           </CardContent>
@@ -178,11 +178,11 @@ export default function ProfessionalPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Ingresos</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(totalRevenue)}</div>
-            <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
               de {formatCurrency(totalBudget)} presupuestado
             </p>
           </CardContent>
@@ -191,22 +191,22 @@ export default function ProfessionalPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Horas Trabajadas</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+              <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalHours}</div>
-            <p className="text-xs text-muted-foreground">Horas facturadas</p>
+              <p className="text-xs text-muted-foreground">Horas facturadas</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Progreso Medio</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{averageProgress}%</div>
-            <p className="text-xs text-muted-foreground">Avance general</p>
+              <p className="text-xs text-muted-foreground">Avance general</p>
           </CardContent>
         </Card>
       </div>
@@ -215,11 +215,11 @@ export default function ProfessionalPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="all">Todos</TabsTrigger>
-          <TabsTrigger value="active">Activos</TabsTrigger>
-          <TabsTrigger value="pending">Pendientes</TabsTrigger>
-          <TabsTrigger value="on_hold">Pausados</TabsTrigger>
-          <TabsTrigger value="completed">Completados</TabsTrigger>
-          <TabsTrigger value="cancelled">Cancelados</TabsTrigger>
+            <TabsTrigger value="active">Activos</TabsTrigger>
+            <TabsTrigger value="pending">Pendientes</TabsTrigger>
+            <TabsTrigger value="on_hold">Pausados</TabsTrigger>
+            <TabsTrigger value="completed">Completados</TabsTrigger>
+            <TabsTrigger value="cancelled">Cancelados</TabsTrigger>
         </TabsList>
 
         <TabsContent value={activeTab} className="space-y-4 mt-4">
@@ -228,7 +228,7 @@ export default function ProfessionalPage() {
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <Briefcase className="h-12 w-12 text-muted-foreground mb-4" />
                 <h3 className="text-lg font-semibold mb-2">No hay proyectos</h3>
-                <p className="text-sm text-muted-foreground mb-4">
+                  <p className="text-sm text-muted-foreground mb-4">
                   {activeTab === 'all' 
                     ? 'Comienza tu primer proyecto profesional'
                     : `No hay proyectos en estado "${getStatusLabel(activeTab)}"`
@@ -256,7 +256,7 @@ export default function ProfessionalPage() {
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
                           <CardTitle className="text-lg">{project.name}</CardTitle>
-                          <CardDescription className="flex items-center gap-1 mt-1">
+                            <CardDescription className="flex items-center gap-1 mt-1">
                             <Users className="h-3 w-3" />
                             {project.client}
                           </CardDescription>
@@ -270,21 +270,21 @@ export default function ProfessionalPage() {
                       <div className="space-y-3">
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">Tipo:</span>
-                          <span className="font-medium">{project.type}</span>
+                            <span className="font-medium">{project.type}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">Presupuesto:</span>
-                          <span className="font-medium">{formatCurrency(project.budget)}</span>
+                            <span className="font-medium">{formatCurrency(project.budget)}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">Ingresos:</span>
-                          <span className="font-medium text-green-600">
+                            <span className="font-medium text-green-600">
                             {formatCurrency(project.revenue)} ({revenuePercentage}%)
                           </span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">Horas:</span>
-                          <span className={`font-medium ${
+                            <span className={`font-medium ${
                             parseFloat(hoursUsed) > 100 ? 'text-red-600' : ''
                           }`}>
                             {project.hoursSpent} / {project.hoursEstimated} ({hoursUsed}%)
@@ -292,12 +292,12 @@ export default function ProfessionalPage() {
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">Equipo:</span>
-                          <span className="font-medium">{project.teamMembers} personas</span>
+                            <span className="font-medium">{project.teamMembers} personas</span>
                         </div>
                         <div className="border-t pt-3">
                           <div className="flex justify-between text-sm mb-1">
                             <span className="font-medium">Progreso:</span>
-                            <span className="font-bold">{project.progress}%</span>
+                              <span className="font-bold">{project.progress}%</span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                             <div
@@ -307,7 +307,7 @@ export default function ProfessionalPage() {
                           </div>
                           <div className="flex justify-between text-xs text-muted-foreground mt-2">
                             <span>Inicio: {format(new Date(project.startDate), 'dd MMM yyyy', { locale: es })}</span>
-                            <span>Fin: {format(new Date(project.endDate), 'dd MMM yyyy', { locale: es })}</span>
+                              <span>Fin: {format(new Date(project.endDate), 'dd MMM yyyy', { locale: es })}</span>
                           </div>
                         </div>
                         <div className="flex gap-2 pt-2">
@@ -337,6 +337,9 @@ export default function ProfessionalPage() {
           )}
         </TabsContent>
       </Tabs>
-    </div>
+            </div>
+          </main>
+        </div>
+      </div>
   );
 }

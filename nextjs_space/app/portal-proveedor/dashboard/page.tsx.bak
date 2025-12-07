@@ -185,9 +185,5 @@ export default function ProveedorDashboardPage() {
         </CardContent></Card>
       </div>
     </div>
-      </div>
-        </main>
-      </div>
-    </div>
   );
 }

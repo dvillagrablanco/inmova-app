@@ -89,20 +89,20 @@ export default function ProveedorDashboardPage() {
         <Header />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
-      <div className="max-w-7xl mx-auto mb-6">
+            <div className="max-w-7xl mx-auto mb-6">
         <div className="flex items-center justify-between mb-6">
           <div><h1 className="text-3xl font-bold">Portal del Proveedor</h1><p className="text-muted-foreground mt-1">Bienvenido, {data.proveedor.nombre}</p></div>
-          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
             <Button variant="outline" onClick={handleLogout}><LogOut className="h-4 w-4 mr-2" />Cerrar Sesión</Button>
           </div>
         </div>
 
         <Card className="mb-6"><CardContent className="pt-6"><div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div><p className="text-sm text-muted-foreground">Tipo</p><p className="font-medium">{data.proveedor.tipo}</p></div>
-          <div><p className="text-sm text-muted-foreground">Email</p><p className="font-medium">{data.proveedor.email}</p></div>
-          <div><p className="text-sm text-muted-foreground">Teléfono</p><p className="font-medium">{data.proveedor.telefono}</p></div>
-          <div><p className="text-sm text-muted-foreground">Rating</p><div className="flex items-center gap-1"><Star className="h-4 w-4 fill-amber-400 text-amber-400" /><span className="font-medium">{data.proveedor.rating.toFixed(1)}</span></div></div>
-          <div><p className="text-sm text-muted-foreground">Rating Promedio</p><div className="flex items-center gap-1"><Star className="h-4 w-4 fill-amber-400 text-amber-400" /><span className="font-medium">{data.kpis.ratingPromedio.toFixed(1)}</span></div></div>
+            <div><p className="text-sm text-muted-foreground">Email</p><p className="font-medium">{data.proveedor.email}</p></div>
+            <div><p className="text-sm text-muted-foreground">Teléfono</p><p className="font-medium">{data.proveedor.telefono}</p></div>
+            <div><p className="text-sm text-muted-foreground">Rating</p><div className="flex items-center gap-1"><Star className="h-4 w-4 fill-amber-400 text-amber-400" /><span className="font-medium">{data.proveedor.rating.toFixed(1)}</span></div></div>
+            <div><p className="text-sm text-muted-foreground">Rating Promedio</p><div className="flex items-center gap-1"><Star className="h-4 w-4 fill-amber-400 text-amber-400" /><span className="font-medium">{data.kpis.ratingPromedio.toFixed(1)}</span></div></div>
         </div></CardContent></Card>
 
         {/* Men\u00fa de Navegaci\u00f3n */}
@@ -158,14 +158,14 @@ export default function ProveedorDashboardPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Total Órdenes</CardTitle><Briefcase className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{data.kpis.totalOrdenes}</div></CardContent></Card>
-          <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Pendientes</CardTitle><Clock className="h-4 w-4 text-amber-500" /></CardHeader><CardContent><div className="text-2xl font-bold">{data.kpis.ordenesPendientes}</div></CardContent></Card>
-          <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">En Progreso</CardTitle><TrendingUp className="h-4 w-4 text-blue-500" /></CardHeader><CardContent><div className="text-2xl font-bold">{data.kpis.ordenesEnProgreso}</div></CardContent></Card>
-          <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Completadas</CardTitle><CheckCircle className="h-4 w-4 text-green-500" /></CardHeader><CardContent><div className="text-2xl font-bold">{data.kpis.ordenesCompletadas}</div></CardContent></Card>
+            <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Pendientes</CardTitle><Clock className="h-4 w-4 text-amber-500" /></CardHeader><CardContent><div className="text-2xl font-bold">{data.kpis.ordenesPendientes}</div></CardContent></Card>
+            <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">En Progreso</CardTitle><TrendingUp className="h-4 w-4 text-blue-500" /></CardHeader><CardContent><div className="text-2xl font-bold">{data.kpis.ordenesEnProgreso}</div></CardContent></Card>
+            <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Completadas</CardTitle><CheckCircle className="h-4 w-4 text-green-500" /></CardHeader><CardContent><div className="text-2xl font-bold">{data.kpis.ordenesCompletadas}</div></CardContent></Card>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Ingresos Totales</CardTitle><Euro className="h-4 w-4 text-green-500" /></CardHeader><CardContent><div className="text-2xl font-bold">€{data.kpis.ingresosTotales.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</div></CardContent></Card>
-          <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Ingresos Este Mes</CardTitle><Euro className="h-4 w-4 text-blue-500" /></CardHeader><CardContent><div className="text-2xl font-bold">€{data.kpis.ingresosMes.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</div></CardContent></Card>
+            <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Ingresos Este Mes</CardTitle><Euro className="h-4 w-4 text-blue-500" /></CardHeader><CardContent><div className="text-2xl font-bold">€{data.kpis.ingresosMes.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</div></CardContent></Card>
         </div>
 
         <Card><CardHeader><CardTitle>Órdenes Recientes</CardTitle></CardHeader><CardContent>
@@ -173,17 +173,19 @@ export default function ProveedorDashboardPage() {
             <div className="space-y-4">{data.ordenesRecientes.map((orden) => (
               <div key={orden.id} className="p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                 <div className="flex items-start justify-between mb-2"><div className="flex-1"><h3 className="font-medium">{orden.titulo}</h3><p className="text-sm text-muted-foreground mt-1">{orden.descripcion}</p></div>{getEstadoBadge(orden.estado)}</div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm mt-3">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm mt-3">
                   <div><span className="text-muted-foreground">Edificio:</span><p className="font-medium">{orden.building?.nombre || 'N/A'}</p></div>
-                  {orden.unit && <div><span className="text-muted-foreground">Unidad:</span><p className="font-medium">{orden.unit.numero}</p></div>}
+                    {orden.unit && <div><span className="text-muted-foreground">Unidad:</span><p className="font-medium">{orden.unit.numero}</p></div>}
                   <div><span className="text-muted-foreground">Fecha:</span><p className="font-medium">{format(new Date(orden.createdAt), 'dd/MM/yyyy', { locale: es })}</p></div>
-                  {orden.costoTotal && <div><span className="text-muted-foreground">Costo:</span><p className="font-medium">€{orden.costoTotal.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</p></div>}
+                    {orden.costoTotal && <div><span className="text-muted-foreground">Costo:</span><p className="font-medium">€{orden.costoTotal.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</p></div>}
                 </div>
               </div>
             ))}</div>
           )}
         </CardContent></Card>
+            </div>
+          </main>
+        </div>
       </div>
-    </div>
   );
 }

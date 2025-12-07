@@ -33,7 +33,7 @@ export default function SugerenciasPage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando...</p>
+            <p className="mt-4 text-gray-600">Cargando...</p>
         </div>
       </div>
     );
@@ -106,25 +106,25 @@ export default function SugerenciasPage() {
         <Header />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
-      <PageHeader
-        title="💡 Buzón de Sugerencias"
-        description="Comparte tus ideas para mejorar la plataforma"
-        actions={
-          <Button
-            variant="outline"
-            onClick={() => router.back()}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Volver
-          </Button>
-        }
-      />
+            <PageHeader
+              title="💡 Buzón de Sugerencias"
+              description="Comparte tus ideas para mejorar la plataforma"
+              actions={
+                <Button
+                  variant="outline"
+                  onClick={() => router.back()}
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Volver
+                </Button>
+              }
+            />
 
-      <div className="grid gap-6 mt-6">
+            <div className="grid gap-6 mt-6">
         <Card>
           <CardHeader>
             <CardTitle>Envía tu Sugerencia</CardTitle>
-            <CardDescription>
+              <CardDescription>
               Tu opinión es muy importante para nosotros. Comparte tus ideas, reporta errores o propón nuevas funcionalidades.
             </CardDescription>
           </CardHeader>
@@ -132,7 +132,7 @@ export default function SugerenciasPage() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="titulo">Título *</Label>
-                <Input
+                  <Input
                   id="titulo"
                   placeholder="Resumen breve de tu sugerencia"
                   value={formData.titulo}
@@ -145,7 +145,7 @@ export default function SugerenciasPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="categoria">Categoría *</Label>
-                  <Select
+                    <Select
                     value={formData.categoria}
                     onValueChange={(value: any) => setFormData({ ...formData, categoria: value })}
                   >
@@ -178,7 +178,7 @@ export default function SugerenciasPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="prioridad">Prioridad</Label>
-                  <Select
+                    <Select
                     value={formData.prioridad}
                     onValueChange={(value: any) => setFormData({ ...formData, prioridad: value })}
                   >
@@ -187,9 +187,9 @@ export default function SugerenciasPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="baja">Baja</SelectItem>
-                      <SelectItem value="media">Media</SelectItem>
-                      <SelectItem value="alta">Alta</SelectItem>
-                      <SelectItem value="critica">Crítica</SelectItem>
+                        <SelectItem value="media">Media</SelectItem>
+                        <SelectItem value="alta">Alta</SelectItem>
+                        <SelectItem value="critica">Crítica</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -197,7 +197,7 @@ export default function SugerenciasPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="descripcion">Descripción *</Label>
-                <Textarea
+                  <Textarea
                   id="descripcion"
                   placeholder="Describe tu sugerencia en detalle..."
                   value={formData.descripcion}
@@ -225,7 +225,7 @@ export default function SugerenciasPage() {
                   {loading ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Enviando...
+                        Enviando...
                     </>
                   ) : (
                     <>
@@ -246,12 +246,15 @@ export default function SugerenciasPage() {
           <CardContent className="text-blue-800">
             <ol className="list-decimal list-inside space-y-2">
               <li>Completa el formulario con tu sugerencia o reporte</li>
-              <li>Nuestro equipo recibirá una notificación inmediata</li>
-              <li>Revisaremos tu sugerencia y te responderemos</li>
-              <li>Recibirás notificaciones sobre el estado de tu sugerencia</li>
+                <li>Nuestro equipo recibirá una notificación inmediata</li>
+                <li>Revisaremos tu sugerencia y te responderemos</li>
+                <li>Recibirás notificaciones sobre el estado de tu sugerencia</li>
             </ol>
           </CardContent>
         </Card>
+      </div>
+          </div>
+        </main>
       </div>
     </div>
   );

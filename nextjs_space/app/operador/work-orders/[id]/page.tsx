@@ -207,11 +207,11 @@ export default function WorkOrderDetail() {
       case 'en_progreso':
         return (
           <Badge className="bg-yellow-100 text-yellow-700">En Progreso</Badge>
-        );
+            );
       case 'completada':
         return (
           <Badge className="bg-green-100 text-green-700">Completada</Badge>
-        );
+            );
       case 'pausada':
         return <Badge className="bg-gray-100 text-gray-700">Pausada</Badge>;
       default:
@@ -224,7 +224,7 @@ export default function WorkOrderDetail() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Cargando...</p>
+            <p className="mt-4 text-muted-foreground">Cargando...</p>
         </div>
       </div>
     );
@@ -236,7 +236,7 @@ export default function WorkOrderDetail() {
         <Card className="p-8 text-center">
           <AlertCircle className="h-12 w-12 mx-auto mb-4 text-red-500" />
           <p className="text-lg font-medium mb-2">Orden no encontrada</p>
-          <Button onClick={() => router.back()}>Volver</Button>
+            <Button onClick={() => router.back()}>Volver</Button>
         </Card>
       </div>
     );
@@ -251,7 +251,7 @@ export default function WorkOrderDetail() {
         <Header />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
-      {/* Header */}
+            {/* Header */}
       <div className="mb-6">
         <Button
           variant="ghost"
@@ -291,7 +291,7 @@ export default function WorkOrderDetail() {
               <Building2 className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
               <div>
                 <p className="font-medium">{workOrder.building.nombre}</p>
-                <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                   {workOrder.building.direccion}
                 </p>
                 {workOrder.unit && (
@@ -346,7 +346,7 @@ export default function WorkOrderDetail() {
           {showCheckOut && (
             <Card className="p-4">
               <h3 className="text-lg font-semibold mb-4">Check-Out</h3>
-              <div className="space-y-4">
+                <div className="space-y-4">
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="workCompleted"
@@ -365,7 +365,7 @@ export default function WorkOrderDetail() {
 
                 <div>
                   <Label htmlFor="completionNotes">Notas de finalización</Label>
-                  <Textarea
+                    <Textarea
                     id="completionNotes"
                     placeholder="Describe el trabajo realizado..."
                     value={checkOutData.completionNotes}
@@ -382,7 +382,7 @@ export default function WorkOrderDetail() {
                 {!checkOutData.workCompleted && (
                   <div>
                     <Label htmlFor="nextActions">Próximas acciones</Label>
-                    <Textarea
+                      <Textarea
                       id="nextActions"
                       placeholder="¿Qué falta por hacer?"
                       value={checkOutData.nextActions}
@@ -489,7 +489,7 @@ export default function WorkOrderDetail() {
             {workOrder.checkInTime && (
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Check-In:</span>
-                <span className="font-medium">
+                  <span className="font-medium">
                   {format(
                     new Date(workOrder.checkInTime),
                     "d 'de' MMMM, HH:mm",
@@ -501,7 +501,7 @@ export default function WorkOrderDetail() {
             {workOrder.checkOutTime && (
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Check-Out:</span>
-                <span className="font-medium">
+                  <span className="font-medium">
                   {format(
                     new Date(workOrder.checkOutTime),
                     "d 'de' MMMM, HH:mm",
@@ -513,7 +513,7 @@ export default function WorkOrderDetail() {
             {workOrder.timeSpent && workOrder.timeSpent > 0 && (
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Tiempo dedicado:</span>
-                <span className="font-medium">
+                  <span className="font-medium">
                   {Math.floor(workOrder.timeSpent / 60)}h{' '}
                   {workOrder.timeSpent % 60}m
                 </span>
@@ -538,6 +538,9 @@ export default function WorkOrderDetail() {
           )}
         </Card>
       )}
-    </div>
+            </div>
+          </main>
+        </div>
+      </div>
   );
 }

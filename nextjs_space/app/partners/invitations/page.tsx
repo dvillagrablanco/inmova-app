@@ -107,11 +107,11 @@ export default function PartnerInvitationsPage() {
         <Header />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
-      {/* Header */}
+            {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Invitaciones</h1>
-          <p className="text-gray-600">Gestiona las invitaciones a tus clientes</p>
+            <p className="text-gray-600">Gestiona las invitaciones a tus clientes</p>
         </div>
         <Dialog open={showDialog} onOpenChange={setShowDialog}>
           <DialogTrigger asChild>
@@ -123,7 +123,7 @@ export default function PartnerInvitationsPage() {
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Enviar Invitación</DialogTitle>
-              <DialogDescription>
+                <DialogDescription>
                 Invita a un nuevo cliente a unirse a INMOVA a través de tu Partner
               </DialogDescription>
             </DialogHeader>
@@ -136,7 +136,7 @@ export default function PartnerInvitationsPage() {
               
               <div className="space-y-2">
                 <Label htmlFor="email">Email *</Label>
-                <Input
+                  <Input
                   id="email"
                   type="email"
                   value={formData.email}
@@ -148,7 +148,7 @@ export default function PartnerInvitationsPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="nombre">Nombre</Label>
-                <Input
+                  <Input
                   id="nombre"
                   value={formData.nombre}
                   onChange={(e) => setFormData({...formData, nombre: e.target.value})}
@@ -158,7 +158,7 @@ export default function PartnerInvitationsPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="telefono">Teléfono</Label>
-                <Input
+                  <Input
                   id="telefono"
                   type="tel"
                   value={formData.telefono}
@@ -169,7 +169,7 @@ export default function PartnerInvitationsPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="mensaje">Mensaje Personalizado</Label>
-                <Textarea
+                  <Textarea
                   id="mensaje"
                   value={formData.mensaje}
                   onChange={(e) => setFormData({...formData, mensaje: e.target.value})}
@@ -194,7 +194,7 @@ export default function PartnerInvitationsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-1">Total</p>
-                <p className="text-2xl font-bold text-gray-900">{invitaciones.length}</p>
+                  <p className="text-2xl font-bold text-gray-900">{invitaciones.length}</p>
               </div>
               <Mail className="h-8 w-8 text-blue-600" />
             </div>
@@ -206,7 +206,7 @@ export default function PartnerInvitationsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-1">Pendientes</p>
-                <p className="text-2xl font-bold text-gray-900">{pendientes}</p>
+                  <p className="text-2xl font-bold text-gray-900">{pendientes}</p>
               </div>
               <Clock className="h-8 w-8 text-yellow-600" />
             </div>
@@ -218,7 +218,7 @@ export default function PartnerInvitationsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-1">Aceptadas</p>
-                <p className="text-2xl font-bold text-gray-900">{aceptadas}</p>
+                  <p className="text-2xl font-bold text-gray-900">{aceptadas}</p>
               </div>
               <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
@@ -230,7 +230,7 @@ export default function PartnerInvitationsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-1">Tasa Conversión</p>
-                <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-2xl font-bold text-gray-900">
                   {invitaciones.length > 0 
                     ? `${((aceptadas / invitaciones.length) * 100).toFixed(1)}%` 
                     : '0%'
@@ -247,7 +247,7 @@ export default function PartnerInvitationsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Historial de Invitaciones</CardTitle>
-          <CardDescription>
+            <CardDescription>
             Todas las invitaciones enviadas y su estado
           </CardDescription>
         </CardHeader>
@@ -298,11 +298,11 @@ export default function PartnerInvitationsPage() {
                         </div>
                         {inv.nombre && (
                           <p className="text-sm text-gray-600 ml-7 mb-1">{inv.nombre}</p>
-                        )}
+                            )}
                         <div className="ml-7 space-y-1 text-sm text-gray-500">
                           <p>Enviada: {new Date(inv.enviadoFecha).toLocaleDateString('es-ES')}</p>
-                          <p>Expira: {new Date(inv.expiraFecha).toLocaleDateString('es-ES')}</p>
-                          {inv.aceptadoFecha && (
+                            <p>Expira: {new Date(inv.expiraFecha).toLocaleDateString('es-ES')}</p>
+                            {inv.aceptadoFecha && (
                             <p className="text-green-600">
                               Aceptada: {new Date(inv.aceptadoFecha).toLocaleDateString('es-ES')}
                             </p>
@@ -326,6 +326,9 @@ export default function PartnerInvitationsPage() {
           )}
         </CardContent>
       </Card>
-    </div>
+            </div>
+          </main>
+        </div>
+      </div>
   );
 }

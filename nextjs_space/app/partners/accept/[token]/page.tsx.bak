@@ -320,9 +320,5 @@ export default function AcceptInvitationPage() {
         </div>
       </div>
     </div>
-      </div>
-        </main>
-      </div>
-    </div>
   );
 }

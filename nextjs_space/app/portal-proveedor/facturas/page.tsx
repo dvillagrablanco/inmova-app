@@ -119,7 +119,7 @@ export default function FacturasPage() {
         <Header />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
-      <div className="mb-6">
+            <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
           Facturas
         </h1>
@@ -143,10 +143,10 @@ export default function FacturasPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas</SelectItem>
-                  <SelectItem value="borrador">Borrador</SelectItem>
-                  <SelectItem value="enviada">Enviada</SelectItem>
-                  <SelectItem value="pagada">Pagada</SelectItem>
-                  <SelectItem value="cancelada">Cancelada</SelectItem>
+                    <SelectItem value="borrador">Borrador</SelectItem>
+                    <SelectItem value="enviada">Enviada</SelectItem>
+                    <SelectItem value="pagada">Pagada</SelectItem>
+                    <SelectItem value="cancelada">Cancelada</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -215,7 +215,7 @@ export default function FacturasPage() {
       <Card>
         <CardHeader>
           <CardTitle>Listado de Facturas</CardTitle>
-          <CardDescription>
+            <CardDescription>
             {invoices.length} factura{invoices.length !== 1 ? 's' : ''}
           </CardDescription>
         </CardHeader>
@@ -244,12 +244,12 @@ export default function FacturasPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Número</TableHead>
-                    <TableHead>Orden de Trabajo</TableHead>
-                    <TableHead>Edificio</TableHead>
-                    <TableHead>Fecha</TableHead>
-                    <TableHead>Total</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
+                      <TableHead>Orden de Trabajo</TableHead>
+                      <TableHead>Edificio</TableHead>
+                      <TableHead>Fecha</TableHead>
+                      <TableHead>Total</TableHead>
+                      <TableHead>Estado</TableHead>
+                      <TableHead className="text-right">Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -259,8 +259,8 @@ export default function FacturasPage() {
                         {invoice.numeroFactura}
                       </TableCell>
                       <TableCell>{invoice.workOrder.titulo}</TableCell>
-                      <TableCell>{invoice.workOrder.building.nombre}</TableCell>
-                      <TableCell>
+                        <TableCell>{invoice.workOrder.building.nombre}</TableCell>
+                        <TableCell>
                         {format(
                           new Date(invoice.fechaEmision),
                           'dd MMM yyyy',
@@ -298,6 +298,9 @@ export default function FacturasPage() {
           )}
         </CardContent>
       </Card>
-    </div>
+            </div>
+          </main>
+        </div>
+      </div>
   );
 }

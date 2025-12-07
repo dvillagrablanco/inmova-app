@@ -93,10 +93,10 @@ export default function PartnerCommissionsPage() {
         <Header />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
-      {/* Header */}
+            {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Comisiones</h1>
-        <p className="text-gray-600">Visualiza y gestiona tus comisiones</p>
+          <p className="text-gray-600">Visualiza y gestiona tus comisiones</p>
       </div>
 
       {/* Stats */}
@@ -106,7 +106,7 @@ export default function PartnerCommissionsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-1">Total Comisiones</p>
-                <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-2xl font-bold text-gray-900">
                   €{data.totales.total.toFixed(2)}
                 </p>
               </div>
@@ -120,7 +120,7 @@ export default function PartnerCommissionsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-1">Pendientes</p>
-                <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-2xl font-bold text-gray-900">
                   €{data.totales.pending.toFixed(2)}
                 </p>
               </div>
@@ -134,7 +134,7 @@ export default function PartnerCommissionsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-1">Aprobadas</p>
-                <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-2xl font-bold text-gray-900">
                   €{data.totales.approved.toFixed(2)}
                 </p>
               </div>
@@ -148,7 +148,7 @@ export default function PartnerCommissionsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-1">Pagadas</p>
-                <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-2xl font-bold text-gray-900">
                   €{data.totales.paid.toFixed(2)}
                 </p>
               </div>
@@ -162,7 +162,7 @@ export default function PartnerCommissionsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Filtros</CardTitle>
-          <CardDescription>Filtra las comisiones por estado</CardDescription>
+            <CardDescription>Filtra las comisiones por estado</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center space-x-4">
@@ -173,9 +173,9 @@ export default function PartnerCommissionsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos los estados</SelectItem>
-                <SelectItem value="PENDING">Pendientes</SelectItem>
-                <SelectItem value="APPROVED">Aprobadas</SelectItem>
-                <SelectItem value="PAID">Pagadas</SelectItem>
+                  <SelectItem value="PENDING">Pendientes</SelectItem>
+                  <SelectItem value="APPROVED">Aprobadas</SelectItem>
+                  <SelectItem value="PAID">Pagadas</SelectItem>
               </SelectContent>
             </Select>
             <span className="text-sm text-gray-600">
@@ -189,7 +189,7 @@ export default function PartnerCommissionsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Historial de Comisiones</CardTitle>
-          <CardDescription>
+            <CardDescription>
             Detalle completo de todas tus comisiones
           </CardDescription>
         </CardHeader>
@@ -206,11 +206,11 @@ export default function PartnerCommissionsPage() {
               {/* Header */}
               <div className="hidden md:grid grid-cols-6 gap-4 pb-3 border-b font-medium text-sm text-gray-600">
                 <div>Periodo</div>
-                <div>Cliente</div>
-                <div className="text-right">Monto Bruto</div>
-                <div className="text-right">% Comisión</div>
-                <div className="text-right">Tu Comisión</div>
-                <div className="text-center">Estado</div>
+                  <div>Cliente</div>
+                  <div className="text-right">Monto Bruto</div>
+                  <div className="text-right">% Comisión</div>
+                  <div className="text-right">Tu Comisión</div>
+                  <div className="text-center">Estado</div>
               </div>
 
               {/* Rows */}
@@ -226,7 +226,7 @@ export default function PartnerCommissionsPage() {
                         <Calendar className="h-5 w-5 text-gray-400 mr-2 md:hidden" />
                         <div>
                           <p className="font-medium text-gray-900">{com.periodo}</p>
-                          <p className="text-xs text-gray-500 md:hidden">Periodo</p>
+                            <p className="text-xs text-gray-500 md:hidden">Periodo</p>
                         </div>
                       </div>
 
@@ -311,10 +311,11 @@ export default function PartnerCommissionsPage() {
                 Cuantos más clientes, mayor será tu porcentaje de comisión (hasta un 70%). 
                 Las comisiones se aprueban y pagan mensualmente según los términos del programa de Partners.
               </p>
-            </div>
-          </div>
         </CardContent>
       </Card>
-    </div>
+            </div>
+          </main>
+        </div>
+      </div>
   );
 }

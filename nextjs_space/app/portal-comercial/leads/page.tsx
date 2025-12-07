@@ -188,7 +188,7 @@ export default function LeadsPage() {
         <Header />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
-        <LoadingState message="Cargando leads..." />
+            <LoadingState message="Cargando leads..." />
       </div>
     );
   }
@@ -207,7 +207,7 @@ export default function LeadsPage() {
               </Link>
               <div>
                 <h1 className="text-2xl font-bold gradient-text">Mis Leads</h1>
-                <p className="text-sm text-muted-foreground mt-1">
+                  <p className="text-sm text-muted-foreground mt-1">
                   Gestiona tus oportunidades comerciales
                 </p>
               </div>
@@ -318,7 +318,7 @@ export default function LeadsPage() {
               <div className="text-center text-muted-foreground">
                 <Users className="h-16 w-16 mx-auto mb-4 opacity-50" />
                 <p className="text-lg font-medium mb-2">No se encontraron leads</p>
-                <p className="text-sm">
+                  <p className="text-sm">
                   {searchTerm || estadoFilter !== 'all' || prioridadFilter !== 'all' || fuenteFilter !== 'all'
                     ? 'Intenta ajustar los filtros'
                     : 'Aún no tienes leads registrados'}
@@ -377,7 +377,7 @@ export default function LeadsPage() {
                             Prioridad: {lead.prioridad}
                           </Badge>
                           <Badge variant="outline">Fuente: {lead.fuente}</Badge>
-                          {lead.presupuestoMensual && (
+                            {lead.presupuestoMensual && (
                             <Badge variant="outline">
                               Presupuesto: {lead.presupuestoMensual}€/mes
                             </Badge>
@@ -415,7 +415,9 @@ export default function LeadsPage() {
             ))}
           </div>
         )}
-      </main>
-    </div>
+            </div>
+          </main>
+        </div>
+      </div>
   );
 }

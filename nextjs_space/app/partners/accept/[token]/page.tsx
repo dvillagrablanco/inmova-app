@@ -127,15 +127,15 @@ export default function AcceptInvitationPage() {
         <Header />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
-        <Card className="max-w-md w-full">
+            <Card className="max-w-md w-full">
           <CardContent className="pt-6">
             <div className="text-center">
               <div className="bg-red-100 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                 <AlertCircle className="h-8 w-8 text-red-600" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Invitación No Válida</h2>
-              <p className="text-gray-600 mb-6">{error}</p>
-              <Link href="/">
+                <p className="text-gray-600 mb-6">{error}</p>
+                <Link href="/">
                 <Button>Volver al Inicio</Button>
               </Link>
             </div>
@@ -155,7 +155,7 @@ export default function AcceptInvitationPage() {
                 <CheckCircle className="h-8 w-8 text-green-600" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">¡Cuenta Creada!</h2>
-              <p className="text-gray-600 mb-2">
+                <p className="text-gray-600 mb-2">
                 Tu cuenta ha sido creada exitosamente.
               </p>
               <p className="text-sm text-gray-500">
@@ -198,7 +198,7 @@ export default function AcceptInvitationPage() {
         <Card>
           <CardHeader>
             <CardTitle>Crea tu Cuenta</CardTitle>
-            <CardDescription>
+              <CardDescription>
               Completa el formulario para activar tu acceso a INMOVA
             </CardDescription>
           </CardHeader>
@@ -222,7 +222,7 @@ export default function AcceptInvitationPage() {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="nombre">Nombre de la Empresa *</Label>
-                  <Input
+                    <Input
                     id="nombre"
                     value={formData.nombre}
                     onChange={(e) => setFormData({...formData, nombre: e.target.value})}
@@ -233,7 +233,7 @@ export default function AcceptInvitationPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="email">Email *</Label>
-                  <Input
+                    <Input
                     id="email"
                     type="email"
                     value={formData.email}
@@ -246,7 +246,7 @@ export default function AcceptInvitationPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="password">Contraseña *</Label>
-                    <Input
+                      <Input
                       id="password"
                       type="password"
                       value={formData.password}
@@ -258,7 +258,7 @@ export default function AcceptInvitationPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="confirmPassword">Confirmar Contraseña *</Label>
-                    <Input
+                      <Input
                       id="confirmPassword"
                       type="password"
                       value={formData.confirmPassword}
@@ -271,7 +271,7 @@ export default function AcceptInvitationPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="telefono">Teléfono</Label>
-                  <Input
+                    <Input
                     id="telefono"
                     type="tel"
                     value={formData.telefono}
@@ -282,7 +282,7 @@ export default function AcceptInvitationPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="direccion">Dirección</Label>
-                  <Input
+                    <Input
                     id="direccion"
                     value={formData.direccion}
                     onChange={(e) => setFormData({...formData, direccion: e.target.value})}
@@ -317,8 +317,9 @@ export default function AcceptInvitationPage() {
         {/* Footer */}
         <div className="mt-8 text-center text-sm text-gray-500">
           <p>© 2025 INMOVA - Gestión Inmobiliaria Inteligente</p>
+            </div>
+          </main>
         </div>
       </div>
-    </div>
   );
 }

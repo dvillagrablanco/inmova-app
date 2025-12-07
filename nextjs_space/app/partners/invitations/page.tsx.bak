@@ -327,9 +327,5 @@ export default function PartnerInvitationsPage() {
         </CardContent>
       </Card>
     </div>
-      </div>
-        </main>
-      </div>
-    </div>
   );
 }

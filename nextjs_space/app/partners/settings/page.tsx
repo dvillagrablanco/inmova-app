@@ -39,10 +39,10 @@ export default function PartnerSettingsPage() {
         <Header />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
-      {/* Header */}
+            {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Configuración</h1>
-        <p className="text-gray-600">Gestiona la información de tu Partner</p>
+          <p className="text-gray-600">Gestiona la información de tu Partner</p>
       </div>
 
       {/* Información de la Empresa */}
@@ -60,22 +60,22 @@ export default function PartnerSettingsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="nombre">Nombre Comercial</Label>
-              <Input id="nombre" value={partnerData.nombre} disabled />
+                <Input id="nombre" value={partnerData.nombre} disabled />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="razonSocial">Razón Social</Label>
-              <Input id="razonSocial" value={partnerData.razonSocial} disabled />
+                <Input id="razonSocial" value={partnerData.razonSocial} disabled />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="cif">CIF / NIF</Label>
-              <Input id="cif" value={partnerData.cif} disabled />
+                <Input id="cif" value={partnerData.cif} disabled />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="tipo">Tipo de Partner</Label>
-              <Input id="tipo" value={partnerData.tipo} disabled />
+                <Input id="tipo" value={partnerData.tipo} disabled />
             </div>
           </div>
 
@@ -102,7 +102,7 @@ export default function PartnerSettingsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="contactoNombre">Nombre Completo</Label>
-              <div className="relative">
+                <div className="relative">
                 <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input 
                   id="contactoNombre" 
@@ -115,7 +115,7 @@ export default function PartnerSettingsPage() {
 
             <div className="space-y-2">
               <Label htmlFor="contactoEmail">Email de Contacto</Label>
-              <div className="relative">
+                <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input 
                   id="contactoEmail" 
@@ -129,7 +129,7 @@ export default function PartnerSettingsPage() {
             {partnerData.contactoTelefono && (
               <div className="space-y-2">
                 <Label htmlFor="contactoTelefono">Teléfono</Label>
-                <div className="relative">
+                  <div className="relative">
                   <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input 
                     id="contactoTelefono" 
@@ -143,7 +143,7 @@ export default function PartnerSettingsPage() {
 
             <div className="space-y-2">
               <Label htmlFor="email">Email de Acceso</Label>
-              <div className="relative">
+                <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input 
                   id="email" 
@@ -180,13 +180,13 @@ export default function PartnerSettingsPage() {
 
           <div className="space-y-2">
             <h4 className="font-medium text-gray-900">Escala de Comisiones:</h4>
-            <div className="space-y-1 text-sm text-gray-600">
+              <div className="space-y-1 text-sm text-gray-600">
               <p>• 1-10 clientes: 20%</p>
-              <p>• 11-25 clientes: 30%</p>
-              <p>• 26-50 clientes: 40%</p>
-              <p>• 51-100 clientes: 50%</p>
-              <p>• 101-250 clientes: 60%</p>
-              <p>• 251+ clientes: 70%</p>
+                <p>• 11-25 clientes: 30%</p>
+                <p>• 26-50 clientes: 40%</p>
+                <p>• 51-100 clientes: 50%</p>
+                <p>• 101-250 clientes: 60%</p>
+                <p>• 251+ clientes: 70%</p>
             </div>
           </div>
         </CardContent>
@@ -196,7 +196,7 @@ export default function PartnerSettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Estado de la Cuenta</CardTitle>
-          <CardDescription>
+            <CardDescription>
             Estado actual de tu Partner
           </CardDescription>
         </CardHeader>
@@ -204,7 +204,7 @@ export default function PartnerSettingsPage() {
           <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
             <div>
               <p className="font-medium text-gray-900">Estado:</p>
-              <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600">
                 Fecha de registro: {new Date(partnerData.createdAt).toLocaleDateString('es-ES')}
               </p>
             </div>
@@ -227,15 +227,17 @@ export default function PartnerSettingsPage() {
       <Card className="bg-primary text-white">
         <CardContent className="p-6">
           <h3 className="text-xl font-bold mb-2">¿Necesitas ayuda?</h3>
-          <p className="text-primary-foreground/90 mb-4">
+            <p className="text-primary-foreground/90 mb-4">
             Nuestro equipo de soporte está disponible para ayudarte con cualquier duda o problema.
           </p>
           <div className="space-y-2 text-sm">
             <p>Email: <a href="mailto:partners@inmova.com" className="underline font-medium">partners@inmova.com</a></p>
-            <p>Teléfono: +34 900 123 456</p>
-          </div>
+              <p>Teléfono: +34 900 123 456</p>
         </CardContent>
       </Card>
-    </div>
+            </div>
+          </main>
+        </div>
+      </div>
   );
 }

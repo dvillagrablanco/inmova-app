@@ -105,7 +105,7 @@ export default function ObjetivosPage() {
         <Header />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
-        <LoadingState message="Cargando objetivos..." />
+            <LoadingState message="Cargando objetivos..." />
       </div>
     );
   }
@@ -127,7 +127,7 @@ export default function ObjetivosPage() {
               </Link>
               <div>
                 <h1 className="text-2xl font-bold gradient-text">Mis Objetivos</h1>
-                <p className="text-sm text-muted-foreground mt-1">
+                  <p className="text-sm text-muted-foreground mt-1">
                   Seguimiento de objetivos y metas comerciales
                 </p>
               </div>
@@ -144,7 +144,7 @@ export default function ObjetivosPage() {
         {/* Objetivos Activos */}
         <div>
           <h2 className="text-xl font-bold mb-4">Objetivos Activos</h2>
-          {objetivosActivos.length === 0 ? (
+            {objetivosActivos.length === 0 ? (
             <Card>
               <CardContent className="py-12">
                 <div className="text-center text-muted-foreground">
@@ -208,7 +208,7 @@ export default function ObjetivosPage() {
                           <Target className="h-6 w-6 text-primary" />
                           <div>
                             <CardTitle>Objetivos - {objetivo.periodo}</CardTitle>
-                            <p className="text-sm text-muted-foreground mt-1">
+                              <p className="text-sm text-muted-foreground mt-1">
                               {format(new Date(objetivo.fechaInicio), "d 'de' MMM", {
                                 locale: es,
                               })}
@@ -368,7 +368,7 @@ export default function ObjetivosPage() {
         {objetivosHistoricos.length > 0 && (
           <div>
             <h2 className="text-xl font-bold mb-4">Objetivos Anteriores</h2>
-            <div className="space-y-4">
+              <div className="space-y-4">
               {objetivosHistoricos.map((objetivo) => {
                 const progresoLeads = calcularProgreso(
                   objetivo.leadsActuales,
@@ -413,7 +413,7 @@ export default function ObjetivosPage() {
                       <div className="flex items-center justify-between">
                         <div>
                           <h3 className="font-semibold">{objetivo.periodo}</h3>
-                          <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-muted-foreground">
                             {format(new Date(objetivo.fechaInicio), "d 'de' MMM", {
                               locale: es,
                             })}
@@ -442,7 +442,9 @@ export default function ObjetivosPage() {
             </div>
           </div>
         )}
-      </main>
-    </div>
+            </div>
+          </main>
+        </div>
+      </div>
   );
 }

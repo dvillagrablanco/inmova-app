@@ -169,8 +169,11 @@ export default function FacturacionPage() {
                   <p className="text-muted-foreground">Cargando información...</p>
                 </div>
               </div>
-  );
-}
+            </div>
+          </main>
+        </div>
+      </div>
+    );
   }
 
   const pendingInvoices = invoices.filter(inv => inv.estado === 'PENDIENTE' || inv.estado === 'VENCIDA');
