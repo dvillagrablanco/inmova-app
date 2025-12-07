@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import Sidebar from "@/components/layout/sidebar";
+import Header from "@/components/layout/header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,13 +23,24 @@ import {
 
 export default function ComunidadesPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login');
+    }
+  }, [status, router]);
 
   useEffect(() => {
     // TODO: Cargar estadísticas desde la API cuando se seleccione un edificio
     setLoading(false);
   }, []);
+
+  if (status === 'loading') {
+    return <div className="flex items-center justify-center min-h-screen">Cargando...</div>;
+  }
 
   const modulos = [
     {
@@ -104,16 +118,21 @@ export default function ComunidadesPage() {
   ];
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Gestión de Comunidades</h1>
-          <p className="text-muted-foreground mt-1">
-            Sistema completo de administración de comunidades de propietarios
-          </p>
-        </div>
-      </div>
+    <div className="flex h-screen overflow-hidden bg-gradient-bg">
+      <Sidebar />
+      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
+        <Header />
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto space-y-6">
+            {/* Header */}
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-3xl font-bold">Gestión de Comunidades</h1>
+                <p className="text-muted-foreground mt-1">
+                  Sistema completo de administración de comunidades de propietarios
+                </p>
+              </div>
+            </div>
 
       {/* Módulos Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -253,6 +272,9 @@ export default function ComunidadesPage() {
           </div>
         </CardContent>
       </Card>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

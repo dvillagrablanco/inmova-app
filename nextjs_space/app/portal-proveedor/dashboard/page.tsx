@@ -1,5 +1,8 @@
 'use client';
 
+import Sidebar from '@/components/layout/sidebar';
+import Header from '@/components/layout/header';
+
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -80,7 +83,12 @@ export default function ProveedorDashboardPage() {
   if (!data) return <div className="min-h-screen flex items-center justify-center bg-muted/30"><Card><CardContent className="pt-6"><p className="text-muted-foreground">No se pudo cargar el dashboard</p><Button onClick={() => router.push('/portal-proveedor/login')} className="mt-4">Volver al Login</Button></CardContent></Card></div>;
 
   return (
-    <div className="min-h-screen bg-muted/30 p-4 md:p-6">
+    <div className="flex h-screen overflow-hidden bg-gradient-bg">
+      <Sidebar />
+      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
+        <Header />
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto">
       <div className="max-w-7xl mx-auto mb-6">
         <div className="flex items-center justify-between mb-6">
           <div><h1 className="text-3xl font-bold">Portal del Proveedor</h1><p className="text-muted-foreground mt-1">Bienvenido, {data.proveedor.nombre}</p></div>
@@ -175,6 +183,10 @@ export default function ProveedorDashboardPage() {
             ))}</div>
           )}
         </CardContent></Card>
+      </div>
+    </div>
+      </div>
+        </main>
       </div>
     </div>
   );

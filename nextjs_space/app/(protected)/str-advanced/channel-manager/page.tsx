@@ -1,5 +1,8 @@
 'use client';
 
+import Sidebar from '@/components/layout/sidebar';
+import Header from '@/components/layout/header';
+
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -59,7 +62,12 @@ export default function ChannelManagerPage() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-7xl">
+    <div className="flex h-screen overflow-hidden bg-gradient-bg">
+      <Sidebar />
+      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
+        <Header />
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto">
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
@@ -181,6 +189,10 @@ export default function ChannelManagerPage() {
           </div>
         </CardContent>
       </Card>
+    </div>
+      </div>
+        </main>
+      </div>
     </div>
   );
 }
