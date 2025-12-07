@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
         },
       },
     });
-    const results = [];
+    const results: any[] = [];
     for (const partner of partners) {
       const clientesActivos = partner.clientes.length;
       if (clientesActivos === 0) {

@@ -177,7 +177,7 @@ export default function ProviderAssignmentDashboard() {
 }
 
 function generateInsights(stats: any) {
-  const insights = [];
+  const insights: any[] = [];
 
   // Insight sobre proveedores
   if (stats.totalProviders < 5) {

@@ -110,7 +110,7 @@ export async function GET(request: Request) {
 
     if (tipo === 'flujo_caja') {
       // Reporte de flujo de caja mensual
-      const flujoCaja = [];
+      const flujoCaja: any[] = [];
       for (let i = meses - 1; i >= 0; i--) {
         const mes = new Date(now);
         mes.setMonth(mes.getMonth() - i);

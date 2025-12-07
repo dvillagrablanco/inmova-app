@@ -134,7 +134,7 @@ export default function OccupancyReportsPage() {
   };
 
   const generateMonthOptions = () => {
-    const options = [];
+    const options: Array<{ value: string; label: string }> = [];
     const today = new Date();
     for (let i = 0; i < 12; i++) {
       const date = new Date(today.getFullYear(), today.getMonth() - i, 1);

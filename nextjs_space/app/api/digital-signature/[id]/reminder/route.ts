@@ -52,7 +52,7 @@ export async function POST(
     }
 
     // Enviar recordatorios a firmantes pendientes
-    const recordatoriosEnviados = [];
+    const recordatoriosEnviados: string[] = [];
     for (const firmante of documento.firmantes) {
       await reenviarInvitacion(params.id, firmante.id);
       recordatoriosEnviados.push(firmante.email);

@@ -167,7 +167,7 @@ function InquilinosPageContent() {
 
   // Update active filters when search term changes
   useEffect(() => {
-    const filters = [];
+    const filters: Array<{id: string; label: string; value: string}> = [];
     if (searchTerm) {
       filters.push({ id: 'search', label: 'Búsqueda', value: searchTerm });
     }

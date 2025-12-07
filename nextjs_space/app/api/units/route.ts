@@ -76,12 +76,11 @@ export async function POST(req: NextRequest) {
         numero: validatedData.numero,
         tipo: validatedData.tipo || 'vivienda',
         estado: validatedData.estado || 'disponible',
-        piso: validatedData.piso || null,
-        superficie: validatedData.superficie || null,
+        planta: validatedData.piso || validatedData.planta || null,
+        superficie: validatedData.superficie || 0,
         habitaciones: validatedData.habitaciones || null,
         banos: validatedData.banos || null,
         rentaMensual: validatedData.rentaMensual || 0,
-        descripcion: validatedData.descripcion || null,
       },
     });
 

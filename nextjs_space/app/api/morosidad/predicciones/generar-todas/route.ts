@@ -95,8 +95,9 @@ export async function POST(request: NextRequest) {
         resultados.push({
           tenantId: contract.tenantId,
           tenantName: contract.tenant.nombreCompleto,
-          status: 'error',
-          error: error.message
+          nivelRiesgo: 'error',
+          probabilidad: 0,
+          status: 'error'
         });
       }
     }

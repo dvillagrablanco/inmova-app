@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     });
 
     // 3. Crear las unidades automáticamente
-    const unitsToCreate = [];
+    const unitsToCreate: any[] = [];
     const unitType = units.type === 'commercial' ? 'local' as const : 'vivienda' as const;
     
     for (let i = 1; i <= units.count; i++) {
