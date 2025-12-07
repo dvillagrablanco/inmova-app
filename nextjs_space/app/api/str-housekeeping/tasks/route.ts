@@ -21,18 +21,16 @@ export async function GET(req: NextRequest) {
     const endDate = searchParams.get('endDate');
 
     const where: any = {
-      listing: {
-        companyId: session.user.companyId,
-      },
+      companyId: session.user.companyId,
     };
 
     if (listingId) where.listingId = listingId;
-    if (status) where.estado = status;
+    if (status) where.status = status;
     if (assignedTo) where.asignadoA = assignedTo;
     if (startDate || endDate) {
-      where.fechaTarea = {};
-      if (startDate) where.fechaTarea.gte = new Date(startDate);
-      if (endDate) where.fechaTarea.lte = new Date(endDate);
+      where.fechaProgramada = {};
+      if (startDate) where.fechaProgramada.gte = new Date(startDate);
+      if (endDate) where.fechaProgramada.lte = new Date(endDate);
     }
 
     const tasks = await prisma.sTRHousekeepingTask.findMany({
@@ -57,9 +55,9 @@ export async function GET(req: NextRequest) {
         booking: {
           select: {
             id: true,
-            nombreHuesped: true,
-            fechaEntrada: true,
-            fechaSalida: true,
+            guestNombre: true,
+            checkInDate: true,
+            checkOutDate: true,
           },
         },
         staff: {
@@ -71,7 +69,7 @@ export async function GET(req: NextRequest) {
         },
       },
       orderBy: {
-        fechaTarea: 'desc',
+        fechaProgramada: 'desc',
       },
     });
 
@@ -98,11 +96,11 @@ export async function POST(req: NextRequest) {
       listingId,
       bookingId,
       tipo,
-      fechaTarea,
-      horaEstimada,
+      fechaProgramada,
+      tiempoEstimadoMin,
       asignadoA,
       prioridad,
-      instrucciones,
+      instruccionesEspeciales,
     } = body;
 
     // Validar listing pertenece a la company
@@ -122,16 +120,16 @@ export async function POST(req: NextRequest) {
 
     const task = await prisma.sTRHousekeepingTask.create({
       data: {
+        companyId: session.user.companyId,
         listingId,
-        bookingId,
-        tipo,
-        fechaTarea: new Date(fechaTarea),
-        horaEstimada: horaEstimada || null,
-        estado: 'pendiente',
+        bookingId: bookingId || null,
+        tipo: tipo || 'check_out',
+        fechaProgramada: new Date(fechaProgramada),
+        tiempoEstimadoMin: tiempoEstimadoMin || null,
+        status: 'pendiente',
         asignadoA: asignadoA || null,
-        prioridad: prioridad || 'normal',
-        instrucciones: instrucciones || null,
-        checklistItems: [],
+        prioridad: prioridad || 0,
+        instruccionesEspeciales: instruccionesEspeciales || null,
       },
       include: {
         listing: {
