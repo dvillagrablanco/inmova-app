@@ -15,6 +15,11 @@ export const metadata: Metadata = {
     shortcut: '/favicon.svg',
   },
   manifest: '/manifest.json',
+  verification: {
+    other: {
+      'vercel-deployment': '220194',
+    },
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
