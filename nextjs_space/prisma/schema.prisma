@@ -382,6 +382,7 @@ model Building {
   @@index([companyId])
   @@index([tipo, companyId])
   @@index([companyId, createdAt])
+  @@index([companyId, tipo, anoConstructor]) // Nuevo: búsqueda por tipo y año
   @@map("buildings")
   // Administrador de Fincas
   communityManagement CommunityManagement?
@@ -493,6 +494,7 @@ model Tenant {
   @@index([email])
   @@index([dni])
   @@index([companyId, scoring])
+  @@index([companyId, createdAt]) // Nuevo: tenants por fecha de creación
   @@map("tenants")
 }
 
@@ -583,6 +585,8 @@ model Unit {
   @@index([estado])
   @@index([tenantId])
   @@index([tipo, estado])
+  @@index([buildingId, tipo, estado]) // Nuevo: búsqueda compuesta por edificio, tipo y estado
+  @@index([rentaMensual, estado]) // Nuevo: búsqueda por rango de renta
   @@map("units")
 }
 
@@ -631,6 +635,8 @@ model Contract {
   @@index([estado])
   @@index([fechaInicio, fechaFin])
   @@index([tenantId, fechaInicio])
+  @@index([estado, fechaFin]) // Nuevo: contratos activos próximos a vencer
+  @@index([unitId, fechaInicio, fechaFin]) // Nuevo: historial de contratos por unidad
   @@map("contracts")
 }
 
@@ -685,6 +691,8 @@ model Payment {
   @@index([fechaVencimiento])
   @@index([fechaPago])
   @@index([contractId, fechaVencimiento])
+  @@index([estado, fechaVencimiento]) // Nuevo: pagos pendientes ordenados por fecha
+  @@index([nivelRiesgo, estado]) // Nuevo: análisis de riesgo de morosidad
   @@map("payments")
 }
 
