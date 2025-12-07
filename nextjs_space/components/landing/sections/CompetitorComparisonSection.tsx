@@ -31,10 +31,10 @@ const comparisonFeatures = [
 ];
 
 const pricing = [
-  { name: 'INMOVA', price: '€149/mes', modules: 56, color: 'indigo' },
-  { name: 'Competidor A', price: '€199/mes', modules: 28, color: 'gray' },
-  { name: 'Competidor B', price: '€129/mes', modules: 18, color: 'gray' },
-  { name: 'Competidor C', price: '€179/mes', modules: 35, color: 'gray' },
+  { name: 'INMOVA', price: '€60/mes', modules: 88, color: 'indigo', subtitle: 'Plan Pro' },
+  { name: 'Homming', price: '€119/mes', modules: 15, color: 'red', subtitle: 'Advanced' },
+  { name: 'Competidor B', price: '€129/mes', modules: 18, color: 'gray', subtitle: 'Estándar' },
+  { name: 'Competidor C', price: '€179/mes', modules: 35, color: 'gray', subtitle: 'Premium' },
 ];
 
 export function CompetitorComparisonSection() {
@@ -63,6 +63,8 @@ export function CompetitorComparisonSection() {
               className={`${
                 item.color === 'indigo' 
                   ? 'border-indigo-500 border-4 shadow-2xl scale-105' 
+                  : item.color === 'red'
+                  ? 'border-red-300 border-2'
                   : 'border-gray-300'
               } hover:shadow-lg transition-all`}
             >
@@ -72,17 +74,30 @@ export function CompetitorComparisonSection() {
                     Mejor Opción
                   </Badge>
                 )}
+                {item.color === 'red' && (
+                  <Badge className="mb-2 bg-red-100 text-red-700 border-red-200">
+                    58% más caro
+                  </Badge>
+                )}
                 <CardTitle className={`text-xl ${
-                  item.color === 'indigo' ? 'text-indigo-600' : 'text-gray-700'
+                  item.color === 'indigo' ? 'text-indigo-600' : item.color === 'red' ? 'text-red-600' : 'text-gray-700'
                 }`}>
                   {item.name}
                 </CardTitle>
-                <p className={`text-3xl font-bold mt-2 ${
-                  item.color === 'indigo' ? 'text-indigo-600' : 'text-gray-600'
+                <p className="text-xs text-gray-500 mb-2">{item.subtitle}</p>
+                <p className={`text-3xl font-bold ${
+                  item.color === 'indigo' ? 'text-indigo-600' : item.color === 'red' ? 'text-red-600' : 'text-gray-600'
                 }`}>
                   {item.price}
                 </p>
                 <p className="text-sm text-gray-500 mt-1">{item.modules} módulos</p>
+                {item.color === 'red' && (
+                  <Link href="/comparativa/homming" className="mt-3 inline-block">
+                    <Button variant="outline" size="sm" className="text-xs">
+                      Ver Comparativa
+                    </Button>
+                  </Link>
+                )}
               </CardHeader>
             </Card>
           ))}
@@ -105,7 +120,7 @@ export function CompetitorComparisonSection() {
                           <span>INMOVA</span>
                         </div>
                       </th>
-                      <th className="p-4 font-semibold text-center min-w-[120px]">Competidor A</th>
+                      <th className="p-4 font-semibold text-center min-w-[120px]">Homming</th>
                       <th className="p-4 font-semibold text-center min-w-[120px]">Competidor B</th>
                       <th className="p-4 font-semibold text-center min-w-[120px]">Competidor C</th>
                     </tr>
@@ -191,13 +206,13 @@ export function CompetitorComparisonSection() {
         </div>
 
         {/* Bottom CTA */}
-        <div className="text-center mt-12">
+        <div className="text-center mt-12 space-y-6">
           <div className="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-2xl p-8 max-w-4xl mx-auto">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="text-left text-white">
                 <h3 className="text-2xl font-bold mb-2 flex items-center gap-2">
                   <TrendingUp className="h-6 w-6" />
-                  56 Módulos vs 18-35 de la Competencia
+                  88 Módulos vs 15-35 de la Competencia
                 </h3>
                 <p className="text-indigo-100">
                   Ahorra hasta un 70% consolidando múltiples herramientas en INMOVA
@@ -209,6 +224,19 @@ export function CompetitorComparisonSection() {
                 </Button>
               </Link>
             </div>
+          </div>
+
+          {/* Homming Specific CTA */}
+          <div className="bg-green-50 border-2 border-green-200 rounded-xl p-6 max-w-2xl mx-auto">
+            <p className="text-sm text-gray-700 mb-3">
+              <strong className="text-green-700">¿Vienes de Homming?</strong> Descubre por qué 
+              <span className="font-semibold"> INMOVA ofrece 6x más funcionalidad por 58% menos precio</span>
+            </p>
+            <Link href="/comparativa/homming">
+              <Button variant="outline" className="border-green-600 text-green-700 hover:bg-green-100">
+                Ver Comparativa Detallada con Homming
+              </Button>
+            </Link>
           </div>
         </div>
 
