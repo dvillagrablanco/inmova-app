@@ -31,7 +31,7 @@ export async function GET(
             },
           },
           orderBy: {
-            fechaTarea: 'desc',
+            fechaProgramada: 'desc',
           },
           take: 10,
         },
@@ -83,14 +83,16 @@ export async function PATCH(
     if (body.email !== undefined) updateData.email = body.email;
     if (body.telefono !== undefined) updateData.telefono = body.telefono;
     if (body.tipo !== undefined) updateData.tipo = body.tipo;
-    if (body.especialidades !== undefined) updateData.especialidades = body.especialidades;
-    if (body.zonas !== undefined) updateData.zonas = body.zonas;
-    if (body.disponible !== undefined) updateData.disponible = body.disponible;
+    if (body.zonasTrabajo !== undefined) updateData.zonasTrabajo = body.zonasTrabajo;
+    if (body.activo !== undefined) updateData.activo = body.activo;
     if (body.capacidadDiaria !== undefined) updateData.capacidadDiaria = body.capacidadDiaria;
-    if (body.tarifaHora !== undefined) updateData.tarifaHora = body.tarifaHora;
+    if (body.tarifaPorHora !== undefined) updateData.tarifaPorHora = body.tarifaPorHora;
+    if (body.tarifaPorTurnover !== undefined) updateData.tarifaPorTurnover = body.tarifaPorTurnover;
     if (body.calificacionPromedio !== undefined) updateData.calificacionPromedio = body.calificacionPromedio;
     if (body.tareasCompletadas !== undefined) updateData.tareasCompletadas = body.tareasCompletadas;
-    if (body.notasInternas !== undefined) updateData.notasInternas = body.notasInternas;
+    if (body.diasDisponibles !== undefined) updateData.diasDisponibles = body.diasDisponibles;
+    if (body.horaInicio !== undefined) updateData.horaInicio = body.horaInicio;
+    if (body.horaFin !== undefined) updateData.horaFin = body.horaFin;
 
     const staff = await prisma.sTRHousekeepingStaff.update({
       where: { id: params.id },
@@ -134,8 +136,8 @@ export async function DELETE(
     const activeTasks = await prisma.sTRHousekeepingTask.count({
       where: {
         asignadoA: params.id,
-        estado: {
-          in: ['pendiente', 'asignada', 'en_progreso'],
+        status: {
+          in: ['pendiente', 'asignado', 'en_progreso'],
         },
       },
     });

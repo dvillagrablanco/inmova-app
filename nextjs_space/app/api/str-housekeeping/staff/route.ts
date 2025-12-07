@@ -15,14 +15,14 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const tipo = searchParams.get('tipo');
-    const disponible = searchParams.get('disponible');
+    const activo = searchParams.get('activo');
 
     const where: any = {
       companyId: session.user.companyId,
     };
 
     if (tipo) where.tipo = tipo;
-    if (disponible !== null) where.disponible = disponible === 'true';
+    if (activo !== null) where.activo = activo === 'true';
 
     const staff = await prisma.sTRHousekeepingStaff.findMany({
       where,
@@ -62,11 +62,11 @@ export async function POST(req: NextRequest) {
       email,
       telefono,
       tipo,
-      especialidades,
-      zonas,
-      disponible,
+      zonasTrabajo,
+      activo,
       capacidadDiaria,
-      tarifaHora,
+      tarifaPorHora,
+      tarifaPorTurnover,
     } = body;
 
     if (!nombre || !telefono) {
@@ -82,12 +82,12 @@ export async function POST(req: NextRequest) {
         nombre,
         email: email || null,
         telefono,
-        tipo: tipo || 'limpiador',
-        especialidades: especialidades || [],
-        zonas: zonas || [],
-        disponible: disponible !== false,
-        capacidadDiaria: capacidadDiaria || 1,
-        tarifaHora: tarifaHora || null,
+        tipo: tipo || 'interno',
+        zonasTrabajo: zonasTrabajo || [],
+        activo: activo !== false,
+        capacidadDiaria: capacidadDiaria || 4,
+        tarifaPorHora: tarifaPorHora || null,
+        tarifaPorTurnover: tarifaPorTurnover || null,
       },
     });
 

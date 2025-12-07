@@ -6436,6 +6436,9 @@ model STRListing {
   competitorAnalysis  STRCompetitorAnalysis[]
   channelMetrics      STRChannelMetrics[]
 
+  // STR Housekeeping - Pack 3
+  housekeepingTasks STRHousekeepingTask[]
+
   @@map("str_listings")
 }
 
@@ -6483,6 +6486,8 @@ model STRBooking {
 
   company Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
   listing STRListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  housekeepingTasks STRHousekeepingTask[]
 
   @@map("str_bookings")
 }
@@ -6806,7 +6811,10 @@ model STRHousekeepingTask {
   company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   listingId String
+  listing   STRListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
   bookingId String?
+  booking   STRBooking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
 
   // Tipo y estado
   tipo        TurnoverType @default(check_out)
@@ -6819,6 +6827,7 @@ model STRHousekeepingTask {
 
   // Asignación
   asignadoA       String?
+  staff           STRHousekeepingStaff? @relation(fields: [asignadoA], references: [id], onDelete: SetNull)
   asignadoNombre  String?
   
   // Detalles
@@ -6901,6 +6910,8 @@ model STRHousekeepingStaff {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  tasks STRHousekeepingTask[]
 
   @@index([companyId])
   @@index([activo])

@@ -19,9 +19,7 @@ export async function GET(
     const task = await prisma.sTRHousekeepingTask.findFirst({
       where: {
         id: params.id,
-        listing: {
-          companyId: session.user.companyId,
-        },
+        companyId: session.user.companyId,
       },
       include: {
         listing: {
@@ -69,9 +67,7 @@ export async function PATCH(
     const existingTask = await prisma.sTRHousekeepingTask.findFirst({
       where: {
         id: params.id,
-        listing: {
-          companyId: session.user.companyId,
-        },
+        companyId: session.user.companyId,
       },
     });
 
@@ -82,30 +78,31 @@ export async function PATCH(
     const updateData: any = {};
 
     // Campos actualizables
-    if (body.estado !== undefined) {
-      updateData.estado = body.estado;
-      if (body.estado === 'completada') {
-        updateData.fechaCompletado = new Date();
+    if (body.status !== undefined) {
+      updateData.status = body.status;
+      if (body.status === 'completado') {
+        updateData.fechaFin = new Date();
       }
-      if (body.estado === 'verificada') {
-        updateData.fechaVerificacion = new Date();
+      if (body.status === 'verificado') {
+        updateData.fechaFin = new Date();
       }
     }
     if (body.asignadoA !== undefined) updateData.asignadoA = body.asignadoA;
     if (body.prioridad !== undefined) updateData.prioridad = body.prioridad;
-    if (body.instrucciones !== undefined) updateData.instrucciones = body.instrucciones;
-    if (body.checklistItems !== undefined) updateData.checklistItems = body.checklistItems;
+    if (body.instruccionesEspeciales !== undefined) updateData.instruccionesEspeciales = body.instruccionesEspeciales;
+    if (body.checklistCompletado !== undefined) updateData.checklistCompletado = body.checklistCompletado;
     if (body.fotosAntes !== undefined) updateData.fotosAntes = body.fotosAntes;
     if (body.fotosDespues !== undefined) updateData.fotosDespues = body.fotosDespues;
-    if (body.tiempoEmpleado !== undefined) updateData.tiempoEmpleado = body.tiempoEmpleado;
-    if (body.costoTotal !== undefined) updateData.costoTotal = body.costoTotal;
+    if (body.tiempoRealMin !== undefined) updateData.tiempoRealMin = body.tiempoRealMin;
+    if (body.costoMateriales !== undefined) updateData.costoMateriales = body.costoMateriales;
+    if (body.costoManoObra !== undefined) updateData.costoManoObra = body.costoManoObra;
     if (body.incidencias !== undefined) updateData.incidencias = body.incidencias;
-    if (body.calificacion !== undefined) updateData.calificacion = body.calificacion;
-    if (body.comentarios !== undefined) updateData.comentarios = body.comentarios;
-    if (body.fechaTarea !== undefined) updateData.fechaTarea = new Date(body.fechaTarea);
-    if (body.horaEstimada !== undefined) updateData.horaEstimada = body.horaEstimada;
-    if (body.horaInicio !== undefined) updateData.horaInicio = body.horaInicio;
-    if (body.horaFin !== undefined) updateData.horaFin = body.horaFin;
+    if (body.requiereAtencion !== undefined) updateData.requiereAtencion = body.requiereAtencion;
+    if (body.notas !== undefined) updateData.notas = body.notas;
+    if (body.fechaProgramada !== undefined) updateData.fechaProgramada = new Date(body.fechaProgramada);
+    if (body.tiempoEstimadoMin !== undefined) updateData.tiempoEstimadoMin = body.tiempoEstimadoMin;
+    if (body.fechaInicio !== undefined) updateData.fechaInicio = new Date(body.fechaInicio);
+    if (body.fechaFin !== undefined) updateData.fechaFin = new Date(body.fechaFin);
 
     const task = await prisma.sTRHousekeepingTask.update({
       where: { id: params.id },
@@ -149,9 +146,7 @@ export async function DELETE(
     const existingTask = await prisma.sTRHousekeepingTask.findFirst({
       where: {
         id: params.id,
-        listing: {
-          companyId: session.user.companyId,
-        },
+        companyId: session.user.companyId,
       },
     });
 

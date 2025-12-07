@@ -64,10 +64,10 @@ export async function POST(req: NextRequest) {
         companyId: session.user.companyId,
         nombre,
         descripcion: descripcion || null,
-        tipo: tipo || 'general',
+        tipo: tipo || 'check_out',
         items,
-        tiempoEstimado: tiempoEstimado || null,
-        activa: true,
+        tiempoEstimadoMin: tiempoEstimado || null,
+        activo: true,
       },
     });
 

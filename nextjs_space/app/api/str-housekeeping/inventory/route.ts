@@ -83,11 +83,9 @@ export async function POST(req: NextRequest) {
       data: {
         companyId: session.user.companyId,
         nombre,
-        descripcion: descripcion || null,
         categoria,
-        unidadMedida: unidadMedida || 'unidad',
         stockActual: stockActual || 0,
-        stockMinimo: stockMinimo || 0,
+        stockMinimo: stockMinimo || 5,
         costoUnitario: costoUnitario || null,
         ubicacion: ubicacion || null,
       },

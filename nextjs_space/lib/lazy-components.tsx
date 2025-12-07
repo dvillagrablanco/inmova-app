@@ -25,68 +25,76 @@ export const LazyConfirmDialog = createLazyComponent(
 );
 
 // Lazy Components para Formularios Complejos
-export const LazyPropertyForm = createLazyComponent(
-  () => import('@/components/forms/property-form').then(mod => ({ default: mod.PropertyForm })),
-  'Cargando formulario...'
-);
+// TODO: Crear estos componentes cuando sean necesarios
+// export const LazyPropertyForm = createLazyComponent(
+//   () => import('@/components/forms/property-form').then(mod => ({ default: mod.PropertyForm })),
+//   'Cargando formulario...'
+// );
 
 // Lazy Components para Dashboards
-export const LazyAnalyticsDashboard = createLazyComponent(
-  () => import('@/app/analytics/components/analytics-dashboard'),
-  'Cargando análisis...'
-);
+// TODO: Crear estos componentes cuando sean necesarios
+// export const LazyAnalyticsDashboard = createLazyComponent(
+//   () => import('@/app/analytics/components/analytics-dashboard'),
+//   'Cargando análisis...'
+// );
 
-export const LazyBIDashboard = createLazyComponent(
-  () => import('@/app/bi/components/bi-dashboard'),
-  'Cargando Business Intelligence...'
-);
+// export const LazyBIDashboard = createLazyComponent(
+//   () => import('@/app/bi/components/bi-dashboard'),
+//   'Cargando Business Intelligence...'
+// );
 
 // Lazy Components para Calendarios y Planificadores
-export const LazyCalendarView = createLazyComponent(
-  () => import('@/components/calendar/calendar-view'),
-  'Cargando calendario...'
-);
+// TODO: Crear estos componentes cuando sean necesarios
+// export const LazyCalendarView = createLazyComponent(
+//   () => import('@/components/calendar/calendar-view'),
+//   'Cargando calendario...'
+// );
 
 // Lazy Components para Editores Ricos
-export const LazyRichTextEditor = createLazyComponent(
-  () => import('@/components/editors/rich-text-editor'),
-  'Cargando editor...'
-);
+// TODO: Crear estos componentes cuando sean necesarios
+// export const LazyRichTextEditor = createLazyComponent(
+//   () => import('@/components/editors/rich-text-editor'),
+//   'Cargando editor...'
+// );
 
 // Lazy Components para Visualizaciones Complejas
-export const LazyDataVisualization = createLazyComponent(
-  () => import('@/components/visualizations/data-visualization'),
-  'Cargando visualización...'
-);
+// TODO: Crear estos componentes cuando sean necesarios
+// export const LazyDataVisualization = createLazyComponent(
+//   () => import('@/components/visualizations/data-visualization'),
+//   'Cargando visualización...'
+// );
 
 // Lazy Components para Chat/Mensajería
-export const LazyChatInterface = createLazyComponent(
-  () => import('@/components/chat/chat-interface'),
-  'Cargando chat...'
-);
+// TODO: Crear estos componentes cuando sean necesarios
+// export const LazyChatInterface = createLazyComponent(
+//   () => import('@/components/chat/chat-interface'),
+//   'Cargando chat...'
+// );
 
 // Lazy Components para Gestión de Archivos
-export const LazyFileManager = createLazyComponent(
-  () => import('@/components/files/file-manager'),
-  'Cargando gestor de archivos...'
-);
+// TODO: Crear estos componentes cuando sean necesarios
+// export const LazyFileManager = createLazyComponent(
+//   () => import('@/components/files/file-manager'),
+//   'Cargando gestor de archivos...'
+// );
 
 // Lazy Components para Reportes
-export const LazyReportGenerator = createLazyComponent(
-  () => import('@/components/reports/report-generator'),
-  'Cargando generador de reportes...'
-);
+// TODO: Crear estos componentes cuando sean necesarios
+// export const LazyReportGenerator = createLazyComponent(
+//   () => import('@/components/reports/report-generator'),
+//   'Cargando generador de reportes...'
+// );
 
 export default {
   LazyConfirmDialog,
-  LazyPropertyForm,
-  LazyAnalyticsDashboard,
-  LazyBIDashboard,
-  LazyCalendarView,
-  LazyRichTextEditor,
-  LazyDataVisualization,
-  LazyChatInterface,
-  LazyFileManager,
-  LazyReportGenerator,
+  // LazyPropertyForm,
+  // LazyAnalyticsDashboard,
+  // LazyBIDashboard,
+  // LazyCalendarView,
+  // LazyRichTextEditor,
+  // LazyDataVisualization,
+  // LazyChatInterface,
+  // LazyFileManager,
+  // LazyReportGenerator,
   createLazyComponent,
 };

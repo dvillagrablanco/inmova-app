@@ -56,19 +56,20 @@ export async function POST(
     const result = await prisma.$transaction([
       prisma.sTRInventoryMovement.create({
         data: {
-          inventoryItemId: params.id,
+          inventoryId: params.id,
           tipo,
           cantidad,
-          stockAnterior: item.stockActual,
-          stockNuevo: nuevoStock,
           motivo: motivo || null,
-          realizadoPor: realizadoPor || session.user.name || session.user.email,
+          registradoPor: realizadoPor || session.user.name || session.user.email,
           taskId: taskId || null,
         },
       }),
       prisma.sTRHousekeepingInventory.update({
         where: { id: params.id },
-        data: { stockActual: nuevoStock },
+        data: { 
+          stockActual: nuevoStock,
+          fechaUltimoConteo: new Date(),
+        },
       }),
     ]);
 
