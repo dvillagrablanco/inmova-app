@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
     }
     if (session.user.role !== 'super_admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
+    }
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '50');
     const companyId = searchParams.get('companyId');

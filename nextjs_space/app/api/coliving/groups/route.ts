@@ -18,9 +18,11 @@ export async function GET(request: NextRequest) {
         { error: 'companyId requerido' },
         { status: 400 }
       );
+    }
     const result = await socialService.getGroupsByCompany(companyId);
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
+    }
     return NextResponse.json(result.groups);
   } catch (error) {
     logger.error('Error en GET /api/coliving/groups:', error);
@@ -31,8 +33,22 @@ export async function GET(request: NextRequest) {
   }
 }
 export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
     const body = await request.json();
     const result = await socialService.createGroup(body);
+    if (!result.success) {
+      return NextResponse.json({ error: result.error }, { status: 400 });
+    }
     return NextResponse.json(result.group, { status: 201 });
+  } catch (error) {
     logger.error('Error en POST /api/coliving/groups:', error);
+    return NextResponse.json(
       { error: 'Error al crear grupo' },
+      { status: 500 }
+    );
+  }
+}

@@ -18,9 +18,11 @@ export async function GET(request: NextRequest) {
         { error: 'profileId requerido' },
         { status: 400 }
       );
+    }
     const result = await socialService.findMatches(profileId);
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
+    }
     return NextResponse.json(result.matches);
   } catch (error) {
     logger.error('Error en GET /api/coliving/matches:', error);
@@ -31,13 +33,32 @@ export async function GET(request: NextRequest) {
   }
 }
 export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
     const { profile1Id, profile2Id, companyId } = await request.json();
     if (!profile1Id || !profile2Id || !companyId) {
+      return NextResponse.json(
         { error: 'Datos incompletos' },
+        { status: 400 }
+      );
+    }
     const result = await socialService.createMatch(
       profile1Id,
       profile2Id,
       companyId
+    );
+    if (!result.success) {
+      return NextResponse.json({ error: result.error }, { status: 400 });
+    }
     return NextResponse.json(result.match, { status: 201 });
+  } catch (error) {
     logger.error('Error en POST /api/coliving/matches:', error);
+    return NextResponse.json(
       { error: 'Error al crear match' },
+      { status: 500 }
+    );
+  }
+}

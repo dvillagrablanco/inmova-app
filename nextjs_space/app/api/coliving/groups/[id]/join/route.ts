@@ -21,9 +21,11 @@ export async function POST(
         { error: 'profileId requerido' },
         { status: 400 }
       );
+    }
     const result = await socialService.joinGroup(groupId, profileId);
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
+    }
     return NextResponse.json(result.member, { status: 201 });
   } catch (error) {
     logger.error('Error en POST /api/coliving/groups/[id]/join:', error);

@@ -21,9 +21,11 @@ export async function POST(
         { error: 'Datos incompletos' },
         { status: 400 }
       );
+    }
     const result = await socialService.addComment(postId, tenantId, comentario);
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
+    }
     return NextResponse.json(result.post);
   } catch (error) {
     logger.error('Error en POST /api/coliving/feed/[id]/comment:', error);

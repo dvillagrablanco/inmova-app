@@ -39,12 +39,14 @@ export async function GET(request: NextRequest) {
     // Calcular duración promedio de proyectos completados
     const projectsWithDates = projects.filter((p: any) => p.fechaInicioObra && p.fechaFinObra);
     const avgProjectDuration = projectsWithDates.length > 0
-          projectsWithDates.reduce((sum: number, p: any) => {
+      ? projectsWithDates.reduce((sum: number, p: any) => {
             return sum + differenceInDays(p.fechaFinObra!, p.fechaInicioObra!);
           }, 0) / projectsWithDates.length
+      : 0;
     // Calcular margen de beneficio
     const profitMargin = totalInvestment > 0
       ? Math.round(((totalRevenue - totalInvestment) / totalInvestment) * 100)
+      : 0;
     const metrics = {
       totalProjects,
       activeProjects,

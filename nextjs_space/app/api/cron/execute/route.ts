@@ -34,14 +34,19 @@ export async function POST(request: NextRequest) {
     } else if (jobId) {
       console.log(`[API] Ejecutando trabajo cron: ${jobId} para empresa: ${companyId}`);
       const result = await executeCronJob(jobId, companyId);
+      return NextResponse.json({
         success: result.success,
         message: result.success 
           ? `Trabajo completado. ${result.itemsProcessed} items procesados.`
           : 'Trabajo completado con errores',
         data: result
+      });
     } else {
+      return NextResponse.json(
         { error: 'Debe especificar jobId o all=true' },
         { status: 400 }
+      );
+    }
   } catch (error) {
     logger.error('[API] Error ejecutando trabajo cron:', error);
     return NextResponse.json(
@@ -53,12 +58,21 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+/**
  * GET /api/cron/execute
  * Obtiene lista de trabajos cron disponibles
+ */
 export async function GET() {
+  try {
     return NextResponse.json({
       success: true,
       jobs: cronJobs
     });
+  } catch (error) {
     logger.error('[API] Error obteniendo trabajos cron:', error);
-        error: 'Error obteniendo trabajos',
+    return NextResponse.json(
+      { error: 'Error obteniendo trabajos' },
+      { status: 500 }
+    );
+  }
+}

@@ -37,7 +37,9 @@ export async function POST(request: NextRequest) {
           },
           include: {
             company: true,
+          },
         },
+      },
     });
     const results = [];
     for (const partner of partners) {

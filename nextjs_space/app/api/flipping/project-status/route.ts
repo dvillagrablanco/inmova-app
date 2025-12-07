@@ -41,9 +41,12 @@ export async function GET(request: NextRequest) {
           value: existing.value + investment,
         });
       } else {
+        statusMap.set(status, {
           count: 1,
           value: investment,
+        });
       }
+    }
     // Convertir a array
     const statusData = Array.from(statusMap.entries()).map(([status, data]) => ({
       status: STATUS_LABELS[status] || status,
