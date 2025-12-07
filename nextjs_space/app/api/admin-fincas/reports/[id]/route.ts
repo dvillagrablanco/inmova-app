@@ -27,6 +27,7 @@ export async function GET(request: NextRequest, { params }: Params) {
       },
       include: {
         community: true,
+      },
     });
     if (!report) {
       return NextResponse.json(

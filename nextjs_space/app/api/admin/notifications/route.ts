@@ -47,14 +47,20 @@ export async function GET(request: NextRequest) {
     })));
     // INQUILINOS - Pagos (simplificado sin joins complejos)
     const recentPayments = await prisma.payment.findMany({
-      where: { fechaPago: { gte: last24Hours }, metodoPago: { contains: 'Stripe' } },
+      where: { 
+        fechaPago: { gte: last24Hours }, 
+        metodoPago: { contains: 'Stripe' } 
+      },
       orderBy: { fechaPago: 'desc' },
       take: 20,
+    });
+    
     // Obtener contracts para los pagos
     const contractIds = recentPayments.map(p => p.contractId);
     const contracts = await prisma.contract.findMany({
       where: { id: { in: contractIds } },
-      select: { id: true, tenantId: true, unitId: true }
+      select: { id: true, tenantId: true, unitId: true },
+    });
     const contractMap = new Map(contracts.map(c => [c.id, c]));
     // Si hay filtro de companyId, obtener units con buildings y filtrar
     let filteredPayments = recentPayments;

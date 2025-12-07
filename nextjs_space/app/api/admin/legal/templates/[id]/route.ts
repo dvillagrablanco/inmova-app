@@ -34,8 +34,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       }
     });
     if (!existingTemplate) {
+      return NextResponse.json(
         { error: 'Plantilla no encontrada' },
         { status: 404 }
+      );
+    }
     const template = await prisma.legalTemplate.update({
       where: { id },
       data: {

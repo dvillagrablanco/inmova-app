@@ -44,8 +44,11 @@ export async function POST(req: NextRequest) {
       activo
     } = body;
     if (!nombre || !categoria || !contenido) {
+      return NextResponse.json(
         { error: 'Faltan campos requeridos' },
         { status: 400 }
+      );
+    }
     const template = await prisma.legalTemplate.create({
       data: {
         companyId: session.user.companyId,
