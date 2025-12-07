@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    logger.info('Payment created successfully:', { paymentId: payment.id });
+    logger.info('Payment created successfully', { paymentId: payment.id });
     return NextResponse.json(payment, { status: 201 });
   } catch (error) {
     logError(error, 'Error creating payment');

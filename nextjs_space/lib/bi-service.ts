@@ -44,7 +44,7 @@ export async function analyzeRevenueTrends(
   companyId: string,
   months: number = 6
 ) {
-  const trends = [];
+  const trends: Array<{ periodo: string; totalRevenue: number; paymentsCount: number }> = [];
   const now = new Date();
 
   for (let i = months - 1; i >= 0; i--) {
@@ -185,7 +185,14 @@ export async function benchmarkProperties(companyId: string) {
 
 // Verificar alertas inteligentes
 export async function checkIntelligentAlerts(companyId: string) {
-  const alerts = [];
+  const alerts: Array<{
+    metrica: string;
+    titulo: string;
+    descripcion: string;
+    valor: number;
+    umbral: number;
+    severidad: string;
+  }> = [];
 
   // Alerta: Tasa de ocupación baja
   const occupancy = await calculateOccupancyMetrics(

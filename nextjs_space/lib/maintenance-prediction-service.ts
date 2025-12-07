@@ -50,14 +50,14 @@ export async function predictEquipmentFailures(companyId: string) {
     stats.numeroFallas += 1;
   }
 
-  const predictions = [];
+  const predictions: any[] = [];
 
   for (const [equipo, stats] of equipmentStats) {
     if (stats.numeroFallas < 2) continue; // Necesitamos al menos 2 fallas para predecir
 
     // Calcular tiempo promedio entre fallas
     const fechas = stats.problemas.map((p: any) => new Date(p.fecha)).sort((a: Date, b: Date) => a.getTime() - b.getTime());
-    const intervalos = [];
+    const intervalos: number[] = [];
     for (let i = 1; i < fechas.length; i++) {
       intervalos.push(differenceInDays(fechas[i], fechas[i - 1]));
     }
@@ -75,14 +75,14 @@ export async function predictEquipmentFailures(companyId: string) {
     const diasEstimados = Math.max(intervaloPromedio - diasDesdeFalla, 0);
 
     // Factores de riesgo
-    const factoresRiesgo = [];
+    const factoresRiesgo: string[] = [];
     if (stats.numeroFallas > 5) factoresRiesgo.push('Alto historial de fallas');
     if (stats.costoTotal > 2000) factoresRiesgo.push('Costos de reparación elevados');
     if (intervaloPromedio < 90) factoresRiesgo.push('Intervalos cortos entre fallas');
     if (diasDesdeFalla > intervaloPromedio * 0.8) factoresRiesgo.push('Próximo al tiempo promedio de falla');
 
     // Recomendaciones
-    const recomendaciones = [];
+    const recomendaciones: string[] = [];
     if (probabilidad > 70) {
       recomendaciones.push('Programar inspección urgente');
       recomendaciones.push('Verificar disponibilidad de repuestos');
