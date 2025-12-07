@@ -56,11 +56,13 @@ export async function POST(request: NextRequest) {
       for (const cliente of partner.clientes) {
         // Verificar si ya existe comisión para este periodo
         const existingCommission = await prisma.commission.findUnique({
+          where: {
             partnerId_companyId_periodo: {
               partnerId: partner.id,
               companyId: cliente.companyId,
               periodo,
             },
+          },
         });
         if (existingCommission) {
           console.log(`Comisión ya existe para ${cliente.company.nombre} en ${periodo}`);
