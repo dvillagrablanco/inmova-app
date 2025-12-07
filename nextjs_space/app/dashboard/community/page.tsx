@@ -78,22 +78,25 @@ export default function CommunityDashboard() {
   if (!isCommunityManager && !isAdmin && !canManageEvents) {
     return (
       <div className="flex h-screen overflow-hidden bg-gradient-bg">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center py-12">
-              <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Acceso Restringido</h3>
-              <p className="text-muted-foreground">
-                No tienes permisos para acceder al panel de gestión de comunidad.
-              </p>
+        <Sidebar />
+        <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
+          <Header />
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <div className="max-w-7xl mx-auto">
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center py-12">
+                    <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">Acceso Restringido</h3>
+                    <p className="text-muted-foreground">
+                      No tienes permisos para acceder al panel de gestión de comunidad.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </CardContent>
-        </Card>
+          </main>
+        </div>
       </div>
     );
   }

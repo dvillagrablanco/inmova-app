@@ -199,13 +199,16 @@ export default function ConfiguracionNotificacionesPage() {
         <Header />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
-        <Skeleton className="h-10 w-96" />
-        <div className="space-y-4">
-          {[...Array(3)].map((_, i) => (
-            <Skeleton key={i} className="h-48" />
-          ))}
-        </div>
+            <Skeleton className="h-10 w-96" />
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <Skeleton key={i} className="h-48" />
+              ))}
+            </div>
+          </div>
+        </main>
       </div>
+    </div>
     );
   }
 
@@ -216,13 +219,13 @@ export default function ConfiguracionNotificacionesPage() {
         <Header />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto space-y-6">
-      <div className="p-8>
-      <div>
-        <h1 className="text-3xl font-bold">Configuración de Notificaciones</h1>
-        <p className="text-muted-foreground mt-2">
-          Personaliza cómo y cuándo quieres recibir notificaciones sobre tu actividad.
-        </p>
-      </div>
+            <div className="p-8">
+              <div>
+                <h1 className="text-3xl font-bold">Configuración de Notificaciones</h1>
+                <p className="text-muted-foreground mt-2">
+                  Personaliza cómo y cuándo quieres recibir notificaciones sobre tu actividad.
+                </p>
+              </div>
 
       {/* Notificaciones Push */}
       <Card>
