@@ -25,9 +25,11 @@ export async function DELETE(
         { error: 'Automatización no encontrada' },
         { status: 404 }
       );
+    }
     // Eliminar automatización
     await prisma.automation.delete({
       where: { id },
+    });
     return NextResponse.json({ message: 'Automatización eliminada' });
   } catch (error) {
     logger.error('Error deleting automation:', error);

@@ -51,6 +51,8 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         aplicableA: Array.isArray(aplicableA) ? aplicableA : [],
         activo,
         ultimaRevision: new Date()
+      }
+    });
     return NextResponse.json(template);
   } catch (error) {
     logger.error('Error al actualizar plantilla:', error);
@@ -61,8 +63,24 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
+      return NextResponse.json(
+        { error: 'No autorizado' },
+        { status: 401 }
+      );
+    }
+    const { id } = params;
     await prisma.legalTemplate.delete({
       where: { id }
+    });
     return NextResponse.json({ message: 'Plantilla eliminada correctamente' });
+  } catch (error) {
     logger.error('Error al eliminar plantilla:', error);
+    return NextResponse.json(
       { error: 'Error al eliminar plantilla' },
+      { status: 500 }
+    );
+  }
+}
