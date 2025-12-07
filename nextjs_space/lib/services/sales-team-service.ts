@@ -4,10 +4,9 @@
  * Gestiona comerciales autónomos, leads, comisiones y objetivos de ventas
  */
 
-import { PrismaClient, SalesRepStatus, LeadStatus, SalesCommissionType, SalesCommissionStatus } from '@prisma/client';
+import { SalesRepStatus, LeadStatus, SalesCommissionType, SalesCommissionStatus } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-
-const prisma = new PrismaClient();
+import { prisma } from '../db';
 
 // ====================================
 // GESTIÓN DE COMERCIALES

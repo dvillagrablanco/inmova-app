@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import logger from '@/lib/logger';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 
 export const dynamic = 'force-dynamic';
-const prisma = new PrismaClient();
+
 // POST /api/partners/register - Registro de nuevo Partner
 export async function POST(request: NextRequest) {
   try {

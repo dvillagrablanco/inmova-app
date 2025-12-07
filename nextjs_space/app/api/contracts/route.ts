@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger, { logError } from '@/lib/logger';
+import { contractCreateSchema } from '@/lib/validations';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,37 +54,52 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { unitId, tenantId, fechaInicio, fechaFin, rentaMensual, deposito, estado, tipo } = body;
-
-    if (!unitId || !tenantId || !fechaInicio || !fechaFin || !rentaMensual || !deposito) {
-      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
+    
+    // Validación con Zod
+    const validationResult = contractCreateSchema.safeParse(body);
+    
+    if (!validationResult.success) {
+      const errors = validationResult.error.errors.map(err => ({
+        field: err.path.join('.'),
+        message: err.message
+      }));
+      logger.warn('Validation error creating contract:', { errors });
+      return NextResponse.json(
+        { error: 'Datos inv\u00e1lidos', details: errors },
+        { status: 400 }
+      );
     }
+
+    const validatedData = validationResult.data;
 
     const contract = await prisma.contract.create({
       data: {
-        unitId,
-        tenantId,
-        fechaInicio: new Date(fechaInicio),
-        fechaFin: new Date(fechaFin),
-        rentaMensual: parseFloat(rentaMensual),
-        deposito: parseFloat(deposito),
-        estado: estado || 'activo',
-        tipo: tipo || 'residencial',
+        unitId: validatedData.unitId,
+        tenantId: validatedData.tenantId,
+        fechaInicio: new Date(validatedData.fechaInicio),
+        fechaFin: new Date(validatedData.fechaFin),
+        rentaMensual: validatedData.rentaMensual,
+        deposito: validatedData.deposito || 0,
+        estado: validatedData.estado || 'activo',
+        diaCobranza: validatedData.diaCobranza || 1,
+        clausulasEspeciales: validatedData.clausulasEspeciales || '',
+        renovacionAutomatica: validatedData.renovacionAutomatica || false,
       },
     });
 
     // Update unit status and tenant
     await prisma.unit.update({
-      where: { id: unitId },
+      where: { id: validatedData.unitId },
       data: {
         estado: 'ocupada',
-        tenantId,
+        tenantId: validatedData.tenantId,
       },
     });
 
+    logger.info('Contract created successfully:', { contractId: contract.id });
     return NextResponse.json(contract, { status: 201 });
   } catch (error) {
-    logger.error('Error creating contract:', error);
+    logError(error, 'Error creating contract');
     return NextResponse.json({ error: 'Error al crear contrato' }, { status: 500 });
   }
 }
