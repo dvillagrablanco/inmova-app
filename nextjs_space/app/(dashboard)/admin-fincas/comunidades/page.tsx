@@ -165,8 +165,7 @@ export default function ComunidadesPage() {
           </CardContent>
         </Card>
       )}
-    </div>
-      </div>
+          </div>
         </main>
       </div>
     </div>

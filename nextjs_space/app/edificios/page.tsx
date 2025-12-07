@@ -30,6 +30,7 @@ import { usePermissions } from '@/lib/hooks/usePermissions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SkeletonList } from '@/components/ui/skeleton-card';
 import { EmptyState } from '@/components/ui/empty-state';
+import { EnhancedEmptyState } from '@/components/ui/enhanced-empty-state';
 import { ViewModeToggle, ViewMode } from '@/components/ui/view-mode-toggle';
 import { SearchInput } from '@/components/ui/search-input';
 import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
@@ -557,26 +558,24 @@ function EdificiosPageContent() {
             )}
 
             {filteredBuildings.length === 0 && !searchTerm && (
-              <EmptyState
-                icon={<Building2 className="h-16 w-16 text-gray-400" />}
-                title="No hay edificios todavía"
-                description="Comienza creando tu primer edificio para gestionar unidades, inquilinos y contratos de manera eficiente."
-                action={canCreate ? {
+              <EnhancedEmptyState
+                preset="buildings"
+                primaryAction={canCreate ? {
                   label: 'Crear Primer Edificio',
                   onClick: () => router.push('/edificios/nuevo'),
-                  icon: <Plus className="h-4 w-4" />
+                  icon: <Plus className="h-4 w-4" aria-hidden="true" />,
                 } : undefined}
+                chatSupport={!canCreate}
               />
             )}
             
             {filteredBuildings.length === 0 && searchTerm && (
-              <EmptyState
-                icon={<Building2 className="h-16 w-16 text-gray-400" />}
-                title="No se encontraron resultados"
-                description={`No encontramos edificios que coincidan con "${searchTerm}". Intenta con otros términos de búsqueda.`}
-                action={{
+              <EnhancedEmptyState
+                preset="buildingsFiltered"
+                primaryAction={{
                   label: 'Limpiar búsqueda',
-                  onClick: () => setSearchTerm('')
+                  onClick: () => setSearchTerm(''),
+                  variant: 'outline',
                 }}
               />
             )}

@@ -160,8 +160,7 @@ export default function TraditionalRentalDashboard() {
           </div>
         </div>
       </Card>
-    </div>
-      </div>
+          </div>
         </main>
       </div>
     </div>

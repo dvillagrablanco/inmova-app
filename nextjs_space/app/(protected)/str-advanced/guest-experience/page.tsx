@@ -229,8 +229,7 @@ export default function GuestExperiencePage() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
-      </div>
+          </div>
         </main>
       </div>
     </div>

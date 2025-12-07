@@ -173,8 +173,7 @@ export default function CompliancePage() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
-      </div>
+          </div>
         </main>
       </div>
     </div>

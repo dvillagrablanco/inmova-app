@@ -192,8 +192,7 @@ export default function RenewalsPage() {
           ))}
         </div>
       </Card>
-    </div>
-      </div>
+          </div>
         </main>
       </div>
     </div>
