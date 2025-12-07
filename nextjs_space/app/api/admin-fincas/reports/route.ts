@@ -166,7 +166,6 @@ export async function POST(request: NextRequest) {
         detalleGastos,
         fondosReserva: saldoFinal > 0 ? saldoFinal * 0.1 : 0, // Ejemplo: 10% del saldo
         generadoPor: session.user.email,
-        estado: 'completado',
       },
       include: {
         community: true,
