@@ -91,9 +91,9 @@ export default function PresupuestosPage() {
         <Header />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
-      <div className="mb-6">
+            <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Presupuestos</h1>
-        <p className="text-gray-600">Gestiona tus presupuestos enviados</p>
+          <p className="text-gray-600">Gestiona tus presupuestos enviados</p>
       </div>
 
       <Card className="mb-6">
@@ -107,10 +107,10 @@ export default function PresupuestosPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="pendiente">Pendiente</SelectItem>
-                  <SelectItem value="aceptado">Aceptado</SelectItem>
-                  <SelectItem value="rechazado">Rechazado</SelectItem>
-                  <SelectItem value="expirado">Expirado</SelectItem>
+                    <SelectItem value="pendiente">Pendiente</SelectItem>
+                    <SelectItem value="aceptado">Aceptado</SelectItem>
+                    <SelectItem value="rechazado">Rechazado</SelectItem>
+                    <SelectItem value="expirado">Expirado</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -158,7 +158,7 @@ export default function PresupuestosPage() {
       <Card>
         <CardHeader>
           <CardTitle>Listado de Presupuestos</CardTitle>
-          <CardDescription>{quotes.length} presupuesto{quotes.length !== 1 ? 's' : ''}</CardDescription>
+            <CardDescription>{quotes.length} presupuesto{quotes.length !== 1 ? 's' : ''}</CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -169,7 +169,7 @@ export default function PresupuestosPage() {
             <div className="text-center py-8">
               <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-500 mb-4">No hay presupuestos disponibles</p>
-              <Button onClick={() => router.push('/portal-proveedor/presupuestos/nuevo')} variant="outline">
+                <Button onClick={() => router.push('/portal-proveedor/presupuestos/nuevo')} variant="outline">
                 <Plus className="h-4 w-4 mr-2" />
                 Crear primer presupuesto
               </Button>
@@ -180,27 +180,27 @@ export default function PresupuestosPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Orden de Trabajo</TableHead>
-                    <TableHead>Edificio</TableHead>
-                    <TableHead>Fecha</TableHead>
-                    <TableHead>Validez</TableHead>
-                    <TableHead>Total</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
+                      <TableHead>Edificio</TableHead>
+                      <TableHead>Fecha</TableHead>
+                      <TableHead>Validez</TableHead>
+                      <TableHead>Total</TableHead>
+                      <TableHead>Estado</TableHead>
+                      <TableHead className="text-right">Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {quotes.map((quote) => (
                     <TableRow key={quote.id}>
                       <TableCell>{quote.workOrder.titulo}</TableCell>
-                      <TableCell>{quote.workOrder.building.nombre}</TableCell>
-                      <TableCell>
+                        <TableCell>{quote.workOrder.building.nombre}</TableCell>
+                        <TableCell>
                         {format(new Date(quote.createdAt), 'dd MMM yyyy', { locale: es })}
                       </TableCell>
                       <TableCell>
                         {format(new Date(quote.fechaValidez), 'dd MMM yyyy', { locale: es })}
                       </TableCell>
                       <TableCell className="font-medium">{formatCurrency(quote.total)}</TableCell>
-                      <TableCell>
+                        <TableCell>
                         <Badge className={`${estadoBadgeColor[quote.estado] || 'bg-gray-500'}`}>
                           {estadoLabel[quote.estado] || quote.estado}
                         </Badge>
@@ -222,6 +222,9 @@ export default function PresupuestosPage() {
           )}
         </CardContent>
       </Card>
-    </div>
+            </div>
+          </main>
+        </div>
+      </div>
   );
 }

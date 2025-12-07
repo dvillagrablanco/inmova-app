@@ -137,14 +137,14 @@ export default function NuevoPresupuestoPage() {
         <Header />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
-      <div className="mb-6 flex items-center gap-4">
+            <div className="mb-6 flex items-center gap-4">
         <Button variant="ghost" onClick={() => router.back()} className="gap-2">
           <ArrowLeft className="h-4 w-4" />
           Volver
         </Button>
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Nuevo Presupuesto</h1>
-          <p className="text-gray-600">Crea un nuevo presupuesto para una orden de trabajo</p>
+            <p className="text-gray-600">Crea un nuevo presupuesto para una orden de trabajo</p>
         </div>
       </div>
 
@@ -158,7 +158,7 @@ export default function NuevoPresupuestoPage() {
               <CardContent className="space-y-4">
                 <div>
                   <Label htmlFor="workOrderId">Orden de Trabajo *</Label>
-                  <Select value={formData.workOrderId} onValueChange={(value) => setFormData({ ...formData, workOrderId: value })}>
+                    <Select value={formData.workOrderId} onValueChange={(value) => setFormData({ ...formData, workOrderId: value })}>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona una orden" />
                     </SelectTrigger>
@@ -175,7 +175,7 @@ export default function NuevoPresupuestoPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="validezDias">Validez (días)</Label>
-                    <Input
+                      <Input
                       id="validezDias"
                       type="number"
                       min="1"
@@ -185,7 +185,7 @@ export default function NuevoPresupuestoPage() {
                   </div>
                   <div>
                     <Label htmlFor="tiempoEjecucion">Tiempo de Ejecución</Label>
-                    <Input
+                      <Input
                       id="tiempoEjecucion"
                       value={formData.tiempoEjecucion}
                       onChange={(e) => setFormData({ ...formData, tiempoEjecucion: e.target.value })}
@@ -196,7 +196,7 @@ export default function NuevoPresupuestoPage() {
 
                 <div>
                   <Label htmlFor="condicionesPago">Condiciones de Pago</Label>
-                  <Input
+                    <Input
                     id="condicionesPago"
                     value={formData.condicionesPago}
                     onChange={(e) => setFormData({ ...formData, condicionesPago: e.target.value })}
@@ -206,7 +206,7 @@ export default function NuevoPresupuestoPage() {
 
                 <div>
                   <Label htmlFor="notas">Notas</Label>
-                  <Textarea
+                    <Textarea
                     id="notas"
                     value={formData.notas}
                     onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
@@ -221,7 +221,7 @@ export default function NuevoPresupuestoPage() {
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle>Conceptos</CardTitle>
-                  <Button type="button" variant="outline" size="sm" onClick={addConcepto} className="gap-2">
+                    <Button type="button" variant="outline" size="sm" onClick={addConcepto} className="gap-2">
                     <Plus className="h-4 w-4" />
                     Añadir Concepto
                   </Button>
@@ -233,7 +233,7 @@ export default function NuevoPresupuestoPage() {
                     <div key={index} className="p-4 border rounded-lg bg-gray-50 space-y-3">
                       <div className="flex justify-between items-start">
                         <Label className="text-sm font-medium">Concepto {index + 1}</Label>
-                        {conceptos.length > 1 && (
+                          {conceptos.length > 1 && (
                           <Button type="button" variant="ghost" size="sm" onClick={() => removeConcepto(index)}>
                             <Trash2 className="h-4 w-4 text-red-500" />
                           </Button>
@@ -242,7 +242,7 @@ export default function NuevoPresupuestoPage() {
 
                       <div>
                         <Label htmlFor={`descripcion-${index}`}>Descripción *</Label>
-                        <Input
+                          <Input
                           id={`descripcion-${index}`}
                           value={concepto.descripcion}
                           onChange={(e) => updateConcepto(index, 'descripcion', e.target.value)}
@@ -254,7 +254,7 @@ export default function NuevoPresupuestoPage() {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor={`cantidad-${index}`}>Cantidad *</Label>
-                          <Input
+                            <Input
                             id={`cantidad-${index}`}
                             type="number"
                             min="1"
@@ -266,7 +266,7 @@ export default function NuevoPresupuestoPage() {
                         </div>
                         <div>
                           <Label htmlFor={`precioUnitario-${index}`}>Precio Unitario (€) *</Label>
-                          <Input
+                            <Input
                             id={`precioUnitario-${index}`}
                             type="number"
                             min="0"
@@ -299,15 +299,15 @@ export default function NuevoPresupuestoPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Subtotal:</span>
-                    <span className="font-medium">{formatCurrency(calculateSubtotal())}</span>
+                      <span className="font-medium">{formatCurrency(calculateSubtotal())}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">IVA (21%):</span>
-                    <span className="font-medium">{formatCurrency(calculateIVA())}</span>
+                      <span className="font-medium">{formatCurrency(calculateIVA())}</span>
                   </div>
                   <div className="flex justify-between text-lg font-bold pt-2 border-t">
                     <span>Total:</span>
-                    <span>{formatCurrency(calculateTotal())}</span>
+                      <span>{formatCurrency(calculateTotal())}</span>
                   </div>
                 </div>
 
@@ -316,9 +316,10 @@ export default function NuevoPresupuestoPage() {
                 </Button>
               </CardContent>
             </Card>
-          </div>
-        </div>
       </form>
-    </div>
+            </div>
+          </main>
+        </div>
+      </div>
   );
 }

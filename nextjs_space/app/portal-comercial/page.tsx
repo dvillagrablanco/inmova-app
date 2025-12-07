@@ -113,7 +113,7 @@ export default function PortalComercialPage() {
         <Header />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
-        <LoadingState message="Cargando dashboard..." />
+            <LoadingState message="Cargando dashboard..." />
       </div>
     );
   }
@@ -130,7 +130,7 @@ export default function PortalComercialPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold gradient-text">Portal Comercial</h1>
-              <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                 Bienvenido, {salesRepData?.nombreCompleto || session?.user?.name}
               </p>
             </div>
@@ -165,7 +165,7 @@ export default function PortalComercialPage() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">{stats.leads.total}</div>
-              <div className="flex items-center gap-2 mt-2">
+                <div className="flex items-center gap-2 mt-2">
                 <Badge variant="outline" className="text-xs">
                   {stats.leads.nuevos} nuevos
                 </Badge>
@@ -185,7 +185,7 @@ export default function PortalComercialPage() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">{stats.leads.convertidos}</div>
-              <p className="text-xs text-muted-foreground mt-2">
+                <p className="text-xs text-muted-foreground mt-2">
                 Tasa de conversión: {stats.leads.tasaConversion.toFixed(1)}%
               </p>
             </CardContent>
@@ -239,7 +239,7 @@ export default function PortalComercialPage() {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium">Leads Generados</span>
-                <span className="text-sm text-muted-foreground">
+                  <span className="text-sm text-muted-foreground">
                   {stats.objetivos.leadsActuales} / {stats.objetivos.leadsObjetivo}
                 </span>
               </div>
@@ -260,7 +260,7 @@ export default function PortalComercialPage() {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium">Conversiones</span>
-                <span className="text-sm text-muted-foreground">
+                  <span className="text-sm text-muted-foreground">
                   {stats.objetivos.conversionesActuales} / {stats.objetivos.conversionesObjetivo}
                 </span>
               </div>
@@ -285,12 +285,12 @@ export default function PortalComercialPage() {
                 <Activity className="h-8 w-8 text-primary" />
                 <div>
                   <p className="text-sm font-medium">Progreso General</p>
-                  <p className="text-xs text-muted-foreground">Este mes</p>
+                    <p className="text-xs text-muted-foreground">Este mes</p>
                 </div>
               </div>
               <div className="text-right">
                 <div className="text-2xl font-bold">{progresoObjetivos.toFixed(0)}%</div>
-                <Badge
+                  <Badge
                   variant={progresoObjetivos >= 100 ? 'default' : 'outline'}
                   className="mt-1"
                 >
@@ -339,13 +339,13 @@ export default function PortalComercialPage() {
                     <div className="flex items-center justify-between p-4 bg-muted/30 hover:bg-muted/50 rounded-lg transition-colors cursor-pointer">
                       <div className="flex-1">
                         <p className="font-medium">{lead.nombreCompleto}</p>
-                        <p className="text-sm text-muted-foreground">
+                          <p className="text-sm text-muted-foreground">
                           {lead.empresa || 'Sin empresa'}
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
                         <Badge variant="outline">{lead.estado}</Badge>
-                        <p className="text-xs text-muted-foreground">
+                          <p className="text-xs text-muted-foreground">
                           {lead.fechaCreacion
                             ? format(new Date(lead.fechaCreacion), "d 'de' MMM", {
                                 locale: es,
@@ -360,7 +360,9 @@ export default function PortalComercialPage() {
             )}
           </CardContent>
         </Card>
-      </main>
-    </div>
+            </div>
+          </main>
+        </div>
+      </div>
   );
 }

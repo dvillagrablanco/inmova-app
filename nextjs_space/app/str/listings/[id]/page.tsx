@@ -113,7 +113,7 @@ export default function ListingDetailPage() {
         <Header />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-center py-12">
+            <div className="flex items-center justify-center py-12">
           <RefreshCw className="h-8 w-8 animate-spin text-primary" />
         </div>
       </div>
@@ -151,7 +151,7 @@ export default function ListingDetailPage() {
           <div>
             <div className="flex items-center space-x-2">
               <h1 className="text-3xl font-bold">{listing.titulo}</h1>
-              {listing.activo ? (
+                {listing.activo ? (
                 <Badge className="bg-green-500">
                   <CheckCircle2 className="mr-1 h-3 w-3" />
                   Activo
@@ -219,7 +219,7 @@ export default function ListingDetailPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Rating</CardTitle>
-            <Star className="h-4 w-4 text-muted-foreground" />
+              <Star className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -254,7 +254,7 @@ export default function ListingDetailPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{connectedChannels}</div>
-            <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
               de {listing.channels.length} configurados
             </p>
           </CardContent>
@@ -380,9 +380,9 @@ export default function ListingDetailPage() {
                     </p>
                     {listing.cancelacionFlexible ? (
                       <Badge className="bg-green-500">Sí</Badge>
-                    ) : (
+                        ) : (
                       <Badge variant="secondary">No</Badge>
-                    )}
+                        )}
                   </div>
 
                   <div className="flex items-center justify-between">
@@ -391,9 +391,9 @@ export default function ListingDetailPage() {
                     </p>
                     {listing.reservaInstantanea ? (
                       <Badge className="bg-green-500">Sí</Badge>
-                    ) : (
+                        ) : (
                       <Badge variant="secondary">No</Badge>
-                    )}
+                        )}
                   </div>
 
                   <div className="flex items-center justify-between">
@@ -402,9 +402,9 @@ export default function ListingDetailPage() {
                     </p>
                     {listing.sincronizarCanales ? (
                       <Badge className="bg-green-500">Sí</Badge>
-                    ) : (
+                        ) : (
                       <Badge variant="secondary">No</Badge>
-                    )}
+                        )}
                   </div>
                 </div>
 
@@ -432,7 +432,7 @@ export default function ListingDetailPage() {
           <Card>
             <CardHeader>
               <CardTitle>Últimas Reservas</CardTitle>
-              <CardDescription>
+                <CardDescription>
                 {listing.bookings.length} reservas recientes
               </CardDescription>
             </CardHeader>
@@ -450,7 +450,7 @@ export default function ListingDetailPage() {
                     >
                       <div>
                         <p className="font-medium">{booking.guestNombre}</p>
-                        <p className="text-sm text-muted-foreground">
+                          <p className="text-sm text-muted-foreground">
                           {format(new Date(booking.checkInDate), "d MMM 'al' ", {
                             locale: es,
                           })}
@@ -486,7 +486,7 @@ export default function ListingDetailPage() {
           <Card>
             <CardHeader>
               <CardTitle>Reseñas</CardTitle>
-              <CardDescription>
+                <CardDescription>
                 {listing.reviews.length} reseñas recientes
               </CardDescription>
             </CardHeader>
@@ -505,7 +505,7 @@ export default function ListingDetailPage() {
                       <div className="flex items-start justify-between">
                         <div>
                           <p className="font-medium">{review.guestNombre}</p>
-                          <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-muted-foreground">
                             {format(new Date(review.fecha), "d 'de' MMMM yyyy", {
                               locale: es,
                             })}
@@ -537,14 +537,14 @@ export default function ListingDetailPage() {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">Precio por noche</p>
-                  <p className="text-lg font-bold">
+                    <p className="text-lg font-bold">
                     €{listing.precioPorNoche}
                   </p>
                 </div>
                 {listing.precioSemana && (
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium">Precio por semana</p>
-                    <p className="text-lg font-bold">
+                      <p className="text-lg font-bold">
                       €{listing.precioSemana}
                     </p>
                   </div>
@@ -552,7 +552,7 @@ export default function ListingDetailPage() {
                 {listing.precioMes && (
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium">Precio por mes</p>
-                    <p className="text-lg font-bold">€{listing.precioMes}</p>
+                      <p className="text-lg font-bold">€{listing.precioMes}</p>
                   </div>
                 )}
 
@@ -560,19 +560,19 @@ export default function ListingDetailPage() {
 
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">Tarifa de limpieza</p>
-                  <p className="text-lg font-bold">
+                    <p className="text-lg font-bold">
                     €{listing.tarifaLimpieza}
                   </p>
                 </div>
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">Depósito de seguridad</p>
-                  <p className="text-lg font-bold">
+                    <p className="text-lg font-bold">
                     €{listing.depositoSeguridad}
                   </p>
                 </div>
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">Comisión plataforma</p>
-                  <p className="text-lg font-bold">
+                    <p className="text-lg font-bold">
                     {listing.comisionPlataforma}%
                   </p>
                 </div>
@@ -598,7 +598,7 @@ export default function ListingDetailPage() {
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="font-medium">{season.nombre}</p>
-                            <p className="text-sm text-muted-foreground">
+                              <p className="text-sm text-muted-foreground">
                               {format(new Date(season.fechaInicio), "d MMM", {
                                 locale: es,
                               })}
@@ -623,9 +623,11 @@ export default function ListingDetailPage() {
                 )}
               </CardContent>
             </Card>
-          </div>
         </TabsContent>
       </Tabs>
-    </div>
+            </div>
+          </main>
+        </div>
+      </div>
   );
 }

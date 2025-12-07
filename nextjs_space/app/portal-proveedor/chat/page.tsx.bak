@@ -358,9 +358,5 @@ export default function ChatPage() {
         </CardContent>
       </Card>
     </div>
-      </div>
-        </main>
-      </div>
-    </div>
   );
 }

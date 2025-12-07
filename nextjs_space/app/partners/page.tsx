@@ -28,7 +28,10 @@ export default function PartnersPage() {
         <Header />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
-      <Loader2 className="h-8 w-8 animate-spin text-primary" />
-    </div>
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          </main>
+        </div>
+      </div>
   );
 }

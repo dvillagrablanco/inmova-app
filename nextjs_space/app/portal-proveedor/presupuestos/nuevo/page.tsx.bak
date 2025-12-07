@@ -320,9 +320,5 @@ export default function NuevoPresupuestoPage() {
         </div>
       </form>
     </div>
-      </div>
-        </main>
-      </div>
-    </div>
   );
 }

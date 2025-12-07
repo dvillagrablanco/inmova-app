@@ -633,9 +633,5 @@ export default function IntegrationsSettingsPage() {
         </TabsContent>
       </Tabs>
     </div>
-      </div>
-        </main>
-      </div>
-    </div>
   );
 }

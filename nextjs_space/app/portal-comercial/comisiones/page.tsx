@@ -179,7 +179,7 @@ export default function ComisionesPage() {
         <Header />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
-        <LoadingState message="Cargando comisiones..." />
+            <LoadingState message="Cargando comisiones..." />
       </div>
     );
   }
@@ -198,7 +198,7 @@ export default function ComisionesPage() {
               </Link>
               <div>
                 <h1 className="text-2xl font-bold gradient-text">Mis Comisiones</h1>
-                <p className="text-sm text-muted-foreground mt-1">
+                  <p className="text-sm text-muted-foreground mt-1">
                   Historial de comisiones y pagos
                 </p>
               </div>
@@ -223,7 +223,7 @@ export default function ComisionesPage() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">{totalComisiones.toFixed(2)}€</div>
-              <p className="text-xs text-muted-foreground mt-2">
+                <p className="text-xs text-muted-foreground mt-2">
                 {filteredComisiones.length} comisiones
               </p>
             </CardContent>
@@ -342,7 +342,7 @@ export default function ComisionesPage() {
               <div className="text-center text-muted-foreground">
                 <DollarSign className="h-16 w-16 mx-auto mb-4 opacity-50" />
                 <p className="text-lg font-medium mb-2">No se encontraron comisiones</p>
-                <p className="text-sm">
+                  <p className="text-sm">
                   {estadoFilter !== 'all' || monthFilter !== 'all'
                     ? 'Intenta ajustar los filtros'
                     : 'Aún no tienes comisiones registradas'}
@@ -423,7 +423,9 @@ export default function ComisionesPage() {
             ))}
           </div>
         )}
-      </main>
-    </div>
+            </div>
+          </main>
+        </div>
+      </div>
   );
 }

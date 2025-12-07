@@ -75,10 +75,10 @@ export default function PartnerClientsPage() {
         <Header />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
-      {/* Header */}
+            {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Mis Clientes</h1>
-        <p className="text-gray-600">
+          <p className="text-gray-600">
           Gestiona y visualiza todos tus clientes activos
         </p>
       </div>
@@ -90,7 +90,7 @@ export default function PartnerClientsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-1">Total Clientes</p>
-                <p className="text-2xl font-bold text-gray-900">{clientes.length}</p>
+                  <p className="text-2xl font-bold text-gray-900">{clientes.length}</p>
               </div>
               <Building className="h-8 w-8 text-blue-600" />
             </div>
@@ -102,7 +102,7 @@ export default function PartnerClientsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-1">Clientes Activos</p>
-                <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-2xl font-bold text-gray-900">
                   {clientes.filter(c => c.estado === 'activo').length}
                 </p>
               </div>
@@ -116,7 +116,7 @@ export default function PartnerClientsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-1">Comisión Total</p>
-                <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-2xl font-bold text-gray-900">
                   €{clientes.reduce((sum, c) => sum + (c.totalComisionGenerada || 0), 0).toFixed(2)}
                 </p>
               </div>
@@ -130,7 +130,7 @@ export default function PartnerClientsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Buscar Clientes</CardTitle>
-          <CardDescription>Busca por nombre o email</CardDescription>
+            <CardDescription>Busca por nombre o email</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="relative">
@@ -149,7 +149,7 @@ export default function PartnerClientsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Lista de Clientes</CardTitle>
-          <CardDescription>
+            <CardDescription>
             {filteredClientes.length} cliente{filteredClientes.length !== 1 ? 's' : ''} encontrado{filteredClientes.length !== 1 ? 's' : ''}
           </CardDescription>
         </CardHeader>
@@ -174,7 +174,7 @@ export default function PartnerClientsPage() {
                           </h3>
                           {cliente.company.email && (
                             <p className="text-sm text-gray-600">{cliente.company.email}</p>
-                          )}
+                              )}
                         </div>
                       </div>
 
@@ -211,6 +211,9 @@ export default function PartnerClientsPage() {
           )}
         </CardContent>
       </Card>
-    </div>
+            </div>
+          </main>
+        </div>
+      </div>
   );
 }

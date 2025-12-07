@@ -539,9 +539,5 @@ export default function WorkOrderDetail() {
         </Card>
       )}
     </div>
-      </div>
-        </main>
-      </div>
-    </div>
   );
 }
