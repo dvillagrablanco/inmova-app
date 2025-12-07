@@ -260,7 +260,7 @@ export async function generateSalesRepsCSV(filters?: {
  * Obtener datos para gráfica de evolución de comisiones
  */
 export async function getCommissionsChartData(salesRepId?: string, months = 12) {
-  const monthsArray = [];
+  const monthsArray: string[] = [];
   for (let i = months - 1; i >= 0; i--) {
     const date = subMonths(new Date(), i);
     monthsArray.push(format(date, 'yyyy-MM'));
@@ -306,7 +306,7 @@ export async function getCommissionsChartData(salesRepId?: string, months = 12) 
  * Obtener datos para gráfica de evolución de leads
  */
 export async function getLeadsChartData(salesRepId?: string, months = 12) {
-  const monthsArray = [];
+  const monthsArray: Array<{ periodo: string; start: Date; end: Date }> = [];
   for (let i = months - 1; i >= 0; i--) {
     const date = subMonths(new Date(), i);
     const start = startOfMonth(date);
@@ -314,7 +314,14 @@ export async function getLeadsChartData(salesRepId?: string, months = 12) {
     monthsArray.push({ periodo: format(date, 'yyyy-MM'), start, end });
   }
   
-  const chartData = [];
+  const chartData: Array<{
+    periodo: string;
+    totalLeads: number;
+    convertidos: number;
+    enProceso: number;
+    perdidos: number;
+    tasaConversion: string;
+  }> = [];
   
   for (const { periodo, start, end } of monthsArray) {
     const where: any = {
@@ -353,7 +360,7 @@ export async function getLeadsChartData(salesRepId?: string, months = 12) {
  * Obtener datos para gráfica de cumplimiento de objetivos
  */
 export async function getTargetsChartData(salesRepId?: string, months = 6) {
-  const monthsArray = [];
+  const monthsArray: string[] = [];
   for (let i = months - 1; i >= 0; i--) {
     const date = subMonths(new Date(), i);
     monthsArray.push(format(date, 'yyyy-MM'));

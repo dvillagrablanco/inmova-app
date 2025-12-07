@@ -2,6 +2,7 @@
  * Servicio de Tesorería Avanzada - Versión Simplificada
  */
 import { prisma } from '@/lib/db';
+import { TreasuryForecast, DefaultProvision, TreasuryAlert, FinancialAlert } from '@prisma/client';
 import { addMonths, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 
 // Tipos básicos para evitar conflictos con Prisma
@@ -28,7 +29,7 @@ export interface GenerateFinancialAlertsParams {
 // Funciones simplificadas que evitan conflictos con el schema
 export async function generateCashFlowForecast(params: CashFlowForecastParams) {
   const meses = params.mesesAdelante || 6;
-  const forecasts = [];
+  const forecasts: TreasuryForecast[] = [];
 
   for (let i = 0; i < meses; i++) {
     const mes = addMonths(new Date(), i);
@@ -124,7 +125,7 @@ export async function calculateBadDebtProvisions(params: BadDebtProvisionParams)
     },
   });
 
-  const provisions = [];
+  const provisions: DefaultProvision[] = [];
 
   for (const contract of contracts) {
     for (const pago of contract.payments) {
@@ -180,7 +181,7 @@ export async function calculateBadDebtProvisions(params: BadDebtProvisionParams)
 }
 
 export async function generateFinancialAlerts(params: GenerateFinancialAlertsParams) {
-  const alerts = [];
+  const alerts: FinancialAlert[] = [];
 
   // Get tenants for this company
   const tenants = await prisma.tenant.findMany({

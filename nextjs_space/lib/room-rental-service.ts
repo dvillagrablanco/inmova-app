@@ -5,6 +5,7 @@
  */
 
 import { prisma } from './db';
+import { RoomPayment } from '@prisma/client';
 import { addMonths, differenceInDays, format, startOfMonth, endOfMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -226,7 +227,7 @@ export async function applyUtilityProrationToUnit(
 
   // 4. Crear pagos prorrateados para cada contrato activo
   const currentMonth = startOfMonth(new Date());
-  const payments = [];
+  const payments: RoomPayment[] = [];
 
   for (const room of activeRooms) {
     const activeContract = room.contracts.find((c) => c.estado === 'activo');
@@ -448,7 +449,7 @@ export async function getAvailableRooms(
   }
 
   // Con fechas, verificar disponibilidad
-  const availableRooms = [];
+  const availableRooms: typeof rooms = [];
   for (const room of rooms) {
     const availability = await checkRoomAvailability(room.id, startDate, endDate);
     if (availability.isAvailable) {

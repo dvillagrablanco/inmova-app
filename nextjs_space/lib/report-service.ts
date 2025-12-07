@@ -451,7 +451,7 @@ const generateIngresosData = async (companyId: string, periodo: number) => {
   const rentabilidad = ingresosBrutos > 0 ? (ingresosNetos / ingresosBrutos) * 100 : 0;
 
   // Desglose mensual
-  const desgloseMensual = [];
+  const desgloseMensual: Array<{ mes: string; ingresos: number; gastos: number; neto: number }> = [];
   for (let i = periodo - 1; i >= 0; i--) {
     const mes = new Date(now);
     mes.setMonth(mes.getMonth() - i);

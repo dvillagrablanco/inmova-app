@@ -102,7 +102,7 @@ export async function detectFraud(data: {
   const score = simulateMLFraudDetection(data.dataToAnalyze);
   const riesgo = score > 70 ? 'critico' : score > 40 ? 'alto' : score > 20 ? 'medio' : 'bajo';
 
-  const factores = [];
+  const factores: string[] = [];
   if (data.dataToAnalyze.ingresosMensuales < data.dataToAnalyze.rentaMensual * 3) {
     factores.push('Ingresos insuficientes');
   }

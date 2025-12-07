@@ -198,7 +198,15 @@ export async function predictTenantDefaultRisk(tenantId: string): Promise<number
  * Genera recomendaciones basadas en analytics
  */
 export async function generateRecommendations(companyId: string) {
-  const recommendations = [];
+  const recommendations: Array<{
+    companyId: string;
+    tipo: string;
+    prioridad: string;
+    titulo: string;
+    descripcion: string;
+    impactoEstimado: number;
+    accionSugerida: string;
+  }> = [];
 
   // Get latest snapshot
   const snapshot = await prisma.analyticsSnapshot.findFirst({
