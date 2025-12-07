@@ -362,9 +362,5 @@ export default function PortalComercialPage() {
         </Card>
       </main>
     </div>
-      </div>
-        </main>
-      </div>
-    </div>
   );
 }

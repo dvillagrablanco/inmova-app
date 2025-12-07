@@ -682,9 +682,5 @@ export default function ChannelsPage() {
         </DialogContent>
       </Dialog>
     </div>
-      </div>
-        </main>
-      </div>
-    </div>
   );
 }

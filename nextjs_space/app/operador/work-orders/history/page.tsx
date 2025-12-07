@@ -326,9 +326,5 @@ export default function WorkOrderHistory() {
         </div>
       )}
     </div>
-      </div>
-        </main>
-      </div>
-    </div>
   );
 }

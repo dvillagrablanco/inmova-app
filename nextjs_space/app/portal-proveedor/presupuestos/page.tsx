@@ -223,9 +223,5 @@ export default function PresupuestosPage() {
         </CardContent>
       </Card>
     </div>
-      </div>
-        </main>
-      </div>
-    </div>
   );
 }

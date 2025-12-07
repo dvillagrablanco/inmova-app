@@ -316,9 +316,5 @@ export default function PartnerCommissionsPage() {
         </CardContent>
       </Card>
     </div>
-      </div>
-        </main>
-      </div>
-    </div>
   );
 }

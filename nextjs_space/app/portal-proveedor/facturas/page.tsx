@@ -299,9 +299,5 @@ export default function FacturasPage() {
         </CardContent>
       </Card>
     </div>
-      </div>
-        </main>
-      </div>
-    </div>
   );
 }

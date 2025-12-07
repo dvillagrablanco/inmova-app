@@ -169,11 +169,8 @@ export default function FacturacionPage() {
                   <p className="text-muted-foreground">Cargando información...</p>
                 </div>
               </div>
-            </div>
-          </main>
-        </div>
-      </div>
-    );
+  );
+}
   }
 
   const pendingInvoices = invoices.filter(inv => inv.estado === 'PENDIENTE' || inv.estado === 'VENCIDA');
@@ -322,10 +319,6 @@ export default function FacturacionPage() {
         </CardContent>
       </Card>
     </div>
-      </div>
-        </main>
-      </div>
-    </div>
   );
 }
 
@@ -402,10 +395,6 @@ function InvoiceTable({
           ))}
         </TableBody>
       </Table>
-    </div>
-      </div>
-        </main>
-      </div>
     </div>
   );
 }

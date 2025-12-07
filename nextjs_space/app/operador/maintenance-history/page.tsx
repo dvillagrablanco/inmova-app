@@ -367,9 +367,5 @@ export default function MaintenanceHistory() {
         </div>
       )}
     </div>
-      </div>
-        </main>
-      </div>
-    </div>
   );
 }
