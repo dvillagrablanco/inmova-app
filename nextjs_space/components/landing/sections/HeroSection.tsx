@@ -28,18 +28,26 @@ export function HeroSection() {
               <Rocket className="h-4 w-4 text-indigo-600" />
             </div>
 
+            {/* Competitive Badge */}
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-100 border-2 border-green-300 rounded-full">
+              <TrendingUp className="h-4 w-4 text-green-700" />
+              <span className="text-sm font-bold text-green-700">
+                70% más económico que Homming • 6x más funcionalidad
+              </span>
+            </div>
+
             {/* Main Heading */}
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight">
-              <span className="block text-gray-900 mb-2">La Plataforma Única</span>
+              <span className="block text-gray-900 mb-2">7 Verticales. 88 Módulos.</span>
               <span className="block bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600 bg-clip-text text-transparent">
-                para Todos tus Inmuebles
+                Una Sola Plataforma.
               </span>
             </h1>
 
             {/* Subheading */}
             <p className="text-xl sm:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              <span className="font-semibold text-indigo-600">56 módulos profesionales</span> en una sola plataforma.
-              Gestiona <span className="font-semibold text-violet-600">Alquiler Tradicional, Coliving, STR, Flipping</span> y más.
+              La plataforma <span className="font-semibold text-indigo-600">multi-vertical más completa</span> del mercado.
+              Gestiona <span className="font-semibold text-violet-600">Alquiler, STR, Coliving, Flipping, Construcción</span> y más en un solo lugar.
             </p>
 
             {/* CTA Buttons */}
@@ -100,10 +108,10 @@ export function HeroSection() {
               {/* Stats Grid Below Video */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
                 {[
-                  { number: '56', label: 'Módulos Incluidos', icon: Building2 },
+                  { number: '88', label: 'Módulos Profesionales', icon: Building2 },
                   { number: '7', label: 'Verticales de Negocio', icon: TrendingUp },
-                  { number: '€149', label: 'Precio Todo Incluido', icon: Star },
-                  { number: '24/7', label: 'Soporte Técnico', icon: Users },
+                  { number: '€60', label: 'Desde €60/mes', icon: Star },
+                  { number: '<24h', label: 'Respuesta Soporte', icon: Users },
                 ].map((stat, index) => (
                   <Card key={index} className="hover:shadow-lg transition-shadow">
                     <CardContent className="p-6 text-center">

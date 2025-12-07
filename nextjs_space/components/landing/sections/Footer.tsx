@@ -36,6 +36,7 @@ export function Footer() {
               <li><a href="#pricing" className="hover:text-white transition-colors">Precios</a></li>
               <li><Link href="/landing/demo" className="hover:text-white transition-colors">Ver Demo</Link></li>
               <li><a href="#integraciones" className="hover:text-white transition-colors">Integraciones</a></li>
+              <li><Link href="/comparativa/homming" className="hover:text-indigo-400 transition-colors font-medium">INMOVA vs Homming</Link></li>
             </ul>
           </div>
 
