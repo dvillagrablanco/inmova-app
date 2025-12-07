@@ -18,6 +18,7 @@ export async function POST(
     const result = await conciergeService.notifyPackageArrival(packageId);
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
+    }
     return NextResponse.json(result.package);
   } catch (error) {
     logger.error('Error en POST /api/coliving/packages/[id]/notify:', error);

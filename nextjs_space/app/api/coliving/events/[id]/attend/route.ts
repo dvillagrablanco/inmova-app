@@ -21,9 +21,11 @@ export async function POST(
         { error: 'profileId requerido' },
         { status: 400 }
       );
+    }
     const result = await socialService.attendEvent(eventId, profileId);
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
+    }
     return NextResponse.json(result.attendance, { status: 201 });
   } catch (error) {
     logger.error('Error en POST /api/coliving/events/[id]/attend:', error);

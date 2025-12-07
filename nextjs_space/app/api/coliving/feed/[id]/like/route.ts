@@ -21,9 +21,11 @@ export async function POST(
         { error: 'tenantId requerido' },
         { status: 400 }
       );
+    }
     const result = await socialService.likePost(postId, tenantId);
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
+    }
     return NextResponse.json({ liked: result.liked });
   } catch (error) {
     logger.error('Error en POST /api/coliving/feed/[id]/like:', error);

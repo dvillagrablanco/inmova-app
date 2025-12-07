@@ -19,9 +19,11 @@ export async function GET(request: NextRequest) {
         { error: 'companyId requerido' },
         { status: 400 }
       );
+    }
     const result = await socialService.getFeed(companyId, buildingId);
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
+    }
     return NextResponse.json(result.posts);
   } catch (error) {
     logger.error('Error en GET /api/coliving/feed:', error);
@@ -32,8 +34,22 @@ export async function GET(request: NextRequest) {
   }
 }
 export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
     const body = await request.json();
     const result = await socialService.createActivityPost(body);
+    if (!result.success) {
+      return NextResponse.json({ error: result.error }, { status: 400 });
+    }
     return NextResponse.json(result.post, { status: 201 });
+  } catch (error) {
     logger.error('Error en POST /api/coliving/feed:', error);
+    return NextResponse.json(
       { error: 'Error al crear publicación' },
+      { status: 500 }
+    );
+  }
+}

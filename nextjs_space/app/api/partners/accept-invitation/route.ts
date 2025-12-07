@@ -23,28 +23,47 @@ export async function POST(request: NextRequest) {
       },
     });
     if (!invitation) {
+      return NextResponse.json(
         { error: 'Invitación no encontrada' },
         { status: 404 }
+      );
+    }
     // Verificar estado
     if (invitation.estado !== 'PENDING') {
+      return NextResponse.json(
         { error: 'Esta invitación ya fue utilizada o ha expirado' },
+        { status: 400 }
+      );
+    }
     // Verificar expiración
     if (new Date() > invitation.expiraFecha) {
       await prisma.partnerInvitation.update({
         where: { id: invitation.id },
         data: { estado: 'EXPIRED' },
       });
+      return NextResponse.json(
         { error: 'Esta invitación ha expirado' },
+        { status: 400 }
+      );
+    }
     // Crear la empresa (Company)
     const { nombre, email, password, telefono, direccion } = userData;
     if (!nombre || !email || !password) {
+      return NextResponse.json(
         { error: 'Nombre, email y contraseña son obligatorios' },
+        { status: 400 }
+      );
+    }
     // Verificar si el email ya existe
     const existingUser = await prisma.user.findUnique({
       where: { email },
+    });
     if (existingUser) {
+      return NextResponse.json(
         { error: 'Ya existe un usuario con este email' },
         { status: 409 }
+      );
+    }
     // Hash de la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
     // Crear Company

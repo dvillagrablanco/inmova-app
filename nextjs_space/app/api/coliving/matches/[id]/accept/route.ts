@@ -18,6 +18,7 @@ export async function POST(
     const result = await socialService.acceptMatch(id);
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
+    }
     return NextResponse.json(result.match);
   } catch (error) {
     logger.error('Error en POST /api/coliving/matches/[id]/accept:', error);

@@ -21,6 +21,7 @@ export async function GET(request: NextRequest) {
       take: 10, // Top 10 proyectos
       orderBy: {
         completadoEn: 'desc',
+      },
     });
     // Calcular ROI para cada proyecto
     const roiData = projects.map((project: any) => {
@@ -35,6 +36,7 @@ export async function GET(request: NextRequest) {
         profit: Math.round(profit),
         roi,
       };
+    });
     // Ordenar por ROI descendente
     roiData.sort((a, b) => b.roi - a.roi);
     return NextResponse.json(roiData);
