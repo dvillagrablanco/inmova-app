@@ -89,74 +89,73 @@ export default function ProveedorDashboardPage() {
         <Header />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
-            <div className="max-w-7xl mx-auto mb-6">
-        <div className="flex items-center justify-between mb-6">
-          <div><h1 className="text-3xl font-bold">Portal del Proveedor</h1><p className="text-muted-foreground mt-1">Bienvenido, {data.proveedor.nombre}</p></div>
-            <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={handleLogout}><LogOut className="h-4 w-4 mr-2" />Cerrar Sesión</Button>
-          </div>
-        </div>
-
-        <Card className="mb-6"><CardContent className="pt-6"><div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <div><p className="text-sm text-muted-foreground">Tipo</p><p className="font-medium">{data.proveedor.tipo}</p></div>
-            <div><p className="text-sm text-muted-foreground">Email</p><p className="font-medium">{data.proveedor.email}</p></div>
-            <div><p className="text-sm text-muted-foreground">Teléfono</p><p className="font-medium">{data.proveedor.telefono}</p></div>
-            <div><p className="text-sm text-muted-foreground">Rating</p><div className="flex items-center gap-1"><Star className="h-4 w-4 fill-amber-400 text-amber-400" /><span className="font-medium">{data.proveedor.rating.toFixed(1)}</span></div></div>
-            <div><p className="text-sm text-muted-foreground">Rating Promedio</p><div className="flex items-center gap-1"><Star className="h-4 w-4 fill-amber-400 text-amber-400" /><span className="font-medium">{data.kpis.ratingPromedio.toFixed(1)}</span></div></div>
-        </div></CardContent></Card>
-
-        {/* Men\u00fa de Navegaci\u00f3n */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Acceso R\u00e1pido</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-              <Button
-                variant="outline"
-                className="h-auto py-4 flex flex-col items-center gap-2"
-                onClick={() => router.push('/portal-proveedor/ordenes')}
-              >
-                <ClipboardList className="h-6 w-6" />
-                <span className="text-sm font-medium">\u00d3rdenes de Trabajo</span>
-              </Button>
-              <Button
-                variant="outline"
-                className="h-auto py-4 flex flex-col items-center gap-2"
-                onClick={() => router.push('/portal-proveedor/facturas')}
-              >
-                <FileText className="h-6 w-6" />
-                <span className="text-sm font-medium">Facturas</span>
-              </Button>
-              <Button
-                variant="outline"
-                className="h-auto py-4 flex flex-col items-center gap-2"
-                onClick={() => router.push('/portal-proveedor/presupuestos')}
-              >
-                <DollarSign className="h-6 w-6" />
-                <span className="text-sm font-medium">Presupuestos</span>
-              </Button>
-              <Button
-                variant="outline"
-                className="h-auto py-4 flex flex-col items-center gap-2"
-                onClick={() => router.push('/portal-proveedor/rese\u00f1as')}
-              >
-                <Award className="h-6 w-6" />
-                <span className="text-sm font-medium">Rese\u00f1as</span>
-              </Button>
-              <Button
-                variant="outline"
-                className="h-auto py-4 flex flex-col items-center gap-2"
-                onClick={() => router.push('/portal-proveedor/chat')}
-              >
-                <MessageCircle className="h-6 w-6" />
-                <span className="text-sm font-medium">Mensajer\u00eda</span>
-              </Button>
+            <div className="flex items-center justify-between mb-6">
+              <div><h1 className="text-3xl font-bold">Portal del Proveedor</h1><p className="text-muted-foreground mt-1">Bienvenido, {data.proveedor.nombre}</p></div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" onClick={handleLogout}><LogOut className="h-4 w-4 mr-2" />Cerrar Sesión</Button>
+              </div>
             </div>
-          </CardContent>
-        </Card>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <Card className="mb-6"><CardContent className="pt-6"><div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+              <div><p className="text-sm text-muted-foreground">Tipo</p><p className="font-medium">{data.proveedor.tipo}</p></div>
+              <div><p className="text-sm text-muted-foreground">Email</p><p className="font-medium">{data.proveedor.email}</p></div>
+              <div><p className="text-sm text-muted-foreground">Teléfono</p><p className="font-medium">{data.proveedor.telefono}</p></div>
+              <div><p className="text-sm text-muted-foreground">Rating</p><div className="flex items-center gap-1"><Star className="h-4 w-4 fill-amber-400 text-amber-400" /><span className="font-medium">{data.proveedor.rating.toFixed(1)}</span></div></div>
+              <div><p className="text-sm text-muted-foreground">Rating Promedio</p><div className="flex items-center gap-1"><Star className="h-4 w-4 fill-amber-400 text-amber-400" /><span className="font-medium">{data.kpis.ratingPromedio.toFixed(1)}</span></div></div>
+            </div></CardContent></Card>
+
+            {/* Menú de Navegación */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Acceso Rápido</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+                  <Button
+                    variant="outline"
+                    className="h-auto py-4 flex flex-col items-center gap-2"
+                    onClick={() => router.push('/portal-proveedor/ordenes')}
+                  >
+                    <ClipboardList className="h-6 w-6" />
+                    <span className="text-sm font-medium">Órdenes de Trabajo</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-auto py-4 flex flex-col items-center gap-2"
+                    onClick={() => router.push('/portal-proveedor/facturas')}
+                  >
+                    <FileText className="h-6 w-6" />
+                    <span className="text-sm font-medium">Facturas</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-auto py-4 flex flex-col items-center gap-2"
+                    onClick={() => router.push('/portal-proveedor/presupuestos')}
+                  >
+                    <DollarSign className="h-6 w-6" />
+                    <span className="text-sm font-medium">Presupuestos</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-auto py-4 flex flex-col items-center gap-2"
+                    onClick={() => router.push('/portal-proveedor/reseñas')}
+                  >
+                    <Award className="h-6 w-6" />
+                    <span className="text-sm font-medium">Reseñas</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-auto py-4 flex flex-col items-center gap-2"
+                    onClick={() => router.push('/portal-proveedor/chat')}
+                  >
+                    <MessageCircle className="h-6 w-6" />
+                    <span className="text-sm font-medium">Mensajería</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Total Órdenes</CardTitle><Briefcase className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{data.kpis.totalOrdenes}</div></CardContent></Card>
             <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Pendientes</CardTitle><Clock className="h-4 w-4 text-amber-500" /></CardHeader><CardContent><div className="text-2xl font-bold">{data.kpis.ordenesPendientes}</div></CardContent></Card>
             <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">En Progreso</CardTitle><TrendingUp className="h-4 w-4 text-blue-500" /></CardHeader><CardContent><div className="text-2xl font-bold">{data.kpis.ordenesEnProgreso}</div></CardContent></Card>
@@ -183,9 +182,9 @@ export default function ProveedorDashboardPage() {
             ))}</div>
           )}
         </CardContent></Card>
-            </div>
-          </main>
-        </div>
+          </div>
+        </main>
       </div>
+    </div>
   );
 }

@@ -626,12 +626,13 @@ export default function IntegrationsSettingsPage() {
 
               <div className="flex justify-end space-x-2">
                 <Button variant="outline">Cancelar</Button>
-                  <Button onClick={handleSaveSettings}>Guardar cambios</Button>
+                <Button onClick={handleSaveSettings}>Guardar cambios</Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
-            </div>
+    </div>
           </main>
         </div>
       </div>

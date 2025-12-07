@@ -227,15 +227,16 @@ export default function PartnerSettingsPage() {
       <Card className="bg-primary text-white">
         <CardContent className="p-6">
           <h3 className="text-xl font-bold mb-2">¿Necesitas ayuda?</h3>
-            <p className="text-primary-foreground/90 mb-4">
+          <p className="text-primary-foreground/90 mb-4">
             Nuestro equipo de soporte está disponible para ayudarte con cualquier duda o problema.
           </p>
           <div className="space-y-2 text-sm">
             <p>Email: <a href="mailto:partners@inmova.com" className="underline font-medium">partners@inmova.com</a></p>
-              <p>Teléfono: +34 900 123 456</p>
+            <p>Teléfono: +34 900 123 456</p>
+          </div>
         </CardContent>
       </Card>
-            </div>
+    </div>
           </main>
         </div>
       </div>
