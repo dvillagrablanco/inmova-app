@@ -3,7 +3,6 @@
  * Servicio para generar y enviar recordatorios automáticos
  */
 
-import { PrismaClient } from '@prisma/client';
 import { addDays, differenceInDays, isBefore, startOfDay } from 'date-fns';
 import { sendEmail } from './email-config';
 import logger, { logError } from '@/lib/logger';
@@ -12,8 +11,7 @@ import {
   contractExpirationEmail,
   maintenanceScheduledEmail,
 } from './email-templates';
-
-const prisma = new PrismaClient();
+import { prisma } from './db';
 
 // ============================================
 // RECORDATORIOS DE PAGOS

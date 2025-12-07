@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger, { logError } from '@/lib/logger';
+import { unitCreateSchema } from '@/lib/validations';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,29 +52,43 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { numero, buildingId, tipo, estado, superficie, habitaciones, banos, rentaMensual, tenantId } = body;
-
-    if (!numero || !buildingId || !tipo || !superficie || !rentaMensual) {
-      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
+    
+    // Validación con Zod
+    const validationResult = unitCreateSchema.safeParse(body);
+    
+    if (!validationResult.success) {
+      const errors = validationResult.error.errors.map(err => ({
+        field: err.path.join('.'),
+        message: err.message
+      }));
+      logger.warn('Validation error creating unit:', { errors });
+      return NextResponse.json(
+        { error: 'Datos inv\u00e1lidos', details: errors },
+        { status: 400 }
+      );
     }
+
+    const validatedData = validationResult.data;
 
     const unit = await prisma.unit.create({
       data: {
-        numero,
-        buildingId,
-        tipo,
-        estado: estado || 'disponible',
-        superficie: parseFloat(superficie),
-        habitaciones: habitaciones ? parseInt(habitaciones) : null,
-        banos: banos ? parseInt(banos) : null,
-        rentaMensual: parseFloat(rentaMensual),
-        tenantId: tenantId || null,
+        buildingId: validatedData.buildingId,
+        numero: validatedData.numero,
+        tipo: validatedData.tipo || 'vivienda',
+        estado: validatedData.estado || 'disponible',
+        piso: validatedData.piso || null,
+        superficie: validatedData.superficie || null,
+        habitaciones: validatedData.habitaciones || null,
+        banos: validatedData.banos || null,
+        rentaMensual: validatedData.rentaMensual || 0,
+        descripcion: validatedData.descripcion || null,
       },
     });
 
+    logger.info('Unit created successfully:', { unitId: unit.id, buildingId: validatedData.buildingId });
     return NextResponse.json(unit, { status: 201 });
   } catch (error) {
-    logger.error('Error creating unit:', error);
+    logError(error, 'Error creating unit');
     return NextResponse.json({ error: 'Error al crear unidad' }, { status: 500 });
   }
 }

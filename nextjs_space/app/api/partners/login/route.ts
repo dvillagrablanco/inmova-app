@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import logger from '@/lib/logger';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 export const dynamic = 'force-dynamic';
-const prisma = new PrismaClient();
+
 const JWT_SECRET = process.env.NEXTAUTH_SECRET || 'your-secret-key-partners';
 // POST /api/partners/login - Login de Partner
 export async function POST(request: NextRequest) {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth, getUserCompany, requirePermission, forbiddenResponse, badRequestResponse } from '@/lib/permissions';
 import logger, { logError } from '@/lib/logger';
+import { buildingCreateSchema } from '@/lib/validations';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,26 +59,43 @@ export async function POST(req: NextRequest) {
     const companyId = user.companyId;
 
     const body = await req.json();
-    const { nombre, direccion, tipo, anoConstructor, numeroUnidades } = body;
-
-    if (!nombre || !direccion || !tipo || !anoConstructor || !numeroUnidades) {
-      return badRequestResponse('Faltan campos requeridos');
+    
+    // Validación con Zod
+    const validationResult = buildingCreateSchema.safeParse(body);
+    
+    if (!validationResult.success) {
+      const errors = validationResult.error.errors.map(err => ({
+        field: err.path.join('.'),
+        message: err.message
+      }));
+      logger.warn('Validation error creating building:', { errors });
+      return NextResponse.json(
+        { error: 'Datos inv\u00e1lidos', details: errors },
+        { status: 400 }
+      );
     }
+
+    const validatedData = validationResult.data;
 
     const building = await prisma.building.create({
       data: {
         companyId,
-        nombre,
-        direccion,
-        tipo,
-        anoConstructor: parseInt(anoConstructor),
-        numeroUnidades: parseInt(numeroUnidades),
+        nombre: validatedData.nombre,
+        direccion: validatedData.direccion,
+        ciudad: validatedData.ciudad,
+        pais: validatedData.pais,
+        tipo: validatedData.tipo || 'residencial',
+        codigoPostal: validatedData.codigoPostal || null,
+        anoConstructor: validatedData.anoConstructor || null,
+        numeroUnidades: validatedData.numeroUnidades || null,
+        descripcion: validatedData.descripcion || null,
       },
     });
 
+    logger.info('Building created successfully:', { buildingId: building.id, companyId });
     return NextResponse.json(building, { status: 201 });
   } catch (error: any) {
-    logger.error('Error creating building:', error);
+    logError(error, 'Error creating building');
     if (error.message?.includes('permiso')) {
       return forbiddenResponse(error.message);
     }

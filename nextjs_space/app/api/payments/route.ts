@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger, { logError } from '@/lib/logger';
+import { paymentCreateSchema } from '@/lib/validations';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,28 +54,48 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { contractId, periodo, monto, fechaVencimiento, fechaPago, estado, metodoPago, nivelRiesgo } = body;
-
-    if (!contractId || !periodo || !monto || !fechaVencimiento) {
-      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
+    
+    // Asegurar que "concepto" esté presente (usar "periodo" si no está definido)
+    const dataToValidate = {
+      ...body,
+      concepto: body.concepto || body.periodo || 'Pago de renta'
+    };
+    
+    // Validación con Zod
+    const validationResult = paymentCreateSchema.safeParse(dataToValidate);
+    
+    if (!validationResult.success) {
+      const errors = validationResult.error.errors.map(err => ({
+        field: err.path.join('.'),
+        message: err.message
+      }));
+      logger.warn('Validation error creating payment:', { errors });
+      return NextResponse.json(
+        { error: 'Datos inv\u00e1lidos', details: errors },
+        { status: 400 }
+      );
     }
+
+    const validatedData = validationResult.data;
 
     const payment = await prisma.payment.create({
       data: {
-        contractId,
-        periodo,
-        monto: parseFloat(monto),
-        fechaVencimiento: new Date(fechaVencimiento),
-        fechaPago: fechaPago ? new Date(fechaPago) : null,
-        estado: estado || 'pendiente',
-        metodoPago,
-        nivelRiesgo: nivelRiesgo || 'bajo',
+        contractId: validatedData.contractId,
+        periodo: validatedData.concepto, // Mapear concepto a periodo
+        monto: validatedData.monto,
+        fechaVencimiento: new Date(validatedData.fechaVencimiento),
+        fechaPago: validatedData.fechaPago ? new Date(validatedData.fechaPago) : null,
+        estado: validatedData.estado || 'pendiente',
+        metodoPago: validatedData.metodoPago || null,
+        referencia: validatedData.referencia || null,
+        notas: validatedData.notas || null,
       },
     });
 
+    logger.info('Payment created successfully:', { paymentId: payment.id });
     return NextResponse.json(payment, { status: 201 });
   } catch (error) {
-    logger.error('Error creating payment:', error);
+    logError(error, 'Error creating payment');
     return NextResponse.json({ error: 'Error al crear pago' }, { status: 500 });
   }
 }

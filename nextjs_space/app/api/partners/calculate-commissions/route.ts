@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import logger from '@/lib/logger';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
-const prisma = new PrismaClient();
+
 // Función para obtener la comisión según el número de clientes
 function getCommissionRate(clientCount: number): number {
   if (clientCount >= 251) return 70.0;

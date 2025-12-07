@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import logger from '@/lib/logger';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/db';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
-const prisma = new PrismaClient();
+
 const JWT_SECRET = process.env.NEXTAUTH_SECRET || 'your-secret-key-partners';
 // Función para verificar el token
 function verifyToken(request: NextRequest) {
