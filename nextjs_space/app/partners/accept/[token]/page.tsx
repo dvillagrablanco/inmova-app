@@ -1,5 +1,8 @@
 'use client';
 
+import Sidebar from '@/components/layout/sidebar';
+import Header from '@/components/layout/header';
+
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Building2, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
@@ -118,7 +121,12 @@ export default function AcceptInvitationPage() {
 
   if (error && !invitation) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/10 via-white to-primary/5 flex items-center justify-center p-4">
+    <div className="flex h-screen overflow-hidden bg-gradient-bg">
+      <Sidebar />
+      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
+        <Header />
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto">
         <Card className="max-w-md w-full">
           <CardContent className="pt-6">
             <div className="text-center">
@@ -310,6 +318,10 @@ export default function AcceptInvitationPage() {
         <div className="mt-8 text-center text-sm text-gray-500">
           <p>© 2025 INMOVA - Gestión Inmobiliaria Inteligente</p>
         </div>
+      </div>
+    </div>
+      </div>
+        </main>
       </div>
     </div>
   );
