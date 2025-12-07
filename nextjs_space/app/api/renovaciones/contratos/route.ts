@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
   }
 }
 export async function POST(request: NextRequest) {
+  try {
     const body = await request.json();
     const { contractId } = body;
     if (!contractId) {
@@ -32,6 +33,14 @@ export async function POST(request: NextRequest) {
         { error: 'contractId es requerido' },
         { status: 400 }
       );
+    }
     const analysis = await analyzeContractForRenewal(contractId);
     return NextResponse.json(analysis);
+  } catch (error) {
     logger.error('Error en POST renovaciones/contratos:', error);
+    return NextResponse.json(
+      { error: 'Error interno del servidor' },
+      { status: 500 }
+    );
+  }
+}
