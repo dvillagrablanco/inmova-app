@@ -93,8 +93,7 @@ export default function ColivingPage() {
           <PaqueteriaPanel />
         </TabsContent>
       </Tabs>
-    </div>
-      </div>
+          </div>
         </main>
       </div>
     </div>

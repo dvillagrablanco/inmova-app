@@ -225,8 +225,7 @@ export default function CommunitiesPage() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
-      </div>
+          </div>
         </main>
       </div>
     </div>

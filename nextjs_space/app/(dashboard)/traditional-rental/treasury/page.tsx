@@ -100,8 +100,7 @@ export default function TreasuryPage() {
           </div>
         </div>
       </Card>
-    </div>
-      </div>
+          </div>
         </main>
       </div>
     </div>

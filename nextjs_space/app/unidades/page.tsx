@@ -35,6 +35,7 @@ import { usePermissions } from '@/lib/hooks/usePermissions';
 import { LoadingState } from '@/components/ui/loading-state';
 import { SkeletonList, SkeletonCard } from '@/components/ui/skeleton-card';
 import { EmptyState } from '@/components/ui/empty-state';
+import { EnhancedEmptyState } from '@/components/ui/enhanced-empty-state';
 import { FilterChips } from '@/components/ui/filter-chips';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ViewModeToggle, ViewMode } from '@/components/ui/view-mode-toggle';
@@ -600,25 +601,23 @@ export default function UnidadesPage() {
 
             {filteredUnits.length === 0 && (
               (searchTerm || estadoFilter !== 'all' || tipoFilter !== 'all') ? (
-                <EmptyState
-                  icon={<Search className="h-16 w-16 text-gray-400" />}
-                  title="No se encontraron resultados"
-                  description="No hay unidades que coincidan con los filtros aplicados"
-                  action={{
+                <EnhancedEmptyState
+                  preset="unitsFiltered"
+                  primaryAction={{
                     label: 'Limpiar filtros',
-                    onClick: clearAllFilters
+                    onClick: clearAllFilters,
+                    variant: 'outline',
                   }}
                 />
               ) : (
-                <EmptyState
-                  icon={<Home className="h-16 w-16 text-gray-400" />}
-                  title="No hay unidades registradas"
-                  description="Comienza agregando tu primera unidad al edificio"
-                  action={canCreate ? {
+                <EnhancedEmptyState
+                  preset="units"
+                  primaryAction={canCreate ? {
                     label: 'Crear Primera Unidad',
                     onClick: () => router.push('/unidades/nuevo'),
-                    icon: <Plus className="h-4 w-4" />
+                    icon: <Plus className="h-4 w-4" aria-hidden="true" />,
                   } : undefined}
+                  chatSupport={!canCreate}
                 />
               )
             )}

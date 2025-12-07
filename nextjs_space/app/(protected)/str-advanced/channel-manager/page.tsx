@@ -189,8 +189,7 @@ export default function ChannelManagerPage() {
           </div>
         </CardContent>
       </Card>
-    </div>
-      </div>
+          </div>
         </main>
       </div>
     </div>

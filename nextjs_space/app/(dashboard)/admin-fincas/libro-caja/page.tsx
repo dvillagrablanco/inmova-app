@@ -224,8 +224,7 @@ export default function LibroCajaPage() {
           </CardContent>
         </Card>
       )}
-    </div>
-      </div>
+          </div>
         </main>
       </div>
     </div>

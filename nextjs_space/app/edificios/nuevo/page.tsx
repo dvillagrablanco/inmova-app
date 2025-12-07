@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
+import { LoadingState } from '@/components/ui/loading-state';
 
 export default function NuevoEdificioPage() {
   const router = useRouter();
@@ -72,8 +73,8 @@ export default function NuevoEdificioPage() {
 
   if (status === 'loading') {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="flex h-screen items-center justify-center bg-gradient-bg">
+        <LoadingState message="Cargando formulario..." size="lg" />
       </div>
     );
   }

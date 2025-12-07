@@ -1,39 +1,54 @@
 'use client';
 
-import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Mail, Lock, AlertCircle, ArrowLeft, Building2 } from 'lucide-react';
+import { Mail, Lock, AlertCircle, ArrowLeft, Building2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { loginSchema, type LoginFormData } from '@/lib/form-schemas';
+import { AccessibleInputField } from '@/components/forms/AccessibleFormField';
+import { useState } from 'react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    watch,
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    mode: 'onBlur',
+  });
+
+  const email = watch('email', '');
+  const password = watch('password', '');
+
+  const onSubmit = async (data: LoginFormData) => {
     setError('');
     setIsLoading(true);
 
     try {
       const result = await signIn('credentials', {
         redirect: false,
-        email,
-        password,
+        email: data.email,
+        password: data.password,
       });
 
       if (result?.error) {
-        setError('Credenciales inválidas');
+        setError('Credenciales inválidas. Por favor, verifica tu correo y contraseña.');
       } else {
         router.push('/dashboard');
       }
     } catch (err) {
-      setError('Error al iniciar sesión');
+      setError('Error al iniciar sesión. Por favor, intenta de nuevo.');
     } finally {
       setIsLoading(false);
     }
@@ -42,18 +57,29 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
       {/* Header con navegación */}
-      <nav className="fixed top-0 w-full bg-black/50 backdrop-blur-md border-b border-gray-800 z-50">
+      <nav 
+        className="fixed top-0 w-full bg-black/50 backdrop-blur-md border-b border-gray-800 z-50"
+        aria-label="Navegación principal"
+      >
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            <Link href="/landing" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-              <Building2 className="h-6 w-6 text-indigo-500" />
+            <Link 
+              href="/landing" 
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+              aria-label="Ir a la página de inicio de INMOVA"
+            >
+              <Building2 className="h-6 w-6 text-indigo-500" aria-hidden="true" />
               <span className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
                 INMOVA
               </span>
             </Link>
             <Link href="/landing">
-              <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-gray-800">
-                <ArrowLeft className="h-4 w-4 mr-2" />
+              <Button 
+                variant="ghost" 
+                className="text-gray-300 hover:text-white hover:bg-gray-800"
+                aria-label="Volver a la página de inicio"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" aria-hidden="true" />
                 Volver
               </Button>
             </Link>
@@ -83,58 +109,51 @@ export default function LoginPage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Iniciar Sesión</h2>
 
           {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700">
-              <AlertCircle size={20} />
+            <div 
+              role="alert" 
+              aria-live="assertive"
+              className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700"
+            >
+              <AlertCircle size={20} aria-hidden="true" />
               <span className="text-sm">{error}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Correo Electrónico
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail size={20} className="text-gray-400" />
-                </div>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-                  placeholder="tu@email.com"
-                />
-              </div>
-            </div>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+            <AccessibleInputField
+              id="email-field"
+              name="email"
+              label="Correo Electrónico"
+              type="email"
+              placeholder="tu@correo.com"
+              value={email}
+              onChange={(val) => setValue('email', val)}
+              error={errors.email?.message}
+              required
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Contraseña
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock size={20} className="text-gray-400" />
-                </div>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-                  placeholder="••••••••"
-                />
-              </div>
-            </div>
+            <AccessibleInputField
+              id="password-field"
+              name="password"
+              label="Contraseña"
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(val) => setValue('password', val)}
+              error={errors.password?.message}
+              required
+            />
 
-            <button
+            <Button
               type="submit"
               disabled={isLoading}
-              className="w-full gradient-primary text-white py-3 rounded-lg font-medium hover:opacity-90 transition-all shadow-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full gradient-primary text-white py-3 rounded-lg font-medium hover:opacity-90 transition-all shadow-primary disabled:opacity-50"
+              aria-busy={isLoading}
+              aria-live="polite"
             >
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
               {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
-            </button>
+            </Button>
           </form>
 
           <div className="mt-6 text-center">
