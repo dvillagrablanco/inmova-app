@@ -32,7 +32,12 @@ export async function GET() {
     });
 
     // Calculate monthly data for last 12 months
-    const monthlyData = [];
+    const monthlyData: Array<{
+      mes: string;
+      ingresos: number;
+      gastos: number;
+      neto: number;
+    }> = [];
     const monthNames = [
       'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
       'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'

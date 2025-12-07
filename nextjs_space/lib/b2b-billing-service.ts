@@ -307,7 +307,12 @@ export async function sendPaymentReminders() {
     }
   });
 
-  const results = [];
+  const results: Array<{
+    invoiceId: string;
+    companyName: string;
+    sent: boolean;
+    error?: string;
+  }> = [];
 
   for (const invoice of invoices) {
     try {

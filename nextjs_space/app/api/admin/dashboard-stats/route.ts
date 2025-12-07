@@ -187,7 +187,13 @@ export async function GET(request: NextRequest) {
     const occupancyRate = totalUnits > 0 ? (occupiedUnits / totalUnits) * 100 : 0;
 
     // ===== DATOS HISTÓRICOS PARA GRÁFICOS (últimos 12 meses) =====
-    const historicalData = [];
+    const historicalData: Array<{
+      month: string;
+      companies: number;
+      users: number;
+      buildings: number;
+      revenue: number;
+    }> = [];
     for (let i = 11; i >= 0; i--) {
       const monthDate = subMonths(now, i);
       const monthStart = startOfMonth(monthDate);

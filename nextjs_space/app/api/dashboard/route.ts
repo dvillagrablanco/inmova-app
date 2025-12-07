@@ -88,7 +88,10 @@ export async function GET() {
     const margenNeto = ingresosNetos > 0 ? ((ingresosNetos - gastosTotales) / ingresosNetos) * 100 : 0;
 
     // Monthly income for last 12 months
-    const monthlyIncome = [];
+    const monthlyIncome: Array<{
+      mes: string;
+      ingresos: number;
+    }> = [];
     for (let i = 11; i >= 0; i--) {
       const date = new Date(now);
       date.setMonth(date.getMonth() - i);

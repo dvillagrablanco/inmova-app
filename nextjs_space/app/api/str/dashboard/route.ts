@@ -148,7 +148,10 @@ export async function GET(request: NextRequest) {
       : 0;
 
     // Ingresos por mes (últimos 6 meses)
-    const revenueByMonth = [];
+    const revenueByMonth: Array<{
+      mes: string;
+      ingresos: number;
+    }> = [];
     for (let i = 5; i >= 0; i--) {
       const monthDate = subMonths(today, i);
       const start = startOfMonth(monthDate);
