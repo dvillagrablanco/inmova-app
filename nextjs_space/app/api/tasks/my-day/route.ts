@@ -19,8 +19,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    userId = session.user.id;
-    companyId = session.user.companyId;
+    userId = session?.user?.id
+    companyId = session?.user?.companyId;
     
     if (!companyId) {
       return NextResponse.json({ error: 'companyId no encontrado' }, { status: 400 });

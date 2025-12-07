@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     const tenant = await prisma.tenant.findFirst({
       where: {
         id: tenantId,
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
       },
     });
 

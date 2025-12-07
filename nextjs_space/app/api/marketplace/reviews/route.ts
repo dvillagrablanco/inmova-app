@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
 
     const reviews = await prisma.serviceReview.findMany({
       where: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         ...(providerId && { providerId }),
         ...(jobId && { jobId }),
       },
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
 
     const review = await prisma.serviceReview.create({
       data: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         jobId,
         providerId,
         calificacion: parseInt(calificacion),
@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
         precioJusto: precioJusto ? parseInt(precioJusto) : null,
         comentario: comentario || null,
         recomendaria: recomendaria !== false,
-        creadoPor: session.user.email || '',
+        creadoPor: session?.user?.email|| '',
       },
       include: {
         provider: true,

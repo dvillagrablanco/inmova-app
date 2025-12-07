@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     const buildingId = searchParams.get('buildingId');
     const periodo = searchParams.get('periodo');
 
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
 
     const where: any = { companyId };
     if (buildingId) where.buildingId = buildingId;
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
     const { buildingId } = await request.json();
     const periodo = format(new Date(), 'yyyy-MM');
 

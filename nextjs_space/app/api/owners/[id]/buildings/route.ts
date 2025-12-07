@@ -33,7 +33,7 @@ export async function POST(
     const owner = await prisma.owner.findFirst({
       where: {
         id: params.id,
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
       },
     });
 
@@ -66,7 +66,7 @@ export async function POST(
     const building = await prisma.building.findFirst({
       where: {
         id: buildingId,
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
       },
     });
 
@@ -97,14 +97,14 @@ export async function POST(
       data: {
         ownerId: params.id,
         buildingId,
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         porcentajePropiedad,
         verIngresos,
         verGastos,
         verOcupacion,
         verMantenimiento,
         verDocumentos,
-        asignadoPor: session.user.id,
+        asignadoPor: session?.user?.id
       },
       include: {
         building: {
@@ -119,7 +119,7 @@ export async function POST(
     });
 
     logger.info(
-      `Edificio ${buildingId} asignado al propietario ${params.id} por usuario ${session.user.id}`
+      `Edificio ${buildingId} asignado al propietario ${params.id} por usuario ${session?.user?.id}`
     );
 
     return NextResponse.json({

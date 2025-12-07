@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     // Crear un objeto temporal de configuración para la preview
     const previewConfig: BrandingConfig = {
       id: 'preview',
-      companyId: session.user.companyId!,
+      companyId: session?.user?.companyId!,
       appName: body.appName || 'INMOVA',
       appDescription: body.appDescription || null,
       tagline: body.tagline || null,

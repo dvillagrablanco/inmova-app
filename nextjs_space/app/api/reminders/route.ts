@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { type, companyId } = body;
 
-    const targetCompanyId = companyId || session.user.companyId;
+    const targetCompanyId = companyId || session?.user?.companyId;
 
     let results;
 
@@ -76,7 +76,7 @@ export async function GET(request: Request) {
     }
 
     const { searchParams } = new URL(request.url);
-    const companyId = searchParams.get('companyId') || session.user.companyId;
+    const companyId = searchParams.get('companyId') || session?.user?.companyId;
 
     // Aquí podríamos agregar lógica para obtener estadísticas
     // de cuántos recordatorios hay pendientes de enviar

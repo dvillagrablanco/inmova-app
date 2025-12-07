@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
     
     if (!companyId) {
       return NextResponse.json(
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
     
     if (!companyId) {
       return NextResponse.json(

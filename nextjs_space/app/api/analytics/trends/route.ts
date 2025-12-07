@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const months = parseInt(searchParams.get('months') || '12');
 
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
     const trends = await getAnalyticsTrends(companyId, months);
 
     return NextResponse.json({ trends });

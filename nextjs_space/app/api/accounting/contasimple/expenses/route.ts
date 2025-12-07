@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     if (
       !expense ||
-      expense.unit?.building?.companyId !== session.user.companyId
+      expense.unit?.building?.companyId !== session?.user?.companyId
     ) {
       return NextResponse.json(
         { error: 'Gasto no encontrado' },

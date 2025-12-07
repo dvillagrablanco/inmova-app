@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
 
     // Verify building belongs to company
     const building = await prisma.building.findFirst({
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
 
     // Verify building belongs to company
     const building = await prisma.building.findFirst({

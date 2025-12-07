@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
 
     const alerts = await prisma.biAlert.findMany({
       where: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         ...(activa && { activa: activa === 'true' }),
       },
       orderBy: { createdAt: 'desc' },
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
 
     // Si es una petición para verificar alertas automáticas
     if (body.action === 'check') {
-      const triggeredAlerts = await checkIntelligentAlerts(session.user.companyId);
+      const triggeredAlerts = await checkIntelligentAlerts(session?.user?.companyId);
       return NextResponse.json(triggeredAlerts);
     }
 
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
 
     const alert = await prisma.biAlert.create({
       data: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         nombre,
         descripcion,
         metrica,

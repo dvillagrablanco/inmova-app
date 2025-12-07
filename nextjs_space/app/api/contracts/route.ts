@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
         rentaMensual: validatedData.rentaMensual,
         deposito: validatedData.deposito || 0,
         estado: validatedData.estado || 'activo',
-        diaPago: validatedData.diaPago || validatedData.diaCobranza || 1,
+        diaPago: validatedData.diaCobranza || 1,
         clausulasAdicionales: validatedData.clausulasEspeciales || '',
         renovacionAutomatica: validatedData.renovacionAutomatica || false,
       },

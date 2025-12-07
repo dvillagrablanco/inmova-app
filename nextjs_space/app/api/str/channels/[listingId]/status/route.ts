@@ -27,7 +27,7 @@ export async function GET(
     }
 
     const { listingId } = params;
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
 
     // Verificar que el listing pertenece a la compañía
     const listing = await prisma.sTRListing.findUnique({

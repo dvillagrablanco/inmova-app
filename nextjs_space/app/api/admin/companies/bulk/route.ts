@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
     // Registrar en audit log
     await prisma.auditLog.create({
       data: {
-        userId: session.user.id || '',
+        userId: session?.user?.id|| '',
         action: 'UPDATE',
         entityType: 'Company',
         entityId: 'bulk',
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
           params,
           affectedCount: result.count,
         }),
-        companyId: session.user.companyId || companyIds[0],
+        companyId: session?.user?.companyId || companyIds[0],
       },
     });
 

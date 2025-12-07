@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
     }
     const templates = await prisma.legalTemplate.findMany({
       where: {
-        companyId: session.user.companyId
+        companyId: session?.user?.companyId
       },
       orderBy: {
         createdAt: 'desc'
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
     }
     const template = await prisma.legalTemplate.create({
       data: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         nombre,
         categoria,
         descripcion: descripcion || null,

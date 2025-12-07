@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       );
     }
     const body = await request.json().catch(() => ({}));
-    const companyId = body.companyId || session.user.companyId;
+    const companyId = body.companyId || session?.user?.companyId;
     console.log(`[API] Iniciando sincronización manual de iCal para empresa: ${companyId}`);
     const result = await syncAllICalFeeds(companyId);
     return NextResponse.json({

@@ -14,7 +14,7 @@ export async function PATCH(
     if (!session || !session.user?.companyId) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
     const { id } = params;
     const body = await request.json();
     const { activa } = body;

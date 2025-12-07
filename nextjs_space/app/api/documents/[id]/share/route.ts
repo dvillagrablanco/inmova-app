@@ -32,7 +32,7 @@ export async function POST(
           data: {
             documentId: params.id,
             tenantId,
-            compartidoPor: session.user.id,
+            compartidoPor: session?.user?.id,
             puedeDescargar,
             puedeEditar,
           },
@@ -51,7 +51,7 @@ export async function POST(
           const tenant = prisma.tenant.findUnique({ where: { id: tenantId } });
           return prisma.notification.create({
             data: {
-              companyId: session.user.companyId,
+              companyId: session?.user?.companyId,
               tipo: 'info',
               titulo: 'Nuevo documento compartido',
               mensaje: `Se ha compartido el documento "${document.nombre}" contigo`,

@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     const resuelta = searchParams.get('resuelta');
 
     const where: any = {
-      companyId: session.user.companyId,
+      companyId: session?.user?.companyId,
     };
 
     if (severidad && severidad !== 'all') {
@@ -68,10 +68,10 @@ export async function POST(req: NextRequest) {
 
     const event = await prisma.securityEvent.create({
       data: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         tipo,
         severidad: severidad || 'warning',
-        userId: session.user.id,
+        userId: session?.user?.id,
         descripcion,
         detalles,
         ipAddress,
@@ -103,7 +103,7 @@ export async function PATCH(req: NextRequest) {
       where: { id: eventId },
     });
 
-    if (!event || event.companyId !== session.user.companyId) {
+    if (!event || event.companyId !== session?.user?.companyId) {
       return NextResponse.json(
         { error: 'Evento no encontrado' },
         { status: 404 }
@@ -115,7 +115,7 @@ export async function PATCH(req: NextRequest) {
       data: {
         resuelta: true,
         resolucionNota,
-        resueltoPor: session.user.email,
+        resueltoPor: session?.user?.email,
         fechaResolucion: new Date(),
       },
     });

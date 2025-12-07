@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
 
     const widgets = await prisma.biWidget.findMany({
       where: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         activo: true,
       },
       orderBy: { posicion: 'asc' },
@@ -45,14 +45,14 @@ export async function POST(req: NextRequest) {
 
     const widget = await prisma.biWidget.create({
       data: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         nombre,
         descripcion: descripcion || null,
         tipo,
         dataSource,
         config,
         posicion: posicion || 0,
-        creadoPor: session.user.email || '',
+        creadoPor: session?.user?.email|| '',
       },
     });
 

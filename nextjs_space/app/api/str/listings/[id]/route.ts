@@ -21,7 +21,7 @@ export async function GET(
     }
 
     const { id } = params;
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
 
     const listing = await prisma.sTRListing.findUnique({
       where: { id },
@@ -84,7 +84,7 @@ export async function PUT(
     }
 
     const { id } = params;
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
     const body = await request.json();
 
     // Verificar que el listing existe y pertenece a la compañía
@@ -133,7 +133,7 @@ export async function DELETE(
     }
 
     const { id } = params;
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
 
     // Verificar que el listing existe y pertenece a la compañía
     const existing = await prisma.sTRListing.findUnique({

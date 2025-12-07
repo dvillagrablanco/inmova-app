@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       );
     }
     const body = await request.json().catch(() => ({}));
-    const companyId = body.companyId || session.user.companyId;
+    const companyId = body.companyId || session?.user?.companyId;
     console.log(`[API] Creando tareas de limpieza automáticas para empresa: ${companyId}`);
     const result = await autoCreateCleaningTasks(companyId);
     return NextResponse.json({

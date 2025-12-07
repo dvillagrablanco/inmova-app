@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    if (!contract || contract.unit?.building?.companyId !== session.user.companyId) {
+    if (!contract || contract.unit?.building?.companyId !== session?.user?.companyId) {
       return NextResponse.json(
         { error: 'Contrato no encontrado' },
         { status: 404 }

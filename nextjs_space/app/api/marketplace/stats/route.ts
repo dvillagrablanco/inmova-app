@@ -15,11 +15,11 @@ export async function GET(req: NextRequest) {
     }
 
     // Verificar cotizaciones expiradas
-    // await checkExpiredQuotes(session.user.companyId);
+    // await checkExpiredQuotes(session?.user?.companyId);
 
     // const [stats, topProviders] = await Promise.all([
-    //   getMarketplaceStats(session.user.companyId),
-    //   getTopProviders(session.user.companyId, 5),
+    //   getMarketplaceStats(session?.user?.companyId),
+    //   getTopProviders(session?.user?.companyId, 5),
     // ]);
     
     const stats = { totalQuotes: 0, activeQuotes: 0, completedJobs: 0 };

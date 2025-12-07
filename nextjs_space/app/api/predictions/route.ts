@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const tipo = searchParams.get('tipo');
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
 
     const where: any = { companyId };
     if (tipo) where.tipo = tipo;

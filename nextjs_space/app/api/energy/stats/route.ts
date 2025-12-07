@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
       const unitId = searchParams.get('unitId');
 
       const trends = await getConsumptionTrends(
-        session.user.companyId,
+        session?.user?.companyId,
         tipo as any,
         months,
         buildingId || undefined,
@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
 
     if (type === 'efficiency') {
       const efficiency = await calculateEnergyEfficiency(
-        session.user.companyId,
+        session?.user?.companyId,
         buildingId || undefined
       );
 
@@ -52,13 +52,13 @@ export async function GET(req: NextRequest) {
 
     if (type === 'billing') {
       const periodo = searchParams.get('periodo') || format(new Date(), 'yyyy-MM');
-      const billing = await calculateTenantBilling(session.user.companyId, periodo);
+      const billing = await calculateTenantBilling(session?.user?.companyId, periodo);
 
       return NextResponse.json(billing);
     }
 
     // Overview por defecto
-    const stats = await getEnergyStats(session.user.companyId);
+    const stats = await getEnergyStats(session?.user?.companyId);
 
     return NextResponse.json(stats);
   } catch (error) {

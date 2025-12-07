@@ -23,19 +23,19 @@ export async function GET(req: NextRequest) {
     const months = parseInt(searchParams.get('months') || '6');
 
     if (type === 'revenue_trends') {
-      const trends = await analyzeRevenueTrends(session.user.companyId, months);
+      const trends = await analyzeRevenueTrends(session?.user?.companyId, months);
       return NextResponse.json(trends);
     }
 
     if (type === 'benchmark') {
-      const benchmarks = await benchmarkProperties(session.user.companyId);
+      const benchmarks = await benchmarkProperties(session?.user?.companyId);
       return NextResponse.json(benchmarks);
     }
 
     if (type === 'compare') {
       const metric = searchParams.get('metric') || 'revenue';
       const comparison = await compareMultiPeriod(
-        session.user.companyId,
+        session?.user?.companyId,
         metric as any,
         months
       );
@@ -44,8 +44,8 @@ export async function GET(req: NextRequest) {
 
     // Overview por defecto
     const [revenueTrends, benchmarks] = await Promise.all([
-      analyzeRevenueTrends(session.user.companyId, 6),
-      benchmarkProperties(session.user.companyId),
+      analyzeRevenueTrends(session?.user?.companyId, 6),
+      benchmarkProperties(session?.user?.companyId),
     ]);
 
     return NextResponse.json({
