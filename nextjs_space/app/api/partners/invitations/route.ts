@@ -17,9 +17,12 @@ function verifyToken(request: NextRequest) {
   try {
     return jwt.verify(token, JWT_SECRET) as any;
   } catch {
+    return null;
+  }
 }
 // POST /api/partners/invitations - Crear invitación
 export async function POST(request: NextRequest) {
+  try {
     // Verificar autenticación
     const decoded = verifyToken(request);
     if (!decoded || !decoded.partnerId) {
@@ -31,8 +34,11 @@ export async function POST(request: NextRequest) {
     const partnerId = decoded.partnerId;
     const { email, nombre, telefono, mensaje } = await request.json();
     if (!email) {
+      return NextResponse.json(
         { error: 'Email es obligatorio' },
         { status: 400 }
+      );
+    }
     // Verificar si ya existe una invitación pendiente para este email
     const existingInvitation = await prisma.partnerInvitation.findFirst({
       where: {
@@ -42,8 +48,11 @@ export async function POST(request: NextRequest) {
       },
     });
     if (existingInvitation) {
+      return NextResponse.json(
         { error: 'Ya existe una invitación pendiente para este email' },
         { status: 409 }
+      );
+    }
     // Generar token único
     const token = crypto.randomBytes(32).toString('hex');
     // Fecha de expiración (30 días)
@@ -52,11 +61,15 @@ export async function POST(request: NextRequest) {
     // Crear invitación
     const invitation = await prisma.partnerInvitation.create({
       data: {
+        partnerId,
+        email,
         nombre,
         telefono,
         token,
         mensaje,
         expiraFecha,
+      },
+    });
     // TODO: Enviar email con el link de invitación
     // const invitationLink = `${process.env.NEXT_PUBLIC_APP_URL}/partners/accept/${token}`;
     // await sendInvitationEmail(email, invitationLink, mensaje);
@@ -70,10 +83,31 @@ export async function POST(request: NextRequest) {
       { error: 'Error interno del servidor', details: error?.message },
       { status: 500 }
     );
+  }
+}
 // GET /api/partners/invitations - Listar invitaciones del Partner
 export async function GET(request: NextRequest) {
+  try {
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET) as { partnerId: string };
+    if (!decoded || !decoded.partnerId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+    const partnerId = decoded.partnerId;
     const invitaciones = await prisma.partnerInvitation.findMany({
       where: { partnerId },
       orderBy: { createdAt: 'desc' },
+    });
     return NextResponse.json({ invitaciones });
+  } catch (error: any) {
     logger.error('Error obteniendo invitaciones:', error);
+    return NextResponse.json(
+      { error: 'Error interno del servidor', details: error?.message },
+      { status: 500 }
+    );
+  }
+}

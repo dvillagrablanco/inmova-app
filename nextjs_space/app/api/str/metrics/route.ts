@@ -34,12 +34,20 @@ export async function GET(request: NextRequest) {
           gte: currentMonthStart,
           lte: currentMonthEnd,
         },
+      },
+    });
     // Calcular reservas del mes anterior
     const lastMonthStart = startOfMonth(subMonths(new Date(), 1));
     const lastMonthEnd = endOfMonth(subMonths(new Date(), 1));
     const lastMonthBookings = await prisma.sTRBooking.findMany({
+      where: {
+        listing: { companyId },
+        checkInDate: {
           gte: lastMonthStart,
           lte: lastMonthEnd,
+        },
+      },
+    });
     // Calcular ingresos
     const monthlyRevenue = currentMonthBookings.reduce((sum: number, b: any) => sum + (b.precioTotal || 0), 0);
     const lastMonthRevenue = lastMonthBookings.reduce((sum: number, b: any) => sum + (b.precioTotal || 0), 0);
@@ -48,6 +56,8 @@ export async function GET(request: NextRequest) {
       : 0;
     // Calcular reservas totales
     const allBookings = await prisma.sTRBooking.findMany({
+      where: { listing: { companyId } },
+    });
     const totalRevenue = allBookings.reduce((sum: number, b: any) => sum + (b.precioTotal || 0), 0);
     const totalBookings = allBookings.length;
     // Calcular ocupación (simplificado - asumimos que cada reserva es 1 día)
@@ -55,13 +65,16 @@ export async function GET(request: NextRequest) {
     const occupiedDays = currentMonthBookings.reduce((sum: number, b: any) => sum + (b.numNoches || 1), 0);
     const occupancyRate = totalPossibleDays > 0 
       ? Math.round((occupiedDays / totalPossibleDays) * 100)
+      : 0;
     // Calcular tarifa promedio
     const avgNightlyRate = totalBookings > 0
       ? Math.round(totalRevenue / allBookings.reduce((sum: number, b: any) => sum + (b.numNoches || 1), 0))
+      : 0;
     // Calcular valoración media
     const reviews = listings.flatMap((l: any) => l.reviews);
     const avgRating = reviews.length > 0
       ? Math.round((reviews.reduce((sum: number, r: any) => sum + (r.puntuacion || 0), 0) / reviews.length) * 10) / 10
+      : 0;
     // Determinar tendencia de ocupación
     const lastMonthOccupiedDays = lastMonthBookings.reduce((sum: number, b: any) => sum + (b.numNoches || 1), 0);
     const occupancyTrend = occupiedDays >= lastMonthOccupiedDays ? 'up' : 'down';

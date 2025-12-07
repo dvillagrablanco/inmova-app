@@ -82,34 +82,49 @@ export async function POST(request: NextRequest) {
         colorPrimario: invitation.partner.coloresPrimarios 
           ? (invitation.partner.coloresPrimarios as any).primary 
           : undefined,
+      },
+    });
     // Crear usuario admin para la empresa
     const user = await prisma.user.create({
+      data: {
+        email,
         name: nombre,
         password: hashedPassword,
         role: 'administrador',
         activo: true,
         companyId: company.id,
+      },
+    });
     // Crear relación PartnerClient
     const partnerClient = await prisma.partnerClient.create({
+      data: {
         partnerId: invitation.partnerId,
+        companyId: company.id,
         estado: 'activo',
         origenInvitacion: 'email',
         codigoReferido: token,
+      },
+    });
     // Actualizar invitación
     await prisma.partnerInvitation.update({
       where: { id: invitation.id },
+      data: {
         estado: 'ACCEPTED',
         aceptadoFecha: new Date(),
+      },
+    });
     return NextResponse.json({
       message: 'Cuenta creada exitosamente',
       company: {
         id: company.id,
         nombre: company.nombre,
         email: company.email,
+      },
       user: {
         id: user.id,
         nombre: user.name,
         email: user.email,
+      },
     }, { status: 201 });
   } catch (error: any) {
     logger.error('Error aceptando invitación:', error);
@@ -121,8 +136,15 @@ export async function POST(request: NextRequest) {
 }
 // GET /api/partners/accept-invitation?token=xxx - Verificar invitación
 export async function GET(request: NextRequest) {
+  try {
     const { searchParams } = new URL(request.url);
     const token = searchParams.get('token');
+    if (!token) {
+      return NextResponse.json({ error: 'Token requerido' }, { status: 400 });
+    }
+    const invitation = await prisma.partnerInvitation.findUnique({
+      where: { token },
+      include: {
         partner: {
           select: {
             id: true,
@@ -132,8 +154,14 @@ export async function GET(request: NextRequest) {
             coloresPrimarios: true,
           },
         },
+      },
+    });
+    if (!invitation) {
+      return NextResponse.json({ error: 'Invitación no encontrada' }, { status: 404 });
+    }
     // Verificar estado y expiración
     const isValid = invitation.estado === 'PENDING' && new Date() <= invitation.expiraFecha;
+    return NextResponse.json({
       invitation: {
         email: invitation.email,
         nombre: invitation.nombre,
@@ -142,4 +170,13 @@ export async function GET(request: NextRequest) {
         expiraFecha: invitation.expiraFecha,
         estado: invitation.estado,
         isValid,
+      },
+    });
+  } catch (error: any) {
     logger.error('Error verificando invitación:', error);
+    return NextResponse.json(
+      { error: 'Error interno del servidor', details: error?.message },
+      { status: 500 }
+    );
+  }
+}

@@ -82,12 +82,18 @@ export async function POST(request: NextRequest) {
             planNombre: 'Plan Profesional',
             estado: 'PENDING',
             clientesActivos,
+          },
+        });
         // Actualizar PartnerClient
         await prisma.partnerClient.update({
           where: { id: cliente.id },
+          data: {
             totalComisionGenerada: {
               increment: montoComision,
+            },
             ultimaComisionFecha: now,
+          },
+        });
         results.push({
           partner: partner.nombre,
           cliente: cliente.company.nombre,
@@ -96,11 +102,14 @@ export async function POST(request: NextRequest) {
           porcentaje: porcentajeComision,
           montoComision,
           commissionId: commission.id,
+        });
+      }
     }
     return NextResponse.json({
       message: `Comisiones calculadas para ${results.length} clientes`,
       periodo,
       results,
+    });
   } catch (error: any) {
     logger.error('Error calculando comisiones:', error);
     return NextResponse.json(
@@ -108,18 +117,39 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
 // GET /api/partners/calculate-commissions - Obtener información del último cálculo
 export async function GET(request: NextRequest) {
+  try {
+    const now = new Date();
     const periodoActual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     const comisionesDelMes = await prisma.commission.findMany({
       where: { periodo: periodoActual },
+      include: {
         partner: {
           select: {
             nombre: true,
+          },
+        },
         company: {
+          select: {
+            nombre: true,
+          },
+        },
+      },
+    });
     const totalComisiones = comisionesDelMes.reduce((sum, c) => sum + c.montoComision, 0);
+    return NextResponse.json({
       periodo: periodoActual,
       totalComisiones: comisionesDelMes.length,
       montoTotal: totalComisiones.toFixed(2),
       comisiones: comisionesDelMes,
+    });
+  } catch (error: any) {
     logger.error('Error obteniendo información de comisiones:', error);
+    return NextResponse.json(
+      { error: 'Error interno del servidor', details: error?.message },
+      { status: 500 }
+    );
+  }
+}

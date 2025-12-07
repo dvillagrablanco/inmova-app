@@ -22,15 +22,26 @@ export async function POST(request: NextRequest) {
       where: { email },
     });
     if (!partner) {
+      return NextResponse.json(
         { error: 'Credenciales inválidas' },
         { status: 401 }
+      );
+    }
     // Verificar contraseña
     const isValidPassword = await bcrypt.compare(password, partner.password);
     if (!isValidPassword) {
+      return NextResponse.json(
+        { error: 'Credenciales inválidas' },
+        { status: 401 }
+      );
+    }
     // Verificar si está activo
     if (!partner.activo || partner.estado !== 'ACTIVE') {
+      return NextResponse.json(
         { error: 'Partner no activo o pendiente de aprobación' },
         { status: 403 }
+      );
+    }
     // Generar JWT
     const token = jwt.sign(
       {
@@ -48,10 +59,12 @@ export async function POST(request: NextRequest) {
       message: 'Login exitoso',
       token,
       partner: partnerWithoutPassword,
+    });
   } catch (error: any) {
     logger.error('Error en login de Partner:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor', details: error?.message },
       { status: 500 }
+    );
   }
 }

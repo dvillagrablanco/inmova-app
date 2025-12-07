@@ -16,9 +16,12 @@ function verifyToken(request: NextRequest) {
   try {
     return jwt.verify(token, JWT_SECRET) as any;
   } catch {
+    return null;
+  }
 }
 // GET /api/partners/commissions - Listar comisiones del Partner
 export async function GET(request: NextRequest) {
+  try {
     // Verificar autenticación
     const decoded = verifyToken(request);
     if (!decoded || !decoded.partnerId) {
@@ -52,16 +55,21 @@ export async function GET(request: NextRequest) {
         .reduce((sum, c) => sum + c.montoComision, 0),
       approved: comisiones
         .filter(c => c.estado === 'APPROVED')
+        .reduce((sum, c) => sum + c.montoComision, 0),
       paid: comisiones
         .filter(c => c.estado === 'PAID')
+        .reduce((sum, c) => sum + c.montoComision, 0),
       total: comisiones.reduce((sum, c) => sum + c.montoComision, 0),
     };
     return NextResponse.json({
       comisiones,
       totales,
+    });
   } catch (error: any) {
     logger.error('Error obteniendo comisiones:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor', details: error?.message },
       { status: 500 }
     );
+  }
+}

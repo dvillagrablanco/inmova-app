@@ -38,8 +38,11 @@ export async function POST(request: NextRequest) {
       }
     });
     if (existingPartner) {
+      return NextResponse.json(
         { error: 'Ya existe un Partner con estos datos (email, CIF o contacto)' },
         { status: 409 }
+      );
+    }
     // Hash de la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
     // Crear el Partner
@@ -58,6 +61,7 @@ export async function POST(request: NextRequest) {
         activo: false,
         comisionPorcentaje: 20.0, // 20% inicial
       },
+    });
     // No devolver el password
     const { password: _, ...partnerWithoutPassword } = partner;
     return NextResponse.json({

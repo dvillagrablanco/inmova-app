@@ -42,11 +42,14 @@ export async function GET(request: NextRequest) {
           commission: existing.commission + commission,
         });
       } else {
+        channelMap.set(channelName, {
           bookings: channelBookings,
           revenue: channelRevenue,
           nights: channelNights,
           commission,
+        });
       }
+    }
     // Convertir a array
     const performance = Array.from(channelMap.entries()).map(([channel, data]) => ({
       channel,

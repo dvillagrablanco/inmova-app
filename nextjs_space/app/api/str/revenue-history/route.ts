@@ -35,6 +35,8 @@ export async function GET(request: NextRequest) {
         month: format(monthDate, 'MMM', { locale: es }),
         revenue: Math.round(revenue),
         bookings: bookings.length,
+      });
+    }
     return NextResponse.json(revenueData);
   } catch (error) {
     logger.error('Error fetching revenue history:', error);
