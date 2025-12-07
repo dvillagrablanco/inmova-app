@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     const intentResult = await detectIntent(message, context);
 
     // 2. Si la intención requiere acción, ejecutarla
-    let actionResult = null;
+    let actionResult: any = null;
     if (
       intentResult.confidence > 0.7 &&
       ['create_maintenance_request', 'check_payment', 'view_contract', 'schedule_visit', 'document_request'].includes(intentResult.intent)
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
         intent: intentResult.intent,
         confidence: intentResult.confidence,
         action: actionResult,
-        response: actionResult.message,
+        response: actionResult?.message || 'Acción ejecutada',
         entities: intentResult.entities
       });
     }

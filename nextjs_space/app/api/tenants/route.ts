@@ -77,7 +77,6 @@ export async function POST(req: NextRequest) {
         email: validatedData.email,
         telefono: validatedData.telefono,
         fechaNacimiento: validatedData.fechaNacimiento ? new Date(validatedData.fechaNacimiento) : new Date(),
-        estado: validatedData.estado || 'activo',
         notas: validatedData.notasInternas || '',
       },
     });

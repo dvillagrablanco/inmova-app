@@ -41,7 +41,7 @@ export async function GET(
 
     // TODO: Implementar modelo ReportHistory en el schema de Prisma
     // Por ahora, devolvemos un historial simulado basado en ultimoEnvio
-    const history = [];
+    const history: any[] = [];
 
     if (report.ultimoEnvio) {
       history.push({

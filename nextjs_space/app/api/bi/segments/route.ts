@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
       );
 
       // Crear o actualizar segmentos
-      const segments = [];
+      const segments: any[] = [];
       for (const [segmentName, tenants] of Object.entries(behaviorSegments)) {
         const tenantIds = (tenants as any[]).map(t => t.id);
         const avgMetrics = {

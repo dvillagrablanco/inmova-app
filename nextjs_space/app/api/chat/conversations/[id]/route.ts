@@ -28,7 +28,7 @@ export async function GET(
     }
 
     // Get tenant info
-    let tenantInfo = null;
+    let tenantInfo: any = null;
     if (conversation.tenantId) {
       tenantInfo = await prisma.tenant.findUnique({
         where: { id: conversation.tenantId },

@@ -87,7 +87,7 @@ export async function GET(
     // Preparar vista general de habitaciones
     const roomsOverview = rooms.map((room: any) => {
       const contract = room.contracts && room.contracts.length > 0 ? room.contracts[0] : null;
-      let diasRestantes = null;
+      let diasRestantes: number | null = null;
       if (contract?.fechaFin) {
         const endDate = new Date(contract.fechaFin);
         const diff = endDate.getTime() - today.getTime();

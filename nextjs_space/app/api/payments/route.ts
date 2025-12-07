@@ -87,8 +87,6 @@ export async function POST(req: NextRequest) {
         fechaPago: validatedData.fechaPago ? new Date(validatedData.fechaPago) : null,
         estado: validatedData.estado || 'pendiente',
         metodoPago: validatedData.metodoPago || null,
-        referencia: validatedData.referencia || null,
-        notas: validatedData.notas || null,
       },
     });
 

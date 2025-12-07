@@ -36,8 +36,8 @@ export async function GET(req: NextRequest) {
     // Enriquecer con datos de edificios/unidades si existen
     const enrichedInspections = await Promise.all(
       inspections.map(async (inspection) => {
-        let buildingName = null;
-        let unitNumber = null;
+        let buildingName: string | null | undefined = null;
+        let unitNumber: string | null | undefined = null;
 
         if (inspection.buildingId) {
           const building = await prisma.building.findUnique({

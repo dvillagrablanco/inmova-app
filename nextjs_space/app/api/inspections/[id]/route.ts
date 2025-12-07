@@ -28,9 +28,9 @@ export async function GET(
     }
 
     // Enriquecer con datos relacionales
-    let building = null;
-    let unit = null;
-    let tenant = null;
+    let building: any = null;
+    let unit: any = null;
+    let tenant: any = null;
 
     if (inspection.buildingId) {
       building = await prisma.building.findUnique({
