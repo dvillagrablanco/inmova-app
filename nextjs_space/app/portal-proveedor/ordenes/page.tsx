@@ -367,9 +367,5 @@ export default function ProveedorOrdenesPage() {
         </DialogContent>
       </Dialog>
     </div>
-      </div>
-        </main>
-      </div>
-    </div>
   );
 }

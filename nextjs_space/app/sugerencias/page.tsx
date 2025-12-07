@@ -254,9 +254,5 @@ export default function SugerenciasPage() {
         </Card>
       </div>
     </div>
-      </div>
-        </main>
-      </div>
-    </div>
   );
 }

@@ -639,9 +639,5 @@ export default function NotificationRulesPage() {
         </DialogContent>
       </Dialog>
     </div>
-      </div>
-        </main>
-      </div>
-    </div>
   );
 }

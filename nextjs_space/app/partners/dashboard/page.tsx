@@ -349,9 +349,5 @@ export default function PartnerDashboardPage() {
         </CardContent>
       </Card>
     </div>
-      </div>
-        </main>
-      </div>
-    </div>
   );
 }

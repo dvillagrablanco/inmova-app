@@ -627,9 +627,5 @@ export default function ListingDetailPage() {
         </TabsContent>
       </Tabs>
     </div>
-      </div>
-        </main>
-      </div>
-    </div>
   );
 }

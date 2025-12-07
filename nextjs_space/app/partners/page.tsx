@@ -30,9 +30,5 @@ export default function PartnersPage() {
           <div className="max-w-7xl mx-auto">
       <Loader2 className="h-8 w-8 animate-spin text-primary" />
     </div>
-      </div>
-        </main>
-      </div>
-    </div>
   );
 }

@@ -239,9 +239,5 @@ export default function CommunityDashboard() {
         </TabsContent>
       </Tabs>
     </div>
-      </div>
-        </main>
-      </div>
-    </div>
   );
 }

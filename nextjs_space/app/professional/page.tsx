@@ -338,9 +338,5 @@ export default function ProfessionalPage() {
         </TabsContent>
       </Tabs>
     </div>
-      </div>
-        </main>
-      </div>
-    </div>
   );
 }

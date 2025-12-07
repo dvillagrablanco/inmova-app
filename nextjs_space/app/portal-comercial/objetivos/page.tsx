@@ -444,9 +444,5 @@ export default function ObjetivosPage() {
         )}
       </main>
     </div>
-      </div>
-        </main>
-      </div>
-    </div>
   );
 }

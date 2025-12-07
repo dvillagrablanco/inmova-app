@@ -303,7 +303,6 @@ export default function FlippingPage() {
               </TabsContent>
             </Tabs>
           </div>
-      </div>
         </main>
       </div>
     </div>

@@ -237,9 +237,5 @@ export default function PartnerSettingsPage() {
         </CardContent>
       </Card>
     </div>
-      </div>
-        </main>
-      </div>
-    </div>
   );
 }
