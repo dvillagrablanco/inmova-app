@@ -36,6 +36,8 @@ export async function GET(request: NextRequest) {
     const where: any = { partnerId };
     if (periodo) {
       where.periodo = periodo;
+    }
+    
     const comisiones = await prisma.commission.findMany({
       where,
       include: {
