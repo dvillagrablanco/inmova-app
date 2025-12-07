@@ -18,7 +18,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
 
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId || '';
+    const companyId = session?.user?.companyId || '';
     const body = await request.json();
     const { subject, description, category } = body;
 
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
     }
 
     const ticket = await createSupportTicket(
-      session.user.id,
+      session?.user?.id,
       companyId,
       subject,
       description,

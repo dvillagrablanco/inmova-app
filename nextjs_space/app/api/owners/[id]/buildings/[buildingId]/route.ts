@@ -34,7 +34,7 @@ export async function PUT(
       where: {
         ownerId: params.id,
         buildingId: params.buildingId,
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
       },
     });
 
@@ -79,7 +79,7 @@ export async function PUT(
     });
 
     logger.info(
-      `Asignación actualizada: propietario ${params.id}, edificio ${params.buildingId} por usuario ${session.user.id}`
+      `Asignación actualizada: propietario ${params.id}, edificio ${params.buildingId} por usuario ${session?.user?.id}`
     );
 
     return NextResponse.json({
@@ -124,7 +124,7 @@ export async function DELETE(
       where: {
         ownerId: params.id,
         buildingId: params.buildingId,
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
       },
     });
 
@@ -141,7 +141,7 @@ export async function DELETE(
     });
 
     logger.info(
-      `Asignación eliminada: propietario ${params.id}, edificio ${params.buildingId} por usuario ${session.user.id}`
+      `Asignación eliminada: propietario ${params.id}, edificio ${params.buildingId} por usuario ${session?.user?.id}`
     );
 
     return NextResponse.json({

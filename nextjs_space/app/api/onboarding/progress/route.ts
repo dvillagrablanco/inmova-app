@@ -340,8 +340,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const userId = session.user.id;
-    const companyId = session.user.companyId;
+    const userId = session?.user?.id
+    const companyId = session?.user?.companyId;
 
     // Obtener o crear progreso de onboarding
     let onboarding = await prisma.onboardingProgress.findFirst({
@@ -354,7 +354,7 @@ export async function GET(request: NextRequest) {
     // Si no existe, crear uno nuevo detectando el vertical del usuario
     if (!onboarding) {
       const user = await prisma.user.findUnique({
-        where: { email: session.user.email },
+        where: { email: session?.user?.email},
         select: { businessVertical: true, id: true }
       });
 
@@ -419,8 +419,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const userId = session.user.id;
-    const companyId = session.user.companyId;
+    const userId = session?.user?.id
+    const companyId = session?.user?.companyId;
     const body = await request.json();
     const { action, stepId } = body;
 

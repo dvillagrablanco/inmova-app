@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
 
     const quotes = await prisma.serviceQuote.findMany({
       where: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         ...(estado && { estado: estado as any }),
         ...(providerId && { providerId }),
       },
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
     const selectedProviderId = providerId;
     // if (!selectedProviderId && servicioRequerido) {
     //   const suggestion = await suggestProviderForService(
-    //     session.user.companyId,
+    //     session?.user?.companyId,
     //     servicioRequerido
     //   );
     //   if (suggestion) {
@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
 
     const quote = await prisma.serviceQuote.create({
       data: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         providerId: selectedProviderId,
         buildingId: buildingId || null,
         unitId: unitId || null,
@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
         descripcion,
         servicioRequerido,
         urgencia: urgencia || 'media',
-        solicitadoPor: session.user.email || '',
+        solicitadoPor: session?.user?.email|| '',
       },
       include: {
         provider: true,

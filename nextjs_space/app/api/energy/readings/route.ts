@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
 
     const readings = await prisma.energyReading.findMany({
       where: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         ...(tipo && { tipo: tipo as any }),
         ...(buildingId && { buildingId }),
         ...(unitId && { unitId }),
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
 
     const reading = await prisma.energyReading.create({
       data: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         buildingId: buildingId || null,
         unitId: unitId || null,
         tipo,
@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
         fechaLectura: fecha,
         periodo,
         costo: costo ? parseFloat(costo) : null,
-        registradoPor: session.user.email || '',
+        registradoPor: session?.user?.email|| '',
         notas: notas || null,
       },
       include: {
@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
 
     // Detectar consumo anormal
     try {
-      await detectAbnormalConsumption(session.user.companyId, reading.id);
+      await detectAbnormalConsumption(session?.user?.companyId, reading.id);
     } catch (error) {
       logger.error('Error detecting abnormal consumption:', error);
       // No fallar la creación de la lectura si falla la detección

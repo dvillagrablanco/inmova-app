@@ -42,7 +42,7 @@ export async function POST(
     }
 
     // Verificar que el reporte pertenece a la empresa del usuario
-    if (report.companyId !== session.user.companyId && session.user.role !== 'super_admin') {
+    if (report.companyId !== session?.user?.companyId && session.user.role !== 'super_admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
 

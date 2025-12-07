@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
 
     const owners = await prisma.owner.findMany({
       where: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
       },
       include: {
         ownerBuildings: {
@@ -139,7 +139,7 @@ export async function POST(req: NextRequest) {
     // Crear propietario
     const owner = await prisma.owner.create({
       data: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         nombreCompleto,
         email,
         telefono,
@@ -150,7 +150,7 @@ export async function POST(req: NextRequest) {
         notificarOcupacion,
         notificarMantenimiento,
         notificarVencimientos,
-        createdBy: session.user.id,
+        createdBy: session?.user?.id
       },
     });
 
@@ -159,14 +159,14 @@ export async function POST(req: NextRequest) {
       const assignments = buildingAssignments.map((assignment: any) => ({
         ownerId: owner.id,
         buildingId: assignment.buildingId,
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         porcentajePropiedad: assignment.porcentajePropiedad || 100,
         verIngresos: assignment.verIngresos ?? true,
         verGastos: assignment.verGastos ?? true,
         verOcupacion: assignment.verOcupacion ?? true,
         verMantenimiento: assignment.verMantenimiento ?? true,
         verDocumentos: assignment.verDocumentos ?? false,
-        asignadoPor: session.user.id,
+        asignadoPor: session?.user?.id
       }));
 
       await prisma.ownerBuilding.createMany({
@@ -196,7 +196,7 @@ export async function POST(req: NextRequest) {
     // No exponer la contraseña
     const { password: _, resetToken, resetTokenExpiry, ...ownerData } = ownerWithBuildings!;
 
-    logger.info(`Propietario creado: ${owner.id} por usuario: ${session.user.id}`);
+    logger.info(`Propietario creado: ${owner.id} por usuario: ${session?.user?.id}`);
 
     return NextResponse.json({
       success: true,

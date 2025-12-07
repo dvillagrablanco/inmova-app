@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
 
     const recommendations = await prisma.recommendation.findMany({
       where: {
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
     const recommendations = await generateRecommendations(companyId);
 
     return NextResponse.json({ recommendations }, { status: 201 });

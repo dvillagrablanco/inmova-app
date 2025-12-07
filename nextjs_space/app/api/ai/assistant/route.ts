@@ -38,11 +38,11 @@ export async function POST(request: NextRequest) {
 
     // Construir contexto del usuario
     const context: AssistantContext = {
-      userId: session.user.id,
-      userType: session.user.companyId ? 'admin' : 'tenant',
-      userName: session.user.name || 'Usuario',
-      userEmail: session.user.email || '',
-      companyId: session.user.companyId || '',
+      userId: session?.user?.id,
+      userType: session?.user?.companyId ? 'admin' : 'tenant',
+      userName: session?.user?.name || 'Usuario',
+      userEmail: session?.user?.email || '',
+      companyId: session?.user?.companyId || '',
       conversationHistory
     };
 

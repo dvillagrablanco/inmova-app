@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
 
     const galerias = await prisma.propertyGallery.findMany({
       where: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         ...(unitId && { unitId }),
       },
       include: {
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
 
     const galeria = await prisma.propertyGallery.create({
       data: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         unitId,
         portada,
         urlTourVirtual,

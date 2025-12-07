@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     // Obtener datos de la compañía (arrendador)
     const company = await prisma.company.findUnique({
-      where: { id: session.user.companyId }
+      where: { id: session?.user?.companyId }
     });
 
     if (!company) {
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
         name: company.nombre,
         dni: company.cif || 'N/A',
         address: company.direccion || 'N/A',
-        email: company.email || session.user.email,
+        email: company.email || session?.user?.email,
         phone: company.telefono || 'N/A'
       },
       tenant: {

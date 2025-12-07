@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { monthsAhead = 3 } = await request.json();
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
 
     const predictions = await predictOccupancy(companyId, monthsAhead);
 

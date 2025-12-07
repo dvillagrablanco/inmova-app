@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
 
     // Últimos 30 días
     const thirtyDaysAgo = startOfDay(subDays(new Date(), 30));

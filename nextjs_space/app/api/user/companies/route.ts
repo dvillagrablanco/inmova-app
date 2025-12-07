@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     // Obtener todas las empresas a las que tiene acceso el usuario
     const userAccess = await prisma.userCompanyAccess.findMany({
       where: {
-        userId: session.user.id,
+        userId: session?.user?.id,
         activo: true,
       },
       include: {
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
 
     // También incluir la empresa principal del usuario
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: session?.user?.id},
       include: {
         company: {
           select: {
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
     const companies = userAccess.map(access => ({
       ...access.company,
       roleInCompany: access.roleInCompany,
-      isCurrent: access.companyId === session.user.companyId,
+      isCurrent: access.companyId === session?.user?.companyId,
       isPrimary: access.companyId === user?.companyId,
       lastAccess: access.lastAccess,
     }));
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
       companies.unshift({
         ...user.company,
         roleInCompany: user.role,
-        isCurrent: user.companyId === session.user.companyId,
+        isCurrent: user.companyId === session?.user?.companyId,
         isPrimary: true,
         lastAccess: null,
       });
@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       companies,
-      currentCompanyId: session.user.companyId,
+      currentCompanyId: session?.user?.companyId,
     });
   } catch (error) {
     logger.error('Error fetching user companies:', error);

@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
 
     // Get all Stripe payments for this company
     const payments = await prisma.payment.findMany({

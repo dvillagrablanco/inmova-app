@@ -20,7 +20,7 @@ export async function GET(
       where: { id: params.id },
     });
 
-    if (!inspection || inspection.companyId !== session.user.companyId) {
+    if (!inspection || inspection.companyId !== session?.user?.companyId) {
       return NextResponse.json(
         { error: 'Inspección no encontrada' },
         { status: 404 }
@@ -82,7 +82,7 @@ export async function PATCH(
       where: { id: params.id },
     });
 
-    if (!inspection || inspection.companyId !== session.user.companyId) {
+    if (!inspection || inspection.companyId !== session?.user?.companyId) {
       return NextResponse.json(
         { error: 'Inspección no encontrada' },
         { status: 404 }
@@ -124,7 +124,7 @@ export async function DELETE(
       where: { id: params.id },
     });
 
-    if (!inspection || inspection.companyId !== session.user.companyId) {
+    if (!inspection || inspection.companyId !== session?.user?.companyId) {
       return NextResponse.json(
         { error: 'Inspección no encontrada' },
         { status: 404 }

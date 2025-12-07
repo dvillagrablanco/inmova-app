@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
 
     const incidencias = await prisma.communityIncident.findMany({
       where: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         ...(buildingId && { buildingId }),
         ...(estado && { estado: estado as any }),
         ...(tipo && { tipo: tipo as any }),
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
 
     const incidencia = await prisma.communityIncident.create({
       data: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         buildingId,
         titulo,
         descripcion,
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
         unitId,
         ubicacion,
         fotos: fotos || [],
-        reportedBy: reportedBy || session.user.id!,
+        reportedBy: reportedBy || session?.user?.id,
         reporterType: reporterType || 'user',
       },
       include: {

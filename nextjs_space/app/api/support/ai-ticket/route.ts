@@ -32,8 +32,8 @@ export async function POST(req: NextRequest) {
     // Crear el ticket
     const ticket = await prisma.supportTicket.create({
       data: {
-        userId: session.user.id,
-        companyId: session.user.companyId,
+        userId: session?.user?.id,
+        companyId: session?.user?.companyId,
         subject,
         description,
         category: category || 'question',
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
 
     logger.info('Ticket de soporte creado con respuesta IA', {
       ticketId: ticket.id,
-      userId: session.user.id,
+      userId: session?.user?.id,
       category,
       autoResolved: aiResponse.canAutoResolve,
     });
@@ -260,8 +260,8 @@ export async function GET(req: NextRequest) {
     const category = searchParams.get('category');
 
     const where: any = {
-      userId: session.user.id,
-      companyId: session.user.companyId,
+      userId: session?.user?.id,
+      companyId: session?.user?.companyId,
     };
 
     if (status) {

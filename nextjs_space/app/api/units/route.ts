@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
         numero: validatedData.numero,
         tipo: validatedData.tipo || 'vivienda',
         estado: validatedData.estado || 'disponible',
-        planta: validatedData.piso || validatedData.planta || null,
+        planta: validatedData.piso || null,
         superficie: validatedData.superficie || 0,
         habitaciones: validatedData.habitaciones || null,
         banos: validatedData.banos || null,

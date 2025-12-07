@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       );
     }
     const body = await request.json().catch(() => ({}));
-    const companyId = body.companyId || session.user.companyId;
+    const companyId = body.companyId || session?.user?.companyId;
     console.log(`[API] Iniciando sincronización de disponibilidad para empresa: ${companyId}`);
     const result = await syncAvailabilityToChannels(companyId);
     return NextResponse.json({

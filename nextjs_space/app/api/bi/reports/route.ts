@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
 
     const reports = await prisma.biReport.findMany({
       where: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         ...(activo && { activo: activo === 'true' }),
       },
       orderBy: { createdAt: 'desc' },
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
 
     const report = await prisma.biReport.create({
       data: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         nombre,
         descripcion: descripcion || null,
         tipo,
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
         filtros,
         columnas,
         emailDestinatarios: emailDestinatarios || [],
-        creadoPor: session.user.email || '',
+        creadoPor: session?.user?.email|| '',
       },
     });
 

@@ -59,11 +59,11 @@ export async function GET(
     }
 
     // Verificar que el usuario tenga acceso al recibo
-    const userEmail = session.user.email;
+    const userEmail = session?.user?.email
     const tenantEmail = payment.contract.tenant.email;
 
     // Si es el inquilino o un usuario del sistema de la misma compañía
-    if (userEmail !== tenantEmail && session.user.companyId !== payment.contract.unit.building.company.id) {
+    if (userEmail !== tenantEmail && session?.user?.companyId !== payment.contract.unit.building.company.id) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
 

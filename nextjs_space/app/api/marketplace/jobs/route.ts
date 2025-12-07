@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
 
     const jobs = await prisma.serviceJob.findMany({
       where: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         ...(estado && { estado: estado as any }),
         ...(providerId && { providerId }),
       },
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
 
     const job = await prisma.serviceJob.create({
       data: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         providerId,
         quoteId: quoteId || null,
         buildingId: buildingId || null,

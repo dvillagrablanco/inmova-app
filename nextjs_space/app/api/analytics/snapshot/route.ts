@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
     const snapshot = await generateAnalyticsSnapshot(companyId);
 
     return NextResponse.json({ snapshot }, { status: 201 });

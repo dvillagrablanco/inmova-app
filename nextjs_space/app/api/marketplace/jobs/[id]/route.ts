@@ -20,7 +20,7 @@ export async function GET(
     const job = await prisma.serviceJob.findFirst({
       where: {
         id: params.id,
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
       },
       include: {
         provider: true,
@@ -65,7 +65,7 @@ export async function PATCH(
     const existingJob = await prisma.serviceJob.findFirst({
       where: {
         id: params.id,
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
       },
     });
 
@@ -129,7 +129,7 @@ export async function DELETE(
     const existingJob = await prisma.serviceJob.findFirst({
       where: {
         id: params.id,
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
       },
     });
 

@@ -73,14 +73,14 @@ export async function GET(
     }
 
     // Verificar que el proveedor pertenece a la compañía del usuario
-    if (provider.companyId !== session.user.companyId) {
+    if (provider.companyId !== session?.user?.companyId) {
       return NextResponse.json(
         { error: 'Prohibido', message: 'No tiene acceso a este proveedor' },
         { status: 403 }
       );
     }
 
-    logger.info(`Proveedor obtenido: ${provider.id}`, { userId: session.user.id });
+    logger.info(`Proveedor obtenido: ${provider.id}`, { userId: session?.user?.id});
     return NextResponse.json(provider, { status: 200 });
     
   } catch (error) {

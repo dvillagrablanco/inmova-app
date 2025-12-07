@@ -14,7 +14,7 @@ export async function DELETE(
     if (!session || !session.user?.companyId) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
     const { id } = params;
     // Verificar que la automatización pertenece a la empresa
     const automation = await prisma.automation.findFirst({

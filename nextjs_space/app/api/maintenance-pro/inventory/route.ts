@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     const categoria = searchParams.get('categoria');
     const lowStock = searchParams.get('lowStock') === 'true';
 
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
 
     const where: any = { companyId };
     if (buildingId) where.buildingId = buildingId;
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
     const data = await request.json();
 
     const item = await prisma.maintenanceInventory.create({

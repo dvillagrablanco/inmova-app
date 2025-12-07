@@ -16,7 +16,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.email || !session.user.companyId) {
+    if (!session?.user?.email || !session?.user?.companyId) {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 401 }
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const periodo = parseInt(searchParams.get('periodo') || '6'); // meses
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
 
     const fechaInicio = startOfMonth(subMonths(new Date(), periodo - 1));
     const fechaFin = endOfMonth(new Date());

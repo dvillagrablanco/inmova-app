@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
         direccion: validatedData.direccion,
         ciudad: validatedData.ciudad,
         pais: validatedData.pais,
-        tipo: (validatedData.tipo && ['residencial', 'mixto', 'comercial'].includes(validatedData.tipo)) ? validatedData.tipo : 'residencial',
+        tipo: (validatedData.tipo && ['residencial', 'mixto', 'comercial'].includes(validatedData.tipo)) ? validatedData.tipo as 'residencial' | 'mixto' | 'comercial' : 'residencial',
         codigoPostal: validatedData.codigoPostal || '',
         anoConstructor: validatedData.anoConstructor || new Date().getFullYear(),
         numeroUnidades: validatedData.numeroUnidades || 0,

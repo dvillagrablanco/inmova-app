@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
 
     // Verify tenant belongs to company
     const tenant = await prisma.tenant.findFirst({
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
 
     // Verify tenant belongs to company
     const tenant = await prisma.tenant.findFirst({

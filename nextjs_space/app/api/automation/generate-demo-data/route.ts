@@ -218,8 +218,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId;
-    const userId = session.user.id;
+    const companyId = session?.user?.companyId;
+    const userId = session?.user?.id
 
     // Verificar que no existan ya datos demo
     const existingBuildings = await prisma.building.count({

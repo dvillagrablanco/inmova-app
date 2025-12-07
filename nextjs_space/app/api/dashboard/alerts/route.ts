@@ -32,7 +32,7 @@ export async function GET() {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
     const today = startOfDay(new Date());
     const alerts: Alert[] = [];
 

@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     const tipoReporte = searchParams.get('tipoReporte');
 
     const where: any = {
-      companyId: session.user.companyId,
+      companyId: session?.user?.companyId,
     };
 
     if (tipoReporte && tipoReporte !== 'all') {
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     // Obtener eventos del período
     const auditLogs = await prisma.auditLog.findMany({
       where: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         createdAt: {
           gte: startDate,
           lte: endDate,
@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
 
     const securityEvents = await prisma.securityEvent.findMany({
       where: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         createdAt: {
           gte: startDate,
           lte: endDate,
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
 
     const report = await prisma.auditReport.create({
       data: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         titulo,
         descripcion,
         tipoReporte,
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
         eventosError,
         eventosCriticos,
         usuariosAfectados,
-        generadoPor: session.user.email,
+        generadoPor: session?.user?.email
       },
     });
 

@@ -67,7 +67,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const userId = session.user.id;
+    const userId = session.user?.id;
+    
+    if (!userId) {
+      return NextResponse.json({ error: 'Usuario no válido' }, { status: 401 });
+    }
 
     // Create message
     const message = await prisma.chatMessage.create({

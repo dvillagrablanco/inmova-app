@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     }
     const body = await request.json().catch(() => ({}));
     const { jobId, all } = body;
-    const companyId = body.companyId || session.user.companyId;
+    const companyId = body.companyId || session?.user?.companyId;
     if (all) {
       console.log(`[API] Ejecutando todos los trabajos cron para empresa: ${companyId}`);
       const results = await executeAllCronJobs(companyId);

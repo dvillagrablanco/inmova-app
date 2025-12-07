@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 
     const segments = await prisma.tenantSegment.findMany({
       where: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         activo: true,
       },
       orderBy: { createdAt: 'desc' },
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
     // Si es una petición para generar segmentos automáticos
     if (body.action === 'generate') {
       const behaviorSegments = await segmentTenantsByBehavior(
-        session.user.companyId
+        session?.user?.companyId
       );
 
       // Crear o actualizar segmentos
@@ -64,11 +64,11 @@ export async function POST(req: NextRequest) {
 
         const segment = await prisma.tenantSegment.upsert({
           where: {
-            id: `${session.user.companyId}-${segmentName}`,
+            id: `${session?.user?.companyId}-${segmentName}`,
           },
           create: {
-            id: `${session.user.companyId}-${segmentName}`,
-            companyId: session.user.companyId,
+            id: `${session?.user?.companyId}-${segmentName}`,
+            companyId: session?.user?.companyId,
             nombre: segmentName.charAt(0).toUpperCase() + segmentName.slice(1),
             descripcion: `Inquilinos con comportamiento ${segmentName}`,
             criterios: { type: 'behavior', segment: segmentName },
@@ -95,7 +95,7 @@ export async function POST(req: NextRequest) {
 
     const segment = await prisma.tenantSegment.create({
       data: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         nombre,
         descripcion: descripcion || null,
         criterios,

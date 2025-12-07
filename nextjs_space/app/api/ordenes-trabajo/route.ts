@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
 
     const ordenes = await prisma.providerWorkOrder.findMany({
       where: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         ...(providerId && { providerId }),
         ...(estado && { estado: estado as any }),
         ...(buildingId && { buildingId }),
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
 
     const orden = await prisma.providerWorkOrder.create({
       data: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         providerId,
         buildingId,
         unitId: unitId || null,
@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
         costoTotal: costoTotal || null,
         fotosAntes: [],
         fotosDespues: [],
-        asignadoPor: session.user.id!,
+        asignadoPor: session?.user?.id,
       },
       include: {
         provider: true,

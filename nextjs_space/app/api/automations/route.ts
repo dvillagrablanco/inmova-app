@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     if (!session || !session.user?.companyId) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
     const automations = await prisma.automation.findMany({
       where: { companyId },
       orderBy: { createdAt: 'desc' },
@@ -28,8 +28,8 @@ export async function POST(request: NextRequest) {
     if (!session || !session.user?.companyId) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
-    const companyId = session.user.companyId;
-    const userId = session.user.id;
+    const companyId = session?.user?.companyId;
+    const userId = session?.user?.id
     const body = await request.json();
     const { nombre, descripcion, tipo, triggerType, prioridad, activa } = body;
     if (!nombre || !tipo || !triggerType) {

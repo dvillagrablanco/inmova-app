@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
 
     const alerts = await prisma.energyAlert.findMany({
       where: {
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
         ...(resuelta !== null && { resuelta: resuelta === 'true' }),
         ...(tipo && { tipo: tipo as any }),
         ...(buildingId && { buildingId }),

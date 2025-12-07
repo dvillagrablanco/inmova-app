@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
 
     const tags = await prisma.documentTag.findMany({
       where: { companyId },
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
 
     const tag = await prisma.documentTag.create({
       data: {

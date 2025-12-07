@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 
     if (
       !payment ||
-      payment.contract?.unit?.building?.companyId !== session.user.companyId
+      payment.contract?.unit?.building?.companyId !== session?.user?.companyId
     ) {
       return NextResponse.json(
         { error: 'Pago no encontrado' },

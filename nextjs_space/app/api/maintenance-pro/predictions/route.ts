@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     const buildingId = searchParams.get('buildingId');
     const estado = searchParams.get('estado');
 
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
 
     const where: any = { companyId };
     if (buildingId) where.buildingId = buildingId;
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
     const predictions = await predictEquipmentFailures(companyId);
 
     return NextResponse.json({ predictions, count: predictions.length }, { status: 201 });

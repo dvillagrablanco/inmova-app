@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
-    const stats = await getRenewalStats(session.user.companyId);
+    const stats = await getRenewalStats(session?.user?.companyId);
     return NextResponse.json(stats);
   } catch (error) {
     logger.error('Error en GET renovaciones/contratos:', error);

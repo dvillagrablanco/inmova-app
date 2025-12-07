@@ -20,7 +20,7 @@ export async function GET(
     const review = await prisma.serviceReview.findFirst({
       where: {
         id: params.id,
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
       },
       include: {
         provider: true,
@@ -67,7 +67,7 @@ export async function PATCH(
     const existingReview = await prisma.serviceReview.findFirst({
       where: {
         id: params.id,
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
       },
     });
 
@@ -137,7 +137,7 @@ export async function DELETE(
     const existingReview = await prisma.serviceReview.findFirst({
       where: {
         id: params.id,
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
       },
     });
 

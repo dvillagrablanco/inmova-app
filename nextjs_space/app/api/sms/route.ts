@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     const tipo = searchParams.get('tipo');
 
     const where: any = {
-      companyId: session.user.companyId
+      companyId: session?.user?.companyId
     };
 
     if (estado) where.estado = estado as SMSEstado;
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
 
     // Enviar SMS
     const smsLog = await enviarSMS(
-      session.user.companyId,
+      session?.user?.companyId,
       {
         tenantId,
         templateId,

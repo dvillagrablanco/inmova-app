@@ -30,7 +30,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     const existingTemplate = await prisma.legalTemplate.findFirst({
       where: {
         id,
-        companyId: session.user.companyId
+        companyId: session?.user?.companyId
       }
     });
     if (!existingTemplate) {

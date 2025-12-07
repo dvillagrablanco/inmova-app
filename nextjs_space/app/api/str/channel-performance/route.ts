@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     if (!session || !session.user?.companyId) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
-    const companyId = session.user.companyId;
+    const companyId = session?.user?.companyId;
     // Obtener sincronizaciones de canales
     const channelSyncs = await prisma.sTRChannelSync.findMany({
       where: { companyId },

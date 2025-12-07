@@ -20,7 +20,7 @@ export async function GET(
     const quote = await prisma.serviceQuote.findFirst({
       where: {
         id: params.id,
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
       },
       include: {
         provider: true,
@@ -64,7 +64,7 @@ export async function PATCH(
     const existingQuote = await prisma.serviceQuote.findFirst({
       where: {
         id: params.id,
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
       },
     });
 
@@ -127,7 +127,7 @@ export async function DELETE(
     const existingQuote = await prisma.serviceQuote.findFirst({
       where: {
         id: params.id,
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
       },
     });
 

@@ -25,7 +25,7 @@ export async function GET(
     const owner = await prisma.owner.findFirst({
       where: {
         id: params.id,
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
       },
       include: {
         ownerBuildings: {
@@ -101,7 +101,7 @@ export async function PUT(
     const owner = await prisma.owner.findFirst({
       where: {
         id: params.id,
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
       },
     });
 
@@ -197,7 +197,7 @@ export async function PUT(
     // No exponer la contraseña
     const { password: _, resetToken, resetTokenExpiry, ...ownerData } = updatedOwner;
 
-    logger.info(`Propietario actualizado: ${params.id} por usuario: ${session.user.id}`);
+    logger.info(`Propietario actualizado: ${params.id} por usuario: ${session?.user?.id}`);
 
     return NextResponse.json({
       success: true,
@@ -239,7 +239,7 @@ export async function DELETE(
     const owner = await prisma.owner.findFirst({
       where: {
         id: params.id,
-        companyId: session.user.companyId,
+        companyId: session?.user?.companyId,
       },
     });
 
@@ -255,7 +255,7 @@ export async function DELETE(
       where: { id: params.id },
     });
 
-    logger.info(`Propietario eliminado: ${params.id} por usuario: ${session.user.id}`);
+    logger.info(`Propietario eliminado: ${params.id} por usuario: ${session?.user?.id}`);
 
     return NextResponse.json({
       success: true,
