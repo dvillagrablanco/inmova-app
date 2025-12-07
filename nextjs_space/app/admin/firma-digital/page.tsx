@@ -139,7 +139,7 @@ export default function FirmaDigitalPage() {
       setDocumentos(data);
     } catch (error) {
       toast.error('Error al cargar los documentos');
-      logger.error(error);
+      logger.error(error instanceof Error ? error.message : String(error));
     } finally {
       setLoading(false);
     }
@@ -289,7 +289,7 @@ export default function FirmaDigitalPage() {
       fetchDocumentos();
     } catch (error: any) {
       toast.error(error.message || 'Error al guardar el documento');
-      logger.error(error);
+      logger.error(error instanceof Error ? error.message : String(error));
     }
   };
 
@@ -309,7 +309,7 @@ export default function FirmaDigitalPage() {
       fetchDocumentos();
     } catch (error) {
       toast.error('Error al eliminar el documento');
-      logger.error(error);
+      logger.error(error instanceof Error ? error.message : String(error));
     }
   };
 

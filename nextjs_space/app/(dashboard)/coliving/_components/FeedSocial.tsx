@@ -183,7 +183,7 @@ export default function FeedSocial() {
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={img}
-                          alt={`Imagen ${idx + 1} de ${post.imagenes.length} en la publicación de ${post.nombreResidente || 'residente'}`}
+                          alt={`Imagen ${idx + 1} de ${post.imagenes?.length || 0} en la publicación de ${post.profile?.tenant?.nombreCompleto || 'residente'}`}
                           className="w-full h-full object-cover"
                         />
                       </div>

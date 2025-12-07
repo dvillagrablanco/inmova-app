@@ -20,8 +20,7 @@ export interface CreateTaskInput {
   checklistId?: string;
   prioridad: 'baja' | 'media' | 'alta' | 'urgente';
   instruccionesEspeciales?: string;
-  bookingCheckOutId?: string;
-  bookingCheckInId?: string;
+  bookingId?: string;
 }
 
 export interface UpdateTaskInput {
@@ -124,30 +123,28 @@ export async function createHousekeepingTask(input: CreateTaskInput) {
   }
 
   // Calcular tiempo estimado basado en tipo de turnover
-  const tiempoEstimado = calculateEstimatedTime(tipoTurnover, listing.capacidadHuespedes || 2);
+  const tiempoEstimado = calculateEstimatedTime(tipoTurnover, listing.unit?.habitaciones || 2);
+
+  // Mapear prioridad de string a número
+  const prioridadMap = { 'baja': 0, 'media': 0, 'alta': 1, 'urgente': 2 };
+  const prioridadNum = prioridadMap[rest.prioridad || 'media'];
 
   // Crear la tarea
   const task = await prisma.sTRHousekeepingTask.create({
     data: {
       companyId,
       listingId,
-      unitId: listing.unitId,
-      tipoTurnover,
-      fechaProgramada: startOfDay(fechaProgramada),
-      horaInicio: rest.horaInicio,
-      horaFin: rest.horaFin,
+      bookingId: rest.bookingId,
+      tipo: tipoTurnover,
       status: HousekeepingStatus.pendiente,
-      tiempoEstimadoMinutos: tiempoEstimado,
-      prioridad: rest.prioridad || 'media',
+      fechaProgramada: startOfDay(fechaProgramada),
+      fechaInicio: rest.horaInicio,
+      fechaFin: rest.horaFin,
+      asignadoA: rest.staffId,
       instruccionesEspeciales: rest.instruccionesEspeciales,
-      checklistTemplate: checklistData,
-      bookingCheckOutId: rest.bookingCheckOutId,
-      bookingCheckInId: rest.bookingCheckInId,
-      staffId: rest.staffId
-    },
-    include: {
-      listing: { include: { unit: true } },
-      staff: true
+      prioridad: prioridadNum,
+      tiempoEstimadoMin: tiempoEstimado,
+      checklistCompletado: checklistData ? JSON.parse(JSON.stringify(checklistData)) : null
     }
   });
 
@@ -556,7 +553,7 @@ function calculateEstimatedTime(tipo: TurnoverType, capacidad: number): number {
   const baseTime: Record<TurnoverType, number> = {
     check_out: 45,
     check_in: 30,
-    deep_clean: 120,
+    limpieza_profunda: 120,
     mantenimiento: 60,
     inspeccion: 20
   };
@@ -577,8 +574,8 @@ export async function generateAutomaticTasks(companyId: string, diasAnticipacion
   const bookings = await prisma.sTRBooking.findMany({
     where: {
       companyId,
-      estado: { in: ['confirmada', 'pendiente'] },
-      fechaCheckIn: {
+      estado: { in: ['CONFIRMADA', 'PENDIENTE'] },
+      checkInDate: {
         gte: new Date(),
         lte: fechaFin
       }
@@ -592,27 +589,25 @@ export async function generateAutomaticTasks(companyId: string, diasAnticipacion
 
   for (const booking of bookings) {
     // Verificar si ya existe tarea para este booking
-    const existingTask = await prisma.sTRHousekeepingTask.findFirst({
+    const existingTasks = await prisma.sTRHousekeepingTask.findMany({
       where: {
-        OR: [
-          { bookingCheckOutId: booking.id },
-          { bookingCheckInId: booking.id }
-        ]
+        bookingId: booking.id
       }
     });
 
-    if (existingTask) continue;
+    // Si ya hay tareas creadas para este booking, saltar
+    if (existingTasks.length > 0) continue;
 
     // Crear tarea de check-in
     const checkInTask = await createHousekeepingTask({
       companyId,
       listingId: booking.listingId,
       tipoTurnover: TurnoverType.check_in,
-      fechaProgramada: booking.fechaCheckIn,
-      horaInicio: addHours(booking.fechaCheckIn, -2),
-      horaFin: booking.fechaCheckIn,
+      fechaProgramada: booking.checkInDate,
+      horaInicio: addHours(booking.checkInDate, -2),
+      horaFin: booking.checkInDate,
       prioridad: 'alta',
-      bookingCheckInId: booking.id
+      bookingId: booking.id
     });
 
     tareasCreadas.push(checkInTask);
@@ -622,11 +617,11 @@ export async function generateAutomaticTasks(companyId: string, diasAnticipacion
       companyId,
       listingId: booking.listingId,
       tipoTurnover: TurnoverType.check_out,
-      fechaProgramada: booking.fechaCheckOut,
-      horaInicio: booking.fechaCheckOut,
-      horaFin: addHours(booking.fechaCheckOut, 3),
+      fechaProgramada: booking.checkOutDate,
+      horaInicio: booking.checkOutDate,
+      horaFin: addHours(booking.checkOutDate, 3),
       prioridad: 'alta',
-      bookingCheckOutId: booking.id
+      bookingId: booking.id
     });
 
     tareasCreadas.push(checkOutTask);

@@ -117,7 +117,7 @@ export default function MarketplacePage() {
       setServices(data);
     } catch (error) {
       toast.error('Error al cargar los servicios');
-      logger.error(error);
+      logger.error(error instanceof Error ? error.message : String(error));
     } finally {
       setLoading(false);
     }
@@ -225,7 +225,7 @@ export default function MarketplacePage() {
       fetchServices();
     } catch (error: any) {
       toast.error(error.message || 'Error al guardar el servicio');
-      logger.error(error);
+      logger.error(error instanceof Error ? error.message : String(error));
     }
   };
 
@@ -245,7 +245,7 @@ export default function MarketplacePage() {
       fetchServices();
     } catch (error) {
       toast.error('Error al eliminar el servicio');
-      logger.error(error);
+      logger.error(error instanceof Error ? error.message : String(error));
     }
   };
 

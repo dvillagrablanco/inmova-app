@@ -104,7 +104,6 @@ export async function GET(request: NextRequest) {
       where: {
         companyId,
         periodo: periodoActual,
-        estado: { notIn: ['completado', 'entregado'] },
       },
     });
     
