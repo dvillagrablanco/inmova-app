@@ -23,7 +23,7 @@ import {
   PieChart,
   Pie,
   Cell
-} from 'recharts';
+} from '@/components/ui/lazy-charts-extended';
 import {
   TrendingUp,
   TrendingDown,
