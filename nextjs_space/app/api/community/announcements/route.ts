@@ -18,15 +18,16 @@ export async function GET(request: NextRequest) {
     if (buildingId) where.buildingId = buildingId;
     if (active) {
       where.AND = [
-        { OR: [{ fechaFin: null }, { fechaFin: { gte: new Date() } }] },
-        { fechaInicio: { lte: new Date() } }
+        { activo: true },
+        { OR: [{ fechaExpiracion: null }, { fechaExpiracion: { gte: new Date() } }] },
+        { fechaPublicacion: { lte: new Date() } }
       ];
     }
     
     const announcements = await prisma.communityAnnouncement.findMany({
       where,
       orderBy: [
-        { fechaInicio: 'desc' }
+        { fechaPublicacion: 'desc' }
       ],
       include: {
         building: {
@@ -60,12 +61,14 @@ export async function POST(request: NextRequest) {
         companyId: user.companyId,
         titulo: data.titulo,
         contenido: data.contenido,
-        prioridad: data.prioridad || 'normal',
+        tipo: data.tipo || 'informacion',
         buildingId: data.buildingId,
-        fechaInicio: data.fechaInicio ? new Date(data.fechaInicio) : new Date(),
-        fechaFin: data.fechaFin ? new Date(data.fechaFin) : null,
-        archivoUrl: data.archivoUrl,
-        imagenUrl: data.imagenUrl,
+        importante: data.importante || false,
+        enviarNotificacion: data.enviarNotificacion || false,
+        fechaPublicacion: data.fechaPublicacion ? new Date(data.fechaPublicacion) : new Date(),
+        fechaExpiracion: data.fechaExpiracion ? new Date(data.fechaExpiracion) : null,
+        adjuntos: data.adjuntos || [],
+        publicadoPor: user.id,
       }
     });
     

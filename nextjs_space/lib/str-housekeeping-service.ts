@@ -42,6 +42,8 @@ export interface StaffInput {
   telefono?: string;
   tipo: 'interno' | 'externo' | 'freelance';
   tarifaHora?: number;
+  tarifaPorTurnover?: number;
+  zonasTrabajo?: string[];
   especialidades?: string[];
   disponibilidad?: Record<string, any>;
   capacidadDiaria?: number;
@@ -50,26 +52,24 @@ export interface StaffInput {
 export interface InventoryInput {
   nombre: string;
   categoria: 'amenity' | 'limpieza' | 'ropa_cama' | 'consumible' | 'herramienta';
-  unidadMedida: string;
-  cantidadActual: number;
-  cantidadMinima: number;
-  costoUnitario: number;
-  proveedor?: string;
-  ubicacionAlmacen?: string;
+  stockActual: number;
+  stockMinimo: number;
+  costoUnitario?: number;
+  ubicacion?: string;
 }
 
 export interface ChecklistTemplateInput {
   nombre: string;
-  tipoTurnover: TurnoverType;
-  areas: Array<{
+  descripcion?: string;
+  tipo: TurnoverType;
+  items: Array<{
+    id: string;
     nombre: string;
-    tareas: Array<{
-      descripcion: string;
-      obligatoria: boolean;
-      tiempoEstimado?: number;
-    }>;
+    categoria: string;
+    obligatorio: boolean;
+    orden: number;
   }>;
-  tiempoEstimadoTotal: number;
+  tiempoEstimadoMin?: number;
 }
 
 export interface TaskStats {
@@ -326,7 +326,7 @@ export async function createHousekeepingStaff(companyId: string, input: StaffInp
       companyId,
       nombre: input.nombre,
       email: input.email || null,
-      telefono: input.telefono,
+      telefono: input.telefono || '',
       tipo: input.tipo || 'interno',
       tarifaPorHora: input.tarifaHora || null,
       tarifaPorTurnover: input.tarifaPorTurnover || null,
@@ -363,7 +363,7 @@ export async function updateStaffPerformance(
 
   if (performance.calificacionPromedio) {
     const totalCalificaciones = staff.tareasCompletadas || 1;
-    const calificacionActual = staff.calificacionPromedio?.toNumber() || 0;
+    const calificacionActual = staff.calificacionPromedio || 0;
     const nuevaCalificacion = (
       (calificacionActual * totalCalificaciones + performance.calificacionPromedio) /
       (totalCalificaciones + 1)
@@ -403,29 +403,29 @@ export async function getStaffPerformance(companyId: string): Promise<StaffPerfo
 
       const tareas = await prisma.sTRHousekeepingTask.findMany({
         where: {
-          staffId: s.id,
+          asignadoA: s.id,
           status: HousekeepingStatus.completado,
-          tiempoRealMinutos: { not: null }
+          tiempoRealMin: { not: null }
         },
         select: {
-          tiempoRealMinutos: true,
-          tiempoEstimadoMinutos: true
+          tiempoRealMin: true,
+          tiempoEstimadoMin: true
         }
       });
 
       const tiempoPromedio = tareas.length > 0
-        ? tareas.reduce((sum, t) => sum + (t.tiempoRealMinutos || 0), 0) / tareas.length
+        ? tareas.reduce((sum, t) => sum + (t.tiempoRealMin || 0), 0) / tareas.length
         : 0;
 
       const tareasATiempo = tareas.filter(t =>
-        t.tiempoRealMinutos && t.tiempoEstimadoMinutos &&
-        t.tiempoRealMinutos <= t.tiempoEstimadoMinutos
+        t.tiempoRealMin && t.tiempoEstimadoMin &&
+        t.tiempoRealMin <= t.tiempoEstimadoMin
       ).length;
       const tasaPuntualidad = tareas.length > 0 ? (tareasATiempo / tareas.length) * 100 : 0;
 
       const incidenciasReportadas = await prisma.sTRHousekeepingTask.count({
         where: {
-          staffId: s.id,
+          asignadoA: s.id,
           status: HousekeepingStatus.incidencia
         }
       });
@@ -435,7 +435,7 @@ export async function getStaffPerformance(companyId: string): Promise<StaffPerfo
         nombreStaff: s.nombre,
         tareasCompletadas,
         tiempoPromedio: Math.round(tiempoPromedio),
-        calificacionPromedio: s.calificacionPromedio?.toNumber() || 0,
+        calificacionPromedio: s.calificacionPromedio || 0,
         tasaPuntualidad: Math.round(tasaPuntualidad * 10) / 10,
         incidenciasReportadas
       };
@@ -456,13 +456,11 @@ export async function createInventoryItem(companyId: string, input: InventoryInp
       companyId,
       nombre: input.nombre,
       categoria: input.categoria,
-      unidadMedida: input.unidadMedida,
-      cantidadActual: input.cantidadActual,
-      cantidadMinima: input.cantidadMinima,
-      costoUnitario: input.costoUnitario,
-      proveedor: input.proveedor,
-      ubicacionAlmacen: input.ubicacionAlmacen,
-      alerta: input.cantidadActual <= input.cantidadMinima
+      stockActual: input.stockActual,
+      stockMinimo: input.stockMinimo,
+      costoUnitario: input.costoUnitario || null,
+      ubicacion: input.ubicacion || null,
+      alertaStockBajo: input.stockActual <= input.stockMinimo
     }
   });
 
@@ -483,27 +481,23 @@ export async function processInventoryUsage(
 
     if (!item) continue;
 
-    const nuevaCantidad = (item.cantidadActual || 0) - cantidad;
+    const nuevaCantidad = (item.stockActual || 0) - cantidad;
 
     await prisma.sTRHousekeepingInventory.update({
       where: { id: itemId },
       data: {
-        cantidadActual: Math.max(0, nuevaCantidad),
-        alerta: nuevaCantidad <= (item.cantidadMinima || 0),
-        ultimoMovimiento: new Date()
+        stockActual: Math.max(0, nuevaCantidad),
+        alertaStockBajo: nuevaCantidad <= (item.stockMinimo || 0)
       }
     });
 
     // Registrar movimiento
     await prisma.sTRInventoryMovement.create({
       data: {
-        companyId,
         inventoryId: itemId,
         tipo: 'uso',
         cantidad: -cantidad,
-        motivo: 'Uso en tarea de housekeeping',
-        cantidadAnterior: item.cantidadActual || 0,
-        cantidadNueva: Math.max(0, nuevaCantidad)
+        motivo: 'Uso en tarea de housekeeping'
       }
     });
   }
@@ -516,10 +510,10 @@ export async function getLowStockItems(companyId: string) {
   const items = await prisma.sTRHousekeepingInventory.findMany({
     where: {
       companyId,
-      alerta: true
+      alertaStockBajo: true
     },
     orderBy: {
-      cantidadActual: 'asc'
+      stockActual: 'asc'
     }
   });
 
@@ -536,9 +530,10 @@ export async function createChecklistTemplate(companyId: string, input: Checklis
     data: {
       companyId,
       nombre: input.nombre,
-      tipoTurnover: input.tipoTurnover,
-      areas: input.areas,
-      tiempoEstimadoTotal: input.tiempoEstimadoTotal,
+      descripcion: input.descripcion || null,
+      tipo: input.tipo,
+      items: input.items,
+      tiempoEstimadoMin: input.tiempoEstimadoMin || null,
       activo: true
     }
   });
