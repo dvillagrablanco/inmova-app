@@ -7,7 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { toast } from 'sonner';
 import { ArrowLeft, Send, Wrench } from 'lucide-react';
 import Link from 'next/link';
@@ -90,7 +96,8 @@ export default function PortalInquilinoMantenimientoPage() {
             <CardHeader>
               <CardTitle>Nueva Solicitud de Mantenimiento</CardTitle>
               <CardDescription>
-                Describe el problema o la reparación que necesitas y nos pondremos en contacto contigo
+                Describe el problema o la reparación que necesitas y nos pondremos en contacto
+                contigo
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -100,9 +107,7 @@ export default function PortalInquilinoMantenimientoPage() {
                   <Input
                     id="titulo"
                     value={formData.titulo}
-                    onChange={(e) =>
-                      setFormData({ ...formData, titulo: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
                     placeholder="Ej: Fuga de agua en baño"
                     required
                   />
@@ -112,9 +117,7 @@ export default function PortalInquilinoMantenimientoPage() {
                   <Label htmlFor="prioridad">Prioridad</Label>
                   <Select
                     value={formData.prioridad}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, prioridad: value })
-                    }
+                    onValueChange={(value) => setFormData({ ...formData, prioridad: value })}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -132,9 +135,7 @@ export default function PortalInquilinoMantenimientoPage() {
                   <Textarea
                     id="descripcion"
                     value={formData.descripcion}
-                    onChange={(e) =>
-                      setFormData({ ...formData, descripcion: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
                     placeholder="Describe el problema con el mayor detalle posible...\n\nIncluye:\n- Cuándo comenzó el problema\n- Dónde se encuentra exactamente\n- Cualquier otro detalle relevante"
                     rows={8}
                     required
@@ -146,7 +147,10 @@ export default function PortalInquilinoMantenimientoPage() {
                   <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
                     <li>Revisaremos tu solicitud en un plazo de 24-48 horas</li>
                     <li>Te contactaremos por teléfono o email para coordinar la reparación</li>
-                    <li>En caso de emergencia (fuga grave, falta de electricidad), llámanos directamente</li>
+                    <li>
+                      En caso de emergencia (fuga grave, falta de electricidad), llámanos
+                      directamente
+                    </li>
                   </ul>
                 </div>
 

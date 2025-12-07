@@ -7,17 +7,53 @@ import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/lazy-tabs';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { Badge } from '@/components/ui/badge';
-import { 
-  BarChart, Bar, LineChart, Line, PieChart, Pie, AreaChart, Area,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell 
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  Cell,
 } from '@/components/ui/lazy-charts-extended';
-import { 
-  Home, ArrowLeft, TrendingUp, TrendingDown, Building2, Users, 
-  Euro, AlertCircle, Download, RefreshCw, Calendar, Filter
+import {
+  Home,
+  ArrowLeft,
+  TrendingUp,
+  TrendingDown,
+  Building2,
+  Users,
+  Euro,
+  AlertCircle,
+  Download,
+  RefreshCw,
+  Calendar,
+  Filter,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -59,12 +95,12 @@ export default function BIPage() {
       setLoading(true);
       const params = new URLSearchParams({
         periodo,
-        buildingId: buildingFilter !== 'all' ? buildingFilter : ''
+        buildingId: buildingFilter !== 'all' ? buildingFilter : '',
       });
-      
+
       const response = await fetch(`/api/bi/dashboard?${params}`);
       if (!response.ok) throw new Error('Error al cargar datos');
-      
+
       const result = await response.json();
       setData(result);
     } catch (error: any) {
@@ -91,12 +127,12 @@ export default function BIPage() {
       const params = new URLSearchParams({
         periodo,
         buildingId: buildingFilter !== 'all' ? buildingFilter : '',
-        format: 'xlsx'
+        format: 'xlsx',
       });
-      
+
       const response = await fetch(`/api/bi/export?${params}`);
       if (!response.ok) throw new Error('Error al exportar');
-      
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -106,7 +142,7 @@ export default function BIPage() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      
+
       toast.success('Reporte exportado exitosamente');
     } catch (error: any) {
       logger.error('Error exporting data:', error);
@@ -205,7 +241,7 @@ export default function BIPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Todos los edificios</SelectItem>
-                      {buildings.map(building => (
+                      {buildings.map((building) => (
                         <SelectItem key={building.id} value={building.id}>
                           {building.nombre}
                         </SelectItem>
@@ -233,7 +269,10 @@ export default function BIPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  €{data?.rentabilidad?.ingresosTotales?.toLocaleString('es-ES', { minimumFractionDigits: 2 }) || '0.00'}
+                  €
+                  {data?.rentabilidad?.ingresosTotales?.toLocaleString('es-ES', {
+                    minimumFractionDigits: 2,
+                  }) || '0.00'}
                 </div>
                 <div className="flex items-center text-xs text-muted-foreground mt-1">
                   <TrendingUp className="h-3 w-3 mr-1 text-green-600" />
@@ -369,7 +408,13 @@ export default function BIPage() {
                         <YAxis />
                         <Tooltip />
                         <Legend />
-                        <Line type="monotone" dataKey="total" stroke="#000000" strokeWidth={2} name="Total Gastos" />
+                        <Line
+                          type="monotone"
+                          dataKey="total"
+                          stroke="#000000"
+                          strokeWidth={2}
+                          name="Total Gastos"
+                        />
                       </LineChart>
                     </ResponsiveContainer>
                   </CardContent>
@@ -413,8 +458,20 @@ export default function BIPage() {
                       <YAxis />
                       <Tooltip />
                       <Legend />
-                      <Area type="monotone" dataKey="morosidad" stroke="#dc2626" fill="#fee2e2" name="Morosidad" />
-                      <Area type="monotone" dataKey="recuperado" stroke="#16a34a" fill="#dcfce7" name="Recuperado" />
+                      <Area
+                        type="monotone"
+                        dataKey="morosidad"
+                        stroke="#dc2626"
+                        fill="#fee2e2"
+                        name="Morosidad"
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="recuperado"
+                        stroke="#16a34a"
+                        fill="#dcfce7"
+                        name="Recuperado"
+                      />
                     </AreaChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -436,11 +493,23 @@ export default function BIPage() {
                       <YAxis />
                       <Tooltip />
                       <Legend />
-                      <Line type="monotone" dataKey="real" stroke="#000000" strokeWidth={2} name="Datos Reales" />
-                      <Line type="monotone" dataKey="prediccion" stroke="#666666" strokeDasharray="5 5" name="Predicción" />
+                      <Line
+                        type="monotone"
+                        dataKey="real"
+                        stroke="#000000"
+                        strokeWidth={2}
+                        name="Datos Reales"
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="prediccion"
+                        stroke="#666666"
+                        strokeDasharray="5 5"
+                        name="Predicción"
+                      />
                     </LineChart>
                   </ResponsiveContainer>
-                  
+
                   <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="p-4 bg-muted rounded-lg">
                       <div className="text-sm text-muted-foreground">Tendencia General</div>

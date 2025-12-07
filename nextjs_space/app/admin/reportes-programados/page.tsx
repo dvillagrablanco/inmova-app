@@ -27,13 +27,7 @@ import { Header } from '@/components/layout/header';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -92,7 +86,7 @@ interface ReportHistory {
 export default function ReportesProgramadosPage() {
   const { data: session, status } = useSession() || {};
   const router = useRouter();
-  
+
   const [reports, setReports] = useState<ScheduledReport[]>([]);
   const [history, setHistory] = useState<ReportHistory[]>([]);
   const [templates, setTemplates] = useState<any[]>([]);
@@ -109,7 +103,7 @@ export default function ReportesProgramadosPage() {
   const [showSendDialog, setShowSendDialog] = useState(false);
   const [sendingReport, setSendingReport] = useState<{ id: string; nombre: string } | null>(null);
   const [isSending, setIsSending] = useState(false);
-  
+
   const [formData, setFormData] = useState<{
     nombre: string;
     tipo: 'morosidad' | 'ocupacion' | 'ingresos' | 'gastos' | 'mantenimiento' | 'general';
@@ -134,7 +128,11 @@ export default function ReportesProgramadosPage() {
     if (status === 'unauthenticated') {
       router.push('/login');
     } else if (status === 'authenticated') {
-      if (session?.user?.role !== 'administrador' && session?.user?.role !== 'super_admin' && session?.user?.role !== 'gestor') {
+      if (
+        session?.user?.role !== 'administrador' &&
+        session?.user?.role !== 'super_admin' &&
+        session?.user?.role !== 'gestor'
+      ) {
         router.push('/unauthorized');
         return;
       }
@@ -200,7 +198,7 @@ export default function ReportesProgramadosPage() {
       const url = editingReport
         ? `/api/scheduled-reports/${editingReport.id}`
         : '/api/scheduled-reports';
-      
+
       const method = editingReport ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -270,9 +268,7 @@ export default function ReportesProgramadosPage() {
 
       if (!response.ok) throw new Error('Error al actualizar reporte');
 
-      toast.success(
-        report.activo ? 'Reporte desactivado' : 'Reporte activado'
-      );
+      toast.success(report.activo ? 'Reporte desactivado' : 'Reporte activado');
       fetchReports();
     } catch (error) {
       logger.error('Error:', error);
@@ -429,12 +425,8 @@ export default function ReportesProgramadosPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold gradient-text">
-                  Reportes Programados
-                </h1>
-                <p className="text-gray-600 mt-1">
-                  Configura reportes automáticos por email
-                </p>
+                <h1 className="text-3xl font-bold gradient-text">Reportes Programados</h1>
+                <p className="text-gray-600 mt-1">Configura reportes automáticos por email</p>
               </div>
               <div className="flex gap-2">
                 <Button onClick={openTemplatesDialogHandler} variant="outline" className="gap-2">
@@ -496,13 +488,15 @@ export default function ReportesProgramadosPage() {
                     <div>
                       <p className="text-sm text-muted-foreground">Próximos 7 días</p>
                       <p className="text-2xl font-bold text-blue-600">
-                        {reports.filter((r) => {
-                          const days = Math.ceil(
-                            (new Date(r.proximoEnvio).getTime() - Date.now()) /
-                              (1000 * 60 * 60 * 24)
-                          );
-                          return days <= 7 && days >= 0;
-                        }).length}
+                        {
+                          reports.filter((r) => {
+                            const days = Math.ceil(
+                              (new Date(r.proximoEnvio).getTime() - Date.now()) /
+                                (1000 * 60 * 60 * 24)
+                            );
+                            return days <= 7 && days >= 0;
+                          }).length
+                        }
                       </p>
                     </div>
                     <Clock className="h-8 w-8 text-blue-600" />
@@ -527,15 +521,19 @@ export default function ReportesProgramadosPage() {
                   <div className="bg-white rounded-md p-4 space-y-2">
                     <p className="text-sm font-medium text-gray-900">Endpoint del cron:</p>
                     <code className="block bg-gray-100 p-2 rounded text-xs break-all">
-                      {typeof window !== 'undefined' ? window.location.origin : ''}/api/cron/process-scheduled-reports
+                      {typeof window !== 'undefined' ? window.location.origin : ''}
+                      /api/cron/process-scheduled-reports
                     </code>
-                    <p className="text-sm font-medium text-gray-900 mt-3">Header de autorización:</p>
+                    <p className="text-sm font-medium text-gray-900 mt-3">
+                      Header de autorización:
+                    </p>
                     <code className="block bg-gray-100 p-2 rounded text-xs">
                       Authorization: Bearer inmova-cron-secret-2024-secure-key-xyz789
                     </code>
                     <p className="text-xs text-gray-600 mt-3">
                       <strong>Recomendación:</strong> Configura el cron para ejecutarse cada hora.
-                      El sistema procesará automáticamente los reportes que estén programados para enviarse.
+                      El sistema procesará automáticamente los reportes que estén programados para
+                      enviarse.
                     </p>
                   </div>
                 </CardContent>
@@ -546,9 +544,7 @@ export default function ReportesProgramadosPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Reportes Configurados</CardTitle>
-                <CardDescription>
-                  Gestiona tus reportes automáticos
-                </CardDescription>
+                <CardDescription>Gestiona tus reportes automáticos</CardDescription>
               </CardHeader>
               <CardContent>
                 {reports.length === 0 ? (
@@ -574,19 +570,13 @@ export default function ReportesProgramadosPage() {
                       >
                         <div className="flex-1">
                           <div className="flex items-center gap-3">
-                            <h3 className="font-semibold text-lg">
-                              {report.nombre}
-                            </h3>
+                            <h3 className="font-semibold text-lg">{report.nombre}</h3>
                             <Badge className={getTipoBadgeColor(report.tipo)}>
                               {getTipoLabel(report.tipo)}
                             </Badge>
-                            <Badge variant="outline">
-                              {getFrecuenciaLabel(report.frecuencia)}
-                            </Badge>
+                            <Badge variant="outline">{getFrecuenciaLabel(report.frecuencia)}</Badge>
                             {report.activo ? (
-                              <Badge className="bg-green-100 text-green-800">
-                                Activo
-                              </Badge>
+                              <Badge className="bg-green-100 text-green-800">Activo</Badge>
                             ) : (
                               <Badge variant="secondary">Pausado</Badge>
                             )}
@@ -669,15 +659,11 @@ export default function ReportesProgramadosPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem
-                                onClick={() => openEditDialog(report)}
-                              >
+                              <DropdownMenuItem onClick={() => openEditDialog(report)}>
                                 <Eye className="h-4 w-4 mr-2" />
                                 Editar
                               </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => handleToggleActive(report)}
-                              >
+                              <DropdownMenuItem onClick={() => handleToggleActive(report)}>
                                 {report.activo ? (
                                   <>
                                     <AlertCircle className="h-4 w-4 mr-2" />
@@ -690,9 +676,7 @@ export default function ReportesProgramadosPage() {
                                   </>
                                 )}
                               </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => handleShowHistory(report.id)}
-                              >
+                              <DropdownMenuItem onClick={() => handleShowHistory(report.id)}>
                                 <Clock className="h-4 w-4 mr-2" />
                                 Ver historial
                               </DropdownMenuItem>
@@ -724,8 +708,8 @@ export default function ReportesProgramadosPage() {
               {editingReport ? 'Editar Reporte' : 'Nuevo Reporte Programado'}
             </DialogTitle>
             <DialogDescription>
-              Configura un reporte automático que se enviará por email según la
-              frecuencia seleccionada.
+              Configura un reporte automático que se enviará por email según la frecuencia
+              seleccionada.
             </DialogDescription>
           </DialogHeader>
 
@@ -736,9 +720,7 @@ export default function ReportesProgramadosPage() {
                 id="nombre"
                 placeholder="Ej: Reporte Semanal de Morosidad"
                 value={formData.nombre}
-                onChange={(e) =>
-                  setFormData({ ...formData, nombre: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
               />
             </div>
 
@@ -747,9 +729,7 @@ export default function ReportesProgramadosPage() {
                 <Label htmlFor="tipo">Tipo de Reporte *</Label>
                 <Select
                   value={formData.tipo}
-                  onValueChange={(value: any) =>
-                    setFormData({ ...formData, tipo: value })
-                  }
+                  onValueChange={(value: any) => setFormData({ ...formData, tipo: value })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -769,9 +749,7 @@ export default function ReportesProgramadosPage() {
                 <Label htmlFor="frecuencia">Frecuencia *</Label>
                 <Select
                   value={formData.frecuencia}
-                  onValueChange={(value: any) =>
-                    setFormData({ ...formData, frecuencia: value })
-                  }
+                  onValueChange={(value: any) => setFormData({ ...formData, frecuencia: value })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -789,16 +767,12 @@ export default function ReportesProgramadosPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="destinatarios">
-                Destinatarios (separados por comas) *
-              </Label>
+              <Label htmlFor="destinatarios">Destinatarios (separados por comas) *</Label>
               <Textarea
                 id="destinatarios"
                 placeholder="email1@ejemplo.com, email2@ejemplo.com"
                 value={formData.destinatarios}
-                onChange={(e) =>
-                  setFormData({ ...formData, destinatarios: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, destinatarios: e.target.value })}
                 rows={3}
               />
               <p className="text-xs text-muted-foreground">
@@ -817,9 +791,7 @@ export default function ReportesProgramadosPage() {
                 <Switch
                   id="incluirPdf"
                   checked={formData.incluirPdf}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, incluirPdf: checked })
-                  }
+                  onCheckedChange={(checked) => setFormData({ ...formData, incluirPdf: checked })}
                 />
               </div>
               <div className="flex items-center justify-between">
@@ -829,9 +801,7 @@ export default function ReportesProgramadosPage() {
                 <Switch
                   id="incluirCsv"
                   checked={formData.incluirCsv}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, incluirCsv: checked })
-                  }
+                  onCheckedChange={(checked) => setFormData({ ...formData, incluirCsv: checked })}
                 />
               </div>
               <div className="flex items-center justify-between">
@@ -841,9 +811,7 @@ export default function ReportesProgramadosPage() {
                 <Switch
                   id="activo"
                   checked={formData.activo}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, activo: checked })
-                  }
+                  onCheckedChange={(checked) => setFormData({ ...formData, activo: checked })}
                 />
               </div>
             </div>
@@ -859,9 +827,7 @@ export default function ReportesProgramadosPage() {
             >
               Cancelar
             </Button>
-            <Button onClick={handleSave}>
-              {editingReport ? 'Actualizar' : 'Crear'} Reporte
-            </Button>
+            <Button onClick={handleSave}>{editingReport ? 'Actualizar' : 'Crear'} Reporte</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -871,22 +837,15 @@ export default function ReportesProgramadosPage() {
         <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>Historial de Envíos</DialogTitle>
-            <DialogDescription>
-              Últimos envíos de este reporte
-            </DialogDescription>
+            <DialogDescription>Últimos envíos de este reporte</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3 max-h-96 overflow-y-auto">
             {history.length === 0 ? (
-              <p className="text-center text-gray-500 py-8">
-                No hay historial de envíos
-              </p>
+              <p className="text-center text-gray-500 py-8">No hay historial de envíos</p>
             ) : (
               history.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-start gap-3 p-3 rounded-lg border"
-                >
+                <div key={item.id} className="flex items-start gap-3 p-3 rounded-lg border">
                   {item.estado === 'exitoso' ? (
                     <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
                   ) : (
@@ -899,20 +858,14 @@ export default function ReportesProgramadosPage() {
                           locale: es,
                         })}
                       </span>
-                      <Badge
-                        variant={
-                          item.estado === 'exitoso' ? 'default' : 'destructive'
-                        }
-                      >
+                      <Badge variant={item.estado === 'exitoso' ? 'default' : 'destructive'}>
                         {item.estado}
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">
                       Enviado a: {item.destinatarios.join(', ')}
                     </p>
-                    {item.error && (
-                      <p className="text-sm text-red-600 mt-1">{item.error}</p>
-                    )}
+                    {item.error && <p className="text-sm text-red-600 mt-1">{item.error}</p>}
                   </div>
                 </div>
               ))
@@ -920,10 +873,7 @@ export default function ReportesProgramadosPage() {
           </div>
 
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setOpenHistoryDialog(false)}
-            >
+            <Button variant="outline" onClick={() => setOpenHistoryDialog(false)}>
               Cerrar
             </Button>
           </DialogFooter>
@@ -953,7 +903,11 @@ export default function ReportesProgramadosPage() {
 
             <TabsContent value="all" className="space-y-3 mt-4">
               {templates.map((template) => (
-                <Card key={template.id} className="hover:shadow-md transition cursor-pointer" onClick={() => useTemplate(template)}>
+                <Card
+                  key={template.id}
+                  className="hover:shadow-md transition cursor-pointer"
+                  onClick={() => useTemplate(template)}
+                >
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg">{template.nombre}</CardTitle>
@@ -992,55 +946,60 @@ export default function ReportesProgramadosPage() {
               ))}
             </TabsContent>
 
-            {['morosidad', 'ocupacion', 'ingresos', 'gastos', 'mantenimiento', 'general'].map((tipo) => (
-              <TabsContent key={tipo} value={tipo} className="space-y-3 mt-4">
-                {templates.filter(t => t.tipo === tipo).map((template) => (
-                  <Card key={template.id} className="hover:shadow-md transition cursor-pointer" onClick={() => useTemplate(template)}>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg">{template.nombre}</CardTitle>
-                        <Badge variant="outline">
-                          {getFrecuenciaLabel(template.frecuenciaSugerida)}
-                        </Badge>
-                      </div>
-                      <CardDescription>{template.descripcion}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        {template.incluirPdf && (
-                          <div className="flex items-center gap-1">
-                            <FileText className="h-4 w-4" />
-                            PDF
+            {['morosidad', 'ocupacion', 'ingresos', 'gastos', 'mantenimiento', 'general'].map(
+              (tipo) => (
+                <TabsContent key={tipo} value={tipo} className="space-y-3 mt-4">
+                  {templates
+                    .filter((t) => t.tipo === tipo)
+                    .map((template) => (
+                      <Card
+                        key={template.id}
+                        className="hover:shadow-md transition cursor-pointer"
+                        onClick={() => useTemplate(template)}
+                      >
+                        <CardHeader>
+                          <div className="flex items-center justify-between">
+                            <CardTitle className="text-lg">{template.nombre}</CardTitle>
+                            <Badge variant="outline">
+                              {getFrecuenciaLabel(template.frecuenciaSugerida)}
+                            </Badge>
                           </div>
-                        )}
-                        {template.incluirCsv && (
-                          <div className="flex items-center gap-1">
-                            <FileSpreadsheet className="h-4 w-4" />
-                            CSV
+                          <CardDescription>{template.descripcion}</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            {template.incluirPdf && (
+                              <div className="flex items-center gap-1">
+                                <FileText className="h-4 w-4" />
+                                PDF
+                              </div>
+                            )}
+                            {template.incluirCsv && (
+                              <div className="flex items-center gap-1">
+                                <FileSpreadsheet className="h-4 w-4" />
+                                CSV
+                              </div>
+                            )}
+                            <div className="flex items-center gap-1">
+                              <Database className="h-4 w-4" />
+                              {template.campos.length} campos
+                            </div>
                           </div>
-                        )}
-                        <div className="flex items-center gap-1">
-                          <Database className="h-4 w-4" />
-                          {template.campos.length} campos
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-                {templates.filter(t => t.tipo === tipo).length === 0 && (
-                  <p className="text-center text-muted-foreground py-8">
-                    No hay plantillas para esta categor\u00eda
-                  </p>
-                )}
-              </TabsContent>
-            ))}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  {templates.filter((t) => t.tipo === tipo).length === 0 && (
+                    <p className="text-center text-muted-foreground py-8">
+                      No hay plantillas para esta categor\u00eda
+                    </p>
+                  )}
+                </TabsContent>
+              )
+            )}
           </Tabs>
 
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowTemplatesDialog(false)}
-            >
+            <Button variant="outline" onClick={() => setShowTemplatesDialog(false)}>
               Cerrar
             </Button>
           </DialogFooter>

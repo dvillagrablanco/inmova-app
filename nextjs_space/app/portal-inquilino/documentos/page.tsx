@@ -28,7 +28,14 @@ import {
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import Link from 'next/link';
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from '@/components/ui/breadcrumb';
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
 
@@ -172,9 +179,10 @@ export default function DocumentosPortalPage() {
     }
   };
 
-  const filteredDocuments = documents.filter((doc) =>
-    doc.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doc.tipo.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredDocuments = documents.filter(
+    (doc) =>
+      doc.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      doc.tipo.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const filteredPayments = payments.filter((payment) =>
@@ -252,9 +260,7 @@ export default function DocumentosPortalPage() {
           </Breadcrumb>
 
           <h1 className="text-3xl font-bold mt-4">Centro de Documentos</h1>
-          <p className="text-gray-600 mt-2">
-            Accede a todos tus documentos y recibos de pago
-          </p>
+          <p className="text-gray-600 mt-2">Accede a todos tus documentos y recibos de pago</p>
         </div>
 
         {/* Search Bar */}
@@ -283,7 +289,7 @@ export default function DocumentosPortalPage() {
             </TabsTrigger>
             <TabsTrigger value="recibos">
               <Receipt className="h-4 w-4 mr-2" />
-              Recibos ({filteredPayments.filter(p => p.estado === 'pagado').length})
+              Recibos ({filteredPayments.filter((p) => p.estado === 'pagado').length})
             </TabsTrigger>
           </TabsList>
 
@@ -326,8 +332,17 @@ export default function DocumentosPortalPage() {
                             ) : (
                               <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
                             )}
-                            <span className={isExpired ? 'text-red-600 font-semibold' : isExpiring ? 'text-yellow-600' : ''}>
-                              {isExpired ? 'Vencido' : 'Vence'}: {format(new Date(doc.fechaVencimiento), 'dd/MM/yyyy', { locale: es })}
+                            <span
+                              className={
+                                isExpired
+                                  ? 'text-red-600 font-semibold'
+                                  : isExpiring
+                                    ? 'text-yellow-600'
+                                    : ''
+                              }
+                            >
+                              {isExpired ? 'Vencido' : 'Vence'}:{' '}
+                              {format(new Date(doc.fechaVencimiento), 'dd/MM/yyyy', { locale: es })}
                             </span>
                           </div>
                         )}
@@ -374,22 +389,20 @@ export default function DocumentosPortalPage() {
                         </div>
                         <Badge variant="outline">{doc.tipo}</Badge>
                       </div>
-                      
-                      <h3 className="font-semibold mb-2 line-clamp-1">
-                        {doc.nombre}
-                      </h3>
+
+                      <h3 className="font-semibold mb-2 line-clamp-1">{doc.nombre}</h3>
 
                       {doc.descripcion && (
-                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                          {doc.descripcion}
-                        </p>
+                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">{doc.descripcion}</p>
                       )}
 
                       <div className="space-y-2 text-sm text-gray-600 mb-4">
                         {doc.unit && (
                           <div className="flex items-center gap-2">
                             <Home className="h-4 w-4" />
-                            <span>{doc.unit.building.nombre} - Unidad {doc.unit.numero}</span>
+                            <span>
+                              {doc.unit.building.nombre} - Unidad {doc.unit.numero}
+                            </span>
                           </div>
                         )}
                         {doc.building && !doc.unit && (
@@ -400,12 +413,15 @@ export default function DocumentosPortalPage() {
                         )}
                         <div className="flex items-center gap-2">
                           <Calendar className="h-4 w-4" />
-                          <span>Compartido: {format(new Date(share.createdAt), 'dd MMM yyyy', { locale: es })}</span>
+                          <span>
+                            Compartido:{' '}
+                            {format(new Date(share.createdAt), 'dd MMM yyyy', { locale: es })}
+                          </span>
                         </div>
                       </div>
 
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         className="w-full"
                         onClick={() => window.open(`/api/documents/${doc.id}/download`, '_blank')}
                         disabled={!share.puedeDescargar}
@@ -422,7 +438,7 @@ export default function DocumentosPortalPage() {
 
           {/* Tab: Recibos */}
           <TabsContent value="recibos" className="mt-6">
-            {filteredPayments.filter(p => p.estado === 'pagado').length === 0 ? (
+            {filteredPayments.filter((p) => p.estado === 'pagado').length === 0 ? (
               <Card className="p-12 text-center">
                 <Receipt className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-600">No hay recibos disponibles aún</p>
@@ -430,15 +446,17 @@ export default function DocumentosPortalPage() {
             ) : (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {filteredPayments
-                  .filter(p => p.estado === 'pagado')
-                  .sort((a, b) => (b.fechaPago ? new Date(b.fechaPago).getTime() : 0) - (a.fechaPago ? new Date(a.fechaPago).getTime() : 0))
+                  .filter((p) => p.estado === 'pagado')
+                  .sort(
+                    (a, b) =>
+                      (b.fechaPago ? new Date(b.fechaPago).getTime() : 0) -
+                      (a.fechaPago ? new Date(a.fechaPago).getTime() : 0)
+                  )
                   .map((payment) => (
                     <Card key={payment.id} className="p-6 hover:shadow-lg transition-shadow">
                       <div className="flex items-start justify-between mb-4">
                         <Receipt className="h-8 w-8 text-green-600" />
-                        <Badge className="bg-green-100 text-green-800">
-                          Pagado
-                        </Badge>
+                        <Badge className="bg-green-100 text-green-800">Pagado</Badge>
                       </div>
 
                       <h3 className="font-semibold text-lg mb-2">Recibo - {payment.periodo}</h3>
@@ -446,7 +464,10 @@ export default function DocumentosPortalPage() {
                       <div className="space-y-2 text-sm text-gray-600 mb-4">
                         <div className="flex items-center">
                           <Calendar className="h-4 w-4 mr-2" />
-                          Pagado: {payment.fechaPago ? format(new Date(payment.fechaPago), 'dd/MM/yyyy', { locale: es }) : 'N/A'}
+                          Pagado:{' '}
+                          {payment.fechaPago
+                            ? format(new Date(payment.fechaPago), 'dd/MM/yyyy', { locale: es })
+                            : 'N/A'}
                         </div>
 
                         <div className="flex items-center font-semibold text-base">

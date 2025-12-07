@@ -12,7 +12,13 @@ import { InfoTooltip } from '@/components/ui/info-tooltip';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -181,9 +187,7 @@ export default function NuevoContratoPage() {
                   <FileText className="h-5 w-5" />
                   Información del Contrato
                 </CardTitle>
-                <CardDescription>
-                  Completa los datos del contrato de arrendamiento
-                </CardDescription>
+                <CardDescription>Completa los datos del contrato de arrendamiento</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">

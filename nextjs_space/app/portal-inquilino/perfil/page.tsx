@@ -9,8 +9,24 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { ArrowLeft, Home, Mail, Phone, User, Lock, MapPin, Building2, FileText } from 'lucide-react';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import {
+  ArrowLeft,
+  Home,
+  Mail,
+  Phone,
+  User,
+  Lock,
+  MapPin,
+  Building2,
+  FileText,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
 
@@ -78,7 +94,7 @@ export default function PerfilInquilinoPage() {
       });
 
       if (!res.ok) throw new Error('Error al actualizar perfil');
-      
+
       toast.success('Perfil actualizado correctamente');
       fetchTenantData();
     } catch (error) {
@@ -120,7 +136,7 @@ export default function PerfilInquilinoPage() {
         const error = await res.json();
         throw new Error(error.error || 'Error al cambiar contraseña');
       }
-      
+
       toast.success('Contraseña actualizada correctamente');
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (error: any) {
@@ -156,7 +172,7 @@ export default function PerfilInquilinoPage() {
 
   const initials = tenantData.nombreCompleto
     .split(' ')
-    .map(n => n[0])
+    .map((n) => n[0])
     .join('')
     .toUpperCase()
     .slice(0, 2);
@@ -172,7 +188,11 @@ export default function PerfilInquilinoPage() {
               <span className="text-sm font-semibold">Portal del Inquilino</span>
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={() => router.push('/portal-inquilino/dashboard')}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push('/portal-inquilino/dashboard')}
+          >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Volver
           </Button>
@@ -226,9 +246,7 @@ export default function PerfilInquilinoPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Información Personal</CardTitle>
-                <CardDescription>
-                  Actualiza tus datos personales y de empleo
-                </CardDescription>
+                <CardDescription>Actualiza tus datos personales y de empleo</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -270,7 +288,9 @@ export default function PerfilInquilinoPage() {
                       id="antiguedad"
                       type="number"
                       value={formData.antiguedad || ''}
-                      onChange={(e) => setFormData({ ...formData, antiguedad: parseInt(e.target.value) || 0 })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, antiguedad: parseInt(e.target.value) || 0 })
+                      }
                     />
                   </div>
                   <div className="space-y-2">
@@ -279,7 +299,9 @@ export default function PerfilInquilinoPage() {
                       id="ingresosMensuales"
                       type="number"
                       value={formData.ingresosMensuales || ''}
-                      onChange={(e) => setFormData({ ...formData, ingresosMensuales: parseFloat(e.target.value) })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, ingresosMensuales: parseFloat(e.target.value) })
+                      }
                     />
                   </div>
                   <div className="space-y-2 sm:col-span-2">
@@ -287,7 +309,9 @@ export default function PerfilInquilinoPage() {
                     <Input
                       id="direccionActual"
                       value={formData.direccionActual || ''}
-                      onChange={(e) => setFormData({ ...formData, direccionActual: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, direccionActual: e.target.value })
+                      }
                     />
                   </div>
                   <div className="space-y-2 sm:col-span-2">
@@ -322,9 +346,7 @@ export default function PerfilInquilinoPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Cambiar Contraseña</CardTitle>
-                <CardDescription>
-                  Actualiza tu contraseña de acceso al portal
-                </CardDescription>
+                <CardDescription>Actualiza tu contraseña de acceso al portal</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -333,7 +355,9 @@ export default function PerfilInquilinoPage() {
                     id="currentPassword"
                     type="password"
                     value={passwordData.currentPassword}
-                    onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                    onChange={(e) =>
+                      setPasswordData({ ...passwordData, currentPassword: e.target.value })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -342,7 +366,9 @@ export default function PerfilInquilinoPage() {
                     id="newPassword"
                     type="password"
                     value={passwordData.newPassword}
-                    onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                    onChange={(e) =>
+                      setPasswordData({ ...passwordData, newPassword: e.target.value })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -351,7 +377,9 @@ export default function PerfilInquilinoPage() {
                     id="confirmPassword"
                     type="password"
                     value={passwordData.confirmPassword}
-                    onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                    onChange={(e) =>
+                      setPasswordData({ ...passwordData, confirmPassword: e.target.value })
+                    }
                   />
                 </div>
                 <Button onClick={handleChangePassword} disabled={isSaving}>

@@ -8,10 +8,26 @@ import { Header } from '@/components/layout/header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
-import { Home, ArrowLeft, Star, ThumbsUp, ThumbsDown, CheckCircle, XCircle, Clock } from 'lucide-react';
+import {
+  Home,
+  ArrowLeft,
+  Star,
+  ThumbsUp,
+  ThumbsDown,
+  CheckCircle,
+  XCircle,
+  Clock,
+} from 'lucide-react';
 import logger, { logError } from '@/lib/logger';
 
 interface Review {
@@ -67,7 +83,7 @@ export default function ReviewsPage() {
       await fetch('/api/reviews', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, estado: 'publicada' })
+        body: JSON.stringify({ id, estado: 'publicada' }),
       });
       toast.success('Review aprobada');
       fetchReviews();
@@ -81,7 +97,7 @@ export default function ReviewsPage() {
       await fetch('/api/reviews', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, estado: 'rechazada', motivoRechazo: 'Contenido inapropiado' })
+        body: JSON.stringify({ id, estado: 'rechazada', motivoRechazo: 'Contenido inapropiado' }),
       });
       toast.success('Review rechazada');
       fetchReviews();
@@ -110,7 +126,7 @@ export default function ReviewsPage() {
       pendiente: { label: 'Pendiente', variant: 'secondary' as const, icon: Clock },
       publicada: { label: 'Publicada', variant: 'default' as const, icon: CheckCircle },
       rechazada: { label: 'Rechazada', variant: 'destructive' as const, icon: XCircle },
-      reportada: { label: 'Reportada', variant: 'destructive' as const, icon: XCircle }
+      reportada: { label: 'Reportada', variant: 'destructive' as const, icon: XCircle },
     };
 
     const config = statusConfig[estado as keyof typeof statusConfig] || statusConfig.pendiente;
@@ -124,9 +140,10 @@ export default function ReviewsPage() {
     );
   };
 
-  const avgRating = reviews.length > 0
-    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
-    : '0.0';
+  const avgRating =
+    reviews.length > 0
+      ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+      : '0.0';
 
   if (loading) {
     return (
@@ -196,7 +213,7 @@ export default function ReviewsPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-orange-600">
-                  {reviews.filter(r => r.estado === 'pendiente').length}
+                  {reviews.filter((r) => r.estado === 'pendiente').length}
                 </div>
               </CardContent>
             </Card>
@@ -207,7 +224,7 @@ export default function ReviewsPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">
-                  {reviews.filter(r => r.estado === 'publicada').length}
+                  {reviews.filter((r) => r.estado === 'publicada').length}
                 </div>
               </CardContent>
             </Card>
@@ -294,9 +311,7 @@ export default function ReviewsPage() {
                             <span>{review.dislikes}</span>
                           </div>
                           {review.reportes > 0 && (
-                            <Badge variant="destructive">
-                              {review.reportes} reportes
-                            </Badge>
+                            <Badge variant="destructive">{review.reportes} reportes</Badge>
                           )}
                         </div>
                       </div>

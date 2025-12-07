@@ -189,17 +189,11 @@ export default function MaintenanceHistory() {
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <div className="mb-6">
-              <Button
-                variant="ghost"
-                onClick={() => router.back()}
-                className="mb-4 -ml-2"
-              >
+              <Button variant="ghost" onClick={() => router.back()} className="mb-4 -ml-2">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Volver
               </Button>
-              <h1 className="text-2xl md:text-3xl font-bold mb-2">
-                Historial de Mantenimiento
-              </h1>
+              <h1 className="text-2xl md:text-3xl font-bold mb-2">Historial de Mantenimiento</h1>
               <p className="text-muted-foreground">
                 {filteredRequests.length} de {requests.length} solicitudes
               </p>
@@ -247,10 +241,7 @@ export default function MaintenanceHistory() {
 
                     <div>
                       <Label>Prioridad</Label>
-                      <Select
-                        value={prioridadFilter}
-                        onValueChange={setPrioridadFilter}
-                      >
+                      <Select value={prioridadFilter} onValueChange={setPrioridadFilter}>
                         <SelectTrigger>
                           <SelectValue placeholder="Todas" />
                         </SelectTrigger>
@@ -272,9 +263,7 @@ export default function MaintenanceHistory() {
             {filteredRequests.length === 0 ? (
               <Card className="p-8 text-center">
                 <Wrench className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-lg font-medium mb-2">
-                  No se encontraron solicitudes
-                </p>
+                <p className="text-lg font-medium mb-2">No se encontraron solicitudes</p>
                 <p className="text-muted-foreground">
                   {searchTerm || estadoFilter !== 'todos' || prioridadFilter !== 'todos'
                     ? 'Intenta ajustar tus filtros'
@@ -284,19 +273,14 @@ export default function MaintenanceHistory() {
             ) : (
               <div className="space-y-3">
                 {filteredRequests.map((request) => (
-                  <Card
-                    key={request.id}
-                    className="p-4 hover:shadow-md transition-shadow"
-                  >
+                  <Card key={request.id} className="p-4 hover:shadow-md transition-shadow">
                     <div className="space-y-3">
                       {/* Header */}
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
                             {getTypeIcon(request.tipo)}
-                            <h3 className="font-semibold text-lg truncate">
-                              {request.titulo}
-                            </h3>
+                            <h3 className="font-semibold text-lg truncate">{request.titulo}</h3>
                           </div>
                           <p className="text-sm text-muted-foreground line-clamp-2">
                             {request.descripcion}
@@ -327,11 +311,9 @@ export default function MaintenanceHistory() {
                           <Calendar className="h-4 w-4 text-muted-foreground" />
                           <span>
                             Solicitada:{' '}
-                            {format(
-                              new Date(request.fechaSolicitud),
-                              "d 'de' MMM 'de' yyyy",
-                              { locale: es }
-                            )}
+                            {format(new Date(request.fechaSolicitud), "d 'de' MMM 'de' yyyy", {
+                              locale: es,
+                            })}
                           </span>
                         </div>
                         {request.fechaResolucion && (
@@ -339,11 +321,9 @@ export default function MaintenanceHistory() {
                             <AlertCircle className="h-4 w-4 text-green-500" />
                             <span>
                               Resuelta:{' '}
-                              {format(
-                                new Date(request.fechaResolucion),
-                                "d 'de' MMM",
-                                { locale: es }
-                              )}
+                              {format(new Date(request.fechaResolucion), "d 'de' MMM", {
+                                locale: es,
+                              })}
                             </span>
                           </div>
                         )}

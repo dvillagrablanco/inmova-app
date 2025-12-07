@@ -79,7 +79,9 @@ interface FlujoCajaItem {
 function ReportesPageContent() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
-  const [tipoReporte, setTipoReporte] = useState<'global' | 'por_propiedad' | 'flujo_caja'>('global');
+  const [tipoReporte, setTipoReporte] = useState<'global' | 'por_propiedad' | 'flujo_caja'>(
+    'global'
+  );
   const [periodo, setPeriodo] = useState('12');
   const [globalData, setGlobalData] = useState<GlobalReport | null>(null);
   const [propertyData, setPropertyData] = useState<PropertyReport[]>([]);
@@ -203,287 +205,347 @@ function ReportesPageContent() {
             {/* Header Section */}
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Reportes Financieros</h1>
-              <p className="text-muted-foreground">Análisis detallado de rentabilidad y flujo de caja</p>
+              <p className="text-muted-foreground">
+                Análisis detallado de rentabilidad y flujo de caja
+              </p>
             </div>
 
-          {/* Controles */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Reporte</label>
-                <select
-                  value={tipoReporte}
-                  onChange={(e) => setTipoReporte(e.target.value as any)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                >
-                  <option value="global">Reporte Global</option>
-                  <option value="por_propiedad">Por Propiedad</option>
-                  <option value="flujo_caja">Flujo de Caja</option>
-                </select>
-              </div>
+            {/* Controles */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Tipo de Reporte
+                  </label>
+                  <select
+                    value={tipoReporte}
+                    onChange={(e) => setTipoReporte(e.target.value as any)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                  >
+                    <option value="global">Reporte Global</option>
+                    <option value="por_propiedad">Por Propiedad</option>
+                    <option value="flujo_caja">Flujo de Caja</option>
+                  </select>
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Período</label>
-                <select
-                  value={periodo}
-                  onChange={(e) => setPeriodo(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                >
-                  <option value="3">Últimos 3 meses</option>
-                  <option value="6">Últimos 6 meses</option>
-                  <option value="12">Últimos 12 meses</option>
-                  <option value="24">Últimos 24 meses</option>
-                </select>
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Período</label>
+                  <select
+                    value={periodo}
+                    onChange={(e) => setPeriodo(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                  >
+                    <option value="3">Últimos 3 meses</option>
+                    <option value="6">Últimos 6 meses</option>
+                    <option value="12">Últimos 12 meses</option>
+                    <option value="24">Últimos 24 meses</option>
+                  </select>
+                </div>
 
-              <div className="flex items-end">
-                <button
-                  onClick={exportToCSV}
-                  className="w-full px-4 py-2 gradient-primary text-white rounded-lg hover:opacity-90 transition-all shadow-primary flex items-center justify-center gap-2"
-                >
-                  <Download size={20} />
-                  Exportar CSV
-                </button>
+                <div className="flex items-end">
+                  <button
+                    onClick={exportToCSV}
+                    className="w-full px-4 py-2 gradient-primary text-white rounded-lg hover:opacity-90 transition-all shadow-primary flex items-center justify-center gap-2"
+                  >
+                    <Download size={20} />
+                    Exportar CSV
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Reporte Global */}
-          {tipoReporte === 'global' && globalData && (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <KPICard
-                  title="Ingresos Brutos"
-                  value={`€${globalData.ingresosBrutos.toLocaleString('es-ES')}`}
-                  icon={DollarSign}
-                />
-                <KPICard
-                  title="Ingresos Netos"
-                  value={`€${globalData.ingresosNetos.toLocaleString('es-ES')}`}
-                  icon={TrendingUp}
-                />
-                <KPICard
-                  title="ROI"
-                  value={`${globalData.roi.toFixed(1)}%`}
-                  icon={TrendingUp}
-                />
-                <KPICard
-                  title="Rentabilidad Neta"
-                  value={`${globalData.rentabilidadNeta.toFixed(1)}%`}
-                  icon={PieChartIcon}
-                />
-              </div>
+            {/* Reporte Global */}
+            {tipoReporte === 'global' && globalData && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                  <KPICard
+                    title="Ingresos Brutos"
+                    value={`€${globalData.ingresosBrutos.toLocaleString('es-ES')}`}
+                    icon={DollarSign}
+                  />
+                  <KPICard
+                    title="Ingresos Netos"
+                    value={`€${globalData.ingresosNetos.toLocaleString('es-ES')}`}
+                    icon={TrendingUp}
+                  />
+                  <KPICard title="ROI" value={`${globalData.roi.toFixed(1)}%`} icon={TrendingUp} />
+                  <KPICard
+                    title="Rentabilidad Neta"
+                    value={`${globalData.rentabilidadNeta.toFixed(1)}%`}
+                    icon={PieChartIcon}
+                  />
+                </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                  <h2 className="text-xl font-bold text-gray-900 mb-4">Métricas Financieras</h2>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <span className="text-gray-700">Ingresos Brutos</span>
-                      <span className="font-semibold text-gray-900">
-                        €{globalData.ingresosBrutos.toLocaleString('es-ES')}
-                      </span>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h2 className="text-xl font-bold text-gray-900 mb-4">Métricas Financieras</h2>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <span className="text-gray-700">Ingresos Brutos</span>
+                        <span className="font-semibold text-gray-900">
+                          €{globalData.ingresosBrutos.toLocaleString('es-ES')}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <span className="text-gray-700">Gastos Totales</span>
+                        <span className="font-semibold text-red-600">
+                          €{globalData.gastos.toLocaleString('es-ES')}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                        <span className="text-gray-900 font-medium">Ingresos Netos</span>
+                        <span className="font-bold text-green-700 text-lg">
+                          €{globalData.ingresosNetos.toLocaleString('es-ES')}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <span className="text-gray-700">Rentabilidad Bruta</span>
+                        <span className="font-semibold text-gray-900">
+                          {globalData.rentabilidadBruta}%
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <span className="text-gray-700">Rentabilidad Neta</span>
+                        <span className="font-semibold text-gray-900">
+                          {globalData.rentabilidadNeta}%
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <span className="text-gray-700">Gastos Totales</span>
-                      <span className="font-semibold text-red-600">
-                        €{globalData.gastos.toLocaleString('es-ES')}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
-                      <span className="text-gray-900 font-medium">Ingresos Netos</span>
-                      <span className="font-bold text-green-700 text-lg">
-                        €{globalData.ingresosNetos.toLocaleString('es-ES')}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <span className="text-gray-700">Rentabilidad Bruta</span>
-                      <span className="font-semibold text-gray-900">{globalData.rentabilidadBruta}%</span>
-                    </div>
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <span className="text-gray-700">Rentabilidad Neta</span>
-                      <span className="font-semibold text-gray-900">{globalData.rentabilidadNeta}%</span>
+                  </div>
+
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h2 className="text-xl font-bold text-gray-900 mb-4">Métricas de Ocupación</h2>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <span className="text-gray-700">Total Unidades</span>
+                        <span className="font-semibold text-gray-900">{globalData.unidades}</span>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <span className="text-gray-700">Unidades Ocupadas</span>
+                        <span className="font-semibold text-green-600">
+                          {globalData.unidadesOcupadas}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <span className="text-gray-700">Unidades Disponibles</span>
+                        <span className="font-semibold text-blue-600">
+                          {globalData.unidades - globalData.unidadesOcupadas}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+                        <span className="text-gray-900 font-medium">Tasa de Ocupación</span>
+                        <span className="font-bold text-blue-700 text-lg">
+                          {globalData.tasaOcupacion}%
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-4 mt-2">
+                        <div
+                          className="bg-blue-600 h-4 rounded-full transition-all duration-500"
+                          style={{ width: `${globalData.tasaOcupacion}%` }}
+                        ></div>
+                      </div>
                     </div>
                   </div>
                 </div>
+              </>
+            )}
+
+            {/* Reporte Por Propiedad */}
+            {tipoReporte === 'por_propiedad' && propertyData.length > 0 && (
+              <>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+                  <h2 className="text-xl font-bold text-gray-900 mb-6">
+                    Comparativa por Propiedad
+                  </h2>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={propertyData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="nombre" tickLine={false} tick={{ fontSize: 10 }} />
+                      <YAxis tickLine={false} tick={{ fontSize: 10 }} />
+                      <Tooltip wrapperStyle={{ fontSize: 11 }} />
+                      <Legend verticalAlign="top" wrapperStyle={{ fontSize: 11 }} />
+                      <Bar dataKey="ingresosBrutos" fill="#000000" name="Ingresos Brutos" />
+                      <Bar dataKey="gastos" fill="#EF4444" name="Gastos" />
+                      <Bar dataKey="ingresosNetos" fill="#10B981" name="Ingresos Netos" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
 
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                  <h2 className="text-xl font-bold text-gray-900 mb-4">Métricas de Ocupación</h2>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <span className="text-gray-700">Total Unidades</span>
-                      <span className="font-semibold text-gray-900">{globalData.unidades}</span>
-                    </div>
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <span className="text-gray-700">Unidades Ocupadas</span>
-                      <span className="font-semibold text-green-600">{globalData.unidadesOcupadas}</span>
-                    </div>
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <span className="text-gray-700">Unidades Disponibles</span>
-                      <span className="font-semibold text-blue-600">
-                        {globalData.unidades - globalData.unidadesOcupadas}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
-                      <span className="text-gray-900 font-medium">Tasa de Ocupación</span>
-                      <span className="font-bold text-blue-700 text-lg">{globalData.tasaOcupacion}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-4 mt-2">
-                      <div
-                        className="bg-blue-600 h-4 rounded-full transition-all duration-500"
-                        style={{ width: `${globalData.tasaOcupacion}%` }}
-                      ></div>
-                    </div>
+                  <h2 className="text-xl font-bold text-gray-900 mb-4">Detalle por Propiedad</h2>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-gray-200">
+                          <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                            Propiedad
+                          </th>
+                          <th className="text-right py-3 px-4 font-semibold text-gray-700">
+                            Ing. Brutos
+                          </th>
+                          <th className="text-right py-3 px-4 font-semibold text-gray-700">
+                            Gastos
+                          </th>
+                          <th className="text-right py-3 px-4 font-semibold text-gray-700">
+                            Ing. Netos
+                          </th>
+                          <th className="text-right py-3 px-4 font-semibold text-gray-700">
+                            ROI %
+                          </th>
+                          <th className="text-right py-3 px-4 font-semibold text-gray-700">
+                            Rent. Neta %
+                          </th>
+                          <th className="text-right py-3 px-4 font-semibold text-gray-700">
+                            Ocupación %
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {propertyData.map((prop) => (
+                          <tr key={prop.id} className="border-b border-gray-100 hover:bg-gray-50">
+                            <td className="py-3 px-4">
+                              <div>
+                                <p className="font-medium text-gray-900">{prop.nombre}</p>
+                                <p className="text-sm text-gray-500">{prop.direccion}</p>
+                              </div>
+                            </td>
+                            <td className="text-right py-3 px-4 text-gray-900">
+                              €{prop.ingresosBrutos.toLocaleString('es-ES')}
+                            </td>
+                            <td className="text-right py-3 px-4 text-red-600">
+                              €{prop.gastos.toLocaleString('es-ES')}
+                            </td>
+                            <td className="text-right py-3 px-4 font-semibold text-green-600">
+                              €{prop.ingresosNetos.toLocaleString('es-ES')}
+                            </td>
+                            <td className="text-right py-3 px-4">
+                              <span
+                                className={`px-2 py-1 rounded-full text-sm font-medium ${
+                                  prop.roi > 20
+                                    ? 'bg-green-100 text-green-800'
+                                    : prop.roi > 10
+                                      ? 'bg-yellow-100 text-yellow-800'
+                                      : 'bg-red-100 text-red-800'
+                                }`}
+                              >
+                                {prop.roi.toFixed(1)}%
+                              </span>
+                            </td>
+                            <td className="text-right py-3 px-4 text-gray-900">
+                              {prop.rentabilidadNeta.toFixed(1)}%
+                            </td>
+                            <td className="text-right py-3 px-4 text-gray-900">
+                              {prop.tasaOcupacion.toFixed(1)}%
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
-              </div>
-            </>
-          )}
+              </>
+            )}
 
-          {/* Reporte Por Propiedad */}
-          {tipoReporte === 'por_propiedad' && propertyData.length > 0 && (
-            <>
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-6">Comparativa por Propiedad</h2>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={propertyData}>
+            {/* Flujo de Caja */}
+            {tipoReporte === 'flujo_caja' && flujoCaja.length > 0 && (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-6">Flujo de Caja Mensual</h2>
+                <ResponsiveContainer width="100%" height={400}>
+                  <LineChart data={flujoCaja}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="nombre" tickLine={false} tick={{ fontSize: 10 }} />
+                    <XAxis dataKey="mes" tickLine={false} tick={{ fontSize: 10 }} />
                     <YAxis tickLine={false} tick={{ fontSize: 10 }} />
                     <Tooltip wrapperStyle={{ fontSize: 11 }} />
                     <Legend verticalAlign="top" wrapperStyle={{ fontSize: 11 }} />
-                    <Bar dataKey="ingresosBrutos" fill="#000000" name="Ingresos Brutos" />
-                    <Bar dataKey="gastos" fill="#EF4444" name="Gastos" />
-                    <Bar dataKey="ingresosNetos" fill="#10B981" name="Ingresos Netos" />
-                  </BarChart>
+                    <Line
+                      type="monotone"
+                      dataKey="ingresos"
+                      stroke="#000000"
+                      name="Ingresos"
+                      strokeWidth={2}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="gastos"
+                      stroke="#EF4444"
+                      name="Gastos"
+                      strokeWidth={2}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="neto"
+                      stroke="#10B981"
+                      name="Flujo Neto"
+                      strokeWidth={3}
+                    />
+                  </LineChart>
                 </ResponsiveContainer>
-              </div>
 
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">Detalle por Propiedad</h2>
-                <div className="overflow-x-auto">
+                <div className="mt-6 overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-gray-200">
-                        <th className="text-left py-3 px-4 font-semibold text-gray-700">Propiedad</th>
-                        <th className="text-right py-3 px-4 font-semibold text-gray-700">Ing. Brutos</th>
+                        <th className="text-left py-3 px-4 font-semibold text-gray-700">Mes</th>
+                        <th className="text-right py-3 px-4 font-semibold text-gray-700">
+                          Ingresos
+                        </th>
                         <th className="text-right py-3 px-4 font-semibold text-gray-700">Gastos</th>
-                        <th className="text-right py-3 px-4 font-semibold text-gray-700">Ing. Netos</th>
-                        <th className="text-right py-3 px-4 font-semibold text-gray-700">ROI %</th>
-                        <th className="text-right py-3 px-4 font-semibold text-gray-700">Rent. Neta %</th>
-                        <th className="text-right py-3 px-4 font-semibold text-gray-700">Ocupación %</th>
+                        <th className="text-right py-3 px-4 font-semibold text-gray-700">
+                          Flujo Neto
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
-                      {propertyData.map((prop) => (
-                        <tr key={prop.id} className="border-b border-gray-100 hover:bg-gray-50">
-                          <td className="py-3 px-4">
-                            <div>
-                              <p className="font-medium text-gray-900">{prop.nombre}</p>
-                              <p className="text-sm text-gray-500">{prop.direccion}</p>
-                            </div>
-                          </td>
+                      {flujoCaja.map((item, index) => (
+                        <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                          <td className="py-3 px-4 font-medium text-gray-900">{item.mes}</td>
                           <td className="text-right py-3 px-4 text-gray-900">
-                            €{prop.ingresosBrutos.toLocaleString('es-ES')}
+                            €{item.ingresos.toLocaleString('es-ES')}
                           </td>
                           <td className="text-right py-3 px-4 text-red-600">
-                            €{prop.gastos.toLocaleString('es-ES')}
-                          </td>
-                          <td className="text-right py-3 px-4 font-semibold text-green-600">
-                            €{prop.ingresosNetos.toLocaleString('es-ES')}
+                            €{item.gastos.toLocaleString('es-ES')}
                           </td>
                           <td className="text-right py-3 px-4">
                             <span
-                              className={`px-2 py-1 rounded-full text-sm font-medium ${
-                                prop.roi > 20
-                                  ? 'bg-green-100 text-green-800'
-                                  : prop.roi > 10
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : 'bg-red-100 text-red-800'
+                              className={`font-semibold ${
+                                item.neto > 0
+                                  ? 'text-green-600'
+                                  : item.neto < 0
+                                    ? 'text-red-600'
+                                    : 'text-gray-600'
                               }`}
                             >
-                              {prop.roi.toFixed(1)}%
+                              €{item.neto.toLocaleString('es-ES')}
                             </span>
                           </td>
-                          <td className="text-right py-3 px-4 text-gray-900">{prop.rentabilidadNeta.toFixed(1)}%</td>
-                          <td className="text-right py-3 px-4 text-gray-900">{prop.tasaOcupacion.toFixed(1)}%</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
               </div>
-            </>
-          )}
+            )}
 
-          {/* Flujo de Caja */}
-          {tipoReporte === 'flujo_caja' && flujoCaja.length > 0 && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Flujo de Caja Mensual</h2>
-              <ResponsiveContainer width="100%" height={400}>
-                <LineChart data={flujoCaja}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="mes" tickLine={false} tick={{ fontSize: 10 }} />
-                  <YAxis tickLine={false} tick={{ fontSize: 10 }} />
-                  <Tooltip wrapperStyle={{ fontSize: 11 }} />
-                  <Legend verticalAlign="top" wrapperStyle={{ fontSize: 11 }} />
-                  <Line type="monotone" dataKey="ingresos" stroke="#000000" name="Ingresos" strokeWidth={2} />
-                  <Line type="monotone" dataKey="gastos" stroke="#EF4444" name="Gastos" strokeWidth={2} />
-                  <Line type="monotone" dataKey="neto" stroke="#10B981" name="Flujo Neto" strokeWidth={3} />
-                </LineChart>
-              </ResponsiveContainer>
-
-              <div className="mt-6 overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Mes</th>
-                      <th className="text-right py-3 px-4 font-semibold text-gray-700">Ingresos</th>
-                      <th className="text-right py-3 px-4 font-semibold text-gray-700">Gastos</th>
-                      <th className="text-right py-3 px-4 font-semibold text-gray-700">Flujo Neto</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {flujoCaja.map((item, index) => (
-                      <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
-                        <td className="py-3 px-4 font-medium text-gray-900">{item.mes}</td>
-                        <td className="text-right py-3 px-4 text-gray-900">€{item.ingresos.toLocaleString('es-ES')}</td>
-                        <td className="text-right py-3 px-4 text-red-600">€{item.gastos.toLocaleString('es-ES')}</td>
-                        <td className="text-right py-3 px-4">
-                          <span
-                            className={`font-semibold ${
-                              item.neto > 0 ? 'text-green-600' : item.neto < 0 ? 'text-red-600' : 'text-gray-600'
-                            }`}
-                          >
-                            €{item.neto.toLocaleString('es-ES')}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            {/* Empty State */}
+            {((tipoReporte === 'por_propiedad' && propertyData.length === 0) ||
+              (tipoReporte === 'flujo_caja' && flujoCaja.length === 0)) && (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+                <BarChartIcon className="mx-auto text-gray-400 mb-4" size={64} />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  No hay datos disponibles
+                </h3>
+                <p className="text-gray-600">
+                  No se encontraron datos para el período seleccionado. Intenta con otro rango de
+                  fechas.
+                </p>
               </div>
-            </div>
-          )}
-
-          {/* Empty State */}
-          {((tipoReporte === 'por_propiedad' && propertyData.length === 0) ||
-            (tipoReporte === 'flujo_caja' && flujoCaja.length === 0)) && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
-              <BarChartIcon className="mx-auto text-gray-400 mb-4" size={64} />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No hay datos disponibles</h3>
-              <p className="text-gray-600">
-                No se encontraron datos para el período seleccionado. Intenta con otro rango de fechas.
-              </p>
-            </div>
-          )}
+            )}
           </div>
         </main>
       </div>
     </div>
   );
 }
-
 
 export default function ReportesPage() {
   return (

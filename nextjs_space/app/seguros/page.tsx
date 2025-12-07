@@ -9,12 +9,49 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
-import { Home, ArrowLeft, Shield, AlertTriangle, CheckCircle, Plus, Search, Phone, Mail, Euro, Calendar, Upload, FileText, Download, Trash2, Loader2 } from 'lucide-react';
+import {
+  Home,
+  ArrowLeft,
+  Shield,
+  AlertTriangle,
+  CheckCircle,
+  Plus,
+  Search,
+  Phone,
+  Mail,
+  Euro,
+  Calendar,
+  Upload,
+  FileText,
+  Download,
+  Trash2,
+  Loader2,
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import logger, { logError } from '@/lib/logger';
@@ -176,13 +213,16 @@ export default function SegurosPage() {
     if (s.estado !== 'activa') return false;
     const vencimiento = new Date(s.fechaVencimiento);
     const hoy = new Date();
-    const diasRestantes = Math.ceil((vencimiento.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+    const diasRestantes = Math.ceil(
+      (vencimiento.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24)
+    );
     return diasRestantes <= 30 && diasRestantes >= 0;
   }).length;
 
-  const filteredSeguros = seguros.filter((s) =>
-    s.numeroPoliza?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.aseguradora?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredSeguros = seguros.filter(
+    (s) =>
+      s.numeroPoliza?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      s.aseguradora?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (status === 'loading' || loading) {
@@ -207,14 +247,19 @@ export default function SegurosPage() {
               <Breadcrumb>
                 <BreadcrumbList>
                   <BreadcrumbItem>
-                    <BreadcrumbLink href="/dashboard"><Home className="h-4 w-4" /></BreadcrumbLink>
+                    <BreadcrumbLink href="/dashboard">
+                      <Home className="h-4 w-4" />
+                    </BreadcrumbLink>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator />
-                  <BreadcrumbItem><BreadcrumbPage>Seguros</BreadcrumbPage></BreadcrumbItem>
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>Seguros</BreadcrumbPage>
+                  </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
               <Button variant="outline" size="sm" onClick={() => router.push('/dashboard')}>
-                <ArrowLeft className="h-4 w-4 mr-2" />Volver
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Volver
               </Button>
             </div>
             <div>
@@ -258,7 +303,11 @@ export default function SegurosPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    €{(seguros.reduce((acc, s) => acc + (s.sumaAsegurada || 0), 0) / 1000).toFixed(0)}K
+                    €
+                    {(seguros.reduce((acc, s) => acc + (s.sumaAsegurada || 0), 0) / 1000).toFixed(
+                      0
+                    )}
+                    K
                   </div>
                 </CardContent>
               </Card>
@@ -266,10 +315,16 @@ export default function SegurosPage() {
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input placeholder="Buscar..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+                <Input
+                  placeholder="Buscar..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
               </div>
               <Button onClick={() => setOpenNew(true)}>
-                <Plus className="h-4 w-4 mr-2" />Nuevo Seguro
+                <Plus className="h-4 w-4 mr-2" />
+                Nuevo Seguro
               </Button>
             </div>
             <div className="grid grid-cols-1 gap-4">
@@ -301,13 +356,17 @@ export default function SegurosPage() {
                       {seguro.sumaAsegurada && (
                         <div>
                           <p className="text-xs text-muted-foreground">Suma Asegurada</p>
-                          <p className="text-sm font-medium">€{seguro.sumaAsegurada.toLocaleString()}</p>
+                          <p className="text-sm font-medium">
+                            €{seguro.sumaAsegurada.toLocaleString()}
+                          </p>
                         </div>
                       )}
                       {seguro.primaAnual && (
                         <div>
                           <p className="text-xs text-muted-foreground">Prima Anual</p>
-                          <p className="text-sm font-medium">€{seguro.primaAnual.toLocaleString()}</p>
+                          <p className="text-sm font-medium">
+                            €{seguro.primaAnual.toLocaleString()}
+                          </p>
                         </div>
                       )}
                     </div>
@@ -345,11 +404,22 @@ export default function SegurosPage() {
           </DialogHeader>
           <div className="grid gap-4">
             <div className="grid grid-cols-2 gap-4">
-              <div><Label>Número Póliza *</Label><Input value={newSeguro.numeroPoliza} onChange={(e) => setNewSeguro({ ...newSeguro, numeroPoliza: e.target.value })} /></div>
+              <div>
+                <Label>Número Póliza *</Label>
+                <Input
+                  value={newSeguro.numeroPoliza}
+                  onChange={(e) => setNewSeguro({ ...newSeguro, numeroPoliza: e.target.value })}
+                />
+              </div>
               <div>
                 <Label>Tipo *</Label>
-                <Select value={newSeguro.tipo} onValueChange={(v) => setNewSeguro({ ...newSeguro, tipo: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                <Select
+                  value={newSeguro.tipo}
+                  onValueChange={(v) => setNewSeguro({ ...newSeguro, tipo: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="incendio">Incendio</SelectItem>
                     <SelectItem value="robo">Robo</SelectItem>
@@ -363,20 +433,75 @@ export default function SegurosPage() {
                 </Select>
               </div>
             </div>
-            <div><Label>Aseguradora *</Label><Input value={newSeguro.aseguradora} onChange={(e) => setNewSeguro({ ...newSeguro, aseguradora: e.target.value })} /></div>
-            <div><Label>Nombre Asegurado *</Label><Input value={newSeguro.nombreAsegurado} onChange={(e) => setNewSeguro({ ...newSeguro, nombreAsegurado: e.target.value })} /></div>
-            <div className="grid grid-cols-2 gap-4">
-              <div><Label>Fecha Inicio *</Label><Input type="date" value={newSeguro.fechaInicio} onChange={(e) => setNewSeguro({ ...newSeguro, fechaInicio: e.target.value })} /></div>
-              <div><Label>Fecha Vencimiento *</Label><Input type="date" value={newSeguro.fechaVencimiento} onChange={(e) => setNewSeguro({ ...newSeguro, fechaVencimiento: e.target.value })} /></div>
+            <div>
+              <Label>Aseguradora *</Label>
+              <Input
+                value={newSeguro.aseguradora}
+                onChange={(e) => setNewSeguro({ ...newSeguro, aseguradora: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Nombre Asegurado *</Label>
+              <Input
+                value={newSeguro.nombreAsegurado}
+                onChange={(e) => setNewSeguro({ ...newSeguro, nombreAsegurado: e.target.value })}
+              />
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div><Label>Prima Anual (€)</Label><Input type="number" step="0.01" value={newSeguro.primaAnual} onChange={(e) => setNewSeguro({ ...newSeguro, primaAnual: e.target.value })} /></div>
-              <div><Label>Suma Asegurada (€)</Label><Input type="number" step="0.01" value={newSeguro.sumaAsegurada} onChange={(e) => setNewSeguro({ ...newSeguro, sumaAsegurada: e.target.value })} /></div>
+              <div>
+                <Label>Fecha Inicio *</Label>
+                <Input
+                  type="date"
+                  value={newSeguro.fechaInicio}
+                  onChange={(e) => setNewSeguro({ ...newSeguro, fechaInicio: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>Fecha Vencimiento *</Label>
+                <Input
+                  type="date"
+                  value={newSeguro.fechaVencimiento}
+                  onChange={(e) => setNewSeguro({ ...newSeguro, fechaVencimiento: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Prima Anual (€)</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={newSeguro.primaAnual}
+                  onChange={(e) => setNewSeguro({ ...newSeguro, primaAnual: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>Suma Asegurada (€)</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={newSeguro.sumaAsegurada}
+                  onChange={(e) => setNewSeguro({ ...newSeguro, sumaAsegurada: e.target.value })}
+                />
+              </div>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenNew(false)}>Cancelar</Button>
-            <Button onClick={handleCreate} disabled={!newSeguro.numeroPoliza || !newSeguro.aseguradora || !newSeguro.nombreAsegurado || !newSeguro.fechaInicio || !newSeguro.fechaVencimiento}>Crear</Button>
+            <Button variant="outline" onClick={() => setOpenNew(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleCreate}
+              disabled={
+                !newSeguro.numeroPoliza ||
+                !newSeguro.aseguradora ||
+                !newSeguro.nombreAsegurado ||
+                !newSeguro.fechaInicio ||
+                !newSeguro.fechaVencimiento
+              }
+            >
+              Crear
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -390,7 +515,7 @@ export default function SegurosPage() {
               {selectedSeguro?.aseguradora} - Póliza {selectedSeguro?.numeroPoliza}
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             {/* Upload section */}
             <div className="border-2 border-dashed rounded-lg p-4">
@@ -405,7 +530,9 @@ export default function SegurosPage() {
                     <>
                       <Upload className="h-10 w-10 text-muted-foreground mb-2" />
                       <p className="text-sm font-medium">Haz clic para subir un documento</p>
-                      <p className="text-xs text-muted-foreground">PDF, DOC, DOCX, JPG, PNG (máx. 10MB)</p>
+                      <p className="text-xs text-muted-foreground">
+                        PDF, DOC, DOCX, JPG, PNG (máx. 10MB)
+                      </p>
                     </>
                   )}
                 </div>
@@ -425,45 +552,47 @@ export default function SegurosPage() {
               <h4 className="text-sm font-medium mb-3">Documentos Adjuntos</h4>
               {(selectedSeguro?.documentosAdjuntos as any)?.length > 0 ? (
                 <div className="space-y-2">
-                  {((selectedSeguro?.documentosAdjuntos as any) || []).map((doc: any, index: number) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <FileText className="h-5 w-5 text-primary flex-shrink-0" />
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-medium truncate">{doc.filename}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(doc.uploadedAt).toLocaleDateString('es-ES', {
-                              day: '2-digit',
-                              month: 'short',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
-                            {doc.size && ` • ${(doc.size / 1024).toFixed(0)} KB`}
-                          </p>
+                  {((selectedSeguro?.documentosAdjuntos as any) || []).map(
+                    (doc: any, index: number) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <FileText className="h-5 w-5 text-primary flex-shrink-0" />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium truncate">{doc.filename}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(doc.uploadedAt).toLocaleDateString('es-ES', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                              {doc.size && ` • ${(doc.size / 1024).toFixed(0)} KB`}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => window.open(doc.url, '_blank')}
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleDeleteDocument(doc.url)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => window.open(doc.url, '_blank')}
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleDeleteDocument(doc.url)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
+                    )
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">

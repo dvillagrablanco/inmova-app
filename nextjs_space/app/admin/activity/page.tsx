@@ -9,16 +9,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
-  Activity,
-  Clock,
-  User,
-  Building2,
-  RefreshCw,
-  Search,
-  Filter,
-} from 'lucide-react';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Activity, Clock, User, Building2, RefreshCw, Search, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -92,17 +90,18 @@ export default function ActivityTimelinePage() {
     }
   }, [status, session, router, actionFilter]);
 
-  const filteredActivities = timeline?.activities.filter((activity) => {
-    if (!searchTerm) return true;
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      activity.company.nombre.toLowerCase().includes(searchLower) ||
-      activity.user.name?.toLowerCase().includes(searchLower) ||
-      activity.user.email.toLowerCase().includes(searchLower) ||
-      activity.entityType.toLowerCase().includes(searchLower) ||
-      activity.entityName?.toLowerCase().includes(searchLower)
-    );
-  }) || [];
+  const filteredActivities =
+    timeline?.activities.filter((activity) => {
+      if (!searchTerm) return true;
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        activity.company.nombre.toLowerCase().includes(searchLower) ||
+        activity.user.name?.toLowerCase().includes(searchLower) ||
+        activity.user.email.toLowerCase().includes(searchLower) ||
+        activity.entityType.toLowerCase().includes(searchLower) ||
+        activity.entityName?.toLowerCase().includes(searchLower)
+      );
+    }) || [];
 
   if (loading || status === 'loading') {
     return (
@@ -127,12 +126,10 @@ export default function ActivityTimelinePage() {
                 <CardContent className="pt-6">
                   <div className="text-center py-8">
                     <Activity className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-muted-foreground">No se pudo cargar la actividad del sistema</p>
-                    <Button
-                      variant="outline"
-                      className="mt-4"
-                      onClick={fetchTimeline}
-                    >
+                    <p className="text-muted-foreground">
+                      No se pudo cargar la actividad del sistema
+                    </p>
+                    <Button variant="outline" className="mt-4" onClick={fetchTimeline}>
                       <RefreshCw className="w-4 h-4 mr-2" />
                       Reintentar
                     </Button>
@@ -170,9 +167,7 @@ export default function ActivityTimelinePage() {
                   <Activity className="h-8 w-8 mr-3" />
                   Timeline de Actividad
                 </h1>
-                <p className="text-gray-600 mt-1">
-                  Historial completo de acciones en el sistema
-                </p>
+                <p className="text-gray-600 mt-1">Historial completo de acciones en el sistema</p>
               </div>
               <Button onClick={fetchTimeline} variant="outline" size="sm">
                 <RefreshCw className="h-4 w-4 mr-2" />
@@ -275,13 +270,14 @@ export default function ActivityTimelinePage() {
                                   <div className="flex-1">
                                     <div className="flex items-center space-x-2 mb-2">
                                       <Badge
-                                        className={actionColors[activity.action] || 'bg-gray-100 text-gray-800'}
+                                        className={
+                                          actionColors[activity.action] ||
+                                          'bg-gray-100 text-gray-800'
+                                        }
                                       >
                                         {activity.action}
                                       </Badge>
-                                      <Badge variant="outline">
-                                        {activity.entityType}
-                                      </Badge>
+                                      <Badge variant="outline">{activity.entityType}</Badge>
                                       {activity.entityName && (
                                         <span className="text-sm font-medium text-gray-700">
                                           {activity.entityName}

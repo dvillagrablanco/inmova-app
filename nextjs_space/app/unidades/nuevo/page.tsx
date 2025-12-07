@@ -10,7 +10,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -171,7 +177,9 @@ export default function NuevaUnidadPage() {
                           <Label htmlFor="edificioId">Edificio *</Label>
                           <Select
                             value={formData.edificioId}
-                            onValueChange={(value) => setFormData({ ...formData, edificioId: value })}
+                            onValueChange={(value) =>
+                              setFormData({ ...formData, edificioId: value })
+                            }
                           >
                             <SelectTrigger>
                               <SelectValue placeholder="Selecciona un edificio" />
@@ -301,10 +309,20 @@ export default function NuevaUnidadPage() {
                         <div className="p-4 bg-muted rounded-lg space-y-2 text-sm">
                           <p className="font-medium">Resumen:</p>
                           <div className="space-y-1">
-                            <p><span className="text-muted-foreground">Tipo:</span> {formData.tipo}</p>
-                            <p><span className="text-muted-foreground">Superficie:</span> {formData.superficie} m²</p>
-                            <p><span className="text-muted-foreground">Habitaciones:</span> {formData.habitaciones}</p>
-                            <p><span className="text-muted-foreground">Baños:</span> {formData.banos}</p>
+                            <p>
+                              <span className="text-muted-foreground">Tipo:</span> {formData.tipo}
+                            </p>
+                            <p>
+                              <span className="text-muted-foreground">Superficie:</span>{' '}
+                              {formData.superficie} m²
+                            </p>
+                            <p>
+                              <span className="text-muted-foreground">Habitaciones:</span>{' '}
+                              {formData.habitaciones}
+                            </p>
+                            <p>
+                              <span className="text-muted-foreground">Baños:</span> {formData.banos}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -313,7 +331,11 @@ export default function NuevaUnidadPage() {
                 ]}
                 submitButton={
                   <div className="flex gap-3">
-                    <Button type="submit" disabled={isLoading || !formData.edificioId} className="flex-1 sm:flex-initial">
+                    <Button
+                      type="submit"
+                      disabled={isLoading || !formData.edificioId}
+                      className="flex-1 sm:flex-initial"
+                    >
                       {isLoading ? (
                         <>
                           <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />

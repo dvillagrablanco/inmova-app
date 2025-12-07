@@ -10,27 +10,47 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import { 
-  Home, 
-  ArrowLeft, 
-  Vote, 
-  Plus, 
-  CheckCircle2, 
-  Clock, 
+import {
+  Home,
+  ArrowLeft,
+  Vote,
+  Plus,
+  CheckCircle2,
+  Clock,
   XCircle,
   Users,
   TrendingUp,
   Calendar,
   MessageSquare,
-  AlertCircle
+  AlertCircle,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -290,12 +310,13 @@ export default function VotacionesPage() {
   const totalVotaciones = votaciones.length;
   const votacionesActivas = votaciones.filter((v) => v.estado === 'activa').length;
   const votacionesCerradas = votaciones.filter((v) => v.estado === 'cerrada').length;
-  const participacionPromedio = votaciones.length > 0 
-    ? votaciones.reduce((sum, v) => {
-        const participacion = v.totalVotantes > 0 ? (v.votos.length / v.totalVotantes) * 100 : 0;
-        return sum + participacion;
-      }, 0) / votaciones.length
-    : 0;
+  const participacionPromedio =
+    votaciones.length > 0
+      ? votaciones.reduce((sum, v) => {
+          const participacion = v.totalVotantes > 0 ? (v.votos.length / v.totalVotantes) * 100 : 0;
+          return sum + participacion;
+        }, 0) / votaciones.length
+      : 0;
 
   const isAdmin = session?.user?.role === 'administrador' || session?.user?.role === 'gestor';
 
@@ -367,9 +388,7 @@ export default function VotacionesPage() {
                   <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>Crear Nueva Votación</DialogTitle>
-                      <DialogDescription>
-                        Define la votación para la comunidad
-                      </DialogDescription>
+                      <DialogDescription>Define la votación para la comunidad</DialogDescription>
                     </DialogHeader>
 
                     <div className="space-y-4 py-4">
@@ -377,9 +396,7 @@ export default function VotacionesPage() {
                         <Label htmlFor="building">Edificio *</Label>
                         <Select
                           value={formData.buildingId}
-                          onValueChange={(value) =>
-                            setFormData({ ...formData, buildingId: value })
-                          }
+                          onValueChange={(value) => setFormData({ ...formData, buildingId: value })}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Seleccionar edificio" />
@@ -399,9 +416,7 @@ export default function VotacionesPage() {
                         <Input
                           id="titulo"
                           value={formData.titulo}
-                          onChange={(e) =>
-                            setFormData({ ...formData, titulo: e.target.value })
-                          }
+                          onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
                           placeholder="Ej: Renovación del ascensor"
                         />
                       </div>
@@ -423,9 +438,7 @@ export default function VotacionesPage() {
                         <Label htmlFor="tipo">Tipo de Votación</Label>
                         <Select
                           value={formData.tipo}
-                          onValueChange={(value) =>
-                            setFormData({ ...formData, tipo: value })
-                          }
+                          onValueChange={(value) => setFormData({ ...formData, tipo: value })}
                         >
                           <SelectTrigger>
                             <SelectValue />
@@ -464,11 +477,7 @@ export default function VotacionesPage() {
                             )}
                           </div>
                         ))}
-                        <Button
-                          variant="outline"
-                          onClick={addOpcion}
-                          className="w-full"
-                        >
+                        <Button variant="outline" onClick={addOpcion} className="w-full">
                           <Plus className="h-4 w-4 mr-2" />
                           Agregar Opción
                         </Button>
@@ -506,9 +515,7 @@ export default function VotacionesPage() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="totalVotantes">
-                          Total de Votantes (0 = sin límite)
-                        </Label>
+                        <Label htmlFor="totalVotantes">Total de Votantes (0 = sin límite)</Label>
                         <Input
                           id="totalVotantes"
                           type="number"
@@ -526,10 +533,7 @@ export default function VotacionesPage() {
                     </div>
 
                     <div className="flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => setOpenNewDialog(false)}
-                      >
+                      <Button variant="outline" onClick={() => setOpenNewDialog(false)}>
                         Cancelar
                       </Button>
                       <Button onClick={handleCreateVotacion}>Crear Votación</Button>
@@ -574,15 +578,11 @@ export default function VotacionesPage() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Participación Promedio
-                </CardTitle>
+                <CardTitle className="text-sm font-medium">Participación Promedio</CardTitle>
                 <TrendingUp className="h-4 w-4 text-purple-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {participacionPromedio.toFixed(1)}%
-                </div>
+                <div className="text-2xl font-bold">{participacionPromedio.toFixed(1)}%</div>
               </CardContent>
             </Card>
           </div>
@@ -616,14 +616,9 @@ export default function VotacionesPage() {
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <Vote className="h-12 w-12 text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground text-center">
-                    No hay votaciones disponibles
-                  </p>
+                  <p className="text-muted-foreground text-center">No hay votaciones disponibles</p>
                   {isAdmin && (
-                    <Button
-                      onClick={() => setOpenNewDialog(true)}
-                      className="mt-4"
-                    >
+                    <Button onClick={() => setOpenNewDialog(true)} className="mt-4">
                       Crear Primera Votación
                     </Button>
                   )}
@@ -631,9 +626,10 @@ export default function VotacionesPage() {
               </Card>
             ) : (
               votacionesFiltradas.map((votacion) => {
-                const participacion = votacion.totalVotantes > 0
-                  ? (votacion.votos.length / votacion.totalVotantes) * 100
-                  : 0;
+                const participacion =
+                  votacion.totalVotantes > 0
+                    ? (votacion.votos.length / votacion.totalVotantes) * 100
+                    : 0;
                 const diasRestantes = Math.ceil(
                   (new Date(votacion.fechaCierre).getTime() - new Date().getTime()) /
                     (1000 * 60 * 60 * 24)
@@ -651,15 +647,15 @@ export default function VotacionesPage() {
                                 votacion.estado === 'activa'
                                   ? 'default'
                                   : votacion.estado === 'cerrada'
-                                  ? 'secondary'
-                                  : 'destructive'
+                                    ? 'secondary'
+                                    : 'destructive'
                               }
                             >
                               {votacion.estado === 'activa'
                                 ? 'Activa'
                                 : votacion.estado === 'cerrada'
-                                ? 'Cerrada'
-                                : 'Cancelada'}
+                                  ? 'Cerrada'
+                                  : 'Cancelada'}
                             </Badge>
                           </div>
                           <CardDescription className="line-clamp-2">
@@ -683,10 +679,10 @@ export default function VotacionesPage() {
                               {votacion.estado === 'activa' && diasRestantes > 0
                                 ? `${diasRestantes} días restantes`
                                 : votacion.estado === 'activa' && diasRestantes <= 0
-                                ? 'Vencida'
-                                : format(new Date(votacion.fechaCierre), 'dd/MM/yyyy', {
-                                    locale: es,
-                                  })}
+                                  ? 'Vencida'
+                                  : format(new Date(votacion.fechaCierre), 'dd/MM/yyyy', {
+                                      locale: es,
+                                    })}
                             </span>
                           </div>
                           <div className="flex items-center gap-2">
@@ -755,16 +751,14 @@ export default function VotacionesPage() {
                           selectedVotacion.estado === 'activa'
                             ? 'default'
                             : selectedVotacion.estado === 'cerrada'
-                            ? 'secondary'
-                            : 'destructive'
+                              ? 'secondary'
+                              : 'destructive'
                         }
                       >
                         {selectedVotacion.estado}
                       </Badge>
                     </div>
-                    <DialogDescription>
-                      {selectedVotacion.descripcion}
-                    </DialogDescription>
+                    <DialogDescription>{selectedVotacion.descripcion}</DialogDescription>
                   </DialogHeader>
 
                   <div className="space-y-6 py-4">
@@ -777,18 +771,15 @@ export default function VotacionesPage() {
                       <div>
                         <span className="text-muted-foreground">Fecha cierre:</span>
                         <p className="font-medium">
-                          {format(
-                            new Date(selectedVotacion.fechaCierre),
-                            "dd/MM/yyyy HH:mm 'h'",
-                            { locale: es }
-                          )}
+                          {format(new Date(selectedVotacion.fechaCierre), "dd/MM/yyyy HH:mm 'h'", {
+                            locale: es,
+                          })}
                         </p>
                       </div>
                       <div>
                         <span className="text-muted-foreground">Total votos:</span>
                         <p className="font-medium">
-                          {selectedVotacion.totalVotos} /{' '}
-                          {selectedVotacion.totalVotantes || '∞'}
+                          {selectedVotacion.totalVotos} / {selectedVotacion.totalVotantes || '∞'}
                         </p>
                       </div>
                       <div>
@@ -849,10 +840,7 @@ export default function VotacionesPage() {
                     {selectedVotacion.estado === 'activa' && !isAdmin && (
                       <>
                         <Separator />
-                        <VotarForm
-                          opciones={selectedVotacion.opciones}
-                          onVotar={handleVotar}
-                        />
+                        <VotarForm opciones={selectedVotacion.opciones} onVotar={handleVotar} />
                       </>
                     )}
                   </div>

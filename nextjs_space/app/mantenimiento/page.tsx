@@ -103,7 +103,7 @@ function MantenimientoPage() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
   const { canCreate } = usePermissions();
-  
+
   // Estados para Solicitudes (Tab 1)
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -146,7 +146,7 @@ function MantenimientoPage() {
   useEffect(() => {
     const fetchRequests = async () => {
       if (status !== 'authenticated') return;
-      
+
       try {
         const response = await fetch('/api/maintenance');
         if (response.ok) {
@@ -191,7 +191,10 @@ function MantenimientoPage() {
 
   // Set loading false cuando se carguen los datos
   useEffect(() => {
-    if (status === 'authenticated' && (requests.length > 0 || schedules.length > 0 || activeTab === 'calendario')) {
+    if (
+      status === 'authenticated' &&
+      (requests.length > 0 || schedules.length > 0 || activeTab === 'calendario')
+    ) {
       setIsLoading(false);
     } else if (status === 'authenticated') {
       // Dar tiempo para cargar datos vacíos
@@ -308,7 +311,9 @@ function MantenimientoPage() {
     e.preventDefault();
 
     try {
-      const url = editingId ? `/api/maintenance-schedule/${editingId}` : '/api/maintenance-schedule';
+      const url = editingId
+        ? `/api/maintenance-schedule/${editingId}`
+        : '/api/maintenance-schedule';
       const method = editingId ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -321,7 +326,7 @@ function MantenimientoPage() {
         toast.success(editingId ? 'Mantenimiento actualizado' : 'Mantenimiento programado creado');
         setShowModal(false);
         resetForm();
-        
+
         const schedRes = await fetch('/api/maintenance-schedule');
         if (schedRes.ok) setSchedules(await schedRes.json());
       } else {
@@ -611,21 +616,33 @@ function MantenimientoPage() {
                     {/* Filter Chips */}
                     <FilterChips
                       filters={[
-                        ...(searchTerm ? [{
-                          id: 'search',
-                          label: 'Búsqueda',
-                          value: searchTerm
-                        }] : []),
-                        ...(estadoFilter !== 'all' ? [{
-                          id: 'estado',
-                          label: 'Estado',
-                          value: getEstadoLabel(estadoFilter)
-                        }] : []),
-                        ...(prioridadFilter !== 'all' ? [{
-                          id: 'prioridad',
-                          label: 'Prioridad',
-                          value: getPrioridadLabel(prioridadFilter)
-                        }] : [])
+                        ...(searchTerm
+                          ? [
+                              {
+                                id: 'search',
+                                label: 'Búsqueda',
+                                value: searchTerm,
+                              },
+                            ]
+                          : []),
+                        ...(estadoFilter !== 'all'
+                          ? [
+                              {
+                                id: 'estado',
+                                label: 'Estado',
+                                value: getEstadoLabel(estadoFilter),
+                              },
+                            ]
+                          : []),
+                        ...(prioridadFilter !== 'all'
+                          ? [
+                              {
+                                id: 'prioridad',
+                                label: 'Prioridad',
+                                value: getPrioridadLabel(prioridadFilter),
+                              },
+                            ]
+                          : []),
                       ]}
                       onRemove={(id) => {
                         if (id === 'search') setSearchTerm('');
@@ -646,13 +663,28 @@ function MantenimientoPage() {
                   {filteredRequests.length === 0 ? (
                     <EmptyState
                       icon={<Wrench className="h-12 w-12" />}
-                      title={searchTerm || estadoFilter !== 'all' || prioridadFilter !== 'all' ? 'No se encontraron solicitudes' : 'No hay solicitudes de mantenimiento'}
-                      description={searchTerm || estadoFilter !== 'all' || prioridadFilter !== 'all' ? 'No se encontraron solicitudes con los filtros aplicados. Intenta ajustar tu búsqueda.' : 'Comienza creando tu primera solicitud de mantenimiento correctivo para gestionar incidencias.'}
-                      action={canCreate && !searchTerm && estadoFilter === 'all' && prioridadFilter === 'all' ? {
-                        label: 'Crear Primera Solicitud',
-                        onClick: () => router.push('/mantenimiento/nuevo'),
-                        icon: <Plus className="h-4 w-4" />
-                      } : undefined}
+                      title={
+                        searchTerm || estadoFilter !== 'all' || prioridadFilter !== 'all'
+                          ? 'No se encontraron solicitudes'
+                          : 'No hay solicitudes de mantenimiento'
+                      }
+                      description={
+                        searchTerm || estadoFilter !== 'all' || prioridadFilter !== 'all'
+                          ? 'No se encontraron solicitudes con los filtros aplicados. Intenta ajustar tu búsqueda.'
+                          : 'Comienza creando tu primera solicitud de mantenimiento correctivo para gestionar incidencias.'
+                      }
+                      action={
+                        canCreate &&
+                        !searchTerm &&
+                        estadoFilter === 'all' &&
+                        prioridadFilter === 'all'
+                          ? {
+                              label: 'Crear Primera Solicitud',
+                              onClick: () => router.push('/mantenimiento/nuevo'),
+                              icon: <Plus className="h-4 w-4" />,
+                            }
+                          : undefined
+                      }
                     />
                   ) : (
                     filteredRequests.map((request) => (
@@ -669,8 +701,8 @@ function MantenimientoPage() {
                                   request.prioridad === 'alta'
                                     ? 'bg-red-100'
                                     : request.prioridad === 'media'
-                                    ? 'bg-yellow-100'
-                                    : 'bg-green-100'
+                                      ? 'bg-yellow-100'
+                                      : 'bg-green-100'
                                 }`}
                               >
                                 {request.prioridad === 'alta' ? (
@@ -874,14 +906,18 @@ function MantenimientoPage() {
                       icon={<CalendarIcon className="h-12 w-12" />}
                       title="No hay mantenimientos programados"
                       description="Comienza creando tu primera programación de mantenimiento preventivo para mantener tus propiedades en óptimas condiciones."
-                      action={canCreate ? {
-                        label: 'Crear Primer Mantenimiento',
-                        onClick: () => {
-                          resetForm();
-                          setShowModal(true);
-                        },
-                        icon: <Plus className="h-4 w-4" />
-                      } : undefined}
+                      action={
+                        canCreate
+                          ? {
+                              label: 'Crear Primer Mantenimiento',
+                              onClick: () => {
+                                resetForm();
+                                setShowModal(true);
+                              },
+                              icon: <Plus className="h-4 w-4" />,
+                            }
+                          : undefined
+                      }
                     />
                   ) : (
                     filteredSchedules.map((schedule) => {
@@ -902,13 +938,17 @@ function MantenimientoPage() {
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
                                 <div className="flex items-center gap-3 mb-2">
-                                  <h3 className="text-lg font-bold text-gray-900">{schedule.titulo}</h3>
-                                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${priorityColor}`}>
+                                  <h3 className="text-lg font-bold text-gray-900">
+                                    {schedule.titulo}
+                                  </h3>
+                                  <span
+                                    className={`px-3 py-1 rounded-full text-xs font-medium ${priorityColor}`}
+                                  >
                                     {daysUntil < 0
                                       ? `Vencido hace ${Math.abs(daysUntil)} días`
                                       : daysUntil === 0
-                                      ? 'Hoy'
-                                      : `En ${daysUntil} días`}
+                                        ? 'Hoy'
+                                        : `En ${daysUntil} días`}
                                   </span>
                                   {!schedule.activo && (
                                     <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-200 text-gray-600">
@@ -926,11 +966,15 @@ function MantenimientoPage() {
                                   </div>
                                   <div>
                                     <span className="text-gray-500">Tipo:</span>
-                                    <p className="font-medium text-gray-900 capitalize">{schedule.tipo}</p>
+                                    <p className="font-medium text-gray-900 capitalize">
+                                      {schedule.tipo}
+                                    </p>
                                   </div>
                                   <div>
                                     <span className="text-gray-500">Frecuencia:</span>
-                                    <p className="font-medium text-gray-900 capitalize">{schedule.frecuencia}</p>
+                                    <p className="font-medium text-gray-900 capitalize">
+                                      {schedule.frecuencia}
+                                    </p>
                                   </div>
                                   <div>
                                     <span className="text-gray-500">Próxima Fecha:</span>
@@ -949,7 +993,9 @@ function MantenimientoPage() {
                                   {schedule.provider && (
                                     <div>
                                       <span className="text-gray-500">Proveedor:</span>
-                                      <p className="font-medium text-gray-900">{schedule.provider.nombre}</p>
+                                      <p className="font-medium text-gray-900">
+                                        {schedule.provider.nombre}
+                                      </p>
                                     </div>
                                   )}
                                   {schedule.costoEstimado && (
@@ -1008,8 +1054,9 @@ function MantenimientoPage() {
                     <CalendarIcon className="h-12 w-12 text-muted-foreground mb-4" />
                     <h3 className="text-lg font-semibold mb-2">Vista de Calendario</h3>
                     <p className="text-muted-foreground text-center max-w-md">
-                      Aquí se mostrará una vista de calendario unificada con todas las solicitudes de
-                      mantenimiento correctivo y preventivo. Esta funcionalidad estará disponible próximamente.
+                      Aquí se mostrará una vista de calendario unificada con todas las solicitudes
+                      de mantenimiento correctivo y preventivo. Esta funcionalidad estará disponible
+                      próximamente.
                     </p>
                   </CardContent>
                 </Card>
@@ -1051,7 +1098,9 @@ function MantenimientoPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Descripción *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Descripción *
+                </label>
                 <textarea
                   value={formData.descripcion}
                   onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
@@ -1080,7 +1129,9 @@ function MantenimientoPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Frecuencia *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Frecuencia *
+                  </label>
                   <select
                     value={formData.frecuencia}
                     onChange={(e) => setFormData({ ...formData, frecuencia: e.target.value })}
@@ -1130,7 +1181,9 @@ function MantenimientoPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Próxima Fecha *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Próxima Fecha *
+                  </label>
                   <input
                     type="date"
                     value={formData.proximaFecha}
@@ -1173,7 +1226,9 @@ function MantenimientoPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Costo Estimado (€)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Costo Estimado (€)
+                  </label>
                   <input
                     type="number"
                     step="0.01"

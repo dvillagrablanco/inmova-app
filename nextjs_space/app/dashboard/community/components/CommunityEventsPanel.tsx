@@ -32,7 +32,7 @@ import {
   Edit,
   Trash2,
   Eye,
-  CheckCircle2
+  CheckCircle2,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -92,7 +92,7 @@ export default function CommunityEventsPanel() {
     try {
       const params = new URLSearchParams();
       if (filter !== 'all') params.append('status', filter);
-      
+
       const res = await fetch(`/api/community/events?${params}`);
       if (res.ok) {
         const data = await res.json();
@@ -321,9 +321,7 @@ export default function CommunityEventsPanel() {
             <div className="text-center">
               <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">No hay eventos</h3>
-              <p className="text-muted-foreground mb-4">
-                Crea el primer evento para tu comunidad.
-              </p>
+              <p className="text-muted-foreground mb-4">Crea el primer evento para tu comunidad.</p>
               <Button onClick={() => setShowCreateDialog(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Crear Evento
@@ -340,7 +338,8 @@ export default function CommunityEventsPanel() {
                   <div className="space-y-1">
                     <CardTitle className="text-lg line-clamp-1">{event.titulo}</CardTitle>
                     <CardDescription className="flex items-center gap-1">
-                      {EVENT_CATEGORIES.find(c => c.value === event.categoria)?.label || event.categoria}
+                      {EVENT_CATEGORIES.find((c) => c.value === event.categoria)?.label ||
+                        event.categoria}
                     </CardDescription>
                   </div>
                   <Badge className={STATUS_COLORS[event.estado] || 'bg-gray-100'}>
@@ -351,14 +350,15 @@ export default function CommunityEventsPanel() {
               <CardContent className="space-y-3">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Calendar className="h-4 w-4" />
-                  <span>
-                    {format(new Date(event.fecha), "d 'de' MMMM, yyyy", { locale: es })}
-                  </span>
+                  <span>{format(new Date(event.fecha), "d 'de' MMMM, yyyy", { locale: es })}</span>
                 </div>
-                
+
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Clock className="h-4 w-4" />
-                  <span>{event.horaInicio}{event.horaFin && ` - ${event.horaFin}`}</span>
+                  <span>
+                    {event.horaInicio}
+                    {event.horaFin && ` - ${event.horaFin}`}
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -382,8 +382,8 @@ export default function CommunityEventsPanel() {
                   <Button variant="outline" size="sm">
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     className="text-destructive hover:text-destructive"
                     onClick={() => handleDeleteEvent(event.id)}

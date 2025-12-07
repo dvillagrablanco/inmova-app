@@ -33,7 +33,7 @@ export default function TenantRegisterPage() {
       const response = await fetch('/api/portal-inquilino/invitations/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: invitationCode })
+        body: JSON.stringify({ code: invitationCode }),
       });
 
       const data = await response.json();
@@ -78,8 +78,8 @@ export default function TenantRegisterPage() {
         body: JSON.stringify({
           invitationCode,
           password,
-          confirmPassword
-        })
+          confirmPassword,
+        }),
       });
 
       const data = await response.json();
@@ -90,7 +90,7 @@ export default function TenantRegisterPage() {
       }
 
       toast.success('¡Registro completado exitosamente!');
-      
+
       // Redirigir al login después de 2 segundos
       setTimeout(() => {
         router.push('/portal-inquilino/login');
@@ -226,9 +226,7 @@ export default function TenantRegisterPage() {
                           password.length >= 8 ? 'text-green-500' : 'text-gray-300'
                         }`}
                       />
-                      <span
-                        className={password.length >= 8 ? 'text-green-600' : 'text-gray-500'}
-                      >
+                      <span className={password.length >= 8 ? 'text-green-600' : 'text-gray-500'}>
                         Mínimo 8 caracteres
                       </span>
                     </div>

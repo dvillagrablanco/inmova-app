@@ -11,8 +11,24 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { Home, MessageSquare, Send, Loader2, CheckCircle, Clock, BookOpen, HelpCircle } from 'lucide-react';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import {
+  Home,
+  MessageSquare,
+  Send,
+  Loader2,
+  CheckCircle,
+  Clock,
+  BookOpen,
+  HelpCircle,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { categorizeTicket } from '@/lib/ai-automation-service';
 import { AIAssistant } from '@/components/automation/AIAssistant';
@@ -89,7 +105,7 @@ export default function SoportePage() {
       }
 
       const data = await response.json();
-      
+
       // Mostrar la respuesta de IA
       if (data.aiResponse) {
         setCategorization(data.aiResponse);
@@ -101,7 +117,7 @@ export default function SoportePage() {
           ? '¡Tu consulta ha sido resuelta automáticamente!'
           : '¡Ticket creado exitosamente! Te contactaremos pronto.'
       );
-      
+
       // Reset después de 3 segundos para que el usuario pueda ver la respuesta
       setTimeout(() => {
         setFormData({ subject: '', description: '' });
@@ -110,10 +126,13 @@ export default function SoportePage() {
       }, 3000);
     } catch (error) {
       toast.error('Error al crear el ticket');
-      logError(new Error(error instanceof Error ? error.message : 'Error creating support ticket'), {
-        context: 'SoportePage - handleAnalyze',
-        subject: formData.subject,
-      });
+      logError(
+        new Error(error instanceof Error ? error.message : 'Error creating support ticket'),
+        {
+          context: 'SoportePage - handleAnalyze',
+          subject: formData.subject,
+        }
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -187,7 +206,10 @@ export default function SoportePage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => router.push('/knowledge-base')}>
+              <Card
+                className="hover:shadow-lg transition-shadow cursor-pointer"
+                onClick={() => router.push('/knowledge-base')}
+              >
                 <CardHeader>
                   <BookOpen className="h-8 w-8 text-indigo-600 mb-2" />
                   <CardTitle className="text-lg">Base de Conocimientos</CardTitle>
@@ -201,9 +223,7 @@ export default function SoportePage() {
                 <CardHeader>
                   <MessageSquare className="h-8 w-8 text-indigo-600 mb-2" />
                   <CardTitle className="text-lg">Asistente IA</CardTitle>
-                  <CardDescription>
-                    Chatea con nuestro asistente inteligente 24/7
-                  </CardDescription>
+                  <CardDescription>Chatea con nuestro asistente inteligente 24/7</CardDescription>
                 </CardHeader>
               </Card>
 
@@ -211,9 +231,7 @@ export default function SoportePage() {
                 <CardHeader>
                   <HelpCircle className="h-8 w-8 text-indigo-600 mb-2" />
                   <CardTitle className="text-lg">Crear Ticket</CardTitle>
-                  <CardDescription>
-                    Nuestro equipo te responderá en menos de 24h
-                  </CardDescription>
+                  <CardDescription>Nuestro equipo te responderá en menos de 24h</CardDescription>
                 </CardHeader>
               </Card>
             </div>
@@ -232,7 +250,7 @@ export default function SoportePage() {
                     <Input
                       id="subject"
                       value={formData.subject}
-                      onChange={e => setFormData({ ...formData, subject: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                       placeholder="Ej: No puedo crear un contrato"
                       required
                     />
@@ -243,7 +261,7 @@ export default function SoportePage() {
                     <Textarea
                       id="description"
                       value={formData.description}
-                      onChange={e => setFormData({ ...formData, description: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       placeholder="Describe tu problema o consulta con el mayor detalle posible..."
                       required
                       rows={6}

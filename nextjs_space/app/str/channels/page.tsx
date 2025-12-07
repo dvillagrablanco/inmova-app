@@ -9,8 +9,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { Home, ArrowLeft, Share2, CheckCircle, AlertCircle, Clock, Building2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -79,7 +92,7 @@ export default function STRChannelsPage() {
 
   const filteredChannels = useMemo(() => {
     return channels.filter((channel) => {
-      const matchesSearch = 
+      const matchesSearch =
         channel.listing.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
         channel.canal.toLowerCase().includes(searchTerm.toLowerCase()) ||
         channel.listing.unit.building.nombre.toLowerCase().includes(searchTerm.toLowerCase());
@@ -94,9 +107,9 @@ export default function STRChannelsPage() {
   const stats = useMemo(() => {
     return {
       total: channels.length,
-      activos: channels.filter(c => c.estado === 'activo').length,
-      sincronizados: channels.filter(c => c.ultimaSincronizacion).length,
-      errores: channels.filter(c => c.estado === 'error').length,
+      activos: channels.filter((c) => c.estado === 'activo').length,
+      sincronizados: channels.filter((c) => c.ultimaSincronizacion).length,
+      errores: channels.filter((c) => c.estado === 'error').length,
     };
   }, [channels]);
 
@@ -170,49 +183,49 @@ export default function STRChannelsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Total Canales</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Total Canales
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.total}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Conexiones configuradas
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Conexiones configuradas</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Activos</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Activos
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.activos}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Canales sincronizando
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Canales sincronizando</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Sincronizados</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Sincronizados
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.sincronizados}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Con última sincronización
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Con última sincronización</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Con Errores</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Con Errores
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-destructive">{stats.errores}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Requieren atención
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Requieren atención</p>
                 </CardContent>
               </Card>
             </div>
@@ -288,14 +301,13 @@ export default function STRChannelsPage() {
                               <Badge className={getCanalColor(channel.canal)}>
                                 {channel.canal}
                               </Badge>
-                              <Badge variant={estadoBadge.variant}>
-                                {estadoBadge.label}
-                              </Badge>
+                              <Badge variant={estadoBadge.variant}>{estadoBadge.label}</Badge>
                             </div>
                             <CardTitle className="text-lg">{channel.listing.titulo}</CardTitle>
                             <CardDescription className="mt-1">
                               <Building2 className="h-3 w-3 inline mr-1" />
-                              {channel.listing.unit.building.nombre} - Unidad {channel.listing.unit.numero}
+                              {channel.listing.unit.building.nombre} - Unidad{' '}
+                              {channel.listing.unit.numero}
                             </CardDescription>
                           </div>
                         </div>
@@ -327,7 +339,11 @@ export default function STRChannelsPage() {
                             <div className="flex items-center gap-1">
                               <Clock className="h-4 w-4" />
                               <p className="font-medium">
-                                {format(new Date(channel.ultimaSincronizacion), "d 'de' MMMM, HH:mm", { locale: es })}
+                                {format(
+                                  new Date(channel.ultimaSincronizacion),
+                                  "d 'de' MMMM, HH:mm",
+                                  { locale: es }
+                                )}
                               </p>
                             </div>
                           </div>
@@ -335,9 +351,9 @@ export default function STRChannelsPage() {
 
                         {channel.urlExterna && (
                           <div className="pt-2 border-t">
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
+                            <Button
+                              variant="outline"
+                              size="sm"
                               className="w-full"
                               onClick={() => window.open(channel.urlExterna!, '_blank')}
                             >

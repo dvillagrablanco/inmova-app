@@ -9,13 +9,42 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/lazy-tabs';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
-import { Shield, Home, ArrowLeft, AlertTriangle, FileText, CheckCircle2, Clock, Users, Activity } from 'lucide-react';
+import {
+  Shield,
+  Home,
+  ArrowLeft,
+  AlertTriangle,
+  FileText,
+  CheckCircle2,
+  Clock,
+  Users,
+  Activity,
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import logger, { logError } from '@/lib/logger';
@@ -136,7 +165,13 @@ export default function AuditoriaPage() {
       if (res.ok) {
         toast.success('Reporte creado exitosamente');
         setOpenReportDialog(false);
-        setReportForm({ titulo: '', descripcion: '', tipoReporte: 'accesos', fechaInicio: '', fechaFin: '' });
+        setReportForm({
+          titulo: '',
+          descripcion: '',
+          tipoReporte: 'accesos',
+          fechaInicio: '',
+          fechaFin: '',
+        });
         fetchAuditReports();
       } else {
         toast.error('Error al crear reporte');
@@ -173,9 +208,21 @@ export default function AuditoriaPage() {
   }, [filterSeverity, filterResolved, status]);
 
   const getSeverityBadge = (severidad: string) => {
-    const variants: any = { info: 'default', warning: 'secondary', error: 'destructive', critical: 'destructive' };
-    const labels: any = { info: 'Info', warning: 'Advertencia', error: 'Error', critical: 'Crítico' };
-    return <Badge variant={variants[severidad] || 'default'}>{labels[severidad] || severidad}</Badge>;
+    const variants: any = {
+      info: 'default',
+      warning: 'secondary',
+      error: 'destructive',
+      critical: 'destructive',
+    };
+    const labels: any = {
+      info: 'Info',
+      warning: 'Advertencia',
+      error: 'Error',
+      critical: 'Crítico',
+    };
+    return (
+      <Badge variant={variants[severidad] || 'default'}>{labels[severidad] || severidad}</Badge>
+    );
   };
 
   if (status === 'loading' || loading) {
@@ -203,32 +250,56 @@ export default function AuditoriaPage() {
             <Breadcrumb className="mb-4">
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/dashboard"><Home className="h-4 w-4" /></BreadcrumbLink>
+                  <BreadcrumbLink href="/dashboard">
+                    <Home className="h-4 w-4" />
+                  </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
-                <BreadcrumbItem><BreadcrumbPage>Auditoría y Seguridad</BreadcrumbPage></BreadcrumbItem>
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Auditoría y Seguridad</BreadcrumbPage>
+                </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Auditoría y Seguridad</h1>
-                <p className="text-muted-foreground mt-1">Monitorea actividad y eventos de seguridad</p>
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                  Auditoría y Seguridad
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                  Monitorea actividad y eventos de seguridad
+                </p>
               </div>
               <Dialog open={openReportDialog} onOpenChange={setOpenReportDialog}>
                 <DialogTrigger asChild>
-                  <Button className="w-full sm:w-auto"><FileText className="mr-2 h-4 w-4" />Generar Reporte</Button>
+                  <Button className="w-full sm:w-auto">
+                    <FileText className="mr-2 h-4 w-4" />
+                    Generar Reporte
+                  </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl">
-                  <DialogHeader><DialogTitle>Generar Reporte de Auditoría</DialogTitle></DialogHeader>
+                  <DialogHeader>
+                    <DialogTitle>Generar Reporte de Auditoría</DialogTitle>
+                  </DialogHeader>
                   <form onSubmit={handleCreateReport} className="space-y-4">
                     <div>
                       <Label>Título *</Label>
-                      <Input value={reportForm.titulo} onChange={(e) => setReportForm({ ...reportForm, titulo: e.target.value })} required />
+                      <Input
+                        value={reportForm.titulo}
+                        onChange={(e) => setReportForm({ ...reportForm, titulo: e.target.value })}
+                        required
+                      />
                     </div>
                     <div>
                       <Label>Tipo de Reporte *</Label>
-                      <Select value={reportForm.tipoReporte} onValueChange={(value) => setReportForm({ ...reportForm, tipoReporte: value })}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                      <Select
+                        value={reportForm.tipoReporte}
+                        onValueChange={(value) =>
+                          setReportForm({ ...reportForm, tipoReporte: value })
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="accesos">Accesos</SelectItem>
                           <SelectItem value="cambios">Cambios</SelectItem>
@@ -240,15 +311,35 @@ export default function AuditoriaPage() {
                     <div className="grid gap-4 md:grid-cols-2">
                       <div>
                         <Label>Fecha Inicio *</Label>
-                        <Input type="date" value={reportForm.fechaInicio} onChange={(e) => setReportForm({ ...reportForm, fechaInicio: e.target.value })} required />
+                        <Input
+                          type="date"
+                          value={reportForm.fechaInicio}
+                          onChange={(e) =>
+                            setReportForm({ ...reportForm, fechaInicio: e.target.value })
+                          }
+                          required
+                        />
                       </div>
                       <div>
                         <Label>Fecha Fin *</Label>
-                        <Input type="date" value={reportForm.fechaFin} onChange={(e) => setReportForm({ ...reportForm, fechaFin: e.target.value })} required />
+                        <Input
+                          type="date"
+                          value={reportForm.fechaFin}
+                          onChange={(e) =>
+                            setReportForm({ ...reportForm, fechaFin: e.target.value })
+                          }
+                          required
+                        />
                       </div>
                     </div>
                     <div className="flex justify-end gap-2">
-                      <Button type="button" variant="outline" onClick={() => setOpenReportDialog(false)}>Cancelar</Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setOpenReportDialog(false)}
+                      >
+                        Cancelar
+                      </Button>
                       <Button type="submit">Generar</Button>
                     </div>
                   </form>
@@ -266,7 +357,9 @@ export default function AuditoriaPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.totalSecurityEvents}</div>
-                  <p className="text-xs text-muted-foreground">{stats.unresolvedEvents} sin resolver</p>
+                  <p className="text-xs text-muted-foreground">
+                    {stats.unresolvedEvents} sin resolver
+                  </p>
                 </CardContent>
               </Card>
               <Card>
@@ -286,7 +379,9 @@ export default function AuditoriaPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.totalAuditLogs}</div>
-                  <p className="text-xs text-muted-foreground">{stats.recentAuditLogs} últimos 30 días</p>
+                  <p className="text-xs text-muted-foreground">
+                    {stats.recentAuditLogs} últimos 30 días
+                  </p>
                 </CardContent>
               </Card>
               <Card>
@@ -314,7 +409,9 @@ export default function AuditoriaPage() {
                     <div>
                       <Label>Severidad</Label>
                       <Select value={filterSeverity} onValueChange={setFilterSeverity}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">Todos</SelectItem>
                           <SelectItem value="info">Info</SelectItem>
@@ -327,7 +424,9 @@ export default function AuditoriaPage() {
                     <div>
                       <Label>Estado</Label>
                       <Select value={filterResolved} onValueChange={setFilterResolved}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">Todos</SelectItem>
                           <SelectItem value="false">Sin resolver</SelectItem>
@@ -357,21 +456,35 @@ export default function AuditoriaPage() {
                               <Badge variant="outline">{event.tipo}</Badge>
                               {event.resuelta ? (
                                 <Badge variant="outline" className="bg-green-50">
-                                  <CheckCircle2 className="mr-1 h-3 w-3" />Resuelto
+                                  <CheckCircle2 className="mr-1 h-3 w-3" />
+                                  Resuelto
                                 </Badge>
                               ) : (
                                 <Badge variant="outline" className="bg-yellow-50">
-                                  <Clock className="mr-1 h-3 w-3" />Pendiente
+                                  <Clock className="mr-1 h-3 w-3" />
+                                  Pendiente
                                 </Badge>
                               )}
                             </div>
                             <p className="text-sm font-medium">{event.descripcion}</p>
-                            {event.user && <p className="text-xs text-muted-foreground">Usuario: {event.user.name}</p>}
+                            {event.user && (
+                              <p className="text-xs text-muted-foreground">
+                                Usuario: {event.user.name}
+                              </p>
+                            )}
                             <p className="text-xs text-muted-foreground">
-                              {format(new Date(event.createdAt), "d 'de' MMMM, yyyy 'a las' HH:mm", { locale: es })}
+                              {format(
+                                new Date(event.createdAt),
+                                "d 'de' MMMM, yyyy 'a las' HH:mm",
+                                { locale: es }
+                              )}
                             </p>
                           </div>
-                          {!event.resuelta && <Button size="sm" onClick={() => handleResolveEvent(event.id)}>Resolver</Button>}
+                          {!event.resuelta && (
+                            <Button size="sm" onClick={() => handleResolveEvent(event.id)}>
+                              Resolver
+                            </Button>
+                          )}
                         </div>
                       </CardContent>
                     </Card>
@@ -415,9 +528,17 @@ export default function AuditoriaPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          <span>Período: {format(new Date(report.fechaInicio), 'dd/MM/yyyy')} - {format(new Date(report.fechaFin), 'dd/MM/yyyy')}</span>
+                          <span>
+                            Período: {format(new Date(report.fechaInicio), 'dd/MM/yyyy')} -{' '}
+                            {format(new Date(report.fechaFin), 'dd/MM/yyyy')}
+                          </span>
                           <span>•</span>
-                          <span>Creado: {format(new Date(report.createdAt), "d 'de' MMMM, yyyy", { locale: es })}</span>
+                          <span>
+                            Creado:{' '}
+                            {format(new Date(report.createdAt), "d 'de' MMMM, yyyy", {
+                              locale: es,
+                            })}
+                          </span>
                         </div>
                       </div>
                     </CardContent>

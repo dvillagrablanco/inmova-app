@@ -13,7 +13,7 @@ export default function PartnersPage() {
   useEffect(() => {
     // Verificar si hay token guardado
     const token = localStorage.getItem('partnerToken');
-    
+
     if (token) {
       router.push('/partners/dashboard');
     } else {
@@ -29,9 +29,9 @@ export default function PartnersPage() {
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          </main>
-        </div>
+          </div>
+        </main>
       </div>
+    </div>
   );
 }

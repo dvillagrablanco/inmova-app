@@ -7,10 +7,25 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { 
-  Building2, Rocket, CheckCircle, TrendingUp, Zap, Shield, 
-  ArrowRight, DollarSign, Clock, Users, Star, Sparkles,
-  Target, Award, AlertCircle, X, ChevronRight, CheckCircle2
+import {
+  Building2,
+  Rocket,
+  CheckCircle,
+  TrendingUp,
+  Zap,
+  Shield,
+  ArrowRight,
+  DollarSign,
+  Clock,
+  Users,
+  Star,
+  Sparkles,
+  Target,
+  Award,
+  AlertCircle,
+  X,
+  ChevronRight,
+  CheckCircle2,
 } from 'lucide-react';
 
 export default function Launch2025Page() {
@@ -19,27 +34,27 @@ export default function Launch2025Page() {
     days: 0,
     hours: 0,
     minutes: 0,
-    seconds: 0
+    seconds: 0,
   });
 
   // Countdown timer hasta fin de Q1 2025 (31 marzo 2025)
   useEffect(() => {
     const countDownDate = new Date('2025-03-31T23:59:59').getTime();
-    
+
     const timer = setInterval(() => {
       const now = new Date().getTime();
       const distance = countDownDate - now;
-      
+
       if (distance < 0) {
         clearInterval(timer);
         return;
       }
-      
+
       setTimeLeft({
         days: Math.floor(distance / (1000 * 60 * 60 * 24)),
         hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
         minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
-        seconds: Math.floor((distance % (1000 * 60)) / 1000)
+        seconds: Math.floor((distance % (1000 * 60)) / 1000),
       });
     }, 1000);
 
@@ -48,7 +63,7 @@ export default function Launch2025Page() {
 
   const handleEarlyAccess = async () => {
     if (!email) return;
-    
+
     // Redirect to register with the email and LAUNCH2025 coupon
     window.location.href = `/register?email=${encodeURIComponent(email)}&coupon=LAUNCH2025`;
   };
@@ -61,12 +76,16 @@ export default function Launch2025Page() {
           <div className="flex items-center justify-between h-16">
             <Link href="/landing" className="flex items-center gap-3">
               <Building2 className="h-8 w-8 text-indigo-400" />
-              <span className="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">INMOVA</span>
+              <span className="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
+                INMOVA
+              </span>
             </Link>
-            
+
             <div className="flex items-center gap-4">
               <Link href="/login">
-                <Button variant="ghost" className="text-white hover:text-indigo-400">Iniciar Sesión</Button>
+                <Button variant="ghost" className="text-white hover:text-indigo-400">
+                  Iniciar Sesión
+                </Button>
               </Link>
               <Link href="/register?coupon=LAUNCH2025">
                 <Button className="bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 text-white">
@@ -85,16 +104,18 @@ export default function Launch2025Page() {
             <Rocket className="h-5 w-5 mr-2" />
             Campaña LAUNCH2025
           </Badge>
-          
+
           <h1 className="text-5xl md:text-7xl font-extrabold mb-6 text-white leading-tight">
             Tu Software Actual <br />
             <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-pink-400 bg-clip-text text-transparent">
               Se Te Ha Quedado Pequeño
             </span>
           </h1>
-          
+
           <p className="text-xl md:text-2xl text-indigo-200 mb-8 max-w-4xl mx-auto">
-            Pásate al primer ecosistema <strong className="text-white">Multi-Vertical PropTech</strong> con 88 módulos profesionales.
+            Pásate al primer ecosistema{' '}
+            <strong className="text-white">Multi-Vertical PropTech</strong> con 88 módulos
+            profesionales.
             <br />
             <span className="text-white font-semibold">Por el mismo precio que pagas ahora.</span>
           </p>
@@ -106,8 +127,10 @@ export default function Launch2025Page() {
               <p className="text-4xl md:text-5xl font-black text-white">50% DE DESCUENTO</p>
               <Sparkles className="h-8 w-8 text-yellow-300" />
             </div>
-            <p className="text-xl text-indigo-100 mb-6">En tu primer mes - Código: <strong className="text-yellow-300">LAUNCH2025</strong></p>
-            
+            <p className="text-xl text-indigo-100 mb-6">
+              En tu primer mes - Código: <strong className="text-yellow-300">LAUNCH2025</strong>
+            </p>
+
             {/* COUNTDOWN TIMER */}
             <div className="grid grid-cols-4 gap-4 max-w-lg mx-auto mb-6">
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
@@ -130,16 +153,16 @@ export default function Launch2025Page() {
 
             {/* EMAIL CAPTURE */}
             <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-              <Input 
-                type="email" 
-                placeholder="tu@email.com" 
+              <Input
+                type="email"
+                placeholder="tu@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="bg-white/90 backdrop-blur-sm text-gray-900 border-white/50 h-14 text-lg"
                 onKeyPress={(e) => e.key === 'Enter' && handleEarlyAccess()}
               />
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 onClick={handleEarlyAccess}
                 className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold h-14 px-8 whitespace-nowrap shadow-lg"
               >
@@ -214,27 +237,39 @@ export default function Launch2025Page() {
               <CardContent className="space-y-3">
                 <div className="flex items-start gap-2 text-green-200">
                   <CheckCircle2 className="h-5 w-5 text-green-400 flex-shrink-0 mt-1" />
-                  <p><strong>88 módulos</strong> en una sola plataforma unificada</p>
+                  <p>
+                    <strong>88 módulos</strong> en una sola plataforma unificada
+                  </p>
                 </div>
                 <div className="flex items-start gap-2 text-green-200">
                   <CheckCircle2 className="h-5 w-5 text-green-400 flex-shrink-0 mt-1" />
-                  <p><strong>Channel Manager nativo</strong> (Airbnb, Booking, VRBO) incluido</p>
+                  <p>
+                    <strong>Channel Manager nativo</strong> (Airbnb, Booking, VRBO) incluido
+                  </p>
                 </div>
                 <div className="flex items-start gap-2 text-green-200">
                   <CheckCircle2 className="h-5 w-5 text-green-400 flex-shrink-0 mt-1" />
-                  <p><strong>House Flipping + Construcción</strong> con ROI en tiempo real</p>
+                  <p>
+                    <strong>House Flipping + Construcción</strong> con ROI en tiempo real
+                  </p>
                 </div>
                 <div className="flex items-start gap-2 text-green-200">
                   <CheckCircle2 className="h-5 w-5 text-green-400 flex-shrink-0 mt-1" />
-                  <p><strong>Firma Digital cualificada</strong> sin coste adicional</p>
+                  <p>
+                    <strong>Firma Digital cualificada</strong> sin coste adicional
+                  </p>
                 </div>
                 <div className="flex items-start gap-2 text-green-200">
                   <CheckCircle2 className="h-5 w-5 text-green-400 flex-shrink-0 mt-1" />
-                  <p><strong>CRM Avanzado + Portal Propietario</strong> completo</p>
+                  <p>
+                    <strong>CRM Avanzado + Portal Propietario</strong> completo
+                  </p>
                 </div>
                 <div className="flex items-start gap-2 text-green-200">
                   <CheckCircle2 className="h-5 w-5 text-green-400 flex-shrink-0 mt-1" />
-                  <p><strong>IA GPT-4 + Mantenimiento Predictivo</strong> incluidos</p>
+                  <p>
+                    <strong>IA GPT-4 + Mantenimiento Predictivo</strong> incluidos
+                  </p>
                 </div>
                 <div className="bg-green-800/30 p-4 rounded-lg mt-4 border-2 border-green-400">
                   <div className="flex items-baseline gap-2">
@@ -282,20 +317,48 @@ export default function Launch2025Page() {
             7 Modelos de Negocio, 1 Plataforma
           </h2>
           <p className="text-xl text-indigo-200 text-center mb-12 max-w-3xl mx-auto">
-            La única plataforma PropTech que gestiona <strong className="text-white">todos</strong> los verticales inmobiliarios.
+            La única plataforma PropTech que gestiona <strong className="text-white">todos</strong>{' '}
+            los verticales inmobiliarios.
           </p>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
             {[
-              { icon: Building2, title: 'Alquiler Tradicional', desc: 'Gestión completa de contratos, IPC, morosidad' },
-              { icon: Star, title: 'Short-Term Rental', desc: 'Channel Manager + Pricing Dinámico' },
-              { icon: TrendingUp, title: 'House Flipping', desc: 'ROI en tiempo real + Pipeline de inversión' },
-              { icon: Shield, title: 'Construcción', desc: '9 fases de obra + Control de subcontratas' },
-              { icon: Users, title: 'Coliving Avanzado', desc: 'Prorrateo automático + Gestión de convivencia' },
+              {
+                icon: Building2,
+                title: 'Alquiler Tradicional',
+                desc: 'Gestión completa de contratos, IPC, morosidad',
+              },
+              {
+                icon: Star,
+                title: 'Short-Term Rental',
+                desc: 'Channel Manager + Pricing Dinámico',
+              },
+              {
+                icon: TrendingUp,
+                title: 'House Flipping',
+                desc: 'ROI en tiempo real + Pipeline de inversión',
+              },
+              {
+                icon: Shield,
+                title: 'Construcción',
+                desc: '9 fases de obra + Control de subcontratas',
+              },
+              {
+                icon: Users,
+                title: 'Coliving Avanzado',
+                desc: 'Prorrateo automático + Gestión de convivencia',
+              },
               { icon: Award, title: 'Hoteles', desc: 'Reservas + Housekeeping integrado' },
-              { icon: Target, title: 'Servicios Profesionales', desc: 'ITEs + Certificaciones para arquitectos' }
+              {
+                icon: Target,
+                title: 'Servicios Profesionales',
+                desc: 'ITEs + Certificaciones para arquitectos',
+              },
             ].map((vertical, idx) => (
-              <Card key={idx} className="bg-white/5 backdrop-blur-sm border-indigo-500/30 hover:border-indigo-400 transition-all">
+              <Card
+                key={idx}
+                className="bg-white/5 backdrop-blur-sm border-indigo-500/30 hover:border-indigo-400 transition-all"
+              >
                 <CardHeader>
                   <div className="flex items-center gap-3">
                     <div className="p-3 bg-gradient-to-br from-indigo-500 to-violet-500 rounded-lg">
@@ -319,7 +382,7 @@ export default function Launch2025Page() {
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-12 text-white">
             Únete a los Innovadores del Sector
           </h2>
-          
+
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-12">
             <div className="text-center">
               <p className="text-5xl font-bold text-indigo-400 mb-2">88</p>
@@ -341,7 +404,9 @@ export default function Launch2025Page() {
             ))}
           </div>
           <p className="text-center text-xl text-indigo-200 italic max-w-2xl mx-auto">
-            "Finalmente una plataforma que entiende que gestiono alquileres tradicionales <strong className="text-white">Y</strong> vacacionales. Ya no necesito 3 softwares diferentes."
+            "Finalmente una plataforma que entiende que gestiono alquileres tradicionales{' '}
+            <strong className="text-white">Y</strong> vacacionales. Ya no necesito 3 softwares
+            diferentes."
           </p>
           <p className="text-center text-indigo-300 mt-4">— Beta Tester, Agencia PropTech Madrid</p>
         </div>
@@ -354,13 +419,16 @@ export default function Launch2025Page() {
             <CardHeader className="text-center">
               <div className="flex items-center justify-center gap-2 mb-4">
                 <Clock className="h-8 w-8 text-yellow-300" />
-                <Badge className="bg-yellow-400 text-gray-900 text-lg px-4 py-1">Oferta Limitada Q1 2025</Badge>
+                <Badge className="bg-yellow-400 text-gray-900 text-lg px-4 py-1">
+                  Oferta Limitada Q1 2025
+                </Badge>
               </div>
               <CardTitle className="text-4xl md:text-5xl font-bold text-white mb-4">
                 No Pierdas Esta Oportunidad
               </CardTitle>
               <CardDescription className="text-xl text-indigo-100">
-                Solo <strong className="text-white">100 plazas disponibles</strong> con el descuento LAUNCH2025.
+                Solo <strong className="text-white">100 plazas disponibles</strong> con el descuento
+                LAUNCH2025.
                 <br />
                 Sé parte de la revolución PropTech Multi-Vertical.
               </CardDescription>
@@ -381,19 +449,28 @@ export default function Launch2025Page() {
                 </div>
                 <div className="flex items-center gap-3">
                   <CheckCircle className="h-6 w-6 text-green-400" />
-                  <p className="text-white font-semibold">Sin permanencia - Cancela cuando quieras</p>
+                  <p className="text-white font-semibold">
+                    Sin permanencia - Cancela cuando quieras
+                  </p>
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
                 <Link href="/register?coupon=LAUNCH2025" className="flex-1 sm:flex-none">
-                  <Button size="lg" className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold text-lg h-16 px-8">
+                  <Button
+                    size="lg"
+                    className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold text-lg h-16 px-8"
+                  >
                     <Rocket className="mr-2 h-6 w-6" />
                     Activar LAUNCH2025 Ahora
                   </Button>
                 </Link>
                 <Link href="/landing/migracion" className="flex-1 sm:flex-none">
-                  <Button size="lg" variant="outline" className="w-full bg-white/10 hover:bg-white/20 text-white border-white/30 font-semibold text-lg h-16 px-8">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="w-full bg-white/10 hover:bg-white/20 text-white border-white/30 font-semibold text-lg h-16 px-8"
+                  >
                     <ChevronRight className="mr-2 h-5 w-5" />
                     Ver Guía de Migración
                   </Button>
@@ -422,9 +499,15 @@ export default function Launch2025Page() {
             La plataforma PropTech Multi-Vertical más completa del mercado
           </p>
           <div className="flex items-center justify-center gap-6 text-sm text-indigo-400">
-            <Link href="/landing/legal/privacidad" className="hover:text-indigo-300">Privacidad</Link>
-            <Link href="/landing/legal/terminos" className="hover:text-indigo-300">Términos</Link>
-            <Link href="/landing/contacto" className="hover:text-indigo-300">Contacto</Link>
+            <Link href="/landing/legal/privacidad" className="hover:text-indigo-300">
+              Privacidad
+            </Link>
+            <Link href="/landing/legal/terminos" className="hover:text-indigo-300">
+              Términos
+            </Link>
+            <Link href="/landing/contacto" className="hover:text-indigo-300">
+              Contacto
+            </Link>
           </div>
         </div>
       </footer>

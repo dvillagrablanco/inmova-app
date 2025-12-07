@@ -49,9 +49,9 @@ function ResetPasswordForm() {
       const res = await fetch('/api/auth-proveedor/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          token, 
-          newPassword: formData.password 
+        body: JSON.stringify({
+          token,
+          newPassword: formData.password,
         }),
       });
 
@@ -91,9 +91,7 @@ function ResetPasswordForm() {
           </CardHeader>
           <CardContent>
             <Link href="/portal-proveedor/login">
-              <Button className="w-full">
-                Iniciar Sesión
-              </Button>
+              <Button className="w-full">Iniciar Sesión</Button>
             </Link>
           </CardContent>
         </Card>
@@ -124,9 +122,7 @@ function ResetPasswordForm() {
                 type="password"
                 placeholder="Mínimo 6 caracteres"
                 value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
                 disabled={loading}
               />
@@ -139,9 +135,7 @@ function ResetPasswordForm() {
                 type="password"
                 placeholder="Repite la contraseña"
                 value={formData.confirmPassword}
-                onChange={(e) =>
-                  setFormData({ ...formData, confirmPassword: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                 required
                 disabled={loading}
               />
@@ -160,11 +154,13 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      }
+    >
       <ResetPasswordForm />
     </Suspense>
   );

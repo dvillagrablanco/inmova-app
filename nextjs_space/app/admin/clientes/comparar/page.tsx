@@ -166,9 +166,7 @@ function CompareCompaniesPageContent() {
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Volver a Clientes
                 </Button>
-                <h1 className="text-3xl font-bold gradient-text">
-                  Comparador de Empresas
-                </h1>
+                <h1 className="text-3xl font-bold gradient-text">Comparador de Empresas</h1>
                 <p className="text-gray-600 mt-1">
                   Comparando {companies.length} empresas lado a lado
                 </p>
@@ -182,19 +180,13 @@ function CompareCompaniesPageContent() {
                 {companies.map((company) => (
                   <Card key={company.id} className="border-t-4 border-t-indigo-600">
                     <CardHeader>
-                      <CardTitle className="text-center">
-                        {company.nombre}
-                      </CardTitle>
+                      <CardTitle className="text-center">{company.nombre}</CardTitle>
                       <div className="flex flex-col items-center space-y-2 mt-2">
-                        <Badge
-                          variant={company.activo ? 'default' : 'destructive'}
-                        >
+                        <Badge variant={company.activo ? 'default' : 'destructive'}>
                           {company.activo ? 'Activa' : 'Inactiva'}
                         </Badge>
                         {company.estadoCliente && (
-                          <Badge variant="outline">
-                            {company.estadoCliente}
-                          </Badge>
+                          <Badge variant="outline">{company.estadoCliente}</Badge>
                         )}
                         {company.tags.length > 0 && (
                           <div className="flex flex-wrap gap-1 justify-center">
@@ -257,8 +249,7 @@ function CompareCompaniesPageContent() {
                         <div className="text-xl font-bold">{c.metrics.users}</div>
                         {c.limits.maxUsuarios && (
                           <div className="text-xs text-gray-500">
-                            de {c.limits.maxUsuarios} ({
-                            c.limits.userLimitUsage.toFixed(0)}%)
+                            de {c.limits.maxUsuarios} ({c.limits.userLimitUsage.toFixed(0)}%)
                           </div>
                         )}
                       </div>
@@ -270,13 +261,10 @@ function CompareCompaniesPageContent() {
                     icon={<Building2 className="h-4 w-4" />}
                     values={companies.map((c) => (
                       <div>
-                        <div className="text-xl font-bold">
-                          {c.metrics.buildings}
-                        </div>
+                        <div className="text-xl font-bold">{c.metrics.buildings}</div>
                         {c.limits.maxEdificios && (
                           <div className="text-xs text-gray-500">
-                            de {c.limits.maxEdificios} ({
-                            c.limits.buildingLimitUsage.toFixed(0)}%)
+                            de {c.limits.maxEdificios} ({c.limits.buildingLimitUsage.toFixed(0)}%)
                           </div>
                         )}
                       </div>
@@ -295,10 +283,7 @@ function CompareCompaniesPageContent() {
                     label="Proveedores"
                     values={companies.map((c) => c.metrics.providers)}
                   />
-                  <ComparisonRow
-                    label="Tareas"
-                    values={companies.map((c) => c.metrics.tasks)}
-                  />
+                  <ComparisonRow label="Tareas" values={companies.map((c) => c.metrics.tasks)} />
 
                   {/* Métricas de Operación */}
                   <div className="text-lg font-semibold text-indigo-600 py-3 border-b-2 border-indigo-600 mt-4">
@@ -354,40 +339,28 @@ function CompareCompaniesPageContent() {
                   </div>
                   <ComparisonRow
                     label="Administradores"
-                    values={companies.map(
-                      (c) => c.roleDistribution['admin'] || 0
-                    )}
+                    values={companies.map((c) => c.roleDistribution['admin'] || 0)}
                   />
                   <ComparisonRow
                     label="Propietarios"
-                    values={companies.map(
-                      (c) => c.roleDistribution['propietario'] || 0
-                    )}
+                    values={companies.map((c) => c.roleDistribution['propietario'] || 0)}
                   />
                   <ComparisonRow
                     label="Gestores"
-                    values={companies.map(
-                      (c) => c.roleDistribution['gestor'] || 0
-                    )}
+                    values={companies.map((c) => c.roleDistribution['gestor'] || 0)}
                   />
                   <ComparisonRow
                     label="Otros"
-                    values={companies.map(
-                      (c) =>
-                        Object.entries(c.roleDistribution)
-                          .filter(
-                            ([role]) =>
-                              !['admin', 'propietario', 'gestor'].includes(role)
-                          )
-                          .reduce((sum, [, count]) => sum + count, 0)
+                    values={companies.map((c) =>
+                      Object.entries(c.roleDistribution)
+                        .filter(([role]) => !['admin', 'propietario', 'gestor'].includes(role))
+                        .reduce((sum, [, count]) => sum + count, 0)
                     )}
                   />
 
                   {/* Alertas de Límites */}
                   {companies.some(
-                    (c) =>
-                      c.limits.userLimitUsage > 80 ||
-                      c.limits.buildingLimitUsage > 80
+                    (c) => c.limits.userLimitUsage > 80 || c.limits.buildingLimitUsage > 80
                   ) && (
                     <>
                       <div className="text-lg font-semibold text-orange-600 py-3 border-b-2 border-orange-600 mt-4">
@@ -443,14 +416,16 @@ function CompareCompaniesPageContent() {
 
 export default function CompareCompaniesPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando comparación...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Cargando comparación...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <CompareCompaniesPageContent />
     </Suspense>
   );

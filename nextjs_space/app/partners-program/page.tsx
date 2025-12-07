@@ -2,7 +2,16 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Building2, Euro, Users, TrendingUp, CheckCircle, ArrowRight, Mail, Phone } from 'lucide-react';
+import {
+  Building2,
+  Euro,
+  Users,
+  TrendingUp,
+  CheckCircle,
+  ArrowRight,
+  Mail,
+  Phone,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -11,7 +20,8 @@ export default function PartnersProgramPage() {
     {
       icon: Euro,
       title: 'Ingresos Recurrentes',
-      description: 'Comisiones mensuales automáticas por cada cliente activo. Hasta 70% de comisión según volumen.',
+      description:
+        'Comisiones mensuales automáticas por cada cliente activo. Hasta 70% de comisión según volumen.',
     },
     {
       icon: Users,
@@ -33,12 +43,14 @@ export default function PartnersProgramPage() {
   const targetProfiles = [
     {
       title: 'Bancos y Entidades Financieras',
-      description: 'Ofrece a tus clientes con hipotecas una herramienta profesional de gestión inmobiliaria.',
+      description:
+        'Ofrece a tus clientes con hipotecas una herramienta profesional de gestión inmobiliaria.',
       commission: '60-70%',
     },
     {
       title: 'Multifamily Offices',
-      description: 'Centraliza y profesionaliza la gestión del patrimonio inmobiliario de tus clientes VIP.',
+      description:
+        'Centraliza y profesionaliza la gestión del patrimonio inmobiliario de tus clientes VIP.',
       commission: '50-60%',
     },
     {
@@ -100,12 +112,12 @@ export default function PartnersProgramPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h1 className="text-5xl font-bold text-gray-900 mb-6">
-                Programa de Partners B2B
-              </h1>
+              <h1 className="text-5xl font-bold text-gray-900 mb-6">Programa de Partners B2B</h1>
               <p className="text-xl text-gray-600 mb-8">
-                Ofrece INMOVA a tus clientes y genera <span className="text-primary font-semibold">ingresos recurrentes</span> sin inversión inicial. 
-                Hasta <span className="text-primary font-semibold">70% de comisión</span> según volumen.
+                Ofrece INMOVA a tus clientes y genera{' '}
+                <span className="text-primary font-semibold">ingresos recurrentes</span> sin
+                inversión inicial. Hasta{' '}
+                <span className="text-primary font-semibold">70% de comisión</span> según volumen.
               </p>
               <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
                 <Link href="/partners/register">
@@ -137,9 +149,7 @@ export default function PartnersProgramPage() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Beneficios del Programa
-            </h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Beneficios del Programa</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Un modelo de negocio completo que te permite ofrecer valor agregado a tus clientes
               mientras generas ingresos predecibles y escalables
@@ -171,12 +181,10 @@ export default function PartnersProgramPage() {
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              ¿Para quién es este programa?
-            </h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">¿Para quién es este programa?</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Diseñado para entidades que tienen acceso a clientes potenciales que necesitan
-              gestión inmobiliaria profesional
+              Diseñado para entidades que tienen acceso a clientes potenciales que necesitan gestión
+              inmobiliaria profesional
             </p>
           </div>
 
@@ -202,12 +210,10 @@ export default function PartnersProgramPage() {
       <section id="comisiones" className="py-20 bg-gradient-to-br from-primary/5 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Escala de Comisiones
-            </h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Escala de Comisiones</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Tu comisión crece automáticamente según el número de clientes activos.
-              Cuantos más clientes, mayor tu porcentaje.
+              Tu comisión crece automáticamente según el número de clientes activos. Cuantos más
+              clientes, mayor tu porcentaje.
             </p>
           </div>
 
@@ -266,12 +272,10 @@ export default function PartnersProgramPage() {
               />
             </div>
             <div>
-              <h2 className="text-4xl font-bold text-gray-900 mb-6">
-                Todo lo que necesitas
-              </h2>
+              <h2 className="text-4xl font-bold text-gray-900 mb-6">Todo lo que necesitas</h2>
               <p className="text-lg text-gray-600 mb-8">
-                Portal completo para Partners con todas las herramientas necesarias
-                para gestionar tus clientes y comisiones
+                Portal completo para Partners con todas las herramientas necesarias para gestionar
+                tus clientes y comisiones
               </p>
               <div className="space-y-3">
                 {features.map((feature, index) => (
@@ -290,9 +294,7 @@ export default function PartnersProgramPage() {
       <section id="como-funciona" className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              ¿Cómo Funciona?
-            </h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">¿Cómo Funciona?</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Proceso simple de 4 pasos para empezar a generar ingresos
             </p>
@@ -300,10 +302,26 @@ export default function PartnersProgramPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {[
-              { step: '1', title: 'Registro', description: 'Regístrate como Partner y envía tu solicitud' },
-              { step: '2', title: 'Aprobación', description: 'Revisamos tu solicitud en 24-48 horas' },
-              { step: '3', title: 'Invita Clientes', description: 'Usa el dashboard para invitar a tus clientes' },
-              { step: '4', title: 'Cobra Comisiones', description: 'Recibe comisiones mensuales automáticas' },
+              {
+                step: '1',
+                title: 'Registro',
+                description: 'Regístrate como Partner y envía tu solicitud',
+              },
+              {
+                step: '2',
+                title: 'Aprobación',
+                description: 'Revisamos tu solicitud en 24-48 horas',
+              },
+              {
+                step: '3',
+                title: 'Invita Clientes',
+                description: 'Usa el dashboard para invitar a tus clientes',
+              },
+              {
+                step: '4',
+                title: 'Cobra Comisiones',
+                description: 'Recibe comisiones mensuales automáticas',
+              },
             ].map((item, index) => (
               <div key={index} className="text-center">
                 <div className="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
@@ -320,12 +338,10 @@ export default function PartnersProgramPage() {
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-r from-primary to-primary/80 text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl font-bold mb-6">
-            ¿Listo para convertirte en Partner?
-          </h2>
+          <h2 className="text-4xl font-bold mb-6">¿Listo para convertirte en Partner?</h2>
           <p className="text-xl text-primary-foreground/90 mb-8">
-            Únete a los Partners que ya están generando ingresos recurrentes con INMOVA.
-            Sin inversión inicial, sin riesgo.
+            Únete a los Partners que ya están generando ingresos recurrentes con INMOVA. Sin
+            inversión inicial, sin riesgo.
           </p>
           <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
             <Link href="/partners/register">
@@ -334,7 +350,11 @@ export default function PartnersProgramPage() {
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Button size="lg" variant="outline" className="w-full sm:w-auto border-white text-white hover:bg-white hover:text-primary">
+            <Button
+              size="lg"
+              variant="outline"
+              className="w-full sm:w-auto border-white text-white hover:bg-white hover:text-primary"
+            >
               <Mail className="mr-2 h-5 w-5" />
               partners@inmova.com
             </Button>

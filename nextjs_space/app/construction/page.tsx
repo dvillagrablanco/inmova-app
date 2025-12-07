@@ -75,33 +75,33 @@ export default function ConstructionPage() {
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      'planning': 'bg-blue-500',
-      'in_progress': 'bg-yellow-500',
-      'on_hold': 'bg-orange-500',
-      'completed': 'bg-green-500',
-      'delayed': 'bg-red-500',
+      planning: 'bg-blue-500',
+      in_progress: 'bg-yellow-500',
+      on_hold: 'bg-orange-500',
+      completed: 'bg-green-500',
+      delayed: 'bg-red-500',
     };
     return colors[status.toLowerCase()] || 'bg-gray-500';
   };
 
   const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
-      'planning': 'Planificación',
-      'in_progress': 'En Progreso',
-      'on_hold': 'Pausado',
-      'completed': 'Completado',
-      'delayed': 'Retrasado',
+      planning: 'Planificación',
+      in_progress: 'En Progreso',
+      on_hold: 'Pausado',
+      completed: 'Completado',
+      delayed: 'Retrasado',
     };
     return labels[status.toLowerCase()] || status;
   };
 
   const getStatusIcon = (status: string) => {
     const icons: Record<string, any> = {
-      'planning': Clock,
-      'in_progress': Building2,
-      'on_hold': AlertCircle,
-      'completed': CheckCircle,
-      'delayed': AlertCircle,
+      planning: Clock,
+      in_progress: Building2,
+      on_hold: AlertCircle,
+      completed: CheckCircle,
+      delayed: AlertCircle,
     };
     const Icon = icons[status.toLowerCase()] || Clock;
     return <Icon className="h-4 w-4" />;
@@ -122,9 +122,10 @@ export default function ConstructionPage() {
   const totalBudget = projects.reduce((sum, p) => sum + p.budget, 0);
   const totalSpent = projects.reduce((sum, p) => sum + p.spent, 0);
   const totalUnits = projects.reduce((sum, p) => sum + p.units, 0);
-  const averageProgress = projects.length > 0 
-    ? (projects.reduce((sum, p) => sum + p.progress, 0) / projects.length).toFixed(1)
-    : '0.0';
+  const averageProgress =
+    projects.length > 0
+      ? (projects.reduce((sum, p) => sum + p.progress, 0) / projects.length).toFixed(1)
+      : '0.0';
 
   if (status === 'loading' || loading) {
     return (
@@ -143,7 +144,9 @@ export default function ConstructionPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Construcción y Desarrollo</h1>
-          <p className="text-muted-foreground">Gestiona tus proyectos de construcción inmobiliaria</p>
+          <p className="text-muted-foreground">
+            Gestiona tus proyectos de construcción inmobiliaria
+          </p>
         </div>
         <Button onClick={() => router.push('/construction/projects?new=true')}>
           <Plus className="mr-2 h-4 w-4" />
@@ -161,7 +164,7 @@ export default function ConstructionPage() {
           <CardContent>
             <div className="text-2xl font-bold">{projects.length}</div>
             <p className="text-xs text-muted-foreground">
-              {projects.filter(p => p.status === 'in_progress').length} en progreso
+              {projects.filter((p) => p.status === 'in_progress').length} en progreso
             </p>
           </CardContent>
         </Card>
@@ -173,9 +176,7 @@ export default function ConstructionPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(totalBudget)}</div>
-            <p className="text-xs text-muted-foreground">
-              {formatCurrency(totalSpent)} ejecutado
-            </p>
+            <p className="text-xs text-muted-foreground">{formatCurrency(totalSpent)} ejecutado</p>
           </CardContent>
         </Card>
 
@@ -220,10 +221,9 @@ export default function ConstructionPage() {
                 <Building2 className="h-12 w-12 text-muted-foreground mb-4" />
                 <h3 className="text-lg font-semibold mb-2">No hay proyectos</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  {activeTab === 'all' 
+                  {activeTab === 'all'
                     ? 'Comienza tu primer proyecto de construcción'
-                    : `No hay proyectos en estado "${getStatusLabel(activeTab)}"`
-                  }
+                    : `No hay proyectos en estado "${getStatusLabel(activeTab)}"`}
                 </p>
                 <Button onClick={() => router.push('/construction/projects?new=true')}>
                   <Plus className="mr-2 h-4 w-4" />
@@ -234,10 +234,13 @@ export default function ConstructionPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredProjects.map((project) => {
-                const budgetUsed = (project.spent / project.budget * 100).toFixed(1);
-                
+                const budgetUsed = ((project.spent / project.budget) * 100).toFixed(1);
+
                 return (
-                  <Card key={project.id} className="hover:shadow-lg transition-shadow cursor-pointer">
+                  <Card
+                    key={project.id}
+                    className="hover:shadow-lg transition-shadow cursor-pointer"
+                  >
                     <CardHeader>
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
@@ -264,9 +267,11 @@ export default function ConstructionPage() {
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">Gastado:</span>
-                          <span className={`font-medium ${
-                            parseFloat(budgetUsed) > 100 ? 'text-red-600' : ''
-                          }`}>
+                          <span
+                            className={`font-medium ${
+                              parseFloat(budgetUsed) > 100 ? 'text-red-600' : ''
+                            }`}
+                          >
                             {formatCurrency(project.spent)} ({budgetUsed}%)
                           </span>
                         </div>
@@ -286,8 +291,16 @@ export default function ConstructionPage() {
                             />
                           </div>
                           <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                            <span>Inicio: {format(new Date(project.startDate), 'dd MMM yyyy', { locale: es })}</span>
-                            <span>Fin: {format(new Date(project.estimatedEndDate), 'dd MMM yyyy', { locale: es })}</span>
+                            <span>
+                              Inicio:{' '}
+                              {format(new Date(project.startDate), 'dd MMM yyyy', { locale: es })}
+                            </span>
+                            <span>
+                              Fin:{' '}
+                              {format(new Date(project.estimatedEndDate), 'dd MMM yyyy', {
+                                locale: es,
+                              })}
+                            </span>
                           </div>
                         </div>
                         {project.contractor && (
@@ -296,17 +309,17 @@ export default function ConstructionPage() {
                           </div>
                         )}
                         <div className="flex gap-2 pt-2">
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
+                          <Button
+                            size="sm"
+                            variant="outline"
                             className="flex-1"
                             onClick={() => router.push(`/construction/projects/${project.id}`)}
                           >
                             <FileText className="h-3 w-3 mr-1" />
                             Ver Detalles
                           </Button>
-                          <Button 
-                            size="sm" 
+                          <Button
+                            size="sm"
                             variant="outline"
                             onClick={() => router.push(`/construction/projects/${project.id}/edit`)}
                           >

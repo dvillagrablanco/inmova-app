@@ -10,10 +10,30 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { Home, ArrowLeft, Bell, Plus, Mail, MessageSquare, Calendar, Clock } from 'lucide-react';
@@ -51,7 +71,7 @@ function RecordatoriosPage() {
     diasAnticipacion: 7,
     horaEnvio: '09:00',
     tituloPlantilla: '',
-    mensajePlantilla: ''
+    mensajePlantilla: '',
   });
 
   useEffect(() => {
@@ -84,7 +104,7 @@ function RecordatoriosPage() {
       const res = await fetch('/api/recordatorios', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form)
+        body: JSON.stringify(form),
       });
 
       if (!res.ok) throw new Error('Error al crear');
@@ -101,7 +121,7 @@ function RecordatoriosPage() {
         diasAnticipacion: 7,
         horaEnvio: '09:00',
         tituloPlantilla: '',
-        mensajePlantilla: ''
+        mensajePlantilla: '',
       });
     } catch (error) {
       toast.error('Error al crear recordatorio');
@@ -113,7 +133,7 @@ function RecordatoriosPage() {
       await fetch('/api/recordatorios', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, activo: !activo })
+        body: JSON.stringify({ id, activo: !activo }),
       });
       toast.success('Recordatorio actualizado');
       fetchReminders();
@@ -178,7 +198,7 @@ function RecordatoriosPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">
-                  {reminders.filter(r => r.activo).length}
+                  {reminders.filter((r) => r.activo).length}
                 </div>
               </CardContent>
             </Card>
@@ -200,7 +220,7 @@ function RecordatoriosPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {reminders.filter(r => r.activo && r.proximoEnvio).length}
+                  {reminders.filter((r) => r.activo && r.proximoEnvio).length}
                 </div>
               </CardContent>
             </Card>
@@ -253,18 +273,29 @@ function RecordatoriosPage() {
 
                     <div>
                       <Label>Tipo de Recordatorio</Label>
-                      <Select value={form.tipo} onValueChange={(value) => setForm({ ...form, tipo: value })}>
+                      <Select
+                        value={form.tipo}
+                        onValueChange={(value) => setForm({ ...form, tipo: value })}
+                      >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="pago_vencimiento">Pago Vencimiento</SelectItem>
-                          <SelectItem value="contrato_expiracion">Expiración de Contrato</SelectItem>
-                          <SelectItem value="mantenimiento_programado">Mantenimiento Programado</SelectItem>
+                          <SelectItem value="contrato_expiracion">
+                            Expiración de Contrato
+                          </SelectItem>
+                          <SelectItem value="mantenimiento_programado">
+                            Mantenimiento Programado
+                          </SelectItem>
                           <SelectItem value="inspeccion_pendiente">Inspección Pendiente</SelectItem>
-                          <SelectItem value="documento_vencimiento">Documento por Vencer</SelectItem>
+                          <SelectItem value="documento_vencimiento">
+                            Documento por Vencer
+                          </SelectItem>
                           <SelectItem value="renovacion_seguro">Renovación de Seguro</SelectItem>
-                          <SelectItem value="certificacion_expiracion">Certificación por Expirar</SelectItem>
+                          <SelectItem value="certificacion_expiracion">
+                            Certificación por Expirar
+                          </SelectItem>
                           <SelectItem value="reunion_proxima">Reunión Próxima</SelectItem>
                           <SelectItem value="custom">Personalizado</SelectItem>
                         </SelectContent>
@@ -273,7 +304,10 @@ function RecordatoriosPage() {
 
                     <div>
                       <Label>Canal de Envío</Label>
-                      <Select value={form.channel} onValueChange={(value) => setForm({ ...form, channel: value })}>
+                      <Select
+                        value={form.channel}
+                        onValueChange={(value) => setForm({ ...form, channel: value })}
+                      >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -288,7 +322,10 @@ function RecordatoriosPage() {
 
                     <div>
                       <Label>Frecuencia</Label>
-                      <Select value={form.frequency} onValueChange={(value) => setForm({ ...form, frequency: value })}>
+                      <Select
+                        value={form.frequency}
+                        onValueChange={(value) => setForm({ ...form, frequency: value })}
+                      >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -306,7 +343,9 @@ function RecordatoriosPage() {
                       <Input
                         type="number"
                         value={form.diasAnticipacion}
-                        onChange={(e) => setForm({ ...form, diasAnticipacion: parseInt(e.target.value) })}
+                        onChange={(e) =>
+                          setForm({ ...form, diasAnticipacion: parseInt(e.target.value) })
+                        }
                         min="1"
                         max="30"
                       />
@@ -379,7 +418,9 @@ function RecordatoriosPage() {
                         </div>
 
                         {reminder.descripcion && (
-                          <p className="text-sm text-muted-foreground mb-3">{reminder.descripcion}</p>
+                          <p className="text-sm text-muted-foreground mb-3">
+                            {reminder.descripcion}
+                          </p>
                         )}
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">

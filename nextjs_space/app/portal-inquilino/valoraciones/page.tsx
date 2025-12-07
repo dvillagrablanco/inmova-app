@@ -103,25 +103,19 @@ export default function TenantRatingsPage() {
     <div className="container mx-auto p-6 max-w-6xl">
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-2">Valoraciones y Feedback</h1>
-        <p className="text-gray-600">
-          Comparte tu opinión y ayuda a mejorar el servicio
-        </p>
+        <p className="text-gray-600">Comparte tu opinión y ayuda a mejorar el servicio</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Formulario de Nueva Valoración */}
-        <div>
-          {showForm && <RatingForm onSuccess={handleRatingSuccess} />}
-        </div>
+        <div>{showForm && <RatingForm onSuccess={handleRatingSuccess} />}</div>
 
         {/* Historial de Valoraciones */}
         <div>
           <Card>
             <CardHeader>
               <CardTitle>Mis Valoraciones</CardTitle>
-              <CardDescription>
-                Historial de tus valoraciones enviadas
-              </CardDescription>
+              <CardDescription>Historial de tus valoraciones enviadas</CardDescription>
             </CardHeader>
             <CardContent>
               {ratings.length === 0 ? (
@@ -147,9 +141,7 @@ export default function TenantRatingsPage() {
                           </Badge>
                           <div className="flex items-center gap-2">
                             {renderStars(rating.puntuacion)}
-                            <span className="text-sm font-semibold">
-                              {rating.puntuacion}/5
-                            </span>
+                            <span className="text-sm font-semibold">{rating.puntuacion}/5</span>
                           </div>
                         </div>
                         <div className="text-xs text-gray-500 flex items-center gap-1">
@@ -180,9 +172,7 @@ export default function TenantRatingsPage() {
                               Respuesta del Equipo
                             </span>
                           </div>
-                          <p className="text-sm text-blue-800">
-                            {rating.respuestaAdmin}
-                          </p>
+                          <p className="text-sm text-blue-800">{rating.respuestaAdmin}</p>
                         </div>
                       )}
 
@@ -216,7 +206,9 @@ export default function TenantRatingsPage() {
                 </div>
                 <div className="text-center">
                   <p className="text-3xl font-bold text-black">
-                    {(ratings.reduce((sum, r) => sum + r.puntuacion, 0) / ratings.length).toFixed(1)}
+                    {(ratings.reduce((sum, r) => sum + r.puntuacion, 0) / ratings.length).toFixed(
+                      1
+                    )}
                   </p>
                   <p className="text-sm text-gray-600">Puntuación Media</p>
                 </div>

@@ -6,45 +6,64 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  BookOpen, 
-  Search, 
-  PlayCircle, 
+import {
+  BookOpen,
+  Search,
+  PlayCircle,
   Clock,
   Tag,
   ArrowRight,
   HelpCircle,
-  Lightbulb
+  Lightbulb,
 } from 'lucide-react';
-import { knowledgeBase, faqs, searchKnowledgeBase, searchFAQs, getAllCategories, type KnowledgeArticle, type FAQ } from '@/lib/knowledge-base';
+import {
+  knowledgeBase,
+  faqs,
+  searchKnowledgeBase,
+  searchFAQs,
+  getAllCategories,
+  type KnowledgeArticle,
+  type FAQ,
+} from '@/lib/knowledge-base';
 import Link from 'next/link';
 
 export default function KnowledgeBasePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedArticle, setSelectedArticle] = useState<KnowledgeArticle | null>(null);
-  
+
   const categories = getAllCategories();
   const articleResults = searchQuery ? searchKnowledgeBase(searchQuery, 20) : knowledgeBase;
   const faqResults = searchQuery ? searchFAQs(searchQuery, 10) : faqs;
 
   const ArticleCard = ({ article }: { article: KnowledgeArticle }) => (
-    <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setSelectedArticle(article)}>
+    <Card
+      className="hover:shadow-lg transition-shadow cursor-pointer"
+      onClick={() => setSelectedArticle(article)}
+    >
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
               <Badge variant="outline">{article.category}</Badge>
-              <Badge 
-                variant={article.difficulty === 'beginner' ? 'default' : article.difficulty === 'intermediate' ? 'secondary' : 'destructive'}
+              <Badge
+                variant={
+                  article.difficulty === 'beginner'
+                    ? 'default'
+                    : article.difficulty === 'intermediate'
+                      ? 'secondary'
+                      : 'destructive'
+                }
                 className="text-xs"
               >
-                {article.difficulty === 'beginner' ? 'Principiante' : article.difficulty === 'intermediate' ? 'Intermedio' : 'Avanzado'}
+                {article.difficulty === 'beginner'
+                  ? 'Principiante'
+                  : article.difficulty === 'intermediate'
+                    ? 'Intermedio'
+                    : 'Avanzado'}
               </Badge>
             </div>
             <CardTitle className="text-base">{article.title}</CardTitle>
-            <CardDescription className="mt-2">
-              {article.excerpt}
-            </CardDescription>
+            <CardDescription className="mt-2">{article.excerpt}</CardDescription>
           </div>
         </div>
       </CardHeader>
@@ -83,9 +102,7 @@ export default function KnowledgeBasePage() {
           <HelpCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
           <div>
             <CardTitle className="text-base">{faq.question}</CardTitle>
-            <CardDescription className="mt-2 whitespace-pre-wrap">
-              {faq.answer}
-            </CardDescription>
+            <CardDescription className="mt-2 whitespace-pre-wrap">{faq.answer}</CardDescription>
           </div>
         </div>
       </CardHeader>
@@ -94,7 +111,7 @@ export default function KnowledgeBasePage() {
           <p className="text-xs text-muted-foreground mb-2">Artículos relacionados:</p>
           <div className="flex flex-wrap gap-2">
             {faq.relatedArticles.slice(0, 3).map((articleId) => {
-              const article = knowledgeBase.find(a => a.id === articleId);
+              const article = knowledgeBase.find((a) => a.id === articleId);
               return article ? (
                 <Link key={articleId} href={`/knowledge-base?article=${articleId}`}>
                   <Badge variant="outline" className="text-xs hover:bg-accent cursor-pointer">
@@ -217,8 +234,8 @@ export default function KnowledgeBasePage() {
             <div>
               <h3 className="font-semibold mb-2">¿No encuentras lo que buscas?</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Nuestro chatbot IA está disponible 24/7 para ayudarte con cualquier duda.
-                También puedes crear un ticket de soporte si necesitas asistencia personalizada.
+                Nuestro chatbot IA está disponible 24/7 para ayudarte con cualquier duda. También
+                puedes crear un ticket de soporte si necesitas asistencia personalizada.
               </p>
               <div className="flex gap-2">
                 <Button size="sm">

@@ -331,9 +331,7 @@ export default function PortalesExternosPage() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-3xl font-bold">
-                        {stats.tenantPortal.conversations}
-                      </div>
+                      <div className="text-3xl font-bold">{stats.tenantPortal.conversations}</div>
                       <p className="text-xs text-muted-foreground mt-1">
                         {stats.tenantPortal.recentActivity} activas últimos 7 días
                       </p>
@@ -542,8 +540,8 @@ export default function PortalesExternosPage() {
                     <CardContent>
                       <div className="text-3xl font-bold">{stats.salesTeam.leadsLast30Days}</div>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {stats.salesTeam.conversions} conversiones (
-                        {stats.salesTeam.conversionRate}%)
+                        {stats.salesTeam.conversions} conversiones ({stats.salesTeam.conversionRate}
+                        %)
                       </p>
                     </CardContent>
                   </Card>
@@ -556,9 +554,7 @@ export default function PortalesExternosPage() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-3xl font-bold">
-                        {stats.salesTeam.pendingCommissions}
-                      </div>
+                      <div className="text-3xl font-bold">{stats.salesTeam.pendingCommissions}</div>
                       <p className="text-xs text-muted-foreground mt-1">Pendientes</p>
                     </CardContent>
                   </Card>
@@ -618,9 +614,7 @@ export default function PortalesExternosPage() {
                             {activity.portal}
                           </Badge>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {activity.description}
-                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">{activity.description}</p>
                         <p className="text-xs text-muted-foreground mt-1">
                           {activity.timestamp
                             ? format(new Date(activity.timestamp), "d 'de' MMMM, HH:mm", {

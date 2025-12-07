@@ -10,8 +10,21 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,7 +44,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
 import {
   Home,
@@ -143,7 +163,11 @@ export default function MarketplacePage() {
   const [openJobDialog, setOpenJobDialog] = useState(false);
   const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
   const [editingJob, setEditingJob] = useState<Job | null>(null);
-  const [deletingItem, setDeletingItem] = useState<{ type: string; id: string; name: string } | null>(null);
+  const [deletingItem, setDeletingItem] = useState<{
+    type: string;
+    id: string;
+    name: string;
+  } | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   const [quoteForm, setQuoteForm] = useState({
@@ -191,16 +215,23 @@ export default function MarketplacePage() {
           fetch('/api/units'),
         ]);
 
-      const [quotesData, jobsData, reviewsData, statsData, providersData, buildingsData, unitsData] =
-        await Promise.all([
-          quotesRes.json(),
-          jobsRes.json(),
-          reviewsRes.json(),
-          statsRes.json(),
-          providersRes.json(),
-          buildingsRes.json(),
-          unitsRes.json(),
-        ]);
+      const [
+        quotesData,
+        jobsData,
+        reviewsData,
+        statsData,
+        providersData,
+        buildingsData,
+        unitsData,
+      ] = await Promise.all([
+        quotesRes.json(),
+        jobsRes.json(),
+        reviewsRes.json(),
+        statsRes.json(),
+        providersRes.json(),
+        buildingsRes.json(),
+        unitsRes.json(),
+      ]);
 
       setQuotes(quotesData);
       setJobs(jobsData);
@@ -227,7 +258,7 @@ export default function MarketplacePage() {
         buildingId: quoteForm.buildingId === 'no-building' ? null : quoteForm.buildingId,
         unitId: quoteForm.unitId === 'no-unit' ? null : quoteForm.unitId,
       };
-      
+
       const res = await fetch('/api/marketplace/quotes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -303,7 +334,7 @@ export default function MarketplacePage() {
   const handleUpdateQuote = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingQuote) return;
-    
+
     try {
       const res = await fetch(`/api/marketplace/quotes/${editingQuote.id}`, {
         method: 'PATCH',
@@ -352,7 +383,7 @@ export default function MarketplacePage() {
   const handleUpdateJob = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingJob) return;
-    
+
     try {
       const res = await fetch(`/api/marketplace/jobs/${editingJob.id}`, {
         method: 'PATCH',
@@ -388,11 +419,12 @@ export default function MarketplacePage() {
     if (!deletingItem) return;
 
     try {
-      const endpoint = deletingItem.type === 'quote' 
-        ? `/api/marketplace/quotes/${deletingItem.id}`
-        : deletingItem.type === 'job'
-        ? `/api/marketplace/jobs/${deletingItem.id}`
-        : `/api/marketplace/reviews/${deletingItem.id}`;
+      const endpoint =
+        deletingItem.type === 'quote'
+          ? `/api/marketplace/quotes/${deletingItem.id}`
+          : deletingItem.type === 'job'
+            ? `/api/marketplace/jobs/${deletingItem.id}`
+            : `/api/marketplace/reviews/${deletingItem.id}`;
 
       const res = await fetch(endpoint, {
         method: 'DELETE',
@@ -400,7 +432,9 @@ export default function MarketplacePage() {
 
       if (!res.ok) throw new Error(`Error al eliminar ${deletingItem.type}`);
 
-      toast.success(`${deletingItem.type === 'quote' ? 'Cotización' : deletingItem.type === 'job' ? 'Trabajo' : 'Reseña'} eliminado exitosamente`);
+      toast.success(
+        `${deletingItem.type === 'quote' ? 'Cotización' : deletingItem.type === 'job' ? 'Trabajo' : 'Reseña'} eliminado exitosamente`
+      );
       setDeletingItem(null);
       fetchData();
     } catch (error) {
@@ -589,9 +623,7 @@ export default function MarketplacePage() {
                 <div className="text-2xl font-bold">
                   {stats?.avgRating ? stats.avgRating.toFixed(1) : '0.0'}
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {stats?.totalReviews || 0} reseñas
-                </p>
+                <p className="text-xs text-muted-foreground">{stats?.totalReviews || 0} reseñas</p>
               </CardContent>
             </Card>
           </div>
@@ -632,7 +664,10 @@ export default function MarketplacePage() {
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-semibold">Cotizaciones Solicitadas</h2>
                 {canCreate && (
-                  <Dialog open={openQuoteDialog} onOpenChange={(open) => handleDialogClose(open, 'quote')}>
+                  <Dialog
+                    open={openQuoteDialog}
+                    onOpenChange={(open) => handleDialogClose(open, 'quote')}
+                  >
                     <DialogTrigger asChild>
                       <Button className="gap-2">
                         <Plus className="h-4 w-4" />
@@ -641,12 +676,17 @@ export default function MarketplacePage() {
                     </DialogTrigger>
                     <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                       <DialogHeader>
-                        <DialogTitle>{editingQuote ? 'Editar Cotización' : 'Solicitar Cotización'}</DialogTitle>
+                        <DialogTitle>
+                          {editingQuote ? 'Editar Cotización' : 'Solicitar Cotización'}
+                        </DialogTitle>
                         <DialogDescription>
                           Solicita una cotización de servicio a un proveedor
                         </DialogDescription>
                       </DialogHeader>
-                      <form onSubmit={editingQuote ? handleUpdateQuote : handleCreateQuote} className="space-y-4">
+                      <form
+                        onSubmit={editingQuote ? handleUpdateQuote : handleCreateQuote}
+                        className="space-y-4"
+                      >
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label htmlFor="titulo">Título *</Label>
@@ -789,7 +829,9 @@ export default function MarketplacePage() {
                           >
                             Cancelar
                           </Button>
-                          <Button type="submit">{editingQuote ? 'Actualizar Cotización' : 'Solicitar Cotización'}</Button>
+                          <Button type="submit">
+                            {editingQuote ? 'Actualizar Cotización' : 'Solicitar Cotización'}
+                          </Button>
                         </div>
                       </form>
                     </DialogContent>
@@ -870,15 +912,15 @@ export default function MarketplacePage() {
                               quote.urgencia === 'alta'
                                 ? 'border-red-500 text-red-500'
                                 : quote.urgencia === 'media'
-                                ? 'border-yellow-500 text-yellow-500'
-                                : 'border-green-500 text-green-500'
+                                  ? 'border-yellow-500 text-yellow-500'
+                                  : 'border-green-500 text-green-500'
                             }
                           >
                             {quote.urgencia === 'alta'
                               ? 'Urgente'
                               : quote.urgencia === 'media'
-                              ? 'Media'
-                              : 'Baja'}
+                                ? 'Media'
+                                : 'Baja'}
                           </Badge>
                         </div>
                       </CardContent>
@@ -893,7 +935,10 @@ export default function MarketplacePage() {
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-semibold">Trabajos</h2>
                 {canCreate && (
-                  <Dialog open={openJobDialog} onOpenChange={(open) => handleDialogClose(open, 'job')}>
+                  <Dialog
+                    open={openJobDialog}
+                    onOpenChange={(open) => handleDialogClose(open, 'job')}
+                  >
                     <DialogTrigger asChild>
                       <Button className="gap-2">
                         <Plus className="h-4 w-4" />
@@ -902,12 +947,15 @@ export default function MarketplacePage() {
                     </DialogTrigger>
                     <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                       <DialogHeader>
-                        <DialogTitle>{editingJob ? 'Editar Trabajo' : 'Registrar Trabajo'}</DialogTitle>
-                        <DialogDescription>
-                          Registra un nuevo trabajo de servicio
-                        </DialogDescription>
+                        <DialogTitle>
+                          {editingJob ? 'Editar Trabajo' : 'Registrar Trabajo'}
+                        </DialogTitle>
+                        <DialogDescription>Registra un nuevo trabajo de servicio</DialogDescription>
                       </DialogHeader>
-                      <form onSubmit={editingJob ? handleUpdateJob : handleCreateJob} className="space-y-4">
+                      <form
+                        onSubmit={editingJob ? handleUpdateJob : handleCreateJob}
+                        className="space-y-4"
+                      >
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label htmlFor="job-titulo">Título *</Label>
@@ -915,9 +963,7 @@ export default function MarketplacePage() {
                               id="job-titulo"
                               required
                               value={jobForm.titulo}
-                              onChange={(e) =>
-                                setJobForm({ ...jobForm, titulo: e.target.value })
-                              }
+                              onChange={(e) => setJobForm({ ...jobForm, titulo: e.target.value })}
                             />
                           </div>
                           <div className="space-y-2">
@@ -1014,7 +1060,9 @@ export default function MarketplacePage() {
                           >
                             Cancelar
                           </Button>
-                          <Button type="submit">{editingJob ? 'Actualizar Trabajo' : 'Crear Trabajo'}</Button>
+                          <Button type="submit">
+                            {editingJob ? 'Actualizar Trabajo' : 'Crear Trabajo'}
+                          </Button>
                         </div>
                       </form>
                     </DialogContent>
@@ -1060,8 +1108,10 @@ export default function MarketplacePage() {
                                     Editar
                                   </DropdownMenuItem>
                                   <DropdownMenuSeparator />
-                                  <DropdownMenuItem 
-                                    onClick={() => setDeletingItem({ type: 'job', id: job.id, name: job.titulo })}
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      setDeletingItem({ type: 'job', id: job.id, name: job.titulo })
+                                    }
                                     className="text-red-600"
                                   >
                                     <Trash2 className="mr-2 h-4 w-4" />
@@ -1090,9 +1140,7 @@ export default function MarketplacePage() {
                           {job.fechaFin && (
                             <div className="flex items-center gap-2">
                               <CheckCircle2 className="h-4 w-4 text-green-600" />
-                              <span>
-                                {format(new Date(job.fechaFin), 'dd/MM/yyyy')}
-                              </span>
+                              <span>{format(new Date(job.fechaFin), 'dd/MM/yyyy')}</span>
                             </div>
                           )}
                         </div>
@@ -1172,12 +1220,8 @@ export default function MarketplacePage() {
                       <CardHeader>
                         <div className="flex items-start justify-between">
                           <div>
-                            <CardTitle className="text-lg">
-                              {review.provider.nombre}
-                            </CardTitle>
-                            <CardDescription className="mt-1">
-                              {review.job.titulo}
-                            </CardDescription>
+                            <CardTitle className="text-lg">{review.provider.nombre}</CardTitle>
+                            <CardDescription className="mt-1">{review.job.titulo}</CardDescription>
                           </div>
                           <div className="flex items-center gap-1">
                             <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
@@ -1189,18 +1233,14 @@ export default function MarketplacePage() {
                       </CardHeader>
                       <CardContent className="space-y-3">
                         {review.comentario && (
-                          <p className="text-sm text-muted-foreground">
-                            "{review.comentario}"
-                          </p>
+                          <p className="text-sm text-muted-foreground">"{review.comentario}"</p>
                         )}
 
                         <div className="grid grid-cols-2 gap-2">
                           {review.puntualidad && (
                             <div className="text-sm">
                               <span className="text-muted-foreground">Puntualidad:</span>
-                              <span className="ml-2 font-medium">
-                                {review.puntualidad}/5
-                              </span>
+                              <span className="ml-2 font-medium">{review.puntualidad}/5</span>
                             </div>
                           )}
                           {review.calidad && (
@@ -1212,9 +1252,7 @@ export default function MarketplacePage() {
                           {review.comunicacion && (
                             <div className="text-sm">
                               <span className="text-muted-foreground">Comunicación:</span>
-                              <span className="ml-2 font-medium">
-                                {review.comunicacion}/5
-                              </span>
+                              <span className="ml-2 font-medium">{review.comunicacion}/5</span>
                             </div>
                           )}
                         </div>

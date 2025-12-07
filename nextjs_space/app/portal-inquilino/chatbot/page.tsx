@@ -34,12 +34,10 @@ export default function TenantChatbotPage() {
               <Bot className="h-16 w-16 text-primary mb-4" />
               <h2 className="text-2xl font-bold mb-2">Chatbot de Asistencia</h2>
               <p className="text-muted-foreground mb-6 max-w-md">
-                Para comunicarte con el equipo de gestión, utiliza el sistema de chat disponible en el menú principal.
+                Para comunicarte con el equipo de gestión, utiliza el sistema de chat disponible en
+                el menú principal.
               </p>
-              <Button
-                onClick={() => router.push('/portal-inquilino/chat')}
-                className="gap-2"
-              >
+              <Button onClick={() => router.push('/portal-inquilino/chat')} className="gap-2">
                 <MessageSquare className="h-4 w-4" />
                 Ir al Chat
               </Button>

@@ -60,14 +60,12 @@ export default function ForgotPasswordPage() {
           <CardContent className="space-y-4">
             <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg">
               <p className="text-sm text-blue-800 dark:text-blue-200">
-                Si el email está registrado en nuestro sistema, recibirás un enlace 
-                para restablecer tu contraseña. El enlace será válido por 1 hora.
+                Si el email está registrado en nuestro sistema, recibirás un enlace para restablecer
+                tu contraseña. El enlace será válido por 1 hora.
               </p>
             </div>
             <Link href="/portal-proveedor/login">
-              <Button className="w-full">
-                Volver al inicio de sesión
-              </Button>
+              <Button className="w-full">Volver al inicio de sesión</Button>
             </Link>
           </CardContent>
         </Card>

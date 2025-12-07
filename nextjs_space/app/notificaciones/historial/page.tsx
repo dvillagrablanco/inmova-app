@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import Sidebar from '@/components/layout/sidebar';
 import Header from '@/components/layout/header';
@@ -10,9 +10,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
+import {
   Mail,
   Bell,
   MessageSquare,
@@ -205,9 +211,7 @@ export default function NotificationHistoryPage() {
           <Card key={stat.canal}>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium capitalize">
-                  {stat.canal}
-                </CardTitle>
+                <CardTitle className="text-sm font-medium capitalize">{stat.canal}</CardTitle>
                 {getCanalIcon(stat.canal)}
               </div>
             </CardHeader>
@@ -310,18 +314,14 @@ export default function NotificationHistoryPage() {
               <CardContent className="py-4">
                 <div className="flex items-start gap-4">
                   {/* Icono del Canal */}
-                  <div className="p-2 bg-muted rounded-lg">
-                    {getCanalIcon(log.canal)}
-                  </div>
+                  <div className="p-2 bg-muted rounded-lg">{getCanalIcon(log.canal)}</div>
 
                   {/* Contenido Principal */}
                   <div className="flex-1 space-y-2">
                     <div className="flex items-start justify-between">
                       <div>
                         <div className="flex items-center gap-2">
-                          {log.asunto && (
-                            <h4 className="font-semibold">{log.asunto}</h4>
-                          )}
+                          {log.asunto && <h4 className="font-semibold">{log.asunto}</h4>}
                           <Badge className={getEstadoColor(log.estado)}>
                             {ESTADOS.find((e) => e.value === log.estado)?.label}
                           </Badge>
@@ -398,8 +398,8 @@ export default function NotificationHistoryPage() {
         <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
             Mostrando {(pagination.page - 1) * pagination.limit + 1} -{' '}
-            {Math.min(pagination.page * pagination.limit, pagination.total)} de{' '}
-            {pagination.total} notificaciones
+            {Math.min(pagination.page * pagination.limit, pagination.total)} de {pagination.total}{' '}
+            notificaciones
           </div>
           <div className="flex gap-2">
             <Button

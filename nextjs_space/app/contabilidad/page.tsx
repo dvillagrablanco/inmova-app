@@ -54,7 +54,7 @@ export default function ContabilidadPage() {
   const { data: session } = useSession() || {};
   const [periodo, setPeriodo] = useState(format(new Date(), 'yyyy-MM'));
   const [loading, setLoading] = useState(true);
-  
+
   // Estados para diferentes secciones
   const [analyticsData, setAnalyticsData] = useState<any>(null);
   const [costCentersData, setCostCentersData] = useState<any[]>([]);
@@ -190,7 +190,6 @@ export default function ContabilidadPage() {
         const data = await ratiosRes.json();
         setRatiosData(data.data);
       }
-
     } catch (error) {
       logger.error('Error al cargar datos financieros:', error);
       toast.error('Error al cargar datos financieros');
@@ -214,10 +213,10 @@ export default function ContabilidadPage() {
     try {
       setLoading(true);
       const res = await fetch('/api/accounting/sync-zucchetti', { method: 'POST' });
-      
+
       if (res.ok) {
         const data = await res.json();
-        
+
         if (data.configured) {
           toast.success('Sincronización con Zucchetti completada');
           loadFinancialData();
@@ -239,7 +238,7 @@ export default function ContabilidadPage() {
     try {
       setLoading(true);
       toast.info('Sincronizando clientes con ContaSimple...');
-      
+
       // Verificar que ContaSimple esté configurado
       if (!contaSimpleStatus?.configured) {
         toast.error('ContaSimple no está configurado. Configura las credenciales primero.');
@@ -252,7 +251,6 @@ export default function ContabilidadPage() {
         'Ve a la sección de Inquilinos para sincronizar clientes individuales con ContaSimple',
         { duration: 5000 }
       );
-      
     } catch (error) {
       logger.error('Error:', error);
       toast.error('Error al sincronizar clientes');
@@ -265,7 +263,7 @@ export default function ContabilidadPage() {
     try {
       setLoading(true);
       toast.info('Creando facturas en ContaSimple...');
-      
+
       // Verificar que ContaSimple esté configurado
       if (!contaSimpleStatus?.configured) {
         toast.error('ContaSimple no está configurado. Configura las credenciales primero.');
@@ -274,11 +272,9 @@ export default function ContabilidadPage() {
 
       // Para usar esta funcionalidad, el usuario debe ir a la sección de Contratos
       // y desde allí crear facturas individuales
-      toast.info(
-        'Ve a la sección de Contratos para crear facturas individuales en ContaSimple',
-        { duration: 5000 }
-      );
-      
+      toast.info('Ve a la sección de Contratos para crear facturas individuales en ContaSimple', {
+        duration: 5000,
+      });
     } catch (error) {
       logger.error('Error:', error);
       toast.error('Error al crear facturas');
@@ -291,7 +287,7 @@ export default function ContabilidadPage() {
     try {
       setLoading(true);
       toast.info('Registrando pagos en ContaSimple...');
-      
+
       // Verificar que ContaSimple esté configurado
       if (!contaSimpleStatus?.configured) {
         toast.error('ContaSimple no está configurado. Configura las credenciales primero.');
@@ -300,11 +296,9 @@ export default function ContabilidadPage() {
 
       // Para usar esta funcionalidad, el usuario debe ir a la sección de Pagos
       // y desde allí registrar pagos individuales
-      toast.info(
-        'Ve a la sección de Pagos para registrar pagos individuales en ContaSimple',
-        { duration: 5000 }
-      );
-      
+      toast.info('Ve a la sección de Pagos para registrar pagos individuales en ContaSimple', {
+        duration: 5000,
+      });
     } catch (error) {
       logger.error('Error:', error);
       toast.error('Error al registrar pagos');
@@ -318,15 +312,15 @@ export default function ContabilidadPage() {
     try {
       setLoading(true);
       toast.info(`Sincronizando clientes con ${system.toUpperCase()}...`);
-      
+
       const res = await fetch(`/api/accounting/${system}/sync-customers`, {
         method: 'POST',
       });
-      
+
       if (!res.ok) {
         throw new Error('Error al sincronizar');
       }
-      
+
       const data = await res.json();
       toast.success(data.message || 'Clientes sincronizados exitosamente');
     } catch (error) {
@@ -341,15 +335,15 @@ export default function ContabilidadPage() {
     try {
       setLoading(true);
       toast.info(`Creando facturas en ${system.toUpperCase()}...`);
-      
+
       const res = await fetch(`/api/accounting/${system}/create-invoice`, {
         method: 'POST',
       });
-      
+
       if (!res.ok) {
         throw new Error('Error al crear facturas');
       }
-      
+
       const data = await res.json();
       toast.success(data.message || 'Facturas creadas exitosamente');
     } catch (error) {
@@ -364,15 +358,15 @@ export default function ContabilidadPage() {
     try {
       setLoading(true);
       toast.info(`Registrando pagos en ${system.toUpperCase()}...`);
-      
+
       const res = await fetch(`/api/accounting/${system}/register-payment`, {
         method: 'POST',
       });
-      
+
       if (!res.ok) {
         throw new Error('Error al registrar pagos');
       }
-      
+
       const data = await res.json();
       toast.success(data.message || 'Pagos registrados exitosamente');
     } catch (error) {
@@ -406,7 +400,8 @@ export default function ContabilidadPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard Financiero</h1>
           <p className="text-muted-foreground">
-            Panel de control para el Director Financiero - Contabilidad Analítica, Costes y Fiscalidad
+            Panel de control para el Director Financiero - Contabilidad Analítica, Costes y
+            Fiscalidad
           </p>
         </div>
         <div className="flex gap-3">
@@ -489,9 +484,7 @@ export default function ContabilidadPage() {
             <BarChart3 className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {formatCurrency(profitLossData?.ebitda || 0)}
-            </div>
+            <div className="text-2xl font-bold">{formatCurrency(profitLossData?.ebitda || 0)}</div>
             <p className="text-xs text-muted-foreground mt-1">
               Margen Operativo: {formatPercentage(profitLossData?.margenes.operativo || 0)}
             </p>
@@ -536,11 +529,7 @@ export default function ContabilidadPage() {
                       Sistema ERP y contabilidad líder en Europa
                     </p>
                   </div>
-                  <Button
-                    onClick={() => loadZucchettiStatus()}
-                    variant="ghost"
-                    size="sm"
-                  >
+                  <Button onClick={() => loadZucchettiStatus()} variant="ghost" size="sm">
                     <RefreshCw className="h-4 w-4" />
                   </Button>
                 </div>
@@ -617,11 +606,7 @@ export default function ContabilidadPage() {
                       Software de facturación y contabilidad para pymes españolas
                     </p>
                   </div>
-                  <Button
-                    onClick={() => loadContaSimpleStatus()}
-                    variant="ghost"
-                    size="sm"
-                  >
+                  <Button onClick={() => loadContaSimpleStatus()} variant="ghost" size="sm">
                     <RefreshCw className="h-4 w-4" />
                   </Button>
                 </div>
@@ -685,21 +670,24 @@ export default function ContabilidadPage() {
                           <strong>No Configurado:</strong> {contaSimpleStatus.message}
                         </p>
                         <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-2">
-                          Para activar la integración con ContaSimple, configura las variables de entorno:
-                          CONTASIMPLE_AUTH_KEY y CONTASIMPLE_API_URL
+                          Para activar la integración con ContaSimple, configura las variables de
+                          entorno: CONTASIMPLE_AUTH_KEY y CONTASIMPLE_API_URL
                         </p>
                       </div>
                     )}
                     {contaSimpleStatus.configured && (
                       <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-md p-4">
                         <p className="text-sm text-green-800 dark:text-green-200">
-                          ✓ <strong>Integración Activa:</strong> ContaSimple está correctamente configurado y listo para usar.
+                          ✓ <strong>Integración Activa:</strong> ContaSimple está correctamente
+                          configurado y listo para usar.
                         </p>
                         <Button
                           onClick={async () => {
                             try {
                               toast.info('Probando conexión con ContaSimple...');
-                              const res = await fetch('/api/accounting/contasimple/test-connection');
+                              const res = await fetch(
+                                '/api/accounting/contasimple/test-connection'
+                              );
                               if (res.ok) {
                                 toast.success('Conexión exitosa con ContaSimple');
                               } else {
@@ -738,11 +726,7 @@ export default function ContabilidadPage() {
                       {sageStatus?.description || 'Líder mundial en software de contabilidad'}
                     </p>
                   </div>
-                  <Button
-                    onClick={() => loadSageStatus()}
-                    variant="ghost"
-                    size="sm"
-                  >
+                  <Button onClick={() => loadSageStatus()} variant="ghost" size="sm">
                     <RefreshCw className="h-4 w-4" />
                   </Button>
                 </div>
@@ -819,11 +803,7 @@ export default function ContabilidadPage() {
                       {holdedStatus?.description || 'Software de gestión empresarial todo-en-uno'}
                     </p>
                   </div>
-                  <Button
-                    onClick={() => loadHoldedStatus()}
-                    variant="ghost"
-                    size="sm"
-                  >
+                  <Button onClick={() => loadHoldedStatus()} variant="ghost" size="sm">
                     <RefreshCw className="h-4 w-4" />
                   </Button>
                 </div>
@@ -900,11 +880,7 @@ export default function ContabilidadPage() {
                       {a3Status?.description || 'ERP líder en España para pymes'}
                     </p>
                   </div>
-                  <Button
-                    onClick={() => loadA3Status()}
-                    variant="ghost"
-                    size="sm"
-                  >
+                  <Button onClick={() => loadA3Status()} variant="ghost" size="sm">
                     <RefreshCw className="h-4 w-4" />
                   </Button>
                 </div>
@@ -981,11 +957,7 @@ export default function ContabilidadPage() {
                       {alegraStatus?.description || 'Facturación líder en Latinoamérica'}
                     </p>
                   </div>
-                  <Button
-                    onClick={() => loadAlegraStatus()}
-                    variant="ghost"
-                    size="sm"
-                  >
+                  <Button onClick={() => loadAlegraStatus()} variant="ghost" size="sm">
                     <RefreshCw className="h-4 w-4" />
                   </Button>
                 </div>
@@ -1059,7 +1031,9 @@ export default function ContabilidadPage() {
 
         {/* Cuenta de Pérdidas y Ganancias */}
         <TabsContent value="pyg" className="space-y-4">
-          <p className="text-muted-foreground">Aquí se mostrará la cuenta de pérdidas y ganancias</p>
+          <p className="text-muted-foreground">
+            Aquí se mostrará la cuenta de pérdidas y ganancias
+          </p>
         </TabsContent>
 
         <TabsContent value="analitica" className="space-y-4">

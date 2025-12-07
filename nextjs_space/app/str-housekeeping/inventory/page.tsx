@@ -10,7 +10,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Plus, Package, AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react';
 import { toast } from 'sonner';
@@ -195,10 +201,7 @@ export default function InventoryPage() {
                   <div className="text-2xl font-bold">
                     €
                     {inventory
-                      .reduce(
-                        (sum, item) => sum + (item.stockActual * (item.costoUnitario || 0)),
-                        0
-                      )
+                      .reduce((sum, item) => sum + item.stockActual * (item.costoUnitario || 0), 0)
                       .toFixed(2)}
                   </div>
                 </CardContent>
@@ -211,9 +214,7 @@ export default function InventoryPage() {
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="h-5 w-5 text-orange-500" />
-                    <span className="font-medium">
-                      {bajoStock.length} item(s) con stock bajo
-                    </span>
+                    <span className="font-medium">{bajoStock.length} item(s) con stock bajo</span>
                   </div>
                 </CardContent>
               </Card>
@@ -226,9 +227,7 @@ export default function InventoryPage() {
                   <CardContent className="p-12 text-center">
                     <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                     <h3 className="font-semibold mb-2">No hay items</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Añade el primer item al inventario
-                    </p>
+                    <p className="text-muted-foreground mb-4">Añade el primer item al inventario</p>
                     <Button onClick={() => setShowDialog(true)} className="gradient-primary">
                       <Plus className="h-4 w-4 mr-2" />
                       Añadir Item
@@ -272,11 +271,7 @@ export default function InventoryPage() {
                         <div className="pt-4 border-t space-y-2">
                           <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">Stock actual:</span>
-                            <span
-                              className={`font-medium ${
-                                lowStock ? 'text-orange-500' : ''
-                              }`}
-                            >
+                            <span className={`font-medium ${lowStock ? 'text-orange-500' : ''}`}>
                               {item.stockActual} {item.unidadMedida}
                             </span>
                           </div>

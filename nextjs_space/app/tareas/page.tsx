@@ -32,7 +32,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import {
   ArrowLeft,
   CheckCircle2,
@@ -280,7 +286,9 @@ export default function TareasPage() {
     const pendientes = tasks.filter((t) => t.estado === 'pendiente').length;
     const enProgreso = tasks.filter((t) => t.estado === 'en_progreso').length;
     const completadas = tasks.filter((t) => t.estado === 'completada').length;
-    const urgentes = tasks.filter((t) => t.prioridad === 'urgente' && t.estado !== 'completada').length;
+    const urgentes = tasks.filter(
+      (t) => t.prioridad === 'urgente' && t.estado !== 'completada'
+    ).length;
 
     return { total, pendientes, enProgreso, completadas, urgentes };
   }, [tasks]);
@@ -297,9 +305,21 @@ export default function TareasPage() {
 
   const getPrioridadBadge = (prioridad: string) => {
     const badges = {
-      baja: <Badge variant="outline" className="border-gray-400">Baja</Badge>,
-      media: <Badge variant="outline" className="border-yellow-400">Media</Badge>,
-      alta: <Badge variant="outline" className="border-orange-500">Alta</Badge>,
+      baja: (
+        <Badge variant="outline" className="border-gray-400">
+          Baja
+        </Badge>
+      ),
+      media: (
+        <Badge variant="outline" className="border-yellow-400">
+          Media
+        </Badge>
+      ),
+      alta: (
+        <Badge variant="outline" className="border-orange-500">
+          Alta
+        </Badge>
+      ),
       urgente: <Badge className="bg-red-500">Urgente</Badge>,
     };
     return badges[prioridad as keyof typeof badges] || <Badge>{prioridad}</Badge>;
@@ -342,11 +362,7 @@ export default function TareasPage() {
                 </BreadcrumbList>
               </Breadcrumb>
               <div className="flex items-center gap-3">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => router.push('/dashboard')}
-                >
+                <Button variant="outline" size="sm" onClick={() => router.push('/dashboard')}>
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Volver al Dashboard
                 </Button>
@@ -447,25 +463,37 @@ export default function TareasPage() {
                 </SelectContent>
               </Select>
             </div>
-            
+
             {/* Filter Chips */}
             <FilterChips
               filters={[
-                ...(searchTerm ? [{
-                  id: 'search',
-                  label: 'Búsqueda',
-                  value: searchTerm
-                }] : []),
-                ...(filterEstado !== 'all' ? [{
-                  id: 'estado',
-                  label: 'Estado',
-                  value: filterEstado
-                }] : []),
-                ...(filterPrioridad !== 'all' ? [{
-                  id: 'prioridad',
-                  label: 'Prioridad',
-                  value: filterPrioridad
-                }] : [])
+                ...(searchTerm
+                  ? [
+                      {
+                        id: 'search',
+                        label: 'Búsqueda',
+                        value: searchTerm,
+                      },
+                    ]
+                  : []),
+                ...(filterEstado !== 'all'
+                  ? [
+                      {
+                        id: 'estado',
+                        label: 'Estado',
+                        value: filterEstado,
+                      },
+                    ]
+                  : []),
+                ...(filterPrioridad !== 'all'
+                  ? [
+                      {
+                        id: 'prioridad',
+                        label: 'Prioridad',
+                        value: filterPrioridad,
+                      },
+                    ]
+                  : []),
               ]}
               onRemove={(id) => {
                 if (id === 'search') setSearchTerm('');
@@ -485,13 +513,25 @@ export default function TareasPage() {
             {filteredTasks.length === 0 ? (
               <EmptyState
                 icon={<CheckCircle2 className="h-12 w-12" />}
-                title={searchTerm || filterEstado !== 'all' || filterPrioridad !== 'all' ? 'No se encontraron tareas' : 'No hay tareas registradas'}
-                description={searchTerm || filterEstado !== 'all' || filterPrioridad !== 'all' ? 'No se encontraron tareas con los filtros aplicados. Intenta ajustar tu búsqueda.' : 'Comienza creando tu primera tarea para organizar el trabajo del equipo.'}
-                action={canCreate && !searchTerm && filterEstado === 'all' && filterPrioridad === 'all' ? {
-                  label: 'Crear Primera Tarea',
-                  onClick: () => handleOpenDialog(),
-                  icon: <Plus className="h-4 w-4" />
-                } : undefined}
+                title={
+                  searchTerm || filterEstado !== 'all' || filterPrioridad !== 'all'
+                    ? 'No se encontraron tareas'
+                    : 'No hay tareas registradas'
+                }
+                description={
+                  searchTerm || filterEstado !== 'all' || filterPrioridad !== 'all'
+                    ? 'No se encontraron tareas con los filtros aplicados. Intenta ajustar tu búsqueda.'
+                    : 'Comienza creando tu primera tarea para organizar el trabajo del equipo.'
+                }
+                action={
+                  canCreate && !searchTerm && filterEstado === 'all' && filterPrioridad === 'all'
+                    ? {
+                        label: 'Crear Primera Tarea',
+                        onClick: () => handleOpenDialog(),
+                        icon: <Plus className="h-4 w-4" />,
+                      }
+                    : undefined
+                }
               />
             ) : (
               filteredTasks.map((task) => (
@@ -518,7 +558,8 @@ export default function TareasPage() {
                             <div className="flex items-center gap-1">
                               <Calendar className="h-3 w-3" />
                               <span>
-                                Límite: {format(new Date(task.fechaLimite), "d MMM yyyy", { locale: es })}
+                                Límite:{' '}
+                                {format(new Date(task.fechaLimite), 'd MMM yyyy', { locale: es })}
                               </span>
                             </div>
                           )}
@@ -573,7 +614,9 @@ export default function TareasPage() {
           <DialogHeader>
             <DialogTitle>{editingTask ? 'Editar Tarea' : 'Nueva Tarea'}</DialogTitle>
             <DialogDescription>
-              {editingTask ? 'Modifica los detalles de la tarea' : 'Crea una nueva tarea para el equipo'}
+              {editingTask
+                ? 'Modifica los detalles de la tarea'
+                : 'Crea una nueva tarea para el equipo'}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -686,9 +729,7 @@ export default function TareasPage() {
             <Button variant="outline" onClick={() => setOpenDialog(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleSave}>
-              {editingTask ? 'Actualizar' : 'Crear'} Tarea
-            </Button>
+            <Button onClick={handleSave}>{editingTask ? 'Actualizar' : 'Crear'} Tarea</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

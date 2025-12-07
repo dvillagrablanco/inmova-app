@@ -10,25 +10,27 @@ export default function BlogPage() {
   const posts = [
     {
       title: '7 Tendencias PropTech que Transformarán el Sector en 2026',
-      excerpt: 'Descubre las tecnologías emergentes que están revolucionando la gestión inmobiliaria.',
+      excerpt:
+        'Descubre las tecnologías emergentes que están revolucionando la gestión inmobiliaria.',
       author: 'Equipo INMOVA',
       date: '15 Enero 2026',
-      category: 'Tendencias'
+      category: 'Tendencias',
     },
     {
       title: 'Cómo la IA Está Cambiando la Gestión de Propiedades',
-      excerpt: 'La inteligencia artificial permite optimizar operaciones y aumentar el ROI hasta un 25%.',
+      excerpt:
+        'La inteligencia artificial permite optimizar operaciones y aumentar el ROI hasta un 25%.',
       author: 'María González',
       date: '10 Enero 2026',
-      category: 'Tecnología'
+      category: 'Tecnología',
     },
     {
       title: 'Blockchain en el Sector Inmobiliario: Casos Reales',
       excerpt: 'Análisis de implementaciones exitosas de tokenización y contratos inteligentes.',
       author: 'Carlos Ruiz',
       date: '5 Enero 2026',
-      category: 'Innovación'
-    }
+      category: 'Innovación',
+    },
   ];
 
   return (
@@ -38,7 +40,9 @@ export default function BlogPage() {
           <div className="flex items-center justify-between h-16">
             <Link href="/landing" className="flex items-center gap-3">
               <Building2 className="h-8 w-8 text-indigo-600" />
-              <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">INMOVA</span>
+              <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                INMOVA
+              </span>
             </Link>
             <Link href="/landing">
               <Button>Volver a Inicio</Button>
@@ -76,7 +80,9 @@ export default function BlogPage() {
                       {post.date}
                     </div>
                   </div>
-                  <Button className="w-full mt-4" variant="outline" disabled>Próximamente</Button>
+                  <Button className="w-full mt-4" variant="outline" disabled>
+                    Próximamente
+                  </Button>
                 </CardContent>
               </Card>
             ))}
@@ -90,7 +96,9 @@ export default function BlogPage() {
 
       <footer className="bg-gray-900 text-white py-8 px-4">
         <div className="container mx-auto text-center">
-          <p className="text-gray-400">© 2026 INMOVA. Powered by Enxames Investments SL. Todos los derechos reservados.</p>
+          <p className="text-gray-400">
+            © 2026 INMOVA. Powered by Enxames Investments SL. Todos los derechos reservados.
+          </p>
         </div>
       </footer>
     </div>

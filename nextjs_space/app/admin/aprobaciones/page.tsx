@@ -6,26 +6,14 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import {
-  ArrowLeft,
-  CheckCircle2,
-  Clock,
-  Euro,
-  Home,
-  XCircle,
-} from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Clock, Euro, Home, XCircle } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Button } from '@/components/ui/button';
 import { BackButton } from '@/components/ui/back-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -157,11 +145,26 @@ export default function AprobacionesPage() {
   const getEstadoBadge = (estado: string) => {
     switch (estado) {
       case 'pendiente':
-        return <Badge variant="outline"><Clock className="h-3 w-3 mr-1" />Pendiente</Badge>;
+        return (
+          <Badge variant="outline">
+            <Clock className="h-3 w-3 mr-1" />
+            Pendiente
+          </Badge>
+        );
       case 'aprobado':
-        return <Badge variant="default" className="bg-green-500"><CheckCircle2 className="h-3 w-3 mr-1" />Aprobado</Badge>;
+        return (
+          <Badge variant="default" className="bg-green-500">
+            <CheckCircle2 className="h-3 w-3 mr-1" />
+            Aprobado
+          </Badge>
+        );
       case 'rechazado':
-        return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Rechazado</Badge>;
+        return (
+          <Badge variant="destructive">
+            <XCircle className="h-3 w-3 mr-1" />
+            Rechazado
+          </Badge>
+        );
       default:
         return <Badge>{estado}</Badge>;
     }
@@ -199,10 +202,7 @@ export default function AprobacionesPage() {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbLink
-                    href="/dashboard"
-                    className="flex items-center gap-2"
-                  >
+                  <BreadcrumbLink href="/dashboard" className="flex items-center gap-2">
                     <Home className="h-4 w-4" />
                     Inicio
                   </BreadcrumbLink>
@@ -216,9 +216,7 @@ export default function AprobacionesPage() {
 
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight">
-                  Historial de Aprobaciones
-                </h1>
+                <h1 className="text-3xl font-bold tracking-tight">Historial de Aprobaciones</h1>
                 <p className="text-muted-foreground mt-2">
                   Gestiona y revisa solicitudes de aprobación
                 </p>
@@ -245,7 +243,12 @@ export default function AprobacionesPage() {
                   <CardContent className="flex flex-col items-center justify-center py-12">
                     <CheckCircle2 className="h-12 w-12 text-muted-foreground mb-4" />
                     <p className="text-muted-foreground">
-                      No hay solicitudes {selectedTab === 'pendiente' ? 'pendientes' : selectedTab === 'aprobado' ? 'aprobadas' : 'rechazadas'}
+                      No hay solicitudes{' '}
+                      {selectedTab === 'pendiente'
+                        ? 'pendientes'
+                        : selectedTab === 'aprobado'
+                          ? 'aprobadas'
+                          : 'rechazadas'}
                     </p>
                   </CardContent>
                 </Card>
@@ -256,12 +259,8 @@ export default function AprobacionesPage() {
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <CardTitle className="text-lg">
-                              {getDescription(approval)}
-                            </CardTitle>
-                            <Badge variant="secondary">
-                              {getTipoLabel(approval.tipo)}
-                            </Badge>
+                            <CardTitle className="text-lg">{getDescription(approval)}</CardTitle>
+                            <Badge variant="secondary">{getTipoLabel(approval.tipo)}</Badge>
                             {getEstadoBadge(approval.estado)}
                           </div>
                           <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -272,22 +271,18 @@ export default function AprobacionesPage() {
                             <span>•</span>
                             <span>
                               Solicitado el{' '}
-                              {format(
-                                new Date(approval.fechaSolicitud),
-                                'dd MMM yyyy',
-                                { locale: es }
-                              )}
+                              {format(new Date(approval.fechaSolicitud), 'dd MMM yyyy', {
+                                locale: es,
+                              })}
                             </span>
                             {approval.fechaRevision && (
                               <>
                                 <span>•</span>
                                 <span>
                                   Revisado el{' '}
-                                  {format(
-                                    new Date(approval.fechaRevision),
-                                    'dd MMM yyyy',
-                                    { locale: es }
-                                  )}
+                                  {format(new Date(approval.fechaRevision), 'dd MMM yyyy', {
+                                    locale: es,
+                                  })}
                                 </span>
                               </>
                             )}
@@ -324,9 +319,7 @@ export default function AprobacionesPage() {
                         {approval.motivo && (
                           <div className="mb-2">
                             <p className="text-sm font-medium mb-1">Motivo de la solicitud:</p>
-                            <p className="text-sm text-muted-foreground">
-                              {approval.motivo}
-                            </p>
+                            <p className="text-sm text-muted-foreground">{approval.motivo}</p>
                           </div>
                         )}
                         {approval.comentarioRechazo && (

@@ -26,9 +26,9 @@ export default function OfflinePage() {
   const handleRetry = async () => {
     setIsRetrying(true);
     try {
-      const response = await fetch('/api/health', { 
+      const response = await fetch('/api/health', {
         method: 'HEAD',
-        cache: 'no-cache'
+        cache: 'no-cache',
       });
       if (response.ok) {
         window.location.reload();
@@ -53,7 +53,8 @@ export default function OfflinePage() {
             </div>
             <CardTitle className="text-2xl">Sin conexi\u00f3n a internet</CardTitle>
             <CardDescription>
-              No se puede conectar con el servidor. Algunas funciones est\u00e1n limitadas en modo offline.
+              No se puede conectar con el servidor. Algunas funciones est\u00e1n limitadas en modo
+              offline.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -63,12 +64,7 @@ export default function OfflinePage() {
               </div>
             )}
 
-            <Button
-              onClick={handleRetry}
-              disabled={isRetrying}
-              className="w-full"
-              size="lg"
-            >
+            <Button onClick={handleRetry} disabled={isRetrying} className="w-full" size="lg">
               {isRetrying ? (
                 <>
                   <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
@@ -99,7 +95,9 @@ export default function OfflinePage() {
                   <Home className="h-5 w-5 text-primary" aria-hidden="true" />
                   <div>
                     <div className="font-medium">Dashboard</div>
-                    <div className="text-sm text-muted-foreground">Ver datos guardados localmente</div>
+                    <div className="text-sm text-muted-foreground">
+                      Ver datos guardados localmente
+                    </div>
                   </div>
                 </div>
               </Link>
@@ -109,7 +107,9 @@ export default function OfflinePage() {
                   <Building2 className="h-5 w-5 text-primary" aria-hidden="true" />
                   <div>
                     <div className="font-medium">Edificios</div>
-                    <div className="text-sm text-muted-foreground">Consultar propiedades en cach\u00e9</div>
+                    <div className="text-sm text-muted-foreground">
+                      Consultar propiedades en cach\u00e9
+                    </div>
                   </div>
                 </div>
               </Link>
@@ -129,7 +129,9 @@ export default function OfflinePage() {
                   <FileText className="h-5 w-5 text-primary" aria-hidden="true" />
                   <div>
                     <div className="font-medium">Documentos</div>
-                    <div className="text-sm text-muted-foreground">Acceder a documentos descargados</div>
+                    <div className="text-sm text-muted-foreground">
+                      Acceder a documentos descargados
+                    </div>
                   </div>
                 </div>
               </Link>
@@ -145,7 +147,10 @@ export default function OfflinePage() {
               Consejos para trabajar offline
             </h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>• Los cambios que realices se sincronizarán automáticamente cuando vuelva la conexión</li>
+              <li>
+                • Los cambios que realices se sincronizarán automáticamente cuando vuelva la
+                conexión
+              </li>
               <li>• Puedes consultar datos previamente visitados</li>
               <li>• Algunas acciones como crear o editar registros requerirán conexión</li>
               <li>• Verifica tu conexión WiFi o datos móviles</li>

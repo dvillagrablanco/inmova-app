@@ -101,9 +101,7 @@ export default function PaqueteriaPanel() {
             <Package className="h-5 w-5" />
             Tus Paquetes
           </CardTitle>
-          <CardDescription>
-            Revisa el estado de tus paquetes y envíos
-          </CardDescription>
+          <CardDescription>Revisa el estado de tus paquetes y envíos</CardDescription>
         </CardHeader>
       </Card>
 
@@ -135,9 +133,7 @@ export default function PaqueteriaPanel() {
                     <div className="flex-1 space-y-3">
                       <div className="flex items-start justify-between">
                         <div>
-                          <h3 className="font-semibold text-lg">
-                            Paquete de {paquete.remitente}
-                          </h3>
+                          <h3 className="font-semibold text-lg">Paquete de {paquete.remitente}</h3>
                           {paquete.empresa && (
                             <p className="text-sm text-gray-600">{paquete.empresa}</p>
                           )}
@@ -147,18 +143,14 @@ export default function PaqueteriaPanel() {
                             </p>
                           )}
                         </div>
-                        <Badge variant={estadoInfo.variant}>
-                          {estadoInfo.label}
-                        </Badge>
+                        <Badge variant={estadoInfo.variant}>{estadoInfo.label}</Badge>
                       </div>
 
                       {/* Detalles */}
                       <div className="grid grid-cols-2 gap-3 text-sm">
                         <div className="flex items-center gap-2 text-gray-600">
                           <Clock className="h-4 w-4" />
-                          <span>
-                            Llegó: {format(fechaLlegada, "d 'de' MMMM", { locale: es })}
-                          </span>
+                          <span>Llegó: {format(fechaLlegada, "d 'de' MMMM", { locale: es })}</span>
                         </div>
                         {paquete.ubicacionAlmacen && (
                           <div className="flex items-center gap-2 text-gray-600">

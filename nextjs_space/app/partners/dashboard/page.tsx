@@ -345,11 +345,12 @@ export default function PartnerDashboardPage() {
                 Enviar Invitación
               </Button>
             </Link>
+          </div>
         </CardContent>
       </Card>
-            </div>
-          </main>
-        </div>
+          </div>
+        </main>
       </div>
+    </div>
   );
 }

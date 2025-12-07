@@ -34,7 +34,7 @@ import {
   EyeOff,
   Plus,
   Send,
-  Image as ImageIcon
+  Image as ImageIcon,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -135,7 +135,7 @@ export default function SocialFeedPanel() {
         });
         if (res.ok) {
           toast.success('Post eliminado');
-          setPosts(posts.filter(p => p.id !== postId));
+          setPosts(posts.filter((p) => p.id !== postId));
         }
       } else {
         const res = await fetch(`/api/community/posts/${postId}`, {
@@ -184,9 +184,7 @@ export default function SocialFeedPanel() {
               <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
                   <DialogTitle>Crear Publicación</DialogTitle>
-                  <DialogDescription>
-                    Comparte algo con la comunidad
-                  </DialogDescription>
+                  <DialogDescription>Comparte algo con la comunidad</DialogDescription>
                 </DialogHeader>
                 <div className="py-4">
                   <Textarea
@@ -248,7 +246,10 @@ export default function SocialFeedPanel() {
                         {post.author?.nombreCompleto || 'Community Manager'}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: es })}
+                        {formatDistanceToNow(new Date(post.createdAt), {
+                          addSuffix: true,
+                          locale: es,
+                        })}
                         {post.building && ` · ${post.building.nombre}`}
                       </p>
                     </div>
@@ -274,13 +275,17 @@ export default function SocialFeedPanel() {
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleModeratePost(post.id, 'hide')}>
                             {post.moderado ? (
-                              <><Eye className="h-4 w-4 mr-2" /> Mostrar</>
+                              <>
+                                <Eye className="h-4 w-4 mr-2" /> Mostrar
+                              </>
                             ) : (
-                              <><EyeOff className="h-4 w-4 mr-2" /> Ocultar</>
+                              <>
+                                <EyeOff className="h-4 w-4 mr-2" /> Ocultar
+                              </>
                             )}
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             className="text-destructive"
                             onClick={() => handleModeratePost(post.id, 'delete')}
                           >
@@ -298,12 +303,7 @@ export default function SocialFeedPanel() {
                 {post.multimedia?.length > 0 && (
                   <div className="mt-3 grid gap-2">
                     {post.multimedia.map((url, i) => (
-                      <img
-                        key={i}
-                        src={url}
-                        alt=""
-                        className="rounded-lg max-h-96 object-cover"
-                      />
+                      <img key={i} src={url} alt="" className="rounded-lg max-h-96 object-cover" />
                     ))}
                   </div>
                 )}

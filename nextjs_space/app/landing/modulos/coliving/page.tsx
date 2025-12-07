@@ -7,11 +7,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { 
-  Building2, Users, Calculator, CheckCircle, Zap, 
-  Euro, Droplets, Wifi, Home, Shield,
-  BarChart3, AlertCircle, Sparkles, ArrowRight, Star,
-  Clock, TrendingUp, FileText
+import {
+  Building2,
+  Users,
+  Calculator,
+  CheckCircle,
+  Zap,
+  Euro,
+  Droplets,
+  Wifi,
+  Home,
+  Shield,
+  BarChart3,
+  AlertCircle,
+  Sparkles,
+  ArrowRight,
+  Star,
+  Clock,
+  TrendingUp,
+  FileText,
 } from 'lucide-react';
 
 interface Habitacion {
@@ -36,14 +50,18 @@ export default function ColivingPage() {
     agua: 50,
     gas: 40,
     internet: 45,
-    limpieza: 80
+    limpieza: 80,
   });
 
   // Método de prorrateo
-  const [metodoProrrateo, setMetodoProrrateo] = useState<'igual' | 'metrosCuadrados' | 'inquilinos'>('metrosCuadrados');
+  const [metodoProrrateo, setMetodoProrrateo] = useState<
+    'igual' | 'metrosCuadrados' | 'inquilinos'
+  >('metrosCuadrados');
 
   // Resultados
-  const [prorrateo, setProrrateo] = useState<Record<number, { total: number; desglose: Record<string, number> }>>({});
+  const [prorrateo, setProrrateo] = useState<
+    Record<number, { total: number; desglose: Record<string, number> }>
+  >({});
 
   useEffect(() => {
     calcularProrrateo();
@@ -57,9 +75,9 @@ export default function ColivingPage() {
 
     const nuevoProrrateo: Record<number, { total: number; desglose: Record<string, number> }> = {};
 
-    habitaciones.forEach(habitacion => {
+    habitaciones.forEach((habitacion) => {
       let factor = 0;
-      
+
       if (metodoProrrateo === 'igual') {
         factor = 1 / numHabitaciones;
       } else if (metodoProrrateo === 'metrosCuadrados') {
@@ -75,7 +93,7 @@ export default function ColivingPage() {
 
       nuevoProrrateo[habitacion.id] = {
         total: totalGastos * factor,
-        desglose
+        desglose,
       };
     });
 
@@ -83,24 +101,29 @@ export default function ColivingPage() {
   };
 
   const actualizarHabitacion = (id: number, field: keyof Habitacion, value: string | number) => {
-    setHabitaciones(prev => prev.map(h => 
-      h.id === id ? { ...h, [field]: typeof value === 'string' ? value : Number(value) } : h
-    ));
+    setHabitaciones((prev) =>
+      prev.map((h) =>
+        h.id === id ? { ...h, [field]: typeof value === 'string' ? value : Number(value) } : h
+      )
+    );
   };
 
   const agregarHabitacion = () => {
-    const nuevoId = Math.max(...habitaciones.map(h => h.id), 0) + 1;
-    setHabitaciones(prev => [...prev, {
-      id: nuevoId,
-      nombre: `Habitación ${nuevoId}`,
-      metrosCuadrados: 15,
-      inquilinos: 1
-    }]);
+    const nuevoId = Math.max(...habitaciones.map((h) => h.id), 0) + 1;
+    setHabitaciones((prev) => [
+      ...prev,
+      {
+        id: nuevoId,
+        nombre: `Habitación ${nuevoId}`,
+        metrosCuadrados: 15,
+        inquilinos: 1,
+      },
+    ]);
   };
 
   const eliminarHabitacion = (id: number) => {
     if (habitaciones.length > 1) {
-      setHabitaciones(prev => prev.filter(h => h.id !== id));
+      setHabitaciones((prev) => prev.filter((h) => h.id !== id));
     }
   };
 
@@ -110,7 +133,7 @@ export default function ColivingPage() {
       agua: 'Agua',
       gas: 'Gas',
       internet: 'Internet',
-      limpieza: 'Limpieza'
+      limpieza: 'Limpieza',
     };
     return nombres[key] || key;
   };
@@ -123,12 +146,17 @@ export default function ColivingPage() {
           <div className="flex items-center justify-between h-16">
             <Link href="/landing" className="flex items-center gap-3">
               <Building2 className="h-8 w-8 text-cyan-600" />
-              <span className="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">INMOVA</span>
+              <span className="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
+                INMOVA
+              </span>
             </Link>
-            
+
             <div className="flex items-center gap-4">
               <Link href="/landing/campanas/launch2025">
-                <Button variant="outline" className="border-cyan-600 text-cyan-600 hover:bg-cyan-50">
+                <Button
+                  variant="outline"
+                  className="border-cyan-600 text-cyan-600 hover:bg-cyan-50"
+                >
                   Ver Oferta LAUNCH2025
                 </Button>
               </Link>
@@ -149,26 +177,34 @@ export default function ColivingPage() {
             <Users className="h-4 w-4 mr-2" />
             Módulo Coliving Avanzado
           </Badge>
-          
+
           <h1 className="text-5xl md:text-6xl font-extrabold mb-6 bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
             Gestiona Tu Coliving
             <br />
             con Prorrateo Automático
           </h1>
-          
+
           <p className="text-xl md:text-2xl text-gray-700 mb-8 max-w-3xl mx-auto">
-            Divide suministros de forma <strong>justa y transparente</strong>. Olvídate de discusiones por facturas.
+            Divide suministros de forma <strong>justa y transparente</strong>. Olvídate de
+            discusiones por facturas.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/register?coupon=COLIVING50">
-              <Button size="lg" className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white text-lg h-14 px-8">
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white text-lg h-14 px-8"
+              >
                 <ArrowRight className="mr-2 h-5 w-5" />
                 Probar Gratis con COLIVING50
               </Button>
             </Link>
             <Link href="/landing/demo?module=coliving">
-              <Button size="lg" variant="outline" className="border-cyan-600 text-cyan-600 hover:bg-cyan-50 text-lg h-14 px-8">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-cyan-600 text-cyan-600 hover:bg-cyan-50 text-lg h-14 px-8"
+              >
                 Ver Demo en Vivo
               </Button>
             </Link>
@@ -201,19 +237,23 @@ export default function ColivingPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div 
+                  <div
                     onClick={() => setMetodoProrrateo('igual')}
                     className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                      metodoProrrateo === 'igual' 
-                        ? 'border-cyan-600 bg-cyan-50' 
+                      metodoProrrateo === 'igual'
+                        ? 'border-cyan-600 bg-cyan-50'
                         : 'border-gray-200 hover:border-cyan-300'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`h-4 w-4 rounded-full border-2 flex items-center justify-center ${
-                        metodoProrrateo === 'igual' ? 'border-cyan-600' : 'border-gray-300'
-                      }`}>
-                        {metodoProrrateo === 'igual' && <div className="h-2 w-2 rounded-full bg-cyan-600" />}
+                      <div
+                        className={`h-4 w-4 rounded-full border-2 flex items-center justify-center ${
+                          metodoProrrateo === 'igual' ? 'border-cyan-600' : 'border-gray-300'
+                        }`}
+                      >
+                        {metodoProrrateo === 'igual' && (
+                          <div className="h-2 w-2 rounded-full bg-cyan-600" />
+                        )}
                       </div>
                       <div>
                         <p className="font-semibold text-gray-900">A Partes Iguales</p>
@@ -222,44 +262,58 @@ export default function ColivingPage() {
                     </div>
                   </div>
 
-                  <div 
+                  <div
                     onClick={() => setMetodoProrrateo('metrosCuadrados')}
                     className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                      metodoProrrateo === 'metrosCuadrados' 
-                        ? 'border-cyan-600 bg-cyan-50' 
+                      metodoProrrateo === 'metrosCuadrados'
+                        ? 'border-cyan-600 bg-cyan-50'
                         : 'border-gray-200 hover:border-cyan-300'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`h-4 w-4 rounded-full border-2 flex items-center justify-center ${
-                        metodoProrrateo === 'metrosCuadrados' ? 'border-cyan-600' : 'border-gray-300'
-                      }`}>
-                        {metodoProrrateo === 'metrosCuadrados' && <div className="h-2 w-2 rounded-full bg-cyan-600" />}
+                      <div
+                        className={`h-4 w-4 rounded-full border-2 flex items-center justify-center ${
+                          metodoProrrateo === 'metrosCuadrados'
+                            ? 'border-cyan-600'
+                            : 'border-gray-300'
+                        }`}
+                      >
+                        {metodoProrrateo === 'metrosCuadrados' && (
+                          <div className="h-2 w-2 rounded-full bg-cyan-600" />
+                        )}
                       </div>
                       <div>
                         <p className="font-semibold text-gray-900">Por Metros Cuadrados</p>
-                        <p className="text-sm text-gray-600">Proporcional al tamaño de la habitación</p>
+                        <p className="text-sm text-gray-600">
+                          Proporcional al tamaño de la habitación
+                        </p>
                       </div>
                     </div>
                   </div>
 
-                  <div 
+                  <div
                     onClick={() => setMetodoProrrateo('inquilinos')}
                     className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                      metodoProrrateo === 'inquilinos' 
-                        ? 'border-cyan-600 bg-cyan-50' 
+                      metodoProrrateo === 'inquilinos'
+                        ? 'border-cyan-600 bg-cyan-50'
                         : 'border-gray-200 hover:border-cyan-300'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`h-4 w-4 rounded-full border-2 flex items-center justify-center ${
-                        metodoProrrateo === 'inquilinos' ? 'border-cyan-600' : 'border-gray-300'
-                      }`}>
-                        {metodoProrrateo === 'inquilinos' && <div className="h-2 w-2 rounded-full bg-cyan-600" />}
+                      <div
+                        className={`h-4 w-4 rounded-full border-2 flex items-center justify-center ${
+                          metodoProrrateo === 'inquilinos' ? 'border-cyan-600' : 'border-gray-300'
+                        }`}
+                      >
+                        {metodoProrrateo === 'inquilinos' && (
+                          <div className="h-2 w-2 rounded-full bg-cyan-600" />
+                        )}
                       </div>
                       <div>
                         <p className="font-semibold text-gray-900">Por Número de Inquilinos</p>
-                        <p className="text-sm text-gray-600">Según cuántas personas hay en cada habitación</p>
+                        <p className="text-sm text-gray-600">
+                          Según cuántas personas hay en cada habitación
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -280,10 +334,12 @@ export default function ColivingPage() {
                       <Zap className="h-4 w-4 text-yellow-600" />
                       Electricidad (€)
                     </Label>
-                    <Input 
-                      type="number" 
+                    <Input
+                      type="number"
                       value={gastosComunes.luz}
-                      onChange={(e) => setGastosComunes(prev => ({ ...prev, luz: Number(e.target.value) }))}
+                      onChange={(e) =>
+                        setGastosComunes((prev) => ({ ...prev, luz: Number(e.target.value) }))
+                      }
                       className="text-base"
                       step="10"
                     />
@@ -294,10 +350,12 @@ export default function ColivingPage() {
                       <Droplets className="h-4 w-4 text-blue-600" />
                       Agua (€)
                     </Label>
-                    <Input 
-                      type="number" 
+                    <Input
+                      type="number"
                       value={gastosComunes.agua}
-                      onChange={(e) => setGastosComunes(prev => ({ ...prev, agua: Number(e.target.value) }))}
+                      onChange={(e) =>
+                        setGastosComunes((prev) => ({ ...prev, agua: Number(e.target.value) }))
+                      }
                       className="text-base"
                       step="10"
                     />
@@ -308,10 +366,12 @@ export default function ColivingPage() {
                       <Home className="h-4 w-4 text-orange-600" />
                       Gas (€)
                     </Label>
-                    <Input 
-                      type="number" 
+                    <Input
+                      type="number"
                       value={gastosComunes.gas}
-                      onChange={(e) => setGastosComunes(prev => ({ ...prev, gas: Number(e.target.value) }))}
+                      onChange={(e) =>
+                        setGastosComunes((prev) => ({ ...prev, gas: Number(e.target.value) }))
+                      }
                       className="text-base"
                       step="10"
                     />
@@ -322,10 +382,12 @@ export default function ColivingPage() {
                       <Wifi className="h-4 w-4 text-indigo-600" />
                       Internet (€)
                     </Label>
-                    <Input 
-                      type="number" 
+                    <Input
+                      type="number"
                       value={gastosComunes.internet}
-                      onChange={(e) => setGastosComunes(prev => ({ ...prev, internet: Number(e.target.value) }))}
+                      onChange={(e) =>
+                        setGastosComunes((prev) => ({ ...prev, internet: Number(e.target.value) }))
+                      }
                       className="text-base"
                       step="5"
                     />
@@ -336,10 +398,12 @@ export default function ColivingPage() {
                       <Users className="h-4 w-4 text-green-600" />
                       Limpieza común (€)
                     </Label>
-                    <Input 
-                      type="number" 
+                    <Input
+                      type="number"
                       value={gastosComunes.limpieza}
-                      onChange={(e) => setGastosComunes(prev => ({ ...prev, limpieza: Number(e.target.value) }))}
+                      onChange={(e) =>
+                        setGastosComunes((prev) => ({ ...prev, limpieza: Number(e.target.value) }))
+                      }
                       className="text-base"
                       step="10"
                     />
@@ -349,7 +413,10 @@ export default function ColivingPage() {
                     <div className="flex justify-between items-center">
                       <span className="font-semibold text-gray-700">Total Mensual:</span>
                       <span className="text-2xl font-bold text-cyan-600">
-                        €{Object.values(gastosComunes).reduce((sum, val) => sum + val, 0).toFixed(2)}
+                        €
+                        {Object.values(gastosComunes)
+                          .reduce((sum, val) => sum + val, 0)
+                          .toFixed(2)}
                       </span>
                     </div>
                   </div>
@@ -361,24 +428,30 @@ export default function ColivingPage() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-xl">Habitaciones</CardTitle>
-                    <Button size="sm" onClick={agregarHabitacion} className="bg-cyan-600 hover:bg-cyan-700">
+                    <Button
+                      size="sm"
+                      onClick={agregarHabitacion}
+                      className="bg-cyan-600 hover:bg-cyan-700"
+                    >
                       + Agregar
                     </Button>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {habitaciones.map(habitacion => (
+                  {habitaciones.map((habitacion) => (
                     <div key={habitacion.id} className="p-4 bg-gray-50 rounded-lg space-y-3">
                       <div className="flex items-center justify-between">
-                        <Input 
+                        <Input
                           value={habitacion.nombre}
-                          onChange={(e) => actualizarHabitacion(habitacion.id, 'nombre', e.target.value)}
+                          onChange={(e) =>
+                            actualizarHabitacion(habitacion.id, 'nombre', e.target.value)
+                          }
                           className="font-semibold max-w-xs"
                         />
                         {habitaciones.length > 1 && (
-                          <Button 
-                            size="sm" 
-                            variant="ghost" 
+                          <Button
+                            size="sm"
+                            variant="ghost"
                             onClick={() => eliminarHabitacion(habitacion.id)}
                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
                           >
@@ -389,20 +462,24 @@ export default function ColivingPage() {
                       <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1">
                           <Label className="text-xs text-gray-600">Metros Cuadrados</Label>
-                          <Input 
-                            type="number" 
+                          <Input
+                            type="number"
                             value={habitacion.metrosCuadrados}
-                            onChange={(e) => actualizarHabitacion(habitacion.id, 'metrosCuadrados', e.target.value)}
+                            onChange={(e) =>
+                              actualizarHabitacion(habitacion.id, 'metrosCuadrados', e.target.value)
+                            }
                             className="text-sm"
                             min="1"
                           />
                         </div>
                         <div className="space-y-1">
                           <Label className="text-xs text-gray-600">Inquilinos</Label>
-                          <Input 
-                            type="number" 
+                          <Input
+                            type="number"
                             value={habitacion.inquilinos}
-                            onChange={(e) => actualizarHabitacion(habitacion.id, 'inquilinos', e.target.value)}
+                            onChange={(e) =>
+                              actualizarHabitacion(habitacion.id, 'inquilinos', e.target.value)
+                            }
                             className="text-sm"
                             min="1"
                           />
@@ -426,8 +503,11 @@ export default function ColivingPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {habitaciones.map(habitacion => (
-                    <Card key={habitacion.id} className="bg-white/10 backdrop-blur-sm border-white/20">
+                  {habitaciones.map((habitacion) => (
+                    <Card
+                      key={habitacion.id}
+                      className="bg-white/10 backdrop-blur-sm border-white/20"
+                    >
                       <CardHeader className="pb-3">
                         <CardTitle className="text-lg text-white flex items-center justify-between">
                           <span>{habitacion.nombre}</span>
@@ -436,16 +516,18 @@ export default function ColivingPage() {
                           </Badge>
                         </CardTitle>
                         <p className="text-xs text-cyan-200">
-                          {habitacion.metrosCuadrados}m² • {habitacion.inquilinos} inquilino{habitacion.inquilinos > 1 ? 's' : ''}
+                          {habitacion.metrosCuadrados}m² • {habitacion.inquilinos} inquilino
+                          {habitacion.inquilinos > 1 ? 's' : ''}
                         </p>
                       </CardHeader>
                       <CardContent className="space-y-2 pt-0">
-                        {prorrateo[habitacion.id] && Object.entries(prorrateo[habitacion.id].desglose).map(([key, value]) => (
-                          <div key={key} className="flex justify-between items-center text-sm">
-                            <span className="text-cyan-100">{getNombreSupply(key)}:</span>
-                            <span className="font-semibold text-white">€{value.toFixed(2)}</span>
-                          </div>
-                        ))}
+                        {prorrateo[habitacion.id] &&
+                          Object.entries(prorrateo[habitacion.id].desglose).map(([key, value]) => (
+                            <div key={key} className="flex justify-between items-center text-sm">
+                              <span className="text-cyan-100">{getNombreSupply(key)}:</span>
+                              <span className="font-semibold text-white">€{value.toFixed(2)}</span>
+                            </div>
+                          ))}
                       </CardContent>
                     </Card>
                   ))}
@@ -472,7 +554,10 @@ export default function ColivingPage() {
                 <CardTitle className="text-lg">Normas de Convivencia Digitales</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">Publica y gestiona normas de convivencia que todos los inquilinos aceptan digitalmente al entrar.</p>
+                <p className="text-gray-600">
+                  Publica y gestiona normas de convivencia que todos los inquilinos aceptan
+                  digitalmente al entrar.
+                </p>
               </CardContent>
             </Card>
 
@@ -484,7 +569,10 @@ export default function ColivingPage() {
                 <CardTitle className="text-lg">Rotación de Limpieza</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">Turnos automáticos de limpieza de zonas comunes con notificaciones a cada inquilino.</p>
+                <p className="text-gray-600">
+                  Turnos automáticos de limpieza de zonas comunes con notificaciones a cada
+                  inquilino.
+                </p>
               </CardContent>
             </Card>
 
@@ -496,7 +584,9 @@ export default function ColivingPage() {
                 <CardTitle className="text-lg">Dashboard de Ocupación</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">Ve en tiempo real qué habitaciones están ocupadas, vacías o en tránsito.</p>
+                <p className="text-gray-600">
+                  Ve en tiempo real qué habitaciones están ocupadas, vacías o en tránsito.
+                </p>
               </CardContent>
             </Card>
 
@@ -508,7 +598,9 @@ export default function ColivingPage() {
                 <CardTitle className="text-lg">Contratos Individuales</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">Cada inquilino tiene su propio contrato digital con firma electrónica.</p>
+                <p className="text-gray-600">
+                  Cada inquilino tiene su propio contrato digital con firma electrónica.
+                </p>
               </CardContent>
             </Card>
 
@@ -520,7 +612,9 @@ export default function ColivingPage() {
                 <CardTitle className="text-lg">Depósitos Individualizados</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">Gestiona fianzas independientes por habitación con devolución automática.</p>
+                <p className="text-gray-600">
+                  Gestiona fianzas independientes por habitación con devolución automática.
+                </p>
               </CardContent>
             </Card>
 
@@ -532,7 +626,9 @@ export default function ColivingPage() {
                 <CardTitle className="text-lg">Rentabilidad por Habitación</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">Análisis de qué habitaciones generan más ingresos y cuáles tienen más rotación.</p>
+                <p className="text-gray-600">
+                  Análisis de qué habitaciones generan más ingresos y cuáles tienen más rotación.
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -550,9 +646,13 @@ export default function ColivingPage() {
                 ))}
               </div>
               <p className="text-xl text-gray-700 italic mb-6">
-                "Gestiono un coliving de 8 habitaciones. Antes pasaba horas dividiendo facturas en Excel y siempre había discusiones. Con INMOVA, el prorrateo es automático y cada inquilino ve su desglose desde su portal. Cero conflictos."
+                "Gestiono un coliving de 8 habitaciones. Antes pasaba horas dividiendo facturas en
+                Excel y siempre había discusiones. Con INMOVA, el prorrateo es automático y cada
+                inquilino ve su desglose desde su portal. Cero conflictos."
               </p>
-              <p className="font-semibold text-gray-900 text-lg">Mónica S. - Propietaria de Coliving, Valencia</p>
+              <p className="font-semibold text-gray-900 text-lg">
+                Mónica S. - Propietaria de Coliving, Valencia
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -565,14 +665,14 @@ export default function ColivingPage() {
             <Sparkles className="h-5 w-5 mr-2" />
             Oferta Especial Coliving
           </Badge>
-          
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Descuento COLIVING50
-          </h2>
+
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Descuento COLIVING50</h2>
           <p className="text-xl text-cyan-100 mb-8 max-w-2xl mx-auto">
-            Si gestionas colivings, <strong className="text-white">obtienes 50% de descuento adicional</strong> en tu suscripción anual de INMOVA.
+            Si gestionas colivings,{' '}
+            <strong className="text-white">obtienes 50% de descuento adicional</strong> en tu
+            suscripción anual de INMOVA.
           </p>
-          
+
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 max-w-md mx-auto mb-8">
             <p className="text-cyan-100 mb-2">Código Exclusivo:</p>
             <p className="text-5xl font-black text-yellow-300 mb-2">COLIVING50</p>
@@ -581,13 +681,20 @@ export default function ColivingPage() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/register?coupon=COLIVING50">
-              <Button size="lg" className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold text-lg h-16 px-10">
+              <Button
+                size="lg"
+                className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold text-lg h-16 px-10"
+              >
                 <ArrowRight className="mr-2 h-6 w-6" />
                 Activar COLIVING50 Ahora
               </Button>
             </Link>
             <Link href="/landing/demo">
-              <Button size="lg" variant="outline" className="bg-white/10 hover:bg-white/20 text-white border-white/30 font-semibold text-lg h-16 px-10">
+              <Button
+                size="lg"
+                variant="outline"
+                className="bg-white/10 hover:bg-white/20 text-white border-white/30 font-semibold text-lg h-16 px-10"
+              >
                 Ver Demo del Módulo
               </Button>
             </Link>
@@ -606,9 +713,15 @@ export default function ColivingPage() {
             La plataforma PropTech Multi-Vertical más completa del mercado
           </p>
           <div className="flex items-center justify-center gap-6 text-sm text-gray-400">
-            <Link href="/landing/legal/privacidad" className="hover:text-gray-300">Privacidad</Link>
-            <Link href="/landing/legal/terminos" className="hover:text-gray-300">Términos</Link>
-            <Link href="/landing/contacto" className="hover:text-gray-300">Contacto</Link>
+            <Link href="/landing/legal/privacidad" className="hover:text-gray-300">
+              Privacidad
+            </Link>
+            <Link href="/landing/legal/terminos" className="hover:text-gray-300">
+              Términos
+            </Link>
+            <Link href="/landing/contacto" className="hover:text-gray-300">
+              Contacto
+            </Link>
           </div>
         </div>
       </footer>

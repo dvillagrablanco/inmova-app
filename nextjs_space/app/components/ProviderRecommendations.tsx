@@ -167,12 +167,7 @@ export default function ProviderRecommendations({
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
           {error}
-          <Button
-            variant="outline"
-            size="sm"
-            className="mt-2"
-            onClick={fetchRecommendations}
-          >
+          <Button variant="outline" size="sm" className="mt-2" onClick={fetchRecommendations}>
             Reintentar
           </Button>
         </AlertDescription>
@@ -202,26 +197,22 @@ export default function ProviderRecommendations({
       </div>
 
       <div className="text-sm text-muted-foreground mb-4">
-        Basado en rating, disponibilidad, especialización, carga de trabajo, rendimiento y
-        tiempo de respuesta.
+        Basado en rating, disponibilidad, especialización, carga de trabajo, rendimiento y tiempo de
+        respuesta.
       </div>
 
       {recommendations.map((rec, index) => (
         <Card
           key={rec.provider.id}
           className={`transition-all hover:shadow-md ${
-            selectedProviderId === rec.provider.id
-              ? 'ring-2 ring-blue-500 border-blue-500'
-              : ''
+            selectedProviderId === rec.provider.id ? 'ring-2 ring-blue-500 border-blue-500' : ''
           }`}
         >
           <CardHeader className="pb-4">
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  {index === 0 && (
-                    <Award className="w-5 h-5 text-yellow-600" />
-                  )}
+                  {index === 0 && <Award className="w-5 h-5 text-yellow-600" />}
                   <CardTitle className="text-xl">{rec.provider.nombre}</CardTitle>
                 </div>
                 <CardDescription className="flex items-center gap-2">
@@ -241,9 +232,7 @@ export default function ProviderRecommendations({
                 <div className="text-xs text-muted-foreground">Score</div>
               </div>
             </div>
-            <Badge
-              className={`${getRecommendationColor(rec.recommendation)} text-white mt-2`}
-            >
+            <Badge className={`${getRecommendationColor(rec.recommendation)} text-white mt-2`}>
               {rec.recommendation}
             </Badge>
           </CardHeader>

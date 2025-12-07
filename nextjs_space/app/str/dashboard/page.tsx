@@ -10,22 +10,36 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Hotel, 
-  Calendar, 
-  DollarSign, 
-  TrendingUp, 
-  Star, 
-  Users, 
+import {
+  Hotel,
+  Calendar,
+  DollarSign,
+  TrendingUp,
+  Star,
+  Users,
   BarChart3,
   Eye,
   AlertTriangle,
   CheckCircle,
   Clock,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
 } from 'lucide-react';
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from '@/components/ui/lazy-charts-extended';
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from '@/components/ui/lazy-charts-extended';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -78,7 +92,7 @@ export default function STRDashboardPage() {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      
+
       // Cargar métricas STR
       const metricsRes = await fetch('/api/str/metrics');
       if (metricsRes.ok) {
@@ -99,7 +113,6 @@ export default function STRDashboardPage() {
         const revenueDataRes = await revenueRes.json();
         setRevenueData(revenueDataRes);
       }
-
     } catch (error) {
       logger.error('Error loading STR dashboard:', error);
       toast.error('Error al cargar el dashboard STR');
@@ -160,9 +173,7 @@ export default function STRDashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{metrics?.activeListings || 0}</div>
-                  <p className="text-xs text-gray-500">
-                    de {metrics?.totalListings || 0} totales
-                  </p>
+                  <p className="text-xs text-gray-500">de {metrics?.totalListings || 0} totales</p>
                 </CardContent>
               </Card>
 
@@ -175,9 +186,13 @@ export default function STRDashboardPage() {
                   <div className="text-2xl font-bold">{metrics?.occupancyRate || 0}%</div>
                   <div className="flex items-center text-xs text-gray-500">
                     {metrics?.occupancyTrend === 'up' ? (
-                      <><ArrowUp className="h-3 w-3 text-green-600 mr-1" /> Aumentando</>
+                      <>
+                        <ArrowUp className="h-3 w-3 text-green-600 mr-1" /> Aumentando
+                      </>
                     ) : (
-                      <><ArrowDown className="h-3 w-3 text-red-600 mr-1" /> Disminuyendo</>
+                      <>
+                        <ArrowDown className="h-3 w-3 text-red-600 mr-1" /> Disminuyendo
+                      </>
                     )}
                   </div>
                 </CardContent>
@@ -189,12 +204,20 @@ export default function STRDashboardPage() {
                   <DollarSign className="h-4 w-4 text-yellow-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">€{metrics?.monthlyRevenue?.toLocaleString() || 0}</div>
+                  <div className="text-2xl font-bold">
+                    €{metrics?.monthlyRevenue?.toLocaleString() || 0}
+                  </div>
                   <div className="flex items-center text-xs text-gray-500">
                     {metrics?.revenueGrowth && metrics.revenueGrowth > 0 ? (
-                      <><ArrowUp className="h-3 w-3 text-green-600 mr-1" /> +{metrics.revenueGrowth}%</>
+                      <>
+                        <ArrowUp className="h-3 w-3 text-green-600 mr-1" /> +{metrics.revenueGrowth}
+                        %
+                      </>
                     ) : (
-                      <><ArrowDown className="h-3 w-3 text-red-600 mr-1" /> {metrics?.revenueGrowth}%</>
+                      <>
+                        <ArrowDown className="h-3 w-3 text-red-600 mr-1" /> {metrics?.revenueGrowth}
+                        %
+                      </>
                     )}
                   </div>
                 </CardContent>
@@ -238,8 +261,22 @@ export default function STRDashboardPage() {
                         <YAxis yAxisId="right" orientation="right" />
                         <Tooltip />
                         <Legend />
-                        <Line yAxisId="left" type="monotone" dataKey="revenue" stroke="#4F46E5" name="Ingresos (€)" strokeWidth={2} />
-                        <Line yAxisId="right" type="monotone" dataKey="bookings" stroke="#10B981" name="Reservas" strokeWidth={2} />
+                        <Line
+                          yAxisId="left"
+                          type="monotone"
+                          dataKey="revenue"
+                          stroke="#4F46E5"
+                          name="Ingresos (€)"
+                          strokeWidth={2}
+                        />
+                        <Line
+                          yAxisId="right"
+                          type="monotone"
+                          dataKey="bookings"
+                          stroke="#10B981"
+                          name="Reservas"
+                          strokeWidth={2}
+                        />
                       </LineChart>
                     </ResponsiveContainer>
                   </CardContent>
@@ -336,27 +373,39 @@ export default function STRDashboardPage() {
                       <div>
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-sm text-gray-600">Tarifa Promedio Noche</span>
-                          <span className="font-semibold text-lg">€{metrics?.avgNightlyRate || 0}</span>
+                          <span className="font-semibold text-lg">
+                            €{metrics?.avgNightlyRate || 0}
+                          </span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div className="bg-indigo-600 h-2 rounded-full" style={{ width: '75%' }}></div>
+                          <div
+                            className="bg-indigo-600 h-2 rounded-full"
+                            style={{ width: '75%' }}
+                          ></div>
                         </div>
                       </div>
 
                       <div>
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-sm text-gray-600">Ocupación Anual</span>
-                          <span className="font-semibold text-lg">{metrics?.occupancyRate || 0}%</span>
+                          <span className="font-semibold text-lg">
+                            {metrics?.occupancyRate || 0}%
+                          </span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div className="bg-green-600 h-2 rounded-full" style={{ width: `${metrics?.occupancyRate || 0}%` }}></div>
+                          <div
+                            className="bg-green-600 h-2 rounded-full"
+                            style={{ width: `${metrics?.occupancyRate || 0}%` }}
+                          ></div>
                         </div>
                       </div>
 
                       <div className="pt-4 border-t">
                         <div className="flex justify-between">
                           <span className="text-sm text-gray-600">Ingresos Totales:</span>
-                          <span className="font-bold text-green-600">€{metrics?.totalRevenue?.toLocaleString() || 0}</span>
+                          <span className="font-bold text-green-600">
+                            €{metrics?.totalRevenue?.toLocaleString() || 0}
+                          </span>
                         </div>
                       </div>
                     </CardContent>

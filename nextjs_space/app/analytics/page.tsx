@@ -9,7 +9,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/lazy-tabs';
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from '@/components/ui/breadcrumb';
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from '@/components/ui/breadcrumb';
 import {
   Home,
   ArrowLeft,
@@ -26,19 +33,19 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
-import { 
-  AreaChart, 
-  Area, 
-  BarChart, 
-  Bar, 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
-  ResponsiveContainer 
+import {
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
 } from '@/components/ui/lazy-charts-extended';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -186,19 +193,19 @@ function AnalyticsPageContent() {
     );
   }
 
-  const revenueData = trends.map(t => ({
+  const revenueData = trends.map((t) => ({
     name: t.periodo,
     ingresos: t.ingresosMensuales,
     neto: t.ingresoNeto,
   }));
 
-  const occupancyData = trends.map(t => ({
+  const occupancyData = trends.map((t) => ({
     name: t.periodo,
     ocupacion: t.tasaOcupacion,
   }));
 
-  const revenuePredictions = predictions.filter(p => p.tipo === 'ingresos');
-  const occupancyPredictions = predictions.filter(p => p.tipo === 'ocupacion');
+  const revenuePredictions = predictions.filter((p) => p.tipo === 'ingresos');
+  const occupancyPredictions = predictions.filter((p) => p.tipo === 'ocupacion');
 
   return (
     <div className="flex h-screen">
@@ -208,11 +215,7 @@ function AnalyticsPageContent() {
         <main className="flex-1 overflow-y-auto p-6 bg-muted/30">
           {/* Header */}
           <div className="mb-6">
-            <Button
-              variant="ghost"
-              onClick={() => router.push('/dashboard')}
-              className="mb-4"
-            >
+            <Button variant="ghost" onClick={() => router.push('/dashboard')} className="mb-4">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Volver al Dashboard
             </Button>
@@ -331,7 +334,9 @@ function AnalyticsPageContent() {
                       <CardTitle className="text-sm font-medium">Ocupación Actual</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{trends[trends.length - 1]?.tasaOcupacion.toFixed(1)}%</div>
+                      <div className="text-2xl font-bold">
+                        {trends[trends.length - 1]?.tasaOcupacion.toFixed(1)}%
+                      </div>
                     </CardContent>
                   </Card>
 
@@ -340,7 +345,9 @@ function AnalyticsPageContent() {
                       <CardTitle className="text-sm font-medium">Ingresos Este Mes</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">€{trends[trends.length - 1]?.ingresosMensuales.toLocaleString()}</div>
+                      <div className="text-2xl font-bold">
+                        €{trends[trends.length - 1]?.ingresosMensuales.toLocaleString()}
+                      </div>
                     </CardContent>
                   </Card>
 
@@ -349,7 +356,9 @@ function AnalyticsPageContent() {
                       <CardTitle className="text-sm font-medium">Ingreso Neto</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">€{trends[trends.length - 1]?.ingresoNeto.toLocaleString()}</div>
+                      <div className="text-2xl font-bold">
+                        €{trends[trends.length - 1]?.ingresoNeto.toLocaleString()}
+                      </div>
                     </CardContent>
                   </Card>
 
@@ -358,7 +367,9 @@ function AnalyticsPageContent() {
                       <CardTitle className="text-sm font-medium">Morosidad</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">€{trends[trends.length - 1]?.morosidad.toLocaleString()}</div>
+                      <div className="text-2xl font-bold">
+                        €{trends[trends.length - 1]?.morosidad.toLocaleString()}
+                      </div>
                     </CardContent>
                   </Card>
                 </div>
@@ -393,7 +404,9 @@ function AnalyticsPageContent() {
                               <div className="text-sm text-muted-foreground">
                                 <p className="font-medium mb-1">Factores:</p>
                                 {factores.map((factor: string, i: number) => (
-                                  <p key={i} className="text-xs">• {factor}</p>
+                                  <p key={i} className="text-xs">
+                                    • {factor}
+                                  </p>
                                 ))}
                               </div>
                             </div>
@@ -433,7 +446,9 @@ function AnalyticsPageContent() {
                               <div className="text-sm text-muted-foreground">
                                 <p className="font-medium mb-1">Factores:</p>
                                 {factores.map((factor: string, i: number) => (
-                                  <p key={i} className="text-xs">• {factor}</p>
+                                  <p key={i} className="text-xs">
+                                    • {factor}
+                                  </p>
                                 ))}
                               </div>
                             </div>
@@ -455,9 +470,12 @@ function AnalyticsPageContent() {
               {recommendations.length > 0 ? (
                 <div className="grid gap-4">
                   {recommendations.map((rec) => {
-                    const priorityColor = 
-                      rec.prioridad === 'alta' ? 'destructive' : 
-                      rec.prioridad === 'media' ? 'default' : 'secondary';
+                    const priorityColor =
+                      rec.prioridad === 'alta'
+                        ? 'destructive'
+                        : rec.prioridad === 'media'
+                          ? 'default'
+                          : 'secondary';
 
                     return (
                       <Card key={rec.id}>
@@ -486,8 +504,8 @@ function AnalyticsPageContent() {
                             <p className="text-sm font-semibold mb-2">Acciones sugeridas:</p>
                             <p className="text-sm">{rec.accionSugerida}</p>
                           </div>
-                          <Button 
-                            variant="outline" 
+                          <Button
+                            variant="outline"
                             size="sm"
                             onClick={() => markRecommendationApplied(rec.id)}
                           >
@@ -515,7 +533,6 @@ function AnalyticsPageContent() {
     </div>
   );
 }
-
 
 export default function AnalyticsPage() {
   return (

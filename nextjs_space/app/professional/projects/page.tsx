@@ -9,8 +9,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { Home, ArrowLeft, Briefcase, Euro, Calendar, FileText, Users } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -67,7 +80,7 @@ export default function ProfessionalProjectsPage() {
 
   const filteredProjects = useMemo(() => {
     return projects.filter((project) => {
-      const matchesSearch = 
+      const matchesSearch =
         project.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
         project.cliente.toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -80,19 +93,39 @@ export default function ProfessionalProjectsPage() {
   const stats = useMemo(() => {
     return {
       total: projects.length,
-      activos: projects.filter(p => ['en_progreso', 'revision'].includes(p.estado)).length,
-      completados: projects.filter(p => p.estado === 'completado').length,
+      activos: projects.filter((p) => ['en_progreso', 'revision'].includes(p.estado)).length,
+      completados: projects.filter((p) => p.estado === 'completado').length,
       facturacion: projects.reduce((sum, p) => sum + p.presupuesto, 0),
     };
   }, [projects]);
 
   const getEstadoBadge = (estado: string) => {
     const badges: Record<string, { variant: any; label: string; color: string }> = {
-      propuesta: { variant: 'secondary' as any, label: 'Propuesta', color: 'bg-blue-100 text-blue-800' },
-      en_progreso: { variant: 'default' as any, label: 'En Progreso', color: 'bg-yellow-100 text-yellow-800' },
-      revision: { variant: 'outline' as any, label: 'Revisión', color: 'bg-orange-100 text-orange-800' },
-      completado: { variant: 'default' as any, label: 'Completado', color: 'bg-green-100 text-green-800' },
-      cancelado: { variant: 'destructive' as any, label: 'Cancelado', color: 'bg-red-100 text-red-800' },
+      propuesta: {
+        variant: 'secondary' as any,
+        label: 'Propuesta',
+        color: 'bg-blue-100 text-blue-800',
+      },
+      en_progreso: {
+        variant: 'default' as any,
+        label: 'En Progreso',
+        color: 'bg-yellow-100 text-yellow-800',
+      },
+      revision: {
+        variant: 'outline' as any,
+        label: 'Revisión',
+        color: 'bg-orange-100 text-orange-800',
+      },
+      completado: {
+        variant: 'default' as any,
+        label: 'Completado',
+        color: 'bg-green-100 text-green-800',
+      },
+      cancelado: {
+        variant: 'destructive' as any,
+        label: 'Cancelado',
+        color: 'bg-red-100 text-red-800',
+      },
     };
     return badges[estado] || badges.propuesta;
   };
@@ -146,49 +179,49 @@ export default function ProfessionalProjectsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Total Proyectos</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Total Proyectos
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.total}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    En cartera
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">En cartera</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Activos</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Activos
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.activos}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    En desarrollo
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">En desarrollo</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Completados</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Completados
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.completados}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Finalizados
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Finalizados</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Facturación Total</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Facturación Total
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">€{stats.facturacion.toLocaleString()}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Volumen de negocio
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Volumen de negocio</p>
                 </CardContent>
               </Card>
             </div>
@@ -248,9 +281,7 @@ export default function ProfessionalProjectsPage() {
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
                               <Briefcase className="h-5 w-5 text-primary" />
-                              <Badge className={estadoBadge.color}>
-                                {estadoBadge.label}
-                              </Badge>
+                              <Badge className={estadoBadge.color}>{estadoBadge.label}</Badge>
                               <Badge variant="outline">{project.tipoServicio}</Badge>
                             </div>
                             <CardTitle className="text-lg">{project.titulo}</CardTitle>
@@ -281,14 +312,22 @@ export default function ProfessionalProjectsPage() {
                             <p className="text-muted-foreground">Inicio</p>
                             <div className="flex items-center gap-1">
                               <Calendar className="h-3 w-3" />
-                              <p>{format(new Date(project.fechaInicio), 'd MMM yyyy', { locale: es })}</p>
+                              <p>
+                                {format(new Date(project.fechaInicio), 'd MMM yyyy', {
+                                  locale: es,
+                                })}
+                              </p>
                             </div>
                           </div>
                           <div>
                             <p className="text-muted-foreground">Fin Estimado</p>
                             <div className="flex items-center gap-1">
                               <Calendar className="h-3 w-3" />
-                              <p>{format(new Date(project.fechaFinEstimada), 'd MMM yyyy', { locale: es })}</p>
+                              <p>
+                                {format(new Date(project.fechaFinEstimada), 'd MMM yyyy', {
+                                  locale: es,
+                                })}
+                              </p>
                             </div>
                           </div>
                         </div>

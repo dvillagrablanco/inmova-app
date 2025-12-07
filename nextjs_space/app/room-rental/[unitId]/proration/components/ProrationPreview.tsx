@@ -93,10 +93,13 @@ export function ProrationPreview({ preview }: ProrationPreviewProps) {
                     <div className="text-2xl font-bold text-gray-900">
                       {room.costoTotal.toFixed(2)}€
                     </div>
-                    <div className={`text-xs font-medium ${
-                      isAboveAverage ? 'text-red-600' : 'text-green-600'
-                    }`}>
-                      {isAboveAverage ? '+' : '-'}{diffPercent}% vs promedio
+                    <div
+                      className={`text-xs font-medium ${
+                        isAboveAverage ? 'text-red-600' : 'text-green-600'
+                      }`}
+                    >
+                      {isAboveAverage ? '+' : '-'}
+                      {diffPercent}% vs promedio
                     </div>
                   </div>
                 </div>
@@ -106,7 +109,9 @@ export function ProrationPreview({ preview }: ProrationPreviewProps) {
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-sm">
                   <div>
                     <p className="text-gray-600 mb-1">Electricidad</p>
-                    <p className="font-semibold text-gray-900">{room.costoElectricidad.toFixed(2)}€</p>
+                    <p className="font-semibold text-gray-900">
+                      {room.costoElectricidad.toFixed(2)}€
+                    </p>
                   </div>
                   <div>
                     <p className="text-gray-600 mb-1">Agua</p>

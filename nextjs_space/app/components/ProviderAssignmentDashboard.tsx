@@ -158,10 +158,7 @@ export default function ProviderAssignmentDashboard() {
         <CardContent>
           <div className="space-y-2">
             {generateInsights(stats).map((insight, index) => (
-              <div
-                key={index}
-                className="flex items-start gap-2 p-3 bg-muted rounded-lg"
-              >
+              <div key={index} className="flex items-start gap-2 p-3 bg-muted rounded-lg">
                 {insight.icon}
                 <div className="flex-1">
                   <div className="font-medium text-sm">{insight.title}</div>

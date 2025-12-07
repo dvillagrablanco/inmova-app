@@ -8,14 +8,50 @@ import { Header } from '@/components/layout/header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { ArrowLeft, Home, Plus, Users, Phone, Mail, TrendingUp, Target, Award, Eye, Edit, Trash2, Filter, RefreshCw, Calendar, Building2 } from 'lucide-react';
+import {
+  ArrowLeft,
+  Home,
+  Plus,
+  Users,
+  Phone,
+  Mail,
+  TrendingUp,
+  Target,
+  Award,
+  Eye,
+  Edit,
+  Trash2,
+  Filter,
+  RefreshCw,
+  Calendar,
+  Building2,
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { LoadingState } from '@/components/ui/loading-state';
@@ -63,7 +99,15 @@ const ETAPA_LABELS: Record<string, string> = {
   cerrado_perdido: 'Perdido',
 };
 
-const ETAPAS_PIPELINE = ['prospecto', 'contactado', 'calificado', 'demo', 'propuesta', 'negociacion', 'cerrado_ganado'];
+const ETAPAS_PIPELINE = [
+  'prospecto',
+  'contactado',
+  'calificado',
+  'demo',
+  'propuesta',
+  'negociacion',
+  'cerrado_ganado',
+];
 
 export default function CRMPage() {
   const router = useRouter();
@@ -133,13 +177,15 @@ export default function CRMPage() {
     try {
       const url = editingLead ? `/api/crm/leads/${editingLead.id}` : '/api/crm/leads';
       const method = editingLead ? 'PATCH' : 'POST';
-      
+
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          presupuestoMensual: formData.presupuestoMensual ? parseFloat(formData.presupuestoMensual) : null,
+          presupuestoMensual: formData.presupuestoMensual
+            ? parseFloat(formData.presupuestoMensual)
+            : null,
         }),
       });
 
@@ -224,7 +270,7 @@ export default function CRMPage() {
   };
 
   const getLeadsByEtapa = (etapa: string) => {
-    return leads.filter(lead => lead.etapa === etapa);
+    return leads.filter((lead) => lead.etapa === etapa);
   };
 
   if (loading) {
@@ -271,11 +317,23 @@ export default function CRMPage() {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" onClick={() => { fetchLeads(); fetchStats(); }}>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    fetchLeads();
+                    fetchStats();
+                  }}
+                >
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Actualizar
                 </Button>
-                <Dialog open={openDialog} onOpenChange={(open) => { setOpenDialog(open); if (!open) resetForm(); }}>
+                <Dialog
+                  open={openDialog}
+                  onOpenChange={(open) => {
+                    setOpenDialog(open);
+                    if (!open) resetForm();
+                  }}
+                >
                   <DialogTrigger asChild>
                     <Button className="gradient-primary">
                       <Plus className="h-4 w-4 mr-2" />
@@ -293,7 +351,9 @@ export default function CRMPage() {
                           <Input
                             id="nombreCompleto"
                             value={formData.nombreCompleto}
-                            onChange={(e) => setFormData({ ...formData, nombreCompleto: e.target.value })}
+                            onChange={(e) =>
+                              setFormData({ ...formData, nombreCompleto: e.target.value })
+                            }
                             required
                           />
                         </div>
@@ -325,14 +385,19 @@ export default function CRMPage() {
                         </div>
                         <div>
                           <Label htmlFor="fuente">Fuente</Label>
-                          <Select value={formData.fuente} onValueChange={(value) => setFormData({ ...formData, fuente: value })}>
+                          <Select
+                            value={formData.fuente}
+                            onValueChange={(value) => setFormData({ ...formData, fuente: value })}
+                          >
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="landing">Landing</SelectItem>
                               <SelectItem value="chatbot">Chatbot</SelectItem>
-                              <SelectItem value="formulario_contacto">Formulario de Contacto</SelectItem>
+                              <SelectItem value="formulario_contacto">
+                                Formulario de Contacto
+                              </SelectItem>
                               <SelectItem value="referido">Referido</SelectItem>
                               <SelectItem value="social_media">Redes Sociales</SelectItem>
                               <SelectItem value="otro">Otro</SelectItem>
@@ -341,7 +406,10 @@ export default function CRMPage() {
                         </div>
                         <div>
                           <Label htmlFor="urgencia">Urgencia</Label>
-                          <Select value={formData.urgencia} onValueChange={(value) => setFormData({ ...formData, urgencia: value })}>
+                          <Select
+                            value={formData.urgencia}
+                            onValueChange={(value) => setFormData({ ...formData, urgencia: value })}
+                          >
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
@@ -358,7 +426,9 @@ export default function CRMPage() {
                             id="presupuesto"
                             type="number"
                             value={formData.presupuestoMensual}
-                            onChange={(e) => setFormData({ ...formData, presupuestoMensual: e.target.value })}
+                            onChange={(e) =>
+                              setFormData({ ...formData, presupuestoMensual: e.target.value })
+                            }
                           />
                         </div>
                       </div>
@@ -372,7 +442,14 @@ export default function CRMPage() {
                         />
                       </div>
                       <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => { setOpenDialog(false); resetForm(); }}>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => {
+                            setOpenDialog(false);
+                            resetForm();
+                          }}
+                        >
                           Cancelar
                         </Button>
                         <Button type="submit" className="gradient-primary">
@@ -452,7 +529,7 @@ export default function CRMPage() {
               {ETAPAS_PIPELINE.map((etapa) => {
                 const leadsInEtapa = getLeadsByEtapa(etapa);
                 const color = ETAPA_COLORS[etapa];
-                
+
                 return (
                   <div key={etapa} className="min-w-[280px]">
                     <Card className="h-full">
@@ -466,7 +543,10 @@ export default function CRMPage() {
                       </CardHeader>
                       <CardContent className="p-2 space-y-2 max-h-[600px] overflow-y-auto">
                         {leadsInEtapa.map((lead) => (
-                          <Card key={lead.id} className="p-3 hover:shadow-md transition-shadow cursor-pointer">
+                          <Card
+                            key={lead.id}
+                            className="p-3 hover:shadow-md transition-shadow cursor-pointer"
+                          >
                             <div className="space-y-2">
                               <div className="flex justify-between items-start">
                                 <h4 className="font-semibold text-sm">{lead.nombreCompleto}</h4>
@@ -489,30 +569,38 @@ export default function CRMPage() {
                                   </Button>
                                 </div>
                               </div>
-                              
+
                               {lead.empresa && (
                                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                   <Building2 className="h-3 w-3" />
                                   {lead.empresa}
                                 </div>
                               )}
-                              
+
                               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                 <Mail className="h-3 w-3" />
                                 {lead.email}
                               </div>
-                              
+
                               {lead.telefono && (
                                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                   <Phone className="h-3 w-3" />
                                   {lead.telefono}
                                 </div>
                               )}
-                              
+
                               <div className="flex items-center justify-between pt-2 border-t">
                                 <div className="flex items-center gap-1">
                                   <span className="text-xs font-medium">Scoring:</span>
-                                  <Badge variant={lead.scoring >= 70 ? 'default' : lead.scoring >= 40 ? 'secondary' : 'outline'}>
+                                  <Badge
+                                    variant={
+                                      lead.scoring >= 70
+                                        ? 'default'
+                                        : lead.scoring >= 40
+                                          ? 'secondary'
+                                          : 'outline'
+                                    }
+                                  >
                                     {lead.scoring}
                                   </Badge>
                                 </div>
@@ -520,13 +608,13 @@ export default function CRMPage() {
                                   {lead.probabilidadCierre}%
                                 </span>
                               </div>
-                              
+
                               {lead.presupuestoMensual && (
                                 <div className="text-xs font-medium text-green-600">
                                   €{lead.presupuestoMensual}/mes
                                 </div>
                               )}
-                              
+
                               {/* Botones de cambio de etapa */}
                               <div className="flex gap-1 pt-2">
                                 {ETAPAS_PIPELINE.indexOf(etapa) > 0 && (
@@ -534,7 +622,12 @@ export default function CRMPage() {
                                     size="sm"
                                     variant="outline"
                                     className="flex-1 h-7 text-xs"
-                                    onClick={() => handleChangeEtapa(lead.id, ETAPAS_PIPELINE[ETAPAS_PIPELINE.indexOf(etapa) - 1])}
+                                    onClick={() =>
+                                      handleChangeEtapa(
+                                        lead.id,
+                                        ETAPAS_PIPELINE[ETAPAS_PIPELINE.indexOf(etapa) - 1]
+                                      )
+                                    }
                                   >
                                     ←
                                   </Button>
@@ -544,7 +637,12 @@ export default function CRMPage() {
                                     size="sm"
                                     variant="outline"
                                     className="flex-1 h-7 text-xs"
-                                    onClick={() => handleChangeEtapa(lead.id, ETAPAS_PIPELINE[ETAPAS_PIPELINE.indexOf(etapa) + 1])}
+                                    onClick={() =>
+                                      handleChangeEtapa(
+                                        lead.id,
+                                        ETAPAS_PIPELINE[ETAPAS_PIPELINE.indexOf(etapa) + 1]
+                                      )
+                                    }
                                   >
                                     →
                                   </Button>
@@ -553,7 +651,7 @@ export default function CRMPage() {
                             </div>
                           </Card>
                         ))}
-                        
+
                         {leadsInEtapa.length === 0 && (
                           <div className="text-center text-sm text-muted-foreground py-8">
                             No hay leads en esta etapa

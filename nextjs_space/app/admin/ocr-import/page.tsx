@@ -8,13 +8,28 @@ import { Header } from '@/components/layout/header';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { 
-  Scan, FileText, Home, AlertCircle, CheckCircle, 
-  Upload, Eye, CreditCard, FileCheck, Loader2, Sparkles
+import {
+  Scan,
+  FileText,
+  Home,
+  AlertCircle,
+  CheckCircle,
+  Upload,
+  Eye,
+  CreditCard,
+  FileCheck,
+  Loader2,
+  Sparkles,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import Image from 'next/image';
@@ -30,7 +45,7 @@ interface OCRResult {
 export default function OCRImportPage() {
   const { data: session, status } = useSession() || {};
   const router = useRouter();
-  
+
   const [file, setFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
   const [documentType, setDocumentType] = useState('generic');
@@ -63,14 +78,15 @@ export default function OCRImportPage() {
         toast.error('Por favor selecciona una imagen válida (JPG, PNG, WEBP)');
         return;
       }
-      
-      if (selectedFile.size > 10 * 1024 * 1024) { // 10MB
+
+      if (selectedFile.size > 10 * 1024 * 1024) {
+        // 10MB
         toast.error('La imagen no debe superar los 10MB');
         return;
       }
 
       setFile(selectedFile);
-      
+
       // Crear preview
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -90,7 +106,7 @@ export default function OCRImportPage() {
     try {
       setProcessing(true);
       setResult(null);
-      
+
       const formData = new FormData();
       formData.append('file', file);
       formData.append('documentType', documentType);
@@ -133,9 +149,7 @@ export default function OCRImportPage() {
             <CheckCircle className="h-5 w-5 text-green-600" />
             Datos Extraídos
           </CardTitle>
-          <CardDescription>
-            Revisa y verifica la información extraída del documento
-          </CardDescription>
+          <CardDescription>Revisa y verifica la información extraída del documento</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="structured">
@@ -143,7 +157,7 @@ export default function OCRImportPage() {
               <TabsTrigger value="structured">Vista Estructurada</TabsTrigger>
               <TabsTrigger value="raw">Texto Original</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="structured" className="space-y-4 mt-4">
               {result.extractedData.rawText ? (
                 <Alert>
@@ -163,22 +177,27 @@ export default function OCRImportPage() {
                         {key.replace(/([A-Z])/g, ' $1').trim()}
                       </Label>
                       <p className="mt-1 font-medium">
-                        {value !== null ? String(value) : <span className="text-gray-400">No disponible</span>}
+                        {value !== null ? (
+                          String(value)
+                        ) : (
+                          <span className="text-gray-400">No disponible</span>
+                        )}
                       </p>
                     </div>
                   ))}
                 </div>
               )}
-              
+
               <Alert className="bg-blue-50 border-blue-200">
                 <Sparkles className="h-4 w-4 text-blue-600" />
                 <AlertTitle className="text-blue-900">Nota</AlertTitle>
                 <AlertDescription className="text-blue-800">
-                  Los datos han sido extraídos automáticamente mediante IA. Por favor, verifica su exactitud antes de utilizarlos.
+                  Los datos han sido extraídos automáticamente mediante IA. Por favor, verifica su
+                  exactitud antes de utilizarlos.
                 </AlertDescription>
               </Alert>
             </TabsContent>
-            
+
             <TabsContent value="raw" className="mt-4">
               <div className="bg-gray-50 p-4 rounded-md">
                 <pre className="text-sm whitespace-pre-wrap">{result.rawText}</pre>
@@ -190,7 +209,7 @@ export default function OCRImportPage() {
             <Button onClick={handleReset} variant="outline" className="flex-1">
               Procesar Otro Documento
             </Button>
-            <Button 
+            <Button
               onClick={() => {
                 navigator.clipboard.writeText(JSON.stringify(result.extractedData, null, 2));
                 toast.success('Datos copiados al portapapeles');
@@ -208,10 +227,10 @@ export default function OCRImportPage() {
   return (
     <div className="flex h-screen overflow-hidden bg-gradient-bg">
       <Sidebar />
-      
+
       <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
         <Header />
-        
+
         <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-5xl mx-auto">
             <div className="mb-8">
@@ -220,7 +239,8 @@ export default function OCRImportPage() {
                 Importación con OCR (Escaneo de Documentos)
               </h1>
               <p className="text-muted-foreground">
-                Escanea y extrae datos automáticamente de DNI, facturas, contratos y otros documentos
+                Escanea y extrae datos automáticamente de DNI, facturas, contratos y otros
+                documentos
               </p>
             </div>
 
@@ -237,7 +257,7 @@ export default function OCRImportPage() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Card 
+                  <Card
                     className={`cursor-pointer transition-all hover:shadow-md ${
                       documentType === 'dni' ? 'ring-2 ring-indigo-600' : ''
                     }`}
@@ -250,7 +270,7 @@ export default function OCRImportPage() {
                     </CardContent>
                   </Card>
 
-                  <Card 
+                  <Card
                     className={`cursor-pointer transition-all hover:shadow-md ${
                       documentType === 'invoice' ? 'ring-2 ring-indigo-600' : ''
                     }`}
@@ -263,7 +283,7 @@ export default function OCRImportPage() {
                     </CardContent>
                   </Card>
 
-                  <Card 
+                  <Card
                     className={`cursor-pointer transition-all hover:shadow-md ${
                       documentType === 'contract' ? 'ring-2 ring-indigo-600' : ''
                     }`}
@@ -272,11 +292,13 @@ export default function OCRImportPage() {
                     <CardContent className="p-4 text-center">
                       <FileCheck className="h-8 w-8 mx-auto mb-2 text-blue-600" />
                       <p className="font-semibold text-sm">Contrato</p>
-                      <p className="text-xs text-muted-foreground mt-1">Contratos de arrendamiento</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Contratos de arrendamiento
+                      </p>
                     </CardContent>
                   </Card>
 
-                  <Card 
+                  <Card
                     className={`cursor-pointer transition-all hover:shadow-md ${
                       documentType === 'generic' ? 'ring-2 ring-indigo-600' : ''
                     }`}
@@ -306,12 +328,7 @@ export default function OCRImportPage() {
                     <div className="space-y-4">
                       <div className="relative w-full max-w-md mx-auto">
                         <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                          <Image
-                            src={imagePreview}
-                            alt="Preview"
-                            fill
-                            className="object-contain"
-                          />
+                          <Image src={imagePreview} alt="Preview" fill className="object-contain" />
                         </div>
                       </div>
                       <div className="flex gap-3 justify-center">
@@ -363,8 +380,8 @@ export default function OCRImportPage() {
                   <Sparkles className="h-4 w-4" />
                   <AlertTitle>Tecnología de IA Avanzada</AlertTitle>
                   <AlertDescription>
-                    Utilizamos modelos de visión artificial de última generación para extraer y estructurar 
-                    automáticamente la información de tus documentos con alta precisión.
+                    Utilizamos modelos de visión artificial de última generación para extraer y
+                    estructurar automáticamente la información de tus documentos con alta precisión.
                   </AlertDescription>
                 </Alert>
               </CardContent>

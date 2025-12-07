@@ -137,13 +137,9 @@ export default function GruposInteres() {
               <CardHeader>
                 <div className="flex items-start justify-between mb-2">
                   <CardTitle className="text-lg">{grupo.nombre}</CardTitle>
-                  <Badge className={getCategoriaColor(grupo.categoria)}>
-                    {grupo.categoria}
-                  </Badge>
+                  <Badge className={getCategoriaColor(grupo.categoria)}>{grupo.categoria}</Badge>
                 </div>
-                <CardDescription className="line-clamp-2">
-                  {grupo.descripcion}
-                </CardDescription>
+                <CardDescription className="line-clamp-2">{grupo.descripcion}</CardDescription>
               </CardHeader>
 
               <CardContent className="space-y-4">
@@ -166,11 +162,7 @@ export default function GruposInteres() {
                 <Button
                   className="w-full"
                   onClick={() => unirseGrupo(grupo.id)}
-                  disabled={
-                    grupo.maxMiembros
-                      ? grupo._count.miembros >= grupo.maxMiembros
-                      : false
-                  }
+                  disabled={grupo.maxMiembros ? grupo._count.miembros >= grupo.maxMiembros : false}
                 >
                   <UserPlus className="h-4 w-4 mr-2" />
                   Unirse al grupo

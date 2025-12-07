@@ -169,9 +169,7 @@ export default function ServiciosPremium() {
               </CardHeader>
 
               <CardContent className="pt-6 space-y-4">
-                <p className="text-sm text-gray-600 line-clamp-3">
-                  {servicio.descripcion}
-                </p>
+                <p className="text-sm text-gray-600 line-clamp-3">{servicio.descripcion}</p>
 
                 {/* Detalles */}
                 <div className="space-y-2 text-sm">
@@ -209,9 +207,7 @@ export default function ServiciosPremium() {
                   <DialogContent>
                     <DialogHeader>
                       <DialogTitle>Reservar {servicio.nombre}</DialogTitle>
-                      <DialogDescription>
-                        Completa los detalles de tu reserva
-                      </DialogDescription>
+                      <DialogDescription>Completa los detalles de tu reserva</DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                       <div className="space-y-2">
@@ -258,11 +254,7 @@ export default function ServiciosPremium() {
                           €{servicio.precioBase.toFixed(2)}
                         </span>
                       </div>
-                      <Button
-                        className="w-full"
-                        onClick={reservarServicio}
-                        disabled={reservando}
-                      >
+                      <Button className="w-full" onClick={reservarServicio} disabled={reservando}>
                         {reservando ? 'Reservando...' : 'Confirmar reserva'}
                       </Button>
                     </div>

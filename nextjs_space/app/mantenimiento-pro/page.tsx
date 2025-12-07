@@ -12,9 +12,29 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from '@/components/ui/breadcrumb';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from '@/components/ui/breadcrumb';
 import {
   Home,
   ArrowLeft,
@@ -32,7 +52,18 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from '@/components/ui/lazy-charts-extended';
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from '@/components/ui/lazy-charts-extended';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import logger, { logError } from '@/lib/logger';
@@ -247,25 +278,34 @@ export default function MantenimientoProPage() {
   }
 
   // KPIs
-  const lowStockItems = inventory.filter(item => item.cantidad <= item.cantidadMinima).length;
-  const criticalPredictions = predictions.filter(p => p.estado === 'critica').length;
+  const lowStockItems = inventory.filter((item) => item.cantidad <= item.cantidadMinima).length;
+  const criticalPredictions = predictions.filter((p) => p.estado === 'critica').length;
   const currentMetric = metrics[0];
   const currentBudget = budgets[0];
-  const totalInventoryValue = inventory.reduce((sum, item) => sum + (item.cantidad * item.costoUnitario), 0);
+  const totalInventoryValue = inventory.reduce(
+    (sum, item) => sum + item.cantidad * item.costoUnitario,
+    0
+  );
 
-  const metricsChartData = metrics.slice(0, 6).reverse().map(m => ({
-    periodo: m.periodo,
-    tiempoRespuesta: m.tiempoRespuestaPromedio,
-    tiempoResolucion: m.tiempoResolucionPromedio,
-    tasa: m.tasaResolucionPrimera,
-  }));
+  const metricsChartData = metrics
+    .slice(0, 6)
+    .reverse()
+    .map((m) => ({
+      periodo: m.periodo,
+      tiempoRespuesta: m.tiempoRespuestaPromedio,
+      tiempoResolucion: m.tiempoResolucionPromedio,
+      tasa: m.tasaResolucionPrimera,
+    }));
 
-  const budgetChartData = budgets.slice(0, 6).reverse().map(b => ({
-    periodo: b.periodo,
-    preventivo: b.gastadoPreventivo,
-    correctivo: b.gastadoCorrectivo,
-    emergencia: b.gastadoEmergencia,
-  }));
+  const budgetChartData = budgets
+    .slice(0, 6)
+    .reverse()
+    .map((b) => ({
+      periodo: b.periodo,
+      preventivo: b.gastadoPreventivo,
+      correctivo: b.gastadoCorrectivo,
+      emergencia: b.gastadoEmergencia,
+    }));
 
   return (
     <div className="flex h-screen">
@@ -275,11 +315,7 @@ export default function MantenimientoProPage() {
         <main className="flex-1 overflow-y-auto p-6 bg-muted/30">
           {/* Header */}
           <div className="mb-6">
-            <Button
-              variant="ghost"
-              onClick={() => router.push('/dashboard')}
-              className="mb-4"
-            >
+            <Button variant="ghost" onClick={() => router.push('/dashboard')} className="mb-4">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Volver al Dashboard
             </Button>
@@ -401,9 +437,12 @@ export default function MantenimientoProPage() {
                 predictions.map((pred) => {
                   const factores = JSON.parse(pred.factoresRiesgo || '[]');
                   const recomendaciones = JSON.parse(pred.recomendaciones || '[]');
-                  const estadoColor = 
-                    pred.estado === 'critica' ? 'destructive' : 
-                    pred.estado === 'alerta' ? 'default' : 'secondary';
+                  const estadoColor =
+                    pred.estado === 'critica'
+                      ? 'destructive'
+                      : pred.estado === 'alerta'
+                        ? 'default'
+                        : 'secondary';
 
                   return (
                     <Card key={pred.id}>
@@ -420,7 +459,9 @@ export default function MantenimientoProPage() {
                           </div>
                           <div className="text-right">
                             <p className="text-xs text-muted-foreground">Probabilidad de falla</p>
-                            <p className="text-3xl font-bold">{pred.probabilidadFalla.toFixed(1)}%</p>
+                            <p className="text-3xl font-bold">
+                              {pred.probabilidadFalla.toFixed(1)}%
+                            </p>
                           </div>
                         </div>
                       </CardHeader>
@@ -432,7 +473,9 @@ export default function MantenimientoProPage() {
                               Factores de Riesgo:
                             </p>
                             {factores.map((factor: string, i: number) => (
-                              <p key={i} className="text-sm text-muted-foreground ml-6">• {factor}</p>
+                              <p key={i} className="text-sm text-muted-foreground ml-6">
+                                • {factor}
+                              </p>
                             ))}
                           </div>
                           <div>
@@ -441,7 +484,9 @@ export default function MantenimientoProPage() {
                               Recomendaciones:
                             </p>
                             {recomendaciones.map((rec: string, i: number) => (
-                              <p key={i} className="text-sm text-muted-foreground ml-6">• {rec}</p>
+                              <p key={i} className="text-sm text-muted-foreground ml-6">
+                                • {rec}
+                              </p>
                             ))}
                           </div>
                         </div>
@@ -449,7 +494,10 @@ export default function MantenimientoProPage() {
                           <Clock className="h-4 w-4" />
                           <span>Estimado en {pred.diasEstimados} días</span>
                           <span>•</span>
-                          <span>Fecha objetivo: {format(new Date(pred.fechaObjetivo), 'dd MMM yyyy', { locale: es })}</span>
+                          <span>
+                            Fecha objetivo:{' '}
+                            {format(new Date(pred.fechaObjetivo), 'dd MMM yyyy', { locale: es })}
+                          </span>
                         </div>
                       </CardContent>
                     </Card>
@@ -460,7 +508,8 @@ export default function MantenimientoProPage() {
                   <CardContent className="py-12 text-center">
                     <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                     <p className="text-muted-foreground">
-                      No hay predicciones disponibles. Genera predicciones para ver alertas de fallas.
+                      No hay predicciones disponibles. Genera predicciones para ver alertas de
+                      fallas.
                     </p>
                   </CardContent>
                 </Card>
@@ -495,7 +544,10 @@ export default function MantenimientoProPage() {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <Label>Categoría</Label>
-                          <Select value={newItem.categoria} onValueChange={(val) => setNewItem({ ...newItem, categoria: val })}>
+                          <Select
+                            value={newItem.categoria}
+                            onValueChange={(val) => setNewItem({ ...newItem, categoria: val })}
+                          >
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
@@ -511,7 +563,10 @@ export default function MantenimientoProPage() {
                         </div>
                         <div>
                           <Label>Unidad de Medida</Label>
-                          <Select value={newItem.unidadMedida} onValueChange={(val) => setNewItem({ ...newItem, unidadMedida: val })}>
+                          <Select
+                            value={newItem.unidadMedida}
+                            onValueChange={(val) => setNewItem({ ...newItem, unidadMedida: val })}
+                          >
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
@@ -531,7 +586,9 @@ export default function MantenimientoProPage() {
                           <Input
                             type="number"
                             value={newItem.cantidad}
-                            onChange={(e) => setNewItem({ ...newItem, cantidad: parseInt(e.target.value) || 0 })}
+                            onChange={(e) =>
+                              setNewItem({ ...newItem, cantidad: parseInt(e.target.value) || 0 })
+                            }
                           />
                         </div>
                         <div>
@@ -539,7 +596,12 @@ export default function MantenimientoProPage() {
                           <Input
                             type="number"
                             value={newItem.cantidadMinima}
-                            onChange={(e) => setNewItem({ ...newItem, cantidadMinima: parseInt(e.target.value) || 5 })}
+                            onChange={(e) =>
+                              setNewItem({
+                                ...newItem,
+                                cantidadMinima: parseInt(e.target.value) || 5,
+                              })
+                            }
                           />
                         </div>
                       </div>
@@ -549,7 +611,12 @@ export default function MantenimientoProPage() {
                           type="number"
                           step="0.01"
                           value={newItem.costoUnitario}
-                          onChange={(e) => setNewItem({ ...newItem, costoUnitario: parseFloat(e.target.value) || 0 })}
+                          onChange={(e) =>
+                            setNewItem({
+                              ...newItem,
+                              costoUnitario: parseFloat(e.target.value) || 0,
+                            })
+                          }
                         />
                       </div>
                       <div>
@@ -571,9 +638,7 @@ export default function MantenimientoProPage() {
                       <Button variant="outline" onClick={() => setOpenInventoryDialog(false)}>
                         Cancelar
                       </Button>
-                      <Button onClick={addInventoryItem}>
-                        Agregar
-                      </Button>
+                      <Button onClick={addInventoryItem}>Agregar</Button>
                     </div>
                   </DialogContent>
                 </Dialog>
@@ -644,8 +709,12 @@ export default function MantenimientoProPage() {
                       <CardTitle className="text-sm font-medium">Pendientes</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold text-orange-600">{currentMetric.solicitudesPendientes}</div>
-                      <p className="text-xs text-muted-foreground">{currentMetric.solicitudesAtrasadas} atrasadas</p>
+                      <div className="text-2xl font-bold text-orange-600">
+                        {currentMetric.solicitudesPendientes}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {currentMetric.solicitudesAtrasadas} atrasadas
+                      </p>
                     </CardContent>
                   </Card>
 
@@ -654,7 +723,9 @@ export default function MantenimientoProPage() {
                       <CardTitle className="text-sm font-medium">Costos Preventivo</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">€{currentMetric.costosPreventivo.toLocaleString()}</div>
+                      <div className="text-2xl font-bold">
+                        €{currentMetric.costosPreventivo.toLocaleString()}
+                      </div>
                       <p className="text-xs text-muted-foreground">Mantenimiento programado</p>
                     </CardContent>
                   </Card>
@@ -664,7 +735,9 @@ export default function MantenimientoProPage() {
                       <CardTitle className="text-sm font-medium">Costos Correctivo</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold text-red-600">€{currentMetric.costosCorrectivo.toLocaleString()}</div>
+                      <div className="text-2xl font-bold text-red-600">
+                        €{currentMetric.costosCorrectivo.toLocaleString()}
+                      </div>
                       <p className="text-xs text-muted-foreground">Reparaciones</p>
                     </CardContent>
                   </Card>
@@ -686,8 +759,18 @@ export default function MantenimientoProPage() {
                           <YAxis />
                           <Tooltip />
                           <Legend />
-                          <Line type="monotone" dataKey="tiempoRespuesta" stroke="#000000" name="Tiempo Respuesta" />
-                          <Line type="monotone" dataKey="tiempoResolucion" stroke="#666666" name="Tiempo Resolución" />
+                          <Line
+                            type="monotone"
+                            dataKey="tiempoRespuesta"
+                            stroke="#000000"
+                            name="Tiempo Respuesta"
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="tiempoResolucion"
+                            stroke="#666666"
+                            name="Tiempo Resolución"
+                          />
                         </LineChart>
                       </ResponsiveContainer>
                     </CardContent>
@@ -735,7 +818,9 @@ export default function MantenimientoProPage() {
                       <CardTitle className="text-sm font-medium">Presupuesto Total</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">€{currentBudget.presupuestoTotal.toLocaleString()}</div>
+                      <div className="text-2xl font-bold">
+                        €{currentBudget.presupuestoTotal.toLocaleString()}
+                      </div>
                       <p className="text-xs text-muted-foreground">{currentBudget.periodo}</p>
                     </CardContent>
                   </Card>
@@ -746,10 +831,22 @@ export default function MantenimientoProPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">
-                        €{(currentBudget.gastadoCorrectivo + currentBudget.gastadoPreventivo + currentBudget.gastadoEmergencia).toLocaleString()}
+                        €
+                        {(
+                          currentBudget.gastadoCorrectivo +
+                          currentBudget.gastadoPreventivo +
+                          currentBudget.gastadoEmergencia
+                        ).toLocaleString()}
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        {(((currentBudget.gastadoCorrectivo + currentBudget.gastadoPreventivo + currentBudget.gastadoEmergencia) / currentBudget.presupuestoTotal) * 100).toFixed(1)}% usado
+                        {(
+                          ((currentBudget.gastadoCorrectivo +
+                            currentBudget.gastadoPreventivo +
+                            currentBudget.gastadoEmergencia) /
+                            currentBudget.presupuestoTotal) *
+                          100
+                        ).toFixed(1)}
+                        % usado
                       </p>
                     </CardContent>
                   </Card>
@@ -760,7 +857,13 @@ export default function MantenimientoProPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold text-green-600">
-                        €{(currentBudget.presupuestoTotal - currentBudget.gastadoCorrectivo - currentBudget.gastadoPreventivo - currentBudget.gastadoEmergencia).toLocaleString()}
+                        €
+                        {(
+                          currentBudget.presupuestoTotal -
+                          currentBudget.gastadoCorrectivo -
+                          currentBudget.gastadoPreventivo -
+                          currentBudget.gastadoEmergencia
+                        ).toLocaleString()}
                       </div>
                       <p className="text-xs text-muted-foreground">Remanente</p>
                     </CardContent>
@@ -805,9 +908,7 @@ export default function MantenimientoProPage() {
                 <Card>
                   <CardContent className="py-12 text-center">
                     <DollarSign className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">
-                      No hay presupuestos registrados.
-                    </p>
+                    <p className="text-muted-foreground">No hay presupuestos registrados.</p>
                   </CardContent>
                 </Card>
               )}

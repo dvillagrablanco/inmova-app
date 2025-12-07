@@ -7,9 +7,23 @@ import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { Building2, Users, TrendingUp, Plus } from 'lucide-react';
@@ -66,7 +80,9 @@ export default function ClientesAdminPage() {
   const [showChangePlanDialog, setShowChangePlanDialog] = useState(false);
   const [selectedCompanyForPlanChange, setSelectedCompanyForPlanChange] = useState<any>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [deletingCompany, setDeletingCompany] = useState<{ id: string; nombre: string } | null>(null);
+  const [deletingCompany, setDeletingCompany] = useState<{ id: string; nombre: string } | null>(
+    null
+  );
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Form state
@@ -179,9 +195,7 @@ export default function ClientesAdminPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <BackButton />
-                  <h1 className="text-3xl font-bold text-gray-900 mt-2">
-                    Gestión de Clientes
-                  </h1>
+                  <h1 className="text-3xl font-bold text-gray-900 mt-2">Gestión de Clientes</h1>
                   <p className="text-gray-600 mt-1">
                     Administra todas las empresas y sus suscripciones
                   </p>
@@ -207,7 +221,9 @@ export default function ClientesAdminPage() {
                           <Input
                             id="nombre"
                             value={newCompany.nombre}
-                            onChange={(e) => setNewCompany({ ...newCompany, nombre: e.target.value })}
+                            onChange={(e) =>
+                              setNewCompany({ ...newCompany, nombre: e.target.value })
+                            }
                             placeholder="Ej: Gestora Inmobiliaria SA"
                           />
                         </div>
@@ -217,7 +233,9 @@ export default function ClientesAdminPage() {
                             id="emailContacto"
                             type="email"
                             value={newCompany.emailContacto}
-                            onChange={(e) => setNewCompany({ ...newCompany, emailContacto: e.target.value })}
+                            onChange={(e) =>
+                              setNewCompany({ ...newCompany, emailContacto: e.target.value })
+                            }
                             placeholder="contacto@empresa.com"
                           />
                         </div>
@@ -228,7 +246,9 @@ export default function ClientesAdminPage() {
                           <Input
                             id="contactoPrincipal"
                             value={newCompany.contactoPrincipal}
-                            onChange={(e) => setNewCompany({ ...newCompany, contactoPrincipal: e.target.value })}
+                            onChange={(e) =>
+                              setNewCompany({ ...newCompany, contactoPrincipal: e.target.value })
+                            }
                             placeholder="Juan Pérez"
                           />
                         </div>
@@ -237,7 +257,9 @@ export default function ClientesAdminPage() {
                           <Input
                             id="telefonoContacto"
                             value={newCompany.telefonoContacto}
-                            onChange={(e) => setNewCompany({ ...newCompany, telefonoContacto: e.target.value })}
+                            onChange={(e) =>
+                              setNewCompany({ ...newCompany, telefonoContacto: e.target.value })
+                            }
                             placeholder="+34 600 123 456"
                           />
                         </div>
@@ -246,7 +268,9 @@ export default function ClientesAdminPage() {
                         <Label htmlFor="subscriptionPlanId">Plan de Suscripción *</Label>
                         <Select
                           value={newCompany.subscriptionPlanId}
-                          onValueChange={(value) => setNewCompany({ ...newCompany, subscriptionPlanId: value })}
+                          onValueChange={(value) =>
+                            setNewCompany({ ...newCompany, subscriptionPlanId: value })
+                          }
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Seleccionar plan" />
@@ -265,7 +289,9 @@ export default function ClientesAdminPage() {
                         <Input
                           id="dominioPersonalizado"
                           value={newCompany.dominioPersonalizado}
-                          onChange={(e) => setNewCompany({ ...newCompany, dominioPersonalizado: e.target.value })}
+                          onChange={(e) =>
+                            setNewCompany({ ...newCompany, dominioPersonalizado: e.target.value })
+                          }
                           placeholder="miempresa.inmova.app"
                         />
                       </div>
@@ -315,7 +341,7 @@ export default function ClientesAdminPage() {
                       <Users className="h-8 w-8 text-green-600" />
                       <div>
                         <div className="text-3xl font-bold">
-                          {companies.filter(c => c.activo).length}
+                          {companies.filter((c) => c.activo).length}
                         </div>
                         <p className="text-xs text-gray-500">Con suscripción activa</p>
                       </div>

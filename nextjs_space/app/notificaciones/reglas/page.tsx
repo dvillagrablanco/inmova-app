@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import Sidebar from '@/components/layout/sidebar';
 import Header from '@/components/layout/header';
@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { 
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -22,9 +22,15 @@ import {
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
+import {
   Plus,
   Edit,
   Trash2,
@@ -166,7 +172,7 @@ export default function NotificationRulesPage() {
       const url = editingRule
         ? `/api/notification-rules/${editingRule.id}`
         : '/api/notification-rules';
-      
+
       const method = editingRule ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -176,9 +182,7 @@ export default function NotificationRulesPage() {
       });
 
       if (response.ok) {
-        toast.success(
-          editingRule ? 'Regla actualizada exitosamente' : 'Regla creada exitosamente'
-        );
+        toast.success(editingRule ? 'Regla actualizada exitosamente' : 'Regla creada exitosamente');
         setIsDialogOpen(false);
         resetForm();
         fetchRules();
@@ -338,35 +342,18 @@ export default function NotificationRulesPage() {
                           Inactiva
                         </Badge>
                       )}
-                      <Badge
-                        className={
-                          PRIORIDADES.find((p) => p.value === rule.prioridad)?.color
-                        }
-                      >
+                      <Badge className={PRIORIDADES.find((p) => p.value === rule.prioridad)?.color}>
                         {PRIORIDADES.find((p) => p.value === rule.prioridad)?.label}
                       </Badge>
                     </div>
-                    {rule.descripcion && (
-                      <CardDescription>{rule.descripcion}</CardDescription>
-                    )}
+                    {rule.descripcion && <CardDescription>{rule.descripcion}</CardDescription>}
                   </div>
                   <div className="flex items-center gap-2">
-                    <Switch
-                      checked={rule.activa}
-                      onCheckedChange={() => toggleRuleStatus(rule)}
-                    />
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => openEditDialog(rule)}
-                    >
+                    <Switch checked={rule.activa} onCheckedChange={() => toggleRuleStatus(rule)} />
+                    <Button size="sm" variant="ghost" onClick={() => openEditDialog(rule)}>
                       <Edit className="w-4 h-4" />
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleDelete(rule.id)}
-                    >
+                    <Button size="sm" variant="ghost" onClick={() => handleDelete(rule.id)}>
                       <Trash2 className="w-4 h-4 text-destructive" />
                     </Button>
                   </div>
@@ -419,8 +406,7 @@ export default function NotificationRulesPage() {
                     {rule.ultimaEjecucion && (
                       <span>
                         {' · '}
-                        Última ejecución:{' '}
-                        {new Date(rule.ultimaEjecucion).toLocaleDateString()}
+                        Última ejecución: {new Date(rule.ultimaEjecucion).toLocaleDateString()}
                       </span>
                     )}
                   </div>
@@ -460,9 +446,7 @@ export default function NotificationRulesPage() {
               <Textarea
                 id="descripcion"
                 value={formData.descripcion}
-                onChange={(e) =>
-                  setFormData({ ...formData, descripcion: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
                 placeholder="Descripción opcional de la regla"
               />
             </div>
@@ -473,9 +457,7 @@ export default function NotificationRulesPage() {
                 <Label htmlFor="tipoEvento">Tipo de Evento *</Label>
                 <Select
                   value={formData.tipoEvento}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, tipoEvento: value })
-                  }
+                  onValueChange={(value) => setFormData({ ...formData, tipoEvento: value })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -635,9 +617,7 @@ export default function NotificationRulesPage() {
             >
               Cancelar
             </Button>
-            <Button onClick={handleSave}>
-              {editingRule ? 'Actualizar' : 'Crear'} Regla
-            </Button>
+            <Button onClick={handleSave}>{editingRule ? 'Actualizar' : 'Crear'} Regla</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

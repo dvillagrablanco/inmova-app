@@ -7,15 +7,44 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { toast } from 'sonner';
-import { 
-  DoorOpen, ArrowLeft, Edit, Trash2, Users, Euro, Calendar, 
-  CheckCircle, FileText, Home, Bed, Bath, Wind, Table, 
-  Armchair, Sun, Check, X 
+import {
+  DoorOpen,
+  ArrowLeft,
+  Edit,
+  Trash2,
+  Users,
+  Euro,
+  Calendar,
+  CheckCircle,
+  FileText,
+  Home,
+  Bed,
+  Bath,
+  Wind,
+  Table,
+  Armchair,
+  Sun,
+  Check,
+  X,
 } from 'lucide-react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
@@ -159,7 +188,8 @@ export default function RoomDetailPage() {
   }
 
   async function handleDeleteRoom() {
-    if (!confirm('¿Estás seguro de eliminar esta habitación? Esta acción no se puede deshacer.')) return;
+    if (!confirm('¿Estás seguro de eliminar esta habitación? Esta acción no se puede deshacer.'))
+      return;
 
     try {
       const res = await fetch(`/api/room-rental/rooms/${roomId}`, {
@@ -228,7 +258,9 @@ export default function RoomDetailPage() {
                 <h1 className="text-3xl font-bold text-gray-900 flex items-center">
                   <DoorOpen className="mr-3 h-8 w-8 text-blue-600" />
                   Habitación {room.numero}
-                  {room.nombre && <span className="text-gray-600 text-2xl ml-2">({room.nombre})</span>}
+                  {room.nombre && (
+                    <span className="text-gray-600 text-2xl ml-2">({room.nombre})</span>
+                  )}
                 </h1>
                 <p className="text-gray-600">
                   {room.unit?.building?.nombre} - Unidad {room.unit?.numero}
@@ -268,7 +300,9 @@ export default function RoomDetailPage() {
                             type="number"
                             step="0.1"
                             value={formData.superficie}
-                            onChange={(e) => setFormData({ ...formData, superficie: e.target.value })}
+                            onChange={(e) =>
+                              setFormData({ ...formData, superficie: e.target.value })
+                            }
                           />
                         </div>
                         <div>
@@ -278,7 +312,9 @@ export default function RoomDetailPage() {
                             type="number"
                             step="0.01"
                             value={formData.precioPorMes}
-                            onChange={(e) => setFormData({ ...formData, precioPorMes: e.target.value })}
+                            onChange={(e) =>
+                              setFormData({ ...formData, precioPorMes: e.target.value })
+                            }
                           />
                         </div>
                         <div>
@@ -288,7 +324,9 @@ export default function RoomDetailPage() {
                             type="number"
                             step="0.01"
                             value={formData.precioPorSemana}
-                            onChange={(e) => setFormData({ ...formData, precioPorSemana: e.target.value })}
+                            onChange={(e) =>
+                              setFormData({ ...formData, precioPorSemana: e.target.value })
+                            }
                             placeholder="Opcional"
                           />
                         </div>
@@ -297,7 +335,9 @@ export default function RoomDetailPage() {
                           <Input
                             id="descripcion"
                             value={formData.descripcion}
-                            onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+                            onChange={(e) =>
+                              setFormData({ ...formData, descripcion: e.target.value })
+                            }
                             placeholder="Descripción de la habitación"
                           />
                         </div>
@@ -322,10 +362,14 @@ export default function RoomDetailPage() {
                                   type="checkbox"
                                   id={feature.key}
                                   checked={formData[feature.key]}
-                                  onChange={(e) => setFormData({ ...formData, [feature.key]: e.target.checked })}
+                                  onChange={(e) =>
+                                    setFormData({ ...formData, [feature.key]: e.target.checked })
+                                  }
                                   className="h-4 w-4"
                                 />
-                                <Label htmlFor={feature.key} className="text-sm">{feature.label}</Label>
+                                <Label htmlFor={feature.key} className="text-sm">
+                                  {feature.label}
+                                </Label>
                               </div>
                             ))}
                           </div>
@@ -333,7 +377,11 @@ export default function RoomDetailPage() {
                       </div>
 
                       <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setShowEditDialog(false)}>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setShowEditDialog(false)}
+                        >
                           Cancelar
                         </Button>
                         <Button type="submit">Guardar Cambios</Button>
@@ -373,7 +421,9 @@ export default function RoomDetailPage() {
                       {room.precioPorSemana && (
                         <div>
                           <p className="text-sm text-gray-600">Precio Semanal</p>
-                          <p className="font-medium text-green-600">€{room.precioPorSemana}/semana</p>
+                          <p className="font-medium text-green-600">
+                            €{room.precioPorSemana}/semana
+                          </p>
                         </div>
                       )}
                       <div>
@@ -407,7 +457,11 @@ export default function RoomDetailPage() {
                         { icon: Bath, label: 'Baño Privado', value: room.bajoPrivado },
                         { icon: Sun, label: 'Balcón', value: room.balcon },
                         { icon: Table, label: 'Escritorio', value: room.escritorio },
-                        { icon: DoorOpen, label: 'Armario Empotrado', value: room.armarioEmpotrado },
+                        {
+                          icon: DoorOpen,
+                          label: 'Armario Empotrado',
+                          value: room.armarioEmpotrado,
+                        },
                         { icon: Wind, label: 'Aire Acondicionado', value: room.aireAcondicionado },
                         { icon: Wind, label: 'Calefacción', value: room.calefaccion },
                         { icon: Bed, label: room.cama || 'Cama', value: true },
@@ -417,7 +471,9 @@ export default function RoomDetailPage() {
                         { icon: Armchair, label: 'Silla', value: room.silla },
                       ].map((item, index) => (
                         <div key={index} className="flex items-center space-x-2">
-                          <item.icon className={`h-5 w-5 ${item.value ? 'text-green-600' : 'text-gray-400'}`} />
+                          <item.icon
+                            className={`h-5 w-5 ${item.value ? 'text-green-600' : 'text-gray-400'}`}
+                          />
                           <span className={item.value ? 'text-gray-900' : 'text-gray-400'}>
                             {item.label}
                           </span>
@@ -457,7 +513,12 @@ export default function RoomDetailPage() {
                               <div className="grid grid-cols-2 gap-4 py-4">
                                 <div className="col-span-2">
                                   <Label htmlFor="tenantId">Inquilino *</Label>
-                                  <Select value={contractData.tenantId} onValueChange={(value) => setContractData({ ...contractData, tenantId: value })}>
+                                  <Select
+                                    value={contractData.tenantId}
+                                    onValueChange={(value) =>
+                                      setContractData({ ...contractData, tenantId: value })
+                                    }
+                                  >
                                     <SelectTrigger>
                                       <SelectValue placeholder="Selecciona un inquilino" />
                                     </SelectTrigger>
@@ -476,7 +537,12 @@ export default function RoomDetailPage() {
                                     id="fechaInicio"
                                     type="date"
                                     value={contractData.fechaInicio}
-                                    onChange={(e) => setContractData({ ...contractData, fechaInicio: e.target.value })}
+                                    onChange={(e) =>
+                                      setContractData({
+                                        ...contractData,
+                                        fechaInicio: e.target.value,
+                                      })
+                                    }
                                     required
                                   />
                                 </div>
@@ -486,7 +552,9 @@ export default function RoomDetailPage() {
                                     id="fechaFin"
                                     type="date"
                                     value={contractData.fechaFin}
-                                    onChange={(e) => setContractData({ ...contractData, fechaFin: e.target.value })}
+                                    onChange={(e) =>
+                                      setContractData({ ...contractData, fechaFin: e.target.value })
+                                    }
                                     required
                                   />
                                 </div>
@@ -497,7 +565,12 @@ export default function RoomDetailPage() {
                                     type="number"
                                     step="0.01"
                                     value={contractData.rentaMensual}
-                                    onChange={(e) => setContractData({ ...contractData, rentaMensual: e.target.value })}
+                                    onChange={(e) =>
+                                      setContractData({
+                                        ...contractData,
+                                        rentaMensual: e.target.value,
+                                      })
+                                    }
                                     required
                                   />
                                 </div>
@@ -509,7 +582,9 @@ export default function RoomDetailPage() {
                                     min="1"
                                     max="31"
                                     value={contractData.diaPago}
-                                    onChange={(e) => setContractData({ ...contractData, diaPago: e.target.value })}
+                                    onChange={(e) =>
+                                      setContractData({ ...contractData, diaPago: e.target.value })
+                                    }
                                   />
                                 </div>
                                 <div className="col-span-2">
@@ -519,14 +594,20 @@ export default function RoomDetailPage() {
                                     type="number"
                                     step="0.01"
                                     value={contractData.deposito}
-                                    onChange={(e) => setContractData({ ...contractData, deposito: e.target.value })}
+                                    onChange={(e) =>
+                                      setContractData({ ...contractData, deposito: e.target.value })
+                                    }
                                     placeholder="Opcional"
                                   />
                                 </div>
                               </div>
 
                               <DialogFooter>
-                                <Button type="button" variant="outline" onClick={() => setShowContractDialog(false)}>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  onClick={() => setShowContractDialog(false)}
+                                >
                                   Cancelar
                                 </Button>
                                 <Button type="submit">Crear Contrato</Button>
@@ -545,9 +626,13 @@ export default function RoomDetailPage() {
                             <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center space-x-2">
                                 <Users className="h-5 w-5 text-gray-500" />
-                                <span className="font-medium">{contract.tenant?.nombreCompleto}</span>
+                                <span className="font-medium">
+                                  {contract.tenant?.nombreCompleto}
+                                </span>
                               </div>
-                              <Badge variant={contract.estado === 'activo' ? 'default' : 'secondary'}>
+                              <Badge
+                                variant={contract.estado === 'activo' ? 'default' : 'secondary'}
+                              >
                                 {contract.estado}
                               </Badge>
                             </div>
@@ -555,19 +640,29 @@ export default function RoomDetailPage() {
                               <div>
                                 <span className="text-gray-600">Periodo:</span>
                                 <p className="font-medium">
-                                  {format(new Date(contract.fechaInicio), 'dd/MM/yyyy', { locale: es })} - {format(new Date(contract.fechaFin), 'dd/MM/yyyy', { locale: es })}
+                                  {format(new Date(contract.fechaInicio), 'dd/MM/yyyy', {
+                                    locale: es,
+                                  })}{' '}
+                                  -{' '}
+                                  {format(new Date(contract.fechaFin), 'dd/MM/yyyy', {
+                                    locale: es,
+                                  })}
                                 </p>
                               </div>
                               <div>
                                 <span className="text-gray-600">Renta:</span>
-                                <p className="font-medium text-green-600">€{contract.rentaMensual}/mes</p>
+                                <p className="font-medium text-green-600">
+                                  €{contract.rentaMensual}/mes
+                                </p>
                               </div>
                             </div>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-gray-600 text-center py-8">No hay contratos para esta habitación</p>
+                      <p className="text-gray-600 text-center py-8">
+                        No hay contratos para esta habitación
+                      </p>
                     )}
                   </CardContent>
                 </Card>
@@ -584,16 +679,22 @@ export default function RoomDetailPage() {
                       <div className="space-y-3">
                         <div className="flex items-center space-x-2">
                           <Users className="h-5 w-5 text-gray-500" />
-                          <span className="font-medium">{activeContract.tenant?.nombreCompleto}</span>
+                          <span className="font-medium">
+                            {activeContract.tenant?.nombreCompleto}
+                          </span>
                         </div>
                         <div className="text-sm space-y-1">
                           <p className="text-gray-600">Email: {activeContract.tenant?.email}</p>
-                          <p className="text-gray-600">Teléfono: {activeContract.tenant?.telefono}</p>
+                          <p className="text-gray-600">
+                            Teléfono: {activeContract.tenant?.telefono}
+                          </p>
                         </div>
                         <div className="pt-3 border-t">
                           <p className="text-sm text-gray-600">Contrato hasta:</p>
                           <p className="font-medium">
-                            {format(new Date(activeContract.fechaFin), 'dd MMMM yyyy', { locale: es })}
+                            {format(new Date(activeContract.fechaFin), 'dd MMMM yyyy', {
+                              locale: es,
+                            })}
                           </p>
                         </div>
                       </div>
@@ -606,19 +707,27 @@ export default function RoomDetailPage() {
                     <CardTitle className="text-lg">Acciones Rápidas</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <Button className="w-full justify-start" variant="outline" onClick={() => setShowEditDialog(true)}>
+                    <Button
+                      className="w-full justify-start"
+                      variant="outline"
+                      onClick={() => setShowEditDialog(true)}
+                    >
                       <Edit className="mr-2 h-4 w-4" />
                       Editar Habitación
                     </Button>
                     {room.estado === 'disponible' && (
-                      <Button className="w-full justify-start" variant="outline" onClick={() => setShowContractDialog(true)}>
+                      <Button
+                        className="w-full justify-start"
+                        variant="outline"
+                        onClick={() => setShowContractDialog(true)}
+                      >
                         <FileText className="mr-2 h-4 w-4" />
                         Crear Contrato
                       </Button>
                     )}
-                    <Button 
-                      className="w-full justify-start" 
-                      variant="outline" 
+                    <Button
+                      className="w-full justify-start"
+                      variant="outline"
                       onClick={() => router.push(`/room-rental/${unitId}`)}
                     >
                       <Home className="mr-2 h-4 w-4" />

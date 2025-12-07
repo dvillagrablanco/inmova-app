@@ -22,7 +22,7 @@ import {
   Bar,
   PieChart,
   Pie,
-  Cell
+  Cell,
 } from '@/components/ui/lazy-charts-extended';
 import {
   TrendingUp,
@@ -33,7 +33,7 @@ import {
   Heart,
   Eye,
   Bell,
-  RefreshCw
+  RefreshCw,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -169,8 +169,11 @@ export default function EngagementMetrics() {
                   ) : Number(metrics.posts?.tendencia) < 0 ? (
                     <TrendingDown className="h-3 w-3 text-red-500" />
                   ) : null}
-                  <span className={`text-xs ${Number(metrics.posts?.tendencia) > 0 ? 'text-green-500' : Number(metrics.posts?.tendencia) < 0 ? 'text-red-500' : 'text-muted-foreground'}`}>
-                    {Number(metrics.posts?.tendencia) > 0 ? '+' : ''}{metrics.posts?.tendencia || 0}%
+                  <span
+                    className={`text-xs ${Number(metrics.posts?.tendencia) > 0 ? 'text-green-500' : Number(metrics.posts?.tendencia) < 0 ? 'text-red-500' : 'text-muted-foreground'}`}
+                  >
+                    {Number(metrics.posts?.tendencia) > 0 ? '+' : ''}
+                    {metrics.posts?.tendencia || 0}%
                   </span>
                 </div>
               </div>
@@ -202,16 +205,14 @@ export default function EngagementMetrics() {
         <Card>
           <CardHeader>
             <CardTitle>Distribución de Interacciones</CardTitle>
-            <CardDescription>
-              Desglose por tipo de interacción en el periodo
-            </CardDescription>
+            <CardDescription>Desglose por tipo de interacción en el periodo</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={interactionData.filter(d => d.value > 0)}
+                    data={interactionData.filter((d) => d.value > 0)}
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
@@ -219,7 +220,9 @@ export default function EngagementMetrics() {
                     fill="#8884d8"
                     paddingAngle={5}
                     dataKey="value"
-                    label={({ name, percent }: { name: string; percent: number }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    label={({ name, percent }: { name: string; percent: number }) =>
+                      `${name} ${(percent * 100).toFixed(0)}%`
+                    }
                   >
                     {interactionData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
@@ -236,9 +239,7 @@ export default function EngagementMetrics() {
         <Card>
           <CardHeader>
             <CardTitle>Contenido Publicado</CardTitle>
-            <CardDescription>
-              Volumen de contenido por tipo
-            </CardDescription>
+            <CardDescription>Volumen de contenido por tipo</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
@@ -247,18 +248,14 @@ export default function EngagementMetrics() {
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                   <XAxis dataKey="name" className="text-xs" />
                   <YAxis className="text-xs" />
-                  <Tooltip 
-                    contentStyle={{ 
+                  <Tooltip
+                    contentStyle={{
                       backgroundColor: 'hsl(var(--background))',
                       border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px'
+                      borderRadius: '8px',
                     }}
                   />
-                  <Bar 
-                    dataKey="value" 
-                    fill="#3b82f6" 
-                    radius={[4, 4, 0, 0]}
-                  />
+                  <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -281,15 +278,21 @@ export default function EngagementMetrics() {
               <p className="text-sm text-muted-foreground">Total Likes</p>
             </div>
             <div className="text-center p-4 bg-muted rounded-lg">
-              <p className="text-2xl font-bold text-blue-500">{metrics.posts?.totalComentarios || 0}</p>
+              <p className="text-2xl font-bold text-blue-500">
+                {metrics.posts?.totalComentarios || 0}
+              </p>
               <p className="text-sm text-muted-foreground">Comentarios</p>
             </div>
             <div className="text-center p-4 bg-muted rounded-lg">
-              <p className="text-2xl font-bold text-green-500">{metrics.eventos?.asistenciasConfirmadas || 0}</p>
+              <p className="text-2xl font-bold text-green-500">
+                {metrics.eventos?.asistenciasConfirmadas || 0}
+              </p>
               <p className="text-sm text-muted-foreground">Asistencias</p>
             </div>
             <div className="text-center p-4 bg-muted rounded-lg">
-              <p className="text-2xl font-bold text-purple-500">{metrics.interacciones?.reacciones || 0}</p>
+              <p className="text-2xl font-bold text-purple-500">
+                {metrics.interacciones?.reacciones || 0}
+              </p>
               <p className="text-sm text-muted-foreground">Reacciones</p>
             </div>
           </div>

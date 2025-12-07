@@ -9,12 +9,42 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Home, ArrowLeft, Eye, MessageSquare, Star, TrendingUp, Share2, FileText, Download } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Home,
+  ArrowLeft,
+  Eye,
+  MessageSquare,
+  Star,
+  TrendingUp,
+  Share2,
+  FileText,
+  Download,
+} from 'lucide-react';
 import { toast } from 'sonner';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 
 export default function PublicacionesPage() {
   const { data: session, status } = useSession();
@@ -30,7 +60,7 @@ export default function PublicacionesPage() {
     unitId: '',
     precioAlquiler: '',
     destacada: false,
-    urgente: false
+    urgente: false,
   });
 
   useEffect(() => {
@@ -45,7 +75,7 @@ export default function PublicacionesPage() {
     try {
       const [pubRes, unitsRes] = await Promise.all([
         fetch('/api/publicaciones'),
-        fetch('/api/units')
+        fetch('/api/units'),
       ]);
       const pubData = await pubRes.json();
       const unitsData = await unitsRes.json();
@@ -69,7 +99,7 @@ export default function PublicacionesPage() {
       const response = await fetch('/api/publicaciones', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       });
 
       if (!response.ok) throw new Error('Error al generar publicación');
@@ -93,7 +123,7 @@ export default function PublicacionesPage() {
       await fetch('/api/publicaciones', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, estado: 'activa', simularStats: true })
+        body: JSON.stringify({ id, estado: 'activa', simularStats: true }),
       });
       toast.success('Publicación activada');
       fetchData();
@@ -102,7 +132,8 @@ export default function PublicacionesPage() {
     }
   };
 
-  if (loading) return <div className="flex items-center justify-center min-h-screen">Cargando...</div>;
+  if (loading)
+    return <div className="flex items-center justify-center min-h-screen">Cargando...</div>;
 
   return (
     <div className="flex h-screen overflow-hidden bg-muted/30">
@@ -112,7 +143,12 @@ export default function PublicacionesPage() {
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
           <div className="max-w-7xl mx-auto space-y-6">
             <div className="flex flex-col gap-4">
-              <Button variant="ghost" size="sm" onClick={() => router.push('/dashboard')} className="w-fit">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push('/dashboard')}
+                className="w-fit"
+              >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Volver al Dashboard
               </Button>
@@ -120,7 +156,9 @@ export default function PublicacionesPage() {
               <Breadcrumb>
                 <BreadcrumbList>
                   <BreadcrumbItem>
-                    <BreadcrumbLink href="/dashboard"><Home className="h-4 w-4" /></BreadcrumbLink>
+                    <BreadcrumbLink href="/dashboard">
+                      <Home className="h-4 w-4" />
+                    </BreadcrumbLink>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
@@ -136,22 +174,36 @@ export default function PublicacionesPage() {
                 </div>
                 <Dialog open={openDialog} onOpenChange={setOpenDialog}>
                   <DialogTrigger asChild>
-                    <Button><Share2 className="h-4 w-4 mr-2" />Nueva Publicación</Button>
+                    <Button>
+                      <Share2 className="h-4 w-4 mr-2" />
+                      Nueva Publicación
+                    </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
                       <DialogTitle>Generar Anuncios</DialogTitle>
-                      <DialogDescription>Crea anuncios optimizados para múltiples portales</DialogDescription>
+                      <DialogDescription>
+                        Crea anuncios optimizados para múltiples portales
+                      </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                       <div className="space-y-2">
                         <Label>Unidad</Label>
-                        <Select value={formData.unitId} onValueChange={(value) => {
-                          setFormData({ ...formData, unitId: value });
-                          const unit = units.find((u: any) => u.id === value);
-                          if (unit) setFormData(prev => ({ ...prev, precioAlquiler: unit.rentaMensual?.toString() || '' }));
-                        }}>
-                          <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
+                        <Select
+                          value={formData.unitId}
+                          onValueChange={(value) => {
+                            setFormData({ ...formData, unitId: value });
+                            const unit = units.find((u: any) => u.id === value);
+                            if (unit)
+                              setFormData((prev) => ({
+                                ...prev,
+                                precioAlquiler: unit.rentaMensual?.toString() || '',
+                              }));
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar" />
+                          </SelectTrigger>
                           <SelectContent>
                             {units.map((u: any) => (
                               <SelectItem key={u.id} value={u.id}>
@@ -163,15 +215,33 @@ export default function PublicacionesPage() {
                       </div>
                       <div className="space-y-2">
                         <Label>Precio Alquiler (€/mes)</Label>
-                        <Input type="number" value={formData.precioAlquiler} onChange={(e) => setFormData({ ...formData, precioAlquiler: e.target.value })} />
+                        <Input
+                          type="number"
+                          value={formData.precioAlquiler}
+                          onChange={(e) =>
+                            setFormData({ ...formData, precioAlquiler: e.target.value })
+                          }
+                        />
                       </div>
                       <div className="flex gap-4">
                         <label className="flex items-center gap-2">
-                          <input type="checkbox" checked={formData.destacada} onChange={(e) => setFormData({ ...formData, destacada: e.target.checked })} />
+                          <input
+                            type="checkbox"
+                            checked={formData.destacada}
+                            onChange={(e) =>
+                              setFormData({ ...formData, destacada: e.target.checked })
+                            }
+                          />
                           Destacada
                         </label>
                         <label className="flex items-center gap-2">
-                          <input type="checkbox" checked={formData.urgente} onChange={(e) => setFormData({ ...formData, urgente: e.target.checked })} />
+                          <input
+                            type="checkbox"
+                            checked={formData.urgente}
+                            onChange={(e) =>
+                              setFormData({ ...formData, urgente: e.target.checked })
+                            }
+                          />
                           Urgente
                         </label>
                       </div>
@@ -187,9 +257,21 @@ export default function PublicacionesPage() {
             <div className="grid gap-4 md:grid-cols-4">
               {[
                 { title: 'Total', value: publicaciones.length, icon: FileText },
-                { title: 'Activas', value: publicaciones.filter(p => p.estado === 'activa').length, icon: TrendingUp },
-                { title: 'Vistas Totales', value: publicaciones.reduce((sum, p) => sum + (p.vistas || 0), 0), icon: Eye },
-                { title: 'Contactos', value: publicaciones.reduce((sum, p) => sum + (p.contactos || 0), 0), icon: MessageSquare }
+                {
+                  title: 'Activas',
+                  value: publicaciones.filter((p) => p.estado === 'activa').length,
+                  icon: TrendingUp,
+                },
+                {
+                  title: 'Vistas Totales',
+                  value: publicaciones.reduce((sum, p) => sum + (p.vistas || 0), 0),
+                  icon: Eye,
+                },
+                {
+                  title: 'Contactos',
+                  value: publicaciones.reduce((sum, p) => sum + (p.contactos || 0), 0),
+                  icon: MessageSquare,
+                },
               ].map((kpi, idx) => (
                 <Card key={idx}>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -218,22 +300,37 @@ export default function PublicacionesPage() {
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
                               <h3 className="font-semibold">{pub.titulo}</h3>
-                              <Badge variant={pub.estado === 'activa' ? 'default' : 'secondary'}>{pub.estado}</Badge>
+                              <Badge variant={pub.estado === 'activa' ? 'default' : 'secondary'}>
+                                {pub.estado}
+                              </Badge>
                               {pub.destacada && <Badge variant="outline">Destacada</Badge>}
                             </div>
                             <p className="text-sm text-muted-foreground">{pub.descripcionCorta}</p>
                             <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
-                              <span><Eye className="inline h-3 w-3 mr-1" />{pub.vistas}</span>
-                              <span><MessageSquare className="inline h-3 w-3 mr-1" />{pub.contactos}</span>
-                              <span><Star className="inline h-3 w-3 mr-1" />{pub.favoritos}</span>
+                              <span>
+                                <Eye className="inline h-3 w-3 mr-1" />
+                                {pub.vistas}
+                              </span>
+                              <span>
+                                <MessageSquare className="inline h-3 w-3 mr-1" />
+                                {pub.contactos}
+                              </span>
+                              <span>
+                                <Star className="inline h-3 w-3 mr-1" />
+                                {pub.favoritos}
+                              </span>
                             </div>
                           </div>
                           <div className="flex flex-col gap-2">
                             <div className="text-right">
-                              <p className="font-bold">{pub.precioAlquiler ? `${pub.precioAlquiler}€/mes` : 'N/A'}</p>
+                              <p className="font-bold">
+                                {pub.precioAlquiler ? `${pub.precioAlquiler}€/mes` : 'N/A'}
+                              </p>
                             </div>
                             {pub.estado === 'borrador' && (
-                              <Button size="sm" onClick={() => handleActivar(pub.id)}>Activar</Button>
+                              <Button size="sm" onClick={() => handleActivar(pub.id)}>
+                                Activar
+                              </Button>
                             )}
                           </div>
                         </div>
@@ -266,21 +363,30 @@ export default function PublicacionesPage() {
                   </div>
                   <div>
                     <Label>Descripción</Label>
-                    <p className="text-sm p-2 bg-muted rounded whitespace-pre-wrap">{anuncio.descripcion}</p>
+                    <p className="text-sm p-2 bg-muted rounded whitespace-pre-wrap">
+                      {anuncio.descripcion}
+                    </p>
                   </div>
                   <div>
                     <Label>Características</Label>
                     <div className="flex flex-wrap gap-1">
                       {anuncio.caracteristicas.map((c: string, i: number) => (
-                        <Badge key={i} variant="secondary">{c}</Badge>
+                        <Badge key={i} variant="secondary">
+                          {c}
+                        </Badge>
                       ))}
                     </div>
                   </div>
-                  <Button size="sm" variant="outline" onClick={() => {
-                    navigator.clipboard.writeText(`${anuncio.titulo}\n\n${anuncio.descripcion}`);
-                    toast.success('Copiado al portapapeles');
-                  }}>
-                    <Download className="h-4 w-4 mr-2" />Copiar Texto
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      navigator.clipboard.writeText(`${anuncio.titulo}\n\n${anuncio.descripcion}`);
+                      toast.success('Copiado al portapapeles');
+                    }}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Copiar Texto
                   </Button>
                 </CardContent>
               </Card>

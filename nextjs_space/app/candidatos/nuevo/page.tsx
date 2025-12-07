@@ -10,7 +10,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Breadcrumb,
@@ -78,7 +84,9 @@ export default function NuevoCandidatoPage() {
           dni: formData.dni,
           email: formData.email,
           telefono: formData.telefono,
-          fechaNacimiento: formData.fechaNacimiento ? new Date(formData.fechaNacimiento).toISOString() : undefined,
+          fechaNacimiento: formData.fechaNacimiento
+            ? new Date(formData.fechaNacimiento).toISOString()
+            : undefined,
           profesion: formData.profesion || undefined,
           ingresosMensuales: parseFloat(formData.ingresosMensuales),
           notas: formData.notas || undefined,
@@ -157,7 +165,9 @@ export default function NuevoCandidatoPage() {
             {/* Header Section */}
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Nuevo Candidato</h1>
-              <p className="text-muted-foreground">Registra un nuevo candidato interesado en alquilar</p>
+              <p className="text-muted-foreground">
+                Registra un nuevo candidato interesado en alquilar
+              </p>
             </div>
 
             {/* Formulario */}

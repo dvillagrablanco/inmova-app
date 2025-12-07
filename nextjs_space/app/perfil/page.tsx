@@ -12,7 +12,14 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { User, Mail, Building2, Shield, Save, ArrowLeft, Home, Lock } from 'lucide-react';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import logger, { logError } from '@/lib/logger';
 import { MFASetup } from '@/components/security/mfa-setup';
 
@@ -35,7 +42,7 @@ export default function PerfilPage() {
     }
 
     if (status === 'authenticated' && session?.user) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         name: session.user.name || '',
         email: session.user.email || '',
@@ -78,12 +85,12 @@ export default function PerfilPage() {
 
       if (response.ok) {
         toast.success('Perfil actualizado correctamente');
-        
+
         // Actualizar la sesión
         await update();
-        
+
         // Limpiar campos de contraseña
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           currentPassword: '',
           newPassword: '',
@@ -172,14 +179,14 @@ export default function PerfilPage() {
                   <User className="h-5 w-5" />
                   Información de Usuario
                 </CardTitle>
-                <CardDescription>
-                  Tu información de cuenta y rol en el sistema
-                </CardDescription>
+                <CardDescription>Tu información de cuenta y rol en el sistema</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium text-muted-foreground">Correo Electrónico</Label>
+                    <Label className="text-sm font-medium text-muted-foreground">
+                      Correo Electrónico
+                    </Label>
                     <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
                       <Mail className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm font-medium">{user?.email}</span>
@@ -209,9 +216,7 @@ export default function PerfilPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Editar Perfil</CardTitle>
-                <CardDescription>
-                  Actualiza tu nombre y configuración de la cuenta
-                </CardDescription>
+                <CardDescription>Actualiza tu nombre y configuración de la cuenta</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleUpdateProfile} className="space-y-4">
@@ -220,20 +225,17 @@ export default function PerfilPage() {
                     <Input
                       id="name"
                       value={formData.name}
-                      onChange={e => setFormData({ ...formData, name: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       placeholder="Tu nombre completo"
                       required
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="email" className="text-muted-foreground">Email (no editable)</Label>
-                    <Input
-                      id="email"
-                      value={formData.email}
-                      disabled
-                      className="bg-muted"
-                    />
+                    <Label htmlFor="email" className="text-muted-foreground">
+                      Email (no editable)
+                    </Label>
+                    <Input id="email" value={formData.email} disabled className="bg-muted" />
                   </div>
 
                   <div className="pt-4 border-t">
@@ -248,7 +250,9 @@ export default function PerfilPage() {
                           id="currentPassword"
                           type="password"
                           value={formData.currentPassword}
-                          onChange={e => setFormData({ ...formData, currentPassword: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({ ...formData, currentPassword: e.target.value })
+                          }
                           placeholder="Ingresa tu contraseña actual"
                         />
                       </div>
@@ -260,7 +264,9 @@ export default function PerfilPage() {
                             id="newPassword"
                             type="password"
                             value={formData.newPassword}
-                            onChange={e => setFormData({ ...formData, newPassword: e.target.value })}
+                            onChange={(e) =>
+                              setFormData({ ...formData, newPassword: e.target.value })
+                            }
                             placeholder="Mínimo 6 caracteres"
                           />
                         </div>
@@ -270,7 +276,9 @@ export default function PerfilPage() {
                             id="confirmPassword"
                             type="password"
                             value={formData.confirmPassword}
-                            onChange={e => setFormData({ ...formData, confirmPassword: e.target.value })}
+                            onChange={(e) =>
+                              setFormData({ ...formData, confirmPassword: e.target.value })
+                            }
                             placeholder="Repite la nueva contraseña"
                           />
                         </div>
@@ -294,11 +302,7 @@ export default function PerfilPage() {
                   </div>
 
                   <div className="flex justify-end gap-3 pt-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => router.back()}
-                    >
+                    <Button type="button" variant="outline" onClick={() => router.back()}>
                       Cancelar
                     </Button>
                     <Button

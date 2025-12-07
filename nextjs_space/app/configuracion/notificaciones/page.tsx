@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import Sidebar from '@/components/layout/sidebar';
 import Header from '@/components/layout/header';
@@ -10,18 +10,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
-import { 
-  Bell, 
-  Mail, 
-  MessageSquare, 
-  AlertCircle,
-  CheckCircle,
-  Save
-} from 'lucide-react';
+import { Bell, Mail, MessageSquare, AlertCircle, CheckCircle, Save } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import logger, { logError } from '@/lib/logger';
 
@@ -32,7 +31,7 @@ interface NotificationPreferences {
   pushContracts: boolean;
   pushMaintenance: boolean;
   pushMessages: boolean;
-  
+
   // Notificaciones Email
   emailEnabled: boolean;
   emailPayments: boolean;
@@ -40,14 +39,14 @@ interface NotificationPreferences {
   emailMaintenance: boolean;
   emailMessages: boolean;
   emailDigest: 'none' | 'daily' | 'weekly';
-  
+
   // Notificaciones SMS
   smsEnabled: boolean;
   smsPayments: boolean;
   smsContracts: boolean;
   smsMaintenance: boolean;
   smsUrgentOnly: boolean;
-  
+
   // Configuración general
   quietHoursEnabled: boolean;
   quietHoursStart: string;
@@ -60,23 +59,23 @@ const defaultPreferences: NotificationPreferences = {
   pushContracts: true,
   pushMaintenance: true,
   pushMessages: true,
-  
+
   emailEnabled: true,
   emailPayments: true,
   emailContracts: true,
   emailMaintenance: true,
   emailMessages: true,
   emailDigest: 'daily',
-  
+
   smsEnabled: false,
   smsPayments: false,
   smsContracts: false,
   smsMaintenance: false,
   smsUrgentOnly: true,
-  
+
   quietHoursEnabled: false,
   quietHoursStart: '22:00',
-  quietHoursEnd: '08:00'
+  quietHoursEnd: '08:00',
 };
 
 export default function ConfiguracionNotificacionesPage() {
@@ -129,7 +128,7 @@ export default function ConfiguracionNotificacionesPage() {
       const response = await fetch('/api/user/notification-preferences', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(preferences)
+        body: JSON.stringify(preferences),
       });
 
       if (response.ok) {
@@ -149,7 +148,7 @@ export default function ConfiguracionNotificacionesPage() {
     try {
       const permission = await Notification.requestPermission();
       setPushPermission(permission);
-      
+
       if (permission === 'granted') {
         toast.success('¡Notificaciones push habilitadas!');
         // Suscribir al servicio push
@@ -166,21 +165,21 @@ export default function ConfiguracionNotificacionesPage() {
   const subscribeToPush = async () => {
     try {
       const registration = await navigator.serviceWorker.ready;
-      
+
       // Obtener clave pública VAPID
       const vapidResponse = await fetch('/api/push/public-key');
       const { publicKey } = await vapidResponse.json();
-      
+
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: publicKey
+        applicationServerKey: publicKey,
       });
 
       // Enviar suscripción al servidor
       await fetch('/api/push/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(subscription)
+        body: JSON.stringify(subscription),
       });
     } catch (error) {
       logger.error('Error subscribing to push:', error);
@@ -188,27 +187,27 @@ export default function ConfiguracionNotificacionesPage() {
   };
 
   const updatePreference = (key: keyof NotificationPreferences, value: any) => {
-    setPreferences(prev => ({ ...prev, [key]: value }));
+    setPreferences((prev) => ({ ...prev, [key]: value }));
   };
 
   if (status === 'loading' || loading) {
     return (
-    <div className="flex h-screen overflow-hidden bg-gradient-bg">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            <Skeleton className="h-10 w-96" />
-            <div className="space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <Skeleton key={i} className="h-48" />
-              ))}
+      <div className="flex h-screen overflow-hidden bg-gradient-bg">
+        <Sidebar />
+        <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
+          <Header />
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <div className="max-w-7xl mx-auto">
+              <Skeleton className="h-10 w-96" />
+              <div className="space-y-4">
+                {[...Array(3)].map((_, i) => (
+                  <Skeleton key={i} className="h-48" />
+                ))}
+              </div>
             </div>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
-    </div>
     );
   }
 
@@ -219,338 +218,350 @@ export default function ConfiguracionNotificacionesPage() {
         <Header />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto space-y-6">
-            <div className="p-8">
-              <div>
-                <h1 className="text-3xl font-bold">Configuración de Notificaciones</h1>
-                <p className="text-muted-foreground mt-2">
-                  Personaliza cómo y cuándo quieres recibir notificaciones sobre tu actividad.
-                </p>
-              </div>
-
-      {/* Notificaciones Push */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Bell className="w-5 h-5" />
             <div>
-              <CardTitle>Notificaciones Push</CardTitle>
-              <CardDescription>
-                Recibe notificaciones en tiempo real en tu navegador
-              </CardDescription>
+              <h1 className="text-3xl font-bold">Configuración de Notificaciones</h1>
+              <p className="text-muted-foreground mt-2">
+                Personaliza cómo y cuándo quieres recibir notificaciones sobre tu actividad.
+              </p>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {!pushSupported ? (
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                Tu navegador no soporta notificaciones push
-              </AlertDescription>
-            </Alert>
-          ) : pushPermission === 'denied' ? (
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                Has bloqueado las notificaciones. Debes habilitarlas desde la configuración de tu navegador.
-              </AlertDescription>
-            </Alert>
-          ) : pushPermission === 'default' ? (
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription className="flex items-center justify-between">
-                <span>Necesitas habilitar las notificaciones push para recibir alertas en tiempo real</span>
-                <Button size="sm" onClick={requestPushPermission}>
-                  Habilitar
-                </Button>
-              </AlertDescription>
-            </Alert>
-          ) : (
-            <Alert>
-              <CheckCircle className="h-4 w-4" />
-              <AlertDescription>
-                ¡Notificaciones push habilitadas!
-              </AlertDescription>
-            </Alert>
-          )}
 
-          <div className="flex items-center justify-between">
-            <div>
-              <Label>Activar notificaciones push</Label>
-              <p className="text-sm text-muted-foreground">Recibe notificaciones instantáneas</p>
-            </div>
-            <Switch
-              checked={preferences.pushEnabled}
-              onCheckedChange={(checked) => updatePreference('pushEnabled', checked)}
-              disabled={pushPermission !== 'granted'}
-            />
-          </div>
+            {/* Notificaciones Push */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Bell className="w-5 h-5" />
+                  <div>
+                    <CardTitle>Notificaciones Push</CardTitle>
+                    <CardDescription>
+                      Recibe notificaciones en tiempo real en tu navegador
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {!pushSupported ? (
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>Tu navegador no soporta notificaciones push</AlertDescription>
+                  </Alert>
+                ) : pushPermission === 'denied' ? (
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      Has bloqueado las notificaciones. Debes habilitarlas desde la configuración de
+                      tu navegador.
+                    </AlertDescription>
+                  </Alert>
+                ) : pushPermission === 'default' ? (
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription className="flex items-center justify-between">
+                      <span>
+                        Necesitas habilitar las notificaciones push para recibir alertas en tiempo
+                        real
+                      </span>
+                      <Button size="sm" onClick={requestPushPermission}>
+                        Habilitar
+                      </Button>
+                    </AlertDescription>
+                  </Alert>
+                ) : (
+                  <Alert>
+                    <CheckCircle className="h-4 w-4" />
+                    <AlertDescription>¡Notificaciones push habilitadas!</AlertDescription>
+                  </Alert>
+                )}
 
-          {preferences.pushEnabled && (
-            <>
-              <Separator />
-              <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label>Nuevos pagos</Label>
+                  <div>
+                    <Label>Activar notificaciones push</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Recibe notificaciones instantáneas
+                    </p>
+                  </div>
                   <Switch
-                    checked={preferences.pushPayments}
-                    onCheckedChange={(checked) => updatePreference('pushPayments', checked)}
+                    checked={preferences.pushEnabled}
+                    onCheckedChange={(checked) => updatePreference('pushEnabled', checked)}
+                    disabled={pushPermission !== 'granted'}
                   />
                 </div>
-                <div className="flex items-center justify-between">
-                  <Label>Contratos y renovaciones</Label>
-                  <Switch
-                    checked={preferences.pushContracts}
-                    onCheckedChange={(checked) => updatePreference('pushContracts', checked)}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label>Mantenimiento e incidencias</Label>
-                  <Switch
-                    checked={preferences.pushMaintenance}
-                    onCheckedChange={(checked) => updatePreference('pushMaintenance', checked)}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label>Mensajes y chat</Label>
-                  <Switch
-                    checked={preferences.pushMessages}
-                    onCheckedChange={(checked) => updatePreference('pushMessages', checked)}
-                  />
-                </div>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
 
-      {/* Notificaciones Email */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Mail className="w-5 h-5" />
-            <div>
-              <CardTitle>Notificaciones por Email</CardTitle>
-              <CardDescription>
-                Recibe un resumen de tu actividad por correo electrónico
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <Label>Activar notificaciones por email</Label>
-              <p className="text-sm text-muted-foreground">Recibe actualizaciones por correo</p>
-            </div>
-            <Switch
-              checked={preferences.emailEnabled}
-              onCheckedChange={(checked) => updatePreference('emailEnabled', checked)}
-            />
-          </div>
-
-          {preferences.emailEnabled && (
-            <>
-              <Separator />
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label>Nuevos pagos</Label>
-                  <Switch
-                    checked={preferences.emailPayments}
-                    onCheckedChange={(checked) => updatePreference('emailPayments', checked)}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label>Contratos y renovaciones</Label>
-                  <Switch
-                    checked={preferences.emailContracts}
-                    onCheckedChange={(checked) => updatePreference('emailContracts', checked)}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label>Mantenimiento e incidencias</Label>
-                  <Switch
-                    checked={preferences.emailMaintenance}
-                    onCheckedChange={(checked) => updatePreference('emailMaintenance', checked)}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label>Mensajes y chat</Label>
-                  <Switch
-                    checked={preferences.emailMessages}
-                    onCheckedChange={(checked) => updatePreference('emailMessages', checked)}
-                  />
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="space-y-2">
-                <Label>Resumen por email</Label>
-                <Select 
-                  value={preferences.emailDigest} 
-                  onValueChange={(value) => updatePreference('emailDigest', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Nunca</SelectItem>
-                    <SelectItem value="daily">Diariamente</SelectItem>
-                    <SelectItem value="weekly">Semanalmente</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-sm text-muted-foreground">
-                  Recibe un resumen consolidado de tu actividad
-                </p>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Notificaciones SMS */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <MessageSquare className="w-5 h-5" />
-            <div>
-              <CardTitle>Notificaciones SMS</CardTitle>
-              <CardDescription>
-                Recibe alertas importantes por mensaje de texto
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Los mensajes SMS pueden tener costo adicional según tu plan
-            </AlertDescription>
-          </Alert>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <Label>Activar notificaciones SMS</Label>
-              <p className="text-sm text-muted-foreground">Solo para alertas importantes</p>
-            </div>
-            <Switch
-              checked={preferences.smsEnabled}
-              onCheckedChange={(checked) => updatePreference('smsEnabled', checked)}
-            />
-          </div>
-
-          {preferences.smsEnabled && (
-            <>
-              <Separator />
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label>Solo notificaciones urgentes</Label>
-                  <Switch
-                    checked={preferences.smsUrgentOnly}
-                    onCheckedChange={(checked) => updatePreference('smsUrgentOnly', checked)}
-                  />
-                </div>
-                {!preferences.smsUrgentOnly && (
+                {preferences.pushEnabled && (
                   <>
-                    <div className="flex items-center justify-between">
-                      <Label>Pagos importantes</Label>
-                      <Switch
-                        checked={preferences.smsPayments}
-                        onCheckedChange={(checked) => updatePreference('smsPayments', checked)}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Label>Vencimientos de contratos</Label>
-                      <Switch
-                        checked={preferences.smsContracts}
-                        onCheckedChange={(checked) => updatePreference('smsContracts', checked)}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Label>Mantenimiento urgente</Label>
-                      <Switch
-                        checked={preferences.smsMaintenance}
-                        onCheckedChange={(checked) => updatePreference('smsMaintenance', checked)}
-                      />
+                    <Separator />
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <Label>Nuevos pagos</Label>
+                        <Switch
+                          checked={preferences.pushPayments}
+                          onCheckedChange={(checked) => updatePreference('pushPayments', checked)}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label>Contratos y renovaciones</Label>
+                        <Switch
+                          checked={preferences.pushContracts}
+                          onCheckedChange={(checked) => updatePreference('pushContracts', checked)}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label>Mantenimiento e incidencias</Label>
+                        <Switch
+                          checked={preferences.pushMaintenance}
+                          onCheckedChange={(checked) =>
+                            updatePreference('pushMaintenance', checked)
+                          }
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label>Mensajes y chat</Label>
+                        <Switch
+                          checked={preferences.pushMessages}
+                          onCheckedChange={(checked) => updatePreference('pushMessages', checked)}
+                        />
+                      </div>
                     </div>
                   </>
                 )}
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
+              </CardContent>
+            </Card>
 
-      {/* Horario silencioso */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Horario Silencioso</CardTitle>
-          <CardDescription>
-            Pausa las notificaciones durante ciertas horas
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <Label>Activar horario silencioso</Label>
-              <p className="text-sm text-muted-foreground">No recibirás notificaciones en este horario</p>
+            {/* Notificaciones Email */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Mail className="w-5 h-5" />
+                  <div>
+                    <CardTitle>Notificaciones por Email</CardTitle>
+                    <CardDescription>
+                      Recibe un resumen de tu actividad por correo electrónico
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Activar notificaciones por email</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Recibe actualizaciones por correo
+                    </p>
+                  </div>
+                  <Switch
+                    checked={preferences.emailEnabled}
+                    onCheckedChange={(checked) => updatePreference('emailEnabled', checked)}
+                  />
+                </div>
+
+                {preferences.emailEnabled && (
+                  <>
+                    <Separator />
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <Label>Nuevos pagos</Label>
+                        <Switch
+                          checked={preferences.emailPayments}
+                          onCheckedChange={(checked) => updatePreference('emailPayments', checked)}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label>Contratos y renovaciones</Label>
+                        <Switch
+                          checked={preferences.emailContracts}
+                          onCheckedChange={(checked) => updatePreference('emailContracts', checked)}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label>Mantenimiento e incidencias</Label>
+                        <Switch
+                          checked={preferences.emailMaintenance}
+                          onCheckedChange={(checked) =>
+                            updatePreference('emailMaintenance', checked)
+                          }
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label>Mensajes y chat</Label>
+                        <Switch
+                          checked={preferences.emailMessages}
+                          onCheckedChange={(checked) => updatePreference('emailMessages', checked)}
+                        />
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    <div className="space-y-2">
+                      <Label>Resumen por email</Label>
+                      <Select
+                        value={preferences.emailDigest}
+                        onValueChange={(value) => updatePreference('emailDigest', value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Nunca</SelectItem>
+                          <SelectItem value="daily">Diariamente</SelectItem>
+                          <SelectItem value="weekly">Semanalmente</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-sm text-muted-foreground">
+                        Recibe un resumen consolidado de tu actividad
+                      </p>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Notificaciones SMS */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5" />
+                  <div>
+                    <CardTitle>Notificaciones SMS</CardTitle>
+                    <CardDescription>
+                      Recibe alertas importantes por mensaje de texto
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    Los mensajes SMS pueden tener costo adicional según tu plan
+                  </AlertDescription>
+                </Alert>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Activar notificaciones SMS</Label>
+                    <p className="text-sm text-muted-foreground">Solo para alertas importantes</p>
+                  </div>
+                  <Switch
+                    checked={preferences.smsEnabled}
+                    onCheckedChange={(checked) => updatePreference('smsEnabled', checked)}
+                  />
+                </div>
+
+                {preferences.smsEnabled && (
+                  <>
+                    <Separator />
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <Label>Solo notificaciones urgentes</Label>
+                        <Switch
+                          checked={preferences.smsUrgentOnly}
+                          onCheckedChange={(checked) => updatePreference('smsUrgentOnly', checked)}
+                        />
+                      </div>
+                      {!preferences.smsUrgentOnly && (
+                        <>
+                          <div className="flex items-center justify-between">
+                            <Label>Pagos importantes</Label>
+                            <Switch
+                              checked={preferences.smsPayments}
+                              onCheckedChange={(checked) =>
+                                updatePreference('smsPayments', checked)
+                              }
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Label>Vencimientos de contratos</Label>
+                            <Switch
+                              checked={preferences.smsContracts}
+                              onCheckedChange={(checked) =>
+                                updatePreference('smsContracts', checked)
+                              }
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Label>Mantenimiento urgente</Label>
+                            <Switch
+                              checked={preferences.smsMaintenance}
+                              onCheckedChange={(checked) =>
+                                updatePreference('smsMaintenance', checked)
+                              }
+                            />
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Horario silencioso */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Horario Silencioso</CardTitle>
+                <CardDescription>Pausa las notificaciones durante ciertas horas</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Activar horario silencioso</Label>
+                    <p className="text-sm text-muted-foreground">
+                      No recibirás notificaciones en este horario
+                    </p>
+                  </div>
+                  <Switch
+                    checked={preferences.quietHoursEnabled}
+                    onCheckedChange={(checked) => updatePreference('quietHoursEnabled', checked)}
+                  />
+                </div>
+
+                {preferences.quietHoursEnabled && (
+                  <>
+                    <Separator />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Desde</Label>
+                        <input
+                          type="time"
+                          value={preferences.quietHoursStart}
+                          onChange={(e) => updatePreference('quietHoursStart', e.target.value)}
+                          className="w-full px-3 py-2 border rounded-md"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Hasta</Label>
+                        <input
+                          type="time"
+                          value={preferences.quietHoursEnd}
+                          onChange={(e) => updatePreference('quietHoursEnd', e.target.value)}
+                          className="w-full px-3 py-2 border rounded-md"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={fetchPreferences} disabled={saving}>
+                Cancelar
+              </Button>
+              <Button onClick={handleSave} disabled={saving}>
+                {saving ? (
+                  <>
+                    <span className="animate-spin mr-2">⧖</span>
+                    Guardando...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Guardar Cambios
+                  </>
+                )}
+              </Button>
             </div>
-            <Switch
-              checked={preferences.quietHoursEnabled}
-              onCheckedChange={(checked) => updatePreference('quietHoursEnabled', checked)}
-            />
           </div>
-
-          {preferences.quietHoursEnabled && (
-            <>
-              <Separator />
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Desde</Label>
-                  <input
-                    type="time"
-                    value={preferences.quietHoursStart}
-                    onChange={(e) => updatePreference('quietHoursStart', e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Hasta</Label>
-                  <input
-                    type="time"
-                    value={preferences.quietHoursEnd}
-                    onChange={(e) => updatePreference('quietHoursEnd', e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md"
-                  />
-                </div>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
-
-      <div className="flex justify-end gap-2">
-        <Button variant="outline" onClick={fetchPreferences} disabled={saving}>
-          Cancelar
-        </Button>
-        <Button onClick={handleSave} disabled={saving}>
-          {saving ? (
-            <>
-              <span className="animate-spin mr-2">⧖</span>
-              Guardando...
-            </>
-          ) : (
-            <>
-              <Save className="w-4 h-4 mr-2" />
-              Guardar Cambios
-            </>
-          )}
-        </Button>
-      </div>
-    </div>
-      </div>
         </main>
       </div>
     </div>

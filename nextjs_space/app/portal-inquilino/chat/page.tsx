@@ -9,7 +9,15 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
@@ -200,7 +208,7 @@ export default function TenantChatPage() {
                   id="asunto"
                   value={newConversation.asunto}
                   onChange={(e) =>
-                    setNewConversation(prev => ({ ...prev, asunto: e.target.value }))
+                    setNewConversation((prev) => ({ ...prev, asunto: e.target.value }))
                   }
                   placeholder="Ej: Consulta sobre el contrato"
                 />
@@ -211,7 +219,7 @@ export default function TenantChatPage() {
                   id="mensaje"
                   value={newConversation.mensaje}
                   onChange={(e) =>
-                    setNewConversation(prev => ({ ...prev, mensaje: e.target.value }))
+                    setNewConversation((prev) => ({ ...prev, mensaje: e.target.value }))
                   }
                   placeholder="Describe tu consulta..."
                   rows={4}
@@ -258,9 +266,7 @@ export default function TenantChatPage() {
                     }`}
                   >
                     <div className="flex items-start justify-between mb-1">
-                      <h3 className="font-semibold text-sm line-clamp-1">
-                        {conv.asunto}
-                      </h3>
+                      <h3 className="font-semibold text-sm line-clamp-1">{conv.asunto}</h3>
                       {conv.unreadCount > 0 && (
                         <Badge variant="destructive" className="ml-2">
                           {conv.unreadCount}
@@ -297,15 +303,11 @@ export default function TenantChatPage() {
               <CardHeader className="border-b">
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-lg">
-                      {selectedConversation.asunto}
-                    </CardTitle>
+                    <CardTitle className="text-lg">{selectedConversation.asunto}</CardTitle>
                     <p className="text-sm text-gray-500">Administración</p>
                   </div>
                   <Badge
-                    variant={
-                      selectedConversation.estado === 'activa' ? 'default' : 'secondary'
-                    }
+                    variant={selectedConversation.estado === 'activa' ? 'default' : 'secondary'}
                   >
                     {selectedConversation.estado}
                   </Badge>

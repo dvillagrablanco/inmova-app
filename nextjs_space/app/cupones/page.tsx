@@ -10,12 +10,52 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
-import { Home, ArrowLeft, Tag, Plus, Search, MoreVertical, Edit, Trash2, CheckCircle, XCircle, Percent, Euro, Calendar, Copy, TrendingUp } from 'lucide-react';
+import {
+  Home,
+  ArrowLeft,
+  Tag,
+  Plus,
+  Search,
+  MoreVertical,
+  Edit,
+  Trash2,
+  CheckCircle,
+  XCircle,
+  Percent,
+  Euro,
+  Calendar,
+  Copy,
+  TrendingUp,
+} from 'lucide-react';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { LoadingState } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -53,7 +93,9 @@ export default function CuponesPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [activeFilters, setActiveFilters] = useState<Array<{ id: string; label: string; value: string }>>([]);
+  const [activeFilters, setActiveFilters] = useState<
+    Array<{ id: string; label: string; value: string }>
+  >([]);
 
   const [openDialog, setOpenDialog] = useState(false);
   const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null);
@@ -67,7 +109,7 @@ export default function CuponesPage() {
     montoMinimo: '',
     fechaInicio: '',
     fechaExpiracion: '',
-    aplicaATodos: true
+    aplicaATodos: true,
   });
 
   useEffect(() => {
@@ -85,7 +127,7 @@ export default function CuponesPage() {
   // Update active filters
   useEffect(() => {
     const filters: Array<{ id: string; label: string; value: string }> = [];
-    
+
     if (searchTerm) {
       filters.push({ id: 'search', label: 'Búsqueda', value: searchTerm });
     }
@@ -132,8 +174,8 @@ export default function CuponesPage() {
           valor: parseFloat(formData.valor),
           usosMaximos: formData.usosMaximos ? parseInt(formData.usosMaximos) : null,
           usosPorUsuario: formData.usosPorUsuario ? parseInt(formData.usosPorUsuario) : null,
-          montoMinimo: formData.montoMinimo ? parseFloat(formData.montoMinimo) : null
-        })
+          montoMinimo: formData.montoMinimo ? parseFloat(formData.montoMinimo) : null,
+        }),
       });
 
       if (response.ok) {
@@ -163,7 +205,7 @@ export default function CuponesPage() {
       montoMinimo: coupon.montoMinimo?.toString() || '',
       fechaInicio: coupon.fechaInicio.split('T')[0],
       fechaExpiracion: coupon.fechaExpiracion.split('T')[0],
-      aplicaATodos: coupon.aplicaATodos
+      aplicaATodos: coupon.aplicaATodos,
     });
     setOpenDialog(true);
   };
@@ -191,7 +233,7 @@ export default function CuponesPage() {
       const response = await fetch(`/api/coupons/${coupon.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action })
+        body: JSON.stringify({ action }),
       });
 
       if (response.ok) {
@@ -223,7 +265,7 @@ export default function CuponesPage() {
       montoMinimo: '',
       fechaInicio: '',
       fechaExpiracion: '',
-      aplicaATodos: true
+      aplicaATodos: true,
     });
   };
 
@@ -238,9 +280,10 @@ export default function CuponesPage() {
   };
 
   const filteredCoupons = useMemo(() => {
-    return coupons.filter(coupon => {
-      const matchesSearch = coupon.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           (coupon.descripcion?.toLowerCase() || '').includes(searchTerm.toLowerCase());
+    return coupons.filter((coupon) => {
+      const matchesSearch =
+        coupon.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (coupon.descripcion?.toLowerCase() || '').includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === 'all' || coupon.estado === statusFilter;
 
       return matchesSearch && matchesStatus;
@@ -250,10 +293,10 @@ export default function CuponesPage() {
   const stats = useMemo(() => {
     return {
       total: coupons.length,
-      activos: coupons.filter(c => c.activo && c.estado === 'activo').length,
-      expirados: coupons.filter(c => c.estado === 'expirado').length,
-      agotados: coupons.filter(c => c.estado === 'agotado').length,
-      totalUsos: coupons.reduce((sum, c) => sum + c.usosActuales, 0)
+      activos: coupons.filter((c) => c.activo && c.estado === 'activo').length,
+      expirados: coupons.filter((c) => c.estado === 'expirado').length,
+      agotados: coupons.filter((c) => c.estado === 'agotado').length,
+      totalUsos: coupons.reduce((sum, c) => sum + c.usosActuales, 0),
     };
   }, [coupons]);
 
@@ -293,15 +336,22 @@ export default function CuponesPage() {
                   <Tag className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Cupones de Descuento</h1>
-                  <p className="text-sm text-gray-600 mt-1">Gestiona códigos promocionales y descuentos</p>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                    Cupones de Descuento
+                  </h1>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Gestiona códigos promocionales y descuentos
+                  </p>
                 </div>
               </div>
               {canCreate && (
-                <Dialog open={openDialog} onOpenChange={(open) => {
-                  setOpenDialog(open);
-                  if (!open) resetForm();
-                }}>
+                <Dialog
+                  open={openDialog}
+                  onOpenChange={(open) => {
+                    setOpenDialog(open);
+                    if (!open) resetForm();
+                  }}
+                >
                   <DialogTrigger asChild>
                     <Button className="gradient-primary shadow-primary">
                       <Plus className="mr-2 h-4 w-4" />
@@ -321,7 +371,9 @@ export default function CuponesPage() {
                           <Input
                             id="codigo"
                             value={formData.codigo}
-                            onChange={(e) => setFormData({...formData, codigo: e.target.value.toUpperCase()})}
+                            onChange={(e) =>
+                              setFormData({ ...formData, codigo: e.target.value.toUpperCase() })
+                            }
                             placeholder="VERANO2024"
                             required
                             maxLength={50}
@@ -331,7 +383,9 @@ export default function CuponesPage() {
                           <Label htmlFor="tipo">Tipo de Descuento *</Label>
                           <Select
                             value={formData.tipo}
-                            onValueChange={(value) => setFormData({...formData, tipo: value as 'PERCENTAGE' | 'FIXED'})}
+                            onValueChange={(value) =>
+                              setFormData({ ...formData, tipo: value as 'PERCENTAGE' | 'FIXED' })
+                            }
                           >
                             <SelectTrigger>
                               <SelectValue />
@@ -355,7 +409,7 @@ export default function CuponesPage() {
                               min="0"
                               max={formData.tipo === 'PERCENTAGE' ? '100' : undefined}
                               value={formData.valor}
-                              onChange={(e) => setFormData({...formData, valor: e.target.value})}
+                              onChange={(e) => setFormData({ ...formData, valor: e.target.value })}
                               required
                               className="pr-8"
                             />
@@ -373,11 +427,15 @@ export default function CuponesPage() {
                               step="0.01"
                               min="0"
                               value={formData.montoMinimo}
-                              onChange={(e) => setFormData({...formData, montoMinimo: e.target.value})}
+                              onChange={(e) =>
+                                setFormData({ ...formData, montoMinimo: e.target.value })
+                              }
                               placeholder="Sin mínimo"
                               className="pr-8"
                             />
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">€</span>
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                              €
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -387,7 +445,9 @@ export default function CuponesPage() {
                         <Input
                           id="descripcion"
                           value={formData.descripcion}
-                          onChange={(e) => setFormData({...formData, descripcion: e.target.value})}
+                          onChange={(e) =>
+                            setFormData({ ...formData, descripcion: e.target.value })
+                          }
                           placeholder="Descuento de verano 2024"
                         />
                       </div>
@@ -400,7 +460,9 @@ export default function CuponesPage() {
                             type="number"
                             min="1"
                             value={formData.usosMaximos}
-                            onChange={(e) => setFormData({...formData, usosMaximos: e.target.value})}
+                            onChange={(e) =>
+                              setFormData({ ...formData, usosMaximos: e.target.value })
+                            }
                             placeholder="Ilimitado"
                           />
                         </div>
@@ -411,7 +473,9 @@ export default function CuponesPage() {
                             type="number"
                             min="1"
                             value={formData.usosPorUsuario}
-                            onChange={(e) => setFormData({...formData, usosPorUsuario: e.target.value})}
+                            onChange={(e) =>
+                              setFormData({ ...formData, usosPorUsuario: e.target.value })
+                            }
                             placeholder="Ilimitado"
                           />
                         </div>
@@ -424,7 +488,9 @@ export default function CuponesPage() {
                             id="fechaInicio"
                             type="date"
                             value={formData.fechaInicio}
-                            onChange={(e) => setFormData({...formData, fechaInicio: e.target.value})}
+                            onChange={(e) =>
+                              setFormData({ ...formData, fechaInicio: e.target.value })
+                            }
                             required
                           />
                         </div>
@@ -434,14 +500,20 @@ export default function CuponesPage() {
                             id="fechaExpiracion"
                             type="date"
                             value={formData.fechaExpiracion}
-                            onChange={(e) => setFormData({...formData, fechaExpiracion: e.target.value})}
+                            onChange={(e) =>
+                              setFormData({ ...formData, fechaExpiracion: e.target.value })
+                            }
                             required
                           />
                         </div>
                       </div>
 
                       <div className="flex justify-end gap-2 pt-4 border-t">
-                        <Button type="button" variant="outline" onClick={() => setOpenDialog(false)}>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setOpenDialog(false)}
+                        >
                           Cancelar
                         </Button>
                         <Button type="submit" className="gradient-primary shadow-primary">
@@ -541,11 +613,15 @@ export default function CuponesPage() {
                 icon={<Tag className="h-16 w-16 text-gray-400" />}
                 title="No hay cupones creados"
                 description="Crea tu primer cupón de descuento para ofrecer promociones a tus clientes"
-                action={canCreate ? {
-                  label: 'Crear Primer Cupón',
-                  onClick: () => setOpenDialog(true),
-                  icon: <Plus className="h-4 w-4" />
-                } : undefined}
+                action={
+                  canCreate
+                    ? {
+                        label: 'Crear Primer Cupón',
+                        onClick: () => setOpenDialog(true),
+                        icon: <Plus className="h-4 w-4" />,
+                      }
+                    : undefined
+                }
               />
             ) : !hasResults ? (
               <EmptyState
@@ -554,7 +630,7 @@ export default function CuponesPage() {
                 description="Intenta ajustar los filtros de búsqueda"
                 action={{
                   label: 'Limpiar búsqueda',
-                  onClick: clearAllFilters
+                  onClick: clearAllFilters,
                 }}
               />
             ) : (
@@ -585,9 +661,13 @@ export default function CuponesPage() {
                             </Badge>
                             <Badge variant="outline" className="flex items-center gap-1">
                               {coupon.tipo === 'PERCENTAGE' ? (
-                                <><Percent className="h-3 w-3" /> {coupon.valor}%</>
+                                <>
+                                  <Percent className="h-3 w-3" /> {coupon.valor}%
+                                </>
                               ) : (
-                                <><Euro className="h-3 w-3" /> {coupon.valor}€</>
+                                <>
+                                  <Euro className="h-3 w-3" /> {coupon.valor}€
+                                </>
                               )}
                             </Badge>
                           </div>
@@ -608,9 +688,13 @@ export default function CuponesPage() {
                                   </DropdownMenuItem>
                                   <DropdownMenuItem onClick={() => handleToggleStatus(coupon)}>
                                     {coupon.activo ? (
-                                      <><XCircle className="h-4 w-4 mr-2" /> Desactivar</>
+                                      <>
+                                        <XCircle className="h-4 w-4 mr-2" /> Desactivar
+                                      </>
                                     ) : (
-                                      <><CheckCircle className="h-4 w-4 mr-2" /> Activar</>
+                                      <>
+                                        <CheckCircle className="h-4 w-4 mr-2" /> Activar
+                                      </>
                                     )}
                                   </DropdownMenuItem>
                                 </>
@@ -634,7 +718,8 @@ export default function CuponesPage() {
                         <div className="flex items-center justify-between">
                           <span className="text-gray-600">Usos:</span>
                           <span className="font-medium">
-                            {coupon.usosActuales} {coupon.usosMaximos ? `/ ${coupon.usosMaximos}` : ''}
+                            {coupon.usosActuales}{' '}
+                            {coupon.usosMaximos ? `/ ${coupon.usosMaximos}` : ''}
                           </span>
                         </div>
                         {coupon.montoMinimo && (
@@ -650,7 +735,10 @@ export default function CuponesPage() {
                               {format(new Date(coupon.fechaInicio), 'dd MMM', { locale: es })}
                             </div>
                             <div className="text-xs text-gray-500">
-                              hasta {format(new Date(coupon.fechaExpiracion), 'dd MMM yyyy', { locale: es })}
+                              hasta{' '}
+                              {format(new Date(coupon.fechaExpiracion), 'dd MMM yyyy', {
+                                locale: es,
+                              })}
                             </div>
                           </div>
                         </div>
@@ -658,7 +746,9 @@ export default function CuponesPage() {
                           <div className="pt-3 border-t">
                             <div className="flex items-center gap-1 text-indigo-600">
                               <TrendingUp className="h-4 w-4" />
-                              <span className="font-medium">{coupon._count.usos} usos registrados</span>
+                              <span className="font-medium">
+                                {coupon._count.usos} usos registrados
+                              </span>
                             </div>
                           </div>
                         )}

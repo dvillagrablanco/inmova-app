@@ -265,29 +265,19 @@ function AdminChatPage() {
                     <CardHeader className="border-b">
                       <div className="flex items-center justify-between">
                         <div>
-                          <CardTitle className="text-lg">
-                            {selectedConversation.asunto}
-                          </CardTitle>
-                          <p className="text-sm text-gray-500">
-                            {selectedConversation.tenantName}
-                          </p>
+                          <CardTitle className="text-lg">{selectedConversation.asunto}</CardTitle>
+                          <p className="text-sm text-gray-500">{selectedConversation.tenantName}</p>
                         </div>
                         <div className="flex gap-2">
                           <Badge
                             variant={
-                              selectedConversation.estado === 'activa'
-                                ? 'default'
-                                : 'secondary'
+                              selectedConversation.estado === 'activa' ? 'default' : 'secondary'
                             }
                           >
                             {selectedConversation.estado}
                           </Badge>
                           {selectedConversation.estado === 'activa' && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={closeConversation}
-                            >
+                            <Button variant="outline" size="sm" onClick={closeConversation}>
                               Cerrar
                             </Button>
                           )}
@@ -300,9 +290,7 @@ function AdminChatPage() {
                           <div
                             key={msg.id}
                             className={`mb-4 flex ${
-                              msg.senderType === 'user'
-                                ? 'justify-end'
-                                : 'justify-start'
+                              msg.senderType === 'user' ? 'justify-end' : 'justify-start'
                             }`}
                           >
                             <div

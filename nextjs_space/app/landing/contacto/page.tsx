@@ -17,7 +17,7 @@ export default function ContactoPage() {
     email: '',
     telefono: '',
     empresa: '',
-    mensaje: ''
+    mensaje: '',
   });
   const [loading, setLoading] = useState(false);
 
@@ -26,10 +26,10 @@ export default function ContactoPage() {
     setLoading(true);
 
     // Simulación de envío
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise((resolve) => setTimeout(resolve, 1500));
 
     toast.success('Mensaje enviado correctamente', {
-      description: 'Nos pondremos en contacto contigo en menos de 24 horas.'
+      description: 'Nos pondremos en contacto contigo en menos de 24 horas.',
     });
 
     setFormData({
@@ -37,7 +37,7 @@ export default function ContactoPage() {
       email: '',
       telefono: '',
       empresa: '',
-      mensaje: ''
+      mensaje: '',
     });
     setLoading(false);
   };
@@ -50,7 +50,9 @@ export default function ContactoPage() {
           <div className="flex items-center justify-between h-16">
             <Link href="/landing" className="flex items-center gap-3">
               <Building2 className="h-8 w-8 text-indigo-600" />
-              <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">INMOVA</span>
+              <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                INMOVA
+              </span>
             </Link>
             <div className="flex gap-4">
               <Link href="/landing">
@@ -73,10 +75,14 @@ export default function ContactoPage() {
               Contacto
             </Badge>
             <h1 className="text-5xl md:text-6xl font-extrabold mb-6 leading-tight">
-              <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600 bg-clip-text text-transparent">Hablemos</span> de tu Proyecto
+              <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600 bg-clip-text text-transparent">
+                Hablemos
+              </span>{' '}
+              de tu Proyecto
             </h1>
             <p className="text-xl text-gray-600 leading-relaxed">
-              Nuestro equipo de expertos está listo para ayudarte a transformar tu negocio inmobiliario
+              Nuestro equipo de expertos está listo para ayudarte a transformar tu negocio
+              inmobiliario
             </p>
           </div>
         </div>
@@ -101,7 +107,7 @@ export default function ContactoPage() {
                           id="nombre"
                           required
                           value={formData.nombre}
-                          onChange={(e) => setFormData({...formData, nombre: e.target.value})}
+                          onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
                           placeholder="Juan Pérez"
                         />
                       </div>
@@ -112,7 +118,7 @@ export default function ContactoPage() {
                           type="email"
                           required
                           value={formData.email}
-                          onChange={(e) => setFormData({...formData, email: e.target.value})}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                           placeholder="juan@empresa.com"
                         />
                       </div>
@@ -125,7 +131,7 @@ export default function ContactoPage() {
                           id="telefono"
                           type="tel"
                           value={formData.telefono}
-                          onChange={(e) => setFormData({...formData, telefono: e.target.value})}
+                          onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
                           placeholder="+34 600 000 000"
                         />
                       </div>
@@ -134,7 +140,7 @@ export default function ContactoPage() {
                         <Input
                           id="empresa"
                           value={formData.empresa}
-                          onChange={(e) => setFormData({...formData, empresa: e.target.value})}
+                          onChange={(e) => setFormData({ ...formData, empresa: e.target.value })}
                           placeholder="Mi Inmobiliaria SL"
                         />
                       </div>
@@ -146,19 +152,21 @@ export default function ContactoPage() {
                         id="mensaje"
                         required
                         value={formData.mensaje}
-                        onChange={(e) => setFormData({...formData, mensaje: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, mensaje: e.target.value })}
                         placeholder="Cuéntanos sobre tu proyecto o necesidades..."
                         rows={6}
                       />
                     </div>
 
-                    <Button 
-                      type="submit" 
-                      size="lg" 
+                    <Button
+                      type="submit"
+                      size="lg"
                       className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700"
                       disabled={loading}
                     >
-                      {loading ? 'Enviando...' : (
+                      {loading ? (
+                        'Enviando...'
+                      ) : (
                         <>
                           <Send className="h-5 w-5 mr-2" />
                           Enviar Mensaje
@@ -183,7 +191,12 @@ export default function ContactoPage() {
                     </div>
                     <div>
                       <div className="font-semibold">Email</div>
-                      <a href="mailto:ventas@inmova.com" className="text-sm text-indigo-600 hover:underline">ventas@inmova.com</a>
+                      <a
+                        href="mailto:ventas@inmova.com"
+                        className="text-sm text-indigo-600 hover:underline"
+                      >
+                        ventas@inmova.com
+                      </a>
                     </div>
                   </div>
 
@@ -193,7 +206,12 @@ export default function ContactoPage() {
                     </div>
                     <div>
                       <div className="font-semibold">Teléfono</div>
-                      <a href="tel:+34900000000" className="text-sm text-indigo-600 hover:underline">+34 900 000 000</a>
+                      <a
+                        href="tel:+34900000000"
+                        className="text-sm text-indigo-600 hover:underline"
+                      >
+                        +34 900 000 000
+                      </a>
                     </div>
                   </div>
 
@@ -213,7 +231,8 @@ export default function ContactoPage() {
                 <CardContent className="p-6">
                   <h3 className="font-bold text-lg mb-2">Respuesta Rápida</h3>
                   <p className="text-sm text-gray-700">
-                    Respondemos a todas las consultas en menos de 24 horas. Para solicitudes urgentes, llámanos directamente.
+                    Respondemos a todas las consultas en menos de 24 horas. Para solicitudes
+                    urgentes, llámanos directamente.
                   </p>
                 </CardContent>
               </Card>
@@ -230,9 +249,7 @@ export default function ContactoPage() {
             Agenda una demostración personalizada de 30 minutos con nuestro equipo
           </p>
           <Link href="/register">
-            <Button size="lg">
-              Agendar Demo
-            </Button>
+            <Button size="lg">Agendar Demo</Button>
           </Link>
         </div>
       </section>
@@ -240,7 +257,9 @@ export default function ContactoPage() {
       {/* FOOTER */}
       <footer className="bg-gray-900 text-white py-8 px-4">
         <div className="container mx-auto text-center">
-          <p className="text-gray-400">&copy; 2026 INMOVA. Powered by Enxames Investments SL. Todos los derechos reservados.</p>
+          <p className="text-gray-400">
+            &copy; 2026 INMOVA. Powered by Enxames Investments SL. Todos los derechos reservados.
+          </p>
         </div>
       </footer>
     </div>

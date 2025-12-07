@@ -117,16 +117,13 @@ export default function WorkOrderDetail() {
   const handleCheckIn = async () => {
     try {
       setActionLoading(true);
-      const response = await fetch(
-        `/api/operador/work-orders/${workOrderId}/check-in`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            notes: 'Check-in desde detalle de orden',
-          }),
-        }
-      );
+      const response = await fetch(`/api/operador/work-orders/${workOrderId}/check-in`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          notes: 'Check-in desde detalle de orden',
+        }),
+      });
 
       if (response.ok) {
         toast({
@@ -141,8 +138,7 @@ export default function WorkOrderDetail() {
     } catch (error) {
       toast({
         title: 'Error',
-        description:
-          error instanceof Error ? error.message : 'Error al hacer check-in',
+        description: error instanceof Error ? error.message : 'Error al hacer check-in',
         variant: 'destructive',
       });
     } finally {
@@ -153,14 +149,11 @@ export default function WorkOrderDetail() {
   const handleCheckOut = async () => {
     try {
       setActionLoading(true);
-      const response = await fetch(
-        `/api/operador/work-orders/${workOrderId}/check-out`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(checkOutData),
-        }
-      );
+      const response = await fetch(`/api/operador/work-orders/${workOrderId}/check-out`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(checkOutData),
+      });
 
       if (response.ok) {
         toast({
@@ -176,8 +169,7 @@ export default function WorkOrderDetail() {
     } catch (error) {
       toast({
         title: 'Error',
-        description:
-          error instanceof Error ? error.message : 'Error al hacer check-out',
+        description: error instanceof Error ? error.message : 'Error al hacer check-out',
         variant: 'destructive',
       });
     } finally {
@@ -205,13 +197,9 @@ export default function WorkOrderDetail() {
       case 'asignada':
         return <Badge className="bg-blue-100 text-blue-700">Asignada</Badge>;
       case 'en_progreso':
-        return (
-          <Badge className="bg-yellow-100 text-yellow-700">En Progreso</Badge>
-            );
+        return <Badge className="bg-yellow-100 text-yellow-700">En Progreso</Badge>;
       case 'completada':
-        return (
-          <Badge className="bg-green-100 text-green-700">Completada</Badge>
-            );
+        return <Badge className="bg-green-100 text-green-700">Completada</Badge>;
       case 'pausada':
         return <Badge className="bg-gray-100 text-gray-700">Pausada</Badge>;
       default:
@@ -224,7 +212,7 @@ export default function WorkOrderDetail() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-4 text-muted-foreground">Cargando...</p>
+          <p className="mt-4 text-muted-foreground">Cargando...</p>
         </div>
       </div>
     );
@@ -236,7 +224,7 @@ export default function WorkOrderDetail() {
         <Card className="p-8 text-center">
           <AlertCircle className="h-12 w-12 mx-auto mb-4 text-red-500" />
           <p className="text-lg font-medium mb-2">Orden no encontrada</p>
-            <Button onClick={() => router.back()}>Volver</Button>
+          <Button onClick={() => router.back()}>Volver</Button>
         </Card>
       </div>
     );
@@ -252,295 +240,277 @@ export default function WorkOrderDetail() {
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
-      <div className="mb-6">
-        <Button
-          variant="ghost"
-          onClick={() => router.back()}
-          className="mb-4 -ml-2"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Volver
-        </Button>
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1">
-            <h1 className="text-2xl md:text-3xl font-bold mb-2">
-              {workOrder.titulo}
-            </h1>
-            <div className="flex flex-wrap gap-2">
-              {getStatusBadge(workOrder.estado)}
-              <Badge className={getPriorityColor(workOrder.prioridad)}>
-                {workOrder.prioridad}
-              </Badge>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Información básica */}
-      <Card className="p-4 mb-4">
-        <div className="space-y-4">
-          <div>
-            <Label className="text-sm font-medium text-muted-foreground">
-              Descripción
-            </Label>
-            <p className="mt-1">{workOrder.descripcion}</p>
-          </div>
-
-          {workOrder.building && (
-            <div className="flex items-start gap-2">
-              <Building2 className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-medium">{workOrder.building.nombre}</p>
-                  <p className="text-sm text-muted-foreground">
-                  {workOrder.building.direccion}
-                </p>
-                {workOrder.unit && (
-                  <p className="text-sm text-muted-foreground">
-                    Unidad {workOrder.unit.numero}
-                  </p>
-                )}
+            <div className="mb-6">
+              <Button variant="ghost" onClick={() => router.back()} className="mb-4 -ml-2">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Volver
+              </Button>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <h1 className="text-2xl md:text-3xl font-bold mb-2">{workOrder.titulo}</h1>
+                  <div className="flex flex-wrap gap-2">
+                    {getStatusBadge(workOrder.estado)}
+                    <Badge className={getPriorityColor(workOrder.prioridad)}>
+                      {workOrder.prioridad}
+                    </Badge>
+                  </div>
+                </div>
               </div>
             </div>
-          )}
 
-          <div className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-muted-foreground" />
-            <span>
-              {format(new Date(workOrder.fechaInicio), "d 'de' MMMM, HH:mm", {
-                locale: es,
-              })}
-              {workOrder.fechaFin &&
-                ` - ${format(new Date(workOrder.fechaFin), 'HH:mm', { locale: es })}`}
-            </span>
-          </div>
-        </div>
-      </Card>
-
-      {/* Acciones de Check-In/Check-Out */}
-      {workOrder.estado !== 'completada' && (
-        <div className="space-y-4 mb-4">
-          {workOrder.estado === 'asignada' && (
-            <Button
-              className="w-full"
-              size="lg"
-              onClick={handleCheckIn}
-              disabled={actionLoading}
-            >
-              <PlayCircle className="h-5 w-5 mr-2" />
-              Iniciar Trabajo (Check-In)
-            </Button>
-          )}
-
-          {workOrder.estado === 'en_progreso' && !showCheckOut && (
-            <Button
-              className="w-full"
-              size="lg"
-              variant="secondary"
-              onClick={() => setShowCheckOut(true)}
-            >
-              <StopCircle className="h-5 w-5 mr-2" />
-              Finalizar / Pausar Trabajo (Check-Out)
-            </Button>
-          )}
-
-          {showCheckOut && (
-            <Card className="p-4">
-              <h3 className="text-lg font-semibold mb-4">Check-Out</h3>
-                <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="workCompleted"
-                    checked={checkOutData.workCompleted}
-                    onCheckedChange={(checked) =>
-                      setCheckOutData({
-                        ...checkOutData,
-                        workCompleted: checked as boolean,
-                      })
-                    }
-                  />
-                  <Label htmlFor="workCompleted" className="cursor-pointer">
-                    Trabajo completado
-                  </Label>
-                </div>
-
+            {/* Información básica */}
+            <Card className="p-4 mb-4">
+              <div className="space-y-4">
                 <div>
-                  <Label htmlFor="completionNotes">Notas de finalización</Label>
-                    <Textarea
-                    id="completionNotes"
-                    placeholder="Describe el trabajo realizado..."
-                    value={checkOutData.completionNotes}
-                    onChange={(e) =>
-                      setCheckOutData({
-                        ...checkOutData,
-                        completionNotes: e.target.value,
-                      })
-                    }
-                    rows={4}
-                  />
+                  <Label className="text-sm font-medium text-muted-foreground">Descripción</Label>
+                  <p className="mt-1">{workOrder.descripcion}</p>
                 </div>
 
-                {!checkOutData.workCompleted && (
-                  <div>
-                    <Label htmlFor="nextActions">Próximas acciones</Label>
-                      <Textarea
-                      id="nextActions"
-                      placeholder="¿Qué falta por hacer?"
-                      value={checkOutData.nextActions}
-                      onChange={(e) =>
-                        setCheckOutData({
-                          ...checkOutData,
-                          nextActions: e.target.value,
-                        })
-                      }
-                      rows={3}
-                    />
+                {workOrder.building && (
+                  <div className="flex items-start gap-2">
+                    <Building2 className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-medium">{workOrder.building.nombre}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {workOrder.building.direccion}
+                      </p>
+                      {workOrder.unit && (
+                        <p className="text-sm text-muted-foreground">
+                          Unidad {workOrder.unit.numero}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 )}
 
-                <div className="flex gap-2">
-                  <Button
-                    className="flex-1"
-                    onClick={handleCheckOut}
-                    disabled={actionLoading}
-                  >
-                    <CheckCircle2 className="h-4 w-4 mr-2" />
-                    Confirmar Check-Out
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowCheckOut(false)}
-                    disabled={actionLoading}
-                  >
-                    Cancelar
-                  </Button>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-muted-foreground" />
+                  <span>
+                    {format(new Date(workOrder.fechaInicio), "d 'de' MMMM, HH:mm", {
+                      locale: es,
+                    })}
+                    {workOrder.fechaFin &&
+                      ` - ${format(new Date(workOrder.fechaFin), 'HH:mm', { locale: es })}`}
+                  </span>
                 </div>
               </div>
             </Card>
-          )}
-        </div>
-      )}
 
-      {/* Captura de fotos */}
-      {workOrder.estado !== 'completada' && (
-        <div className="mb-4">
-          {!showPhotoCapture ? (
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => setShowPhotoCapture(true)}
-            >
-              <Camera className="h-4 w-4 mr-2" />
-              Añadir Fotos
-            </Button>
-          ) : (
-            <div className="space-y-2">
-              <MobilePhotoCapture
-                workOrderId={workOrderId}
-                onPhotosUploaded={() => {
-                  setShowPhotoCapture(false);
-                  loadWorkOrder();
-                }}
-              />
-              <Button
-                variant="ghost"
-                className="w-full"
-                onClick={() => setShowPhotoCapture(false)}
-              >
-                Cancelar
-              </Button>
-            </div>
-          )}
-        </div>
-      )}
+            {/* Acciones de Check-In/Check-Out */}
+            {workOrder.estado !== 'completada' && (
+              <div className="space-y-4 mb-4">
+                {workOrder.estado === 'asignada' && (
+                  <Button
+                    className="w-full"
+                    size="lg"
+                    onClick={handleCheckIn}
+                    disabled={actionLoading}
+                  >
+                    <PlayCircle className="h-5 w-5 mr-2" />
+                    Iniciar Trabajo (Check-In)
+                  </Button>
+                )}
 
-      {/* Fotos existentes */}
-      {photos.length > 0 && (
-        <Card className="p-4 mb-4">
-          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <Camera className="h-5 w-5" />
-            Fotos del Trabajo ({photos.length})
-          </h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {photos.map((photo: string, index: number) => (
-              <div
-                key={index}
-                className="relative aspect-square rounded-lg overflow-hidden bg-muted"
-              >
-                <Image
-                  src={photo}
-                  alt={`Foto ${index + 1}`}
-                  fill
-                  className="object-cover"
-                />
+                {workOrder.estado === 'en_progreso' && !showCheckOut && (
+                  <Button
+                    className="w-full"
+                    size="lg"
+                    variant="secondary"
+                    onClick={() => setShowCheckOut(true)}
+                  >
+                    <StopCircle className="h-5 w-5 mr-2" />
+                    Finalizar / Pausar Trabajo (Check-Out)
+                  </Button>
+                )}
+
+                {showCheckOut && (
+                  <Card className="p-4">
+                    <h3 className="text-lg font-semibold mb-4">Check-Out</h3>
+                    <div className="space-y-4">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="workCompleted"
+                          checked={checkOutData.workCompleted}
+                          onCheckedChange={(checked) =>
+                            setCheckOutData({
+                              ...checkOutData,
+                              workCompleted: checked as boolean,
+                            })
+                          }
+                        />
+                        <Label htmlFor="workCompleted" className="cursor-pointer">
+                          Trabajo completado
+                        </Label>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="completionNotes">Notas de finalización</Label>
+                        <Textarea
+                          id="completionNotes"
+                          placeholder="Describe el trabajo realizado..."
+                          value={checkOutData.completionNotes}
+                          onChange={(e) =>
+                            setCheckOutData({
+                              ...checkOutData,
+                              completionNotes: e.target.value,
+                            })
+                          }
+                          rows={4}
+                        />
+                      </div>
+
+                      {!checkOutData.workCompleted && (
+                        <div>
+                          <Label htmlFor="nextActions">Próximas acciones</Label>
+                          <Textarea
+                            id="nextActions"
+                            placeholder="¿Qué falta por hacer?"
+                            value={checkOutData.nextActions}
+                            onChange={(e) =>
+                              setCheckOutData({
+                                ...checkOutData,
+                                nextActions: e.target.value,
+                              })
+                            }
+                            rows={3}
+                          />
+                        </div>
+                      )}
+
+                      <div className="flex gap-2">
+                        <Button
+                          className="flex-1"
+                          onClick={handleCheckOut}
+                          disabled={actionLoading}
+                        >
+                          <CheckCircle2 className="h-4 w-4 mr-2" />
+                          Confirmar Check-Out
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => setShowCheckOut(false)}
+                          disabled={actionLoading}
+                        >
+                          Cancelar
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                )}
               </div>
-            ))}
-          </div>
-        </Card>
-      )}
+            )}
 
-      {/* Información de tiempo */}
-      {(workOrder.checkInTime || workOrder.checkOutTime) && (
-        <Card className="p-4">
-          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <Clock className="h-5 w-5" />
-            Registro de Tiempo
-          </h3>
-          <div className="space-y-2">
-            {workOrder.checkInTime && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Check-In:</span>
-                  <span className="font-medium">
-                  {format(
-                    new Date(workOrder.checkInTime),
-                    "d 'de' MMMM, HH:mm",
-                    { locale: es }
+            {/* Captura de fotos */}
+            {workOrder.estado !== 'completada' && (
+              <div className="mb-4">
+                {!showPhotoCapture ? (
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => setShowPhotoCapture(true)}
+                  >
+                    <Camera className="h-4 w-4 mr-2" />
+                    Añadir Fotos
+                  </Button>
+                ) : (
+                  <div className="space-y-2">
+                    <MobilePhotoCapture
+                      workOrderId={workOrderId}
+                      onPhotosUploaded={() => {
+                        setShowPhotoCapture(false);
+                        loadWorkOrder();
+                      }}
+                    />
+                    <Button
+                      variant="ghost"
+                      className="w-full"
+                      onClick={() => setShowPhotoCapture(false)}
+                    >
+                      Cancelar
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Fotos existentes */}
+            {photos.length > 0 && (
+              <Card className="p-4 mb-4">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Camera className="h-5 w-5" />
+                  Fotos del Trabajo ({photos.length})
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {photos.map((photo: string, index: number) => (
+                    <div
+                      key={index}
+                      className="relative aspect-square rounded-lg overflow-hidden bg-muted"
+                    >
+                      <Image src={photo} alt={`Foto ${index + 1}`} fill className="object-cover" />
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            )}
+
+            {/* Información de tiempo */}
+            {(workOrder.checkInTime || workOrder.checkOutTime) && (
+              <Card className="p-4">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Clock className="h-5 w-5" />
+                  Registro de Tiempo
+                </h3>
+                <div className="space-y-2">
+                  {workOrder.checkInTime && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Check-In:</span>
+                      <span className="font-medium">
+                        {format(new Date(workOrder.checkInTime), "d 'de' MMMM, HH:mm", {
+                          locale: es,
+                        })}
+                      </span>
+                    </div>
                   )}
-                </span>
-              </div>
-            )}
-            {workOrder.checkOutTime && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Check-Out:</span>
-                  <span className="font-medium">
-                  {format(
-                    new Date(workOrder.checkOutTime),
-                    "d 'de' MMMM, HH:mm",
-                    { locale: es }
+                  {workOrder.checkOutTime && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Check-Out:</span>
+                      <span className="font-medium">
+                        {format(new Date(workOrder.checkOutTime), "d 'de' MMMM, HH:mm", {
+                          locale: es,
+                        })}
+                      </span>
+                    </div>
                   )}
-                </span>
-              </div>
-            )}
-            {workOrder.timeSpent && workOrder.timeSpent > 0 && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Tiempo dedicado:</span>
-                  <span className="font-medium">
-                  {Math.floor(workOrder.timeSpent / 60)}h{' '}
-                  {workOrder.timeSpent % 60}m
-                </span>
-              </div>
+                  {workOrder.timeSpent && workOrder.timeSpent > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Tiempo dedicado:</span>
+                      <span className="font-medium">
+                        {Math.floor(workOrder.timeSpent / 60)}h {workOrder.timeSpent % 60}m
+                      </span>
+                    </div>
+                  )}
+                </div>
+                {workOrder.completionNotes && (
+                  <div className="mt-4 pt-4 border-t">
+                    <Label className="text-sm font-medium text-muted-foreground">
+                      Notas de finalización
+                    </Label>
+                    <p className="mt-1">{workOrder.completionNotes}</p>
+                  </div>
+                )}
+                {workOrder.nextActions && (
+                  <div className="mt-4 pt-4 border-t">
+                    <Label className="text-sm font-medium text-muted-foreground">
+                      Próximas acciones
+                    </Label>
+                    <p className="mt-1">{workOrder.nextActions}</p>
+                  </div>
+                )}
+              </Card>
             )}
           </div>
-          {workOrder.completionNotes && (
-            <div className="mt-4 pt-4 border-t">
-              <Label className="text-sm font-medium text-muted-foreground">
-                Notas de finalización
-              </Label>
-              <p className="mt-1">{workOrder.completionNotes}</p>
-            </div>
-          )}
-          {workOrder.nextActions && (
-            <div className="mt-4 pt-4 border-t">
-              <Label className="text-sm font-medium text-muted-foreground">
-                Próximas acciones
-              </Label>
-              <p className="mt-1">{workOrder.nextActions}</p>
-            </div>
-          )}
-        </Card>
-      )}
-            </div>
-          </main>
-        </div>
+        </main>
       </div>
+    </div>
   );
 }

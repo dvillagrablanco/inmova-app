@@ -80,10 +80,7 @@ export default function NuevaFacturaPage() {
   };
 
   const calculateSubtotal = () => {
-    return conceptos.reduce(
-      (sum, item) => sum + item.cantidad * item.precioUnitario,
-      0
-    );
+    return conceptos.reduce((sum, item) => sum + item.cantidad * item.precioUnitario, 0);
   };
 
   const calculateIVA = () => {
@@ -129,9 +126,7 @@ export default function NuevaFacturaPage() {
       router.push(`/portal-proveedor/facturas/${invoice.id}`);
     } catch (error) {
       logger.error('Error creating invoice:', error);
-      toast.error(
-        error instanceof Error ? error.message : 'Error al crear la factura'
-      );
+      toast.error(error instanceof Error ? error.message : 'Error al crear la factura');
     } finally {
       setLoading(false);
     }
@@ -147,11 +142,7 @@ export default function NuevaFacturaPage() {
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="mb-6 flex items-center gap-4">
-        <Button
-          variant="ghost"
-          onClick={() => router.back()}
-          className="gap-2"
-        >
+        <Button variant="ghost" onClick={() => router.back()} className="gap-2">
           <ArrowLeft className="h-4 w-4" />
           Volver
         </Button>
@@ -174,9 +165,7 @@ export default function NuevaFacturaPage() {
                   <Label htmlFor="workOrderId">Orden de Trabajo *</Label>
                   <Select
                     value={formData.workOrderId}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, workOrderId: value })
-                    }
+                    onValueChange={(value) => setFormData({ ...formData, workOrderId: value })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona una orden" />
@@ -196,9 +185,7 @@ export default function NuevaFacturaPage() {
                   <Input
                     id="numeroFactura"
                     value={formData.numeroFactura}
-                    onChange={(e) =>
-                      setFormData({ ...formData, numeroFactura: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, numeroFactura: e.target.value })}
                     placeholder="Ej: FAC-2024-001"
                     required
                   />
@@ -209,9 +196,7 @@ export default function NuevaFacturaPage() {
                   <Textarea
                     id="notas"
                     value={formData.notas}
-                    onChange={(e) =>
-                      setFormData({ ...formData, notas: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
                     placeholder="Notas adicionales..."
                     rows={3}
                   />
@@ -238,14 +223,9 @@ export default function NuevaFacturaPage() {
               <CardContent>
                 <div className="space-y-4">
                   {conceptos.map((concepto, index) => (
-                    <div
-                      key={index}
-                      className="p-4 border rounded-lg bg-gray-50 space-y-3"
-                    >
+                    <div key={index} className="p-4 border rounded-lg bg-gray-50 space-y-3">
                       <div className="flex justify-between items-start">
-                        <Label className="text-sm font-medium">
-                          Concepto {index + 1}
-                        </Label>
+                        <Label className="text-sm font-medium">Concepto {index + 1}</Label>
                         {conceptos.length > 1 && (
                           <Button
                             type="button"
@@ -259,15 +239,11 @@ export default function NuevaFacturaPage() {
                       </div>
 
                       <div>
-                        <Label htmlFor={`descripcion-${index}`}>
-                          Descripción *
-                        </Label>
+                        <Label htmlFor={`descripcion-${index}`}>Descripción *</Label>
                         <Input
                           id={`descripcion-${index}`}
                           value={concepto.descripcion}
-                          onChange={(e) =>
-                            updateConcepto(index, 'descripcion', e.target.value)
-                          }
+                          onChange={(e) => updateConcepto(index, 'descripcion', e.target.value)}
                           placeholder="Descripción del servicio..."
                           required
                         />
@@ -283,19 +259,13 @@ export default function NuevaFacturaPage() {
                             step="1"
                             value={concepto.cantidad}
                             onChange={(e) =>
-                              updateConcepto(
-                                index,
-                                'cantidad',
-                                parseFloat(e.target.value) || 1
-                              )
+                              updateConcepto(index, 'cantidad', parseFloat(e.target.value) || 1)
                             }
                             required
                           />
                         </div>
                         <div>
-                          <Label htmlFor={`precioUnitario-${index}`}>
-                            Precio Unitario (€) *
-                          </Label>
+                          <Label htmlFor={`precioUnitario-${index}`}>Precio Unitario (€) *</Label>
                           <Input
                             id={`precioUnitario-${index}`}
                             type="number"
@@ -318,9 +288,7 @@ export default function NuevaFacturaPage() {
                         <p className="text-sm text-gray-600">
                           Subtotal:{' '}
                           <span className="font-semibold">
-                            {formatCurrency(
-                              concepto.cantidad * concepto.precioUnitario
-                            )}
+                            {formatCurrency(concepto.cantidad * concepto.precioUnitario)}
                           </span>
                         </p>
                       </div>
@@ -341,15 +309,11 @@ export default function NuevaFacturaPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Subtotal:</span>
-                    <span className="font-medium">
-                      {formatCurrency(calculateSubtotal())}
-                    </span>
+                    <span className="font-medium">{formatCurrency(calculateSubtotal())}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">IVA (21%):</span>
-                    <span className="font-medium">
-                      {formatCurrency(calculateIVA())}
-                    </span>
+                    <span className="font-medium">{formatCurrency(calculateIVA())}</span>
                   </div>
                   <div className="flex justify-between text-lg font-bold pt-2 border-t">
                     <span>Total:</span>
@@ -357,11 +321,7 @@ export default function NuevaFacturaPage() {
                   </div>
                 </div>
 
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={loading}
-                >
+                <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? 'Creando...' : 'Crear Factura'}
                 </Button>
               </CardContent>

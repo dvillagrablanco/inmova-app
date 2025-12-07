@@ -6,13 +6,37 @@ import { useSession } from 'next-auth/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { DoorOpen, Plus, Edit, Users, Euro, Calendar, Calculator, Trash2, Home } from 'lucide-react';
+import {
+  DoorOpen,
+  Plus,
+  Edit,
+  Users,
+  Euro,
+  Calendar,
+  Calculator,
+  Trash2,
+  Home,
+} from 'lucide-react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
 import logger, { logError } from '@/lib/logger';
@@ -132,7 +156,7 @@ export default function UnitRoomsPage() {
                 <p className="text-gray-600">Gestiona las habitaciones de esta unidad</p>
               </div>
               <div className="space-x-2">
-                <Button 
+                <Button
                   variant="outline"
                   onClick={() => router.push(`/room-rental/${unitId}/proration`)}
                 >
@@ -182,7 +206,9 @@ export default function UnitRoomsPage() {
                             type="number"
                             step="0.1"
                             value={formData.superficie}
-                            onChange={(e) => setFormData({ ...formData, superficie: e.target.value })}
+                            onChange={(e) =>
+                              setFormData({ ...formData, superficie: e.target.value })
+                            }
                             required
                           />
                         </div>
@@ -193,13 +219,20 @@ export default function UnitRoomsPage() {
                             type="number"
                             step="0.01"
                             value={formData.precioPorMes}
-                            onChange={(e) => setFormData({ ...formData, precioPorMes: e.target.value })}
+                            onChange={(e) =>
+                              setFormData({ ...formData, precioPorMes: e.target.value })
+                            }
                             required
                           />
                         </div>
                         <div>
                           <Label htmlFor="tipoHabitacion">Tipo de Habitación</Label>
-                          <Select value={formData.tipoHabitacion} onValueChange={(value) => setFormData({ ...formData, tipoHabitacion: value })}>
+                          <Select
+                            value={formData.tipoHabitacion}
+                            onValueChange={(value) =>
+                              setFormData({ ...formData, tipoHabitacion: value })
+                            }
+                          >
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
@@ -217,7 +250,9 @@ export default function UnitRoomsPage() {
                               type="checkbox"
                               id="bajoPrivado"
                               checked={formData.bajoPrivado}
-                              onChange={(e) => setFormData({ ...formData, bajoPrivado: e.target.checked })}
+                              onChange={(e) =>
+                                setFormData({ ...formData, bajoPrivado: e.target.checked })
+                              }
                               className="h-4 w-4"
                             />
                             <Label htmlFor="bajoPrivado">Baño Privado</Label>
@@ -227,7 +262,9 @@ export default function UnitRoomsPage() {
                               type="checkbox"
                               id="amueblada"
                               checked={formData.amueblada}
-                              onChange={(e) => setFormData({ ...formData, amueblada: e.target.checked })}
+                              onChange={(e) =>
+                                setFormData({ ...formData, amueblada: e.target.checked })
+                              }
                               className="h-4 w-4"
                             />
                             <Label htmlFor="amueblada">Amueblada</Label>
@@ -236,7 +273,11 @@ export default function UnitRoomsPage() {
                       </div>
 
                       <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setShowCreateDialog(false)}>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setShowCreateDialog(false)}
+                        >
                           Cancelar
                         </Button>
                         <Button type="submit">Crear Habitación</Button>
@@ -256,7 +297,11 @@ export default function UnitRoomsPage() {
                       <div>
                         <CardTitle className="text-lg">
                           Habitación {room.numero}
-                          {room.nombre && <span className="text-sm font-normal text-gray-600 ml-2">({room.nombre})</span>}
+                          {room.nombre && (
+                            <span className="text-sm font-normal text-gray-600 ml-2">
+                              ({room.nombre})
+                            </span>
+                          )}
                         </CardTitle>
                         <CardDescription>{room.tipoHabitacion}</CardDescription>
                       </div>
@@ -282,13 +327,19 @@ export default function UnitRoomsPage() {
                         <div className="border-t pt-3">
                           <div className="flex items-center space-x-2 text-sm">
                             <Users className="h-4 w-4 text-gray-500" />
-                            <span className="font-medium">{room.contracts[0].tenant?.nombreCompleto}</span>
+                            <span className="font-medium">
+                              {room.contracts[0].tenant?.nombreCompleto}
+                            </span>
                           </div>
                         </div>
                       )}
 
                       <div className="flex space-x-2">
-                        <Button size="sm" className="flex-1" onClick={() => router.push(`/room-rental/${unitId}/rooms/${room.id}`)}>
+                        <Button
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => router.push(`/room-rental/${unitId}/rooms/${room.id}`)}
+                        >
                           Ver Detalles
                         </Button>
                       </div>
@@ -302,7 +353,9 @@ export default function UnitRoomsPage() {
                   <Card>
                     <CardContent className="py-12 text-center">
                       <DoorOpen className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                      <p className="text-gray-600 mb-4">No hay habitaciones creadas en esta unidad</p>
+                      <p className="text-gray-600 mb-4">
+                        No hay habitaciones creadas en esta unidad
+                      </p>
                       <Button onClick={() => setShowCreateDialog(true)}>
                         <Plus className="mr-2 h-4 w-4" />
                         Crear Primera Habitación

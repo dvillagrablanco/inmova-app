@@ -9,17 +9,50 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { 
-  Upload, FileText, Home, ArrowLeft, AlertCircle, CheckCircle, 
-  Download, X, Eye, FileSpreadsheet, Database, ExternalLink,
-  AlertTriangle, CheckCircle2, Info, ArrowRight
+import {
+  Upload,
+  FileText,
+  Home,
+  ArrowLeft,
+  AlertCircle,
+  CheckCircle,
+  Download,
+  X,
+  Eye,
+  FileSpreadsheet,
+  Database,
+  ExternalLink,
+  AlertTriangle,
+  CheckCircle2,
+  Info,
+  ArrowRight,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
@@ -44,42 +77,45 @@ interface ImportResult {
   importedIds: string[];
 }
 
-const SYSTEM_INFO: Record<string, { name: string; description: string; icon: string; website?: string }> = {
+const SYSTEM_INFO: Record<
+  string,
+  { name: string; description: string; icon: string; website?: string }
+> = {
   homming: {
     name: 'Homming',
     description: 'Sistema de gestión inmobiliaria español',
     icon: '🏢',
-    website: 'https://www.homming.es'
+    website: 'https://www.homming.es',
   },
   rentger: {
     name: 'Rentger',
     description: 'Software de administración de fincas',
     icon: '🏘️',
-    website: 'https://www.rentger.com'
+    website: 'https://www.rentger.com',
   },
   nester: {
     name: 'Nester',
     description: 'Plataforma de gestión de alquileres',
     icon: '🏠',
-    website: 'https://www.nester.com'
+    website: 'https://www.nester.com',
   },
   buildium: {
     name: 'Buildium',
     description: 'Property management software (USA)',
     icon: '🇺🇸',
-    website: 'https://www.buildium.com'
+    website: 'https://www.buildium.com',
   },
   appfolio: {
     name: 'AppFolio',
     description: 'Cloud-based property management',
     icon: '☁️',
-    website: 'https://www.appfolio.com'
+    website: 'https://www.appfolio.com',
   },
   generic_csv: {
     name: 'CSV Genérico',
     description: 'Formato CSV estándar con cabeceras descriptivas',
-    icon: '📄'
-  }
+    icon: '📄',
+  },
 };
 
 const ENTITY_LABELS = {
@@ -89,13 +125,13 @@ const ENTITY_LABELS = {
   contracts: 'Contratos',
   payments: 'Pagos',
   providers: 'Proveedores',
-  expenses: 'Gastos'
+  expenses: 'Gastos',
 };
 
 export default function ImportarPage() {
   const { data: session, status } = useSession() || {};
   const router = useRouter();
-  
+
   const [currentStep, setCurrentStep] = useState<ImportStep>('select');
   const [file, setFile] = useState<File | null>(null);
   const [entityType, setEntityType] = useState('');
@@ -166,7 +202,7 @@ export default function ImportarPage() {
 
       const response = await fetch('/api/import/validate', {
         method: 'POST',
-        body: formData
+        body: formData,
       });
 
       const data = await response.json();
@@ -209,7 +245,7 @@ export default function ImportarPage() {
 
       const response = await fetch('/api/import/execute', {
         method: 'POST',
-        body: formData
+        body: formData,
       });
 
       const data = await response.json();
@@ -257,16 +293,21 @@ export default function ImportarPage() {
     <div className="flex items-center justify-between mb-8">
       {['select', 'validate', 'preview', 'import', 'results'].map((step, index) => {
         const isActive = currentStep === step;
-        const isCompleted = ['select', 'validate', 'preview', 'import', 'results'].indexOf(currentStep) > index;
-        
+        const isCompleted =
+          ['select', 'validate', 'preview', 'import', 'results'].indexOf(currentStep) > index;
+
         return (
           <div key={step} className="flex items-center flex-1">
             <div className="flex flex-col items-center">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                isCompleted ? 'bg-green-500 text-white' : 
-                isActive ? 'bg-indigo-600 text-white' : 
-                'bg-gray-200 text-gray-500'
-              }`}>
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                  isCompleted
+                    ? 'bg-green-500 text-white'
+                    : isActive
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-gray-200 text-gray-500'
+                }`}
+              >
                 {isCompleted ? <CheckCircle2 className="h-5 w-5" /> : index + 1}
               </div>
               <span className="text-xs mt-1 text-center hidden sm:block">
@@ -278,9 +319,7 @@ export default function ImportarPage() {
               </span>
             </div>
             {index < 4 && (
-              <div className={`flex-1 h-1 mx-2 ${
-                isCompleted ? 'bg-green-500' : 'bg-gray-200'
-              }`} />
+              <div className={`flex-1 h-1 mx-2 ${isCompleted ? 'bg-green-500' : 'bg-gray-200'}`} />
             )}
           </div>
         );
@@ -296,14 +335,12 @@ export default function ImportarPage() {
             <Database className="h-5 w-5" />
             Sistema de Origen
           </CardTitle>
-          <CardDescription>
-            Selecciona el sistema desde el que estás migrando
-          </CardDescription>
+          <CardDescription>Selecciona el sistema desde el que estás migrando</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {Object.entries(SYSTEM_INFO).map(([key, info]) => (
-              <Card 
+              <Card
                 key={key}
                 className={`cursor-pointer transition-all hover:shadow-md ${
                   sourceSystem === key ? 'ring-2 ring-indigo-600' : ''
@@ -315,9 +352,9 @@ export default function ImportarPage() {
                   <h3 className="font-semibold">{info.name}</h3>
                   <p className="text-sm text-muted-foreground">{info.description}</p>
                   {info.website && (
-                    <a 
-                      href={info.website} 
-                      target="_blank" 
+                    <a
+                      href={info.website}
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs text-indigo-600 hover:underline flex items-center gap-1 mt-2"
                       onClick={(e) => e.stopPropagation()}
@@ -348,7 +385,9 @@ export default function ImportarPage() {
               </SelectTrigger>
               <SelectContent>
                 {Object.entries(ENTITY_LABELS).map(([key, label]) => (
-                  <SelectItem key={key} value={key}>{label}</SelectItem>
+                  <SelectItem key={key} value={key}>
+                    {label}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -377,11 +416,7 @@ export default function ImportarPage() {
           )}
 
           {entityType && (
-            <Button 
-              onClick={downloadTemplate} 
-              variant="outline" 
-              className="w-full"
-            >
+            <Button onClick={downloadTemplate} variant="outline" className="w-full">
               <Download className="h-4 w-4 mr-2" />
               Descargar Plantilla CSV
             </Button>
@@ -447,7 +482,8 @@ export default function ImportarPage() {
           Validar Datos
         </CardTitle>
         <CardDescription>
-          Verificaremos que el archivo contenga todos los campos obligatorios y que los datos sean válidos
+          Verificaremos que el archivo contenga todos los campos obligatorios y que los datos sean
+          válidos
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -459,7 +495,8 @@ export default function ImportarPage() {
                 <h4 className="font-semibold text-blue-900">Archivo seleccionado</h4>
                 <p className="text-sm text-blue-700 mt-1">{file.name}</p>
                 <p className="text-xs text-blue-600 mt-1">
-                  Tipo: {ENTITY_LABELS[entityType as keyof typeof ENTITY_LABELS]}<br />
+                  Tipo: {ENTITY_LABELS[entityType as keyof typeof ENTITY_LABELS]}
+                  <br />
                   Sistema: {SYSTEM_INFO[sourceSystem as keyof typeof SYSTEM_INFO].name}
                 </p>
               </div>
@@ -482,7 +519,9 @@ export default function ImportarPage() {
                     ))}
                   </ul>
                   {validationResult.errors.length > 5 && (
-                    <p className="text-sm mt-2">Y {validationResult.errors.length - 5} errores más...</p>
+                    <p className="text-sm mt-2">
+                      Y {validationResult.errors.length - 5} errores más...
+                    </p>
                   )}
                 </AlertDescription>
               </Alert>
@@ -495,7 +534,9 @@ export default function ImportarPage() {
                 <AlertDescription>
                   <ul className="list-disc list-inside mt-2 space-y-1">
                     {validationResult.warnings.slice(0, 3).map((warning, index) => (
-                      <li key={index} className="text-sm">{warning}</li>
+                      <li key={index} className="text-sm">
+                        {warning}
+                      </li>
                     ))}
                   </ul>
                 </AlertDescription>
@@ -507,7 +548,8 @@ export default function ImportarPage() {
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
                 <AlertTitle className="text-green-900">Validación exitosa</AlertTitle>
                 <AlertDescription className="text-green-700">
-                  El archivo contiene {validationResult.totalRecords} registros válidos listos para importar.
+                  El archivo contiene {validationResult.totalRecords} registros válidos listos para
+                  importar.
                 </AlertDescription>
               </Alert>
             )}
@@ -518,8 +560,8 @@ export default function ImportarPage() {
           <Button onClick={handleReset} variant="outline" className="flex-1">
             Cancelar
           </Button>
-          <Button 
-            onClick={handleValidate} 
+          <Button
+            onClick={handleValidate}
             disabled={validating || !file || !entityType}
             className="flex-1 gradient-primary"
           >
@@ -538,9 +580,7 @@ export default function ImportarPage() {
             <Eye className="h-5 w-5" />
             Vista Previa de Datos
           </CardTitle>
-          <CardDescription>
-            Primeros registros que se importarán
-          </CardDescription>
+          <CardDescription>Primeros registros que se importarán</CardDescription>
         </CardHeader>
         <CardContent>
           {validationResult?.preview && validationResult.preview.length > 0 ? (
@@ -576,7 +616,7 @@ export default function ImportarPage() {
         <Button onClick={handleReset} variant="outline" className="flex-1">
           Cancelar
         </Button>
-        <Button 
+        <Button
           onClick={handleImport}
           disabled={importing || !validationResult?.valid}
           className="flex-1 gradient-primary"
@@ -621,9 +661,7 @@ export default function ImportarPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-2xl font-bold text-gray-900">
-                      {importResult.totalRows}
-                    </div>
+                    <div className="text-2xl font-bold text-gray-900">{importResult.totalRows}</div>
                     <div className="text-sm text-muted-foreground">Total registros</div>
                   </CardContent>
                 </Card>
@@ -647,12 +685,13 @@ export default function ImportarPage() {
 
               {importResult.successfulImports > 0 && (
                 <div className="mt-4">
-                  <Progress 
-                    value={(importResult.successfulImports / importResult.totalRows) * 100} 
+                  <Progress
+                    value={(importResult.successfulImports / importResult.totalRows) * 100}
                     className="h-2"
                   />
                   <p className="text-sm text-muted-foreground mt-2 text-center">
-                    {((importResult.successfulImports / importResult.totalRows) * 100).toFixed(1)}% completado
+                    {((importResult.successfulImports / importResult.totalRows) * 100).toFixed(1)}%
+                    completado
                   </p>
                 </div>
               )}
@@ -701,7 +740,9 @@ export default function ImportarPage() {
               <CardContent>
                 <ul className="list-disc list-inside space-y-1">
                   {importResult.warnings.map((warning, index) => (
-                    <li key={index} className="text-sm text-yellow-700">{warning}</li>
+                    <li key={index} className="text-sm text-yellow-700">
+                      {warning}
+                    </li>
                   ))}
                 </ul>
               </CardContent>
@@ -714,11 +755,7 @@ export default function ImportarPage() {
         <Button onClick={handleReset} className="flex-1 gradient-primary">
           Nueva Importación
         </Button>
-        <Button 
-          onClick={() => router.push(`/${entityType}`)} 
-          variant="outline" 
-          className="flex-1"
-        >
+        <Button onClick={() => router.push(`/${entityType}`)} variant="outline" className="flex-1">
           Ver {ENTITY_LABELS[entityType as keyof typeof ENTITY_LABELS]}
         </Button>
       </div>
@@ -728,10 +765,10 @@ export default function ImportarPage() {
   return (
     <div className="flex h-screen overflow-hidden bg-gradient-bg">
       <Sidebar />
-      
+
       <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
         <Header />
-        
+
         <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
             <Breadcrumb className="mb-6">
@@ -749,9 +786,12 @@ export default function ImportarPage() {
             </Breadcrumb>
 
             <div className="mb-8">
-              <h1 className="text-3xl font-bold gradient-text mb-2">Migración desde Otros Sistemas</h1>
+              <h1 className="text-3xl font-bold gradient-text mb-2">
+                Migración desde Otros Sistemas
+              </h1>
               <p className="text-muted-foreground">
-                Importa tus datos desde Homming, Rentger, Nester, Buildium, AppFolio y otros sistemas de gestión
+                Importa tus datos desde Homming, Rentger, Nester, Buildium, AppFolio y otros
+                sistemas de gestión
               </p>
             </div>
 

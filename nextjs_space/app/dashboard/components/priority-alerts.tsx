@@ -212,19 +212,13 @@ export function PriorityAlerts() {
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center space-x-2 mb-1">
-                    <h4 className="font-semibold text-sm text-gray-900">
-                      {alert.title}
-                    </h4>
-                    <Badge
-                      className={`text-xs text-white ${colors.badge}`}
-                    >
+                    <h4 className="font-semibold text-sm text-gray-900">{alert.title}</h4>
+                    <Badge className={`text-xs text-white ${colors.badge}`}>
                       {alert.priority.toUpperCase()}
                     </Badge>
                   </div>
 
-                  <p className="text-sm text-gray-700 mb-2">
-                    {alert.description}
-                  </p>
+                  <p className="text-sm text-gray-700 mb-2">{alert.description}</p>
 
                   {alert.date && (
                     <p className="text-xs text-gray-600 mb-2">
@@ -237,19 +231,15 @@ export function PriorityAlerts() {
                           {alert.daysRemaining === 0
                             ? 'Vence HOY'
                             : alert.daysRemaining === 1
-                            ? 'Vence MAÑANA'
-                            : `${alert.daysRemaining} días restantes`}
+                              ? 'Vence MAÑANA'
+                              : `${alert.daysRemaining} días restantes`}
                         </span>
                       )}
                     </p>
                   )}
 
                   <Link href={route}>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-xs mt-1 px-2 h-7"
-                    >
+                    <Button variant="ghost" size="sm" className="text-xs mt-1 px-2 h-7">
                       Ver Detalles
                       <ChevronRight className="h-3 w-3 ml-1" />
                     </Button>

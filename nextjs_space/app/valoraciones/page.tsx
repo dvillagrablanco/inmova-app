@@ -9,13 +9,44 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Home, ArrowLeft, TrendingUp, Calculator, Building2, DollarSign, Award, BarChart3, FileText, CheckCircle2 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Home,
+  ArrowLeft,
+  TrendingUp,
+  Calculator,
+  Building2,
+  DollarSign,
+  Award,
+  BarChart3,
+  FileText,
+  CheckCircle2,
+} from 'lucide-react';
 import { toast } from 'sonner';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import logger, { logError } from '@/lib/logger';
 
 export default function ValoracionesPage() {
@@ -37,7 +68,7 @@ export default function ValoracionesPage() {
     terraza: false,
     piscina: false,
     estadoConservacion: 'bueno',
-    finalidad: 'venta'
+    finalidad: 'venta',
   });
 
   useEffect(() => {
@@ -52,7 +83,7 @@ export default function ValoracionesPage() {
     try {
       const [valRes, unitsRes] = await Promise.all([
         fetch('/api/valoraciones'),
-        fetch('/api/units')
+        fetch('/api/units'),
       ]);
       const valData = await valRes.json();
       const unitsData = await unitsRes.json();
@@ -74,8 +105,8 @@ export default function ValoracionesPage() {
 
     setGenerando(true);
     try {
-      const selectedUnit = units.find(u => u.id === formData.unitId);
-      
+      const selectedUnit = units.find((u) => u.id === formData.unitId);
+
       const response = await fetch('/api/valoraciones', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -83,8 +114,8 @@ export default function ValoracionesPage() {
           ...formData,
           direccion: selectedUnit?.building?.direccion || '',
           municipio: 'Madrid',
-          provincia: 'Madrid'
-        })
+          provincia: 'Madrid',
+        }),
       });
 
       if (!response.ok) throw new Error('Error al generar valoración');
@@ -103,7 +134,7 @@ export default function ValoracionesPage() {
         terraza: false,
         piscina: false,
         estadoConservacion: 'bueno',
-        finalidad: 'venta'
+        finalidad: 'venta',
       });
     } catch (error: any) {
       toast.error(error.message);
@@ -116,7 +147,7 @@ export default function ValoracionesPage() {
     return new Intl.NumberFormat('es-ES', {
       style: 'currency',
       currency: 'EUR',
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(value);
   };
 
@@ -157,7 +188,9 @@ export default function ValoracionesPage() {
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                   <h1 className="text-2xl sm:text-3xl font-bold">Valoración de Propiedades</h1>
-                  <p className="text-muted-foreground mt-1">Sistema inteligente de valoración basado en comparables</p>
+                  <p className="text-muted-foreground mt-1">
+                    Sistema inteligente de valoración basado en comparables
+                  </p>
                 </div>
                 <Dialog open={openDialog} onOpenChange={setOpenDialog}>
                   <DialogTrigger asChild>
@@ -176,23 +209,26 @@ export default function ValoracionesPage() {
                     <div className="space-y-4 py-4">
                       <div className="space-y-2">
                         <Label>Unidad</Label>
-                        <Select value={formData.unitId} onValueChange={(value) => {
-                          setFormData({ ...formData, unitId: value });
-                          const unit = units.find(u => u.id === value);
-                          if (unit) {
-                            setFormData(prev => ({
-                              ...prev,
-                              metrosCuadrados: unit.superficie?.toString() || '',
-                              habitaciones: unit.habitaciones?.toString() || '',
-                              banos: unit.banos?.toString() || ''
-                            }));
-                          }
-                        }}>
+                        <Select
+                          value={formData.unitId}
+                          onValueChange={(value) => {
+                            setFormData({ ...formData, unitId: value });
+                            const unit = units.find((u) => u.id === value);
+                            if (unit) {
+                              setFormData((prev) => ({
+                                ...prev,
+                                metrosCuadrados: unit.superficie?.toString() || '',
+                                habitaciones: unit.habitaciones?.toString() || '',
+                                banos: unit.banos?.toString() || '',
+                              }));
+                            }
+                          }}
+                        >
                           <SelectTrigger>
                             <SelectValue placeholder="Seleccionar unidad" />
                           </SelectTrigger>
                           <SelectContent>
-                            {units.map(unit => (
+                            {units.map((unit) => (
                               <SelectItem key={unit.id} value={unit.id}>
                                 {unit.building?.nombre} - Unidad {unit.numero}
                               </SelectItem>
@@ -207,7 +243,9 @@ export default function ValoracionesPage() {
                           <Input
                             type="number"
                             value={formData.metrosCuadrados}
-                            onChange={(e) => setFormData({ ...formData, metrosCuadrados: e.target.value })}
+                            onChange={(e) =>
+                              setFormData({ ...formData, metrosCuadrados: e.target.value })
+                            }
                           />
                         </div>
                         <div className="space-y-2">
@@ -215,7 +253,9 @@ export default function ValoracionesPage() {
                           <Input
                             type="number"
                             value={formData.habitaciones}
-                            onChange={(e) => setFormData({ ...formData, habitaciones: e.target.value })}
+                            onChange={(e) =>
+                              setFormData({ ...formData, habitaciones: e.target.value })
+                            }
                           />
                         </div>
                         <div className="space-y-2">
@@ -231,7 +271,12 @@ export default function ValoracionesPage() {
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label>Estado Conservación</Label>
-                          <Select value={formData.estadoConservacion} onValueChange={(value) => setFormData({ ...formData, estadoConservacion: value })}>
+                          <Select
+                            value={formData.estadoConservacion}
+                            onValueChange={(value) =>
+                              setFormData({ ...formData, estadoConservacion: value })
+                            }
+                          >
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
@@ -245,7 +290,12 @@ export default function ValoracionesPage() {
                         </div>
                         <div className="space-y-2">
                           <Label>Finalidad</Label>
-                          <Select value={formData.finalidad} onValueChange={(value) => setFormData({ ...formData, finalidad: value })}>
+                          <Select
+                            value={formData.finalidad}
+                            onValueChange={(value) =>
+                              setFormData({ ...formData, finalidad: value })
+                            }
+                          >
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
@@ -264,7 +314,9 @@ export default function ValoracionesPage() {
                             <input
                               type="checkbox"
                               checked={formData.ascensor}
-                              onChange={(e) => setFormData({ ...formData, ascensor: e.target.checked })}
+                              onChange={(e) =>
+                                setFormData({ ...formData, ascensor: e.target.checked })
+                              }
                             />
                             Ascensor
                           </label>
@@ -272,7 +324,9 @@ export default function ValoracionesPage() {
                             <input
                               type="checkbox"
                               checked={formData.terraza}
-                              onChange={(e) => setFormData({ ...formData, terraza: e.target.checked })}
+                              onChange={(e) =>
+                                setFormData({ ...formData, terraza: e.target.checked })
+                              }
                             />
                             Terraza
                           </label>
@@ -280,7 +334,9 @@ export default function ValoracionesPage() {
                             <input
                               type="checkbox"
                               checked={formData.piscina}
-                              onChange={(e) => setFormData({ ...formData, piscina: e.target.checked })}
+                              onChange={(e) =>
+                                setFormData({ ...formData, piscina: e.target.checked })
+                              }
                             />
                             Piscina
                           </label>
@@ -314,9 +370,12 @@ export default function ValoracionesPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {valoraciones.length > 0 ? formatCurrency(
-                      valoraciones.reduce((sum, v) => sum + v.valorEstimado, 0) / valoraciones.length
-                    ) : '€0'}
+                    {valoraciones.length > 0
+                      ? formatCurrency(
+                          valoraciones.reduce((sum, v) => sum + v.valorEstimado, 0) /
+                            valoraciones.length
+                        )
+                      : '€0'}
                   </div>
                 </CardContent>
               </Card>
@@ -327,9 +386,13 @@ export default function ValoracionesPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {valoraciones.length > 0 ? Math.round(
-                      valoraciones.reduce((sum, v) => sum + v.confianzaValoracion, 0) / valoraciones.length
-                    ) : 0}%
+                    {valoraciones.length > 0
+                      ? Math.round(
+                          valoraciones.reduce((sum, v) => sum + v.confianzaValoracion, 0) /
+                            valoraciones.length
+                        )
+                      : 0}
+                    %
                   </div>
                 </CardContent>
               </Card>
@@ -340,11 +403,16 @@ export default function ValoracionesPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {valoraciones.filter(v => {
-                      const fecha = new Date(v.createdAt);
-                      const ahora = new Date();
-                      return fecha.getMonth() === ahora.getMonth() && fecha.getFullYear() === ahora.getFullYear();
-                    }).length}
+                    {
+                      valoraciones.filter((v) => {
+                        const fecha = new Date(v.createdAt);
+                        const ahora = new Date();
+                        return (
+                          fecha.getMonth() === ahora.getMonth() &&
+                          fecha.getFullYear() === ahora.getFullYear()
+                        );
+                      }).length
+                    }
                   </div>
                 </CardContent>
               </Card>
@@ -359,7 +427,9 @@ export default function ValoracionesPage() {
               <CardContent>
                 <div className="space-y-4">
                   {valoraciones.length === 0 ? (
-                    <p className="text-center text-muted-foreground py-8">No hay valoraciones generadas</p>
+                    <p className="text-center text-muted-foreground py-8">
+                      No hay valoraciones generadas
+                    </p>
                   ) : (
                     valoraciones.map((val) => (
                       <Card key={val.id} className="p-4">
@@ -371,23 +441,37 @@ export default function ValoracionesPage() {
                               <Badge>{val.finalidad}</Badge>
                             </div>
                             <p className="text-sm text-muted-foreground">
-                              {val.metrosCuadrados}m² • {val.habitaciones || 0} hab • {val.banos || 0} baños
+                              {val.metrosCuadrados}m² • {val.habitaciones || 0} hab •{' '}
+                              {val.banos || 0} baños
                             </p>
                             <p className="text-xs text-muted-foreground mt-1">
-                              {val.municipio}, {val.provincia} • {new Date(val.fechaValoracion).toLocaleDateString('es-ES')}
+                              {val.municipio}, {val.provincia} •{' '}
+                              {new Date(val.fechaValoracion).toLocaleDateString('es-ES')}
                             </p>
                           </div>
                           <div className="flex flex-col items-end gap-2">
                             <div className="text-right">
-                              <p className="text-2xl font-bold text-primary">{formatCurrency(val.valorEstimado)}</p>
-                              <p className="text-xs text-muted-foreground">
-                                Rango: {formatCurrency(val.valorMinimo)} - {formatCurrency(val.valorMaximo)}
+                              <p className="text-2xl font-bold text-primary">
+                                {formatCurrency(val.valorEstimado)}
                               </p>
                               <p className="text-xs text-muted-foreground">
-                                {formatCurrency(val.precioM2)}/m² • Confianza: {val.confianzaValoracion}%
+                                Rango: {formatCurrency(val.valorMinimo)} -{' '}
+                                {formatCurrency(val.valorMaximo)}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {formatCurrency(val.precioM2)}/m² • Confianza:{' '}
+                                {val.confianzaValoracion}%
                               </p>
                             </div>
-                            <Badge variant={val.confianzaValoracion >= 80 ? 'default' : val.confianzaValoracion >= 60 ? 'secondary' : 'outline'}>
+                            <Badge
+                              variant={
+                                val.confianzaValoracion >= 80
+                                  ? 'default'
+                                  : val.confianzaValoracion >= 60
+                                    ? 'secondary'
+                                    : 'outline'
+                              }
+                            >
                               {val.numComparables} comparables
                             </Badge>
                           </div>
@@ -396,12 +480,14 @@ export default function ValoracionesPage() {
                           <div className="mt-3 pt-3 border-t">
                             <p className="text-sm font-medium mb-1">Factores positivos:</p>
                             <div className="flex flex-wrap gap-1">
-                              {val.factoresPositivos.slice(0, 3).map((factor: string, idx: number) => (
-                                <Badge key={idx} variant="secondary" className="text-xs">
-                                  <CheckCircle2 className="h-3 w-3 mr-1" />
-                                  {factor.split('(')[0].trim()}
-                                </Badge>
-                              ))}
+                              {val.factoresPositivos
+                                .slice(0, 3)
+                                .map((factor: string, idx: number) => (
+                                  <Badge key={idx} variant="secondary" className="text-xs">
+                                    <CheckCircle2 className="h-3 w-3 mr-1" />
+                                    {factor.split('(')[0].trim()}
+                                  </Badge>
+                                ))}
                             </div>
                           </div>
                         )}

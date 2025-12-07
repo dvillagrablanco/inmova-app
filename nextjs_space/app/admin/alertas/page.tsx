@@ -101,11 +101,12 @@ export default function AlertsPage() {
     toast.success('Alerta desestimada');
   };
 
-  const filteredAlerts = alertsData?.alerts.filter((alert) => {
-    if (dismissedAlerts.has(alert.id)) return false;
-    if (filterType === 'all') return true;
-    return alert.type === filterType;
-  }) || [];
+  const filteredAlerts =
+    alertsData?.alerts.filter((alert) => {
+      if (dismissedAlerts.has(alert.id)) return false;
+      if (filterType === 'all') return true;
+      return alert.type === filterType;
+    }) || [];
 
   if (loading || status === 'loading') {
     return (
@@ -212,9 +213,7 @@ export default function AlertsPage() {
                   <AlertCircle className="h-4 w-4 text-red-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-red-600">
-                    {summary.errors}
-                  </div>
+                  <div className="text-2xl font-bold text-red-600">{summary.errors}</div>
                   <p className="text-xs text-muted-foreground">críticas</p>
                 </CardContent>
               </Card>
@@ -225,9 +224,7 @@ export default function AlertsPage() {
                   <AlertTriangle className="h-4 w-4 text-yellow-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-yellow-600">
-                    {summary.warnings}
-                  </div>
+                  <div className="text-2xl font-bold text-yellow-600">{summary.warnings}</div>
                   <p className="text-xs text-muted-foreground">requieren atención</p>
                 </CardContent>
               </Card>
@@ -238,9 +235,7 @@ export default function AlertsPage() {
                   <Info className="h-4 w-4 text-blue-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-blue-600">
-                    {summary.info}
-                  </div>
+                  <div className="text-2xl font-bold text-blue-600">{summary.info}</div>
                   <p className="text-xs text-muted-foreground">para revisar</p>
                 </CardContent>
               </Card>
@@ -256,10 +251,9 @@ export default function AlertsPage() {
                       {filterType === 'all' ? '¡Todo en orden!' : 'Sin alertas de este tipo'}
                     </h3>
                     <p className="text-gray-600">
-                      {filterType === 'all' 
+                      {filterType === 'all'
                         ? 'No hay alertas activas en este momento'
-                        : `No hay alertas de tipo "${filterType}" en este momento`
-                      }
+                        : `No hay alertas de tipo "${filterType}" en este momento`}
                     </p>
                   </div>
                 </CardContent>
@@ -267,22 +261,15 @@ export default function AlertsPage() {
             ) : (
               <div className="space-y-4">
                 {filteredAlerts.map((alert) => (
-                  <Card
-                    key={alert.id}
-                    className={`border ${getAlertBgColor(alert.type)}`}
-                  >
+                  <Card key={alert.id} className={`border ${getAlertBgColor(alert.type)}`}>
                     <CardContent className="pt-6">
                       <div className="flex items-start justify-between">
                         <div className="flex items-start space-x-4 flex-1">
                           <div className="mt-1">{getAlertIcon(alert.type)}</div>
                           <div className="flex-1">
                             <div className="flex items-center space-x-2 mb-1">
-                              <h3 className="text-lg font-semibold text-gray-900">
-                                {alert.title}
-                              </h3>
-                              <Badge
-                                variant={alert.type === 'error' ? 'destructive' : 'secondary'}
-                              >
+                              <h3 className="text-lg font-semibold text-gray-900">{alert.title}</h3>
+                              <Badge variant={alert.type === 'error' ? 'destructive' : 'secondary'}>
                                 {alert.type.toUpperCase()}
                               </Badge>
                             </div>
@@ -296,10 +283,7 @@ export default function AlertsPage() {
                         </div>
                         <div className="flex items-center gap-2 ml-4">
                           {alert.actionUrl && (
-                            <Button
-                              size="sm"
-                              onClick={() => router.push(alert.actionUrl!)}
-                            >
+                            <Button size="sm" onClick={() => router.push(alert.actionUrl!)}>
                               {alert.action || 'Ver'}
                               <ExternalLink className="h-4 w-4 ml-2" />
                             </Button>

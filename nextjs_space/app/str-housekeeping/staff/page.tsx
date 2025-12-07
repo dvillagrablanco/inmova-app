@@ -10,7 +10,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Plus, Users, Star, Phone, Mail } from 'lucide-react';
 import { toast } from 'sonner';
@@ -189,9 +195,7 @@ export default function StaffPage() {
                   <CardContent className="p-12 text-center">
                     <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                     <h3 className="font-semibold mb-2">No hay personal</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Añade el primer miembro del equipo
-                    </p>
+                    <p className="text-muted-foreground mb-4">Añade el primer miembro del equipo</p>
                     <Button onClick={() => setShowDialog(true)} className="gradient-primary">
                       <Plus className="h-4 w-4 mr-2" />
                       Añadir Personal

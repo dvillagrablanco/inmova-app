@@ -9,9 +9,21 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -20,7 +32,20 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { DollarSign, Plus, TrendingUp, ArrowLeft, Home, Search, Euro, Calendar as CalendarIcon, Building2, Tag, Edit, Trash2 } from 'lucide-react';
+import {
+  DollarSign,
+  Plus,
+  TrendingUp,
+  ArrowLeft,
+  Home,
+  Search,
+  Euro,
+  Calendar as CalendarIcon,
+  Building2,
+  Tag,
+  Edit,
+  Trash2,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { format } from 'date-fns';
@@ -52,7 +77,9 @@ export default function GastosPage() {
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [filterCategoria, setFilterCategoria] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeFilters, setActiveFilters] = useState<Array<{ id: string; label: string; value: string }>>([]);
+  const [activeFilters, setActiveFilters] = useState<
+    Array<{ id: string; label: string; value: string }>
+  >([]);
   const [form, setForm] = useState({
     concepto: '',
     categoria: 'otro',
@@ -112,7 +139,13 @@ export default function GastosPage() {
       if (res.ok) {
         toast.success('Gasto registrado exitosamente');
         setOpenDialog(false);
-        setForm({ concepto: '', categoria: 'otro', monto: '', fecha: new Date().toISOString().split('T')[0], notas: '' });
+        setForm({
+          concepto: '',
+          categoria: 'otro',
+          monto: '',
+          fecha: new Date().toISOString().split('T')[0],
+          notas: '',
+        });
         fetchExpenses();
       } else {
         toast.error('Error al registrar gasto');
@@ -137,7 +170,13 @@ export default function GastosPage() {
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingExpense || !editForm.concepto || !editForm.categoria || !editForm.monto || !editForm.fecha) {
+    if (
+      !editingExpense ||
+      !editForm.concepto ||
+      !editForm.categoria ||
+      !editForm.monto ||
+      !editForm.fecha
+    ) {
       toast.error('Por favor completa todos los campos requeridos');
       return;
     }
@@ -216,22 +255,26 @@ export default function GastosPage() {
   // Actualizar filtros activos
   useEffect(() => {
     const filters: Array<{ id: string; label: string; value: string }> = [];
-    
+
     if (searchTerm) {
       filters.push({ id: 'search', label: 'Búsqueda', value: searchTerm });
     }
     if (filterCategoria !== 'all') {
       const categoriaLabels: Record<string, string> = {
-        'mantenimiento': 'Mantenimiento',
-        'servicios': 'Servicios',
-        'impuestos': 'Impuestos',
-        'seguros': 'Seguros',
-        'renovacion': 'Renovación',
-        'otro': 'Otro',
+        mantenimiento: 'Mantenimiento',
+        servicios: 'Servicios',
+        impuestos: 'Impuestos',
+        seguros: 'Seguros',
+        renovacion: 'Renovación',
+        otro: 'Otro',
       };
-      filters.push({ id: 'categoria', label: 'Categoría', value: categoriaLabels[filterCategoria] || filterCategoria });
+      filters.push({
+        id: 'categoria',
+        label: 'Categoría',
+        value: categoriaLabels[filterCategoria] || filterCategoria,
+      });
     }
-    
+
     setActiveFilters(filters);
   }, [searchTerm, filterCategoria]);
 
@@ -250,8 +293,9 @@ export default function GastosPage() {
 
   // Filtrado de gastos
   const filteredExpenses = useMemo(() => {
-    return expenses.filter(expense => {
-      const matchesSearch = searchTerm === '' ||
+    return expenses.filter((expense) => {
+      const matchesSearch =
+        searchTerm === '' ||
         expense.concepto.toLowerCase().includes(searchTerm.toLowerCase()) ||
         expense.building?.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
         expense.provider?.nombre.toLowerCase().includes(searchTerm.toLowerCase());
@@ -265,17 +309,24 @@ export default function GastosPage() {
   // Estadísticas
   const stats = useMemo(() => {
     const totalGastos = expenses.reduce((sum, e) => sum + e.monto, 0);
-    const gastosEsteMes = expenses.filter(e => {
-      const expenseDate = new Date(e.fecha);
-      const now = new Date();
-      return expenseDate.getMonth() === now.getMonth() && expenseDate.getFullYear() === now.getFullYear();
-    }).reduce((sum, e) => sum + e.monto, 0);
+    const gastosEsteMes = expenses
+      .filter((e) => {
+        const expenseDate = new Date(e.fecha);
+        const now = new Date();
+        return (
+          expenseDate.getMonth() === now.getMonth() &&
+          expenseDate.getFullYear() === now.getFullYear()
+        );
+      })
+      .reduce((sum, e) => sum + e.monto, 0);
 
     return {
       total: expenses.length,
       totalMonto: totalGastos,
       esteMes: gastosEsteMes,
-      mantenimiento: expenses.filter(e => e.categoria === 'mantenimiento').reduce((sum, e) => sum + e.monto, 0),
+      mantenimiento: expenses
+        .filter((e) => e.categoria === 'mantenimiento')
+        .reduce((sum, e) => sum + e.monto, 0),
     };
   }, [expenses]);
 
@@ -332,9 +383,7 @@ export default function GastosPage() {
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <h1 className="text-3xl font-bold tracking-tight">Gastos</h1>
-                <p className="text-muted-foreground">
-                  Gestiona los gastos de tus propiedades
-                </p>
+                <p className="text-muted-foreground">Gestiona los gastos de tus propiedades</p>
               </div>
               {canCreate && (
                 <Dialog open={openDialog} onOpenChange={setOpenDialog}>
@@ -410,12 +459,14 @@ export default function GastosPage() {
                         />
                       </div>
                       <div className="flex justify-end gap-2">
-                        <Button type="button" variant="outline" onClick={() => setOpenDialog(false)}>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setOpenDialog(false)}
+                        >
                           Cancelar
                         </Button>
-                        <Button type="submit">
-                          Registrar Gasto
-                        </Button>
+                        <Button type="submit">Registrar Gasto</Button>
                       </div>
                     </form>
                   </DialogContent>
@@ -490,12 +541,14 @@ export default function GastosPage() {
                     />
                   </div>
                   <div className="flex justify-end gap-2">
-                    <Button type="button" variant="outline" onClick={() => setOpenEditDialog(false)}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setOpenEditDialog(false)}
+                    >
                       Cancelar
                     </Button>
-                    <Button type="submit">
-                      Guardar Cambios
-                    </Button>
+                    <Button type="submit">Guardar Cambios</Button>
                   </div>
                 </form>
               </DialogContent>
@@ -523,7 +576,9 @@ export default function GastosPage() {
                   <Euro className="h-4 w-4 text-green-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">€{stats.totalMonto.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</div>
+                  <div className="text-2xl font-bold">
+                    €{stats.totalMonto.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                  </div>
                 </CardContent>
               </Card>
 
@@ -535,7 +590,9 @@ export default function GastosPage() {
                   <CalendarIcon className="h-4 w-4 text-blue-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">€{stats.esteMes.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</div>
+                  <div className="text-2xl font-bold">
+                    €{stats.esteMes.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                  </div>
                 </CardContent>
               </Card>
 
@@ -547,7 +604,9 @@ export default function GastosPage() {
                   <TrendingUp className="h-4 w-4 text-orange-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">€{stats.mantenimiento.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</div>
+                  <div className="text-2xl font-bold">
+                    €{stats.mantenimiento.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -589,7 +648,11 @@ export default function GastosPage() {
             </Card>
 
             {/* Filter Chips */}
-            <FilterChips filters={activeFilters} onRemove={clearFilter} onClearAll={clearAllFilters} />
+            <FilterChips
+              filters={activeFilters}
+              onRemove={clearFilter}
+              onClearAll={clearAllFilters}
+            />
 
             {/* Lista de Gastos */}
             <div className="space-y-4">
@@ -600,9 +663,9 @@ export default function GastosPage() {
                     title="No se encontraron resultados"
                     description="Intenta ajustar los filtros de búsqueda"
                     action={{
-                      label: "Limpiar filtros",
+                      label: 'Limpiar filtros',
                       onClick: clearAllFilters,
-                      icon: <Search className="h-4 w-4" />
+                      icon: <Search className="h-4 w-4" />,
                     }}
                   />
                 ) : (
@@ -610,11 +673,15 @@ export default function GastosPage() {
                     icon={<DollarSign className="h-16 w-16 text-gray-400" />}
                     title="No hay gastos registrados"
                     description="Comienza registrando tu primer gasto para un mejor control financiero"
-                    action={canCreate ? {
-                      label: "Crear Primer Gasto",
-                      onClick: () => setOpenDialog(true),
-                      icon: <Plus className="h-4 w-4" />
-                    } : undefined}
+                    action={
+                      canCreate
+                        ? {
+                            label: 'Crear Primer Gasto',
+                            onClick: () => setOpenDialog(true),
+                            icon: <Plus className="h-4 w-4" />,
+                          }
+                        : undefined
+                    }
                   />
                 )
               ) : (
@@ -646,7 +713,9 @@ export default function GastosPage() {
                               {expense.building && (
                                 <div className="flex items-center gap-2 text-sm">
                                   <Building2 className="h-4 w-4 text-primary" />
-                                  <span className="font-medium">Edificio: {expense.building.nombre}</span>
+                                  <span className="font-medium">
+                                    Edificio: {expense.building.nombre}
+                                  </span>
                                 </div>
                               )}
                               {expense.unit && (
@@ -658,7 +727,9 @@ export default function GastosPage() {
                               {expense.provider && (
                                 <div className="flex items-center gap-2 text-sm">
                                   <Tag className="h-4 w-4 text-primary" />
-                                  <span className="font-medium">Proveedor: {expense.provider.nombre}</span>
+                                  <span className="font-medium">
+                                    Proveedor: {expense.provider.nombre}
+                                  </span>
                                 </div>
                               )}
                             </div>
@@ -681,7 +752,10 @@ export default function GastosPage() {
                                 Monto
                               </div>
                               <div className="font-bold text-lg text-red-600">
-                                €{expense.monto.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                                €
+                                {expense.monto.toLocaleString('es-ES', {
+                                  minimumFractionDigits: 2,
+                                })}
                               </div>
                             </div>
                           </div>

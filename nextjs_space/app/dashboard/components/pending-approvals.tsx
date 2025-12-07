@@ -6,13 +6,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { CheckCircle2, Clock, Euro, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
@@ -150,9 +144,7 @@ export function PendingApprovals() {
       <Card>
         <CardHeader>
           <CardTitle>Aprobaciones Pendientes</CardTitle>
-          <CardDescription>
-            No hay solicitudes de aprobación pendientes
-          </CardDescription>
+          <CardDescription>No hay solicitudes de aprobación pendientes</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
@@ -175,11 +167,7 @@ export function PendingApprovals() {
                 {approvals.length} solicitud{approvals.length !== 1 ? 'es' : ''} esperando revisión
               </CardDescription>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push('/admin/aprobaciones')}
-            >
+            <Button variant="outline" size="sm" onClick={() => router.push('/admin/aprobaciones')}>
               Ver Historial
             </Button>
           </div>
@@ -197,29 +185,19 @@ export function PendingApprovals() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <p className="font-medium truncate">
-                        {getDescription(approval)}
-                      </p>
-                      <Badge variant="secondary">
-                        {getTipoLabel(approval.tipo)}
-                      </Badge>
+                      <p className="font-medium truncate">{getDescription(approval)}</p>
+                      <Badge variant="secondary">{getTipoLabel(approval.tipo)}</Badge>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Euro className="h-3 w-3" />
                       {approval.monto?.toFixed(2) || '0.00'} €
                     </div>
                     {approval.motivo && (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {approval.motivo}
-                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">{approval.motivo}</p>
                     )}
                     <p className="text-xs text-muted-foreground mt-1">
                       Solicitado el{' '}
-                      {format(
-                        new Date(approval.fechaSolicitud),
-                        'dd MMM yyyy',
-                        { locale: es }
-                      )}
+                      {format(new Date(approval.fechaSolicitud), 'dd MMM yyyy', { locale: es })}
                     </p>
                   </div>
                 </div>

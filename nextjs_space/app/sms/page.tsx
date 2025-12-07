@@ -10,14 +10,43 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Home, ArrowLeft, Send, MessageSquare, CheckCircle, XCircle, Clock, FileText } from 'lucide-react';
+import {
+  Home,
+  ArrowLeft,
+  Send,
+  MessageSquare,
+  CheckCircle,
+  XCircle,
+  Clock,
+  FileText,
+} from 'lucide-react';
 import { toast } from 'sonner';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 
 export default function SMSPage() {
   const { data: session, status } = useSession();
@@ -28,7 +57,12 @@ export default function SMSPage() {
   const [tenants, setTenants] = useState<any[]>([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [enviando, setEnviando] = useState(false);
-  const [formData, setFormData] = useState({ tenantId: '', templateId: '', tipo: 'personalizado', mensaje: '' });
+  const [formData, setFormData] = useState({
+    tenantId: '',
+    templateId: '',
+    tipo: 'personalizado',
+    mensaje: '',
+  });
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login');
@@ -40,7 +74,7 @@ export default function SMSPage() {
       const [smsRes, templatesRes, tenantsRes] = await Promise.all([
         fetch('/api/sms'),
         fetch('/api/sms/templates'),
-        fetch('/api/tenants')
+        fetch('/api/tenants'),
       ]);
 
       // Verificar que todas las respuestas sean exitosas
@@ -51,7 +85,7 @@ export default function SMSPage() {
       const [smsData, templatesData, tenantsData] = await Promise.all([
         smsRes.json(),
         templatesRes.json(),
-        tenantsRes.json()
+        tenantsRes.json(),
       ]);
 
       setSmsLogs(Array.isArray(smsData) ? smsData : []);
@@ -76,7 +110,7 @@ export default function SMSPage() {
       const response = await fetch('/api/sms', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       });
 
       if (!response.ok) throw new Error('Error al enviar SMS');
@@ -97,7 +131,7 @@ export default function SMSPage() {
       const response = await fetch('/api/sms/templates', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accion: 'instalar_predefinidas' })
+        body: JSON.stringify({ accion: 'instalar_predefinidas' }),
       });
 
       if (!response.ok) throw new Error('Error al instalar plantillas');
@@ -135,60 +169,99 @@ export default function SMSPage() {
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
           <div className="max-w-7xl mx-auto space-y-6">
             <div className="flex flex-col gap-4">
-              <Button variant="ghost" size="sm" onClick={() => router.push('/dashboard')} className="w-fit">
-                <ArrowLeft className="h-4 w-4 mr-2" />Volver al Dashboard
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push('/dashboard')}
+                className="w-fit"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Volver al Dashboard
               </Button>
 
               <Breadcrumb>
                 <BreadcrumbList>
-                  <BreadcrumbItem><BreadcrumbLink href="/dashboard"><Home className="h-4 w-4" /></BreadcrumbLink></BreadcrumbItem>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink href="/dashboard">
+                      <Home className="h-4 w-4" />
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
                   <BreadcrumbSeparator />
-                  <BreadcrumbItem><BreadcrumbPage>SMS</BreadcrumbPage></BreadcrumbItem>
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>SMS</BreadcrumbPage>
+                  </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
 
               <div className="flex justify-between items-center">
                 <div>
                   <h1 className="text-3xl font-bold">Centro de Mensajería SMS</h1>
-                  <p className="text-muted-foreground">Sistema de SMS con plantillas y logs (simulado)</p>
+                  <p className="text-muted-foreground">
+                    Sistema de SMS con plantillas y logs (simulado)
+                  </p>
                 </div>
                 <div className="flex gap-2">
                   {templates.length === 0 && (
                     <Button variant="outline" onClick={handleInstalarPlantillas}>
-                      <FileText className="h-4 w-4 mr-2" />Instalar Plantillas
+                      <FileText className="h-4 w-4 mr-2" />
+                      Instalar Plantillas
                     </Button>
                   )}
                   <Dialog open={openDialog} onOpenChange={setOpenDialog}>
                     <DialogTrigger asChild>
-                      <Button><Send className="h-4 w-4 mr-2" />Enviar SMS</Button>
+                      <Button>
+                        <Send className="h-4 w-4 mr-2" />
+                        Enviar SMS
+                      </Button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
                         <DialogTitle>Enviar SMS</DialogTitle>
-                        <DialogDescription>Envía un mensaje a un inquilino (simulado)</DialogDescription>
+                        <DialogDescription>
+                          Envía un mensaje a un inquilino (simulado)
+                        </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-4 py-4">
                         <div className="space-y-2">
                           <Label>Inquilino</Label>
-                          <Select value={formData.tenantId} onValueChange={(value) => setFormData({ ...formData, tenantId: value })}>
-                            <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
+                          <Select
+                            value={formData.tenantId}
+                            onValueChange={(value) => setFormData({ ...formData, tenantId: value })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleccionar" />
+                            </SelectTrigger>
                             <SelectContent>
                               {tenants.map((t: any) => (
-                                <SelectItem key={t.id} value={t.id}>{t.nombreCompleto} - {t.telefono}</SelectItem>
+                                <SelectItem key={t.id} value={t.id}>
+                                  {t.nombreCompleto} - {t.telefono}
+                                </SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
                         </div>
                         <div className="space-y-2">
                           <Label>Plantilla (opcional)</Label>
-                          <Select value={formData.templateId} onValueChange={(value) => {
-                            const template = templates.find(t => t.id === value);
-                            setFormData({ ...formData, templateId: value, mensaje: template?.mensaje || '', tipo: template?.tipo || 'personalizado' });
-                          }}>
-                            <SelectTrigger><SelectValue placeholder="Sin plantilla" /></SelectTrigger>
+                          <Select
+                            value={formData.templateId}
+                            onValueChange={(value) => {
+                              const template = templates.find((t) => t.id === value);
+                              setFormData({
+                                ...formData,
+                                templateId: value,
+                                mensaje: template?.mensaje || '',
+                                tipo: template?.tipo || 'personalizado',
+                              });
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Sin plantilla" />
+                            </SelectTrigger>
                             <SelectContent>
                               {templates.map((t: any) => (
-                                <SelectItem key={t.id} value={t.id}>{t.nombre}</SelectItem>
+                                <SelectItem key={t.id} value={t.id}>
+                                  {t.nombre}
+                                </SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
@@ -201,7 +274,9 @@ export default function SMSPage() {
                             maxLength={160}
                             rows={4}
                           />
-                          <p className="text-xs text-muted-foreground text-right">{formData.mensaje.length}/160</p>
+                          <p className="text-xs text-muted-foreground text-right">
+                            {formData.mensaje.length}/160
+                          </p>
                         </div>
                         <Button onClick={handleEnviar} disabled={enviando} className="w-full">
                           {enviando ? 'Enviando...' : 'Enviar SMS'}
@@ -215,10 +290,26 @@ export default function SMSPage() {
 
             <div className="grid gap-4 md:grid-cols-4">
               {[
-                { title: 'Total Enviados', value: smsLogs.filter(s => s.estado === 'enviado').length, icon: MessageSquare },
-                { title: 'Exitosos', value: smsLogs.filter(s => s.exitoso === true).length, icon: CheckCircle },
-                { title: 'Fallidos', value: smsLogs.filter(s => s.exitoso === false).length, icon: XCircle },
-                { title: 'Programados', value: smsLogs.filter(s => s.estado === 'programado').length, icon: Clock }
+                {
+                  title: 'Total Enviados',
+                  value: smsLogs.filter((s) => s.estado === 'enviado').length,
+                  icon: MessageSquare,
+                },
+                {
+                  title: 'Exitosos',
+                  value: smsLogs.filter((s) => s.exitoso === true).length,
+                  icon: CheckCircle,
+                },
+                {
+                  title: 'Fallidos',
+                  value: smsLogs.filter((s) => s.exitoso === false).length,
+                  icon: XCircle,
+                },
+                {
+                  title: 'Programados',
+                  value: smsLogs.filter((s) => s.estado === 'programado').length,
+                  icon: Clock,
+                },
               ].map((kpi, idx) => (
                 <Card key={idx}>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -255,10 +346,18 @@ export default function SMSPage() {
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-1">
                                   <span className="font-semibold">{sms.nombreDestinatario}</span>
-                                  <Badge variant={sms.estado === 'enviado' ? 'default' : 'secondary'}>{sms.estado}</Badge>
+                                  <Badge
+                                    variant={sms.estado === 'enviado' ? 'default' : 'secondary'}
+                                  >
+                                    {sms.estado}
+                                  </Badge>
                                   {sms.exitoso !== null && (
                                     <Badge variant={sms.exitoso ? 'default' : 'destructive'}>
-                                      {sms.exitoso ? <CheckCircle className="h-3 w-3 mr-1" /> : <XCircle className="h-3 w-3 mr-1" />}
+                                      {sms.exitoso ? (
+                                        <CheckCircle className="h-3 w-3 mr-1" />
+                                      ) : (
+                                        <XCircle className="h-3 w-3 mr-1" />
+                                      )}
                                       {sms.exitoso ? 'Exitoso' : 'Fallido'}
                                     </Badge>
                                   )}
@@ -267,8 +366,12 @@ export default function SMSPage() {
                                 <p className="text-sm">{sms.mensaje}</p>
                                 <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
                                   <span>Tipo: {sms.tipo}</span>
-                                  <span>Fecha: {new Date(sms.createdAt).toLocaleString('es-ES')}</span>
-                                  {sms.costeEstimado && <span>Coste: {sms.costeEstimado.toFixed(3)}€</span>}
+                                  <span>
+                                    Fecha: {new Date(sms.createdAt).toLocaleString('es-ES')}
+                                  </span>
+                                  {sms.costeEstimado && (
+                                    <span>Coste: {sms.costeEstimado.toFixed(3)}€</span>
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -290,8 +393,12 @@ export default function SMSPage() {
                     <div className="space-y-3">
                       {templates.length === 0 ? (
                         <div className="text-center py-8">
-                          <p className="text-muted-foreground mb-4">No hay plantillas configuradas</p>
-                          <Button onClick={handleInstalarPlantillas}>Instalar Plantillas Predefinidas</Button>
+                          <p className="text-muted-foreground mb-4">
+                            No hay plantillas configuradas
+                          </p>
+                          <Button onClick={handleInstalarPlantillas}>
+                            Instalar Plantillas Predefinidas
+                          </Button>
                         </div>
                       ) : (
                         templates.map((template) => (
@@ -305,7 +412,9 @@ export default function SMSPage() {
                                   </Badge>
                                 </div>
                                 {template.descripcion && (
-                                  <p className="text-sm text-muted-foreground mb-2">{template.descripcion}</p>
+                                  <p className="text-sm text-muted-foreground mb-2">
+                                    {template.descripcion}
+                                  </p>
                                 )}
                                 <p className="text-sm bg-muted p-2 rounded">{template.mensaje}</p>
                                 <div className="flex gap-2 mt-2 text-xs text-muted-foreground">
