@@ -5,7 +5,17 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
-import { Building2, Plus, MapPin, TrendingUp, Home, ArrowLeft, MoreVertical, Eye, Trash2 } from 'lucide-react';
+import {
+  Building2,
+  Plus,
+  MapPin,
+  TrendingUp,
+  Home,
+  ArrowLeft,
+  MoreVertical,
+  Eye,
+  Trash2,
+} from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -65,8 +75,11 @@ function EdificiosPageContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode, viewModeLoaded] = useLocalStorage<ViewMode>('edificios-view-mode', 'grid');
-  
+  const [viewMode, setViewMode, viewModeLoaded] = useLocalStorage<ViewMode>(
+    'edificios-view-mode',
+    'grid'
+  );
+
   // Delete confirmation dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [buildingToDelete, setBuildingToDelete] = useState<Building | null>(null);
@@ -96,10 +109,10 @@ function EdificiosPageContent() {
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : 'Error desconocido';
         setError(errorMsg);
-        logError(
-          error instanceof Error ? error : new Error(errorMsg),
-          { context: 'fetchBuildings', page: 'edificios' }
-        );
+        logError(error instanceof Error ? error : new Error(errorMsg), {
+          context: 'fetchBuildings',
+          page: 'edificios',
+        });
       } finally {
         setIsLoading(false);
       }
@@ -112,10 +125,11 @@ function EdificiosPageContent() {
 
   useEffect(() => {
     if (searchTerm) {
-      const filtered = buildings.filter((building) =>
-        building.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        building.direccion.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        building.tipo.toLowerCase().includes(searchTerm.toLowerCase())
+      const filtered = buildings.filter(
+        (building) =>
+          building.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          building.direccion.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          building.tipo.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredBuildings(filtered);
     } else {
@@ -147,10 +161,10 @@ function EdificiosPageContent() {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Error al eliminar';
       toast.error(errorMsg);
-      logError(
-        error instanceof Error ? error : new Error(errorMsg),
-        { context: 'deleteBuilding', buildingId: buildingToDelete.id }
-      );
+      logError(error instanceof Error ? error : new Error(errorMsg), {
+        context: 'deleteBuilding',
+        buildingId: buildingToDelete.id,
+      });
     } finally {
       setIsDeleting(false);
       setDeleteDialogOpen(false);
@@ -167,7 +181,10 @@ function EdificiosPageContent() {
           <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
             <div className="max-w-7xl mx-auto">
               <Skeleton className="h-8 w-48 mb-6" />
-              <SkeletonList count={6} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" />
+              <SkeletonList
+                count={6}
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              />
             </div>
           </main>
         </div>
@@ -234,12 +251,16 @@ function EdificiosPageContent() {
                   title={helpData.edificios.title}
                   description={helpData.edificios.description}
                   sections={helpData.edificios.sections}
-                  quickActions={canCreate ? [
-                    {
-                      label: 'Crear nuevo edificio',
-                      action: () => router.push('/edificios/nuevo')
-                    }
-                  ] : undefined}
+                  quickActions={
+                    canCreate
+                      ? [
+                          {
+                            label: 'Crear nuevo edificio',
+                            action: () => router.push('/edificios/nuevo'),
+                          },
+                        ]
+                      : undefined
+                  }
                 />
               </div>
               {canCreate && (
@@ -316,7 +337,8 @@ function EdificiosPageContent() {
                           buildings.reduce((acc, b) => acc + (b.metrics?.ocupacionPct || 0), 0) /
                             buildings.length
                         )
-                      : 0}%
+                      : 0}
+                    %
                   </div>
                   <p className="text-xs text-muted-foreground">De todas las unidades</p>
                 </CardContent>
@@ -349,7 +371,9 @@ function EdificiosPageContent() {
                               />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => router.push(`/edificios/${building.id}`)}>
+                              <DropdownMenuItem
+                                onClick={() => router.push(`/edificios/${building.id}`)}
+                              >
                                 <Eye className="mr-2 h-4 w-4" aria-hidden="true" />
                                 Ver Detalles
                               </DropdownMenuItem>
@@ -439,7 +463,7 @@ function EdificiosPageContent() {
                               </div>
                               <Badge variant={tipoBadge.variant}>{tipoBadge.label}</Badge>
                             </div>
-                            
+
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                               <div>
                                 <p className="text-sm text-muted-foreground">Año construcción</p>
@@ -453,7 +477,9 @@ function EdificiosPageContent() {
                                 <>
                                   <div>
                                     <p className="text-sm text-muted-foreground">Ocupación</p>
-                                    <p className="text-lg font-semibold">{building.metrics.ocupacionPct}%</p>
+                                    <p className="text-lg font-semibold">
+                                      {building.metrics.ocupacionPct}%
+                                    </p>
                                   </div>
                                   <div>
                                     <p className="text-sm text-muted-foreground">Ingresos/mes</p>
@@ -469,7 +495,9 @@ function EdificiosPageContent() {
                               <div>
                                 <div className="flex items-center justify-between mb-2">
                                   <span className="text-sm font-medium">Tasa de ocupación</span>
-                                  <span className="text-sm font-medium">{building.metrics.ocupacionPct}%</span>
+                                  <span className="text-sm font-medium">
+                                    {building.metrics.ocupacionPct}%
+                                  </span>
                                 </div>
                                 <div className="h-2 w-full rounded-full bg-muted">
                                   <div
@@ -560,15 +588,19 @@ function EdificiosPageContent() {
             {filteredBuildings.length === 0 && !searchTerm && (
               <EnhancedEmptyState
                 preset="buildings"
-                primaryAction={canCreate ? {
-                  label: 'Crear Primer Edificio',
-                  onClick: () => router.push('/edificios/nuevo'),
-                  icon: <Plus className="h-4 w-4" aria-hidden="true" />,
-                } : undefined}
+                primaryAction={
+                  canCreate
+                    ? {
+                        label: 'Crear Primer Edificio',
+                        onClick: () => router.push('/edificios/nuevo'),
+                        icon: <Plus className="h-4 w-4" aria-hidden="true" />,
+                      }
+                    : undefined
+                }
                 chatSupport={!canCreate}
               />
             )}
-            
+
             {filteredBuildings.length === 0 && searchTerm && (
               <EnhancedEmptyState
                 preset="buildingsFiltered"

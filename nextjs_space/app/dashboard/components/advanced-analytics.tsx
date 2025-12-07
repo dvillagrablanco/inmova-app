@@ -32,20 +32,22 @@ export function AdvancedAnalytics({ monthlyData }: AdvancedAnalyticsProps) {
   const lastMonth = monthlyData[monthlyData.length - 1]?.neto || 0;
   const previousMonth = monthlyData[monthlyData.length - 2]?.neto || 0;
   const trend = lastMonth > previousMonth ? 'up' : 'down';
-  const trendPercentage = previousMonth > 0
-    ? (((lastMonth - previousMonth) / previousMonth) * 100).toFixed(1)
-    : 0;
+  const trendPercentage =
+    previousMonth > 0 ? (((lastMonth - previousMonth) / previousMonth) * 100).toFixed(1) : 0;
 
   // Calcular promedios
-  const avgIngresos = monthlyData.length > 0
-    ? monthlyData.reduce((sum, m) => sum + m.ingresos, 0) / monthlyData.length
-    : 0;
-  const avgGastos = monthlyData.length > 0
-    ? monthlyData.reduce((sum, m) => sum + m.gastos, 0) / monthlyData.length
-    : 0;
-  const avgNeto = monthlyData.length > 0
-    ? monthlyData.reduce((sum, m) => sum + m.neto, 0) / monthlyData.length
-    : 0;
+  const avgIngresos =
+    monthlyData.length > 0
+      ? monthlyData.reduce((sum, m) => sum + m.ingresos, 0) / monthlyData.length
+      : 0;
+  const avgGastos =
+    monthlyData.length > 0
+      ? monthlyData.reduce((sum, m) => sum + m.gastos, 0) / monthlyData.length
+      : 0;
+  const avgNeto =
+    monthlyData.length > 0
+      ? monthlyData.reduce((sum, m) => sum + m.neto, 0) / monthlyData.length
+      : 0;
 
   // Proyección simple para los próximos 3 meses
   const projectionData = [
@@ -90,7 +92,8 @@ export function AdvancedAnalytics({ monthlyData }: AdvancedAnalyticsProps) {
                 <TrendingDown className="h-5 w-5 text-red-500" />
               )}
               <Badge variant={trend === 'up' ? 'default' : 'destructive'}>
-                {trend === 'up' ? '+' : ''}{trendPercentage}%
+                {trend === 'up' ? '+' : ''}
+                {trendPercentage}%
               </Badge>
             </div>
           </div>

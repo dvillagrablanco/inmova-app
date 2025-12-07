@@ -18,7 +18,7 @@ function RecuperarContrasenaContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams?.get('token');
-  
+
   const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -43,7 +43,7 @@ function RecuperarContrasenaContent() {
       if (response.ok) {
         setSuccess(true);
         toast.success('Se ha enviado un enlace de recuperación a tu email');
-        
+
         // En desarrollo, mostrar el token
         if (data.token && process.env.NODE_ENV === 'development') {
           logger.info(`Token de desarrollo: ${data.token}`);
@@ -121,10 +121,7 @@ function RecuperarContrasenaContent() {
                   ? 'Tu contraseña ha sido restablecida exitosamente. Serás redirigido al login...'
                   : 'Si el email existe, recibirás un enlace de recuperación en breve.'}
               </p>
-              <Button
-                onClick={() => router.push('/login')}
-                className="mt-6"
-              >
+              <Button onClick={() => router.push('/login')} className="mt-6">
                 Ir al Login
               </Button>
             </div>
@@ -191,11 +188,7 @@ function RecuperarContrasenaContent() {
                 />
               </div>
 
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={loading}
-              >
+              <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? 'Restableciendo...' : 'Restablecer Contraseña'}
               </Button>
             </form>
@@ -217,27 +210,19 @@ function RecuperarContrasenaContent() {
                 <Shield className="h-4 w-4" />
                 <AlertTitle>Seguridad</AlertTitle>
                 <AlertDescription>
-                  Solo se pueden recuperar cuentas de super administrador.
-                  Recibirás un email con instrucciones si la cuenta existe.
+                  Solo se pueden recuperar cuentas de super administrador. Recibirás un email con
+                  instrucciones si la cuenta existe.
                 </AlertDescription>
               </Alert>
 
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={loading}
-              >
+              <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? 'Enviando...' : 'Enviar Enlace de Recuperación'}
               </Button>
             </form>
           )}
 
           <div className="mt-6 text-center">
-            <Button
-              variant="ghost"
-              onClick={() => router.push('/login')}
-              className="text-sm"
-            >
+            <Button variant="ghost" onClick={() => router.push('/login')} className="text-sm">
               Volver al Login
             </Button>
           </div>
@@ -249,14 +234,16 @@ function RecuperarContrasenaContent() {
 
 export default function RecuperarContrasenaPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-cyan-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Cargando...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-cyan-50">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+            <p className="mt-4 text-muted-foreground">Cargando...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <RecuperarContrasenaContent />
     </Suspense>
   );

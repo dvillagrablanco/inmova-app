@@ -10,7 +10,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -162,9 +168,7 @@ export default function NuevoPagoPage() {
                   <CreditCard className="h-5 w-5" />
                   Información del Pago
                 </CardTitle>
-                <CardDescription>
-                  Completa los datos del pago o cuota de alquiler
-                </CardDescription>
+                <CardDescription>Completa los datos del pago o cuota de alquiler</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -182,7 +186,8 @@ export default function NuevoPagoPage() {
                         <SelectContent>
                           {contracts.map((contract) => (
                             <SelectItem key={contract.id} value={contract.id}>
-                              {contract.unit.building.nombre} - {contract.unit.numero} ({contract.tenant.nombre})
+                              {contract.unit.building.nombre} - {contract.unit.numero} (
+                              {contract.tenant.nombre})
                             </SelectItem>
                           ))}
                         </SelectContent>

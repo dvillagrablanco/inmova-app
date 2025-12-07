@@ -13,25 +13,28 @@ export default function CasosExitoPage() {
       sector: 'Alquiler Residencial',
       propiedades: 150,
       mejora: '+35% ROI',
-      testimonio: 'INMOVA nos permitió centralizar toda nuestra operación. Antes usábamos 6 herramientas diferentes, ahora todo está en una sola plataforma.',
-      logo: '🏢'
+      testimonio:
+        'INMOVA nos permitió centralizar toda nuestra operación. Antes usábamos 6 herramientas diferentes, ahora todo está en una sola plataforma.',
+      logo: '🏢',
     },
     {
       empresa: 'Barcelona STR Properties',
       sector: 'Short-Term Rental',
       propiedades: 80,
       mejora: '+50% Ocupación',
-      testimonio: 'El channel manager nativo y el pricing dinámico aumentaron nuestra ocupación del 65% al 98% en solo 3 meses.',
-      logo: '🏨'
+      testimonio:
+        'El channel manager nativo y el pricing dinámico aumentaron nuestra ocupación del 65% al 98% en solo 3 meses.',
+      logo: '🏨',
     },
     {
       empresa: 'Inversiones Coliving Madrid',
       sector: 'Coliving',
       propiedades: 25,
       mejora: '-70% Costes',
-      testimonio: 'La gestión por habitaciones con prorrateo automático nos ahorró 40 horas mensuales y €3,000 en software.',
-      logo: '👥'
-    }
+      testimonio:
+        'La gestión por habitaciones con prorrateo automático nos ahorró 40 horas mensuales y €3,000 en software.',
+      logo: '👥',
+    },
   ];
 
   return (
@@ -41,7 +44,9 @@ export default function CasosExitoPage() {
           <div className="flex items-center justify-between h-16">
             <Link href="/landing" className="flex items-center gap-3">
               <Building2 className="h-8 w-8 text-indigo-600" />
-              <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">INMOVA</span>
+              <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                INMOVA
+              </span>
             </Link>
             <Link href="/landing">
               <Button>Volver a Inicio</Button>
@@ -111,7 +116,9 @@ export default function CasosExitoPage() {
 
       <footer className="bg-gray-900 text-white py-8 px-4">
         <div className="container mx-auto text-center">
-          <p className="text-gray-400">© 2026 INMOVA. Powered by Enxames Investments SL. Todos los derechos reservados.</p>
+          <p className="text-gray-400">
+            © 2026 INMOVA. Powered by Enxames Investments SL. Todos los derechos reservados.
+          </p>
         </div>
       </footer>
     </div>

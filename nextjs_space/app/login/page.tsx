@@ -57,14 +57,14 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
       {/* Header con navegación */}
-      <nav 
+      <nav
         className="fixed top-0 w-full bg-black/50 backdrop-blur-md border-b border-gray-800 z-50"
         aria-label="Navegación principal"
       >
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            <Link 
-              href="/landing" 
+            <Link
+              href="/landing"
               className="flex items-center gap-3 hover:opacity-80 transition-opacity"
               aria-label="Ir a la página de inicio de INMOVA"
             >
@@ -74,8 +74,8 @@ export default function LoginPage() {
               </span>
             </Link>
             <Link href="/landing">
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 className="text-gray-300 hover:text-white hover:bg-gray-800"
                 aria-label="Volver a la página de inicio"
               >
@@ -88,84 +88,84 @@ export default function LoginPage() {
       </nav>
 
       <div className="flex items-center justify-center min-h-screen p-4 pt-20">
-      <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="text-center mb-8 animate-fade-in">
-          <div className="relative w-48 h-16 mx-auto mb-4">
-            <Image
-              src="/inmova-logo-cover.jpg"
-              alt="INMOVA - Logotipo de la plataforma integral de gestión inmobiliaria profesional"
-              fill
-              className="object-contain"
-              priority
-            />
-          </div>
-          <h1 className="text-2xl font-bold text-white">Bienvenido</h1>
-          <p className="text-gray-400 text-sm mt-2">Sistema de Gestión Inmobiliaria</p>
-        </div>
-
-        {/* Login Form */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8 animate-fade-in">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Iniciar Sesión</h2>
-
-          {error && (
-            <div 
-              role="alert" 
-              aria-live="assertive"
-              className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700"
-            >
-              <AlertCircle size={20} aria-hidden="true" />
-              <span className="text-sm">{error}</span>
+        <div className="w-full max-w-md">
+          {/* Logo */}
+          <div className="text-center mb-8 animate-fade-in">
+            <div className="relative w-48 h-16 mx-auto mb-4">
+              <Image
+                src="/inmova-logo-cover.jpg"
+                alt="INMOVA - Logotipo de la plataforma integral de gestión inmobiliaria profesional"
+                fill
+                className="object-contain"
+                priority
+              />
             </div>
-          )}
+            <h1 className="text-2xl font-bold text-white">Bienvenido</h1>
+            <p className="text-gray-400 text-sm mt-2">Sistema de Gestión Inmobiliaria</p>
+          </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
-            <AccessibleInputField
-              id="email-field"
-              name="email"
-              label="Correo Electrónico"
-              type="email"
-              placeholder="tu@correo.com"
-              value={email}
-              onChange={(val) => setValue('email', val)}
-              error={errors.email?.message}
-              required
-            />
+          {/* Login Form */}
+          <div className="bg-white rounded-2xl shadow-2xl p-8 animate-fade-in">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Iniciar Sesión</h2>
 
-            <AccessibleInputField
-              id="password-field"
-              name="password"
-              label="Contraseña"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(val) => setValue('password', val)}
-              error={errors.password?.message}
-              required
-            />
+            {error && (
+              <div
+                role="alert"
+                aria-live="assertive"
+                className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700"
+              >
+                <AlertCircle size={20} aria-hidden="true" />
+                <span className="text-sm">{error}</span>
+              </div>
+            )}
 
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full gradient-primary text-white py-3 rounded-lg font-medium hover:opacity-90 transition-all shadow-primary disabled:opacity-50"
-              aria-busy={isLoading}
-              aria-live="polite"
-            >
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
-              {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
-            </Button>
-          </form>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+              <AccessibleInputField
+                id="email-field"
+                name="email"
+                label="Correo Electrónico"
+                type="email"
+                placeholder="tu@correo.com"
+                value={email}
+                onChange={(val) => setValue('email', val)}
+                error={errors.email?.message}
+                required
+              />
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              ¿No tienes cuenta?{' '}
-              <Link href="/register" className="text-black font-medium hover:underline">
-                Regístrate aquí
-              </Link>
-            </p>
+              <AccessibleInputField
+                id="password-field"
+                name="password"
+                label="Contraseña"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(val) => setValue('password', val)}
+                error={errors.password?.message}
+                required
+              />
+
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full gradient-primary text-white py-3 rounded-lg font-medium hover:opacity-90 transition-all shadow-primary disabled:opacity-50"
+                aria-busy={isLoading}
+                aria-live="polite"
+              >
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
+                {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+              </Button>
+            </form>
+
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-600">
+                ¿No tienes cuenta?{' '}
+                <Link href="/register" className="text-black font-medium hover:underline">
+                  Regístrate aquí
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
-      </div>
       </div>
     </div>
   );

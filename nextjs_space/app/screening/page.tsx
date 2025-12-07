@@ -11,7 +11,14 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Home, ArrowLeft, CheckCircle2, XCircle, AlertTriangle, User, Shield } from 'lucide-react';
 import { toast } from 'sonner';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 
 export default function ScreeningPage() {
   const { data: session, status } = useSession();
@@ -36,14 +43,19 @@ export default function ScreeningPage() {
     }
   };
 
-  if (loading) return <div className="flex items-center justify-center min-h-screen">Cargando...</div>;
+  if (loading)
+    return <div className="flex items-center justify-center min-h-screen">Cargando...</div>;
 
   const getRiesgoColor = (nivel: string) => {
     switch (nivel) {
-      case 'bajo': return 'bg-green-500';
-      case 'medio': return 'bg-yellow-500';
-      case 'alto': return 'bg-red-500';
-      default: return 'bg-gray-500';
+      case 'bajo':
+        return 'bg-green-500';
+      case 'medio':
+        return 'bg-yellow-500';
+      case 'alto':
+        return 'bg-red-500';
+      default:
+        return 'bg-gray-500';
     }
   };
 
@@ -55,28 +67,59 @@ export default function ScreeningPage() {
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
           <div className="max-w-7xl mx-auto space-y-6">
             <div className="flex flex-col gap-4">
-              <Button variant="ghost" size="sm" onClick={() => router.push('/dashboard')} className="w-fit">
-                <ArrowLeft className="h-4 w-4 mr-2" />Volver al Dashboard
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push('/dashboard')}
+                className="w-fit"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Volver al Dashboard
               </Button>
 
               <Breadcrumb>
                 <BreadcrumbList>
-                  <BreadcrumbItem><BreadcrumbLink href="/dashboard"><Home className="h-4 w-4" /></BreadcrumbLink></BreadcrumbItem>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink href="/dashboard">
+                      <Home className="h-4 w-4" />
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
                   <BreadcrumbSeparator />
-                  <BreadcrumbItem><BreadcrumbPage>Screening</BreadcrumbPage></BreadcrumbItem>
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>Screening</BreadcrumbPage>
+                  </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
 
               <h1 className="text-3xl font-bold">Screening Avanzado</h1>
-              <p className="text-muted-foreground">Verificación y scoring de candidatos con 20+ criterios</p>
+              <p className="text-muted-foreground">
+                Verificación y scoring de candidatos con 20+ criterios
+              </p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-4">
               {[
                 { title: 'Total', value: screenings.length, icon: User },
-                { title: 'Aprobados', value: screenings.filter(s => s.aprobado === true).length, icon: CheckCircle2 },
-                { title: 'Rechazados', value: screenings.filter(s => s.aprobado === false).length, icon: XCircle },
-                { title: 'Scoring Promedio', value: screenings.length > 0 ? Math.round(screenings.reduce((sum, s) => sum + s.scoringTotal, 0) / screenings.length) : 0, icon: Shield }
+                {
+                  title: 'Aprobados',
+                  value: screenings.filter((s) => s.aprobado === true).length,
+                  icon: CheckCircle2,
+                },
+                {
+                  title: 'Rechazados',
+                  value: screenings.filter((s) => s.aprobado === false).length,
+                  icon: XCircle,
+                },
+                {
+                  title: 'Scoring Promedio',
+                  value:
+                    screenings.length > 0
+                      ? Math.round(
+                          screenings.reduce((sum, s) => sum + s.scoringTotal, 0) / screenings.length
+                        )
+                      : 0,
+                  icon: Shield,
+                },
               ].map((kpi, idx) => (
                 <Card key={idx}>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -84,7 +127,10 @@ export default function ScreeningPage() {
                     <kpi.icon className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{kpi.value}{kpi.title.includes('Scoring') ? '/100' : ''}</div>
+                    <div className="text-2xl font-bold">
+                      {kpi.value}
+                      {kpi.title.includes('Scoring') ? '/100' : ''}
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -98,15 +144,27 @@ export default function ScreeningPage() {
               <CardContent>
                 <div className="space-y-4">
                   {screenings.length === 0 ? (
-                    <p className="text-center text-muted-foreground py-8">No hay screenings realizados</p>
+                    <p className="text-center text-muted-foreground py-8">
+                      No hay screenings realizados
+                    </p>
                   ) : (
                     screenings.map((screening) => (
                       <Card key={screening.id} className="p-4">
                         <div className="flex flex-col md:flex-row justify-between gap-4">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
-                              <h3 className="font-semibold">{screening.candidate?.nombreCompleto}</h3>
-                              <Badge variant={screening.estado === 'aprobado' ? 'default' : screening.estado === 'rechazado' ? 'destructive' : 'secondary'}>
+                              <h3 className="font-semibold">
+                                {screening.candidate?.nombreCompleto}
+                              </h3>
+                              <Badge
+                                variant={
+                                  screening.estado === 'aprobado'
+                                    ? 'default'
+                                    : screening.estado === 'rechazado'
+                                      ? 'destructive'
+                                      : 'secondary'
+                                }
+                              >
                                 {screening.estado}
                               </Badge>
                               <Badge className={getRiesgoColor(screening.nivelRiesgoGlobal)}>
@@ -152,11 +210,13 @@ export default function ScreeningPage() {
                                   Flags de riesgo:
                                 </p>
                                 <div className="flex flex-wrap gap-1">
-                                  {screening.flagsRiesgo.slice(0, 3).map((flag: any, idx: number) => (
-                                    <Badge key={idx} variant="outline" className="text-xs">
-                                      {flag.descripcion}
-                                    </Badge>
-                                  ))}
+                                  {screening.flagsRiesgo
+                                    .slice(0, 3)
+                                    .map((flag: any, idx: number) => (
+                                      <Badge key={idx} variant="outline" className="text-xs">
+                                        {flag.descripcion}
+                                      </Badge>
+                                    ))}
                                 </div>
                               </div>
                             )}

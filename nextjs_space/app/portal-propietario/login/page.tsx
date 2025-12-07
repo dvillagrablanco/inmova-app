@@ -96,9 +96,7 @@ export default function PropietarioLoginPage() {
                 type="email"
                 placeholder="propietario@ejemplo.com"
                 value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
                 disabled={loading}
                 autoComplete="email"
@@ -108,8 +106,8 @@ export default function PropietarioLoginPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Contraseña</Label>
-                <Link 
-                  href="/portal-propietario/forgot-password" 
+                <Link
+                  href="/portal-propietario/forgot-password"
                   className="text-xs text-primary hover:underline"
                 >
                   ¿Olvidaste tu contraseña?
@@ -120,9 +118,7 @@ export default function PropietarioLoginPage() {
                 type="password"
                 placeholder="••••••••"
                 value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
                 disabled={loading}
                 autoComplete="current-password"
@@ -142,8 +138,8 @@ export default function PropietarioLoginPage() {
           </div>
 
           <div className="pt-4 border-t text-center">
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className="text-sm text-muted-foreground hover:text-primary transition-colors"
             >
               ← Volver al inicio

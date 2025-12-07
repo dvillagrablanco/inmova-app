@@ -30,9 +30,7 @@ export default function PasswordResetConfirmPage() {
   useEffect(() => {
     const validateToken = async () => {
       try {
-        const response = await fetch(
-          `/api/portal-inquilino/password-reset/confirm?token=${token}`
-        );
+        const response = await fetch(`/api/portal-inquilino/password-reset/confirm?token=${token}`);
         const data = await response.json();
 
         if (!response.ok || !data.valid) {
@@ -74,7 +72,7 @@ export default function PasswordResetConfirmPage() {
       const response = await fetch('/api/portal-inquilino/password-reset/confirm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, password, confirmPassword })
+        body: JSON.stringify({ token, password, confirmPassword }),
       });
 
       const data = await response.json();
@@ -85,7 +83,7 @@ export default function PasswordResetConfirmPage() {
       }
 
       toast.success('¡Contraseña restablecida exitosamente!');
-      
+
       // Redirigir al login
       setTimeout(() => {
         router.push('/portal-inquilino/login');
@@ -145,9 +143,7 @@ export default function PasswordResetConfirmPage() {
             <Lock className="w-8 h-8 text-white" />
           </div>
           <CardTitle className="text-2xl font-bold">Nueva Contraseña</CardTitle>
-          <CardDescription>
-            Hola {tenantName}, crea una nueva contraseña segura
-          </CardDescription>
+          <CardDescription>Hola {tenantName}, crea una nueva contraseña segura</CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-4">

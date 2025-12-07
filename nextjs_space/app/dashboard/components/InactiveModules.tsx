@@ -5,13 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Lock, 
-  Unlock, 
-  TrendingUp, 
-  Building2, 
-  FileText, 
-  Wrench, 
+import {
+  Lock,
+  Unlock,
+  TrendingUp,
+  Building2,
+  FileText,
+  Wrench,
   Users,
   DollarSign,
   BarChart3,
@@ -22,7 +22,7 @@ import {
   ChevronRight,
   Info,
   Sparkles,
-  Zap
+  Zap,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import logger from '@/lib/logger';
@@ -40,17 +40,17 @@ interface Module {
 
 // Mapeo de iconos
 const iconMap: Record<string, any> = {
-  'TrendingUp': TrendingUp,
-  'Building2': Building2,
-  'FileText': FileText,
-  'Wrench': Wrench,
-  'Users': Users,
-  'DollarSign': DollarSign,
-  'BarChart3': BarChart3,
-  'MapPin': MapPin,
-  'Calendar': Calendar,
-  'MessageSquare': MessageSquare,
-  'Settings': Settings,
+  TrendingUp: TrendingUp,
+  Building2: Building2,
+  FileText: FileText,
+  Wrench: Wrench,
+  Users: Users,
+  DollarSign: DollarSign,
+  BarChart3: BarChart3,
+  MapPin: MapPin,
+  Calendar: Calendar,
+  MessageSquare: MessageSquare,
+  Settings: Settings,
 };
 
 export default function InactiveModules() {
@@ -81,19 +81,19 @@ export default function InactiveModules() {
       const response = await fetch('/api/modules/activate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ moduloCodigo: moduleCode })
+        body: JSON.stringify({ moduloCodigo: moduleCode }),
       });
 
       if (response.ok) {
         toast.success('Módulo activado correctamente', {
-          description: 'Ya puedes acceder a sus funcionalidades desde el menú'
+          description: 'Ya puedes acceder a sus funcionalidades desde el menú',
         });
         // Recargar módulos inactivos
         loadInactiveModules();
       } else {
         const error = await response.json();
         toast.error('Error al activar módulo', {
-          description: error.message || 'Inténtalo nuevamente'
+          description: error.message || 'Inténtalo nuevamente',
         });
       }
     } catch (error) {

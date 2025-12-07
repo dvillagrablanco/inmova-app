@@ -74,9 +74,7 @@ export default function ProveedorLoginPage() {
                 type="email"
                 placeholder="proveedor@ejemplo.com"
                 value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
                 disabled={loading}
               />
@@ -89,9 +87,7 @@ export default function ProveedorLoginPage() {
                 type="password"
                 placeholder="••••••••"
                 value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
                 disabled={loading}
               />
@@ -104,16 +100,16 @@ export default function ProveedorLoginPage() {
           </form>
 
           <div className="mt-6 space-y-3 text-center text-sm">
-            <Link 
-              href="/portal-proveedor/forgot-password" 
+            <Link
+              href="/portal-proveedor/forgot-password"
               className="block text-primary hover:underline"
             >
               ¿Olvidaste tu contraseña?
             </Link>
             <div className="text-muted-foreground">
               ¿No tienes cuenta?{' '}
-              <Link 
-                href="/portal-proveedor/register" 
+              <Link
+                href="/portal-proveedor/register"
                 className="text-primary hover:underline font-medium"
               >
                 Regístrate aquí

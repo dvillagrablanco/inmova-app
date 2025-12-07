@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -7,7 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Settings, Bell, Lock, User, Save, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
@@ -48,7 +54,7 @@ export default function ConfiguracionOwnerPage() {
           'x-owner-id': ownerId || '',
         },
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setSettings(data);
@@ -124,18 +130,12 @@ export default function ConfiguracionOwnerPage() {
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.push('/portal-propietario')}
-          >
+          <Button variant="ghost" size="icon" onClick={() => router.push('/portal-propietario')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
             <h1 className="text-3xl font-bold">Configuración</h1>
-            <p className="text-muted-foreground">
-              Gestiona tu perfil y preferencias
-            </p>
+            <p className="text-muted-foreground">Gestiona tu perfil y preferencias</p>
           </div>
         </div>
 
@@ -146,9 +146,7 @@ export default function ConfiguracionOwnerPage() {
               <User className="w-5 h-5" />
               <CardTitle>Información Personal</CardTitle>
             </div>
-            <CardDescription>
-              Actualiza tu información de contacto
-            </CardDescription>
+            <CardDescription>Actualiza tu información de contacto</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -157,9 +155,7 @@ export default function ConfiguracionOwnerPage() {
                 <Input
                   id="nombreCompleto"
                   value={settings.nombreCompleto}
-                  onChange={(e) =>
-                    setSettings({ ...settings, nombreCompleto: e.target.value })
-                  }
+                  onChange={(e) => setSettings({ ...settings, nombreCompleto: e.target.value })}
                 />
               </div>
               <div>
@@ -177,9 +173,7 @@ export default function ConfiguracionOwnerPage() {
                 <Input
                   id="telefono"
                   value={settings.telefono}
-                  onChange={(e) =>
-                    setSettings({ ...settings, telefono: e.target.value })
-                  }
+                  onChange={(e) => setSettings({ ...settings, telefono: e.target.value })}
                 />
               </div>
               <div>
@@ -187,9 +181,7 @@ export default function ConfiguracionOwnerPage() {
                 <Input
                   id="direccion"
                   value={settings.direccion}
-                  onChange={(e) =>
-                    setSettings({ ...settings, direccion: e.target.value })
-                  }
+                  onChange={(e) => setSettings({ ...settings, direccion: e.target.value })}
                 />
               </div>
             </div>
@@ -203,9 +195,7 @@ export default function ConfiguracionOwnerPage() {
               <Bell className="w-5 h-5" />
               <CardTitle>Preferencias de Notificación</CardTitle>
             </div>
-            <CardDescription>
-              Elige qué notificaciones deseas recibir
-            </CardDescription>
+            <CardDescription>Elige qué notificaciones deseas recibir</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
@@ -291,9 +281,7 @@ export default function ConfiguracionOwnerPage() {
               <Settings className="w-5 h-5" />
               <CardTitle>Configuración Regional</CardTitle>
             </div>
-            <CardDescription>
-              Personaliza el idioma y zona horaria
-            </CardDescription>
+            <CardDescription>Personaliza el idioma y zona horaria</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -301,9 +289,7 @@ export default function ConfiguracionOwnerPage() {
                 <Label htmlFor="idioma">Idioma</Label>
                 <Select
                   value={settings.idioma}
-                  onValueChange={(value) =>
-                    setSettings({ ...settings, idioma: value })
-                  }
+                  onValueChange={(value) => setSettings({ ...settings, idioma: value })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -319,9 +305,7 @@ export default function ConfiguracionOwnerPage() {
                 <Label htmlFor="zona">Zona Horaria</Label>
                 <Select
                   value={settings.zona || 'Europe/Madrid'}
-                  onValueChange={(value) =>
-                    setSettings({ ...settings, zona: value })
-                  }
+                  onValueChange={(value) => setSettings({ ...settings, zona: value })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -345,9 +329,7 @@ export default function ConfiguracionOwnerPage() {
               <Lock className="w-5 h-5" />
               <CardTitle>Cambiar Contraseña</CardTitle>
             </div>
-            <CardDescription>
-              Actualiza tu contraseña para mayor seguridad
-            </CardDescription>
+            <CardDescription>Actualiza tu contraseña para mayor seguridad</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 gap-4">
@@ -387,10 +369,7 @@ export default function ConfiguracionOwnerPage() {
 
         {/* Save Button */}
         <div className="flex justify-end gap-4">
-          <Button
-            variant="outline"
-            onClick={() => router.push('/portal-propietario')}
-          >
+          <Button variant="outline" onClick={() => router.push('/portal-propietario')}>
             Cancelar
           </Button>
           <Button onClick={handleSave} disabled={saving}>

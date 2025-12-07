@@ -26,7 +26,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import {
   ArrowLeft,
   Calendar as CalendarIcon,
@@ -93,7 +99,7 @@ export default function VisitasPage() {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [filterStatus, setFilterStatus] = useState<string>('all');
-  
+
   const [formData, setFormData] = useState({
     candidateId: '',
     fechaVisita: '',
@@ -160,7 +166,7 @@ export default function VisitasPage() {
       });
 
       if (!res.ok) throw new Error('Error al crear visita');
-      
+
       toast.success('Visita programada correctamente');
       setOpenDialog(false);
       setFormData({ candidateId: '', fechaVisita: '', hora: '10:00', notas: '' });
@@ -180,7 +186,7 @@ export default function VisitasPage() {
       });
 
       if (!res.ok) throw new Error('Error al actualizar visita');
-      
+
       toast.success(confirmada ? 'Visita confirmada' : 'Confirmación cancelada');
       fetchVisits();
     } catch (error) {
@@ -198,7 +204,7 @@ export default function VisitasPage() {
       });
 
       if (!res.ok) throw new Error('Error al actualizar visita');
-      
+
       toast.success('Visita marcada como realizada');
       fetchVisits();
     } catch (error) {
@@ -212,36 +218,34 @@ export default function VisitasPage() {
     let filtered = visits;
 
     if (filterStatus === 'pendientes') {
-      filtered = filtered.filter(v => !v.confirmada && !v.asistio);
+      filtered = filtered.filter((v) => !v.confirmada && !v.asistio);
     } else if (filterStatus === 'confirmadas') {
-      filtered = filtered.filter(v => v.confirmada && !v.asistio);
+      filtered = filtered.filter((v) => v.confirmada && !v.asistio);
     } else if (filterStatus === 'realizadas') {
-      filtered = filtered.filter(v => v.asistio);
+      filtered = filtered.filter((v) => v.asistio);
     }
 
-    return filtered.sort((a, b) => 
-      new Date(a.fechaVisita).getTime() - new Date(b.fechaVisita).getTime()
+    return filtered.sort(
+      (a, b) => new Date(a.fechaVisita).getTime() - new Date(b.fechaVisita).getTime()
     );
   }, [visits, filterStatus]);
 
   // Visitas del día seleccionado
   const visitsForSelectedDate = useMemo(() => {
-    return filteredVisits.filter(visit => 
-      isSameDay(parseISO(visit.fechaVisita), selectedDate)
-    );
+    return filteredVisits.filter((visit) => isSameDay(parseISO(visit.fechaVisita), selectedDate));
   }, [filteredVisits, selectedDate]);
 
   // Días con visitas para el calendario
   const daysWithVisits = useMemo(() => {
-    return visits.map(v => parseISO(v.fechaVisita));
+    return visits.map((v) => parseISO(v.fechaVisita));
   }, [visits]);
 
   // KPIs
   const stats = useMemo(() => {
     const total = visits.length;
-    const pendientes = visits.filter(v => !v.confirmada && !v.asistio).length;
-    const confirmadas = visits.filter(v => v.confirmada && !v.asistio).length;
-    const realizadas = visits.filter(v => v.asistio).length;
+    const pendientes = visits.filter((v) => !v.confirmada && !v.asistio).length;
+    const confirmadas = visits.filter((v) => v.confirmada && !v.asistio).length;
+    const realizadas = visits.filter((v) => v.asistio).length;
 
     return { total, pendientes, confirmadas, realizadas };
   }, [visits]);
@@ -289,11 +293,7 @@ export default function VisitasPage() {
                 </BreadcrumbList>
               </Breadcrumb>
               <div className="flex items-center gap-3">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => router.push('/dashboard')}
-                >
+                <Button variant="outline" size="sm" onClick={() => router.push('/dashboard')}>
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Volver al Dashboard
                 </Button>
@@ -427,12 +427,15 @@ export default function VisitasPage() {
                             <div className="space-y-1">
                               <div className="flex items-center gap-2 text-sm">
                                 <User className="h-4 w-4 text-muted-foreground" />
-                                <span className="font-medium">{visit.candidate.nombreCompleto}</span>
+                                <span className="font-medium">
+                                  {visit.candidate.nombreCompleto}
+                                </span>
                               </div>
                               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <MapPin className="h-4 w-4" />
                                 <span>
-                                  {visit.candidate.unit.building.nombre} - Unidad {visit.candidate.unit.numero}
+                                  {visit.candidate.unit.building.nombre} - Unidad{' '}
+                                  {visit.candidate.unit.numero}
                                 </span>
                               </div>
                               <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -478,9 +481,7 @@ export default function VisitasPage() {
           <Card className="mt-6">
             <CardHeader>
               <CardTitle>Todas las Visitas</CardTitle>
-              <CardDescription>
-                Lista completa de visitas programadas
-              </CardDescription>
+              <CardDescription>Lista completa de visitas programadas</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -497,7 +498,11 @@ export default function VisitasPage() {
                             <div className="flex flex-wrap items-center gap-2">
                               {getStatusBadge(visit)}
                               <span className="text-sm font-medium">
-                                {format(parseISO(visit.fechaVisita), "d 'de' MMMM, yyyy 'a las' HH:mm", { locale: es })}
+                                {format(
+                                  parseISO(visit.fechaVisita),
+                                  "d 'de' MMMM, yyyy 'a las' HH:mm",
+                                  { locale: es }
+                                )}
                               </span>
                             </div>
                             <div className="grid gap-2 sm:grid-cols-2">
@@ -516,7 +521,8 @@ export default function VisitasPage() {
                               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <MapPin className="h-4 w-4" />
                                 <span>
-                                  {visit.candidate.unit.building.nombre} - Unidad {visit.candidate.unit.numero}
+                                  {visit.candidate.unit.building.nombre} - Unidad{' '}
+                                  {visit.candidate.unit.numero}
                                 </span>
                               </div>
                             </div>
@@ -534,10 +540,7 @@ export default function VisitasPage() {
                                     Confirmar
                                   </Button>
                                 ) : (
-                                  <Button
-                                    size="sm"
-                                    onClick={() => handleMarkAsCompleted(visit.id)}
-                                  >
+                                  <Button size="sm" onClick={() => handleMarkAsCompleted(visit.id)}>
                                     Marcar Realizada
                                   </Button>
                                 )}
@@ -560,9 +563,7 @@ export default function VisitasPage() {
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>Programar Nueva Visita</DialogTitle>
-            <DialogDescription>
-              Programa una visita para un candidato interesado
-            </DialogDescription>
+            <DialogDescription>Programa una visita para un candidato interesado</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
@@ -577,7 +578,8 @@ export default function VisitasPage() {
                 <SelectContent>
                   {candidates.map((candidate) => (
                     <SelectItem key={candidate.id} value={candidate.id}>
-                      {candidate.nombreCompleto} - {candidate.unit.building.nombre} ({candidate.unit.numero})
+                      {candidate.nombreCompleto} - {candidate.unit.building.nombre} (
+                      {candidate.unit.numero})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -606,9 +608,7 @@ export default function VisitasPage() {
             <Button variant="outline" onClick={() => setOpenDialog(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleCreateVisit}>
-              Programar Visita
-            </Button>
+            <Button onClick={handleCreateVisit}>Programar Visita</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

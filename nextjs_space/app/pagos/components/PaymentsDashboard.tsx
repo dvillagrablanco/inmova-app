@@ -125,10 +125,7 @@ export default function PaymentsDashboard() {
       p.fechaPago ? new Date(p.fechaPago).toLocaleDateString('es-ES') : 'N/A',
     ]);
 
-    const csvContent = [
-      headers.join(','),
-      ...rows.map((row) => row.join(',')),
-    ].join('\n');
+    const csvContent = [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
@@ -188,9 +185,7 @@ export default function PaymentsDashboard() {
   }
 
   const stripePayments = payments.filter((p) => p.stripePaymentStatus);
-  const successfulPayments = stripePayments.filter(
-    (p) => p.stripePaymentStatus === 'succeeded'
-  );
+  const successfulPayments = stripePayments.filter((p) => p.stripePaymentStatus === 'succeeded');
 
   return (
     <div className="space-y-6">
@@ -201,11 +196,7 @@ export default function PaymentsDashboard() {
           <p className="text-gray-600">Monitorea tus pagos en línea</p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={handleRefresh}
-            disabled={refreshing}
-          >
+          <Button variant="outline" onClick={handleRefresh} disabled={refreshing}>
             <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
             Actualizar
           </Button>
@@ -252,9 +243,7 @@ export default function PaymentsDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{formatCurrency(stats.netRevenue)}</div>
-              <p className="text-xs text-muted-foreground">
-                Después de comisiones
-              </p>
+              <p className="text-xs text-muted-foreground">Después de comisiones</p>
             </CardContent>
           </Card>
 
@@ -277,21 +266,16 @@ export default function PaymentsDashboard() {
       <Card>
         <CardHeader>
           <CardTitle>Transacciones Recientes</CardTitle>
-          <CardDescription>
-            Historial de pagos procesados con Stripe
-          </CardDescription>
+          <CardDescription>Historial de pagos procesados con Stripe</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="all" className="w-full">
             <TabsList>
               <TabsTrigger value="all">Todos ({stripePayments.length})</TabsTrigger>
-              <TabsTrigger value="succeeded">
-                Exitosos ({successfulPayments.length})
-              </TabsTrigger>
+              <TabsTrigger value="succeeded">Exitosos ({successfulPayments.length})</TabsTrigger>
               <TabsTrigger value="processing">
                 Procesando (
-                {stripePayments.filter((p) => p.stripePaymentStatus === 'processing').length}
-                )
+                {stripePayments.filter((p) => p.stripePaymentStatus === 'processing').length})
               </TabsTrigger>
             </TabsList>
 

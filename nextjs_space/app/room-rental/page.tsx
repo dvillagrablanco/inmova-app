@@ -72,7 +72,9 @@ function RoomRentalPage() {
             {/* Header */}
             <div className="mb-6">
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Alquiler por Habitaciones</h1>
-              <p className="text-gray-600">Gestiona habitaciones, contratos y prorrateo de suministros</p>
+              <p className="text-gray-600">
+                Gestiona habitaciones, contratos y prorrateo de suministros
+              </p>
             </div>
 
             {/* Analytics KPIs */}
@@ -80,7 +82,9 @@ function RoomRentalPage() {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <Card>
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium text-gray-600">Tasa Ocupación</CardTitle>
+                    <CardTitle className="text-sm font-medium text-gray-600">
+                      Tasa Ocupación
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-green-600">
@@ -91,7 +95,9 @@ function RoomRentalPage() {
 
                 <Card>
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium text-gray-600">Ingresos Totales</CardTitle>
+                    <CardTitle className="text-sm font-medium text-gray-600">
+                      Ingresos Totales
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-blue-600">
@@ -102,7 +108,9 @@ function RoomRentalPage() {
 
                 <Card>
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium text-gray-600">Precio Promedio</CardTitle>
+                    <CardTitle className="text-sm font-medium text-gray-600">
+                      Precio Promedio
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-purple-600">
@@ -113,7 +121,9 @@ function RoomRentalPage() {
 
                 <Card>
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium text-gray-600">Estancia Promedio</CardTitle>
+                    <CardTitle className="text-sm font-medium text-gray-600">
+                      Estancia Promedio
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-orange-600">
@@ -128,12 +138,18 @@ function RoomRentalPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Unidades con Habitaciones</CardTitle>
-                <CardDescription>Selecciona una unidad para gestionar sus habitaciones</CardDescription>
+                <CardDescription>
+                  Selecciona una unidad para gestionar sus habitaciones
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {units.map((unit) => (
-                    <Card key={unit.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => router.push(`/room-rental/${unit.id}`)}>
+                    <Card
+                      key={unit.id}
+                      className="hover:shadow-md transition-shadow cursor-pointer"
+                      onClick={() => router.push(`/room-rental/${unit.id}`)}
+                    >
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between mb-3">
                           <div>
@@ -142,7 +158,7 @@ function RoomRentalPage() {
                           </div>
                           <Building2 className="h-8 w-8 text-blue-500" />
                         </div>
-                        
+
                         <div className="space-y-2 text-sm">
                           <div className="flex items-center justify-between">
                             <span className="text-gray-600">Superficie:</span>

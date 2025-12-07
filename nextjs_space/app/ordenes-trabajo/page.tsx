@@ -11,11 +11,53 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Home, ArrowLeft, ClipboardList, Clock, CheckCircle, AlertCircle, Plus, Search, MoreVertical, Eye, Edit, Trash2, Building2, Home as HomeIcon, User, Euro } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Home,
+  ArrowLeft,
+  ClipboardList,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  Plus,
+  Search,
+  MoreVertical,
+  Eye,
+  Edit,
+  Trash2,
+  Building2,
+  Home as HomeIcon,
+  User,
+  Euro,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { LoadingState } from '@/components/ui/loading-state';
@@ -44,18 +86,18 @@ function OrdenesTrabajoPage() {
   const { data: session, status } = useSession() || {};
   const router = useRouter();
   const { canCreate, canUpdate, canDelete } = usePermissions();
-  
+
   // Estados principales
   const [ordenes, setOrdenes] = useState<WorkOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [estadoFilter, setEstadoFilter] = useState<string>('all');
   const [tipoFilter, setTipoFilter] = useState<string>('all');
-  
+
   // Estados de diálogo
   const [openDialog, setOpenDialog] = useState(false);
   const [editingOrden, setEditingOrden] = useState<WorkOrder | null>(null);
-  
+
   // Estados del formulario
   const [formData, setFormData] = useState({
     titulo: '',
@@ -69,7 +111,7 @@ function OrdenesTrabajoPage() {
     fechaAsignacion: '',
     fechaEstimada: '',
     costoTotal: '',
-    notas: ''
+    notas: '',
   });
 
   // Datos auxiliares
@@ -108,14 +150,14 @@ function OrdenesTrabajoPage() {
     try {
       const [provRes, buildRes] = await Promise.all([
         fetch('/api/providers'),
-        fetch('/api/buildings')
+        fetch('/api/buildings'),
       ]);
-      
+
       if (provRes.ok) setProviders(await provRes.json());
       if (buildRes.ok) {
         const buildingsData = await buildRes.json();
         setBuildings(buildingsData);
-        
+
         // Cargar unidades del primer edificio si existe
         if (buildingsData.length > 0 && buildingsData[0].units) {
           setUnits(buildingsData[0].units);
@@ -128,7 +170,7 @@ function OrdenesTrabajoPage() {
 
   const handleBuildingChange = (buildingId: string) => {
     setFormData({ ...formData, buildingId, unitId: 'no-unit' });
-    const building = buildings.find(b => b.id === buildingId);
+    const building = buildings.find((b) => b.id === buildingId);
     setUnits(building?.units || []);
   };
 
@@ -147,12 +189,12 @@ function OrdenesTrabajoPage() {
         fechaAsignacion: orden.fechaAsignacion.split('T')[0],
         fechaEstimada: orden.fechaEstimada ? orden.fechaEstimada.split('T')[0] : '',
         costoTotal: orden.costoTotal?.toString() || '',
-        notas: ''
+        notas: '',
       });
-      
+
       // Cargar unidades del edificio
       if ((orden.building as any)?.id) {
-        const building = buildings.find(b => b.id === (orden.building as any).id);
+        const building = buildings.find((b) => b.id === (orden.building as any).id);
         setUnits(building?.units || []);
       }
     } else {
@@ -169,7 +211,7 @@ function OrdenesTrabajoPage() {
         fechaAsignacion: '',
         fechaEstimada: '',
         costoTotal: '',
-        notas: ''
+        notas: '',
       });
     }
     setOpenDialog(true);
@@ -191,8 +233,8 @@ function OrdenesTrabajoPage() {
         body: JSON.stringify({
           ...formData,
           unitId: formData.unitId === 'no-unit' ? null : formData.unitId,
-          costoTotal: formData.costoTotal ? parseFloat(formData.costoTotal) : null
-        })
+          costoTotal: formData.costoTotal ? parseFloat(formData.costoTotal) : null,
+        }),
       });
 
       if (!res.ok) throw new Error('Error al guardar orden');
@@ -244,7 +286,7 @@ function OrdenesTrabajoPage() {
       total: ordenes.length,
       asignadas: ordenes.filter((o) => o.estado === 'asignada').length,
       enProceso: ordenes.filter((o) => o.estado === 'en_progreso').length,
-      completadas: ordenes.filter((o) => o.estado === 'completada').length
+      completadas: ordenes.filter((o) => o.estado === 'completada').length,
     };
   }, [ordenes]);
 
@@ -253,7 +295,7 @@ function OrdenesTrabajoPage() {
       asignada: 'bg-blue-500 text-white hover:bg-blue-600',
       en_progreso: 'bg-yellow-500 text-white hover:bg-yellow-600',
       completada: 'bg-green-500 text-white hover:bg-green-600',
-      cancelada: 'bg-red-500 text-white hover:bg-red-600'
+      cancelada: 'bg-red-500 text-white hover:bg-red-600',
     };
     return variants[estado] || 'bg-muted';
   };
@@ -263,7 +305,7 @@ function OrdenesTrabajoPage() {
       asignada: 'Asignada',
       en_progreso: 'En Progreso',
       completada: 'Completada',
-      cancelada: 'Cancelada'
+      cancelada: 'Cancelada',
     };
     return labels[estado] || estado;
   };
@@ -275,7 +317,7 @@ function OrdenesTrabajoPage() {
       mantenimiento: 'Mantenimiento',
       inspeccion: 'Inspección',
       limpieza: 'Limpieza',
-      otro: 'Otro'
+      otro: 'Otro',
     };
     return labels[tipo] || tipo;
   };
@@ -333,9 +375,7 @@ function OrdenesTrabajoPage() {
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <h1 className="text-3xl font-bold tracking-tight">Órdenes de Trabajo</h1>
-                <p className="text-muted-foreground">
-                  Gestiona trabajos asignados a proveedores
-                </p>
+                <p className="text-muted-foreground">Gestiona trabajos asignados a proveedores</p>
               </div>
               {canCreate && (
                 <Button onClick={() => handleOpenDialog()}>
@@ -359,7 +399,9 @@ function OrdenesTrabajoPage() {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Asignadas</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Asignadas
+                  </CardTitle>
                   <AlertCircle className="h-4 w-4 text-blue-500" />
                 </CardHeader>
                 <CardContent>
@@ -369,7 +411,9 @@ function OrdenesTrabajoPage() {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">En Proceso</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    En Proceso
+                  </CardTitle>
                   <Clock className="h-4 w-4 text-yellow-500" />
                 </CardHeader>
                 <CardContent>
@@ -379,7 +423,9 @@ function OrdenesTrabajoPage() {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Completadas</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Completadas
+                  </CardTitle>
                   <CheckCircle className="h-4 w-4 text-green-500" />
                 </CardHeader>
                 <CardContent>
@@ -438,21 +484,33 @@ function OrdenesTrabajoPage() {
                 {/* Filter Chips */}
                 <FilterChips
                   filters={[
-                    ...(searchTerm ? [{
-                      id: 'search',
-                      label: 'Búsqueda',
-                      value: searchTerm
-                    }] : []),
-                    ...(estadoFilter !== 'all' ? [{
-                      id: 'estado',
-                      label: 'Estado',
-                      value: getEstadoLabel(estadoFilter)
-                    }] : []),
-                    ...(tipoFilter !== 'all' ? [{
-                      id: 'tipo',
-                      label: 'Tipo',
-                      value: getTipoLabel(tipoFilter)
-                    }] : [])
+                    ...(searchTerm
+                      ? [
+                          {
+                            id: 'search',
+                            label: 'Búsqueda',
+                            value: searchTerm,
+                          },
+                        ]
+                      : []),
+                    ...(estadoFilter !== 'all'
+                      ? [
+                          {
+                            id: 'estado',
+                            label: 'Estado',
+                            value: getEstadoLabel(estadoFilter),
+                          },
+                        ]
+                      : []),
+                    ...(tipoFilter !== 'all'
+                      ? [
+                          {
+                            id: 'tipo',
+                            label: 'Tipo',
+                            value: getTipoLabel(tipoFilter),
+                          },
+                        ]
+                      : []),
                   ]}
                   onRemove={(id) => {
                     if (id === 'search') setSearchTerm('');
@@ -473,13 +531,25 @@ function OrdenesTrabajoPage() {
               {filteredOrdenes.length === 0 ? (
                 <EmptyState
                   icon={<ClipboardList className="h-12 w-12" />}
-                  title={searchTerm || estadoFilter !== 'all' || tipoFilter !== 'all' ? 'No se encontraron órdenes' : 'No hay órdenes de trabajo'}
-                  description={searchTerm || estadoFilter !== 'all' || tipoFilter !== 'all' ? 'No se encontraron órdenes con los filtros aplicados. Intenta ajustar tu búsqueda.' : 'Comienza creando tu primera orden de trabajo para gestionar trabajos asignados a proveedores.'}
-                  action={canCreate && !searchTerm && estadoFilter === 'all' && tipoFilter === 'all' ? {
-                    label: 'Crear Primera Orden',
-                    onClick: () => handleOpenDialog(),
-                    icon: <Plus className="h-4 w-4" />
-                  } : undefined}
+                  title={
+                    searchTerm || estadoFilter !== 'all' || tipoFilter !== 'all'
+                      ? 'No se encontraron órdenes'
+                      : 'No hay órdenes de trabajo'
+                  }
+                  description={
+                    searchTerm || estadoFilter !== 'all' || tipoFilter !== 'all'
+                      ? 'No se encontraron órdenes con los filtros aplicados. Intenta ajustar tu búsqueda.'
+                      : 'Comienza creando tu primera orden de trabajo para gestionar trabajos asignados a proveedores.'
+                  }
+                  action={
+                    canCreate && !searchTerm && estadoFilter === 'all' && tipoFilter === 'all'
+                      ? {
+                          label: 'Crear Primera Orden',
+                          onClick: () => handleOpenDialog(),
+                          icon: <Plus className="h-4 w-4" />,
+                        }
+                      : undefined
+                  }
                 />
               ) : (
                 filteredOrdenes.map((orden) => (
@@ -517,7 +587,9 @@ function OrdenesTrabajoPage() {
                           <div className="bg-muted/50 rounded-lg p-3 space-y-2">
                             <div className="flex items-center gap-2 text-sm">
                               <User className="h-4 w-4 text-primary" />
-                              <span className="font-medium">Proveedor: {orden.provider.nombre}</span>
+                              <span className="font-medium">
+                                Proveedor: {orden.provider.nombre}
+                              </span>
                             </div>
                             <div className="flex items-center gap-2 text-sm">
                               <Building2 className="h-4 w-4 text-primary" />
@@ -606,7 +678,9 @@ function OrdenesTrabajoPage() {
               {editingOrden ? 'Editar Orden de Trabajo' : 'Nueva Orden de Trabajo'}
             </DialogTitle>
             <DialogDescription>
-              {editingOrden ? 'Modifica los detalles de la orden' : 'Crea una nueva orden de trabajo'}
+              {editingOrden
+                ? 'Modifica los detalles de la orden'
+                : 'Crea una nueva orden de trabajo'}
             </DialogDescription>
           </DialogHeader>
 
@@ -635,7 +709,10 @@ function OrdenesTrabajoPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <Label htmlFor="tipo">Tipo *</Label>
-                <Select value={formData.tipo} onValueChange={(value) => setFormData({ ...formData, tipo: value })}>
+                <Select
+                  value={formData.tipo}
+                  onValueChange={(value) => setFormData({ ...formData, tipo: value })}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -652,7 +729,10 @@ function OrdenesTrabajoPage() {
 
               <div>
                 <Label htmlFor="estado">Estado *</Label>
-                <Select value={formData.estado} onValueChange={(value) => setFormData({ ...formData, estado: value })}>
+                <Select
+                  value={formData.estado}
+                  onValueChange={(value) => setFormData({ ...formData, estado: value })}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -669,7 +749,10 @@ function OrdenesTrabajoPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <Label htmlFor="providerId">Proveedor *</Label>
-                <Select value={formData.providerId} onValueChange={(value) => setFormData({ ...formData, providerId: value })}>
+                <Select
+                  value={formData.providerId}
+                  onValueChange={(value) => setFormData({ ...formData, providerId: value })}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecciona proveedor" />
                   </SelectTrigger>
@@ -685,7 +768,10 @@ function OrdenesTrabajoPage() {
 
               <div>
                 <Label htmlFor="prioridad">Prioridad</Label>
-                <Select value={formData.prioridad} onValueChange={(value) => setFormData({ ...formData, prioridad: value })}>
+                <Select
+                  value={formData.prioridad}
+                  onValueChange={(value) => setFormData({ ...formData, prioridad: value })}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -718,7 +804,10 @@ function OrdenesTrabajoPage() {
 
               <div>
                 <Label htmlFor="unitId">Unidad (Opcional)</Label>
-                <Select value={formData.unitId} onValueChange={(value) => setFormData({ ...formData, unitId: value })}>
+                <Select
+                  value={formData.unitId}
+                  onValueChange={(value) => setFormData({ ...formData, unitId: value })}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecciona unidad" />
                   </SelectTrigger>
@@ -773,9 +862,7 @@ function OrdenesTrabajoPage() {
             <Button variant="outline" onClick={() => setOpenDialog(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleSave}>
-              {editingOrden ? 'Actualizar' : 'Crear'} Orden
-            </Button>
+            <Button onClick={handleSave}>{editingOrden ? 'Actualizar' : 'Crear'} Orden</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -5,15 +5,28 @@ import { useSession } from 'next-auth/react';
 import { useRouter, useParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { LoadingState } from '@/components/ui/loading-state';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Home, 
-  FileText, 
+import {
+  Home,
+  FileText,
   Download,
   TrendingUp,
   Calendar,
@@ -21,7 +34,7 @@ import {
   Users,
   Euro,
   BarChart3,
-  PieChart as PieChartIcon
+  PieChart as PieChartIcon,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval } from 'date-fns';
@@ -112,7 +125,9 @@ export default function OccupancyReportsPage() {
 
   const handleExport = async () => {
     try {
-      const response = await fetch(`/api/room-rental/${unitId}/reports/export?month=${selectedMonth}`);
+      const response = await fetch(
+        `/api/room-rental/${unitId}/reports/export?month=${selectedMonth}`
+      );
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
@@ -140,7 +155,7 @@ export default function OccupancyReportsPage() {
       const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
       options.push({
         value: format(date, 'yyyy-MM'),
-        label: format(date, 'MMMM yyyy', { locale: es })
+        label: format(date, 'MMMM yyyy', { locale: es }),
       });
     }
     return options;
@@ -173,7 +188,9 @@ export default function OccupancyReportsPage() {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbLink href={`/room-rental/${unitId}`}>{report.unit.nombre}</BreadcrumbLink>
+                  <BreadcrumbLink href={`/room-rental/${unitId}`}>
+                    {report.unit.nombre}
+                  </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
@@ -189,7 +206,9 @@ export default function OccupancyReportsPage() {
                   <FileText className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Reportes de Ocupación</h1>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                    Reportes de Ocupación
+                  </h1>
                   <p className="text-sm text-gray-600 mt-1">{report.unit.nombre}</p>
                 </div>
               </div>
@@ -199,7 +218,7 @@ export default function OccupancyReportsPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {monthOptions.map(option => (
+                    {monthOptions.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
                       </SelectItem>
@@ -224,7 +243,8 @@ export default function OccupancyReportsPage() {
                         {report.summary.averageOccupancyRate.toFixed(1)}%
                       </p>
                       <p className="text-xs text-gray-600 mt-1">
-                        {report.summary.totalOccupiedDays} de {report.summary.totalAvailableDays} días
+                        {report.summary.totalOccupiedDays} de {report.summary.totalAvailableDays}{' '}
+                        días
                       </p>
                     </div>
                     <div className="p-3 bg-indigo-600 rounded-xl">
@@ -242,9 +262,7 @@ export default function OccupancyReportsPage() {
                       <p className="text-3xl font-bold text-green-900">
                         {report.summary.totalRevenue.toFixed(0)}€
                       </p>
-                      <p className="text-xs text-gray-600 mt-1">
-                        En el período seleccionado
-                      </p>
+                      <p className="text-xs text-gray-600 mt-1">En el período seleccionado</p>
                     </div>
                     <div className="p-3 bg-green-600 rounded-xl">
                       <Euro className="h-8 w-8 text-white" />
@@ -261,9 +279,7 @@ export default function OccupancyReportsPage() {
                       <p className="text-3xl font-bold text-purple-900">
                         {report.summary.avgRevPerRoom.toFixed(0)}€
                       </p>
-                      <p className="text-xs text-gray-600 mt-1">
-                        Promedio del período
-                      </p>
+                      <p className="text-xs text-gray-600 mt-1">Promedio del período</p>
                     </div>
                     <div className="p-3 bg-purple-600 rounded-xl">
                       <TrendingUp className="h-8 w-8 text-white" />
@@ -280,9 +296,7 @@ export default function OccupancyReportsPage() {
                       <p className="text-3xl font-bold text-orange-900">
                         {report.roomsData.length}
                       </p>
-                      <p className="text-xs text-gray-600 mt-1">
-                        En esta propiedad
-                      </p>
+                      <p className="text-xs text-gray-600 mt-1">En esta propiedad</p>
                     </div>
                     <div className="p-3 bg-orange-600 rounded-xl">
                       <DoorOpen className="h-8 w-8 text-white" />
@@ -303,7 +317,10 @@ export default function OccupancyReportsPage() {
               <CardContent>
                 <div className="space-y-4">
                   {report.roomsData.map((room) => (
-                    <div key={room.roomId} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                    <div
+                      key={room.roomId}
+                      className="p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                    >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-start gap-4">
                           <div className="p-3 bg-indigo-100 rounded-lg">
@@ -311,7 +328,9 @@ export default function OccupancyReportsPage() {
                           </div>
                           <div>
                             <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-semibold text-gray-900">Habitación {room.numero}</h3>
+                              <h3 className="font-semibold text-gray-900">
+                                Habitación {room.numero}
+                              </h3>
                               <Badge variant="outline">{room.superficie}m²</Badge>
                               <Badge variant="outline">{room.precio}€/mes</Badge>
                             </div>
@@ -324,12 +343,18 @@ export default function OccupancyReportsPage() {
                             <div className="flex flex-wrap gap-3 text-xs text-gray-600">
                               {room.checkInDate && (
                                 <span>
-                                  Check-in: {format(new Date(room.checkInDate), 'dd MMM yyyy', { locale: es })}
+                                  Check-in:{' '}
+                                  {format(new Date(room.checkInDate), 'dd MMM yyyy', {
+                                    locale: es,
+                                  })}
                                 </span>
                               )}
                               {room.checkOutDate && (
                                 <span>
-                                  Check-out: {format(new Date(room.checkOutDate), 'dd MMM yyyy', { locale: es })}
+                                  Check-out:{' '}
+                                  {format(new Date(room.checkOutDate), 'dd MMM yyyy', {
+                                    locale: es,
+                                  })}
                                 </span>
                               )}
                             </div>
@@ -338,12 +363,18 @@ export default function OccupancyReportsPage() {
                         <div className="flex sm:flex-col items-center sm:items-end gap-4 sm:gap-2">
                           <div className="text-left sm:text-right">
                             <p className="text-sm text-gray-600">Tasa de Ocupación</p>
-                            <p className="text-2xl font-bold text-indigo-600">{room.occupancyRate.toFixed(1)}%</p>
-                            <p className="text-xs text-gray-500">{room.daysOccupied} días ocupados</p>
+                            <p className="text-2xl font-bold text-indigo-600">
+                              {room.occupancyRate.toFixed(1)}%
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {room.daysOccupied} días ocupados
+                            </p>
                           </div>
                           <div className="text-left sm:text-right">
                             <p className="text-sm text-gray-600">Ingresos</p>
-                            <p className="text-2xl font-bold text-green-600">{room.revenue.toFixed(0)}€</p>
+                            <p className="text-2xl font-bold text-green-600">
+                              {room.revenue.toFixed(0)}€
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -395,7 +426,8 @@ export default function OccupancyReportsPage() {
                 </div>
                 {report.timeline.length > 10 && (
                   <p className="text-xs text-gray-500 mt-4 text-center">
-                    Mostrando primeros 10 días. Exporta el reporte completo para ver todos los datos.
+                    Mostrando primeros 10 días. Exporta el reporte completo para ver todos los
+                    datos.
                   </p>
                 )}
               </CardContent>

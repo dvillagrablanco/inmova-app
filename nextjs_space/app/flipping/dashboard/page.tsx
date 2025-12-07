@@ -10,11 +10,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  TrendingUp, 
-  Home, 
-  DollarSign, 
-  Calendar, 
+import {
+  TrendingUp,
+  Home,
+  DollarSign,
+  Calendar,
   Target,
   AlertCircle,
   CheckCircle,
@@ -22,9 +22,23 @@ import {
   ArrowUp,
   ArrowDown,
   Percent,
-  PieChart as PieChartIcon
+  PieChart as PieChartIcon,
 } from 'lucide-react';
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from '@/components/ui/lazy-charts-extended';
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from '@/components/ui/lazy-charts-extended';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -75,7 +89,7 @@ export default function FlippingDashboardPage() {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      
+
       // Cargar métricas de flipping
       const metricsRes = await fetch('/api/flipping/metrics');
       if (metricsRes.ok) {
@@ -96,7 +110,6 @@ export default function FlippingDashboardPage() {
         const roiDataRes = await roiRes.json();
         setRoiData(roiDataRes);
       }
-
     } catch (error) {
       logger.error('Error loading flipping dashboard:', error);
       toast.error('Error al cargar el dashboard de House Flipping');
@@ -141,7 +154,10 @@ export default function FlippingDashboardPage() {
                   <TrendingUp className="h-4 w-4 mr-2" />
                   Actualizar
                 </Button>
-                <Button onClick={() => router.push('/flipping/projects')} className="gradient-primary">
+                <Button
+                  onClick={() => router.push('/flipping/projects')}
+                  className="gradient-primary"
+                >
                   <Home className="h-4 w-4 mr-2" />
                   Ver Proyectos
                 </Button>
@@ -157,9 +173,7 @@ export default function FlippingDashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{metrics?.activeProjects || 0}</div>
-                  <p className="text-xs text-gray-500">
-                    de {metrics?.totalProjects || 0} totales
-                  </p>
+                  <p className="text-xs text-gray-500">de {metrics?.totalProjects || 0} totales</p>
                 </CardContent>
               </Card>
 
@@ -170,9 +184,7 @@ export default function FlippingDashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-green-600">{metrics?.avgROI || 0}%</div>
-                  <p className="text-xs text-gray-500">
-                    Retorno de inversión
-                  </p>
+                  <p className="text-xs text-gray-500">Retorno de inversión</p>
                 </CardContent>
               </Card>
 
@@ -182,10 +194,10 @@ export default function FlippingDashboardPage() {
                   <DollarSign className="h-4 w-4 text-yellow-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">€{metrics?.totalInvestment?.toLocaleString() || 0}</div>
-                  <p className="text-xs text-gray-500">
-                    En proyectos
-                  </p>
+                  <div className="text-2xl font-bold">
+                    €{metrics?.totalInvestment?.toLocaleString() || 0}
+                  </div>
+                  <p className="text-xs text-gray-500">En proyectos</p>
                 </CardContent>
               </Card>
 
@@ -196,9 +208,7 @@ export default function FlippingDashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{metrics?.avgProjectDuration || 0}</div>
-                  <p className="text-xs text-gray-500">
-                    días por proyecto
-                  </p>
+                  <p className="text-xs text-gray-500">días por proyecto</p>
                 </CardContent>
               </Card>
             </div>
@@ -221,11 +231,16 @@ export default function FlippingDashboardPage() {
                     </CardHeader>
                     <CardContent>
                       <ResponsiveContainer width="100%" height={250}>
-                        <BarChart data={[
-                          { name: 'Inversión', value: metrics?.totalInvestment || 0 },
-                          { name: 'Ingresos', value: metrics?.totalRevenue || 0 },
-                          { name: 'Beneficio', value: (metrics?.totalRevenue || 0) - (metrics?.totalInvestment || 0) },
-                        ]}>
+                        <BarChart
+                          data={[
+                            { name: 'Inversión', value: metrics?.totalInvestment || 0 },
+                            { name: 'Ingresos', value: metrics?.totalRevenue || 0 },
+                            {
+                              name: 'Beneficio',
+                              value: (metrics?.totalRevenue || 0) - (metrics?.totalInvestment || 0),
+                            },
+                          ]}
+                        >
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis dataKey="name" />
                           <YAxis />
@@ -273,17 +288,23 @@ export default function FlippingDashboardPage() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="p-4 border rounded-lg">
                         <div className="text-sm text-gray-600 mb-1">Proyectos Completados</div>
-                        <div className="text-2xl font-bold text-green-600">{metrics?.completedProjects || 0}</div>
+                        <div className="text-2xl font-bold text-green-600">
+                          {metrics?.completedProjects || 0}
+                        </div>
                         <div className="text-xs text-gray-500 mt-1">Finalizados con éxito</div>
                       </div>
                       <div className="p-4 border rounded-lg">
                         <div className="text-sm text-gray-600 mb-1">Margen de Beneficio</div>
-                        <div className="text-2xl font-bold text-indigo-600">{metrics?.profitMargin || 0}%</div>
+                        <div className="text-2xl font-bold text-indigo-600">
+                          {metrics?.profitMargin || 0}%
+                        </div>
                         <div className="text-xs text-gray-500 mt-1">Promedio</div>
                       </div>
                       <div className="p-4 border rounded-lg">
                         <div className="text-sm text-gray-600 mb-1">Ingresos Totales</div>
-                        <div className="text-2xl font-bold text-yellow-600">€{metrics?.totalRevenue?.toLocaleString() || 0}</div>
+                        <div className="text-2xl font-bold text-yellow-600">
+                          €{metrics?.totalRevenue?.toLocaleString() || 0}
+                        </div>
                         <div className="text-xs text-gray-500 mt-1">Acumulado</div>
                       </div>
                     </div>
@@ -324,22 +345,33 @@ export default function FlippingDashboardPage() {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                           <div>
                             <div className="text-sm text-gray-600">Inversión</div>
-                            <div className="text-lg font-semibold text-red-600">€{project.investment.toLocaleString()}</div>
+                            <div className="text-lg font-semibold text-red-600">
+                              €{project.investment.toLocaleString()}
+                            </div>
                           </div>
                           <div>
                             <div className="text-sm text-gray-600">Ingresos</div>
-                            <div className="text-lg font-semibold text-green-600">€{project.revenue.toLocaleString()}</div>
+                            <div className="text-lg font-semibold text-green-600">
+                              €{project.revenue.toLocaleString()}
+                            </div>
                           </div>
                           <div>
                             <div className="text-sm text-gray-600">Beneficio</div>
-                            <div className="text-lg font-semibold text-blue-600">€{project.profit.toLocaleString()}</div>
+                            <div className="text-lg font-semibold text-blue-600">
+                              €{project.profit.toLocaleString()}
+                            </div>
                           </div>
                           <div>
                             <div className="text-sm text-gray-600">ROI</div>
-                            <div className={`text-lg font-bold ${
-                              project.roi > 20 ? 'text-green-600' :
-                              project.roi > 10 ? 'text-yellow-600' : 'text-red-600'
-                            }`}>
+                            <div
+                              className={`text-lg font-bold ${
+                                project.roi > 20
+                                  ? 'text-green-600'
+                                  : project.roi > 10
+                                    ? 'text-yellow-600'
+                                    : 'text-red-600'
+                              }`}
+                            >
                               {project.roi}%
                             </div>
                           </div>

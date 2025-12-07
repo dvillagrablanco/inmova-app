@@ -11,23 +11,36 @@ import { ButtonWithLoading } from '@/components/ui/button-with-loading';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { 
-  Home, 
-  ArrowLeft, 
-  Palette, 
-  Type, 
-  Layout, 
-  Info, 
-  Save, 
+import {
+  Home,
+  ArrowLeft,
+  Palette,
+  Type,
+  Layout,
+  Info,
+  Save,
   RefreshCw,
   Image as ImageIcon,
   Eye,
-  Settings
+  Settings,
 } from 'lucide-react';
 import { useBranding } from '@/lib/hooks/useBranding';
 import logger, { logError } from '@/lib/logger';
@@ -37,13 +50,13 @@ interface BrandingFormData {
   appName: string;
   appDescription: string;
   tagline: string;
-  
+
   // Logos
   logoUrl: string;
   logoSmallUrl: string;
   faviconUrl: string;
   ogImageUrl: string;
-  
+
   // Colores
   primaryColor: string;
   secondaryColor: string;
@@ -53,22 +66,22 @@ interface BrandingFormData {
   successColor: string;
   warningColor: string;
   errorColor: string;
-  
+
   // Tipografía
   fontFamily: string;
   headingFont: string;
-  
+
   // UI
   borderRadius: string;
   sidebarPosition: string;
   theme: string;
-  
+
   // Contacto
   footerText: string;
   contactEmail: string;
   contactPhone: string;
   websiteUrl: string;
-  
+
   // SEO
   metaTitle: string;
   metaDescription: string;
@@ -81,7 +94,7 @@ export default function PersonalizacionPage() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('identidad');
-  
+
   const [formData, setFormData] = useState<BrandingFormData>({
     appName: 'INMOVA',
     appDescription: '',
@@ -151,7 +164,7 @@ export default function PersonalizacionPage() {
   }, [fullConfig, isLoaded]);
 
   const handleInputChange = (field: keyof BrandingFormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSave = async () => {
@@ -161,7 +174,7 @@ export default function PersonalizacionPage() {
       const response = await fetch('/api/branding', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       });
 
       if (!response.ok) {
@@ -169,14 +182,14 @@ export default function PersonalizacionPage() {
       }
 
       const data = await response.json();
-      
+
       toast.success('¡Personalización guardada!', {
-        description: 'Los cambios se aplicarán inmediatamente en toda la aplicación.'
+        description: 'Los cambios se aplicarán inmediatamente en toda la aplicación.',
       });
 
       // Refrescar branding
       await refresh();
-      
+
       // Recargar la página para aplicar cambios visuales
       setTimeout(() => {
         window.location.reload();
@@ -184,7 +197,7 @@ export default function PersonalizacionPage() {
     } catch (error) {
       logger.error('Error saving branding:', error);
       toast.error('Error al guardar', {
-        description: 'No se pudo guardar la configuración de personalización.'
+        description: 'No se pudo guardar la configuración de personalización.',
       });
     } finally {
       setSaving(false);
@@ -239,24 +252,20 @@ export default function PersonalizacionPage() {
   return (
     <div className="flex h-screen overflow-hidden bg-muted/30">
       <Sidebar />
-      
+
       <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
         <Header />
-        
+
         <main className="flex-1 overflow-y-auto p-6 bg-gradient-bg">
           {/* Breadcrumbs y Header */}
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push('/dashboard')}
-              >
+              <Button variant="ghost" size="sm" onClick={() => router.push('/dashboard')}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Volver al Dashboard
               </Button>
             </div>
-            
+
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
@@ -266,9 +275,7 @@ export default function PersonalizacionPage() {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/admin/configuracion">
-                    Administración
-                  </BreadcrumbLink>
+                  <BreadcrumbLink href="/admin/configuracion">Administración</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
@@ -276,7 +283,7 @@ export default function PersonalizacionPage() {
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
-            
+
             <div className="mt-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -285,20 +292,17 @@ export default function PersonalizacionPage() {
                     Personalización White Label
                   </h1>
                   <p className="text-muted-foreground mt-2">
-                    Configura la identidad visual de tu empresa. Los cambios se aplicarán inmediatamente.
+                    Configura la identidad visual de tu empresa. Los cambios se aplicarán
+                    inmediatamente.
                   </p>
                 </div>
-                
+
                 <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={handleReset}
-                    disabled={saving}
-                  >
+                  <Button variant="outline" onClick={handleReset} disabled={saving}>
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Descartar
                   </Button>
-                  
+
                   <ButtonWithLoading
                     onClick={handleSave}
                     isLoading={saving}
@@ -391,7 +395,7 @@ export default function PersonalizacionPage() {
                       <ImageIcon className="h-5 w-5" />
                       Logos y Assets
                     </h3>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <Label htmlFor="logoUrl">Logo Principal (URL)</Label>
@@ -414,9 +418,7 @@ export default function PersonalizacionPage() {
                           onChange={(e) => handleInputChange('logoSmallUrl', e.target.value)}
                           placeholder="https://www.shutterstock.com/shutterstock/photos/1321585844/display_1500/stock-vector-pixel-perfect-food-icons-with-x-px-export-ready-1321585844.jpg"
                         />
-                        <p className="text-sm text-muted-foreground">
-                          Tamaño recomendado: 40x40px
-                        </p>
+                        <p className="text-sm text-muted-foreground">Tamaño recomendado: 40x40px</p>
                       </div>
 
                       <div className="space-y-2">
@@ -456,7 +458,8 @@ export default function PersonalizacionPage() {
                 <CardHeader>
                   <CardTitle>Paleta de Colores</CardTitle>
                   <CardDescription>
-                    Personaliza los colores de tu aplicación. Los cambios se aplicarán en toda la interfaz.
+                    Personaliza los colores de tu aplicación. Los cambios se aplicarán en toda la
+                    interfaz.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -621,42 +624,42 @@ export default function PersonalizacionPage() {
                     <p className="text-sm font-medium mb-3">Vista Previa</p>
                     <div className="flex flex-wrap gap-3">
                       <div className="text-center">
-                        <div 
+                        <div
                           className="w-16 h-16 rounded-lg border-2 mb-2"
                           style={{ backgroundColor: formData.primaryColor }}
                         />
                         <span className="text-xs">Primario</span>
                       </div>
                       <div className="text-center">
-                        <div 
+                        <div
                           className="w-16 h-16 rounded-lg border-2 mb-2"
                           style={{ backgroundColor: formData.secondaryColor }}
                         />
                         <span className="text-xs">Secundario</span>
                       </div>
                       <div className="text-center">
-                        <div 
+                        <div
                           className="w-16 h-16 rounded-lg border-2 mb-2"
                           style={{ backgroundColor: formData.accentColor }}
                         />
                         <span className="text-xs">Acento</span>
                       </div>
                       <div className="text-center">
-                        <div 
+                        <div
                           className="w-16 h-16 rounded-lg border-2 mb-2"
                           style={{ backgroundColor: formData.successColor }}
                         />
                         <span className="text-xs">Exitoso</span>
                       </div>
                       <div className="text-center">
-                        <div 
+                        <div
                           className="w-16 h-16 rounded-lg border-2 mb-2"
                           style={{ backgroundColor: formData.warningColor }}
                         />
                         <span className="text-xs">Advertencia</span>
                       </div>
                       <div className="text-center">
-                        <div 
+                        <div
                           className="w-16 h-16 rounded-lg border-2 mb-2"
                           style={{ backgroundColor: formData.errorColor }}
                         />
@@ -697,9 +700,7 @@ export default function PersonalizacionPage() {
                         <SelectItem value="system-ui, sans-serif">System UI</SelectItem>
                       </SelectContent>
                     </Select>
-                    <p className="text-sm text-muted-foreground">
-                      Fuente usada en texto general
-                    </p>
+                    <p className="text-sm text-muted-foreground">Fuente usada en texto general</p>
                   </div>
 
                   <div className="space-y-2">
@@ -716,13 +717,19 @@ export default function PersonalizacionPage() {
                   </div>
 
                   {/* Preview de Tipografía */}
-                  <div className="mt-6 p-6 border rounded-lg bg-muted/30" style={{ fontFamily: formData.fontFamily }}>
-                    <h3 className="text-2xl font-bold mb-2" style={{ fontFamily: formData.headingFont || formData.fontFamily }}>
+                  <div
+                    className="mt-6 p-6 border rounded-lg bg-muted/30"
+                    style={{ fontFamily: formData.fontFamily }}
+                  >
+                    <h3
+                      className="text-2xl font-bold mb-2"
+                      style={{ fontFamily: formData.headingFont || formData.fontFamily }}
+                    >
                       Título de Ejemplo
                     </h3>
                     <p className="text-base">
-                      Este es un párrafo de ejemplo que muestra cómo se verá el texto con la fuente seleccionada. 
-                      La tipografía es fundamental para la identidad de tu marca.
+                      Este es un párrafo de ejemplo que muestra cómo se verá el texto con la fuente
+                      seleccionada. La tipografía es fundamental para la identidad de tu marca.
                     </p>
                     <p className="text-sm text-muted-foreground mt-2">
                       Texto secundario y descripciones.
@@ -737,9 +744,7 @@ export default function PersonalizacionPage() {
               <Card>
                 <CardHeader>
                   <CardTitle>Configuración de Interfaz</CardTitle>
-                  <CardDescription>
-                    Ajusta el aspecto visual de los componentes
-                  </CardDescription>
+                  <CardDescription>Ajusta el aspecto visual de los componentes</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -800,7 +805,7 @@ export default function PersonalizacionPage() {
                   {/* Preview de Componentes */}
                   <div className="mt-6 p-6 border rounded-lg bg-muted/30 space-y-4">
                     <p className="text-sm font-medium mb-3">Vista Previa de Componentes</p>
-                    
+
                     <div className="flex flex-wrap gap-3">
                       <Button style={{ borderRadius: formData.borderRadius }}>
                         Botón Primario
@@ -808,11 +813,9 @@ export default function PersonalizacionPage() {
                       <Button variant="outline" style={{ borderRadius: formData.borderRadius }}>
                         Botón Secundario
                       </Button>
-                      <Badge style={{ borderRadius: formData.borderRadius }}>
-                        Badge
-                      </Badge>
+                      <Badge style={{ borderRadius: formData.borderRadius }}>Badge</Badge>
                     </div>
-                    
+
                     <div className="p-4 border" style={{ borderRadius: formData.borderRadius }}>
                       <p className="text-sm">Card de ejemplo con el radio de bordes seleccionado</p>
                     </div>

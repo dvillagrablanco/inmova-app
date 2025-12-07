@@ -13,7 +13,9 @@ export default function PartnerLayout({ children }: PartnerLayoutProps) {
 
   // Páginas que no necesitan el layout con sidebar
   const publicPages = ['/partners', '/partners/login', '/partners/register', '/partners/accept'];
-  const isPublicPage = publicPages.some(page => pathname === page || pathname?.startsWith('/partners/accept'));
+  const isPublicPage = publicPages.some(
+    (page) => pathname === page || pathname?.startsWith('/partners/accept')
+  );
 
   if (isPublicPage) {
     return <>{children}</>;
@@ -53,15 +55,13 @@ export default function PartnerLayout({ children }: PartnerLayoutProps) {
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
-            
+
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                  isActive
-                    ? 'bg-primary text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
+                  isActive ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
                 <Icon className="h-5 w-5" />
@@ -84,9 +84,7 @@ export default function PartnerLayout({ children }: PartnerLayoutProps) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto">
-        {children}
-      </main>
+      <main className="flex-1 overflow-auto">{children}</main>
     </div>
   );
 }

@@ -6,7 +6,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Briefcase, Loader2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -113,9 +119,7 @@ export default function ProveedorRegisterPage() {
                   type="text"
                   placeholder="Nombre completo o empresa"
                   value={formData.nombre}
-                  onChange={(e) =>
-                    setFormData({ ...formData, nombre: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
                   required
                   disabled={loading}
                 />
@@ -148,9 +152,7 @@ export default function ProveedorRegisterPage() {
                   type="email"
                   placeholder="proveedor@ejemplo.com"
                   value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   required
                   disabled={loading}
                 />
@@ -163,9 +165,7 @@ export default function ProveedorRegisterPage() {
                   type="tel"
                   placeholder="+34 600 000 000"
                   value={formData.telefono}
-                  onChange={(e) =>
-                    setFormData({ ...formData, telefono: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
                   required
                   disabled={loading}
                 />
@@ -179,9 +179,7 @@ export default function ProveedorRegisterPage() {
                 type="text"
                 placeholder="Calle, número, ciudad"
                 value={formData.direccion}
-                onChange={(e) =>
-                  setFormData({ ...formData, direccion: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, direccion: e.target.value })}
                 disabled={loading}
               />
             </div>
@@ -194,9 +192,7 @@ export default function ProveedorRegisterPage() {
                   type="password"
                   placeholder="Mínimo 6 caracteres"
                   value={formData.password}
-                  onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   required
                   disabled={loading}
                 />
@@ -209,9 +205,7 @@ export default function ProveedorRegisterPage() {
                   type="password"
                   placeholder="Repite la contraseña"
                   value={formData.confirmPassword}
-                  onChange={(e) =>
-                    setFormData({ ...formData, confirmPassword: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                   required
                   disabled={loading}
                 />
@@ -220,8 +214,8 @@ export default function ProveedorRegisterPage() {
 
             <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg">
               <p className="text-sm text-blue-800 dark:text-blue-200">
-                Tu cuenta quedará pendiente de aprobación por parte del administrador. 
-                Recibirás un email cuando tu cuenta sea activada.
+                Tu cuenta quedará pendiente de aprobación por parte del administrador. Recibirás un
+                email cuando tu cuenta sea activada.
               </p>
             </div>
 

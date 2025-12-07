@@ -9,10 +9,30 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
@@ -145,7 +165,9 @@ export default function ReservasPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...newReservation,
-          numeroPersonas: newReservation.numeroPersonas ? parseInt(newReservation.numeroPersonas) : null,
+          numeroPersonas: newReservation.numeroPersonas
+            ? parseInt(newReservation.numeroPersonas)
+            : null,
         }),
       });
       if (response.ok) {
@@ -207,7 +229,9 @@ export default function ReservasPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...newReservation,
-          numeroPersonas: newReservation.numeroPersonas ? parseInt(newReservation.numeroPersonas) : null,
+          numeroPersonas: newReservation.numeroPersonas
+            ? parseInt(newReservation.numeroPersonas)
+            : null,
         }),
       });
       if (response.ok) {
@@ -246,7 +270,9 @@ export default function ReservasPage() {
   const totalEspacios = espacios.length;
   const espaciosActivos = espacios.filter((e) => e.activo).length;
   const totalReservas = reservas.length;
-  const reservasPendientes = reservas.filter((r) => r.estado === 'pendiente' || r.estado === 'confirmada').length;
+  const reservasPendientes = reservas.filter(
+    (r) => r.estado === 'pendiente' || r.estado === 'confirmada'
+  ).length;
 
   const filteredReservas = reservas.filter((reserva) => {
     const matchSearch =
@@ -278,7 +304,9 @@ export default function ReservasPage() {
               <Breadcrumb>
                 <BreadcrumbList>
                   <BreadcrumbItem>
-                    <BreadcrumbLink href="/dashboard"><Home className="h-4 w-4" /></BreadcrumbLink>
+                    <BreadcrumbLink href="/dashboard">
+                      <Home className="h-4 w-4" />
+                    </BreadcrumbLink>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
@@ -331,7 +359,8 @@ export default function ReservasPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {totalReservas > 0 ? Math.round((reservasPendientes / totalReservas) * 100) : 0}%
+                    {totalReservas > 0 ? Math.round((reservasPendientes / totalReservas) * 100) : 0}
+                    %
                   </div>
                 </CardContent>
               </Card>
@@ -396,10 +425,10 @@ export default function ReservasPage() {
                                 reserva.estado === 'confirmada'
                                   ? 'default'
                                   : reserva.estado === 'completada'
-                                  ? 'secondary'
-                                  : reserva.estado === 'cancelada'
-                                  ? 'destructive'
-                                  : 'outline'
+                                    ? 'secondary'
+                                    : reserva.estado === 'cancelada'
+                                      ? 'destructive'
+                                      : 'outline'
                               }
                             >
                               {reserva.estado}
@@ -413,7 +442,9 @@ export default function ReservasPage() {
                               <div>
                                 <p className="text-xs text-muted-foreground">Fecha</p>
                                 <p className="text-sm font-medium">
-                                  {format(new Date(reserva.fechaReserva), 'dd/MM/yyyy', { locale: es })}
+                                  {format(new Date(reserva.fechaReserva), 'dd/MM/yyyy', {
+                                    locale: es,
+                                  })}
                                 </p>
                               </div>
                             </div>
@@ -430,7 +461,9 @@ export default function ReservasPage() {
                               <User className="h-4 w-4 text-muted-foreground" />
                               <div>
                                 <p className="text-xs text-muted-foreground">Inquilino</p>
-                                <p className="text-sm font-medium">{reserva.tenant?.nombreCompleto}</p>
+                                <p className="text-sm font-medium">
+                                  {reserva.tenant?.nombreCompleto}
+                                </p>
                               </div>
                             </div>
                             {reserva.monto && reserva.monto > 0 && (
@@ -441,7 +474,9 @@ export default function ReservasPage() {
                                   <p className="text-sm font-medium">
                                     €{reserva.monto.toFixed(2)}
                                     {reserva.pagado && (
-                                      <Badge variant="secondary" className="ml-2">Pagado</Badge>
+                                      <Badge variant="secondary" className="ml-2">
+                                        Pagado
+                                      </Badge>
                                     )}
                                   </p>
                                 </div>
@@ -499,14 +534,18 @@ export default function ReservasPage() {
                             {espacio.capacidadMaxima && (
                               <div className="flex items-center gap-1">
                                 <Users className="h-3 w-3 text-muted-foreground" />
-                                <span className="text-muted-foreground">{espacio.capacidadMaxima} pers.</span>
+                                <span className="text-muted-foreground">
+                                  {espacio.capacidadMaxima} pers.
+                                </span>
                               </div>
                             )}
                           </div>
                           {espacio.horaApertura && espacio.horaCierre && (
                             <div className="flex items-center gap-2 text-sm">
                               <Clock className="h-4 w-4 text-muted-foreground" />
-                              <span>{espacio.horaApertura} - {espacio.horaCierre}</span>
+                              <span>
+                                {espacio.horaApertura} - {espacio.horaCierre}
+                              </span>
                             </div>
                           )}
                           {espacio.requierePago && espacio.costoPorHora && (
@@ -535,19 +574,31 @@ export default function ReservasPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Edificio</Label>
-                <Select value={newSpace.buildingId} onValueChange={(v) => setNewSpace({ ...newSpace, buildingId: v })}>
-                  <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
+                <Select
+                  value={newSpace.buildingId}
+                  onValueChange={(v) => setNewSpace({ ...newSpace, buildingId: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar" />
+                  </SelectTrigger>
                   <SelectContent>
                     {buildings.map((b) => (
-                      <SelectItem key={b.id} value={b.id}>{b.nombre}</SelectItem>
+                      <SelectItem key={b.id} value={b.id}>
+                        {b.nombre}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
                 <Label>Tipo</Label>
-                <Select value={newSpace.tipo} onValueChange={(v) => setNewSpace({ ...newSpace, tipo: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                <Select
+                  value={newSpace.tipo}
+                  onValueChange={(v) => setNewSpace({ ...newSpace, tipo: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="salon_fiestas">Salón de Fiestas</SelectItem>
                     <SelectItem value="gimnasio">Gimnasio</SelectItem>
@@ -564,50 +615,95 @@ export default function ReservasPage() {
             </div>
             <div>
               <Label>Nombre</Label>
-              <Input value={newSpace.nombre} onChange={(e) => setNewSpace({ ...newSpace, nombre: e.target.value })} />
+              <Input
+                value={newSpace.nombre}
+                onChange={(e) => setNewSpace({ ...newSpace, nombre: e.target.value })}
+              />
             </div>
             <div>
               <Label>Descripción</Label>
-              <Textarea value={newSpace.descripcion} onChange={(e) => setNewSpace({ ...newSpace, descripcion: e.target.value })} rows={3} />
+              <Textarea
+                value={newSpace.descripcion}
+                onChange={(e) => setNewSpace({ ...newSpace, descripcion: e.target.value })}
+                rows={3}
+              />
             </div>
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <Label>Capacidad</Label>
-                <Input type="number" value={newSpace.capacidadMaxima} onChange={(e) => setNewSpace({ ...newSpace, capacidadMaxima: e.target.value })} />
+                <Input
+                  type="number"
+                  value={newSpace.capacidadMaxima}
+                  onChange={(e) => setNewSpace({ ...newSpace, capacidadMaxima: e.target.value })}
+                />
               </div>
               <div>
                 <Label>Duración Máx. (h)</Label>
-                <Input type="number" value={newSpace.duracionMaximaHoras} onChange={(e) => setNewSpace({ ...newSpace, duracionMaximaHoras: e.target.value })} />
+                <Input
+                  type="number"
+                  value={newSpace.duracionMaximaHoras}
+                  onChange={(e) =>
+                    setNewSpace({ ...newSpace, duracionMaximaHoras: e.target.value })
+                  }
+                />
               </div>
               <div>
                 <Label>Anticipación (días)</Label>
-                <Input type="number" value={newSpace.anticipacionDias} onChange={(e) => setNewSpace({ ...newSpace, anticipacionDias: e.target.value })} />
+                <Input
+                  type="number"
+                  value={newSpace.anticipacionDias}
+                  onChange={(e) => setNewSpace({ ...newSpace, anticipacionDias: e.target.value })}
+                />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Apertura</Label>
-                <Input type="time" value={newSpace.horaApertura} onChange={(e) => setNewSpace({ ...newSpace, horaApertura: e.target.value })} />
+                <Input
+                  type="time"
+                  value={newSpace.horaApertura}
+                  onChange={(e) => setNewSpace({ ...newSpace, horaApertura: e.target.value })}
+                />
               </div>
               <div>
                 <Label>Cierre</Label>
-                <Input type="time" value={newSpace.horaCierre} onChange={(e) => setNewSpace({ ...newSpace, horaCierre: e.target.value })} />
+                <Input
+                  type="time"
+                  value={newSpace.horaCierre}
+                  onChange={(e) => setNewSpace({ ...newSpace, horaCierre: e.target.value })}
+                />
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <input type="checkbox" id="req-pago" checked={newSpace.requierePago} onChange={(e) => setNewSpace({ ...newSpace, requierePago: e.target.checked })} />
-              <Label htmlFor="req-pago" className="cursor-pointer">Requiere pago</Label>
+              <input
+                type="checkbox"
+                id="req-pago"
+                checked={newSpace.requierePago}
+                onChange={(e) => setNewSpace({ ...newSpace, requierePago: e.target.checked })}
+              />
+              <Label htmlFor="req-pago" className="cursor-pointer">
+                Requiere pago
+              </Label>
             </div>
             {newSpace.requierePago && (
               <div>
                 <Label>Costo/Hora (€)</Label>
-                <Input type="number" step="0.01" value={newSpace.costoPorHora} onChange={(e) => setNewSpace({ ...newSpace, costoPorHora: e.target.value })} />
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={newSpace.costoPorHora}
+                  onChange={(e) => setNewSpace({ ...newSpace, costoPorHora: e.target.value })}
+                />
               </div>
             )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenNewSpace(false)}>Cancelar</Button>
-            <Button onClick={handleCreateSpace} disabled={!newSpace.buildingId || !newSpace.nombre}>Crear</Button>
+            <Button variant="outline" onClick={() => setOpenNewSpace(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleCreateSpace} disabled={!newSpace.buildingId || !newSpace.nombre}>
+              Crear
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -620,52 +716,110 @@ export default function ReservasPage() {
           <div className="grid gap-4">
             <div>
               <Label>Espacio</Label>
-              <Select value={newReservation.spaceId} onValueChange={(v) => setNewReservation({ ...newReservation, spaceId: v })}>
-                <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
+              <Select
+                value={newReservation.spaceId}
+                onValueChange={(v) => setNewReservation({ ...newReservation, spaceId: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar" />
+                </SelectTrigger>
                 <SelectContent>
-                  {espacios.filter((e) => e.activo).map((e) => (
-                    <SelectItem key={e.id} value={e.id}>{e.nombre} - {e.building?.nombre}</SelectItem>
-                  ))}
+                  {espacios
+                    .filter((e) => e.activo)
+                    .map((e) => (
+                      <SelectItem key={e.id} value={e.id}>
+                        {e.nombre} - {e.building?.nombre}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label>Inquilino</Label>
-              <Select value={newReservation.tenantId} onValueChange={(v) => setNewReservation({ ...newReservation, tenantId: v })}>
-                <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
+              <Select
+                value={newReservation.tenantId}
+                onValueChange={(v) => setNewReservation({ ...newReservation, tenantId: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar" />
+                </SelectTrigger>
                 <SelectContent>
                   {tenants.map((t) => (
-                    <SelectItem key={t.id} value={t.id}>{t.nombreCompleto}</SelectItem>
+                    <SelectItem key={t.id} value={t.id}>
+                      {t.nombreCompleto}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label>Fecha</Label>
-              <Input type="date" value={newReservation.fechaReserva} onChange={(e) => setNewReservation({ ...newReservation, fechaReserva: e.target.value })} />
+              <Input
+                type="date"
+                value={newReservation.fechaReserva}
+                onChange={(e) =>
+                  setNewReservation({ ...newReservation, fechaReserva: e.target.value })
+                }
+              />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Hora Inicio</Label>
-                <Input type="time" value={newReservation.horaInicio} onChange={(e) => setNewReservation({ ...newReservation, horaInicio: e.target.value })} />
+                <Input
+                  type="time"
+                  value={newReservation.horaInicio}
+                  onChange={(e) =>
+                    setNewReservation({ ...newReservation, horaInicio: e.target.value })
+                  }
+                />
               </div>
               <div>
                 <Label>Hora Fin</Label>
-                <Input type="time" value={newReservation.horaFin} onChange={(e) => setNewReservation({ ...newReservation, horaFin: e.target.value })} />
+                <Input
+                  type="time"
+                  value={newReservation.horaFin}
+                  onChange={(e) =>
+                    setNewReservation({ ...newReservation, horaFin: e.target.value })
+                  }
+                />
               </div>
             </div>
             <div>
               <Label>Personas</Label>
-              <Input type="number" value={newReservation.numeroPersonas} onChange={(e) => setNewReservation({ ...newReservation, numeroPersonas: e.target.value })} />
+              <Input
+                type="number"
+                value={newReservation.numeroPersonas}
+                onChange={(e) =>
+                  setNewReservation({ ...newReservation, numeroPersonas: e.target.value })
+                }
+              />
             </div>
             <div>
               <Label>Propósito</Label>
-              <Input value={newReservation.proposito} onChange={(e) => setNewReservation({ ...newReservation, proposito: e.target.value })} />
+              <Input
+                value={newReservation.proposito}
+                onChange={(e) =>
+                  setNewReservation({ ...newReservation, proposito: e.target.value })
+                }
+              />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenNewReservation(false)}>Cancelar</Button>
-            <Button onClick={handleCreateReservation} disabled={!newReservation.spaceId || !newReservation.tenantId || !newReservation.fechaReserva || !newReservation.horaInicio || !newReservation.horaFin}>Crear</Button>
+            <Button variant="outline" onClick={() => setOpenNewReservation(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleCreateReservation}
+              disabled={
+                !newReservation.spaceId ||
+                !newReservation.tenantId ||
+                !newReservation.fechaReserva ||
+                !newReservation.horaInicio ||
+                !newReservation.horaFin
+              }
+            >
+              Crear
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

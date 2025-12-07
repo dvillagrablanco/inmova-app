@@ -7,9 +7,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Calculator, Zap, Droplet, Flame, Wifi, Sparkles, CheckCircle, AlertCircle } from 'lucide-react';
+import {
+  ArrowLeft,
+  Calculator,
+  Zap,
+  Droplet,
+  Flame,
+  Wifi,
+  Sparkles,
+  CheckCircle,
+  AlertCircle,
+} from 'lucide-react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
 import logger, { logError } from '@/lib/logger';
@@ -65,7 +81,7 @@ export default function ProrationPage() {
 
   async function handlePreview() {
     // Validar que haya al menos un suministro
-    const hasUtility = Object.values(utilities).some(v => v && parseFloat(v) > 0);
+    const hasUtility = Object.values(utilities).some((v) => v && parseFloat(v) > 0);
     if (!hasUtility) {
       toast.error('Ingresa al menos un monto de suministro');
       return;
@@ -78,8 +94,8 @@ export default function ProrationPage() {
 
     try {
       setCalculating(true);
-      
-      const roomsData = rooms.map(room => ({
+
+      const roomsData = rooms.map((room) => ({
         roomId: room.id,
         surface: room.superficie,
         occupants: 1, // Por ahora 1 por habitación
@@ -87,7 +103,7 @@ export default function ProrationPage() {
 
       // Calcular prorrateo para cada suministro que tenga valor
       const results: any = {};
-      
+
       for (const [key, value] of Object.entries(utilities)) {
         if (value && parseFloat(value) > 0) {
           const res = await fetch(
@@ -116,7 +132,11 @@ export default function ProrationPage() {
       return;
     }
 
-    if (!confirm('¿Aplicar prorrateo y generar pagos? Esta acción creará registros de pago para cada habitación ocupada.')) {
+    if (
+      !confirm(
+        '¿Aplicar prorrateo y generar pagos? Esta acción creará registros de pago para cada habitación ocupada.'
+      )
+    ) {
       return;
     }
 
@@ -140,7 +160,9 @@ export default function ProrationPage() {
 
       if (res.ok) {
         const data = await res.json();
-        toast.success(`Prorrateo aplicado correctamente. Se crearon ${data.paymentsCreated.length} pagos.`);
+        toast.success(
+          `Prorrateo aplicado correctamente. Se crearon ${data.paymentsCreated.length} pagos.`
+        );
         setPreview(null);
         setUtilities({
           electricity: '',
@@ -176,7 +198,10 @@ export default function ProrationPage() {
     );
   }
 
-  const totalUtilities = Object.values(utilities).reduce((sum, val) => sum + (val ? parseFloat(val) : 0), 0);
+  const totalUtilities = Object.values(utilities).reduce(
+    (sum, val) => sum + (val ? parseFloat(val) : 0),
+    0
+  );
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -196,7 +221,8 @@ export default function ProrationPage() {
                 Prorrateo de Suministros
               </h1>
               <p className="text-gray-600">
-                {unit?.building?.nombre} - Unidad {unit?.numero} - {rooms.length} habitaciones ocupadas
+                {unit?.building?.nombre} - Unidad {unit?.numero} - {rooms.length} habitaciones
+                ocupadas
               </p>
             </div>
 
@@ -222,7 +248,9 @@ export default function ProrationPage() {
                           type="number"
                           step="0.01"
                           value={utilities.electricity}
-                          onChange={(e) => setUtilities({ ...utilities, electricity: e.target.value })}
+                          onChange={(e) =>
+                            setUtilities({ ...utilities, electricity: e.target.value })
+                          }
                           placeholder="0.00"
                         />
                       </div>
@@ -303,36 +331,48 @@ export default function ProrationPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="equal">División Equitativa - Cada habitación paga igual</SelectItem>
-                        <SelectItem value="by_surface">Por Superficie - Según los metros cuadrados</SelectItem>
-                        <SelectItem value="by_occupants">Por Ocupantes - Según número de personas</SelectItem>
-                        <SelectItem value="combined">Combinado - 50% superficie + 50% ocupantes (Recomendado)</SelectItem>
+                        <SelectItem value="equal">
+                          División Equitativa - Cada habitación paga igual
+                        </SelectItem>
+                        <SelectItem value="by_surface">
+                          Por Superficie - Según los metros cuadrados
+                        </SelectItem>
+                        <SelectItem value="by_occupants">
+                          Por Ocupantes - Según número de personas
+                        </SelectItem>
+                        <SelectItem value="combined">
+                          Combinado - 50% superficie + 50% ocupantes (Recomendado)
+                        </SelectItem>
                       </SelectContent>
                     </Select>
 
                     <div className="mt-4 p-4 bg-blue-50 rounded-lg">
                       <p className="text-sm text-blue-900">
                         <strong>Método seleccionado:</strong>{' '}
-                        {prorationMethod === 'equal' && 'Los costos se dividen equitativamente entre todas las habitaciones.'}
-                        {prorationMethod === 'by_surface' && 'Los costos se distribuyen proporcionalmente según la superficie de cada habitación.'}
-                        {prorationMethod === 'by_occupants' && 'Los costos se distribuyen según el número de ocupantes en cada habitación.'}
-                        {prorationMethod === 'combined' && 'Los costos se calculan con una combinación de superficie y número de ocupantes. Este es el método más justo.'}
+                        {prorationMethod === 'equal' &&
+                          'Los costos se dividen equitativamente entre todas las habitaciones.'}
+                        {prorationMethod === 'by_surface' &&
+                          'Los costos se distribuyen proporcionalmente según la superficie de cada habitación.'}
+                        {prorationMethod === 'by_occupants' &&
+                          'Los costos se distribuyen según el número de ocupantes en cada habitación.'}
+                        {prorationMethod === 'combined' &&
+                          'Los costos se calculan con una combinación de superficie y número de ocupantes. Este es el método más justo.'}
                       </p>
                     </div>
                   </CardContent>
                 </Card>
 
                 <div className="flex space-x-3">
-                  <Button 
-                    onClick={handlePreview} 
+                  <Button
+                    onClick={handlePreview}
                     disabled={calculating || rooms.length === 0}
                     className="flex-1"
                   >
                     {calculating ? 'Calculando...' : 'Calcular Prorrateo'}
                   </Button>
                   {preview && (
-                    <Button 
-                      onClick={handleApply} 
+                    <Button
+                      onClick={handleApply}
                       disabled={calculating}
                       variant="default"
                       className="flex-1"
@@ -353,7 +393,9 @@ export default function ProrationPage() {
                   <CardContent className="space-y-3">
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-600">Total Suministros:</span>
-                      <span className="text-2xl font-bold text-blue-600">€{totalUtilities.toFixed(2)}</span>
+                      <span className="text-2xl font-bold text-blue-600">
+                        €{totalUtilities.toFixed(2)}
+                      </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-600">Habitaciones Ocupadas:</span>
@@ -376,7 +418,8 @@ export default function ProrationPage() {
                       <div className="text-center py-4">
                         <AlertCircle className="h-12 w-12 text-yellow-600 mx-auto mb-2" />
                         <p className="text-sm text-gray-600">
-                          No hay habitaciones ocupadas. El prorrateo solo se aplica a habitaciones con contratos activos.
+                          No hay habitaciones ocupadas. El prorrateo solo se aplica a habitaciones
+                          con contratos activos.
                         </p>
                       </div>
                     </CardContent>
@@ -392,16 +435,23 @@ export default function ProrationPage() {
                     <CardContent>
                       <div className="space-y-3">
                         {rooms.map((room: any, index: number) => {
-                          const roomTotal = Object.keys(preview).reduce((sum: number, utilityKey: string) => {
-                            const distribution = preview[utilityKey].find((d: any) => d.roomId === room.id);
-                            return sum + (distribution?.amount || 0);
-                          }, 0);
+                          const roomTotal = Object.keys(preview).reduce(
+                            (sum: number, utilityKey: string) => {
+                              const distribution = preview[utilityKey].find(
+                                (d: any) => d.roomId === room.id
+                              );
+                              return sum + (distribution?.amount || 0);
+                            },
+                            0
+                          );
 
                           return (
                             <div key={room.id} className="p-3 bg-gray-50 rounded-lg">
                               <p className="font-medium mb-1">Habitación {room.numero}</p>
                               <p className="text-sm text-gray-600 mb-2">{room.superficie}m²</p>
-                              <p className="text-lg font-bold text-green-600">€{roomTotal.toFixed(2)}</p>
+                              <p className="text-lg font-bold text-green-600">
+                                €{roomTotal.toFixed(2)}
+                              </p>
                             </div>
                           );
                         })}

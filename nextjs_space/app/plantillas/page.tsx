@@ -10,18 +10,24 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  FileText, 
-  Mail, 
-  Workflow, 
-  BarChart3, 
-  Search, 
+import {
+  FileText,
+  Mail,
+  Workflow,
+  BarChart3,
+  Search,
   Star,
   Copy,
   Eye,
-  Download
+  Download,
 } from 'lucide-react';
-import { templates, getTemplatesByCategory, getPopularTemplates, searchTemplates, type Template } from '@/lib/templates';
+import {
+  templates,
+  getTemplatesByCategory,
+  getPopularTemplates,
+  searchTemplates,
+  type Template,
+} from '@/lib/templates';
 import { toast } from 'sonner';
 
 export default function PlantillasPage() {
@@ -39,10 +45,8 @@ export default function PlantillasPage() {
   if (status === 'loading') {
     return <div className="flex items-center justify-center min-h-screen">Cargando...</div>;
   }
-  
-  const filteredTemplates = searchQuery 
-    ? searchTemplates(searchQuery)
-    : templates;
+
+  const filteredTemplates = searchQuery ? searchTemplates(searchQuery) : templates;
 
   const popularTemplates = getPopularTemplates();
   const contractTemplates = getTemplatesByCategory('contract');
@@ -76,23 +80,20 @@ export default function PlantillasPage() {
   };
 
   const TemplateCard = ({ template }: { template: Template }) => (
-    <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setSelectedTemplate(template)}>
+    <Card
+      className="hover:shadow-lg transition-shadow cursor-pointer"
+      onClick={() => setSelectedTemplate(template)}
+    >
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3 flex-1">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              {getCategoryIcon(template.category)}
-            </div>
+            <div className="p-2 bg-primary/10 rounded-lg">{getCategoryIcon(template.category)}</div>
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <CardTitle className="text-base">{template.name}</CardTitle>
-                {template.popular && (
-                  <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                )}
+                {template.popular && <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />}
               </div>
-              <CardDescription className="mt-1">
-                {template.description}
-              </CardDescription>
+              <CardDescription className="mt-1">{template.description}</CardDescription>
             </div>
           </div>
         </div>
@@ -143,135 +144,136 @@ export default function PlantillasPage() {
             <div>
               <h1 className="text-3xl font-bold mb-2">Biblioteca de Plantillas</h1>
               <p className="text-muted-foreground">
-                Plantillas profesionales listas para usar. Ahorra tiempo y asegura cumplimiento normativo.
+                Plantillas profesionales listas para usar. Ahorra tiempo y asegura cumplimiento
+                normativo.
               </p>
             </div>
 
-      {/* Search Bar */}
-      <div className="relative">
-        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Buscar plantillas por nombre, tipo o etiqueta..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10"
-        />
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <p className="text-3xl font-bold text-primary">{templates.length}</p>
-              <p className="text-sm text-muted-foreground">Plantillas Totales</p>
+            {/* Search Bar */}
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar plantillas por nombre, tipo o etiqueta..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
             </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <p className="text-3xl font-bold text-primary">{contractTemplates.length}</p>
-              <p className="text-sm text-muted-foreground">Contratos</p>
+
+            {/* Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold text-primary">{templates.length}</p>
+                    <p className="text-sm text-muted-foreground">Plantillas Totales</p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold text-primary">{contractTemplates.length}</p>
+                    <p className="text-sm text-muted-foreground">Contratos</p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold text-primary">{emailTemplates.length}</p>
+                    <p className="text-sm text-muted-foreground">Emails</p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold text-primary">{workflowTemplates.length}</p>
+                    <p className="text-sm text-muted-foreground">Workflows</p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <p className="text-3xl font-bold text-primary">{emailTemplates.length}</p>
-              <p className="text-sm text-muted-foreground">Emails</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <p className="text-3xl font-bold text-primary">{workflowTemplates.length}</p>
-              <p className="text-sm text-muted-foreground">Workflows</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
 
-      {/* Templates Tabs */}
-      <Tabs defaultValue="popular" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="popular">
-            <Star className="mr-2 h-4 w-4" />
-            Populares
-          </TabsTrigger>
-          <TabsTrigger value="contracts">
-            <FileText className="mr-2 h-4 w-4" />
-            Contratos
-          </TabsTrigger>
-          <TabsTrigger value="emails">
-            <Mail className="mr-2 h-4 w-4" />
-            Emails
-          </TabsTrigger>
-          <TabsTrigger value="workflows">
-            <Workflow className="mr-2 h-4 w-4" />
-            Workflows
-          </TabsTrigger>
-          <TabsTrigger value="reports">
-            <BarChart3 className="mr-2 h-4 w-4" />
-            Reportes
-          </TabsTrigger>
-        </TabsList>
+            {/* Templates Tabs */}
+            <Tabs defaultValue="popular" className="space-y-4">
+              <TabsList className="grid w-full grid-cols-5">
+                <TabsTrigger value="popular">
+                  <Star className="mr-2 h-4 w-4" />
+                  Populares
+                </TabsTrigger>
+                <TabsTrigger value="contracts">
+                  <FileText className="mr-2 h-4 w-4" />
+                  Contratos
+                </TabsTrigger>
+                <TabsTrigger value="emails">
+                  <Mail className="mr-2 h-4 w-4" />
+                  Emails
+                </TabsTrigger>
+                <TabsTrigger value="workflows">
+                  <Workflow className="mr-2 h-4 w-4" />
+                  Workflows
+                </TabsTrigger>
+                <TabsTrigger value="reports">
+                  <BarChart3 className="mr-2 h-4 w-4" />
+                  Reportes
+                </TabsTrigger>
+              </TabsList>
 
-        <TabsContent value="popular" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {popularTemplates.map((template) => (
-              <TemplateCard key={template.id} template={template} />
-            ))}
-          </div>
-        </TabsContent>
+              <TabsContent value="popular" className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {popularTemplates.map((template) => (
+                    <TemplateCard key={template.id} template={template} />
+                  ))}
+                </div>
+              </TabsContent>
 
-        <TabsContent value="contracts" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {contractTemplates.map((template) => (
-              <TemplateCard key={template.id} template={template} />
-            ))}
-          </div>
-        </TabsContent>
+              <TabsContent value="contracts" className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {contractTemplates.map((template) => (
+                    <TemplateCard key={template.id} template={template} />
+                  ))}
+                </div>
+              </TabsContent>
 
-        <TabsContent value="emails" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {emailTemplates.map((template) => (
-              <TemplateCard key={template.id} template={template} />
-            ))}
-          </div>
-        </TabsContent>
+              <TabsContent value="emails" className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {emailTemplates.map((template) => (
+                    <TemplateCard key={template.id} template={template} />
+                  ))}
+                </div>
+              </TabsContent>
 
-        <TabsContent value="workflows" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {workflowTemplates.map((template) => (
-              <TemplateCard key={template.id} template={template} />
-            ))}
-          </div>
-        </TabsContent>
+              <TabsContent value="workflows" className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {workflowTemplates.map((template) => (
+                    <TemplateCard key={template.id} template={template} />
+                  ))}
+                </div>
+              </TabsContent>
 
-        <TabsContent value="reports" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {reportTemplates.map((template) => (
-              <TemplateCard key={template.id} template={template} />
-            ))}
-          </div>
-        </TabsContent>
-      </Tabs>
+              <TabsContent value="reports" className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {reportTemplates.map((template) => (
+                    <TemplateCard key={template.id} template={template} />
+                  ))}
+                </div>
+              </TabsContent>
+            </Tabs>
 
-      {/* Help Section */}
-      <Card className="bg-gradient-to-r from-blue-50 to-purple-50">
-        <CardContent className="pt-6">
-          <h3 className="font-semibold mb-2">💡 ¿Cómo usar las plantillas?</h3>
-          <ul className="text-sm space-y-1 text-muted-foreground">
-            <li>• Haz clic en "Usar Plantilla" para abrir el editor</li>
-            <li>• Las variables se rellenan automáticamente con datos de tu sistema</li>
-            <li>• Puedes personalizar cualquier parte de la plantilla</li>
-            <li>• Las plantillas se actualizan con cambios normativos</li>
-          </ul>
-        </CardContent>
-      </Card>
+            {/* Help Section */}
+            <Card className="bg-gradient-to-r from-blue-50 to-purple-50">
+              <CardContent className="pt-6">
+                <h3 className="font-semibold mb-2">💡 ¿Cómo usar las plantillas?</h3>
+                <ul className="text-sm space-y-1 text-muted-foreground">
+                  <li>• Haz clic en "Usar Plantilla" para abrir el editor</li>
+                  <li>• Las variables se rellenan automáticamente con datos de tu sistema</li>
+                  <li>• Puedes personalizar cualquier parte de la plantilla</li>
+                  <li>• Las plantillas se actualizan con cambios normativos</li>
+                </ul>
+              </CardContent>
+            </Card>
           </div>
         </main>
       </div>

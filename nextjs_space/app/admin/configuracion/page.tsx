@@ -5,7 +5,17 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
-import { Building2, Home, ArrowLeft, Save, Mail, Phone, Globe, MapPin, FileText } from 'lucide-react';
+import {
+  Building2,
+  Home,
+  ArrowLeft,
+  Save,
+  Mail,
+  Phone,
+  Globe,
+  MapPin,
+  FileText,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ButtonWithLoading } from '@/components/ui/button-with-loading';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -190,9 +200,7 @@ export default function ConfiguracionPage() {
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <h1 className="text-3xl font-bold tracking-tight">Configuración de Empresa</h1>
-                <p className="text-muted-foreground">
-                  Gestiona la información de tu empresa
-                </p>
+                <p className="text-muted-foreground">Gestiona la información de tu empresa</p>
               </div>
             </div>
 
@@ -335,19 +343,22 @@ export default function ConfiguracionPage() {
                   </div>
 
                   {/* Información de Jerarquía de Empresa */}
-                  {(company.parentCompany || (company.childCompanies && company.childCompanies.length > 0)) && (
+                  {(company.parentCompany ||
+                    (company.childCompanies && company.childCompanies.length > 0)) && (
                     <div className="space-y-4 p-4 border rounded-lg bg-blue-50/50 dark:bg-blue-950/20">
                       <h3 className="font-semibold text-sm text-blue-900 dark:text-blue-100">
                         Jerarquía de Empresa
                       </h3>
-                      
+
                       {company.parentCompany && (
                         <div className="space-y-2">
                           <Label className="text-sm text-muted-foreground">Empresa Madre</Label>
                           <div className="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-md border">
                             <Building2 className="h-4 w-4 text-blue-600" />
                             <span className="font-medium">{company.parentCompany.nombre}</span>
-                            <Badge variant="secondary" className="ml-auto">Grupo</Badge>
+                            <Badge variant="secondary" className="ml-auto">
+                              Grupo
+                            </Badge>
                           </div>
                         </div>
                       )}
@@ -358,8 +369,11 @@ export default function ConfiguracionPage() {
                             Empresas Hijas ({company.childCompanies.length})
                           </Label>
                           <div className="space-y-2">
-                            {company.childCompanies.map(child => (
-                              <div key={child.id} className="flex items-center gap-2 p-2 bg-white dark:bg-gray-800 rounded-md border text-sm">
+                            {company.childCompanies.map((child) => (
+                              <div
+                                key={child.id}
+                                className="flex items-center gap-2 p-2 bg-white dark:bg-gray-800 rounded-md border text-sm"
+                              >
                                 <Building2 className="h-3 w-3 text-blue-600" />
                                 <span>{child.nombre}</span>
                               </div>

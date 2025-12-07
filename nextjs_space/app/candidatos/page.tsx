@@ -248,9 +248,7 @@ export default function CandidatosPage() {
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <h1 className="text-3xl font-bold tracking-tight">Candidatos</h1>
-                <p className="text-muted-foreground">
-                  Gestión de candidatos a inquilinos
-                </p>
+                <p className="text-muted-foreground">Gestión de candidatos a inquilinos</p>
               </div>
               {canCreate && (
                 <Button onClick={() => router.push('/candidatos/nuevo')}>
@@ -359,21 +357,38 @@ export default function CandidatosPage() {
                 {/* Filter Chips */}
                 <FilterChips
                   filters={[
-                    ...(searchTerm ? [{
-                      id: 'search',
-                      label: 'Búsqueda',
-                      value: searchTerm
-                    }] : []),
-                    ...(estadoFilter !== 'all' ? [{
-                      id: 'estado',
-                      label: 'Estado',
-                      value: getEstadoLabel(estadoFilter)
-                    }] : []),
-                    ...(scoringFilter !== 'all' ? [{
-                      id: 'scoring',
-                      label: 'Puntuación',
-                      value: scoringFilter === 'alto' ? 'Alta (80-100)' : scoringFilter === 'medio' ? 'Media (60-79)' : 'Baja (<60)'
-                    }] : [])
+                    ...(searchTerm
+                      ? [
+                          {
+                            id: 'search',
+                            label: 'Búsqueda',
+                            value: searchTerm,
+                          },
+                        ]
+                      : []),
+                    ...(estadoFilter !== 'all'
+                      ? [
+                          {
+                            id: 'estado',
+                            label: 'Estado',
+                            value: getEstadoLabel(estadoFilter),
+                          },
+                        ]
+                      : []),
+                    ...(scoringFilter !== 'all'
+                      ? [
+                          {
+                            id: 'scoring',
+                            label: 'Puntuación',
+                            value:
+                              scoringFilter === 'alto'
+                                ? 'Alta (80-100)'
+                                : scoringFilter === 'medio'
+                                  ? 'Media (60-79)'
+                                  : 'Baja (<60)',
+                          },
+                        ]
+                      : []),
                   ]}
                   onRemove={(id) => {
                     if (id === 'search') setSearchTerm('');
@@ -394,13 +409,25 @@ export default function CandidatosPage() {
               {filteredCandidates.length === 0 ? (
                 <EmptyState
                   icon={<UserPlus className="h-12 w-12" />}
-                  title={searchTerm || estadoFilter !== 'all' || scoringFilter !== 'all' ? 'No se encontraron candidatos' : 'No hay candidatos registrados'}
-                  description={searchTerm || estadoFilter !== 'all' || scoringFilter !== 'all' ? 'No se encontraron candidatos con los filtros aplicados. Intenta ajustar tu búsqueda.' : 'Comienza registrando tu primer candidato a inquilino para gestionar el proceso de selección.'}
-                  action={canCreate && !searchTerm && estadoFilter === 'all' && scoringFilter === 'all' ? {
-                    label: 'Registrar Primer Candidato',
-                    onClick: () => router.push('/candidatos/nuevo'),
-                    icon: <UserPlus className="h-4 w-4" />
-                  } : undefined}
+                  title={
+                    searchTerm || estadoFilter !== 'all' || scoringFilter !== 'all'
+                      ? 'No se encontraron candidatos'
+                      : 'No hay candidatos registrados'
+                  }
+                  description={
+                    searchTerm || estadoFilter !== 'all' || scoringFilter !== 'all'
+                      ? 'No se encontraron candidatos con los filtros aplicados. Intenta ajustar tu búsqueda.'
+                      : 'Comienza registrando tu primer candidato a inquilino para gestionar el proceso de selección.'
+                  }
+                  action={
+                    canCreate && !searchTerm && estadoFilter === 'all' && scoringFilter === 'all'
+                      ? {
+                          label: 'Registrar Primer Candidato',
+                          onClick: () => router.push('/candidatos/nuevo'),
+                          icon: <UserPlus className="h-4 w-4" />,
+                        }
+                      : undefined
+                  }
                 />
               ) : (
                 filteredCandidates.map((candidate) => (

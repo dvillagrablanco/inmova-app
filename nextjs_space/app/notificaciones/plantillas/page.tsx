@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import Sidebar from '@/components/layout/sidebar';
 import Header from '@/components/layout/header';
@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -21,9 +21,15 @@ import {
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
+import {
   Plus,
   Edit,
   Trash2,
@@ -107,7 +113,10 @@ export default function NotificationTemplatesPage() {
 
   const handleSave = async () => {
     try {
-      if (!formData.nombre || (!formData.mensajeEmail && !formData.mensajePush && !formData.mensajeSMS)) {
+      if (
+        !formData.nombre ||
+        (!formData.mensajeEmail && !formData.mensajePush && !formData.mensajeSMS)
+      ) {
         toast.error('Nombre y al menos un mensaje son obligatorios');
         return;
       }
@@ -115,7 +124,7 @@ export default function NotificationTemplatesPage() {
       const url = editingTemplate
         ? `/api/notification-templates/${editingTemplate.id}`
         : '/api/notification-templates';
-      
+
       const method = editingTemplate ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -126,9 +135,7 @@ export default function NotificationTemplatesPage() {
 
       if (response.ok) {
         toast.success(
-          editingTemplate
-            ? 'Plantilla actualizada exitosamente'
-            : 'Plantilla creada exitosamente'
+          editingTemplate ? 'Plantilla actualizada exitosamente' : 'Plantilla creada exitosamente'
         );
         setIsDialogOpen(false);
         resetForm();
@@ -296,18 +303,10 @@ export default function NotificationTemplatesPage() {
                   </div>
                   {!template.esPlantillaGlobal && (
                     <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => openEditDialog(template)}
-                      >
+                      <Button size="sm" variant="ghost" onClick={() => openEditDialog(template)}>
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleDelete(template.id)}
-                      >
+                      <Button size="sm" variant="ghost" onClick={() => handleDelete(template.id)}>
                         <Trash2 className="w-4 h-4 text-destructive" />
                       </Button>
                     </div>
@@ -439,9 +438,7 @@ export default function NotificationTemplatesPage() {
                   <Input
                     id="asuntoEmail"
                     value={formData.asuntoEmail}
-                    onChange={(e) =>
-                      setFormData({ ...formData, asuntoEmail: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, asuntoEmail: e.target.value })}
                     placeholder="Asunto del correo electrónico"
                   />
                 </div>
@@ -450,9 +447,7 @@ export default function NotificationTemplatesPage() {
                   <Textarea
                     id="mensajeEmail"
                     value={formData.mensajeEmail}
-                    onChange={(e) =>
-                      setFormData({ ...formData, mensajeEmail: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, mensajeEmail: e.target.value })}
                     placeholder="Contenido del correo electrónico"
                     rows={6}
                   />
@@ -465,9 +460,7 @@ export default function NotificationTemplatesPage() {
                   <Textarea
                     id="mensajePush"
                     value={formData.mensajePush}
-                    onChange={(e) =>
-                      setFormData({ ...formData, mensajePush: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, mensajePush: e.target.value })}
                     placeholder="Mensaje que aparecerá en la notificación push (máximo 200 caracteres)"
                     maxLength={200}
                     rows={4}
@@ -484,9 +477,7 @@ export default function NotificationTemplatesPage() {
                   <Textarea
                     id="mensajeSMS"
                     value={formData.mensajeSMS}
-                    onChange={(e) =>
-                      setFormData({ ...formData, mensajeSMS: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, mensajeSMS: e.target.value })}
                     placeholder="Mensaje que se enviará por SMS (máximo 160 caracteres)"
                     maxLength={160}
                     rows={3}

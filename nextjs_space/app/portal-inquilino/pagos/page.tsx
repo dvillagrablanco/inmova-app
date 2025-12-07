@@ -8,7 +8,16 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import { CreditCard, Calendar, DollarSign, CheckCircle, Clock, AlertCircle, Download, Eye } from 'lucide-react';
+import {
+  CreditCard,
+  Calendar,
+  DollarSign,
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  Download,
+  Eye,
+} from 'lucide-react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import StripePaymentForm from './components/StripePaymentForm';
@@ -111,7 +120,7 @@ export default function TenantPaymentsPage() {
   const handleDownloadReceipt = async (paymentId: string, periodo: string) => {
     try {
       const response = await fetch(`/api/payments/${paymentId}/receipt`);
-      
+
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || 'Error al descargar recibo');
@@ -119,7 +128,7 @@ export default function TenantPaymentsPage() {
 
       // Crear un blob del PDF
       const blob = await response.blob();
-      
+
       // Crear un link temporal y hacer click para descargar
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -127,11 +136,11 @@ export default function TenantPaymentsPage() {
       link.download = `recibo_${periodo.replace(/\s+/g, '_')}.pdf`;
       document.body.appendChild(link);
       link.click();
-      
+
       // Limpiar
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      
+
       toast.success('Recibo descargado exitosamente');
     } catch (error: any) {
       logger.error('Error downloading receipt:', error);
@@ -142,7 +151,7 @@ export default function TenantPaymentsPage() {
   const handleViewReceipt = async (paymentId: string) => {
     try {
       const response = await fetch(`/api/payments/${paymentId}/receipt`);
-      
+
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || 'Error al cargar recibo');
@@ -150,11 +159,11 @@ export default function TenantPaymentsPage() {
 
       // Crear un blob del PDF
       const blob = await response.blob();
-      
+
       // Abrir en nueva pestaña
       const url = window.URL.createObjectURL(blob);
       window.open(url, '_blank');
-      
+
       // El URL se limpiará automáticamente cuando se cierre la pestaña
     } catch (error: any) {
       logger.error('Error viewing receipt:', error);
@@ -164,16 +173,36 @@ export default function TenantPaymentsPage() {
 
   const getStatusBadge = (estado: string, stripeStatus?: string | null) => {
     if (stripeStatus === 'processing') {
-      return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200"><Clock className="w-3 h-3 mr-1" />Procesando</Badge>;
+      return (
+        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+          <Clock className="w-3 h-3 mr-1" />
+          Procesando
+        </Badge>
+      );
     }
-    
+
     switch (estado) {
       case 'pagado':
-        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200"><CheckCircle className="w-3 h-3 mr-1" />Pagado</Badge>;
+        return (
+          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+            <CheckCircle className="w-3 h-3 mr-1" />
+            Pagado
+          </Badge>
+        );
       case 'pendiente':
-        return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200"><Clock className="w-3 h-3 mr-1" />Pendiente</Badge>;
+        return (
+          <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+            <Clock className="w-3 h-3 mr-1" />
+            Pendiente
+          </Badge>
+        );
       case 'atrasado':
-        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200"><AlertCircle className="w-3 h-3 mr-1" />Atrasado</Badge>;
+        return (
+          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+            <AlertCircle className="w-3 h-3 mr-1" />
+            Atrasado
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{estado}</Badge>;
     }
@@ -198,11 +227,7 @@ export default function TenantPaymentsPage() {
   if (clientSecret && selectedPayment) {
     return (
       <div className="container mx-auto p-6 max-w-2xl">
-        <Button
-          variant="ghost"
-          onClick={handlePaymentCancel}
-          className="mb-4"
-        >
+        <Button variant="ghost" onClick={handlePaymentCancel} className="mb-4">
           ← Volver a mis pagos
         </Button>
 
@@ -210,7 +235,8 @@ export default function TenantPaymentsPage() {
           <CardHeader>
             <CardTitle>Pagar con Tarjeta</CardTitle>
             <CardDescription>
-              {selectedPayment.contract.unit.building.nombre} - Unidad {selectedPayment.contract.unit.numero}
+              {selectedPayment.contract.unit.building.nombre} - Unidad{' '}
+              {selectedPayment.contract.unit.numero}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -239,10 +265,7 @@ export default function TenantPaymentsPage() {
                 },
               }}
             >
-              <StripePaymentForm
-                onSuccess={handlePaymentSuccess}
-                onCancel={handlePaymentCancel}
-              />
+              <StripePaymentForm onSuccess={handlePaymentSuccess} onCancel={handlePaymentCancel} />
             </Elements>
           </CardContent>
         </Card>
@@ -250,8 +273,8 @@ export default function TenantPaymentsPage() {
     );
   }
 
-  const pendingPayments = payments.filter(p => p.estado !== 'pagado');
-  const paidPayments = payments.filter(p => p.estado === 'pagado');
+  const pendingPayments = payments.filter((p) => p.estado !== 'pagado');
+  const paidPayments = payments.filter((p) => p.estado === 'pagado');
 
   return (
     <div className="container mx-auto p-6">
@@ -278,7 +301,8 @@ export default function TenantPaymentsPage() {
                         {getStatusBadge(payment.estado, payment.stripePaymentStatus)}
                       </div>
                       <p className="text-sm text-gray-600 mb-1">
-                        {payment.contract.unit.building.nombre} - Unidad {payment.contract.unit.numero}
+                        {payment.contract.unit.building.nombre} - Unidad{' '}
+                        {payment.contract.unit.numero}
                       </p>
                       <div className="flex items-center gap-4 text-sm text-gray-500">
                         <span className="flex items-center gap-1">
@@ -286,8 +310,7 @@ export default function TenantPaymentsPage() {
                           Vence: {new Date(payment.fechaVencimiento).toLocaleDateString('es-ES')}
                         </span>
                         <span className="flex items-center gap-1">
-                          <DollarSign className="w-4 h-4" />
-                          €{payment.monto.toFixed(2)}
+                          <DollarSign className="w-4 h-4" />€{payment.monto.toFixed(2)}
                         </span>
                       </div>
                     </div>
@@ -327,16 +350,19 @@ export default function TenantPaymentsPage() {
                         {getStatusBadge(payment.estado, payment.stripePaymentStatus)}
                       </div>
                       <p className="text-sm text-gray-600 mb-1">
-                        {payment.contract.unit.building.nombre} - Unidad {payment.contract.unit.numero}
+                        {payment.contract.unit.building.nombre} - Unidad{' '}
+                        {payment.contract.unit.numero}
                       </p>
                       <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
                         <span className="flex items-center gap-1">
                           <Calendar className="w-4 h-4" />
-                          Pagado: {payment.fechaPago ? new Date(payment.fechaPago).toLocaleDateString('es-ES') : 'N/A'}
+                          Pagado:{' '}
+                          {payment.fechaPago
+                            ? new Date(payment.fechaPago).toLocaleDateString('es-ES')
+                            : 'N/A'}
                         </span>
                         <span className="flex items-center gap-1">
-                          <DollarSign className="w-4 h-4" />
-                          €{payment.monto.toFixed(2)}
+                          <DollarSign className="w-4 h-4" />€{payment.monto.toFixed(2)}
                         </span>
                         {payment.metodoPago && (
                           <span className="flex items-center gap-1">

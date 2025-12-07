@@ -10,20 +10,26 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Plus, 
-  CheckCircle, 
-  Clock, 
-  AlertCircle, 
-  Users, 
-  Package, 
+import {
+  Plus,
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  Users,
+  Package,
   ClipboardList,
   Calendar,
   Search,
-  RefreshCw
+  RefreshCw,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -128,7 +134,7 @@ export default function STRHousekeepingPage() {
   };
 
   const filteredTasks = tasks.filter((task) => {
-    const matchesSearch = 
+    const matchesSearch =
       task.listing?.titulo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       task.staff?.nombre?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || task.estado === statusFilter;
@@ -136,10 +142,10 @@ export default function STRHousekeepingPage() {
   });
 
   const stats = {
-    pendientes: tasks.filter(t => t.estado === 'pendiente').length,
-    asignadas: tasks.filter(t => t.estado === 'asignada').length,
-    enProgreso: tasks.filter(t => t.estado === 'en_progreso').length,
-    completadas: tasks.filter(t => t.estado === 'completada').length,
+    pendientes: tasks.filter((t) => t.estado === 'pendiente').length,
+    asignadas: tasks.filter((t) => t.estado === 'asignada').length,
+    enProgreso: tasks.filter((t) => t.estado === 'en_progreso').length,
+    completadas: tasks.filter((t) => t.estado === 'completada').length,
   };
 
   const getStatusBadge = (estado: string) => {
@@ -266,7 +272,10 @@ export default function STRHousekeepingPage() {
                   <Users className="h-4 w-4 mr-2" />
                   Personal
                 </TabsTrigger>
-                <TabsTrigger value="inventory" onClick={() => router.push('/str-housekeeping/inventory')}>
+                <TabsTrigger
+                  value="inventory"
+                  onClick={() => router.push('/str-housekeeping/inventory')}
+                >
                   <Package className="h-4 w-4 mr-2" />
                   Inventario
                 </TabsTrigger>
@@ -341,7 +350,10 @@ export default function STRHousekeepingPage() {
                               </div>
                               <div className="text-sm text-muted-foreground space-y-1">
                                 {task.listing?.unit?.building?.nombre && (
-                                  <div>📍 {task.listing.unit.building.nombre} - {task.listing.unit.numero}</div>
+                                  <div>
+                                    📍 {task.listing.unit.building.nombre} -{' '}
+                                    {task.listing.unit.numero}
+                                  </div>
                                 )}
                                 <div className="flex items-center gap-4">
                                   <span className="flex items-center gap-1">

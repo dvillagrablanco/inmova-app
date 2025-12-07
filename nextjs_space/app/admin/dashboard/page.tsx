@@ -188,12 +188,21 @@ export default function SuperAdminDashboardPage() {
 
   if (!stats) return null;
 
-  const { overview, financial, growth, subscriptionBreakdown, historicalData, recentActivity, topCompaniesByProperties, companiesNeedingAttention } = stats;
+  const {
+    overview,
+    financial,
+    growth,
+    subscriptionBreakdown,
+    historicalData,
+    recentActivity,
+    topCompaniesByProperties,
+    companiesNeedingAttention,
+  } = stats;
 
   // Formatear números
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(value);
-  
+
   const formatPercent = (value: number) => `${value.toFixed(1)}%`;
 
   return (
@@ -209,19 +218,10 @@ export default function SuperAdminDashboardPage() {
                 <h1 className="text-3xl font-bold gradient-text">
                   Dashboard de Superadministrador
                 </h1>
-                <p className="text-gray-600 mt-1">
-                  Vista global de todas las empresas en INMOVA
-                </p>
+                <p className="text-gray-600 mt-1">Vista global de todas las empresas en INMOVA</p>
               </div>
-              <Button
-                onClick={handleRefresh}
-                disabled={refreshing}
-                variant="outline"
-                size="sm"
-              >
-                <RefreshCw
-                  className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`}
-                />
+              <Button onClick={handleRefresh} disabled={refreshing} variant="outline" size="sm">
+                <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
                 Actualizar
               </Button>
             </div>
@@ -251,9 +251,7 @@ export default function SuperAdminDashboardPage() {
 
               <Card className="border-l-4 border-l-blue-600 bg-gradient-to-br from-blue-50 to-white">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Ingresos del Mes
-                  </CardTitle>
+                  <CardTitle className="text-sm font-medium">Ingresos del Mes</CardTitle>
                   <DollarSign className="h-4 w-4 text-blue-600" />
                 </CardHeader>
                 <CardContent>
@@ -268,25 +266,19 @@ export default function SuperAdminDashboardPage() {
                     )}
                     <span
                       className={`text-xs font-semibold ${
-                        financial.revenueGrowth >= 0
-                          ? 'text-green-700'
-                          : 'text-red-700'
+                        financial.revenueGrowth >= 0 ? 'text-green-700' : 'text-red-700'
                       }`}
                     >
                       {formatPercent(Math.abs(financial.revenueGrowth))}
                     </span>
-                    <span className="text-xs text-muted-foreground ml-1">
-                      vs mes anterior
-                    </span>
+                    <span className="text-xs text-muted-foreground ml-1">vs mes anterior</span>
                   </div>
                 </CardContent>
               </Card>
 
               <Card className="border-l-4 border-l-indigo-600 bg-gradient-to-br from-indigo-50 to-white">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Empresas Activas
-                  </CardTitle>
+                  <CardTitle className="text-sm font-medium">Empresas Activas</CardTitle>
                   <Building2 className="h-4 w-4 text-indigo-600" />
                 </CardHeader>
                 <CardContent>
@@ -312,18 +304,14 @@ export default function SuperAdminDashboardPage() {
 
               <Card className="border-l-4 border-l-purple-600 bg-gradient-to-br from-purple-50 to-white">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Tasa de Conversión
-                  </CardTitle>
+                  <CardTitle className="text-sm font-medium">Tasa de Conversión</CardTitle>
                   <Percent className="h-4 w-4 text-purple-600" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-purple-700">
                     {formatPercent(growth.trialToActiveRate)}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Trial → Activo
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Trial → Activo</p>
                   <div className="mt-2 flex items-center text-xs">
                     <AlertTriangle className="h-3 w-3 mr-1 text-amber-600" />
                     <span className="text-muted-foreground">
@@ -338,9 +326,7 @@ export default function SuperAdminDashboardPage() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Nuevas Empresas (30d)
-                  </CardTitle>
+                  <CardTitle className="text-sm font-medium">Nuevas Empresas (30d)</CardTitle>
                   <Building2 className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
@@ -353,45 +339,33 @@ export default function SuperAdminDashboardPage() {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Nuevos Usuarios (30d)
-                  </CardTitle>
+                  <CardTitle className="text-sm font-medium">Nuevos Usuarios (30d)</CardTitle>
                   <UserPlus className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{growth.newUsersLast30Days}</div>
-                  <p className="text-xs text-muted-foreground">
-                    Total: {overview.totalUsers}
-                  </p>
+                  <p className="text-xs text-muted-foreground">Total: {overview.totalUsers}</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Nuevas Propiedades (30d)
-                  </CardTitle>
+                  <CardTitle className="text-sm font-medium">Nuevas Propiedades (30d)</CardTitle>
                   <Home className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{growth.newBuildingsLast30Days}</div>
-                  <p className="text-xs text-muted-foreground">
-                    Total: {overview.totalBuildings}
-                  </p>
+                  <p className="text-xs text-muted-foreground">Total: {overview.totalBuildings}</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Tasa de Ocupación
-                  </CardTitle>
+                  <CardTitle className="text-sm font-medium">Tasa de Ocupación</CardTitle>
                   <Activity className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
-                    {formatPercent(overview.occupancyRate)}
-                  </div>
+                  <div className="text-2xl font-bold">{formatPercent(overview.occupancyRate)}</div>
                   <p className="text-xs text-muted-foreground">
                     {overview.activeTenants} inquilinos activos
                   </p>
@@ -424,9 +398,7 @@ export default function SuperAdminDashboardPage() {
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="month" tick={{ fontSize: 12 }} />
                             <YAxis tick={{ fontSize: 12 }} />
-                            <Tooltip
-                              formatter={(value: any) => formatCurrency(Number(value))}
-                            />
+                            <Tooltip formatter={(value: any) => formatCurrency(Number(value))} />
                             <Legend />
                             <Area
                               type="monotone"
@@ -497,10 +469,7 @@ export default function SuperAdminDashboardPage() {
                             label={(entry: any) => `${entry.planName}: ${entry.count}`}
                           >
                             {subscriptionBreakdown.map((entry, index) => (
-                              <Cell
-                                key={`cell-${index}`}
-                                fill={COLORS[index % COLORS.length]}
-                              />
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                           </Pie>
                           <Tooltip />
@@ -582,9 +551,7 @@ export default function SuperAdminDashboardPage() {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-center text-gray-500 py-8">
-                        No hay actividad reciente
-                      </p>
+                      <p className="text-center text-gray-500 py-8">No hay actividad reciente</p>
                     )}
                   </CardContent>
                 </Card>
@@ -628,9 +595,7 @@ export default function SuperAdminDashboardPage() {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-center text-gray-500 py-8">
-                        No hay datos disponibles
-                      </p>
+                      <p className="text-center text-gray-500 py-8">No hay datos disponibles</p>
                     )}
                   </CardContent>
                 </Card>

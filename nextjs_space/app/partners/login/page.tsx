@@ -103,12 +103,7 @@ export default function PartnerLoginPage() {
               </div>
             </div>
 
-            <Button
-              type="submit"
-              className="w-full"
-              size="lg"
-              disabled={loading}
-            >
+            <Button type="submit" className="w-full" size="lg" disabled={loading}>
               {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
             </Button>
           </form>
@@ -116,7 +111,10 @@ export default function PartnerLoginPage() {
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               ¿Aún no eres Partner?{' '}
-              <Link href="/partners/register" className="text-primary font-semibold hover:underline">
+              <Link
+                href="/partners/register"
+                className="text-primary font-semibold hover:underline"
+              >
                 Regístrate aquí
               </Link>
             </p>

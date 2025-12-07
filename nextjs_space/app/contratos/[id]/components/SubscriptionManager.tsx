@@ -4,7 +4,17 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { CreditCard, CheckCircle, XCircle, Calendar, DollarSign, AlertCircle } from 'lucide-react';
 import logger, { logError } from '@/lib/logger';
@@ -121,14 +131,14 @@ export default function SubscriptionManager({
             <CreditCard className="w-5 h-5" />
             Pagos Recurrentes
           </CardTitle>
-          <CardDescription>
-            Configura pagos automáticos mensuales con Stripe
-          </CardDescription>
+          <CardDescription>Configura pagos automáticos mensuales con Stripe</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <h4 className="font-semibold text-blue-900 mb-2">Beneficios de los Pagos Recurrentes</h4>
+              <h4 className="font-semibold text-blue-900 mb-2">
+                Beneficios de los Pagos Recurrentes
+              </h4>
               <ul className="text-sm text-blue-800 space-y-1">
                 <li>• Cobros automáticos cada mes</li>
                 <li>• Reduce la morosidad</li>
@@ -163,9 +173,7 @@ export default function SubscriptionManager({
           <CreditCard className="w-5 h-5" />
           Suscripción de Pagos
         </CardTitle>
-        <CardDescription>
-          Gestión de pagos recurrentes automáticos
-        </CardDescription>
+        <CardDescription>Gestión de pagos recurrentes automáticos</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -232,8 +240,8 @@ export default function SubscriptionManager({
                   <AlertDialogHeader>
                     <AlertDialogTitle>¿Cancelar suscripción?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      La suscripción se cancelará al final del período actual. El inquilino
-                      podrá seguir usando el servicio hasta el{' '}
+                      La suscripción se cancelará al final del período actual. El inquilino podrá
+                      seguir usando el servicio hasta el{' '}
                       {new Date(subscription.currentPeriodEnd).toLocaleDateString('es-ES')}.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
@@ -259,8 +267,8 @@ export default function SubscriptionManager({
                   <AlertDialogHeader>
                     <AlertDialogTitle>¿Cancelar inmediatamente?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Esta acción cancelará la suscripción de inmediato. No se realizarán más
-                      cobros automáticos. Esta acción no se puede deshacer.
+                      Esta acción cancelará la suscripción de inmediato. No se realizarán más cobros
+                      automáticos. Esta acción no se puede deshacer.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>

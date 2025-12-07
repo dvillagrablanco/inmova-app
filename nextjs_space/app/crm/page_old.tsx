@@ -8,14 +8,48 @@ import { Header } from '@/components/layout/header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { ArrowLeft, Home, Plus, Users, Phone, Mail, TrendingUp, Target, Award, Eye, Edit, Trash2, Filter, RefreshCw } from 'lucide-react';
+import {
+  ArrowLeft,
+  Home,
+  Plus,
+  Users,
+  Phone,
+  Mail,
+  TrendingUp,
+  Target,
+  Award,
+  Eye,
+  Edit,
+  Trash2,
+  Filter,
+  RefreshCw,
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { LoadingState } from '@/components/ui/loading-state';
@@ -137,7 +171,11 @@ export default function CrmPage() {
   };
 
   if (status === 'loading' || isLoading) {
-    return <div className="flex h-screen items-center justify-center"><div className="text-lg">Cargando...</div></div>;
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-lg">Cargando...</div>
+      </div>
+    );
   }
 
   return (
@@ -153,7 +191,9 @@ export default function CrmPage() {
                 <Breadcrumb className="mt-2">
                   <BreadcrumbList>
                     <BreadcrumbItem>
-                      <BreadcrumbLink href="/dashboard"><Home className="h-4 w-4" /></BreadcrumbLink>
+                      <BreadcrumbLink href="/dashboard">
+                        <Home className="h-4 w-4" />
+                      </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>CRM</BreadcrumbItem>
@@ -161,7 +201,11 @@ export default function CrmPage() {
                 </Breadcrumb>
               </div>
               <div className="flex gap-2">
-                <Button onClick={() => router.push('/dashboard')} variant="outline" className="w-full sm:w-auto">
+                <Button
+                  onClick={() => router.push('/dashboard')}
+                  variant="outline"
+                  className="w-full sm:w-auto"
+                >
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Volver
                 </Button>
@@ -181,7 +225,9 @@ export default function CrmPage() {
                         <Label>Nombre Completo *</Label>
                         <Input
                           value={formData.nombreCompleto}
-                          onChange={(e) => setFormData({ ...formData, nombreCompleto: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({ ...formData, nombreCompleto: e.target.value })
+                          }
                           required
                         />
                       </div>
@@ -204,7 +250,10 @@ export default function CrmPage() {
                       </div>
                       <div>
                         <Label>Fuente</Label>
-                        <Select value={formData.fuente} onValueChange={(v) => setFormData({ ...formData, fuente: v })}>
+                        <Select
+                          value={formData.fuente}
+                          onValueChange={(v) => setFormData({ ...formData, fuente: v })}
+                        >
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
@@ -222,18 +271,24 @@ export default function CrmPage() {
                         <Input
                           type="number"
                           value={formData.presupuesto}
-                          onChange={(e) => setFormData({ ...formData, presupuesto: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({ ...formData, presupuesto: e.target.value })
+                          }
                         />
                       </div>
                       <div>
                         <Label>Necesidades</Label>
                         <Textarea
                           value={formData.necesidades}
-                          onChange={(e) => setFormData({ ...formData, necesidades: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({ ...formData, necesidades: e.target.value })
+                          }
                           rows={3}
                         />
                       </div>
-                      <Button type="submit" className="w-full">Crear Lead</Button>
+                      <Button type="submit" className="w-full">
+                        Crear Lead
+                      </Button>
                     </form>
                   </DialogContent>
                 </Dialog>
@@ -279,7 +334,9 @@ export default function CrmPage() {
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">€{(stats.valorTotalPipeline || 0).toLocaleString('es-ES')}</div>
+                <div className="text-2xl font-bold">
+                  €{(stats.valorTotalPipeline || 0).toLocaleString('es-ES')}
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -292,7 +349,10 @@ export default function CrmPage() {
             <CardContent>
               <div className="space-y-3">
                 {leads.map((lead) => (
-                  <div key={lead.id} className="flex flex-col sm:flex-row sm:items-center gap-3 border-b pb-3 last:border-0">
+                  <div
+                    key={lead.id}
+                    className="flex flex-col sm:flex-row sm:items-center gap-3 border-b pb-3 last:border-0"
+                  >
                     <div className="flex-1">
                       <div className="font-medium">{lead.nombreCompleto}</div>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
@@ -308,7 +368,9 @@ export default function CrmPage() {
                       </Badge>
                       <div className="text-sm">
                         <div className="font-medium">Score: {lead.scoring}/100</div>
-                        <div className="text-muted-foreground">{lead.probabilidadCierre.toFixed(0)}% prob.</div>
+                        <div className="text-muted-foreground">
+                          {lead.probabilidadCierre.toFixed(0)}% prob.
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -31,9 +31,7 @@ export default function LanguageSelector() {
           <span className="hidden sm:inline">
             {availableLocales.find((l) => l.code === locale)?.name}
           </span>
-          <span className="sm:hidden">
-            {availableLocales.find((l) => l.code === locale)?.flag}
-          </span>
+          <span className="sm:hidden">{availableLocales.find((l) => l.code === locale)?.flag}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">

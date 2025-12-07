@@ -5,7 +5,19 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
-import { FileText, Plus, Calendar, Euro, Home, ArrowLeft, MoreVertical, Eye, AlertTriangle, Clock, Trash2 } from 'lucide-react';
+import {
+  FileText,
+  Plus,
+  Calendar,
+  Euro,
+  Home,
+  ArrowLeft,
+  MoreVertical,
+  Eye,
+  AlertTriangle,
+  Clock,
+  Trash2,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -69,8 +81,10 @@ function ContratosPageContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeFilters, setActiveFilters] = useState<Array<{ id: string; label: string; value: string }>>([]);
-  
+  const [activeFilters, setActiveFilters] = useState<
+    Array<{ id: string; label: string; value: string }>
+  >([]);
+
   // Delete confirmation dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [contractToDelete, setContractToDelete] = useState<Contract | null>(null);
@@ -96,10 +110,10 @@ function ContratosPageContent() {
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : 'Error desconocido';
         setError(errorMsg);
-        logError(
-          error instanceof Error ? error : new Error(errorMsg),
-          { context: 'fetchContracts', page: 'contratos' }
-        );
+        logError(error instanceof Error ? error : new Error(errorMsg), {
+          context: 'fetchContracts',
+          page: 'contratos',
+        });
       } finally {
         setIsLoading(false);
       }
@@ -133,10 +147,10 @@ function ContratosPageContent() {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Error al eliminar';
       toast.error(errorMsg);
-      logError(
-        error instanceof Error ? error : new Error(errorMsg),
-        { context: 'deleteContract', contractId: contractToDelete.id }
-      );
+      logError(error instanceof Error ? error : new Error(errorMsg), {
+        context: 'deleteContract',
+        contractId: contractToDelete.id,
+      });
     } finally {
       setIsDeleting(false);
       setDeleteDialogOpen(false);
@@ -146,10 +160,11 @@ function ContratosPageContent() {
 
   useEffect(() => {
     if (searchTerm) {
-      const filtered = contracts.filter((contract) =>
-        contract.tenant.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        contract.unit.building.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        contract.unit.numero.toLowerCase().includes(searchTerm.toLowerCase())
+      const filtered = contracts.filter(
+        (contract) =>
+          contract.tenant.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          contract.unit.building.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          contract.unit.numero.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredContracts(filtered);
     } else {
@@ -160,15 +175,15 @@ function ContratosPageContent() {
   // Actualizar filtros activos
   useEffect(() => {
     const filters: Array<{ id: string; label: string; value: string }> = [];
-    
+
     if (searchTerm) {
       filters.push({
         id: 'search',
         label: 'Búsqueda',
-        value: searchTerm
+        value: searchTerm,
       });
     }
-    
+
     setActiveFilters(filters);
   }, [searchTerm]);
 
@@ -217,12 +232,9 @@ function ContratosPageContent() {
 
               {/* Skeleton for contracts list */}
               <SkeletonList count={3} />
-              
+
               {/* Loading message */}
-              <LoadingState 
-                message="Cargando contratos..."
-                size="sm"
-              />
+              <LoadingState message="Cargando contratos..." size="sm" />
             </div>
           </main>
         </div>
@@ -312,16 +324,23 @@ function ContratosPageContent() {
                   title={helpData.contratos.title}
                   description={helpData.contratos.description}
                   sections={helpData.contratos.sections}
-                  quickActions={canCreate ? [
-                    {
-                      label: 'Crear nuevo contrato',
-                      action: () => router.push('/contratos/nuevo')
-                    }
-                  ] : undefined}
+                  quickActions={
+                    canCreate
+                      ? [
+                          {
+                            label: 'Crear nuevo contrato',
+                            action: () => router.push('/contratos/nuevo'),
+                          },
+                        ]
+                      : undefined
+                  }
                 />
               </div>
               {canCreate && (
-                <Button onClick={() => router.push('/contratos/nuevo')} className="w-full sm:w-auto">
+                <Button
+                  onClick={() => router.push('/contratos/nuevo')}
+                  className="w-full sm:w-auto"
+                >
                   <Plus className="mr-2 h-4 w-4" />
                   Nuevo Contrato
                 </Button>
@@ -369,7 +388,8 @@ function ContratosPageContent() {
                 <CardContent>
                   <div className="text-2xl font-bold text-green-600">{activosCount}</div>
                   <p className="text-xs text-muted-foreground">
-                    {contracts.length > 0 ? Math.round((activosCount / contracts.length) * 100) : 0}% del total
+                    {contracts.length > 0 ? Math.round((activosCount / contracts.length) * 100) : 0}
+                    % del total
                   </p>
                 </CardContent>
               </Card>
@@ -413,8 +433,13 @@ function ContratosPageContent() {
                           <div className="flex items-start justify-between">
                             <div className="space-y-2 min-w-0 flex-1">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <h3 className="text-base sm:text-lg font-semibold break-words">{contract.tenant.nombreCompleto}</h3>
-                                <Badge variant={estadoBadge.variant} className="flex items-center gap-1">
+                                <h3 className="text-base sm:text-lg font-semibold break-words">
+                                  {contract.tenant.nombreCompleto}
+                                </h3>
+                                <Badge
+                                  variant={estadoBadge.variant}
+                                  className="flex items-center gap-1"
+                                >
                                   <IconComponent className="h-3 w-3" />
                                   {estadoBadge.label}
                                 </Badge>
@@ -434,14 +459,18 @@ function ContratosPageContent() {
                             <div className="space-y-1">
                               <p className="text-xs text-muted-foreground">Fecha Inicio</p>
                               <p className="text-sm font-medium">
-                                {format(new Date(contract.fechaInicio), 'dd MMM yyyy', { locale: es })}
+                                {format(new Date(contract.fechaInicio), 'dd MMM yyyy', {
+                                  locale: es,
+                                })}
                               </p>
                             </div>
                             <div className="space-y-1">
                               <p className="text-xs text-muted-foreground">Fecha Fin</p>
                               <div className="flex items-center gap-2 flex-wrap">
                                 <p className="text-sm font-medium">
-                                  {format(new Date(contract.fechaFin), 'dd MMM yyyy', { locale: es })}
+                                  {format(new Date(contract.fechaFin), 'dd MMM yyyy', {
+                                    locale: es,
+                                  })}
                                 </p>
                                 {isExpiringSoon && (
                                   <Badge variant="destructive" className="text-[10px]">
@@ -490,7 +519,9 @@ function ContratosPageContent() {
                             />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => router.push(`/contratos/${contract.id}`)}>
+                            <DropdownMenuItem
+                              onClick={() => router.push(`/contratos/${contract.id}`)}
+                            >
                               <Eye className="mr-2 h-4 w-4" aria-hidden="true" />
                               Ver Detalles
                             </DropdownMenuItem>
@@ -512,15 +543,15 @@ function ContratosPageContent() {
               })}
             </div>
 
-            {filteredContracts.length === 0 && (
-              searchTerm ? (
+            {filteredContracts.length === 0 &&
+              (searchTerm ? (
                 <EmptyState
                   icon={<FileText className="h-16 w-16 text-gray-400" />}
                   title="No se encontraron resultados"
                   description={`No hay contratos que coincidan con "${searchTerm}"`}
                   action={{
                     label: 'Limpiar búsqueda',
-                    onClick: () => setSearchTerm('')
+                    onClick: () => setSearchTerm(''),
                   }}
                 />
               ) : (
@@ -528,14 +559,17 @@ function ContratosPageContent() {
                   icon={<FileText className="h-16 w-16 text-gray-400" />}
                   title="No hay contratos registrados"
                   description="Comienza creando tu primer contrato de arrendamiento"
-                  action={canCreate ? {
-                    label: 'Crear Primer Contrato',
-                    onClick: () => router.push('/contratos/nuevo'),
-                    icon: <Plus className="h-4 w-4" />
-                  } : undefined}
+                  action={
+                    canCreate
+                      ? {
+                          label: 'Crear Primer Contrato',
+                          onClick: () => router.push('/contratos/nuevo'),
+                          icon: <Plus className="h-4 w-4" />,
+                        }
+                      : undefined
+                  }
                 />
-              )
-            )}
+              ))}
           </div>
         </main>
       </div>

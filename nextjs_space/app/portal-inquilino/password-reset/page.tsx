@@ -25,7 +25,7 @@ export default function PasswordResetRequestPage() {
       const response = await fetch('/api/portal-inquilino/password-reset/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ email }),
       });
 
       const data = await response.json();
@@ -51,9 +51,7 @@ export default function PasswordResetRequestPage() {
           <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-2">
             <Mail className="w-8 h-8 text-white" />
           </div>
-          <CardTitle className="text-2xl font-bold">
-            Recuperar Contraseña
-          </CardTitle>
+          <CardTitle className="text-2xl font-bold">Recuperar Contraseña</CardTitle>
           <CardDescription>
             Ingresa tu email y te enviaremos un enlace para restablecer tu contraseña
           </CardDescription>
@@ -72,12 +70,10 @@ export default function PasswordResetRequestPage() {
                 <AlertDescription className="text-green-800">
                   <p className="font-semibold mb-2">¡Solicitud enviada!</p>
                   <p className="text-sm">
-                    Si el email existe en nuestro sistema, recibirás un enlace para
-                    restablecer tu contraseña.
+                    Si el email existe en nuestro sistema, recibirás un enlace para restablecer tu
+                    contraseña.
                   </p>
-                  <p className="text-sm mt-2">
-                    Revisa tu bandeja de entrada y la carpeta de spam.
-                  </p>
+                  <p className="text-sm mt-2">Revisa tu bandeja de entrada y la carpeta de spam.</p>
                 </AlertDescription>
               </Alert>
 

@@ -9,12 +9,42 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
-import { ClipboardCheck, Home, ArrowLeft, Plus, Calendar, Building2, MapPin, User, FileText, AlertCircle } from 'lucide-react';
+import {
+  ClipboardCheck,
+  Home,
+  ArrowLeft,
+  Plus,
+  Calendar,
+  Building2,
+  MapPin,
+  User,
+  FileText,
+  AlertCircle,
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { usePermissions } from '@/lib/hooks/usePermissions';
@@ -205,11 +235,7 @@ export default function InspeccionesPage() {
       pendiente_accion: 'Acción Requerida',
       cancelada: 'Cancelada',
     };
-    return (
-      <Badge variant={variants[estado] || 'default'}>
-        {labels[estado] || estado}
-      </Badge>
-    );
+    return <Badge variant={variants[estado] || 'default'}>{labels[estado] || estado}</Badge>;
   };
 
   if (status === 'loading' || loading) {
@@ -231,11 +257,7 @@ export default function InspeccionesPage() {
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
           {/* Header */}
           <div className="mb-6">
-            <Button
-              variant="ghost"
-              onClick={() => router.push('/dashboard')}
-              className="mb-4"
-            >
+            <Button variant="ghost" onClick={() => router.push('/dashboard')} className="mb-4">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Volver al Dashboard
             </Button>
@@ -296,10 +318,7 @@ export default function InspeccionesPage() {
 
                       <div>
                         <Label>Edificio</Label>
-                        <Select
-                          value={form.buildingId}
-                          onValueChange={handleBuildingChange}
-                        >
+                        <Select value={form.buildingId} onValueChange={handleBuildingChange}>
                           <SelectTrigger>
                             <SelectValue placeholder="Selecciona un edificio" />
                           </SelectTrigger>

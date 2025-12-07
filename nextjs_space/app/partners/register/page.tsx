@@ -3,11 +3,26 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Building2, Mail, Lock, User, Building, Phone, AlertCircle, CheckCircle } from 'lucide-react';
+import {
+  Building2,
+  Mail,
+  Lock,
+  User,
+  Building,
+  Phone,
+  AlertCircle,
+  CheckCircle,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const tiposPartner = [
@@ -39,7 +54,7 @@ export default function PartnerRegisterPage() {
   const [loading, setLoading] = useState(false);
 
   const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -74,7 +89,7 @@ export default function PartnerRegisterPage() {
       }
 
       setSuccess(true);
-      
+
       // Redirigir al login después de 3 segundos
       setTimeout(() => {
         router.push('/partners/login');
@@ -97,7 +112,9 @@ export default function PartnerRegisterPage() {
             </div>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Conviértete en Partner</h1>
-          <p className="text-gray-600">Ofrece INMOVA a tus clientes y genera ingresos recurrentes</p>
+          <p className="text-gray-600">
+            Ofrece INMOVA a tus clientes y genera ingresos recurrentes
+          </p>
         </div>
 
         {/* Formulario */}
@@ -106,7 +123,8 @@ export default function PartnerRegisterPage() {
             <Alert className="bg-green-50 border-green-200">
               <CheckCircle className="h-4 w-4 text-green-600" />
               <AlertDescription className="text-green-800">
-                ¡Registro exitoso! Tu solicitud está pendiente de aprobación. Te redirigiremos al login...
+                ¡Registro exitoso! Tu solicitud está pendiente de aprobación. Te redirigiremos al
+                login...
               </AlertDescription>
             </Alert>
           ) : (
@@ -121,7 +139,7 @@ export default function PartnerRegisterPage() {
               {/* Información de la Empresa */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900">Información de la Empresa</h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="nombre">Nombre Comercial *</Label>
@@ -160,12 +178,15 @@ export default function PartnerRegisterPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="tipo">Tipo de Partner *</Label>
-                    <Select value={formData.tipo} onValueChange={(value) => handleChange('tipo', value)}>
+                    <Select
+                      value={formData.tipo}
+                      onValueChange={(value) => handleChange('tipo', value)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Selecciona un tipo" />
                       </SelectTrigger>
                       <SelectContent>
-                        {tiposPartner.map(tipo => (
+                        {tiposPartner.map((tipo) => (
                           <SelectItem key={tipo.value} value={tipo.value}>
                             {tipo.label}
                           </SelectItem>
@@ -179,7 +200,7 @@ export default function PartnerRegisterPage() {
               {/* Información de Contacto */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900">Contacto Principal</h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="contactoNombre">Nombre Completo *</Label>
@@ -220,7 +241,7 @@ export default function PartnerRegisterPage() {
               {/* Credenciales de Acceso */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900">Credenciales de Acceso</h3>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="email">Email de Acceso *</Label>
                   <Input
@@ -260,12 +281,7 @@ export default function PartnerRegisterPage() {
                 </div>
               </div>
 
-              <Button
-                type="submit"
-                className="w-full"
-                size="lg"
-                disabled={loading}
-              >
+              <Button type="submit" className="w-full" size="lg" disabled={loading}>
                 {loading ? 'Registrando...' : 'Registrar Partner'}
               </Button>
 

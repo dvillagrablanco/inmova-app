@@ -5,7 +5,18 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
-import { Users, Plus, Mail, Phone, Home, ArrowLeft, MoreVertical, Eye, AlertCircle, Trash2 } from 'lucide-react';
+import {
+  Users,
+  Plus,
+  Mail,
+  Phone,
+  Home,
+  ArrowLeft,
+  MoreVertical,
+  Eye,
+  AlertCircle,
+  Trash2,
+} from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -71,8 +82,11 @@ function InquilinosPageContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode, viewModeLoaded] = useLocalStorage<ViewMode>('inquilinos-view-mode', 'grid');
-  
+  const [viewMode, setViewMode, viewModeLoaded] = useLocalStorage<ViewMode>(
+    'inquilinos-view-mode',
+    'grid'
+  );
+
   // Delete confirmation dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [tenantToDelete, setTenantToDelete] = useState<Tenant | null>(null);
@@ -102,10 +116,10 @@ function InquilinosPageContent() {
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : 'Error desconocido';
         setError(errorMsg);
-        logError(
-          error instanceof Error ? error : new Error(errorMsg),
-          { context: 'fetchTenants', page: 'inquilinos' }
-        );
+        logError(error instanceof Error ? error : new Error(errorMsg), {
+          context: 'fetchTenants',
+          page: 'inquilinos',
+        });
       } finally {
         setIsLoading(false);
       }
@@ -139,10 +153,10 @@ function InquilinosPageContent() {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Error al eliminar';
       toast.error(errorMsg);
-      logError(
-        error instanceof Error ? error : new Error(errorMsg),
-        { context: 'deleteTenant', tenantId: tenantToDelete.id }
-      );
+      logError(error instanceof Error ? error : new Error(errorMsg), {
+        context: 'deleteTenant',
+        tenantId: tenantToDelete.id,
+      });
     } finally {
       setIsDeleting(false);
       setDeleteDialogOpen(false);
@@ -152,10 +166,11 @@ function InquilinosPageContent() {
 
   useEffect(() => {
     if (searchTerm) {
-      const filtered = tenants.filter((tenant) =>
-        tenant.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        tenant.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        tenant.dni.toLowerCase().includes(searchTerm.toLowerCase())
+      const filtered = tenants.filter(
+        (tenant) =>
+          tenant.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          tenant.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          tenant.dni.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredTenants(filtered);
     } else {
@@ -163,11 +178,13 @@ function InquilinosPageContent() {
     }
   }, [searchTerm, tenants]);
 
-  const [activeFilters, setActiveFilters] = useState<Array<{id: string; label: string; value: string}>>([]);
+  const [activeFilters, setActiveFilters] = useState<
+    Array<{ id: string; label: string; value: string }>
+  >([]);
 
   // Update active filters when search term changes
   useEffect(() => {
-    const filters: Array<{id: string; label: string; value: string}> = [];
+    const filters: Array<{ id: string; label: string; value: string }> = [];
     if (searchTerm) {
       filters.push({ id: 'search', label: 'Búsqueda', value: searchTerm });
     }
@@ -194,7 +211,10 @@ function InquilinosPageContent() {
             <div className="max-w-7xl mx-auto">
               <Skeleton className="h-8 w-48 mb-6" />
               <Skeleton className="h-10 w-full max-w-md mb-6" />
-              <SkeletonList count={5} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" />
+              <SkeletonList
+                count={5}
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              />
             </div>
           </main>
         </div>
@@ -282,12 +302,16 @@ function InquilinosPageContent() {
                   title={helpData.inquilinos.title}
                   description={helpData.inquilinos.description}
                   sections={helpData.inquilinos.sections}
-                  quickActions={canCreate ? [
-                    {
-                      label: 'Registrar nuevo inquilino',
-                      action: () => router.push('/inquilinos/nuevo')
-                    }
-                  ] : undefined}
+                  quickActions={
+                    canCreate
+                      ? [
+                          {
+                            label: 'Registrar nuevo inquilino',
+                            action: () => router.push('/inquilinos/nuevo'),
+                          },
+                        ]
+                      : undefined
+                  }
                 />
               </div>
               {canCreate && (
@@ -355,7 +379,8 @@ function InquilinosPageContent() {
                 <CardContent>
                   <div className="text-2xl font-bold text-green-600">{activeTenants}</div>
                   <p className="text-xs text-muted-foreground">
-                    {tenants.length > 0 ? Math.round((activeTenants / tenants.length) * 100) : 0}% del total
+                    {tenants.length > 0 ? Math.round((activeTenants / tenants.length) * 100) : 0}%
+                    del total
                   </p>
                 </CardContent>
               </Card>
@@ -378,7 +403,7 @@ function InquilinosPageContent() {
                   const estado = getTenantEstado(tenant);
                   const estadoBadge = getEstadoBadge(estado);
                   const primeraUnidad = tenant.units?.[0];
-                  
+
                   return (
                     <Card key={tenant.id} className="hover:shadow-lg transition-shadow">
                       <CardHeader>
@@ -390,7 +415,9 @@ function InquilinosPageContent() {
                           </Avatar>
                           <div className="flex-1">
                             <CardTitle className="text-lg">{tenant.nombreCompleto}</CardTitle>
-                            <Badge variant={estadoBadge.variant} className="mt-1">{estadoBadge.label}</Badge>
+                            <Badge variant={estadoBadge.variant} className="mt-1">
+                              {estadoBadge.label}
+                            </Badge>
                           </div>
                         </div>
                       </CardHeader>
@@ -450,7 +477,7 @@ function InquilinosPageContent() {
                   const estado = getTenantEstado(tenant);
                   const estadoBadge = getEstadoBadge(estado);
                   const primeraUnidad = tenant.units?.[0];
-                  
+
                   return (
                     <Card key={tenant.id} className="hover:shadow-lg transition-shadow">
                       <CardContent className="pt-6">
@@ -464,10 +491,12 @@ function InquilinosPageContent() {
                               </Avatar>
                               <div>
                                 <h3 className="text-xl font-bold">{tenant.nombreCompleto}</h3>
-                                <Badge variant={estadoBadge.variant} className="mt-1">{estadoBadge.label}</Badge>
+                                <Badge variant={estadoBadge.variant} className="mt-1">
+                                  {estadoBadge.label}
+                                </Badge>
                               </div>
                             </div>
-                            
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div className="flex items-center gap-2">
                                 <Mail className="h-5 w-5 text-muted-foreground" />
@@ -524,7 +553,7 @@ function InquilinosPageContent() {
                       const estado = getTenantEstado(tenant);
                       const estadoBadge = getEstadoBadge(estado);
                       const primeraUnidad = tenant.units?.[0];
-                      
+
                       return (
                         <div
                           key={tenant.id}

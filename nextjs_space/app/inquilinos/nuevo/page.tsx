@@ -10,7 +10,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -53,7 +59,9 @@ export default function NuevoInquilinoPage() {
           telefono: formData.telefono,
           documentoIdentidad: formData.documentoIdentidad,
           tipoDocumento: formData.tipoDocumento,
-          fechaNacimiento: formData.fechaNacimiento ? new Date(formData.fechaNacimiento).toISOString() : undefined,
+          fechaNacimiento: formData.fechaNacimiento
+            ? new Date(formData.fechaNacimiento).toISOString()
+            : undefined,
           nacionalidad: formData.nacionalidad,
           estadoCivil: formData.estadoCivil,
           profesion: formData.profesion,
@@ -143,9 +151,7 @@ export default function NuevoInquilinoPage() {
                   <Users className="h-5 w-5" />
                   Información del Inquilino
                 </CardTitle>
-                <CardDescription>
-                  Completa los datos personales del inquilino
-                </CardDescription>
+                <CardDescription>Completa los datos personales del inquilino</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -195,7 +201,9 @@ export default function NuevoInquilinoPage() {
                       <Label htmlFor="tipoDocumento">Tipo de Documento</Label>
                       <Select
                         value={formData.tipoDocumento}
-                        onValueChange={(value) => setFormData({ ...formData, tipoDocumento: value })}
+                        onValueChange={(value) =>
+                          setFormData({ ...formData, tipoDocumento: value })
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue />

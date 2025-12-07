@@ -69,12 +69,7 @@ export default function ApiDocsPage() {
               </div>
             </div>
             {spec && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={downloadSpec}
-                className="gap-2"
-              >
+              <Button variant="outline" size="sm" onClick={downloadSpec} className="gap-2">
                 <Download className="h-4 w-4" />
                 Descargar OpenAPI Spec
               </Button>

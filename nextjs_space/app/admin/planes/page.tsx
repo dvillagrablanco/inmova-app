@@ -11,23 +11,30 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { InfoTooltip } from '@/components/ui/info-tooltip';
 import { BackButton } from '@/components/ui/back-button';
 import { toast } from 'sonner';
-import { 
-  Package, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Building2, 
-  Users, 
-  CheckCircle, 
+import {
+  Package,
+  Plus,
+  Edit,
+  Trash2,
+  Building2,
+  Users,
+  CheckCircle,
   XCircle,
   ArrowLeft,
   DollarSign,
-  Star
+  Star,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -68,7 +75,7 @@ export default function PlanesPage() {
     maxUsuarios: null as number | null,
     maxPropiedades: null as number | null,
     modulosIncluidos: [] as string[],
-    activo: true
+    activo: true,
   });
 
   // Verificar autenticación y rol
@@ -113,7 +120,7 @@ export default function PlanesPage() {
         maxUsuarios: plan.maxUsuarios,
         maxPropiedades: plan.maxPropiedades,
         modulosIncluidos: plan.modulosIncluidos,
-        activo: plan.activo
+        activo: plan.activo,
       });
     } else {
       setEditingPlan(null);
@@ -125,7 +132,7 @@ export default function PlanesPage() {
         maxUsuarios: null,
         maxPropiedades: null,
         modulosIncluidos: [],
-        activo: true
+        activo: true,
       });
     }
     setOpenDialog(true);
@@ -133,13 +140,13 @@ export default function PlanesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (isSaving) return;
-    
+
     setIsSaving(true);
 
     try {
-      const url = editingPlan 
+      const url = editingPlan
         ? `/api/admin/subscription-plans/${editingPlan.id}`
         : '/api/admin/subscription-plans';
       const method = editingPlan ? 'PATCH' : 'POST';
@@ -147,7 +154,7 @@ export default function PlanesPage() {
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       });
 
       if (response.ok) {
@@ -177,7 +184,7 @@ export default function PlanesPage() {
     try {
       setIsDeleting(true);
       const response = await fetch(`/api/admin/subscription-plans/${deletingPlan.id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
       });
 
       if (response.ok) {
@@ -202,7 +209,7 @@ export default function PlanesPage() {
       basico: 'bg-slate-100 text-slate-800',
       profesional: 'bg-blue-100 text-blue-800',
       empresarial: 'bg-violet-100 text-violet-800',
-      premium: 'bg-amber-100 text-amber-800'
+      premium: 'bg-amber-100 text-amber-800',
     };
     return colors[tier] || 'bg-gray-100 text-gray-800';
   };
@@ -237,9 +244,15 @@ export default function PlanesPage() {
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <h1 className="text-3xl font-bold gradient-text">Planes de Suscripción</h1>
-                <p className="text-gray-600 mt-1">Gestiona los planes disponibles para las empresas</p>
+                <p className="text-gray-600 mt-1">
+                  Gestiona los planes disponibles para las empresas
+                </p>
               </div>
-              <Button size="lg" onClick={() => handleOpenDialog()} className="gradient-primary shadow-md hover:shadow-lg transition-all">
+              <Button
+                size="lg"
+                onClick={() => handleOpenDialog()}
+                className="gradient-primary shadow-md hover:shadow-lg transition-all"
+              >
                 <Plus className="h-5 w-5 mr-2" />
                 Nuevo Plan
               </Button>
@@ -263,11 +276,7 @@ export default function PlanesPage() {
                         </div>
                       </div>
                       <div className="flex space-x-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleOpenDialog(plan)}
-                        >
+                        <Button variant="ghost" size="sm" onClick={() => handleOpenDialog(plan)}>
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button
@@ -283,7 +292,9 @@ export default function PlanesPage() {
                   <CardContent>
                     <div className="space-y-4">
                       <div className="flex items-baseline space-x-2">
-                        <span className="text-3xl font-bold text-indigo-600">€{plan.precioMensual}</span>
+                        <span className="text-3xl font-bold text-indigo-600">
+                          €{plan.precioMensual}
+                        </span>
                         <span className="text-gray-500">/mes</span>
                       </div>
 
@@ -346,12 +357,8 @@ export default function PlanesPage() {
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
-              {editingPlan ? 'Editar Plan' : 'Nuevo Plan de Suscripción'}
-            </DialogTitle>
-            <DialogDescription>
-              Define los límites y características del plan
-            </DialogDescription>
+            <DialogTitle>{editingPlan ? 'Editar Plan' : 'Nuevo Plan de Suscripción'}</DialogTitle>
+            <DialogDescription>Define los límites y características del plan</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit}>
             <div className="space-y-4 py-4">
@@ -412,7 +419,9 @@ export default function PlanesPage() {
                     id="precio"
                     type="number"
                     value={formData.precioMensual}
-                    onChange={(e) => setFormData({ ...formData, precioMensual: parseFloat(e.target.value) })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, precioMensual: parseFloat(e.target.value) })
+                    }
                     required
                     min="0"
                     step="0.01"
@@ -431,7 +440,12 @@ export default function PlanesPage() {
                     id="maxUsuarios"
                     type="number"
                     value={formData.maxUsuarios || ''}
-                    onChange={(e) => setFormData({ ...formData, maxUsuarios: e.target.value ? parseInt(e.target.value) : null })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        maxUsuarios: e.target.value ? parseInt(e.target.value) : null,
+                      })
+                    }
                     placeholder="Ilimitado si vacío"
                     min="1"
                   />
@@ -446,7 +460,12 @@ export default function PlanesPage() {
                     id="maxPropiedades"
                     type="number"
                     value={formData.maxPropiedades || ''}
-                    onChange={(e) => setFormData({ ...formData, maxPropiedades: e.target.value ? parseInt(e.target.value) : null })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        maxPropiedades: e.target.value ? parseInt(e.target.value) : null,
+                      })
+                    }
                     placeholder="Ilimitado si vacío"
                     min="1"
                   />
@@ -467,7 +486,12 @@ export default function PlanesPage() {
               </div>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setOpenDialog(false)} disabled={isSaving}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setOpenDialog(false)}
+                disabled={isSaving}
+              >
                 Cancelar
               </Button>
               <Button type="submit" className="gradient-primary" disabled={isSaving}>
@@ -476,8 +500,10 @@ export default function PlanesPage() {
                     <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
                     Guardando...
                   </>
+                ) : editingPlan ? (
+                  'Actualizar'
                 ) : (
-                  editingPlan ? 'Actualizar' : 'Crear Plan'
+                  'Crear Plan'
                 )}
               </Button>
             </DialogFooter>
@@ -493,8 +519,10 @@ export default function PlanesPage() {
         description={
           <>
             ¿Estás seguro de que deseas eliminar el plan <strong>{deletingPlan?.nombre}</strong>?
-            <br /><br />
-            Esta acción no se puede deshacer. Las empresas con este plan asignado deberán ser reasignadas a otro plan.
+            <br />
+            <br />
+            Esta acción no se puede deshacer. Las empresas con este plan asignado deberán ser
+            reasignadas a otro plan.
           </>
         }
         onConfirm={handleDelete}

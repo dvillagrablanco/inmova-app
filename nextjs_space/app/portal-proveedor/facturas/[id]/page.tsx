@@ -116,9 +116,7 @@ export default function DetalleFacturaPage() {
       fetchInvoice();
     } catch (error) {
       logger.error('Error sending invoice:', error);
-      toast.error(
-        error instanceof Error ? error.message : 'Error al enviar la factura'
-      );
+      toast.error(error instanceof Error ? error.message : 'Error al enviar la factura');
     } finally {
       setSending(false);
     }
@@ -181,9 +179,7 @@ export default function DetalleFacturaPage() {
             Volver
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Factura {invoice.numeroFactura}
-            </h1>
+            <h1 className="text-3xl font-bold text-gray-900">Factura {invoice.numeroFactura}</h1>
             <p className="text-gray-600">Detalles y seguimiento de la factura</p>
           </div>
         </div>
@@ -211,9 +207,7 @@ export default function DetalleFacturaPage() {
                 <div>
                   <CardTitle>Información de la Factura</CardTitle>
                 </div>
-                <Badge
-                  className={`${estadoBadgeColor[invoice.estado] || 'bg-gray-500'}`}
-                >
+                <Badge className={`${estadoBadgeColor[invoice.estado] || 'bg-gray-500'}`}>
                   {estadoLabel[invoice.estado] || invoice.estado}
                 </Badge>
               </div>
@@ -227,22 +221,14 @@ export default function DetalleFacturaPage() {
                 <div>
                   <p className="text-sm text-gray-600">Fecha de Emisión</p>
                   <p className="font-medium">
-                    {format(
-                      new Date(invoice.fechaEmision),
-                      'dd MMMM yyyy',
-                      { locale: es }
-                    )}
+                    {format(new Date(invoice.fechaEmision), 'dd MMMM yyyy', { locale: es })}
                   </p>
                 </div>
                 {invoice.fechaEnvio && (
                   <div>
                     <p className="text-sm text-gray-600">Fecha de Envío</p>
                     <p className="font-medium">
-                      {format(
-                        new Date(invoice.fechaEnvio),
-                        'dd MMMM yyyy',
-                        { locale: es }
-                      )}
+                      {format(new Date(invoice.fechaEnvio), 'dd MMMM yyyy', { locale: es })}
                     </p>
                   </div>
                 )}
@@ -250,11 +236,7 @@ export default function DetalleFacturaPage() {
                   <div>
                     <p className="text-sm text-gray-600">Fecha de Vencimiento</p>
                     <p className="font-medium">
-                      {format(
-                        new Date(invoice.fechaVencimiento),
-                        'dd MMMM yyyy',
-                        { locale: es }
-                      )}
+                      {format(new Date(invoice.fechaVencimiento), 'dd MMMM yyyy', { locale: es })}
                     </p>
                   </div>
                 )}
@@ -266,21 +248,15 @@ export default function DetalleFacturaPage() {
                 <p className="text-sm text-gray-600 mb-2">Orden de Trabajo</p>
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <p className="font-medium">{invoice.workOrder.titulo}</p>
-                  <p className="text-sm text-gray-600 mt-1">
-                    {invoice.workOrder.building.nombre}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {invoice.workOrder.building.direccion}
-                  </p>
+                  <p className="text-sm text-gray-600 mt-1">{invoice.workOrder.building.nombre}</p>
+                  <p className="text-sm text-gray-500">{invoice.workOrder.building.direccion}</p>
                 </div>
               </div>
 
               {invoice.notas && (
                 <div>
                   <p className="text-sm text-gray-600 mb-2">Notas</p>
-                  <p className="text-sm bg-gray-50 p-4 rounded-lg">
-                    {invoice.notas}
-                  </p>
+                  <p className="text-sm bg-gray-50 p-4 rounded-lg">{invoice.notas}</p>
                 </div>
               )}
             </CardContent>
@@ -294,10 +270,7 @@ export default function DetalleFacturaPage() {
             <CardContent>
               <div className="space-y-4">
                 {invoice.conceptos.map((concepto: any, index: number) => (
-                  <div
-                    key={index}
-                    className="p-4 bg-gray-50 rounded-lg space-y-2"
-                  >
+                  <div key={index} className="p-4 bg-gray-50 rounded-lg space-y-2">
                     <p className="font-medium">{concepto.descripcion}</p>
                     <div className="flex justify-between text-sm text-gray-600">
                       <span>
@@ -315,15 +288,11 @@ export default function DetalleFacturaPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Subtotal:</span>
-                    <span className="font-medium">
-                      {formatCurrency(invoice.subtotal)}
-                    </span>
+                    <span className="font-medium">{formatCurrency(invoice.subtotal)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">IVA (21%):</span>
-                    <span className="font-medium">
-                      {formatCurrency(invoice.iva)}
-                    </span>
+                    <span className="font-medium">{formatCurrency(invoice.iva)}</span>
                   </div>
                   <div className="flex justify-between text-lg font-bold pt-2 border-t">
                     <span>Total:</span>
@@ -348,20 +317,12 @@ export default function DetalleFacturaPage() {
                       className="flex justify-between items-center p-3 bg-gray-50 rounded-lg"
                     >
                       <div>
-                        <p className="font-medium">
-                          {formatCurrency(payment.monto)}
-                        </p>
+                        <p className="font-medium">{formatCurrency(payment.monto)}</p>
                         <p className="text-sm text-gray-600">
-                          {format(
-                            new Date(payment.fechaPago),
-                            'dd MMMM yyyy',
-                            { locale: es }
-                          )}
+                          {format(new Date(payment.fechaPago), 'dd MMMM yyyy', { locale: es })}
                         </p>
                       </div>
-                      <Badge className="bg-green-500">
-                        {payment.metodoPago || 'Pagado'}
-                      </Badge>
+                      <Badge className="bg-green-500">{payment.metodoPago || 'Pagado'}</Badge>
                     </div>
                   ))}
                 </div>
@@ -381,9 +342,7 @@ export default function DetalleFacturaPage() {
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Total Facturado:</span>
-                  <span className="font-medium">
-                    {formatCurrency(invoice.total)}
-                  </span>
+                  <span className="font-medium">{formatCurrency(invoice.total)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Total Pagado:</span>
@@ -393,13 +352,7 @@ export default function DetalleFacturaPage() {
                 </div>
                 <div className="flex justify-between text-lg font-bold pt-2 border-t">
                   <span>Pendiente:</span>
-                  <span
-                    className={
-                      calculatePendiente() > 0
-                        ? 'text-orange-600'
-                        : 'text-green-600'
-                    }
-                  >
+                  <span className={calculatePendiente() > 0 ? 'text-orange-600' : 'text-green-600'}>
                     {formatCurrency(calculatePendiente())}
                   </span>
                 </div>

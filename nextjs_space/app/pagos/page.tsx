@@ -5,7 +5,19 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
-import { CreditCard, Plus, Calendar, Euro, Home, ArrowLeft, CheckCircle, XCircle, Clock, Search, TrendingUp } from 'lucide-react';
+import {
+  CreditCard,
+  Plus,
+  Calendar,
+  Euro,
+  Home,
+  ArrowLeft,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Search,
+  TrendingUp,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -22,7 +34,14 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { usePermissions } from '@/lib/hooks/usePermissions';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth } from 'date-fns';
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  isSameDay,
+  isSameMonth,
+} from 'date-fns';
 import { es } from 'date-fns/locale';
 import PaymentsDashboard from './components/PaymentsDashboard';
 import { LoadingState } from '@/components/ui/loading-state';
@@ -64,7 +83,9 @@ function PagosPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentDate, setCurrentDate] = useState<Date | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'calendar' | 'stripe'>('list');
-  const [activeFilters, setActiveFilters] = useState<Array<{ id: string; label: string; value: string }>>([]);
+  const [activeFilters, setActiveFilters] = useState<
+    Array<{ id: string; label: string; value: string }>
+  >([]);
 
   // Initialize currentDate on client to avoid hydration errors
   useEffect(() => {
@@ -102,9 +123,10 @@ function PagosPage() {
 
   useEffect(() => {
     if (searchTerm) {
-      const filtered = payments.filter((payment) =>
-        payment.contract.tenant.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        payment.contract.unit.building.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+      const filtered = payments.filter(
+        (payment) =>
+          payment.contract.tenant.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          payment.contract.unit.building.nombre.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredPayments(filtered);
     } else {
@@ -115,15 +137,15 @@ function PagosPage() {
   // Actualizar filtros activos
   useEffect(() => {
     const filters: Array<{ id: string; label: string; value: string }> = [];
-    
+
     if (searchTerm) {
       filters.push({
         id: 'search',
         label: 'Búsqueda',
-        value: searchTerm
+        value: searchTerm,
       });
     }
-    
+
     setActiveFilters(filters);
   }, [searchTerm]);
 
@@ -179,12 +201,9 @@ function PagosPage() {
 
               {/* Skeleton for payments list */}
               <SkeletonList count={3} />
-              
+
               {/* Loading message */}
-              <LoadingState 
-                message="Cargando pagos..."
-                size="sm"
-              />
+              <LoadingState message="Cargando pagos..." size="sm" />
             </div>
           </main>
         </div>
@@ -349,7 +368,9 @@ function PagosPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-yellow-600">{pendientesCount}</div>
-                  <p className="text-xs text-muted-foreground">€{totalPendiente.toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground">
+                    €{totalPendiente.toLocaleString()}
+                  </p>
                 </CardContent>
               </Card>
               <Card>
@@ -379,7 +400,9 @@ function PagosPage() {
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle>{currentDate ? format(currentDate, 'MMMM yyyy', { locale: es }) : ''}</CardTitle>
+                    <CardTitle>
+                      {currentDate ? format(currentDate, 'MMMM yyyy', { locale: es }) : ''}
+                    </CardTitle>
                     <div className="flex gap-2">
                       <Button
                         variant="outline"
@@ -414,7 +437,10 @@ function PagosPage() {
                 <CardContent>
                   <div className="grid grid-cols-7 gap-2">
                     {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((day) => (
-                      <div key={day} className="text-center text-sm font-semibold text-muted-foreground p-2">
+                      <div
+                        key={day}
+                        className="text-center text-sm font-semibold text-muted-foreground p-2"
+                      >
                         {day}
                       </div>
                     ))}
@@ -428,9 +454,7 @@ function PagosPage() {
                           key={index}
                           className={`min-h-[80px] rounded-lg border p-2 transition-colors ${
                             isToday ? 'border-primary bg-primary/5' : 'border-border'
-                          } ${
-                            hasPayments ? 'cursor-pointer hover:bg-muted' : ''
-                          }`}
+                          } ${hasPayments ? 'cursor-pointer hover:bg-muted' : ''}`}
                         >
                           <div className={`text-sm font-medium ${isToday ? 'text-primary' : ''}`}>
                             {format(day, 'd')}
@@ -448,8 +472,8 @@ function PagosPage() {
                                         payment.estado.toLowerCase() === 'pagado'
                                           ? 'rgb(220, 252, 231)'
                                           : payment.estado.toLowerCase() === 'vencido'
-                                          ? 'rgb(254, 226, 226)'
-                                          : 'rgb(254, 249, 195)',
+                                            ? 'rgb(254, 226, 226)'
+                                            : 'rgb(254, 249, 195)',
                                     }}
                                   >
                                     €{payment.monto}
@@ -457,7 +481,9 @@ function PagosPage() {
                                 );
                               })}
                               {dayPayments.length > 2 && (
-                                <div className="text-xs text-muted-foreground">+{dayPayments.length - 2} más</div>
+                                <div className="text-xs text-muted-foreground">
+                                  +{dayPayments.length - 2} más
+                                </div>
                               )}
                             </div>
                           )}
@@ -484,8 +510,13 @@ function PagosPage() {
                             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                               <div className="space-y-2 min-w-0 flex-1">
                                 <div className="flex items-center gap-2 flex-wrap">
-                                  <h3 className="text-base sm:text-lg font-semibold break-words">{payment.contract.tenant.nombreCompleto}</h3>
-                                  <Badge variant={estadoBadge.variant} className="flex items-center gap-1">
+                                  <h3 className="text-base sm:text-lg font-semibold break-words">
+                                    {payment.contract.tenant.nombreCompleto}
+                                  </h3>
+                                  <Badge
+                                    variant={estadoBadge.variant}
+                                    className="flex items-center gap-1"
+                                  >
                                     <IconComponent className="h-3 w-3" />
                                     {estadoBadge.label}
                                   </Badge>
@@ -499,7 +530,9 @@ function PagosPage() {
                                 </div>
                               </div>
                               <div className="text-left sm:text-right">
-                                <p className="text-xl sm:text-2xl font-bold text-green-600">€{payment.monto.toLocaleString()}</p>
+                                <p className="text-xl sm:text-2xl font-bold text-green-600">
+                                  €{payment.monto.toLocaleString()}
+                                </p>
                               </div>
                             </div>
 
@@ -507,21 +540,27 @@ function PagosPage() {
                               <div className="space-y-1">
                                 <p className="text-xs text-muted-foreground">Fecha Vencimiento</p>
                                 <p className="text-sm font-medium">
-                                  {format(new Date(payment.fechaVencimiento), 'dd MMM yyyy', { locale: es })}
+                                  {format(new Date(payment.fechaVencimiento), 'dd MMM yyyy', {
+                                    locale: es,
+                                  })}
                                 </p>
                               </div>
                               {payment.fechaPago && (
                                 <div className="space-y-1">
                                   <p className="text-xs text-muted-foreground">Fecha Pago</p>
                                   <p className="text-sm font-medium">
-                                    {format(new Date(payment.fechaPago), 'dd MMM yyyy', { locale: es })}
+                                    {format(new Date(payment.fechaPago), 'dd MMM yyyy', {
+                                      locale: es,
+                                    })}
                                   </p>
                                 </div>
                               )}
                               {payment.metodoPago && (
                                 <div className="space-y-1">
                                   <p className="text-xs text-muted-foreground">Método</p>
-                                  <p className="text-sm font-medium capitalize">{payment.metodoPago}</p>
+                                  <p className="text-sm font-medium capitalize">
+                                    {payment.metodoPago}
+                                  </p>
                                 </div>
                               )}
                             </div>
@@ -544,19 +583,18 @@ function PagosPage() {
             )}
 
             {/* Stripe Dashboard */}
-            {viewMode === 'stripe' && (
-              <PaymentsDashboard />
-            )}
+            {viewMode === 'stripe' && <PaymentsDashboard />}
 
-            {filteredPayments.length === 0 && viewMode === 'list' && (
-              searchTerm ? (
+            {filteredPayments.length === 0 &&
+              viewMode === 'list' &&
+              (searchTerm ? (
                 <EmptyState
                   icon={<Search className="h-16 w-16 text-gray-400" />}
                   title="No se encontraron resultados"
                   description={`No hay pagos que coincidan con "${searchTerm}"`}
                   action={{
                     label: 'Limpiar búsqueda',
-                    onClick: () => setSearchTerm('')
+                    onClick: () => setSearchTerm(''),
                   }}
                 />
               ) : (
@@ -565,8 +603,7 @@ function PagosPage() {
                   title="No hay pagos registrados"
                   description="Los pagos aparecerán aquí cuando se registren contratos"
                 />
-              )
-            )}
+              ))}
           </div>
         </main>
       </div>

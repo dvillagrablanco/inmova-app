@@ -10,20 +10,33 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/lazy-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/lazy-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
-  Zap, 
-  Plus, 
-  Clock, 
-  CheckCircle, 
-  XCircle, 
-  Calendar, 
-  Bell, 
-  Mail, 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Zap,
+  Plus,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Calendar,
+  Bell,
+  Mail,
   MessageSquare,
   Settings,
   Play,
@@ -35,7 +48,7 @@ import {
   DollarSign,
   AlertCircle,
   Eye,
-  Activity
+  Activity,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -103,7 +116,7 @@ export default function AutomatizacionPage() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showExecutionsDialog, setShowExecutionsDialog] = useState(false);
   const [selectedAutomation, setSelectedAutomation] = useState<string | null>(null);
-  
+
   // Form state
   const [formData, setFormData] = useState({
     nombre: '',
@@ -125,7 +138,7 @@ export default function AutomatizacionPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      
+
       // Cargar automatizaciones
       const automationsRes = await fetch('/api/automations');
       if (automationsRes.ok) {
@@ -139,7 +152,6 @@ export default function AutomatizacionPage() {
         const templatesData = await templatesRes.json();
         setTemplates(templatesData);
       }
-
     } catch (error) {
       logger.error('Error loading automations:', error);
       toast.error('Error al cargar automatizaciones');
@@ -234,11 +246,16 @@ export default function AutomatizacionPage() {
 
   const getIconForType = (tipo: string) => {
     switch (tipo) {
-      case 'recordatorio': return Clock;
-      case 'notificacion': return Bell;
-      case 'accion': return Zap;
-      case 'workflow': return Activity;
-      default: return Zap;
+      case 'recordatorio':
+        return Clock;
+      case 'notificacion':
+        return Bell;
+      case 'accion':
+        return Zap;
+      case 'workflow':
+        return Activity;
+      default:
+        return Zap;
     }
   };
 
@@ -271,7 +288,9 @@ export default function AutomatizacionPage() {
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
                   Automatizaciones Inteligentes
                 </h1>
-                <p className="text-gray-600 mt-1">Crea y gestiona flujos automatizados para tu negocio</p>
+                <p className="text-gray-600 mt-1">
+                  Crea y gestiona flujos automatizados para tu negocio
+                </p>
               </div>
               <Button onClick={() => setShowCreateDialog(true)} className="gradient-primary">
                 <Plus className="h-4 w-4 mr-2" />
@@ -298,7 +317,7 @@ export default function AutomatizacionPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {automations.filter(a => a.activa).length}
+                    {automations.filter((a) => a.activa).length}
                   </div>
                 </CardContent>
               </Card>
@@ -340,7 +359,9 @@ export default function AutomatizacionPage() {
                     <CardContent className="flex flex-col items-center justify-center py-12">
                       <Zap className="h-12 w-12 text-gray-400 mb-4" />
                       <h3 className="text-lg font-semibold mb-2">No hay automatizaciones</h3>
-                      <p className="text-gray-500 mb-4">Crea tu primera automatización para empezar</p>
+                      <p className="text-gray-500 mb-4">
+                        Crea tu primera automatización para empezar
+                      </p>
                       <Button onClick={() => setShowCreateDialog(true)}>
                         <Plus className="h-4 w-4 mr-2" />
                         Nueva Automatización
@@ -386,14 +407,21 @@ export default function AutomatizacionPage() {
                                 <div className="text-sm text-gray-600">Última Ejecución</div>
                                 <div className="font-semibold">
                                   {automation.ultimaEjecucion
-                                    ? format(new Date(automation.ultimaEjecucion), 'dd/MM/yyyy HH:mm', { locale: es })
-                                    : 'Nunca'
-                                  }
+                                    ? format(
+                                        new Date(automation.ultimaEjecucion),
+                                        'dd/MM/yyyy HH:mm',
+                                        { locale: es }
+                                      )
+                                    : 'Nunca'}
                                 </div>
                               </div>
                               <div>
                                 <div className="text-sm text-gray-600">Prioridad</div>
-                                <Badge variant={automation.prioridad === 'alta' ? 'destructive' : 'outline'}>
+                                <Badge
+                                  variant={
+                                    automation.prioridad === 'alta' ? 'destructive' : 'outline'
+                                  }
+                                >
                                   {automation.prioridad}
                                 </Badge>
                               </div>
@@ -404,7 +432,11 @@ export default function AutomatizacionPage() {
                                 variant="outline"
                                 onClick={() => toggleAutomation(automation.id, automation.activa)}
                               >
-                                {automation.activa ? <Pause className="h-4 w-4 mr-1" /> : <Play className="h-4 w-4 mr-1" />}
+                                {automation.activa ? (
+                                  <Pause className="h-4 w-4 mr-1" />
+                                ) : (
+                                  <Play className="h-4 w-4 mr-1" />
+                                )}
                                 {automation.activa ? 'Desactivar' : 'Activar'}
                               </Button>
                               <Button
@@ -443,7 +475,9 @@ export default function AutomatizacionPage() {
                     <CardContent className="flex flex-col items-center justify-center py-12">
                       <FileText className="h-12 w-12 text-gray-400 mb-4" />
                       <h3 className="text-lg font-semibold mb-2">No hay plantillas disponibles</h3>
-                      <p className="text-gray-500">Las plantillas estarán disponibles próximamente</p>
+                      <p className="text-gray-500">
+                        Las plantillas estarán disponibles próximamente
+                      </p>
                     </CardContent>
                   </Card>
                 ) : (
@@ -460,7 +494,9 @@ export default function AutomatizacionPage() {
                             <Badge variant="outline">{template.categoria}</Badge>
                           </div>
                           <CardTitle className="text-base">{template.nombre}</CardTitle>
-                          <CardDescription className="text-sm">{template.descripcion}</CardDescription>
+                          <CardDescription className="text-sm">
+                            {template.descripcion}
+                          </CardDescription>
                         </CardHeader>
                         <CardContent>
                           <Button size="sm" className="w-full">
@@ -509,7 +545,10 @@ export default function AutomatizacionPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="tipo">Tipo</Label>
-                <Select value={formData.tipo} onValueChange={(value) => setFormData({ ...formData, tipo: value })}>
+                <Select
+                  value={formData.tipo}
+                  onValueChange={(value) => setFormData({ ...formData, tipo: value })}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -524,7 +563,10 @@ export default function AutomatizacionPage() {
               </div>
               <div>
                 <Label htmlFor="triggerType">Disparador</Label>
-                <Select value={formData.triggerType} onValueChange={(value) => setFormData({ ...formData, triggerType: value })}>
+                <Select
+                  value={formData.triggerType}
+                  onValueChange={(value) => setFormData({ ...formData, triggerType: value })}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -540,7 +582,10 @@ export default function AutomatizacionPage() {
             </div>
             <div>
               <Label htmlFor="prioridad">Prioridad</Label>
-              <Select value={formData.prioridad} onValueChange={(value) => setFormData({ ...formData, prioridad: value })}>
+              <Select
+                value={formData.prioridad}
+                onValueChange={(value) => setFormData({ ...formData, prioridad: value })}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -558,9 +603,7 @@ export default function AutomatizacionPage() {
             <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleCreate}>
-              Crear Automatización
-            </Button>
+            <Button onClick={handleCreate}>Crear Automatización</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -570,9 +613,7 @@ export default function AutomatizacionPage() {
         <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>Historial de Ejecuciones</DialogTitle>
-            <DialogDescription>
-              Últimas ejecuciones de esta automatización
-            </DialogDescription>
+            <DialogDescription>Últimas ejecuciones de esta automatización</DialogDescription>
           </DialogHeader>
           <div className="space-y-2 max-h-96 overflow-y-auto">
             {executions.length === 0 ? (
@@ -594,9 +635,13 @@ export default function AutomatizacionPage() {
                         )}
                         <div>
                           <div className="font-semibold">
-                            {format(new Date(execution.ejecutadaEn), 'dd/MM/yyyy HH:mm:ss', { locale: es })}
+                            {format(new Date(execution.ejecutadaEn), 'dd/MM/yyyy HH:mm:ss', {
+                              locale: es,
+                            })}
                           </div>
-                          <div className="text-sm text-gray-600">{execution.mensaje || 'Sin mensaje'}</div>
+                          <div className="text-sm text-gray-600">
+                            {execution.mensaje || 'Sin mensaje'}
+                          </div>
                         </div>
                       </div>
                       <div className="text-right">

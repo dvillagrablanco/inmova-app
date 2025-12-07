@@ -10,12 +10,28 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/lazy-tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { ArrowLeft, Building2, Users, TrendingUp, Save, AlertCircle, CheckCircle2, Palette, Settings } from 'lucide-react';
+import {
+  ArrowLeft,
+  Building2,
+  Users,
+  TrendingUp,
+  Save,
+  AlertCircle,
+  CheckCircle2,
+  Palette,
+  Settings,
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import logger, { logError } from '@/lib/logger';
@@ -120,10 +136,10 @@ export default function ClienteDetailPage() {
 
   const loadData = async () => {
     if (!params?.id) return;
-    
+
     try {
       setLoading(true);
-      
+
       // Cargar empresa
       const companyRes = await fetch(`/api/admin/companies/${params.id}`);
       if (companyRes.ok) {
@@ -131,14 +147,14 @@ export default function ClienteDetailPage() {
         setCompany(data);
         setFormData(data);
       }
-      
+
       // Cargar estadísticas
       const statsRes = await fetch(`/api/admin/companies/${params.id}/stats`);
       if (statsRes.ok) {
         const data = await statsRes.json();
         setStats(data);
       }
-      
+
       // Cargar planes
       const plansRes = await fetch('/api/admin/subscription-plans');
       if (plansRes.ok) {
@@ -155,10 +171,10 @@ export default function ClienteDetailPage() {
 
   const handleSave = async () => {
     if (!params?.id) return;
-    
+
     try {
       setSaving(true);
-      
+
       const response = await fetch(`/api/admin/companies/${params.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -232,12 +248,17 @@ export default function ClienteDetailPage() {
                 <div>
                   <div className="flex items-center gap-3 mb-2">
                     <h1 className="text-3xl font-bold text-foreground">{company.nombre}</h1>
-                    <Badge className={company.estadoCliente === 'activo' ? 'bg-green-500' : 'bg-yellow-500'}>
+                    <Badge
+                      className={
+                        company.estadoCliente === 'activo' ? 'bg-green-500' : 'bg-yellow-500'
+                      }
+                    >
                       {company.estadoCliente}
                     </Badge>
                   </div>
                   <p className="text-muted-foreground">
-                    Cliente desde {format(new Date(company.createdAt), 'dd MMMM yyyy', { locale: es })}
+                    Cliente desde{' '}
+                    {format(new Date(company.createdAt), 'dd MMMM yyyy', { locale: es })}
                   </p>
                 </div>
                 <Button onClick={handleSave} disabled={saving} className="flex items-center gap-2">
@@ -304,7 +325,9 @@ export default function ClienteDetailPage() {
                     <CheckCircle2 className="h-4 w-4 text-green-500" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stats.pagos.ingresosMesActual.toFixed(0)}€</div>
+                    <div className="text-2xl font-bold">
+                      {stats.pagos.ingresosMesActual.toFixed(0)}€
+                    </div>
                     <p className="text-xs text-muted-foreground mt-2">
                       {stats.pagos.pagosPendientesMes} pagos pendientes
                     </p>
@@ -335,7 +358,7 @@ export default function ClienteDetailPage() {
                         <Input
                           id="nombre"
                           value={formData.nombre || ''}
-                          onChange={e => setFormData({ ...formData, nombre: e.target.value })}
+                          onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
                         />
                       </div>
                       <div>
@@ -343,7 +366,7 @@ export default function ClienteDetailPage() {
                         <Input
                           id="cif"
                           value={formData.cif || ''}
-                          onChange={e => setFormData({ ...formData, cif: e.target.value })}
+                          onChange={(e) => setFormData({ ...formData, cif: e.target.value })}
                         />
                       </div>
                     </div>
@@ -355,7 +378,7 @@ export default function ClienteDetailPage() {
                           id="email"
                           type="email"
                           value={formData.email || ''}
-                          onChange={e => setFormData({ ...formData, email: e.target.value })}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         />
                       </div>
                       <div>
@@ -363,7 +386,7 @@ export default function ClienteDetailPage() {
                         <Input
                           id="telefono"
                           value={formData.telefono || ''}
-                          onChange={e => setFormData({ ...formData, telefono: e.target.value })}
+                          onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
                         />
                       </div>
                     </div>
@@ -373,7 +396,7 @@ export default function ClienteDetailPage() {
                       <Input
                         id="direccion"
                         value={formData.direccion || ''}
-                        onChange={e => setFormData({ ...formData, direccion: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, direccion: e.target.value })}
                       />
                     </div>
                   </CardContent>
@@ -391,7 +414,9 @@ export default function ClienteDetailPage() {
                         <Input
                           id="contactoPrincipal"
                           value={formData.contactoPrincipal || ''}
-                          onChange={e => setFormData({ ...formData, contactoPrincipal: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({ ...formData, contactoPrincipal: e.target.value })
+                          }
                         />
                       </div>
                       <div>
@@ -400,7 +425,9 @@ export default function ClienteDetailPage() {
                           id="emailContacto"
                           type="email"
                           value={formData.emailContacto || ''}
-                          onChange={e => setFormData({ ...formData, emailContacto: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({ ...formData, emailContacto: e.target.value })
+                          }
                         />
                       </div>
                     </div>
@@ -409,7 +436,9 @@ export default function ClienteDetailPage() {
                       <Input
                         id="telefonoContacto"
                         value={formData.telefonoContacto || ''}
-                        onChange={e => setFormData({ ...formData, telefonoContacto: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, telefonoContacto: e.target.value })
+                        }
                       />
                     </div>
                   </CardContent>
@@ -426,7 +455,9 @@ export default function ClienteDetailPage() {
                         <Label htmlFor="estadoCliente">Estado del Cliente</Label>
                         <Select
                           value={formData.estadoCliente || 'activo'}
-                          onValueChange={value => setFormData({ ...formData, estadoCliente: value })}
+                          onValueChange={(value) =>
+                            setFormData({ ...formData, estadoCliente: value })
+                          }
                         >
                           <SelectTrigger>
                             <SelectValue />
@@ -443,7 +474,9 @@ export default function ClienteDetailPage() {
                         <Input
                           id="dominioPersonalizado"
                           value={formData.dominioPersonalizado || ''}
-                          onChange={e => setFormData({ ...formData, dominioPersonalizado: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({ ...formData, dominioPersonalizado: e.target.value })
+                          }
                           placeholder="cliente.inmova.com"
                         />
                       </div>
@@ -454,7 +487,7 @@ export default function ClienteDetailPage() {
                       <Textarea
                         id="notasAdmin"
                         value={formData.notasAdmin || ''}
-                        onChange={e => setFormData({ ...formData, notasAdmin: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, notasAdmin: e.target.value })}
                         placeholder="Notas internas sobre el cliente..."
                         rows={4}
                       />
@@ -464,7 +497,7 @@ export default function ClienteDetailPage() {
                       <Switch
                         id="activo"
                         checked={formData.activo !== undefined ? formData.activo : true}
-                        onCheckedChange={checked => setFormData({ ...formData, activo: checked })}
+                        onCheckedChange={(checked) => setFormData({ ...formData, activo: checked })}
                       />
                       <Label htmlFor="activo">Empresa Activa</Label>
                     </div>
@@ -484,14 +517,16 @@ export default function ClienteDetailPage() {
                       <Label htmlFor="subscriptionPlanId">Plan Actual</Label>
                       <Select
                         value={formData.subscriptionPlanId || ''}
-                        onValueChange={value => setFormData({ ...formData, subscriptionPlanId: value || null })}
+                        onValueChange={(value) =>
+                          setFormData({ ...formData, subscriptionPlanId: value || null })
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccionar plan" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="no-plan">Sin plan</SelectItem>
-                          {plans.map(plan => (
+                          {plans.map((plan) => (
                             <SelectItem key={plan.id} value={plan.id}>
                               {plan.nombre} ({plan.tier}) - {plan.precioMensual}€/mes
                             </SelectItem>
@@ -507,7 +542,9 @@ export default function ClienteDetailPage() {
                           id="maxUsuarios"
                           type="number"
                           value={formData.maxUsuarios || 5}
-                          onChange={e => setFormData({ ...formData, maxUsuarios: parseInt(e.target.value) || 5 })}
+                          onChange={(e) =>
+                            setFormData({ ...formData, maxUsuarios: parseInt(e.target.value) || 5 })
+                          }
                         />
                       </div>
                       <div>
@@ -516,7 +553,12 @@ export default function ClienteDetailPage() {
                           id="maxPropiedades"
                           type="number"
                           value={formData.maxPropiedades || 10}
-                          onChange={e => setFormData({ ...formData, maxPropiedades: parseInt(e.target.value) || 10 })}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              maxPropiedades: parseInt(e.target.value) || 10,
+                            })
+                          }
                         />
                       </div>
                       <div>
@@ -525,7 +567,12 @@ export default function ClienteDetailPage() {
                           id="maxEdificios"
                           type="number"
                           value={formData.maxEdificios || 5}
-                          onChange={e => setFormData({ ...formData, maxEdificios: parseInt(e.target.value) || 5 })}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              maxEdificios: parseInt(e.target.value) || 5,
+                            })
+                          }
                         />
                       </div>
                     </div>
@@ -536,7 +583,7 @@ export default function ClienteDetailPage() {
                   <CardHeader>
                     <CardTitle>Módulos Activos</CardTitle>
                     <CardDescription>
-                      {company.companyModules.filter(m => m.activo).length} módulos activos
+                      {company.companyModules.filter((m) => m.activo).length} módulos activos
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -545,7 +592,7 @@ export default function ClienteDetailPage() {
                         <p className="text-sm text-muted-foreground">No hay módulos configurados</p>
                       ) : (
                         <div className="grid grid-cols-3 gap-2">
-                          {company.companyModules.map(module => (
+                          {company.companyModules.map((module) => (
                             <Badge
                               key={module.id}
                               variant={module.activo ? 'default' : 'outline'}

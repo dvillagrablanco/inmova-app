@@ -9,9 +9,31 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { Home, ArrowLeft, TrendingUp, Building2, Euro, Calendar, Target, CheckCircle } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import {
+  Home,
+  ArrowLeft,
+  TrendingUp,
+  Building2,
+  Euro,
+  Calendar,
+  Target,
+  CheckCircle,
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import logger, { logError } from '@/lib/logger';
@@ -86,7 +108,7 @@ export default function FlippingProjectsPage() {
 
   const filteredProjects = useMemo(() => {
     return projects.filter((project) => {
-      const matchesSearch = 
+      const matchesSearch =
         project.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (project.unit?.building.nombre || '').toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -97,25 +119,54 @@ export default function FlippingProjectsPage() {
   }, [projects, searchTerm, filterEstado]);
 
   const stats = useMemo(() => {
-    const completados = projects.filter(p => p.estado === 'vendido');
+    const completados = projects.filter((p) => p.estado === 'vendido');
     return {
       total: projects.length,
-      activos: projects.filter(p => ['planificacion', 'en_reforma', 'en_venta'].includes(p.estado)).length,
+      activos: projects.filter((p) =>
+        ['planificacion', 'en_reforma', 'en_venta'].includes(p.estado)
+      ).length,
       completados: completados.length,
-      roiPromedio: completados.length > 0
-        ? (completados.reduce((sum, p) => sum + (p.roiPorcentaje || 0), 0) / completados.length).toFixed(1)
-        : '0.0',
+      roiPromedio:
+        completados.length > 0
+          ? (
+              completados.reduce((sum, p) => sum + (p.roiPorcentaje || 0), 0) / completados.length
+            ).toFixed(1)
+          : '0.0',
     };
   }, [projects]);
 
   const getEstadoBadge = (estado: string) => {
     const badges: Record<string, { variant: any; label: string; color: string }> = {
-      planificacion: { variant: 'secondary' as any, label: 'Planificación', color: 'bg-blue-100 text-blue-800' },
-      en_compra: { variant: 'outline' as any, label: 'En Compra', color: 'bg-purple-100 text-purple-800' },
-      en_reforma: { variant: 'default' as any, label: 'En Reforma', color: 'bg-yellow-100 text-yellow-800' },
-      en_venta: { variant: 'outline' as any, label: 'En Venta', color: 'bg-green-100 text-green-800' },
-      vendido: { variant: 'default' as any, label: 'Vendido', color: 'bg-emerald-100 text-emerald-800' },
-      cancelado: { variant: 'destructive' as any, label: 'Cancelado', color: 'bg-red-100 text-red-800' },
+      planificacion: {
+        variant: 'secondary' as any,
+        label: 'Planificación',
+        color: 'bg-blue-100 text-blue-800',
+      },
+      en_compra: {
+        variant: 'outline' as any,
+        label: 'En Compra',
+        color: 'bg-purple-100 text-purple-800',
+      },
+      en_reforma: {
+        variant: 'default' as any,
+        label: 'En Reforma',
+        color: 'bg-yellow-100 text-yellow-800',
+      },
+      en_venta: {
+        variant: 'outline' as any,
+        label: 'En Venta',
+        color: 'bg-green-100 text-green-800',
+      },
+      vendido: {
+        variant: 'default' as any,
+        label: 'Vendido',
+        color: 'bg-emerald-100 text-emerald-800',
+      },
+      cancelado: {
+        variant: 'destructive' as any,
+        label: 'Cancelado',
+        color: 'bg-red-100 text-red-800',
+      },
     };
     return badges[estado] || badges.planificacion;
   };
@@ -169,49 +220,49 @@ export default function FlippingProjectsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Total Proyectos</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Total Proyectos
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.total}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    En cartera
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">En cartera</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Activos</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Activos
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.activos}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    En desarrollo
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">En desarrollo</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Completados</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Completados
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.completados}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Vendidos
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Vendidos</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">ROI Promedio</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    ROI Promedio
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-green-600">{stats.roiPromedio}%</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Retorno de inversión
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Retorno de inversión</p>
                 </CardContent>
               </Card>
             </div>
@@ -272,9 +323,7 @@ export default function FlippingProjectsPage() {
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
                               <TrendingUp className="h-5 w-5 text-primary" />
-                              <Badge className={estadoBadge.color}>
-                                {estadoBadge.label}
-                              </Badge>
+                              <Badge className={estadoBadge.color}>{estadoBadge.label}</Badge>
                               <Badge variant="outline">{project.estrategia}</Badge>
                             </div>
                             <CardTitle className="text-lg">{project.titulo}</CardTitle>
@@ -300,7 +349,9 @@ export default function FlippingProjectsPage() {
                             <p className="text-muted-foreground">Precio Objetivo</p>
                             <div className="flex items-center gap-1">
                               <Target className="h-4 w-4" />
-                              <p className="font-bold">{project.precioVentaObjetivo.toLocaleString()}</p>
+                              <p className="font-bold">
+                                {project.precioVentaObjetivo.toLocaleString()}
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -308,7 +359,9 @@ export default function FlippingProjectsPage() {
                         {project.roiPorcentaje !== null && (
                           <div className="bg-green-50 p-3 rounded-lg">
                             <p className="text-sm text-muted-foreground">ROI</p>
-                            <p className="text-2xl font-bold text-green-600">{project.roiPorcentaje.toFixed(2)}%</p>
+                            <p className="text-2xl font-bold text-green-600">
+                              {project.roiPorcentaje.toFixed(2)}%
+                            </p>
                           </div>
                         )}
 
@@ -317,7 +370,11 @@ export default function FlippingProjectsPage() {
                             <p className="text-muted-foreground">Fecha Compra</p>
                             <div className="flex items-center gap-1">
                               <Calendar className="h-3 w-3" />
-                              <p>{format(new Date(project.fechaCompra), 'd MMM yyyy', { locale: es })}</p>
+                              <p>
+                                {format(new Date(project.fechaCompra), 'd MMM yyyy', {
+                                  locale: es,
+                                })}
+                              </p>
                             </div>
                           </div>
                           {project.fechaVenta && (
@@ -325,7 +382,11 @@ export default function FlippingProjectsPage() {
                               <p className="text-muted-foreground">Fecha Venta</p>
                               <div className="flex items-center gap-1">
                                 <CheckCircle className="h-3 w-3 text-green-600" />
-                                <p>{format(new Date(project.fechaVenta), 'd MMM yyyy', { locale: es })}</p>
+                                <p>
+                                  {format(new Date(project.fechaVenta), 'd MMM yyyy', {
+                                    locale: es,
+                                  })}
+                                </p>
                               </div>
                             </div>
                           )}

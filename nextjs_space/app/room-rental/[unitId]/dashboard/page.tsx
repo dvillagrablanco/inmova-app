@@ -7,15 +7,22 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { LoadingState } from '@/components/ui/loading-state';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
-import { 
-  Home, 
-  DoorOpen, 
-  Users, 
-  Euro, 
-  TrendingUp, 
+import {
+  Home,
+  DoorOpen,
+  Users,
+  Euro,
+  TrendingUp,
   TrendingDown,
   Calendar,
   CheckCircle,
@@ -23,7 +30,7 @@ import {
   Building,
   User,
   PieChart,
-  BarChart3
+  BarChart3,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
@@ -156,10 +163,7 @@ export default function CoLivingDashboard() {
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => router.push(`/room-rental/${unitId}`)}
-                >
+                <Button variant="outline" onClick={() => router.push(`/room-rental/${unitId}`)}>
                   Ver Habitaciones
                 </Button>
                 <Button
@@ -178,7 +182,9 @@ export default function CoLivingDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-600 mb-1">Tasa de Ocupación</p>
-                      <p className="text-3xl font-bold text-indigo-900">{stats.occupancyRate.toFixed(1)}%</p>
+                      <p className="text-3xl font-bold text-indigo-900">
+                        {stats.occupancyRate.toFixed(1)}%
+                      </p>
                       <p className="text-xs text-gray-600 mt-1">
                         {stats.occupiedRooms} de {stats.totalRooms} habitaciones
                       </p>
@@ -195,7 +201,9 @@ export default function CoLivingDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-600 mb-1">Ingresos Mensuales</p>
-                      <p className="text-3xl font-bold text-green-900">{stats.monthlyRevenue.toFixed(0)}€</p>
+                      <p className="text-3xl font-bold text-green-900">
+                        {stats.monthlyRevenue.toFixed(0)}€
+                      </p>
                       <p className="text-xs text-gray-600 mt-1">
                         Ø {stats.averageRoomPrice.toFixed(0)}€ por habitación
                       </p>
@@ -214,7 +222,8 @@ export default function CoLivingDashboard() {
                       <p className="text-sm text-gray-600 mb-1">Total Inquilinos</p>
                       <p className="text-3xl font-bold text-purple-900">{stats.totalTenants}</p>
                       <p className="text-xs text-gray-600 mt-1">
-                        {stats.availableRooms} habitación{stats.availableRooms !== 1 ? 'es' : ''} disponible{stats.availableRooms !== 1 ? 's' : ''}
+                        {stats.availableRooms} habitación{stats.availableRooms !== 1 ? 'es' : ''}{' '}
+                        disponible{stats.availableRooms !== 1 ? 's' : ''}
                       </p>
                     </div>
                     <div className="p-3 bg-purple-600 rounded-xl">
@@ -229,10 +238,10 @@ export default function CoLivingDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-600 mb-1">Próximas Salidas</p>
-                      <p className="text-3xl font-bold text-orange-900">{stats.upcomingCheckouts}</p>
-                      <p className="text-xs text-gray-600 mt-1">
-                        En los próximos 30 días
+                      <p className="text-3xl font-bold text-orange-900">
+                        {stats.upcomingCheckouts}
                       </p>
+                      <p className="text-xs text-gray-600 mt-1">En los próximos 30 días</p>
                     </div>
                     <div className="p-3 bg-orange-600 rounded-xl">
                       <Calendar className="h-8 w-8 text-white" />
@@ -254,28 +263,40 @@ export default function CoLivingDashboard() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                     <span className="font-semibold text-gray-900">Total</span>
-                    <span className="text-2xl font-bold text-indigo-600">{expensesSummary.total.toFixed(2)}€</span>
+                    <span className="text-2xl font-bold text-indigo-600">
+                      {expensesSummary.total.toFixed(2)}€
+                    </span>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                     <div className="text-center p-3 bg-blue-50 rounded-lg">
                       <p className="text-xs text-gray-600 mb-1">Electricidad</p>
-                      <p className="text-lg font-bold text-blue-900">{expensesSummary.electricidad.toFixed(2)}€</p>
+                      <p className="text-lg font-bold text-blue-900">
+                        {expensesSummary.electricidad.toFixed(2)}€
+                      </p>
                     </div>
                     <div className="text-center p-3 bg-cyan-50 rounded-lg">
                       <p className="text-xs text-gray-600 mb-1">Agua</p>
-                      <p className="text-lg font-bold text-cyan-900">{expensesSummary.agua.toFixed(2)}€</p>
+                      <p className="text-lg font-bold text-cyan-900">
+                        {expensesSummary.agua.toFixed(2)}€
+                      </p>
                     </div>
                     <div className="text-center p-3 bg-red-50 rounded-lg">
                       <p className="text-xs text-gray-600 mb-1">Gas</p>
-                      <p className="text-lg font-bold text-red-900">{expensesSummary.gas.toFixed(2)}€</p>
+                      <p className="text-lg font-bold text-red-900">
+                        {expensesSummary.gas.toFixed(2)}€
+                      </p>
                     </div>
                     <div className="text-center p-3 bg-violet-50 rounded-lg">
                       <p className="text-xs text-gray-600 mb-1">Internet</p>
-                      <p className="text-lg font-bold text-violet-900">{expensesSummary.internet.toFixed(2)}€</p>
+                      <p className="text-lg font-bold text-violet-900">
+                        {expensesSummary.internet.toFixed(2)}€
+                      </p>
                     </div>
                     <div className="text-center p-3 bg-green-50 rounded-lg">
                       <p className="text-xs text-gray-600 mb-1">Limpieza</p>
-                      <p className="text-lg font-bold text-green-900">{expensesSummary.limpieza.toFixed(2)}€</p>
+                      <p className="text-lg font-bold text-green-900">
+                        {expensesSummary.limpieza.toFixed(2)}€
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -298,12 +319,16 @@ export default function CoLivingDashboard() {
                       className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
                     >
                       <div className="flex items-center gap-4">
-                        <div className={`p-3 rounded-lg ${
-                          room.estado === 'ocupada' ? 'bg-green-100' : 'bg-gray-100'
-                        }`}>
-                          <DoorOpen className={`h-5 w-5 ${
-                            room.estado === 'ocupada' ? 'text-green-600' : 'text-gray-400'
-                          }`} />
+                        <div
+                          className={`p-3 rounded-lg ${
+                            room.estado === 'ocupada' ? 'bg-green-100' : 'bg-gray-100'
+                          }`}
+                        >
+                          <DoorOpen
+                            className={`h-5 w-5 ${
+                              room.estado === 'ocupada' ? 'text-green-600' : 'text-gray-400'
+                            }`}
+                          />
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
@@ -323,9 +348,11 @@ export default function CoLivingDashboard() {
                                 {room.numOcupantes} ocupante{room.numOcupantes !== 1 ? 's' : ''}
                               </span>
                               {room.diasRestantes !== null && (
-                                <span className={`flex items-center gap-1 ${
-                                  room.diasRestantes <= 30 ? 'text-orange-600 font-medium' : ''
-                                }`}>
+                                <span
+                                  className={`flex items-center gap-1 ${
+                                    room.diasRestantes <= 30 ? 'text-orange-600 font-medium' : ''
+                                  }`}
+                                >
                                   <Calendar className="h-3 w-3" />
                                   {room.diasRestantes} días restantes
                                 </span>
@@ -337,7 +364,9 @@ export default function CoLivingDashboard() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-lg font-bold text-gray-900">{room.precio}€<span className="text-sm text-gray-500">/mes</span></p>
+                        <p className="text-lg font-bold text-gray-900">
+                          {room.precio}€<span className="text-sm text-gray-500">/mes</span>
+                        </p>
                         <p className="text-xs text-gray-500">{room.superficie}m²</p>
                       </div>
                     </div>

@@ -10,11 +10,30 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { 
-  Home, ArrowLeft, Package, CheckCircle, XCircle, AlertCircle,
-  Building2, DollarSign, MessageSquare, TrendingUp, Shield, Users,
-  Zap, RefreshCw, Star
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import {
+  Home,
+  ArrowLeft,
+  Package,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Building2,
+  DollarSign,
+  MessageSquare,
+  TrendingUp,
+  Shield,
+  Users,
+  Zap,
+  RefreshCw,
+  Star,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
@@ -67,7 +86,11 @@ const CATEGORIAS = {
   core: { nombre: 'Módulos Esenciales', icono: Package, color: 'bg-blue-100 text-blue-800' },
   gestion: { nombre: 'Gestión Básica', icono: Building2, color: 'bg-green-100 text-green-800' },
   financiero: { nombre: 'Financiero', icono: DollarSign, color: 'bg-purple-100 text-purple-800' },
-  comunicacion: { nombre: 'Comunicación', icono: MessageSquare, color: 'bg-orange-100 text-orange-800' },
+  comunicacion: {
+    nombre: 'Comunicación',
+    icono: MessageSquare,
+    color: 'bg-orange-100 text-orange-800',
+  },
   avanzado: { nombre: 'Avanzado', icono: TrendingUp, color: 'bg-red-100 text-red-800' },
   comunidad: { nombre: 'Comunidad', icono: Users, color: 'bg-teal-100 text-teal-800' },
   portales: { nombre: 'Portales', icono: Zap, color: 'bg-indigo-100 text-indigo-800' },
@@ -89,7 +112,7 @@ export default function ModulosAdminPage() {
       router.push('/login');
       return;
     }
-    
+
     if (status === 'authenticated') {
       const userRole = (session?.user as any)?.role;
       if (userRole !== 'administrador' && userRole !== 'super_admin') {
@@ -104,7 +127,7 @@ export default function ModulosAdminPage() {
   async function loadData() {
     try {
       setLoading(true);
-      
+
       // Cargar catálogo de módulos
       const catalogRes = await fetch('/api/modules/catalog');
       if (catalogRes.ok) {
@@ -137,11 +160,11 @@ export default function ModulosAdminPage() {
   async function toggleModule(moduloCodigo: string, activo: boolean) {
     try {
       setUpdating(moduloCodigo);
-      
+
       const res = await fetch('/api/modules/toggle', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ moduloCodigo, activo })
+        body: JSON.stringify({ moduloCodigo, activo }),
       });
 
       if (!res.ok) {
@@ -160,15 +183,15 @@ export default function ModulosAdminPage() {
   }
 
   function isModuleActive(codigo: string): boolean {
-    const modulo = modulos.find(m => m.codigo === codigo);
+    const modulo = modulos.find((m) => m.codigo === codigo);
     if (modulo?.esCore) return true; // Core siempre activo
-    
-    const companyModule = companyModules.find(cm => cm.moduloCodigo === codigo);
+
+    const companyModule = companyModules.find((cm) => cm.moduloCodigo === codigo);
     return companyModule?.activo || false;
   }
 
   function getModulosByCategoria(categoria: string) {
-    return modulos.filter(m => m.categoria === categoria);
+    return modulos.filter((m) => m.categoria === categoria);
   }
 
   if (status === 'loading' || loading) {
@@ -219,7 +242,11 @@ export default function ModulosAdminPage() {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => router.push('/admin/configuracion')}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push('/admin/configuracion')}
+              >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Volver
               </Button>
@@ -244,12 +271,17 @@ export default function ModulosAdminPage() {
                       Información de tu suscripción y opciones de mejora
                     </CardDescription>
                   </div>
-                  <Badge className={`text-lg px-4 py-2 ${
-                    currentPlan.tier === 'basico' ? 'bg-blue-500' :
-                    currentPlan.tier === 'profesional' ? 'bg-purple-500' :
-                    currentPlan.tier === 'empresarial' ? 'bg-orange-500' :
-                    'bg-gradient-to-r from-orange-500 to-red-500'
-                  }`}>
+                  <Badge
+                    className={`text-lg px-4 py-2 ${
+                      currentPlan.tier === 'basico'
+                        ? 'bg-blue-500'
+                        : currentPlan.tier === 'profesional'
+                          ? 'bg-purple-500'
+                          : currentPlan.tier === 'empresarial'
+                            ? 'bg-orange-500'
+                            : 'bg-gradient-to-r from-orange-500 to-red-500'
+                    }`}
+                  >
                     {currentPlan.nombre}
                   </Badge>
                 </div>
@@ -269,7 +301,9 @@ export default function ModulosAdminPage() {
                   <div className="space-y-2">
                     <p className="text-sm text-muted-foreground">Propiedades Máximas</p>
                     <p className="text-2xl font-semibold">
-                      {currentPlan.maxPropiedades === -1 ? 'Ilimitadas' : currentPlan.maxPropiedades}
+                      {currentPlan.maxPropiedades === -1
+                        ? 'Ilimitadas'
+                        : currentPlan.maxPropiedades}
                     </p>
                   </div>
                   <div className="space-y-2">
@@ -279,8 +313,8 @@ export default function ModulosAdminPage() {
                 </div>
                 <div className="mt-6 flex flex-wrap gap-3">
                   {currentPlan.tier !== 'premium' && currentPlan.tier !== 'empresarial' && (
-                    <Button 
-                      size="lg" 
+                    <Button
+                      size="lg"
                       className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
                       onClick={() => router.push('/admin/clientes')}
                     >
@@ -288,19 +322,15 @@ export default function ModulosAdminPage() {
                       Mejorar Plan (Upgrade)
                     </Button>
                   )}
-                  <Button 
-                    size="lg" 
+                  <Button
+                    size="lg"
                     variant="outline"
                     onClick={() => router.push('/admin/clientes')}
                   >
                     <Package className="h-4 w-4 mr-2" />
                     Cambiar Plan
                   </Button>
-                  <Button 
-                    size="lg" 
-                    variant="outline"
-                    onClick={() => router.push('/contacto')}
-                  >
+                  <Button size="lg" variant="outline" onClick={() => router.push('/contacto')}>
                     <MessageSquare className="h-4 w-4 mr-2" />
                     Contactar Soporte
                   </Button>
@@ -317,11 +347,12 @@ export default function ModulosAdminPage() {
                   Sin Plan de Suscripción
                 </CardTitle>
                 <CardDescription className="text-orange-700">
-                  No tienes un plan de suscripción asignado. Contacta con el administrador para configurar tu plan.
+                  No tienes un plan de suscripción asignado. Contacta con el administrador para
+                  configurar tu plan.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button 
+                <Button
                   onClick={() => router.push('/admin/clientes')}
                   className="bg-orange-500 hover:bg-orange-600"
                 >
@@ -359,7 +390,7 @@ export default function ModulosAdminPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        {modulosCategoria.map(modulo => {
+                        {modulosCategoria.map((modulo) => {
                           const activo = isModuleActive(modulo.codigo);
                           const isDisabled = modulo.esCore || updating === modulo.codigo;
 
@@ -367,7 +398,9 @@ export default function ModulosAdminPage() {
                             <div
                               key={modulo.codigo}
                               className={`p-4 border rounded-lg transition-all ${
-                                activo ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
+                                activo
+                                  ? 'bg-green-50 border-green-200'
+                                  : 'bg-gray-50 border-gray-200'
                               }`}
                             >
                               <div className="flex items-start justify-between gap-4">
@@ -391,7 +424,9 @@ export default function ModulosAdminPage() {
                                     {modulo.descripcion}
                                   </p>
                                   <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                                    <code className="bg-gray-100 px-2 py-1 rounded">{modulo.ruta}</code>
+                                    <code className="bg-gray-100 px-2 py-1 rounded">
+                                      {modulo.ruta}
+                                    </code>
                                     {modulo.requiereModulos.length > 0 && (
                                       <div className="flex items-center gap-1">
                                         <AlertCircle className="h-3 w-3" />
@@ -409,7 +444,9 @@ export default function ModulosAdminPage() {
                                   <Switch
                                     checked={activo}
                                     disabled={isDisabled}
-                                    onCheckedChange={(checked) => toggleModule(modulo.codigo, checked)}
+                                    onCheckedChange={(checked) =>
+                                      toggleModule(modulo.codigo, checked)
+                                    }
                                     className="data-[state=checked]:bg-green-600"
                                   />
                                   <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">
@@ -430,13 +467,17 @@ export default function ModulosAdminPage() {
             {/* Tab de Packs */}
             <TabsContent value="packs" className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {packs.map(pack => (
+                {packs.map((pack) => (
                   <Card key={pack.tier} className="relative overflow-hidden">
-                    <div className={`h-2 ${
-                      pack.tier === 'basico' ? 'bg-blue-500' :
-                      pack.tier === 'profesional' ? 'bg-purple-500' :
-                      'bg-gradient-to-r from-orange-500 to-red-500'
-                    }`} />
+                    <div
+                      className={`h-2 ${
+                        pack.tier === 'basico'
+                          ? 'bg-blue-500'
+                          : pack.tier === 'profesional'
+                            ? 'bg-purple-500'
+                            : 'bg-gradient-to-r from-orange-500 to-red-500'
+                      }`}
+                    />
                     <CardHeader>
                       <CardTitle className="text-xl">{pack.nombre}</CardTitle>
                       <CardDescription>{pack.descripcion}</CardDescription>
@@ -456,7 +497,9 @@ export default function ModulosAdminPage() {
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">Propiedades:</span>
                           <span className="font-semibold">
-                            {pack.maxPropiedades === -1 ? 'Ilimitadas' : `Hasta ${pack.maxPropiedades}`}
+                            {pack.maxPropiedades === -1
+                              ? 'Ilimitadas'
+                              : `Hasta ${pack.maxPropiedades}`}
                           </span>
                         </div>
                         <div className="flex items-center justify-between text-sm">
@@ -490,16 +533,17 @@ export default function ModulosAdminPage() {
                 </CardHeader>
                 <CardContent className="space-y-2 text-sm text-muted-foreground">
                   <p>
-                    • Los <strong>módulos esenciales</strong> (Core) están siempre activos en todos los planes.
+                    • Los <strong>módulos esenciales</strong> (Core) están siempre activos en todos
+                    los planes.
                   </p>
                   <p>
-                    • Puedes activar/desactivar módulos individualmente según las necesidades de tu empresa.
+                    • Puedes activar/desactivar módulos individualmente según las necesidades de tu
+                    empresa.
                   </p>
+                  <p>• Los módulos desactivados no aparecerán en el menú de navegación.</p>
                   <p>
-                    • Los módulos desactivados no aparecerán en el menú de navegación.
-                  </p>
-                  <p>
-                    • Algunos módulos tienen <strong>prerequisitos</strong> que deben estar activos para funcionar correctamente.
+                    • Algunos módulos tienen <strong>prerequisitos</strong> que deben estar activos
+                    para funcionar correctamente.
                   </p>
                 </CardContent>
               </Card>

@@ -11,21 +11,28 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import { 
-  Scan, 
-  FileText, 
-  CreditCard, 
-  Upload, 
-  Loader2, 
+import {
+  Scan,
+  FileText,
+  CreditCard,
+  Upload,
+  Loader2,
   CheckCircle2,
   AlertCircle,
   Eye,
   Copy,
-  Download
+  Download,
 } from 'lucide-react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
-import { processImageOCR, processDocument, extractDNIData, extractContractData, isFileTypeSupported, getSupportedFileTypes } from '@/lib/ocr-service';
+import {
+  processImageOCR,
+  processDocument,
+  extractDNIData,
+  extractContractData,
+  isFileTypeSupported,
+  getSupportedFileTypes,
+} from '@/lib/ocr-service';
 import logger, { logError } from '@/lib/logger';
 
 interface OCRResult {
@@ -55,7 +62,9 @@ export default function OCRPage() {
     if (file) {
       // Validar tipo de archivo usando la función del servicio
       if (!isFileTypeSupported(file.type)) {
-        toast.error('Tipo de archivo no soportado. Se permiten: Imágenes (JPG, PNG, GIF, BMP, TIFF), PDF, DOC, DOCX');
+        toast.error(
+          'Tipo de archivo no soportado. Se permiten: Imágenes (JPG, PNG, GIF, BMP, TIFF), PDF, DOC, DOCX'
+        );
         return;
       }
 
@@ -180,14 +189,14 @@ export default function OCRPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle>Escaneo General</CardTitle>
-                    <CardDescription>
-                      Extrae texto de cualquier documento o imagen
-                    </CardDescription>
+                    <CardDescription>Extrae texto de cualquier documento o imagen</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       <div>
-                        <Label htmlFor="file-general">Seleccionar Archivo (Imagen, PDF o DOC)</Label>
+                        <Label htmlFor="file-general">
+                          Seleccionar Archivo (Imagen, PDF o DOC)
+                        </Label>
                         <Input
                           id="file-general"
                           type="file"
@@ -213,7 +222,9 @@ export default function OCRPage() {
                   <CardContent>
                     <div className="space-y-4">
                       <div>
-                        <Label htmlFor="file-dni">Seleccionar Archivo (Imagen, PDF o DOC) del DNI</Label>
+                        <Label htmlFor="file-dni">
+                          Seleccionar Archivo (Imagen, PDF o DOC) del DNI
+                        </Label>
                         <Input
                           id="file-dni"
                           type="file"
@@ -239,7 +250,9 @@ export default function OCRPage() {
                   <CardContent>
                     <div className="space-y-4">
                       <div>
-                        <Label htmlFor="file-contract">Seleccionar Archivo (Imagen, PDF o DOC) del Contrato</Label>
+                        <Label htmlFor="file-contract">
+                          Seleccionar Archivo (Imagen, PDF o DOC) del Contrato
+                        </Label>
                         <Input
                           id="file-contract"
                           type="file"
@@ -274,7 +287,9 @@ export default function OCRPage() {
                     </div>
                     <div className="flex-1 flex flex-col justify-center gap-4">
                       <div className="p-4 bg-blue-50 rounded-lg">
-                        <p className="text-sm font-medium text-blue-900 mb-2">Información del Archivo</p>
+                        <p className="text-sm font-medium text-blue-900 mb-2">
+                          Información del Archivo
+                        </p>
                         <p className="text-sm text-blue-700">Nombre: {selectedFile?.name}</p>
                         <p className="text-sm text-blue-700">
                           Tamaño: {((selectedFile?.size || 0) / 1024).toFixed(2)} KB
@@ -326,7 +341,9 @@ export default function OCRPage() {
                         <Loader2 className="h-8 w-8 text-blue-600" />
                         <div>
                           <p className="text-sm text-gray-600">Tiempo</p>
-                          <p className="text-2xl font-bold">{(result.processingTime / 1000).toFixed(1)}s</p>
+                          <p className="text-2xl font-bold">
+                            {(result.processingTime / 1000).toFixed(1)}s
+                          </p>
                         </div>
                       </div>
                     </CardContent>
@@ -358,7 +375,9 @@ export default function OCRPage() {
                         {result.dniData.numeroDocumento && (
                           <div>
                             <Label>Número de Documento</Label>
-                            <p className="mt-1 font-mono font-bold">{result.dniData.numeroDocumento}</p>
+                            <p className="mt-1 font-mono font-bold">
+                              {result.dniData.numeroDocumento}
+                            </p>
                           </div>
                         )}
                         {result.dniData.fechaNacimiento && (

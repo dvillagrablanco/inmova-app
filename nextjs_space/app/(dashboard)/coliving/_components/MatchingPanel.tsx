@@ -79,9 +79,7 @@ export default function MatchingPanel() {
             <Sparkles className="h-5 w-5 text-yellow-500" />
             Encuentra tu compañero ideal
           </CardTitle>
-          <CardDescription>
-            Basado en tus intereses, idiomas y preferencias
-          </CardDescription>
+          <CardDescription>Basado en tus intereses, idiomas y preferencias</CardDescription>
         </CardHeader>
       </Card>
 
@@ -126,9 +124,7 @@ export default function MatchingPanel() {
               </CardHeader>
               <CardContent className="pt-6 space-y-4">
                 {/* Bio */}
-                {match.profile.bio && (
-                  <p className="text-sm text-gray-600">{match.profile.bio}</p>
-                )}
+                {match.profile.bio && <p className="text-sm text-gray-600">{match.profile.bio}</p>}
 
                 {/* Intereses comunes */}
                 {match.interesesComunes.length > 0 && (
@@ -160,10 +156,7 @@ export default function MatchingPanel() {
 
                 {/* Acciones */}
                 <div className="flex gap-2 pt-4">
-                  <Button
-                    className="flex-1"
-                    onClick={() => crearMatch(match.profile.id)}
-                  >
+                  <Button className="flex-1" onClick={() => crearMatch(match.profile.id)}>
                     <Check className="h-4 w-4 mr-2" />
                     Conectar
                   </Button>

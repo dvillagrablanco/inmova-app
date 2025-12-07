@@ -72,22 +72,22 @@ export default function FlippingPage() {
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      'active': 'bg-green-500',
-      'planning': 'bg-blue-500',
-      'renovation': 'bg-yellow-500',
-      'selling': 'bg-purple-500',
-      'completed': 'bg-gray-500',
+      active: 'bg-green-500',
+      planning: 'bg-blue-500',
+      renovation: 'bg-yellow-500',
+      selling: 'bg-purple-500',
+      completed: 'bg-gray-500',
     };
     return colors[status.toLowerCase()] || 'bg-gray-500';
   };
 
   const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
-      'active': 'Activo',
-      'planning': 'Planificación',
-      'renovation': 'Renovación',
-      'selling': 'En Venta',
-      'completed': 'Completado',
+      active: 'Activo',
+      planning: 'Planificación',
+      renovation: 'Renovación',
+      selling: 'En Venta',
+      completed: 'Completado',
     };
     return labels[status.toLowerCase()] || status;
   };
@@ -113,7 +113,8 @@ export default function FlippingPage() {
   const totalInvestment = projects.reduce((sum, p) => sum + p.purchasePrice + p.investmentTotal, 0);
   const totalValue = projects.reduce((sum, p) => sum + p.currentValue, 0);
   const totalProfit = totalValue - totalInvestment;
-  const averageROI = projects.length > 0 ? (totalProfit / totalInvestment * 100).toFixed(2) : '0.00';
+  const averageROI =
+    projects.length > 0 ? ((totalProfit / totalInvestment) * 100).toFixed(2) : '0.00';
 
   if (status === 'loading' || loading) {
     return (
@@ -137,7 +138,9 @@ export default function FlippingPage() {
             <div className="flex justify-between items-center">
               <div>
                 <h1 className="text-3xl font-bold">Flipping Inmobiliario</h1>
-                <p className="text-muted-foreground">Gestiona tus proyectos de compra, renovación y venta</p>
+                <p className="text-muted-foreground">
+                  Gestiona tus proyectos de compra, renovación y venta
+                </p>
               </div>
               <Button onClick={() => router.push('/flipping/projects?new=true')}>
                 <Plus className="mr-2 h-4 w-4" />
@@ -155,7 +158,7 @@ export default function FlippingPage() {
                 <CardContent>
                   <div className="text-2xl font-bold">{projects.length}</div>
                   <p className="text-xs text-muted-foreground">
-                    {projects.filter(p => p.status.toLowerCase() === 'active').length} en progreso
+                    {projects.filter((p) => p.status.toLowerCase() === 'active').length} en progreso
                   </p>
                 </CardContent>
               </Card>
@@ -190,7 +193,8 @@ export default function FlippingPage() {
                 <CardContent>
                   <div className="text-2xl font-bold">{averageROI}%</div>
                   <p className="text-xs text-muted-foreground">
-                    {totalProfit >= 0 ? '+' : ''}{formatCurrency(totalProfit)} ganancia
+                    {totalProfit >= 0 ? '+' : ''}
+                    {formatCurrency(totalProfit)} ganancia
                   </p>
                 </CardContent>
               </Card>
@@ -214,10 +218,9 @@ export default function FlippingPage() {
                       <Home className="h-12 w-12 text-muted-foreground mb-4" />
                       <h3 className="text-lg font-semibold mb-2">No hay proyectos</h3>
                       <p className="text-sm text-muted-foreground mb-4">
-                        {activeTab === 'all' 
+                        {activeTab === 'all'
                           ? 'Comienza tu primer proyecto de flipping'
-                          : `No hay proyectos en estado "${getStatusLabel(activeTab)}"`
-                        }
+                          : `No hay proyectos en estado "${getStatusLabel(activeTab)}"`}
                       </p>
                       <Button onClick={() => router.push('/flipping/projects?new=true')}>
                         <Plus className="mr-2 h-4 w-4" />
@@ -228,7 +231,10 @@ export default function FlippingPage() {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {filteredProjects.map((project) => (
-                      <Card key={project.id} className="hover:shadow-lg transition-shadow cursor-pointer">
+                      <Card
+                        key={project.id}
+                        className="hover:shadow-lg transition-shadow cursor-pointer"
+                      >
                         <CardHeader>
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
@@ -247,22 +253,32 @@ export default function FlippingPage() {
                           <div className="space-y-3">
                             <div className="flex justify-between text-sm">
                               <span className="text-muted-foreground">Precio Compra:</span>
-                              <span className="font-medium">{formatCurrency(project.purchasePrice)}</span>
+                              <span className="font-medium">
+                                {formatCurrency(project.purchasePrice)}
+                              </span>
                             </div>
                             <div className="flex justify-between text-sm">
                               <span className="text-muted-foreground">Inversión:</span>
-                              <span className="font-medium">{formatCurrency(project.investmentTotal)}</span>
+                              <span className="font-medium">
+                                {formatCurrency(project.investmentTotal)}
+                              </span>
                             </div>
                             <div className="flex justify-between text-sm">
                               <span className="text-muted-foreground">Valor Actual:</span>
-                              <span className="font-medium text-green-600">{formatCurrency(project.currentValue)}</span>
+                              <span className="font-medium text-green-600">
+                                {formatCurrency(project.currentValue)}
+                              </span>
                             </div>
                             <div className="border-t pt-3">
                               <div className="flex justify-between text-sm mb-1">
                                 <span className="font-medium">ROI Esperado:</span>
-                                <span className={`font-bold ${
-                                  parseFloat(calculateROI(project)) >= 0 ? 'text-green-600' : 'text-red-600'
-                                }`}>
+                                <span
+                                  className={`font-bold ${
+                                    parseFloat(calculateROI(project)) >= 0
+                                      ? 'text-green-600'
+                                      : 'text-red-600'
+                                  }`}
+                                >
                                   {calculateROI(project)}%
                                 </span>
                               </div>
@@ -277,17 +293,17 @@ export default function FlippingPage() {
                               </p>
                             </div>
                             <div className="flex gap-2 pt-2">
-                              <Button 
-                                size="sm" 
-                                variant="outline" 
+                              <Button
+                                size="sm"
+                                variant="outline"
                                 className="flex-1"
                                 onClick={() => router.push(`/flipping/projects/${project.id}`)}
                               >
                                 <FileText className="h-3 w-3 mr-1" />
                                 Ver Detalles
                               </Button>
-                              <Button 
-                                size="sm" 
+                              <Button
+                                size="sm"
                                 variant="outline"
                                 onClick={() => router.push(`/flipping/projects/${project.id}/edit`)}
                               >

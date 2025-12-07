@@ -9,27 +9,48 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { 
-  Home, 
-  ArrowLeft, 
-  Hotel, 
-  TrendingUp, 
-  DollarSign, 
-  Calendar, 
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import {
+  Home,
+  ArrowLeft,
+  Hotel,
+  TrendingUp,
+  DollarSign,
+  Calendar,
   Star,
   Users,
   Building2,
   Activity,
   TrendingDown,
   CheckCircle,
-  Clock
+  Clock,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { LoadingState } from '@/components/ui/loading-state';
-import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from '@/components/ui/lazy-charts-extended';
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from '@/components/ui/lazy-charts-extended';
 import logger, { logError } from '@/lib/logger';
 
 interface DashboardStats {
@@ -175,9 +196,7 @@ export default function STRDashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.activeListings}</div>
-                  <p className="text-xs text-gray-500">
-                    {stats.totalListings} anuncios totales
-                  </p>
+                  <p className="text-xs text-gray-500">{stats.totalListings} anuncios totales</p>
                 </CardContent>
               </Card>
 
@@ -188,9 +207,7 @@ export default function STRDashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.bookingsThisMonth}</div>
-                  <p className="text-xs text-gray-500">
-                    {stats.totalBookings} reservas totales
-                  </p>
+                  <p className="text-xs text-gray-500">{stats.totalBookings} reservas totales</p>
                 </CardContent>
               </Card>
 
@@ -200,7 +217,9 @@ export default function STRDashboardPage() {
                   <DollarSign className="h-4 w-4 text-pink-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">€{stats.revenueThisMonth.toLocaleString()}</div>
+                  <div className="text-2xl font-bold">
+                    €{stats.revenueThisMonth.toLocaleString()}
+                  </div>
                   <p className="text-xs text-gray-500">
                     €{stats.totalRevenue.toLocaleString()} total
                   </p>
@@ -275,7 +294,13 @@ export default function STRDashboardPage() {
                         <YAxis />
                         <Tooltip />
                         <Legend />
-                        <Line type="monotone" dataKey="ingresos" stroke="#4F46E5" strokeWidth={2} name="Ingresos (€)" />
+                        <Line
+                          type="monotone"
+                          dataKey="ingresos"
+                          stroke="#4F46E5"
+                          strokeWidth={2}
+                          name="Ingresos (€)"
+                        />
                       </LineChart>
                     </ResponsiveContainer>
                   </CardContent>
@@ -319,7 +344,10 @@ export default function STRDashboardPage() {
                   <CardContent>
                     <div className="space-y-4">
                       {stats.topListings.map((listing, index) => (
-                        <div key={listing.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                        <div
+                          key={listing.id}
+                          className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                        >
                           <div className="flex items-center gap-4">
                             <div className="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white flex items-center justify-center font-bold">
                               {index + 1}
@@ -327,13 +355,16 @@ export default function STRDashboardPage() {
                             <div>
                               <p className="font-semibold">{listing.titulo}</p>
                               <p className="text-sm text-gray-500">
-                                {listing.totalReservas} reservas • €{listing.ingresoTotal.toLocaleString()}
+                                {listing.totalReservas} reservas • €
+                                {listing.ingresoTotal.toLocaleString()}
                               </p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
                             <Star className="h-4 w-4 text-yellow-500" />
-                            <span className="font-semibold">{listing.ratingPromedio.toFixed(1)}</span>
+                            <span className="font-semibold">
+                              {listing.ratingPromedio.toFixed(1)}
+                            </span>
                           </div>
                         </div>
                       ))}

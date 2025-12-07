@@ -97,82 +97,88 @@ export default function InquilinoDetailPage() {
               </Breadcrumb>
             </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 mb-6">
-            <div className="flex items-start justify-between mb-6">
-              <div className="flex items-center gap-4">
-                <div className="p-4 bg-black text-white rounded-lg">
-                  <Users size={32} />
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 mb-6">
+              <div className="flex items-start justify-between mb-6">
+                <div className="flex items-center gap-4">
+                  <div className="p-4 bg-black text-white rounded-lg">
+                    <Users size={32} />
+                  </div>
+                  <div>
+                    <h1 className="text-3xl font-bold text-gray-900">{tenant?.nombreCompleto}</h1>
+                    <p className="text-gray-600 mt-1">DNI: {tenant?.dni}</p>
+                  </div>
+                </div>
+                <span
+                  className={`px-4 py-2 rounded-full text-sm font-medium ${
+                    tenant?.nivelRiesgo === 'bajo'
+                      ? 'bg-green-100 text-green-800'
+                      : tenant?.nivelRiesgo === 'medio'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-red-100 text-red-800'
+                  }`}
+                >
+                  Riesgo: {tenant?.nivelRiesgo}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <p className="text-sm text-gray-500 mb-1 flex items-center gap-2">
+                    <Mail size={16} />
+                    Email
+                  </p>
+                  <p className="text-gray-900 font-medium">{tenant?.email}</p>
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">{tenant?.nombreCompleto}</h1>
-                  <p className="text-gray-600 mt-1">DNI: {tenant?.dni}</p>
+                  <p className="text-sm text-gray-500 mb-1 flex items-center gap-2">
+                    <Phone size={16} />
+                    Teléfono
+                  </p>
+                  <p className="text-gray-900 font-medium">{tenant?.telefono}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 mb-1 flex items-center gap-2">
+                    <CreditCard size={16} />
+                    Scoring
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">{tenant?.scoring}/100</p>
                 </div>
               </div>
-              <span className={`px-4 py-2 rounded-full text-sm font-medium ${
-                tenant?.nivelRiesgo === 'bajo' ? 'bg-green-100 text-green-800' :
-                tenant?.nivelRiesgo === 'medio' ? 'bg-yellow-100 text-yellow-800' :
-                'bg-red-100 text-red-800'
-              }`}>
-                Riesgo: {tenant?.nivelRiesgo}
-              </span>
+
+              {tenant?.notas && (
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <p className="text-sm text-gray-500 mb-2">Notas</p>
+                  <p className="text-gray-900">{tenant.notas}</p>
+                </div>
+              )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <p className="text-sm text-gray-500 mb-1 flex items-center gap-2">
-                  <Mail size={16} />
-                  Email
-                </p>
-                <p className="text-gray-900 font-medium">{tenant?.email}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 mb-1 flex items-center gap-2">
-                  <Phone size={16} />
-                  Teléfono
-                </p>
-                <p className="text-gray-900 font-medium">{tenant?.telefono}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 mb-1 flex items-center gap-2">
-                  <CreditCard size={16} />
-                  Scoring
-                </p>
-                <p className="text-2xl font-bold text-gray-900">{tenant?.scoring}/100</p>
-              </div>
-            </div>
-
-            {tenant?.notas && (
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <p className="text-sm text-gray-500 mb-2">Notas</p>
-                <p className="text-gray-900">{tenant.notas}</p>
+            {tenant?.contracts && tenant.contracts.length > 0 && (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Contratos</h2>
+                <div className="space-y-4">
+                  {tenant.contracts.map((contract: any) => (
+                    <div key={contract?.id} className="p-4 border border-gray-200 rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="font-medium text-gray-900">
+                          {contract?.unit?.building?.nombre} - {contract?.unit?.numero}
+                        </p>
+                        <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">
+                          {contract?.estado}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        {new Date(contract?.fechaInicio).toLocaleDateString('es-ES')} -{' '}
+                        {new Date(contract?.fechaFin).toLocaleDateString('es-ES')}
+                      </p>
+                      <p className="text-sm font-bold text-gray-900 mt-2">
+                        €{contract?.rentaMensual?.toLocaleString('es-ES')}/mes
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
-          </div>
-
-          {tenant?.contracts && tenant.contracts.length > 0 && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Contratos</h2>
-              <div className="space-y-4">
-                {tenant.contracts.map((contract: any) => (
-                  <div key={contract?.id} className="p-4 border border-gray-200 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="font-medium text-gray-900">
-                        {contract?.unit?.building?.nombre} - {contract?.unit?.numero}
-                      </p>
-                      <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">{contract?.estado}</span>
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      {new Date(contract?.fechaInicio).toLocaleDateString('es-ES')} -{' '}
-                      {new Date(contract?.fechaFin).toLocaleDateString('es-ES')}
-                    </p>
-                    <p className="text-sm font-bold text-gray-900 mt-2">
-                      €{contract?.rentaMensual?.toLocaleString('es-ES')}/mes
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
           </div>
         </main>
       </div>

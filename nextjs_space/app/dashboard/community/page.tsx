@@ -24,7 +24,7 @@ import {
   BarChart3,
   CalendarDays,
   FileText,
-  Bell
+  Bell,
 } from 'lucide-react';
 import CommunityEventsPanel from './components/CommunityEventsPanel';
 import SocialFeedPanel from './components/SocialFeedPanel';
@@ -58,7 +58,7 @@ export default function CommunityDashboard() {
         setLoading(false);
       }
     };
-    
+
     if (canViewEngagement) {
       fetchMetrics();
     } else {
@@ -114,7 +114,7 @@ export default function CommunityDashboard() {
             Gestiona eventos, contenido social y comunicaciones con la comunidad
           </p>
         </div>
-        
+
         <div className="flex gap-2">
           <Button variant="outline" size="sm">
             <Settings className="h-4 w-4 mr-2" />
@@ -137,8 +137,11 @@ export default function CommunityDashboard() {
                   <p className="text-sm font-medium text-muted-foreground">Eventos Activos</p>
                   <p className="text-2xl font-bold">{metrics.eventos?.total || 0}</p>
                   {metrics.eventos?.tendencia !== 0 && (
-                    <p className={`text-xs ${Number(metrics.eventos.tendencia) > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {Number(metrics.eventos.tendencia) > 0 ? '+' : ''}{metrics.eventos.tendencia}% vs mes anterior
+                    <p
+                      className={`text-xs ${Number(metrics.eventos.tendencia) > 0 ? 'text-green-600' : 'text-red-600'}`}
+                    >
+                      {Number(metrics.eventos.tendencia) > 0 ? '+' : ''}
+                      {metrics.eventos.tendencia}% vs mes anterior
                     </p>
                   )}
                 </div>
@@ -156,8 +159,11 @@ export default function CommunityDashboard() {
                   <p className="text-sm font-medium text-muted-foreground">Posts Publicados</p>
                   <p className="text-2xl font-bold">{metrics.posts?.total || 0}</p>
                   {metrics.posts?.tendencia !== 0 && (
-                    <p className={`text-xs ${Number(metrics.posts.tendencia) > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {Number(metrics.posts.tendencia) > 0 ? '+' : ''}{metrics.posts.tendencia}% vs mes anterior
+                    <p
+                      className={`text-xs ${Number(metrics.posts.tendencia) > 0 ? 'text-green-600' : 'text-red-600'}`}
+                    >
+                      {Number(metrics.posts.tendencia) > 0 ? '+' : ''}
+                      {metrics.posts.tendencia}% vs mes anterior
                     </p>
                   )}
                 </div>
@@ -175,7 +181,8 @@ export default function CommunityDashboard() {
                   <p className="text-sm font-medium text-muted-foreground">Interacciones</p>
                   <p className="text-2xl font-bold">{metrics.interacciones?.total || 0}</p>
                   <p className="text-xs text-muted-foreground">
-                    {metrics.interacciones?.reacciones || 0} reacciones, {metrics.interacciones?.comentarios || 0} comentarios
+                    {metrics.interacciones?.reacciones || 0} reacciones,{' '}
+                    {metrics.interacciones?.comentarios || 0} comentarios
                   </p>
                 </div>
                 <div className="h-12 w-12 bg-pink-100 rounded-full flex items-center justify-center">

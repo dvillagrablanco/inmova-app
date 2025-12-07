@@ -10,11 +10,31 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
 import {
   Home,
@@ -33,7 +53,18 @@ import {
 } from 'lucide-react';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { format } from 'date-fns';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from '@/components/ui/lazy-charts-extended';
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from '@/components/ui/lazy-charts-extended';
 import logger, { logError } from '@/lib/logger';
 
 interface Building {
@@ -169,7 +200,7 @@ export default function EnergiaPage() {
         buildingId: readingForm.buildingId === 'no-building' ? null : readingForm.buildingId,
         unitId: readingForm.unitId === 'no-unit' ? null : readingForm.unitId,
       };
-      
+
       const res = await fetch('/api/energy/readings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -218,7 +249,12 @@ export default function EnergiaPage() {
   const filteredReadings = useMemo(() => {
     return readings.filter((reading) => {
       if (filterTipo && filterTipo !== 'all-types' && reading.tipo !== filterTipo) return false;
-      if (filterBuilding && filterBuilding !== 'all-buildings' && reading.building?.id !== filterBuilding) return false;
+      if (
+        filterBuilding &&
+        filterBuilding !== 'all-buildings' &&
+        reading.building?.id !== filterBuilding
+      )
+        return false;
       return true;
     });
   }, [readings, filterTipo, filterBuilding]);
@@ -355,9 +391,7 @@ export default function EnergiaPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats?.unresolvedAlerts || 0}</div>
-                <p className="text-xs text-muted-foreground">
-                  {stats?.totalAlerts || 0} totales
-                </p>
+                <p className="text-xs text-muted-foreground">{stats?.totalAlerts || 0} totales</p>
               </CardContent>
             </Card>
           </div>
@@ -604,24 +638,18 @@ export default function EnergiaPage() {
                           <div className="flex items-center gap-3">
                             {getEnergyIcon(reading.tipo)}
                             <div>
-                              <CardTitle className="text-lg capitalize">
-                                {reading.tipo}
-                              </CardTitle>
+                              <CardTitle className="text-lg capitalize">{reading.tipo}</CardTitle>
                               <CardDescription>{reading.periodo}</CardDescription>
                             </div>
                           </div>
-                          <Badge>
-                            {format(new Date(reading.fechaLectura), 'dd/MM/yyyy')}
-                          </Badge>
+                          <Badge>{format(new Date(reading.fechaLectura), 'dd/MM/yyyy')}</Badge>
                         </div>
                       </CardHeader>
                       <CardContent className="space-y-3">
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <p className="text-sm text-muted-foreground">Lectura Actual</p>
-                            <p className="text-2xl font-bold">
-                              {reading.lecturaActual.toFixed(2)}
-                            </p>
+                            <p className="text-2xl font-bold">{reading.lecturaActual.toFixed(2)}</p>
                           </div>
                           <div>
                             <p className="text-sm text-muted-foreground">Consumo</p>
@@ -651,9 +679,7 @@ export default function EnergiaPage() {
                         )}
 
                         {reading.notas && (
-                          <p className="text-sm text-muted-foreground italic">
-                            {reading.notas}
-                          </p>
+                          <p className="text-sm text-muted-foreground italic">{reading.notas}</p>
                         )}
                       </CardContent>
                     </Card>
@@ -671,9 +697,7 @@ export default function EnergiaPage() {
                   <Card>
                     <CardContent className="flex flex-col items-center justify-center py-12">
                       <CheckCircle2 className="h-12 w-12 text-green-600 mb-4" />
-                      <p className="text-muted-foreground text-center">
-                        No hay alertas activas
-                      </p>
+                      <p className="text-muted-foreground text-center">No hay alertas activas</p>
                     </CardContent>
                   </Card>
                 ) : (
@@ -714,9 +738,7 @@ export default function EnergiaPage() {
                               <p className="text-muted-foreground">Desviación</p>
                               <p
                                 className={`text-lg font-semibold ${
-                                  alert.desviacionPorcentaje > 0
-                                    ? 'text-red-600'
-                                    : 'text-green-600'
+                                  alert.desviacionPorcentaje > 0 ? 'text-red-600' : 'text-green-600'
                                 }`}
                               >
                                 {alert.desviacionPorcentaje > 0 ? '+' : ''}
@@ -743,9 +765,7 @@ export default function EnergiaPage() {
                         {!alert.resuelta && (
                           <Button
                             size="sm"
-                            onClick={() =>
-                              handleResolveAlert(alert.id, 'Revisado y corregido')
-                            }
+                            onClick={() => handleResolveAlert(alert.id, 'Revisado y corregido')}
                             className="w-full"
                           >
                             <CheckCircle2 className="h-4 w-4 mr-2" />
@@ -766,9 +786,7 @@ export default function EnergiaPage() {
               <Card>
                 <CardHeader>
                   <CardTitle>Consumo de Electricidad (Últimos 6 Meses)</CardTitle>
-                  <CardDescription>
-                    Evolución del consumo y costos
-                  </CardDescription>
+                  <CardDescription>Evolución del consumo y costos</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {trends.length === 0 ? (

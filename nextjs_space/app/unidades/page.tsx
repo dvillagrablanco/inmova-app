@@ -5,7 +5,18 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
-import { Home, Plus, Building2, User, ArrowLeft, MoreVertical, Eye, Search, Square, Maximize } from 'lucide-react';
+import {
+  Home,
+  Plus,
+  Building2,
+  User,
+  ArrowLeft,
+  MoreVertical,
+  Eye,
+  Search,
+  Square,
+  Maximize,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -68,7 +79,9 @@ export default function UnidadesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [estadoFilter, setEstadoFilter] = useState<string>('all');
   const [tipoFilter, setTipoFilter] = useState<string>('all');
-  const [activeFilters, setActiveFilters] = useState<Array<{ id: string; label: string; value: string }>>([]);
+  const [activeFilters, setActiveFilters] = useState<
+    Array<{ id: string; label: string; value: string }>
+  >([]);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
   // Load view preference from localStorage
@@ -116,10 +129,11 @@ export default function UnidadesPage() {
     let filtered = units;
 
     if (searchTerm) {
-      filtered = filtered.filter((unit) =>
-        unit.numero.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        unit.building.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        unit.tenant?.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (unit) =>
+          unit.numero.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          unit.building.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          unit.tenant?.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -137,42 +151,42 @@ export default function UnidadesPage() {
   // Actualizar filtros activos
   useEffect(() => {
     const filters: Array<{ id: string; label: string; value: string }> = [];
-    
+
     if (searchTerm) {
       filters.push({
         id: 'search',
         label: 'Búsqueda',
-        value: searchTerm
+        value: searchTerm,
       });
     }
-    
+
     if (estadoFilter && estadoFilter !== 'all') {
       const estadoLabels: Record<string, string> = {
-        'disponible': 'Disponible',
-        'ocupada': 'Ocupada',
-        'mantenimiento': 'En Mantenimiento'
+        disponible: 'Disponible',
+        ocupada: 'Ocupada',
+        mantenimiento: 'En Mantenimiento',
       };
       filters.push({
         id: 'estado',
         label: 'Estado',
-        value: estadoLabels[estadoFilter] || estadoFilter
+        value: estadoLabels[estadoFilter] || estadoFilter,
       });
     }
-    
+
     if (tipoFilter && tipoFilter !== 'all') {
       const tipoLabels: Record<string, string> = {
-        'vivienda': 'Vivienda',
-        'local': 'Local',
-        'oficina': 'Oficina',
-        'estudio': 'Estudio'
+        vivienda: 'Vivienda',
+        local: 'Local',
+        oficina: 'Oficina',
+        estudio: 'Estudio',
       };
       filters.push({
         id: 'tipo',
         label: 'Tipo',
-        value: tipoLabels[tipoFilter] || tipoFilter
+        value: tipoLabels[tipoFilter] || tipoFilter,
       });
     }
-    
+
     setActiveFilters(filters);
   }, [searchTerm, estadoFilter, tipoFilter]);
 
@@ -232,12 +246,9 @@ export default function UnidadesPage() {
 
               {/* Skeleton for units list */}
               <SkeletonList count={4} />
-              
+
               {/* Loading message */}
-              <LoadingState 
-                message="Cargando unidades..."
-                size="sm"
-              />
+              <LoadingState message="Cargando unidades..." size="sm" />
             </div>
           </main>
         </div>
@@ -307,9 +318,7 @@ export default function UnidadesPage() {
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <h1 className="text-3xl font-bold tracking-tight">Unidades</h1>
-                <p className="text-muted-foreground">
-                  Gestiona las unidades de tus propiedades
-                </p>
+                <p className="text-muted-foreground">Gestiona las unidades de tus propiedades</p>
               </div>
               {canCreate && (
                 <Button onClick={() => router.push('/unidades/nuevo')}>
@@ -388,9 +397,7 @@ export default function UnidadesPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-green-600">{unitsOcupadas}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {ocupacionRate}% de ocupación
-                  </p>
+                  <p className="text-xs text-muted-foreground">{ocupacionRate}% de ocupación</p>
                 </CardContent>
               </Card>
               <Card>
@@ -483,11 +490,13 @@ export default function UnidadesPage() {
                                 <h3 className="text-xl font-bold">
                                   {unit.building.nombre} - Unidad {unit.numero}
                                 </h3>
-                                <p className="text-muted-foreground mt-1">{getTipoLabel(unit.tipo)}</p>
+                                <p className="text-muted-foreground mt-1">
+                                  {getTipoLabel(unit.tipo)}
+                                </p>
                               </div>
                               <Badge variant={estadoBadge.variant}>{estadoBadge.label}</Badge>
                             </div>
-                            
+
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                               <div>
                                 <p className="text-sm text-muted-foreground">Superficie</p>
@@ -517,7 +526,9 @@ export default function UnidadesPage() {
                               <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
                                 <User className="h-5 w-5 text-muted-foreground" />
                                 <div>
-                                  <p className="text-sm font-medium">{unit.tenant.nombreCompleto}</p>
+                                  <p className="text-sm font-medium">
+                                    {unit.tenant.nombreCompleto}
+                                  </p>
                                   <p className="text-xs text-muted-foreground">Inquilino actual</p>
                                 </div>
                               </div>
@@ -557,7 +568,9 @@ export default function UnidadesPage() {
                           <div className="flex items-center gap-4 flex-1">
                             <Home className="h-8 w-8 text-muted-foreground" />
                             <div className="flex-1">
-                              <p className="font-semibold">{unit.building.nombre} - Unidad {unit.numero}</p>
+                              <p className="font-semibold">
+                                {unit.building.nombre} - Unidad {unit.numero}
+                              </p>
                               <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                                 <span>{getTipoLabel(unit.tipo)}</span>
                                 <span>•</span>
@@ -578,7 +591,9 @@ export default function UnidadesPage() {
                             {unit.tenant && (
                               <div className="text-center max-w-[120px]">
                                 <p className="text-muted-foreground">Inquilino</p>
-                                <p className="font-semibold truncate">{unit.tenant.nombreCompleto}</p>
+                                <p className="font-semibold truncate">
+                                  {unit.tenant.nombreCompleto}
+                                </p>
                               </div>
                             )}
                             <div className="text-center">
@@ -599,8 +614,8 @@ export default function UnidadesPage() {
               </Card>
             )}
 
-            {filteredUnits.length === 0 && (
-              (searchTerm || estadoFilter !== 'all' || tipoFilter !== 'all') ? (
+            {filteredUnits.length === 0 &&
+              (searchTerm || estadoFilter !== 'all' || tipoFilter !== 'all' ? (
                 <EnhancedEmptyState
                   preset="unitsFiltered"
                   primaryAction={{
@@ -612,15 +627,18 @@ export default function UnidadesPage() {
               ) : (
                 <EnhancedEmptyState
                   preset="units"
-                  primaryAction={canCreate ? {
-                    label: 'Crear Primera Unidad',
-                    onClick: () => router.push('/unidades/nuevo'),
-                    icon: <Plus className="h-4 w-4" aria-hidden="true" />,
-                  } : undefined}
+                  primaryAction={
+                    canCreate
+                      ? {
+                          label: 'Crear Primera Unidad',
+                          onClick: () => router.push('/unidades/nuevo'),
+                          icon: <Plus className="h-4 w-4" aria-hidden="true" />,
+                        }
+                      : undefined
+                  }
                   chatSupport={!canCreate}
                 />
-              )
-            )}
+              ))}
           </div>
         </main>
       </div>

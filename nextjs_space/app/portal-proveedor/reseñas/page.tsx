@@ -80,9 +80,7 @@ export default function ReseñasPage() {
           <Star
             key={star}
             className={`h-4 w-4 ${
-              star <= rating
-                ? 'fill-yellow-400 text-yellow-400'
-                : 'text-gray-300'
+              star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
             }`}
           />
         ))}
@@ -154,7 +152,7 @@ export default function ReseñasPage() {
             <div className="mt-2">{renderStars(Math.round(stats.averageRating))}</div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
@@ -171,8 +169,7 @@ export default function ReseñasPage() {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              5 Estrellas
+              <TrendingUp className="h-4 w-4" />5 Estrellas
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -209,8 +206,7 @@ export default function ReseñasPage() {
           <CardContent className="space-y-3">
             {[5, 4, 3, 2, 1].map((rating) => {
               const count = stats.ratingDistribution[rating] || 0;
-              const percentage =
-                stats.totalReviews > 0 ? (count / stats.totalReviews) * 100 : 0;
+              const percentage = stats.totalReviews > 0 ? (count / stats.totalReviews) * 100 : 0;
               return (
                 <div key={rating} className="flex items-center gap-3">
                   <span className="text-sm font-medium w-8">{rating}</span>
@@ -221,9 +217,7 @@ export default function ReseñasPage() {
                       style={{ width: `${percentage}%` }}
                     />
                   </div>
-                  <span className="text-sm text-gray-600 w-12 text-right">
-                    {count}
-                  </span>
+                  <span className="text-sm text-gray-600 w-12 text-right">{count}</span>
                 </div>
               );
             })}
@@ -234,12 +228,13 @@ export default function ReseñasPage() {
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Calificaciones por Categoría</CardTitle>
-            <CardDescription>
-              Desglose de tu desempeño en diferentes áreas
-            </CardDescription>
+            <CardDescription>Desglose de tu desempeño en diferentes áreas</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <CategoryBar label="Calidad del Trabajo" value={stats.categoryAverages.calidadTrabajo} />
+            <CategoryBar
+              label="Calidad del Trabajo"
+              value={stats.categoryAverages.calidadTrabajo}
+            />
             <CategoryBar label="Puntualidad" value={stats.categoryAverages.puntualidad} />
             <CategoryBar label="Profesionalismo" value={stats.categoryAverages.profesionalismo} />
             <CategoryBar label="Limpieza" value={stats.categoryAverages.limpieza} />
@@ -292,50 +287,38 @@ export default function ReseñasPage() {
                   </div>
 
                   {review.comentario && (
-                    <p className="text-sm text-gray-700 mb-3 italic">
-                      "{review.comentario}"
-                    </p>
+                    <p className="text-sm text-gray-700 mb-3 italic">"{review.comentario}"</p>
                   )}
 
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-2 pt-3 border-t">
                     {review.calidadTrabajo && (
                       <div className="text-center">
                         <p className="text-xs text-gray-500">Calidad</p>
-                        <p className="text-sm font-medium">
-                          {review.calidadTrabajo.toFixed(1)}
-                        </p>
+                        <p className="text-sm font-medium">{review.calidadTrabajo.toFixed(1)}</p>
                       </div>
                     )}
                     {review.puntualidad && (
                       <div className="text-center">
                         <p className="text-xs text-gray-500">Puntualidad</p>
-                        <p className="text-sm font-medium">
-                          {review.puntualidad.toFixed(1)}
-                        </p>
+                        <p className="text-sm font-medium">{review.puntualidad.toFixed(1)}</p>
                       </div>
                     )}
                     {review.profesionalismo && (
                       <div className="text-center">
                         <p className="text-xs text-gray-500">Profesionalismo</p>
-                        <p className="text-sm font-medium">
-                          {review.profesionalismo.toFixed(1)}
-                        </p>
+                        <p className="text-sm font-medium">{review.profesionalismo.toFixed(1)}</p>
                       </div>
                     )}
                     {review.limpieza && (
                       <div className="text-center">
                         <p className="text-xs text-gray-500">Limpieza</p>
-                        <p className="text-sm font-medium">
-                          {review.limpieza.toFixed(1)}
-                        </p>
+                        <p className="text-sm font-medium">{review.limpieza.toFixed(1)}</p>
                       </div>
                     )}
                     {review.comunicacion && (
                       <div className="text-center">
                         <p className="text-xs text-gray-500">Comunicación</p>
-                        <p className="text-sm font-medium">
-                          {review.comunicacion.toFixed(1)}
-                        </p>
+                        <p className="text-sm font-medium">{review.comunicacion.toFixed(1)}</p>
                       </div>
                     )}
                   </div>

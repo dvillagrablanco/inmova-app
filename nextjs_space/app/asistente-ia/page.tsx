@@ -16,7 +16,7 @@ import {
   BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
-  BreadcrumbSeparator
+  BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import {
   Home,
@@ -29,7 +29,7 @@ import {
   Loader2,
   CheckCircle2,
   User,
-  Sparkles
+  Sparkles,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import logger from '@/lib/logger';
@@ -47,19 +47,22 @@ export default function AIAssistantPage() {
   const { data: session, status } = useSession() || {};
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [messages, setMessages] = useState<Message[]>([{
-    id: '1',
-    role: 'assistant',
-    content: '¡Hola! 👋 Soy INMOVA Assistant, tu asistente IA. Puedo ayudarte con:\n\n✅ Crear solicitudes de mantenimiento\n💳 Consultar el estado de tus pagos\n📄 Ver información de tu contrato\n📅 Agendar visitas\n📂 Acceder a documentos\n\n¿En qué puedo ayudarte hoy?',
-    timestamp: new Date()
-  }]);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: '1',
+      role: 'assistant',
+      content:
+        '¡Hola! 👋 Soy INMOVA Assistant, tu asistente IA. Puedo ayudarte con:\n\n✅ Crear solicitudes de mantenimiento\n💳 Consultar el estado de tus pagos\n📄 Ver información de tu contrato\n📅 Agendar visitas\n📂 Acceder a documentos\n\n¿En qué puedo ayudarte hoy?',
+      timestamp: new Date(),
+    },
+  ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [stats, setStats] = useState({
     conversations: 0,
     actionsExecuted: 0,
-    successRate: 0
+    successRate: 0,
   });
 
   useEffect(() => {
@@ -82,8 +85,8 @@ export default function AIAssistantPage() {
   const loadStats = async () => {
     setStats({
       conversations: messages.length > 1 ? 1 : 0,
-      actionsExecuted: messages.filter(m => m.actionExecuted).length,
-      successRate: 95
+      actionsExecuted: messages.filter((m) => m.actionExecuted).length,
+      successRate: 95,
     });
   };
 
@@ -94,28 +97,28 @@ export default function AIAssistantPage() {
       id: Date.now().toString(),
       role: 'user',
       content: inputMessage,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInputMessage('');
     setIsTyping(true);
 
     try {
-      const conversationHistory = messages.map(m => ({
+      const conversationHistory = messages.map((m) => ({
         role: m.role,
-        content: m.content
+        content: m.content,
       }));
 
       const response = await fetch('/api/ai/assistant', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           message: inputMessage,
-          conversationHistory
-        })
+          conversationHistory,
+        }),
       });
 
       if (!response.ok) throw new Error('Error en la respuesta');
@@ -128,28 +131,32 @@ export default function AIAssistantPage() {
         content: data.response,
         timestamp: new Date(),
         actionExecuted: data.type === 'action_executed',
-        actionType: data.action?.action
+        actionType: data.action?.action,
       };
 
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, assistantMessage]);
 
       if (data.type === 'action_executed' && data.action?.success) {
         toast.success('✅ Acción ejecutada automáticamente');
-        setStats(prev => ({
+        setStats((prev) => ({
           ...prev,
-          actionsExecuted: prev.actionsExecuted + 1
+          actionsExecuted: prev.actionsExecuted + 1,
         }));
       }
     } catch (error) {
       logger.error('Error enviando mensaje:', error);
       toast.error('Error al procesar tu mensaje');
-      
-      setMessages(prev => [...prev, {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'Lo siento, hubo un error al procesar tu mensaje. Por favor, inténtalo de nuevo.',
-        timestamp: new Date()
-      }]);
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content:
+            'Lo siento, hubo un error al procesar tu mensaje. Por favor, inténtalo de nuevo.',
+          timestamp: new Date(),
+        },
+      ]);
     } finally {
       setIsTyping(false);
     }
@@ -200,15 +207,13 @@ export default function AIAssistantPage() {
                   Asistente IA Avanzado
                 </h1>
                 <p className="text-muted-foreground">
-                  <Badge variant="outline" className="mr-2">FASE 3 - LLM Integrado</Badge>
+                  <Badge variant="outline" className="mr-2">
+                    FASE 3 - LLM Integrado
+                  </Badge>
                   Auto-resolución inteligente con GPT-4
                 </p>
               </div>
-              <Button
-                variant="outline"
-                onClick={() => router.push('/dashboard')}
-                className="gap-2"
-              >
+              <Button variant="outline" onClick={() => router.push('/dashboard')} className="gap-2">
                 <ArrowLeft className="h-4 w-4" />
                 Volver
               </Button>
@@ -225,7 +230,9 @@ export default function AIAssistantPage() {
               </Card>
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm text-muted-foreground">Acciones Automatizadas</CardTitle>
+                  <CardTitle className="text-sm text-muted-foreground">
+                    Acciones Automatizadas
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-green-600">{stats.actionsExecuted}</div>
@@ -282,7 +289,7 @@ export default function AIAssistantPage() {
                             <p className="mt-1 text-xs opacity-70">
                               {message.timestamp.toLocaleTimeString('es-ES', {
                                 hour: '2-digit',
-                                minute: '2-digit'
+                                minute: '2-digit',
                               })}
                             </p>
                           </div>
@@ -356,18 +363,14 @@ export default function AIAssistantPage() {
                       <CheckCircle2 className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
                       <div>
                         <p className="font-medium">Detección de intenciones</p>
-                        <p className="text-xs text-muted-foreground">
-                          Entiende lo que necesitas
-                        </p>
+                        <p className="text-xs text-muted-foreground">Entiende lo que necesitas</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-2">
                       <MessageSquare className="h-4 w-4 text-purple-600 shrink-0 mt-0.5" />
                       <div>
                         <p className="font-medium">Memoria contextual</p>
-                        <p className="text-xs text-muted-foreground">
-                          Recuerda la conversación
-                        </p>
+                        <p className="text-xs text-muted-foreground">Recuerda la conversación</p>
                       </div>
                     </div>
                   </CardContent>

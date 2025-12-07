@@ -17,7 +17,8 @@ export default function UnauthorizedPage() {
           </div>
           <CardTitle className="text-2xl">Acceso Denegado</CardTitle>
           <CardDescription>
-            No tienes permisos para acceder a esta página. Por favor, contacta con tu administrador si crees que es un error.
+            No tienes permisos para acceder a esta página. Por favor, contacta con tu administrador
+            si crees que es un error.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
@@ -25,11 +26,7 @@ export default function UnauthorizedPage() {
             <ArrowLeft className="mr-2 h-4 w-4" />
             Volver al Dashboard
           </Button>
-          <Button
-            variant="outline"
-            onClick={() => router.back()}
-            className="w-full"
-          >
+          <Button variant="outline" onClick={() => router.back()} className="w-full">
             Página Anterior
           </Button>
         </CardContent>

@@ -101,9 +101,7 @@ export default function EventosCalendario() {
             <Calendar className="h-5 w-5" />
             Próximos Eventos
           </CardTitle>
-          <CardDescription>
-            Participa en eventos y actividades de la comunidad
-          </CardDescription>
+          <CardDescription>Participa en eventos y actividades de la comunidad</CardDescription>
         </CardHeader>
       </Card>
 
@@ -118,7 +116,9 @@ export default function EventosCalendario() {
         ) : (
           eventos.map((evento) => {
             const fechaEvento = new Date(evento.fecha);
-            const estaLleno = evento.capacidad ? evento._count.asistentes >= evento.capacidad : false;
+            const estaLleno = evento.capacidad
+              ? evento._count.asistentes >= evento.capacidad
+              : false;
 
             return (
               <Card key={evento.id} className="overflow-hidden">
@@ -137,13 +137,9 @@ export default function EventosCalendario() {
                 <CardHeader>
                   <div className="flex items-start justify-between mb-2">
                     <CardTitle className="text-xl">{evento.titulo}</CardTitle>
-                    <Badge className={getTipoColor(evento.tipo)}>
-                      {evento.tipo}
-                    </Badge>
+                    <Badge className={getTipoColor(evento.tipo)}>{evento.tipo}</Badge>
                   </div>
-                  <CardDescription className="line-clamp-2">
-                    {evento.descripcion}
-                  </CardDescription>
+                  <CardDescription className="line-clamp-2">{evento.descripcion}</CardDescription>
                 </CardHeader>
 
                 <CardContent className="space-y-4">
@@ -151,9 +147,7 @@ export default function EventosCalendario() {
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2 text-gray-600">
                       <Calendar className="h-4 w-4" />
-                      <span>
-                        {format(fechaEvento, "EEEE, d 'de' MMMM", { locale: es })}
-                      </span>
+                      <span>{format(fechaEvento, "EEEE, d 'de' MMMM", { locale: es })}</span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-600">
                       <Clock className="h-4 w-4" />

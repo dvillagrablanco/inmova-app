@@ -10,7 +10,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -19,7 +25,20 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Users, Plus, Phone, Mail, Star, ArrowLeft, Home, Search, Briefcase, TrendingUp, Edit, Trash2 } from 'lucide-react';
+import {
+  Users,
+  Plus,
+  Phone,
+  Mail,
+  Star,
+  ArrowLeft,
+  Home,
+  Search,
+  Briefcase,
+  TrendingUp,
+  Edit,
+  Trash2,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { LoadingState } from '@/components/ui/loading-state';
@@ -116,7 +135,15 @@ export default function ProveedoresPage() {
       if (res.ok) {
         toast.success('Proveedor creado exitosamente');
         setOpenDialog(false);
-        setForm({ nombre: '', tipo: '', telefono: '', email: '', direccion: '', rating: '', notas: '' });
+        setForm({
+          nombre: '',
+          tipo: '',
+          telefono: '',
+          email: '',
+          direccion: '',
+          rating: '',
+          notas: '',
+        });
         fetchProviders();
       } else {
         toast.error('Error al crear proveedor');
@@ -197,11 +224,12 @@ export default function ProveedoresPage() {
 
   // Filtrado de proveedores
   const filteredProviders = useMemo(() => {
-    return providers.filter(provider =>
-      searchTerm === '' ||
-      provider.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      provider.tipo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      provider.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    return providers.filter(
+      (provider) =>
+        searchTerm === '' ||
+        provider.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        provider.tipo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        provider.email?.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [providers, searchTerm]);
 
@@ -209,8 +237,8 @@ export default function ProveedoresPage() {
   const stats = useMemo(() => {
     return {
       total: providers.length,
-      conTrabajos: providers.filter(p => (p._count?.maintenanceRequests || 0) > 0).length,
-      rating5: providers.filter(p => p.rating === 5).length,
+      conTrabajos: providers.filter((p) => (p._count?.maintenanceRequests || 0) > 0).length,
+      rating5: providers.filter((p) => p.rating === 5).length,
       totalTrabajos: providers.reduce((sum, p) => sum + (p._count?.maintenanceRequests || 0), 0),
     };
   }, [providers]);
@@ -268,9 +296,7 @@ export default function ProveedoresPage() {
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <h1 className="text-3xl font-bold tracking-tight">Proveedores</h1>
-                <p className="text-muted-foreground">
-                  Gestiona los proveedores de servicios
-                </p>
+                <p className="text-muted-foreground">Gestiona los proveedores de servicios</p>
               </div>
               {canCreate && (
                 <Dialog open={openDialog} onOpenChange={setOpenDialog}>
@@ -352,12 +378,14 @@ export default function ProveedoresPage() {
                         />
                       </div>
                       <div className="flex justify-end gap-2">
-                        <Button type="button" variant="outline" onClick={() => setOpenDialog(false)}>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setOpenDialog(false)}
+                        >
                           Cancelar
                         </Button>
-                        <Button type="submit">
-                          Crear Proveedor
-                        </Button>
+                        <Button type="submit">Crear Proveedor</Button>
                       </div>
                     </form>
                   </DialogContent>
@@ -439,12 +467,14 @@ export default function ProveedoresPage() {
                     />
                   </div>
                   <div className="flex justify-end gap-2">
-                    <Button type="button" variant="outline" onClick={() => setOpenEditDialog(false)}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setOpenEditDialog(false)}
+                    >
                       Cancelar
                     </Button>
-                    <Button type="submit">
-                      Guardar Cambios
-                    </Button>
+                    <Button type="submit">Guardar Cambios</Button>
                   </div>
                 </form>
               </DialogContent>
@@ -454,9 +484,7 @@ export default function ProveedoresPage() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Total
-                  </CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Total</CardTitle>
                   <Users className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
@@ -524,13 +552,23 @@ export default function ProveedoresPage() {
               {filteredProviders.length === 0 ? (
                 <EmptyState
                   icon={<Users className="h-12 w-12" />}
-                  title={searchTerm ? 'No se encontraron proveedores' : 'No hay proveedores registrados'}
-                  description={searchTerm ? 'No se encontraron proveedores con los filtros aplicados. Intenta ajustar tu búsqueda.' : 'Comienza registrando tu primer proveedor de servicios para gestionar el mantenimiento.'}
-                  action={canCreate && !searchTerm ? {
-                    label: 'Registrar Primer Proveedor',
-                    onClick: () => setOpenDialog(true),
-                    icon: <Plus className="h-4 w-4" />
-                  } : undefined}
+                  title={
+                    searchTerm ? 'No se encontraron proveedores' : 'No hay proveedores registrados'
+                  }
+                  description={
+                    searchTerm
+                      ? 'No se encontraron proveedores con los filtros aplicados. Intenta ajustar tu búsqueda.'
+                      : 'Comienza registrando tu primer proveedor de servicios para gestionar el mantenimiento.'
+                  }
+                  action={
+                    canCreate && !searchTerm
+                      ? {
+                          label: 'Registrar Primer Proveedor',
+                          onClick: () => setOpenDialog(true),
+                          icon: <Plus className="h-4 w-4" />,
+                        }
+                      : undefined
+                  }
                 />
               ) : (
                 filteredProviders.map((provider) => (
@@ -557,14 +595,20 @@ export default function ProveedoresPage() {
                           <div className="bg-muted/50 rounded-lg p-3 space-y-2">
                             <div className="flex items-center gap-2 text-sm">
                               <Phone className="h-4 w-4 text-primary" />
-                              <a href={`tel:${provider.telefono}`} className="font-medium hover:underline">
+                              <a
+                                href={`tel:${provider.telefono}`}
+                                className="font-medium hover:underline"
+                              >
                                 {provider.telefono}
                               </a>
                             </div>
                             {provider.email && (
                               <div className="flex items-center gap-2 text-sm">
                                 <Mail className="h-4 w-4 text-primary" />
-                                <a href={`mailto:${provider.email}`} className="font-medium hover:underline">
+                                <a
+                                  href={`mailto:${provider.email}`}
+                                  className="font-medium hover:underline"
+                                >
                                   {provider.email}
                                 </a>
                               </div>
@@ -579,9 +623,7 @@ export default function ProveedoresPage() {
                                   <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
                                   Valoración
                                 </div>
-                                <div className="font-bold text-lg">
-                                  {provider.rating}/5
-                                </div>
+                                <div className="font-bold text-lg">{provider.rating}/5</div>
                               </div>
                             )}
                             {provider._count && (

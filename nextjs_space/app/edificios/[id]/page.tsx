@@ -10,7 +10,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PhotoGallery } from '@/components/ui/photo-gallery';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import {
   ArrowLeft,
   Building2,
@@ -75,7 +81,7 @@ export default function EdificioDetallePage() {
 
   const fetchBuilding = async () => {
     if (!params?.id) return;
-    
+
     try {
       const res = await fetch(`/api/buildings/${params.id}`);
       if (!res.ok) throw new Error('Error al cargar edificio');
@@ -113,14 +119,13 @@ export default function EdificioDetallePage() {
   // Calcular estadísticas
   const unitsStats = {
     total: building.units?.length || 0,
-    ocupadas: building.units?.filter(u => u.estado === 'ocupada').length || 0,
-    disponibles: building.units?.filter(u => u.estado === 'disponible').length || 0,
-    mantenimiento: building.units?.filter(u => u.estado === 'mantenimiento').length || 0,
+    ocupadas: building.units?.filter((u) => u.estado === 'ocupada').length || 0,
+    disponibles: building.units?.filter((u) => u.estado === 'disponible').length || 0,
+    mantenimiento: building.units?.filter((u) => u.estado === 'mantenimiento').length || 0,
   };
 
-  const ocupacionRate = unitsStats.total > 0
-    ? ((unitsStats.ocupadas / unitsStats.total) * 100).toFixed(1)
-    : 0;
+  const ocupacionRate =
+    unitsStats.total > 0 ? ((unitsStats.ocupadas / unitsStats.total) * 100).toFixed(1) : 0;
 
   const totalExpenses = building.expenses?.reduce((sum, exp) => sum + exp.monto, 0) || 0;
   const monthlyIncome = building.units?.reduce((sum, u) => sum + (u.rentaMensual || 0), 0) || 0;
@@ -152,11 +157,7 @@ export default function EdificioDetallePage() {
                 </BreadcrumbList>
               </Breadcrumb>
               <div className="flex items-center gap-3">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => router.push('/edificios')}
-                >
+                <Button variant="outline" size="sm" onClick={() => router.push('/edificios')}>
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Volver a Edificios
                 </Button>
@@ -216,7 +217,9 @@ export default function EdificioDetallePage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">€{totalExpenses.toFixed(0)}</div>
-                <p className="text-xs text-muted-foreground">{building.expenses?.length || 0} gastos</p>
+                <p className="text-xs text-muted-foreground">
+                  {building.expenses?.length || 0} gastos
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -351,7 +354,9 @@ export default function EdificioDetallePage() {
                       {building.gastosComunidad && (
                         <div>
                           <p className="text-sm text-muted-foreground">Gastos Comunidad</p>
-                          <p className="text-2xl font-bold">€{building.gastosComunidad.toFixed(2)}</p>
+                          <p className="text-2xl font-bold">
+                            €{building.gastosComunidad.toFixed(2)}
+                          </p>
                           <p className="text-xs text-muted-foreground">Mensuales</p>
                         </div>
                       )}
@@ -373,9 +378,7 @@ export default function EdificioDetallePage() {
               <Card>
                 <CardHeader>
                   <CardTitle>Unidades del Edificio</CardTitle>
-                  <CardDescription>
-                    {unitsStats.total} unidades en total
-                  </CardDescription>
+                  <CardDescription>{unitsStats.total} unidades en total</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {building.units && building.units.length > 0 ? (
@@ -395,8 +398,8 @@ export default function EdificioDetallePage() {
                                     unit.estado === 'disponible'
                                       ? 'default'
                                       : unit.estado === 'ocupada'
-                                      ? 'secondary'
-                                      : 'destructive'
+                                        ? 'secondary'
+                                        : 'destructive'
                                   }
                                 >
                                   {unit.estado}
@@ -428,9 +431,7 @@ export default function EdificioDetallePage() {
               <Card>
                 <CardHeader>
                   <CardTitle>Gastos del Edificio</CardTitle>
-                  <CardDescription>
-                    Historial de gastos y mantenimiento
-                  </CardDescription>
+                  <CardDescription>Historial de gastos y mantenimiento</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {building.expenses && building.expenses.length > 0 ? (
@@ -441,7 +442,9 @@ export default function EdificioDetallePage() {
                             <div className="flex-1">
                               <p className="font-semibold">{expense.concepto}</p>
                               <p className="text-sm text-muted-foreground">
-                                {format(new Date(expense.fecha), "d 'de' MMMM, yyyy", { locale: es })}
+                                {format(new Date(expense.fecha), "d 'de' MMMM, yyyy", {
+                                  locale: es,
+                                })}
                               </p>
                               {expense.categoria && (
                                 <Badge variant="outline" className="mt-1">
@@ -470,9 +473,7 @@ export default function EdificioDetallePage() {
               <Card>
                 <CardHeader>
                   <CardTitle>Mantenimiento Programado</CardTitle>
-                  <CardDescription>
-                    Tareas de mantenimiento preventivo
-                  </CardDescription>
+                  <CardDescription>Tareas de mantenimiento preventivo</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {building.maintenanceSchedules && building.maintenanceSchedules.length > 0 ? (
@@ -483,7 +484,9 @@ export default function EdificioDetallePage() {
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
                                 <p className="font-semibold">{schedule.titulo}</p>
-                                <p className="text-sm text-muted-foreground">{schedule.descripcion}</p>
+                                <p className="text-sm text-muted-foreground">
+                                  {schedule.descripcion}
+                                </p>
                                 <div className="mt-2 flex items-center gap-2">
                                   <Badge variant="outline">{schedule.tipo}</Badge>
                                   <Badge variant="outline">{schedule.frecuencia}</Badge>
@@ -519,16 +522,10 @@ export default function EdificioDetallePage() {
               <Card>
                 <CardHeader>
                   <CardTitle>Galería de Fotos</CardTitle>
-                  <CardDescription>
-                    Fotos del edificio
-                  </CardDescription>
+                  <CardDescription>Fotos del edificio</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <PhotoGallery
-                    entityType="building"
-                    entityId={building.id}
-                    canEdit={canUpdate}
-                  />
+                  <PhotoGallery entityType="building" entityId={building.id} canEdit={canUpdate} />
                 </CardContent>
               </Card>
             </TabsContent>

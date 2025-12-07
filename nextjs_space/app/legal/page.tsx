@@ -9,9 +9,23 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
-import { ArrowLeft, Home, FileText, ClipboardCheck, Shield, AlertCircle, CheckCircle } from 'lucide-react';
+import {
+  ArrowLeft,
+  Home,
+  FileText,
+  ClipboardCheck,
+  Shield,
+  AlertCircle,
+  CheckCircle,
+} from 'lucide-react';
 import { format } from 'date-fns';
 
 interface Template {
@@ -99,12 +113,16 @@ export default function LegalPage() {
   };
 
   if (status === 'loading' || isLoading) {
-    return <div className="flex h-screen items-center justify-center"><div className="text-lg">Cargando...</div></div>;
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-lg">Cargando...</div>
+      </div>
+    );
   }
 
-  const pendingCompliance = complianceAlerts.filter(a => !a.completada).length;
-  const activeInsurances = insurances.filter(i => i.estado === 'activa').length;
-  const scheduledInspections = inspections.filter(i => i.estado === 'programada').length;
+  const pendingCompliance = complianceAlerts.filter((a) => !a.completada).length;
+  const activeInsurances = insurances.filter((i) => i.estado === 'activa').length;
+  const scheduledInspections = inspections.filter((i) => i.estado === 'programada').length;
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -119,14 +137,20 @@ export default function LegalPage() {
                 <Breadcrumb className="mt-2">
                   <BreadcrumbList>
                     <BreadcrumbItem>
-                      <BreadcrumbLink href="/dashboard"><Home className="h-4 w-4" /></BreadcrumbLink>
+                      <BreadcrumbLink href="/dashboard">
+                        <Home className="h-4 w-4" />
+                      </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>Legal</BreadcrumbItem>
                   </BreadcrumbList>
                 </Breadcrumb>
               </div>
-              <Button onClick={() => router.push('/dashboard')} variant="outline" className="w-full sm:w-auto">
+              <Button
+                onClick={() => router.push('/dashboard')}
+                variant="outline"
+                className="w-full sm:w-auto"
+              >
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Volver al Dashboard
               </Button>
@@ -141,7 +165,7 @@ export default function LegalPage() {
                 <FileText className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{templates.filter(t => t.activo).length}</div>
+                <div className="text-2xl font-bold">{templates.filter((t) => t.activo).length}</div>
                 <p className="text-xs text-muted-foreground">Activas</p>
               </CardContent>
             </Card>
@@ -197,10 +221,15 @@ export default function LegalPage() {
                 <CardContent>
                   <div className="space-y-2">
                     {templates.map((template) => (
-                      <div key={template.id} className="flex items-center justify-between border-b py-2 last:border-0">
+                      <div
+                        key={template.id}
+                        className="flex items-center justify-between border-b py-2 last:border-0"
+                      >
                         <div>
                           <div className="font-medium">{template.nombre}</div>
-                          <div className="text-sm text-muted-foreground capitalize">{template.categoria.replace(/_/g, ' ')}</div>
+                          <div className="text-sm text-muted-foreground capitalize">
+                            {template.categoria.replace(/_/g, ' ')}
+                          </div>
                         </div>
                         <Badge variant={template.activo ? 'default' : 'secondary'}>
                           {template.activo ? 'Activa' : 'Inactiva'}
@@ -225,7 +254,10 @@ export default function LegalPage() {
                 <CardContent>
                   <div className="space-y-2">
                     {inspections.map((inspection) => (
-                      <div key={inspection.id} className="flex flex-col sm:flex-row sm:items-center justify-between border-b py-2 last:border-0 gap-2">
+                      <div
+                        key={inspection.id}
+                        className="flex flex-col sm:flex-row sm:items-center justify-between border-b py-2 last:border-0 gap-2"
+                      >
                         <div>
                           <div className="font-medium capitalize">{inspection.tipo}</div>
                           <div className="text-sm text-muted-foreground">
@@ -255,15 +287,23 @@ export default function LegalPage() {
                 <CardContent>
                   <div className="space-y-2">
                     {insurances.map((insurance) => (
-                      <div key={insurance.id} className="flex flex-col sm:flex-row sm:items-center justify-between border-b py-2 last:border-0 gap-2">
+                      <div
+                        key={insurance.id}
+                        className="flex flex-col sm:flex-row sm:items-center justify-between border-b py-2 last:border-0 gap-2"
+                      >
                         <div className="flex-1">
-                          <div className="font-medium">{insurance.tipoSeguro} - {insurance.aseguradora}</div>
+                          <div className="font-medium">
+                            {insurance.tipoSeguro} - {insurance.aseguradora}
+                          </div>
                           <div className="text-sm text-muted-foreground">
-                            Póliza: {insurance.numeroPoliza} | Vence: {format(new Date(insurance.fechaVencimiento), 'dd/MM/yyyy')}
+                            Póliza: {insurance.numeroPoliza} | Vence:{' '}
+                            {format(new Date(insurance.fechaVencimiento), 'dd/MM/yyyy')}
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="text-sm font-medium">€{insurance.primaAnual.toLocaleString('es-ES')}/año</div>
+                          <div className="text-sm font-medium">
+                            €{insurance.primaAnual.toLocaleString('es-ES')}/año
+                          </div>
                           <Badge className={POLICY_STATUS_COLORS[insurance.estado]}>
                             {insurance.estado.replace(/_/g, ' ')}
                           </Badge>
@@ -288,7 +328,10 @@ export default function LegalPage() {
                 <CardContent>
                   <div className="space-y-2">
                     {complianceAlerts.map((alert) => (
-                      <div key={alert.id} className="flex flex-col sm:flex-row sm:items-center justify-between border-b py-2 last:border-0 gap-2">
+                      <div
+                        key={alert.id}
+                        className="flex flex-col sm:flex-row sm:items-center justify-between border-b py-2 last:border-0 gap-2"
+                      >
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             {alert.completada ? (
@@ -299,7 +342,8 @@ export default function LegalPage() {
                             <span className="font-medium">{alert.titulo}</span>
                           </div>
                           <div className="text-sm text-muted-foreground mt-1">
-                            Límite: {format(new Date(alert.fechaLimite), 'dd/MM/yyyy')} | Prioridad: {alert.prioridad}
+                            Límite: {format(new Date(alert.fechaLimite), 'dd/MM/yyyy')} | Prioridad:{' '}
+                            {alert.prioridad}
                           </div>
                         </div>
                         <Badge variant={alert.completada ? 'default' : 'destructive'}>

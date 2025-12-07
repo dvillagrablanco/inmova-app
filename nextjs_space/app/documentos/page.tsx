@@ -9,9 +9,21 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -67,7 +79,9 @@ export default function DocumentosPage() {
   const [uploading, setUploading] = useState(false);
   const [filterTipo, setFilterTipo] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeFilters, setActiveFilters] = useState<Array<{ id: string; label: string; value: string }>>([]);
+  const [activeFilters, setActiveFilters] = useState<
+    Array<{ id: string; label: string; value: string }>
+  >([]);
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
   const [openDetailDialog, setOpenDetailDialog] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
@@ -218,24 +232,24 @@ export default function DocumentosPage() {
   // Actualizar filtros activos
   useEffect(() => {
     const filters: Array<{ id: string; label: string; value: string }> = [];
-    
+
     if (searchTerm) {
       filters.push({ id: 'search', label: 'Búsqueda', value: searchTerm });
     }
     if (filterTipo !== 'all') {
       const tipoLabels: Record<string, string> = {
-        'contrato': 'Contrato',
-        'documento_identidad': 'Documento de Identidad',
-        'recibo': 'Recibo',
-        'certificado': 'Certificado',
-        'inspeccion': 'Inspección',
-        'seguro': 'Seguro',
-        'factura': 'Factura',
-        'otro': 'Otro',
+        contrato: 'Contrato',
+        documento_identidad: 'Documento de Identidad',
+        recibo: 'Recibo',
+        certificado: 'Certificado',
+        inspeccion: 'Inspección',
+        seguro: 'Seguro',
+        factura: 'Factura',
+        otro: 'Otro',
       };
       filters.push({ id: 'tipo', label: 'Tipo', value: tipoLabels[filterTipo] || filterTipo });
     }
-    
+
     setActiveFilters(filters);
   }, [searchTerm, filterTipo]);
 
@@ -254,8 +268,9 @@ export default function DocumentosPage() {
 
   // Filtrado de documentos
   const filteredDocuments = useMemo(() => {
-    return documents.filter(doc => {
-      const matchesSearch = searchTerm === '' ||
+    return documents.filter((doc) => {
+      const matchesSearch =
+        searchTerm === '' ||
         doc.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
         doc.tenant?.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase()) ||
         doc.unit?.numero.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -274,9 +289,16 @@ export default function DocumentosPage() {
 
     return {
       total: documents.length,
-      vencidos: documents.filter(doc => doc.fechaVencimiento && new Date(doc.fechaVencimiento) < now).length,
-      porVencer: documents.filter(doc => doc.fechaVencimiento && new Date(doc.fechaVencimiento) >= now && new Date(doc.fechaVencimiento) <= in30Days).length,
-      sinVencimiento: documents.filter(doc => !doc.fechaVencimiento).length,
+      vencidos: documents.filter(
+        (doc) => doc.fechaVencimiento && new Date(doc.fechaVencimiento) < now
+      ).length,
+      porVencer: documents.filter(
+        (doc) =>
+          doc.fechaVencimiento &&
+          new Date(doc.fechaVencimiento) >= now &&
+          new Date(doc.fechaVencimiento) <= in30Days
+      ).length,
+      sinVencimiento: documents.filter((doc) => !doc.fechaVencimiento).length,
     };
   }, [documents]);
 
@@ -333,9 +355,7 @@ export default function DocumentosPage() {
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <h1 className="text-3xl font-bold tracking-tight">Documentos</h1>
-                <p className="text-muted-foreground">
-                  Gestiona todos los documentos del sistema
-                </p>
+                <p className="text-muted-foreground">Gestiona todos los documentos del sistema</p>
               </div>
               {canCreate && (
                 <Dialog open={openUploadDialog} onOpenChange={setOpenUploadDialog}>
@@ -356,7 +376,9 @@ export default function DocumentosPage() {
                           id="file"
                           type="file"
                           required
-                          onChange={(e) => setUploadForm({ ...uploadForm, file: e.target.files?.[0] || null })}
+                          onChange={(e) =>
+                            setUploadForm({ ...uploadForm, file: e.target.files?.[0] || null })
+                          }
                         />
                       </div>
                       <div>
@@ -382,7 +404,9 @@ export default function DocumentosPage() {
                             <SelectItem value="contrato">Contrato</SelectItem>
                             <SelectItem value="dni">DNI</SelectItem>
                             <SelectItem value="nomina">Nómina</SelectItem>
-                            <SelectItem value="certificado_energetico">Certificado Energético</SelectItem>
+                            <SelectItem value="certificado_energetico">
+                              Certificado Energético
+                            </SelectItem>
                             <SelectItem value="ite">ITE</SelectItem>
                             <SelectItem value="seguro">Seguro</SelectItem>
                             <SelectItem value="factura">Factura</SelectItem>
@@ -396,11 +420,17 @@ export default function DocumentosPage() {
                           id="fechaVencimiento"
                           type="date"
                           value={uploadForm.fechaVencimiento}
-                          onChange={(e) => setUploadForm({ ...uploadForm, fechaVencimiento: e.target.value })}
+                          onChange={(e) =>
+                            setUploadForm({ ...uploadForm, fechaVencimiento: e.target.value })
+                          }
                         />
                       </div>
                       <div className="flex justify-end gap-2">
-                        <Button type="button" variant="outline" onClick={() => setOpenUploadDialog(false)}>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setOpenUploadDialog(false)}
+                        >
                           Cancelar
                         </Button>
                         <Button type="submit" disabled={uploading}>
@@ -417,9 +447,7 @@ export default function DocumentosPage() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Total
-                  </CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Total</CardTitle>
                   <FileText className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
@@ -501,7 +529,11 @@ export default function DocumentosPage() {
             </Card>
 
             {/* Filter Chips */}
-            <FilterChips filters={activeFilters} onRemove={clearFilter} onClearAll={clearAllFilters} />
+            <FilterChips
+              filters={activeFilters}
+              onRemove={clearFilter}
+              onClearAll={clearAllFilters}
+            />
 
             {/* Lista de Documentos */}
             <div className="space-y-4">
@@ -512,9 +544,9 @@ export default function DocumentosPage() {
                     title="No se encontraron resultados"
                     description="Intenta ajustar los filtros de búsqueda"
                     action={{
-                      label: "Limpiar filtros",
+                      label: 'Limpiar filtros',
                       onClick: clearAllFilters,
-                      icon: <Search className="h-4 w-4" />
+                      icon: <Search className="h-4 w-4" />,
                     }}
                   />
                 ) : (
@@ -522,11 +554,15 @@ export default function DocumentosPage() {
                     icon={<FileText className="h-16 w-16 text-gray-400" />}
                     title="No hay documentos almacenados"
                     description="Comienza subiendo tu primer documento para organizarlos mejor"
-                    action={canCreate ? {
-                      label: "Subir Primer Documento",
-                      onClick: () => setOpenUploadDialog(true),
-                      icon: <Upload className="h-4 w-4" />
-                    } : undefined}
+                    action={
+                      canCreate
+                        ? {
+                            label: 'Subir Primer Documento',
+                            onClick: () => setOpenUploadDialog(true),
+                            icon: <Upload className="h-4 w-4" />,
+                          }
+                        : undefined
+                    }
                   />
                 )
               ) : (
@@ -534,7 +570,10 @@ export default function DocumentosPage() {
                   const now = new Date();
                   const vencimiento = doc.fechaVencimiento ? new Date(doc.fechaVencimiento) : null;
                   const isVencido = vencimiento && vencimiento < now;
-                  const isPorVencer = vencimiento && vencimiento >= now && vencimiento < new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+                  const isPorVencer =
+                    vencimiento &&
+                    vencimiento >= now &&
+                    vencimiento < new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
                   return (
                     <Card key={doc.id} className="hover:shadow-lg transition-all duration-200">
@@ -564,13 +603,17 @@ export default function DocumentosPage() {
                                 {doc.tenant && (
                                   <div className="flex items-center gap-2 text-sm">
                                     <User className="h-4 w-4 text-primary" />
-                                    <span className="font-medium">Inquilino: {doc.tenant.nombreCompleto}</span>
+                                    <span className="font-medium">
+                                      Inquilino: {doc.tenant.nombreCompleto}
+                                    </span>
                                   </div>
                                 )}
                                 {doc.building && (
                                   <div className="flex items-center gap-2 text-sm">
                                     <Building2 className="h-4 w-4 text-primary" />
-                                    <span className="font-medium">Edificio: {doc.building.nombre}</span>
+                                    <span className="font-medium">
+                                      Edificio: {doc.building.nombre}
+                                    </span>
                                   </div>
                                 )}
                                 {doc.unit && (
@@ -601,9 +644,15 @@ export default function DocumentosPage() {
                                 {doc.fechaVencimiento ? (
                                   <div className="flex items-center gap-1">
                                     {isVencido && <AlertCircle className="h-3 w-3 text-red-500" />}
-                                    {isPorVencer && <AlertTriangle className="h-3 w-3 text-orange-500" />}
-                                    <span className={`font-medium ${isVencido ? 'text-red-500' : isPorVencer ? 'text-orange-500' : ''}`}>
-                                      {format(new Date(doc.fechaVencimiento), 'dd MMM yyyy', { locale: es })}
+                                    {isPorVencer && (
+                                      <AlertTriangle className="h-3 w-3 text-orange-500" />
+                                    )}
+                                    <span
+                                      className={`font-medium ${isVencido ? 'text-red-500' : isPorVencer ? 'text-orange-500' : ''}`}
+                                    >
+                                      {format(new Date(doc.fechaVencimiento), 'dd MMM yyyy', {
+                                        locale: es,
+                                      })}
                                     </span>
                                   </div>
                                 ) : (
@@ -677,14 +726,18 @@ export default function DocumentosPage() {
                 <div>
                   <Label className="text-muted-foreground">Fecha de Subida</Label>
                   <p className="font-medium mt-1">
-                    {format(new Date(selectedDocument.fechaSubida), 'dd MMMM yyyy HH:mm', { locale: es })}
+                    {format(new Date(selectedDocument.fechaSubida), 'dd MMMM yyyy HH:mm', {
+                      locale: es,
+                    })}
                   </p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Fecha de Vencimiento</Label>
                   <p className="font-medium mt-1">
                     {selectedDocument.fechaVencimiento
-                      ? format(new Date(selectedDocument.fechaVencimiento), 'dd MMMM yyyy', { locale: es })
+                      ? format(new Date(selectedDocument.fechaVencimiento), 'dd MMMM yyyy', {
+                          locale: es,
+                        })
                       : 'Sin vencimiento'}
                   </p>
                 </div>
@@ -697,13 +750,17 @@ export default function DocumentosPage() {
                     {selectedDocument.tenant && (
                       <div className="flex items-center gap-2">
                         <User className="h-4 w-4 text-primary" />
-                        <span className="font-medium">Inquilino: {selectedDocument.tenant.nombreCompleto}</span>
+                        <span className="font-medium">
+                          Inquilino: {selectedDocument.tenant.nombreCompleto}
+                        </span>
                       </div>
                     )}
                     {selectedDocument.building && (
                       <div className="flex items-center gap-2">
                         <Building2 className="h-4 w-4 text-primary" />
-                        <span className="font-medium">Edificio: {selectedDocument.building.nombre}</span>
+                        <span className="font-medium">
+                          Edificio: {selectedDocument.building.nombre}
+                        </span>
                       </div>
                     )}
                     {selectedDocument.unit && (

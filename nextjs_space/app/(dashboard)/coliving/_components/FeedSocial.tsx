@@ -124,10 +124,7 @@ export default function FeedSocial() {
             rows={3}
           />
           <div className="flex justify-end">
-            <Button
-              onClick={crearPost}
-              disabled={!nuevoPost.trim() || creatingPost}
-            >
+            <Button onClick={crearPost} disabled={!nuevoPost.trim() || creatingPost}>
               <Send className="h-4 w-4 mr-2" />
               Publicar
             </Button>
@@ -158,9 +155,7 @@ export default function FeedSocial() {
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <p className="font-semibold">
-                      {post.profile.tenant.nombreCompleto}
-                    </p>
+                    <p className="font-semibold">{post.profile.tenant.nombreCompleto}</p>
                     <p className="text-sm text-gray-500">
                       {new Date(post.createdAt).toLocaleDateString('es-ES', {
                         day: 'numeric',
@@ -179,7 +174,10 @@ export default function FeedSocial() {
                 {post.imagenes && post.imagenes.length > 0 && (
                   <div className="grid grid-cols-2 gap-2">
                     {post.imagenes.map((img, idx) => (
-                      <div key={idx} className="aspect-video relative bg-gray-100 rounded-lg overflow-hidden">
+                      <div
+                        key={idx}
+                        className="aspect-video relative bg-gray-100 rounded-lg overflow-hidden"
+                      >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={img}

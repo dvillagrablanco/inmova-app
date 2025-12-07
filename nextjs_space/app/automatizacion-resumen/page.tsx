@@ -3,11 +3,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Bot, 
-  Zap, 
-  Sparkles, 
-  CheckCircle, 
+import {
+  Bot,
+  Zap,
+  Sparkles,
+  CheckCircle,
   BookOpen,
   FileText,
   MessageSquare,
@@ -17,7 +17,7 @@ import {
   Lightbulb,
   Ticket,
   PlayCircle,
-  ArrowRight
+  ArrowRight,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -33,11 +33,11 @@ export default function AutomationSummaryPage() {
         'Análisis de sentimiento en tiempo real',
         'Sugerencias de acciones contextuales',
         'Artículos relacionados automáticos',
-        'Detección de urgencia y escalamiento'
+        'Detección de urgencia y escalamiento',
       ],
       location: 'Botón flotante en la esquina inferior derecha',
       color: 'blue',
-      link: null
+      link: null,
     },
     {
       id: 'tickets',
@@ -49,11 +49,11 @@ export default function AutomationSummaryPage() {
         'Asignación de prioridad inteligente',
         'Búsqueda de soluciones automáticas',
         'Resolución sin intervención humana (70% de casos)',
-        'Escalamiento automático cuando necesario'
+        'Escalamiento automático cuando necesario',
       ],
       location: 'Botón "Crear Ticket" en todas las páginas',
       color: 'purple',
-      link: null
+      link: null,
     },
     {
       id: 'proactive',
@@ -65,11 +65,11 @@ export default function AutomationSummaryPage() {
         'Tips y mejores prácticas',
         'Atajos y funcionalidades ocultas',
         'Advertencias preventivas',
-        'Guías paso a paso'
+        'Guías paso a paso',
       ],
       location: 'Aparece automáticamente en cada módulo (esquina inferior izquierda)',
       color: 'green',
-      link: null
+      link: null,
     },
     {
       id: 'onboarding',
@@ -81,11 +81,11 @@ export default function AutomationSummaryPage() {
         'Tips profesionales en cada paso',
         'Tiempo estimado de lectura',
         'Enlaces directos a acciones',
-        'Progreso guardado automáticamente'
+        'Progreso guardado automáticamente',
       ],
       location: 'Se muestra al primer login o desde Menú > Ayuda',
       color: 'indigo',
-      link: null
+      link: null,
     },
     {
       id: 'wizard',
@@ -97,11 +97,11 @@ export default function AutomationSummaryPage() {
         'Creación automática de edificio',
         'Generación de unidades',
         'Activación de automatizaciones',
-        'Diseño intuitivo con validaciones'
+        'Diseño intuitivo con validaciones',
       ],
       location: 'Primera vez que accedes al sistema',
       color: 'pink',
-      link: null
+      link: null,
     },
     {
       id: 'knowledge',
@@ -113,11 +113,11 @@ export default function AutomationSummaryPage() {
         '20 preguntas frecuentes',
         'Videos tutoriales integrados',
         'Búsqueda inteligente',
-        'Artículos relacionados automáticos'
+        'Artículos relacionados automáticos',
       ],
       location: 'Página dedicada',
       color: 'yellow',
-      link: '/knowledge-base'
+      link: '/knowledge-base',
     },
     {
       id: 'templates',
@@ -129,12 +129,12 @@ export default function AutomationSummaryPage() {
         'Emails automatizados',
         'Workflows predefinidos',
         'Reportes configurables',
-        'Cumplimiento normativo garantizado'
+        'Cumplimiento normativo garantizado',
       ],
       location: 'Página dedicada',
       color: 'cyan',
-      link: '/plantillas'
-    }
+      link: '/plantillas',
+    },
   ];
 
   const getColorClasses = (color: string) => {
@@ -145,7 +145,7 @@ export default function AutomationSummaryPage() {
       indigo: 'from-indigo-50 to-indigo-100 border-indigo-200',
       pink: 'from-pink-50 to-pink-100 border-pink-200',
       yellow: 'from-yellow-50 to-yellow-100 border-yellow-200',
-      cyan: 'from-cyan-50 to-cyan-100 border-cyan-200'
+      cyan: 'from-cyan-50 to-cyan-100 border-cyan-200',
     };
     return colors[color] || colors.blue;
   };
@@ -164,8 +164,9 @@ export default function AutomationSummaryPage() {
                 🤖 Sistema de Soporte y Onboarding Totalmente Automatizado
               </CardTitle>
               <CardDescription className="text-primary-foreground/90 text-base">
-                INMOVA ahora cuenta con 7 sistemas automatizados que eliminan la necesidad de intervención humana
-                en soporte, onboarding y capacitación. Todo funciona con Inteligencia Artificial avanzada.
+                INMOVA ahora cuenta con 7 sistemas automatizados que eliminan la necesidad de
+                intervención humana en soporte, onboarding y capacitación. Todo funciona con
+                Inteligencia Artificial avanzada.
               </CardDescription>
             </div>
           </div>
@@ -203,12 +204,12 @@ export default function AutomationSummaryPage() {
       {/* Features */}
       <div className="space-y-4">
         <h2 className="text-2xl font-bold">Sistemas Implementados</h2>
-        
+
         {automationFeatures.map((feature) => {
           const Icon = feature.icon;
           return (
-            <Card 
-              key={feature.id} 
+            <Card
+              key={feature.id}
               className={`border-2 bg-gradient-to-r ${getColorClasses(feature.color)}`}
             >
               <CardHeader>
@@ -219,9 +220,7 @@ export default function AutomationSummaryPage() {
                     </div>
                     <div className="flex-1">
                       <CardTitle className="text-xl mb-2">{feature.title}</CardTitle>
-                      <CardDescription className="text-base">
-                        {feature.description}
-                      </CardDescription>
+                      <CardDescription className="text-base">{feature.description}</CardDescription>
                     </div>
                   </div>
                   {feature.link && (
@@ -277,7 +276,8 @@ export default function AutomationSummaryPage() {
                 <div>
                   <h4 className="font-semibold">Respuesta Instantánea</h4>
                   <p className="text-sm text-muted-foreground">
-                    0 segundos de espera. Los usuarios obtienen ayuda inmediata sin esperar a agentes humanos.
+                    0 segundos de espera. Los usuarios obtienen ayuda inmediata sin esperar a
+                    agentes humanos.
                   </p>
                 </div>
               </div>
@@ -288,7 +288,8 @@ export default function AutomationSummaryPage() {
                 <div>
                   <h4 className="font-semibold">Disponibilidad Total</h4>
                   <p className="text-sm text-muted-foreground">
-                    24/7/365 sin interrupciones. El sistema nunca duerme, no tiene vacaciones ni días libres.
+                    24/7/365 sin interrupciones. El sistema nunca duerme, no tiene vacaciones ni
+                    días libres.
                   </p>
                 </div>
               </div>
@@ -299,7 +300,8 @@ export default function AutomationSummaryPage() {
                 <div>
                   <h4 className="font-semibold">Inteligencia Artificial</h4>
                   <p className="text-sm text-muted-foreground">
-                    Aprende de cada interacción y mejora continuamente. Contexto completo de cada usuario.
+                    Aprende de cada interacción y mejora continuamente. Contexto completo de cada
+                    usuario.
                   </p>
                 </div>
               </div>
@@ -358,9 +360,7 @@ export default function AutomationSummaryPage() {
                 <CardContent className="pt-6">
                   <BookOpen className="h-8 w-8 text-primary mb-3" />
                   <h4 className="font-semibold mb-2">Base de Conocimiento</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Explora artículos y FAQs
-                  </p>
+                  <p className="text-sm text-muted-foreground">Explora artículos y FAQs</p>
                 </CardContent>
               </Card>
             </Link>
@@ -369,9 +369,7 @@ export default function AutomationSummaryPage() {
                 <CardContent className="pt-6">
                   <FileText className="h-8 w-8 text-primary mb-3" />
                   <h4 className="font-semibold mb-2">Plantillas</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Revisa plantillas predefinidas
-                  </p>
+                  <p className="text-sm text-muted-foreground">Revisa plantillas predefinidas</p>
                 </CardContent>
               </Card>
             </Link>
@@ -379,9 +377,7 @@ export default function AutomationSummaryPage() {
               <CardContent className="pt-6">
                 <MessageSquare className="h-8 w-8 text-primary mb-3" />
                 <h4 className="font-semibold mb-2">Probar Chatbot</h4>
-                <p className="text-sm text-muted-foreground">
-                  Haz clic en el botón flotante
-                </p>
+                <p className="text-sm text-muted-foreground">Haz clic en el botón flotante</p>
               </CardContent>
             </Card>
           </div>

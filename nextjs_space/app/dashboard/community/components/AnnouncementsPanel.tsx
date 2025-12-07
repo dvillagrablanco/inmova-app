@@ -31,7 +31,7 @@ import {
   Plus,
   Calendar,
   Eye,
-  CheckCircle2
+  CheckCircle2,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -52,10 +52,22 @@ interface Announcement {
 }
 
 const PRIORITY_CONFIG: Record<string, { icon: any; color: string; label: string }> = {
-  urgente: { icon: AlertTriangle, color: 'bg-red-100 text-red-800 border-red-200', label: 'Urgente' },
-  importante: { icon: Bell, color: 'bg-amber-100 text-amber-800 border-amber-200', label: 'Importante' },
+  urgente: {
+    icon: AlertTriangle,
+    color: 'bg-red-100 text-red-800 border-red-200',
+    label: 'Urgente',
+  },
+  importante: {
+    icon: Bell,
+    color: 'bg-amber-100 text-amber-800 border-amber-200',
+    label: 'Importante',
+  },
   normal: { icon: Megaphone, color: 'bg-blue-100 text-blue-800 border-blue-200', label: 'Normal' },
-  informativo: { icon: Info, color: 'bg-gray-100 text-gray-800 border-gray-200', label: 'Informativo' },
+  informativo: {
+    icon: Info,
+    color: 'bg-gray-100 text-gray-800 border-gray-200',
+    label: 'Informativo',
+  },
 };
 
 export default function AnnouncementsPanel() {
@@ -143,9 +155,7 @@ export default function AnnouncementsPanel() {
             <DialogContent className="sm:max-w-[600px]">
               <DialogHeader>
                 <DialogTitle>Crear Anuncio</DialogTitle>
-                <DialogDescription>
-                  Publica un anuncio para la comunidad.
-                </DialogDescription>
+                <DialogDescription>Publica un anuncio para la comunidad.</DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
@@ -213,7 +223,10 @@ export default function AnnouncementsPanel() {
                 <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
                   Cancelar
                 </Button>
-                <Button onClick={handleCreateAnnouncement} disabled={!formData.titulo || !formData.contenido}>
+                <Button
+                  onClick={handleCreateAnnouncement}
+                  disabled={!formData.titulo || !formData.contenido}
+                >
                   Publicar Anuncio
                 </Button>
               </DialogFooter>
@@ -244,11 +257,15 @@ export default function AnnouncementsPanel() {
       ) : (
         <div className="space-y-4">
           {announcements.map((announcement) => {
-            const priorityConfig = PRIORITY_CONFIG[announcement.prioridad] || PRIORITY_CONFIG.normal;
+            const priorityConfig =
+              PRIORITY_CONFIG[announcement.prioridad] || PRIORITY_CONFIG.normal;
             const IconComponent = priorityConfig.icon;
 
             return (
-              <Card key={announcement.id} className={`border-l-4 ${announcement.prioridad === 'urgente' ? 'border-l-red-500' : announcement.prioridad === 'importante' ? 'border-l-amber-500' : 'border-l-blue-500'}`}>
+              <Card
+                key={announcement.id}
+                className={`border-l-4 ${announcement.prioridad === 'urgente' ? 'border-l-red-500' : announcement.prioridad === 'importante' ? 'border-l-amber-500' : 'border-l-blue-500'}`}
+              >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
@@ -259,16 +276,22 @@ export default function AnnouncementsPanel() {
                         <CardTitle className="text-lg">{announcement.titulo}</CardTitle>
                         <CardDescription className="flex items-center gap-2 mt-1">
                           <Calendar className="h-3 w-3" />
-                          {format(new Date(announcement.fechaInicio), "d 'de' MMMM, yyyy", { locale: es })}
+                          {format(new Date(announcement.fechaInicio), "d 'de' MMMM, yyyy", {
+                            locale: es,
+                          })}
                           {announcement.fechaFin && (
-                            <span> - {format(new Date(announcement.fechaFin), "d 'de' MMMM", { locale: es })}</span>
+                            <span>
+                              {' '}
+                              -{' '}
+                              {format(new Date(announcement.fechaFin), "d 'de' MMMM", {
+                                locale: es,
+                              })}
+                            </span>
                           )}
                         </CardDescription>
                       </div>
                     </div>
-                    <Badge className={priorityConfig.color}>
-                      {priorityConfig.label}
-                    </Badge>
+                    <Badge className={priorityConfig.color}>{priorityConfig.label}</Badge>
                   </div>
                 </CardHeader>
                 <CardContent>

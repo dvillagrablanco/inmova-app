@@ -11,13 +11,7 @@ import Header from '@/components/layout/header';
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -143,7 +137,9 @@ export default function FacturacionPage() {
     const Icon = badge.icon;
 
     return (
-      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium border ${badge.color}`}>
+      <span
+        className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium border ${badge.color}`}
+      >
         <Icon className="w-3 h-3" />
         {estado.replace('_', ' ')}
       </span>
@@ -176,7 +172,9 @@ export default function FacturacionPage() {
     );
   }
 
-  const pendingInvoices = invoices.filter(inv => inv.estado === 'PENDIENTE' || inv.estado === 'VENCIDA');
+  const pendingInvoices = invoices.filter(
+    (inv) => inv.estado === 'PENDIENTE' || inv.estado === 'VENCIDA'
+  );
   const totalPending = pendingInvoices.reduce((sum, inv) => sum + inv.total, 0);
 
   return (
@@ -184,9 +182,7 @@ export default function FacturacionPage() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold">Facturación y Suscripción</h1>
-        <p className="text-muted-foreground">
-          Gestiona tus facturas, pagos y plan de suscripción
-        </p>
+        <p className="text-muted-foreground">Gestiona tus facturas, pagos y plan de suscripción</p>
       </div>
 
       {/* Resumen de Suscripción */}
@@ -211,11 +207,15 @@ export default function FacturacionPage() {
                     <span className="text-sm font-medium">Usuarios</span>
                   </div>
                   <span className="text-sm text-muted-foreground">
-                    {usageStats.usuarios} / {company.maxUsuarios || company.subscriptionPlan.maxUsuarios}
+                    {usageStats.usuarios} /{' '}
+                    {company.maxUsuarios || company.subscriptionPlan.maxUsuarios}
                   </span>
                 </div>
-                <Progress 
-                  value={calculateUsagePercentage(usageStats.usuarios, company.maxUsuarios || company.subscriptionPlan.maxUsuarios)} 
+                <Progress
+                  value={calculateUsagePercentage(
+                    usageStats.usuarios,
+                    company.maxUsuarios || company.subscriptionPlan.maxUsuarios
+                  )}
                   className="h-2"
                 />
               </div>
@@ -228,11 +228,15 @@ export default function FacturacionPage() {
                     <span className="text-sm font-medium">Propiedades</span>
                   </div>
                   <span className="text-sm text-muted-foreground">
-                    {usageStats.propiedades} / {company.maxPropiedades || company.subscriptionPlan.maxPropiedades}
+                    {usageStats.propiedades} /{' '}
+                    {company.maxPropiedades || company.subscriptionPlan.maxPropiedades}
                   </span>
                 </div>
-                <Progress 
-                  value={calculateUsagePercentage(usageStats.propiedades, company.maxPropiedades || company.subscriptionPlan.maxPropiedades)} 
+                <Progress
+                  value={calculateUsagePercentage(
+                    usageStats.propiedades,
+                    company.maxPropiedades || company.subscriptionPlan.maxPropiedades
+                  )}
                   className="h-2"
                 />
               </div>
@@ -261,7 +265,8 @@ export default function FacturacionPage() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-yellow-700 mb-4">
-              Tienes {pendingInvoices.length} factura(s) pendiente(s) por un total de €{totalPending.toFixed(2)}
+              Tienes {pendingInvoices.length} factura(s) pendiente(s) por un total de €
+              {totalPending.toFixed(2)}
             </p>
             <Button variant="default" size="sm">
               <CreditCard className="w-4 h-4 mr-2" />
@@ -280,17 +285,15 @@ export default function FacturacionPage() {
         <CardContent>
           <Tabs defaultValue="all" className="w-full">
             <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="all">
-                Todas ({invoices.length})
-              </TabsTrigger>
+              <TabsTrigger value="all">Todas ({invoices.length})</TabsTrigger>
               <TabsTrigger value="pending">
-                Pendientes ({invoices.filter(inv => inv.estado === 'PENDIENTE').length})
+                Pendientes ({invoices.filter((inv) => inv.estado === 'PENDIENTE').length})
               </TabsTrigger>
               <TabsTrigger value="paid">
-                Pagadas ({invoices.filter(inv => inv.estado === 'PAGADA').length})
+                Pagadas ({invoices.filter((inv) => inv.estado === 'PAGADA').length})
               </TabsTrigger>
               <TabsTrigger value="overdue">
-                Vencidas ({invoices.filter(inv => inv.estado === 'VENCIDA').length})
+                Vencidas ({invoices.filter((inv) => inv.estado === 'VENCIDA').length})
               </TabsTrigger>
             </TabsList>
 
@@ -299,23 +302,23 @@ export default function FacturacionPage() {
             </TabsContent>
 
             <TabsContent value="pending" className="mt-6">
-              <InvoiceTable 
-                invoices={invoices.filter(inv => inv.estado === 'PENDIENTE')} 
-                getEstadoBadge={getEstadoBadge} 
+              <InvoiceTable
+                invoices={invoices.filter((inv) => inv.estado === 'PENDIENTE')}
+                getEstadoBadge={getEstadoBadge}
               />
             </TabsContent>
 
             <TabsContent value="paid" className="mt-6">
-              <InvoiceTable 
-                invoices={invoices.filter(inv => inv.estado === 'PAGADA')} 
-                getEstadoBadge={getEstadoBadge} 
+              <InvoiceTable
+                invoices={invoices.filter((inv) => inv.estado === 'PAGADA')}
+                getEstadoBadge={getEstadoBadge}
               />
             </TabsContent>
 
             <TabsContent value="overdue" className="mt-6">
-              <InvoiceTable 
-                invoices={invoices.filter(inv => inv.estado === 'VENCIDA')} 
-                getEstadoBadge={getEstadoBadge} 
+              <InvoiceTable
+                invoices={invoices.filter((inv) => inv.estado === 'VENCIDA')}
+                getEstadoBadge={getEstadoBadge}
               />
             </TabsContent>
           </Tabs>
@@ -326,12 +329,12 @@ export default function FacturacionPage() {
 }
 
 // Componente de tabla de facturas
-function InvoiceTable({ 
-  invoices, 
-  getEstadoBadge 
-}: { 
-  invoices: Invoice[]; 
-  getEstadoBadge: (estado: string) => JSX.Element; 
+function InvoiceTable({
+  invoices,
+  getEstadoBadge,
+}: {
+  invoices: Invoice[];
+  getEstadoBadge: (estado: string) => JSX.Element;
 }) {
   if (invoices.length === 0) {
     return (
@@ -367,9 +370,7 @@ function InvoiceTable({
               <TableCell>
                 {format(new Date(invoice.fechaVencimiento), 'dd/MM/yyyy', { locale: es })}
               </TableCell>
-              <TableCell className="text-right font-medium">
-                €{invoice.total.toFixed(2)}
-              </TableCell>
+              <TableCell className="text-right font-medium">€{invoice.total.toFixed(2)}</TableCell>
               <TableCell>{getEstadoBadge(invoice.estado)}</TableCell>
               <TableCell className="text-right">
                 <div className="flex gap-1 justify-end">
@@ -379,8 +380,8 @@ function InvoiceTable({
                       Pagar
                     </Button>
                   )}
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     size="sm"
                     onClick={() => {
                       if (invoice.stripePdfUrl) {
