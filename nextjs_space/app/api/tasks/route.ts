@@ -1,82 +1,142 @@
-import { NextResponse } from 'next/server';
+/**
+ * Endpoints API para Tareas
+ * 
+ * Implementa operaciones CRUD con validación Zod, manejo de errores
+ * y códigos de estado HTTP correctos.
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth, requirePermission } from '@/lib/permissions';
 import { prisma } from '@/lib/db';
-import { requireAuth } from '@/lib/permissions';
-import logger, { logError } from '@/lib/logger';
+import logger from '@/lib/logger';
+import { taskCreateSchema } from '@/lib/validations';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+/**
+ * GET /api/tasks
+ * Obtiene todas las tareas con filtros opcionales
+ */
+export async function GET(req: NextRequest) {
   try {
     const user = await requireAuth();
-    const companyId = user.companyId;
+    const { searchParams } = new URL(req.url);
+    
+    const estado = searchParams.get('estado');
+    const prioridad = searchParams.get('prioridad');
+    const asignadoA = searchParams.get('asignadoA');
+    const limit = searchParams.get('limit');
+    const offset = searchParams.get('offset');
 
-    const tasks = await prisma.task.findMany({
-      where: { companyId },
-      include: {
-        asignadoUser: {
-          select: { id: true, name: true, email: true },
+    const where: any = { companyId: user.companyId };
+    
+    if (estado) where.estado = estado;
+    if (prioridad) where.prioridad = prioridad;
+    if (asignadoA) where.asignadoA = asignadoA;
+
+    // Paginación
+    const take = limit ? parseInt(limit) : undefined;
+    const skip = offset ? parseInt(offset) : undefined;
+
+    const [tasks, total] = await Promise.all([
+      prisma.task.findMany({
+        where,
+        include: {
+          asignadoUser: {
+            select: { id: true, name: true, email: true },
+          },
+          creadorUser: {
+            select: { id: true, name: true, email: true },
+          },
         },
-        creadorUser: {
-          select: { id: true, name: true, email: true },
-        },
+        orderBy: [
+          { prioridad: 'desc' },
+          { fechaLimite: 'asc' },
+        ],
+        take,
+        skip,
+      }),
+      prisma.task.count({ where }),
+    ]);
+
+    logger.info(`Tareas obtenidas: ${tasks.length} de ${total}`, { userId: user.id });
+    
+    return NextResponse.json({
+      data: tasks,
+      meta: {
+        total,
+        limit: take,
+        offset: skip,
       },
-      orderBy: [
-        { prioridad: 'desc' },
-        { fechaLimite: 'asc' },
-      ],
-    });
-
-    return NextResponse.json(tasks);
+    }, { status: 200 });
+    
   } catch (error: any) {
     logger.error('Error fetching tasks:', error);
-    if (error.message === 'No autorizado') {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    
+    if (error.message === 'No autenticado') {
+      return NextResponse.json(
+        { error: 'No autenticado', message: 'Debe iniciar sesión' },
+        { status: 401 }
+      );
     }
+    
     return NextResponse.json(
-      { error: 'Error al obtener tareas' },
+      { error: 'Error interno del servidor', message: 'Error al obtener tareas' },
       { status: 500 }
     );
   }
 }
 
-export async function POST(request: Request) {
+/**
+ * POST /api/tasks
+ * Crea una nueva tarea con validación Zod
+ */
+export async function POST(req: NextRequest) {
   try {
-    const user = await requireAuth();
-    const companyId = user.companyId;
-    const userId = user.id;
+    const user = await requirePermission('create');
+    const body = await req.json();
 
-    const body = await request.json();
-    const {
-      titulo,
-      descripcion,
-      estado,
-      prioridad,
-      fechaLimite,
-      fechaInicio,
-      asignadoA,
-      notas,
-    } = body;
+    // Validación con Zod
+    const validatedData = taskCreateSchema.parse(body);
 
-    if (!titulo) {
-      return NextResponse.json(
-        { error: 'El título es requerido' },
-        { status: 400 }
-      );
+    // Verificar que el usuario asignado pertenece a la compañía
+    if (validatedData.asignadoA) {
+      const assignedUser = await prisma.user.findUnique({
+        where: { id: validatedData.asignadoA },
+      });
+
+      if (!assignedUser) {
+        return NextResponse.json(
+          { error: 'No encontrado', message: 'Usuario asignado no encontrado' },
+          { status: 404 }
+        );
+      }
+
+      if (assignedUser.companyId !== user.companyId) {
+        return NextResponse.json(
+          { error: 'Prohibido', message: 'No puede asignar tareas a usuarios de otra compañía' },
+          { status: 403 }
+        );
+      }
+    }
+
+    const taskData: any = {
+      ...validatedData,
+      companyId: user.companyId,
+      creadoPor: user.id,
+    };
+
+    if (validatedData.fechaLimite) {
+      taskData.fechaLimite = new Date(validatedData.fechaLimite);
+    }
+
+    if (validatedData.fechaInicio) {
+      taskData.fechaInicio = new Date(validatedData.fechaInicio);
     }
 
     const task = await prisma.task.create({
-      data: {
-        companyId,
-        titulo,
-        descripcion,
-        estado: estado || 'pendiente',
-        prioridad: prioridad || 'media',
-        fechaLimite: fechaLimite ? new Date(fechaLimite) : null,
-        fechaInicio: fechaInicio ? new Date(fechaInicio) : null,
-        asignadoA,
-        creadoPor: userId,
-        notas,
-      },
+      data: taskData,
       include: {
         asignadoUser: {
           select: { id: true, name: true, email: true },
@@ -87,14 +147,39 @@ export async function POST(request: Request) {
       },
     });
 
+    logger.info(`Tarea creada: ${task.id}`, { userId: user.id, taskId: task.id });
     return NextResponse.json(task, { status: 201 });
+    
   } catch (error: any) {
     logger.error('Error creating task:', error);
-    if (error.message === 'No autorizado') {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        {
+          error: 'Validación fallida',
+          message: 'Los datos proporcionados no son válidos',
+          details: error.errors,
+        },
+        { status: 400 }
+      );
     }
+
+    if (error.message?.includes('permiso')) {
+      return NextResponse.json(
+        { error: 'Prohibido', message: error.message },
+        { status: 403 }
+      );
+    }
+    
+    if (error.message === 'No autenticado') {
+      return NextResponse.json(
+        { error: 'No autenticado', message: 'Debe iniciar sesión' },
+        { status: 401 }
+      );
+    }
+
     return NextResponse.json(
-      { error: 'Error al crear tarea' },
+      { error: 'Error interno del servidor', message: 'Error al crear tarea' },
       { status: 500 }
     );
   }

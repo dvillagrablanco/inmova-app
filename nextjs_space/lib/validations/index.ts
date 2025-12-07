@@ -152,7 +152,7 @@ export const tenantUpdateSchema = tenantCreateSchema.partial();
 // CONTRATOS (CONTRACTS)
 // ====================================
 
-export const contractCreateSchema = z.object({
+const contractBaseSchema = z.object({
   unitId: z.string()
     .uuid('ID de unidad inválido'),
   tenantId: z.string()
@@ -185,7 +185,9 @@ export const contractCreateSchema = z.object({
   renovacionAutomatica: z.boolean()
     .optional()
     .default(false)
-}).refine((data) => {
+});
+
+export const contractCreateSchema = contractBaseSchema.refine((data) => {
   const inicio = new Date(data.fechaInicio);
   const fin = new Date(data.fechaFin);
   return fin > inicio;
@@ -194,7 +196,7 @@ export const contractCreateSchema = z.object({
   path: ['fechaFin']
 });
 
-export const contractUpdateSchema = contractCreateSchema.partial()
+export const contractUpdateSchema = contractBaseSchema.partial()
   .omit({ unitId: true, tenantId: true });
 
 // ====================================
@@ -297,27 +299,15 @@ export const providerCreateSchema = z.object({
   email: z.string()
     .email('Email inválido')
     .toLowerCase()
-    .trim(),
+    .trim()
+    .optional(),
   telefono: z.string()
     .regex(/^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/, 'Teléfono inválido')
     .trim(),
-  cif: z.string()
-    .regex(/^[A-Z][0-9]{7}[A-Z0-9]$/, 'CIF inválido (formato: A12345678)')
-    .toUpperCase()
-    .trim()
-    .optional()
-    .or(z.literal('')),
   direccion: z.string()
     .max(500, 'La dirección no puede exceder 500 caracteres')
     .optional(),
-  ciudad: z.string()
-    .max(100, 'La ciudad no puede exceder 100 caracteres')
-    .optional(),
-  codigoPostal: z.string()
-    .regex(/^\d{5}$/, 'El código postal debe tener 5 dígitos')
-    .optional()
-    .or(z.literal('')),
-  calificacion: z.number()
+  rating: z.number()
     .min(0, 'La calificación mínima es 0')
     .max(5, 'La calificación máxima es 5')
     .optional(),
@@ -360,6 +350,143 @@ export const userUpdateSchema = userCreateSchema.partial()
   .omit({ password: true });
 
 // ====================================
+// GASTOS (EXPENSES)
+// ====================================
+
+export const expenseCreateSchema = z.object({
+  buildingId: z.string()
+    .uuid('ID de edificio inválido')
+    .optional(),
+  unitId: z.string()
+    .uuid('ID de unidad inválido')
+    .optional(),
+  providerId: z.string()
+    .uuid('ID de proveedor inválido')
+    .optional(),
+  concepto: z.string()
+    .min(1, 'El concepto es requerido')
+    .max(500, 'El concepto no puede exceder 500 caracteres')
+    .trim(),
+  categoria: z.enum([
+    'mantenimiento',
+    'servicios',
+    'impuestos',
+    'seguros',
+    'suministros',
+    'personal',
+    'marketing',
+    'legal',
+    'tecnologia',
+    'otro'
+  ]),
+  monto: z.number()
+    .positive('El monto debe ser mayor a 0')
+    .max(10000000, 'El monto no puede exceder 10,000,000'),
+  fecha: z.string()
+    .datetime({ message: 'Fecha inválida' })
+    .or(z.date()),
+  facturaPdfPath: z.string()
+    .max(1000, 'La ruta del archivo no puede exceder 1000 caracteres')
+    .optional(),
+  numeroFactura: z.string()
+    .max(100, 'El número de factura no puede exceder 100 caracteres')
+    .optional(),
+  notas: z.string()
+    .max(5000, 'Las notas no pueden exceder 5000 caracteres')
+    .optional()
+});
+
+export const expenseUpdateSchema = expenseCreateSchema.partial();
+
+// ====================================
+// TAREAS (TASKS)
+// ====================================
+
+export const taskCreateSchema = z.object({
+  titulo: z.string()
+    .min(1, 'El título es requerido')
+    .max(200, 'El título no puede exceder 200 caracteres')
+    .trim(),
+  descripcion: z.string()
+    .max(5000, 'La descripción no puede exceder 5000 caracteres')
+    .optional(),
+  estado: z.enum(['pendiente', 'en_progreso', 'completado', 'cancelado'])
+    .optional()
+    .default('pendiente'),
+  prioridad: z.enum(['baja', 'media', 'alta', 'urgente'])
+    .optional()
+    .default('media'),
+  fechaLimite: z.string()
+    .datetime({ message: 'Fecha límite inválida' })
+    .or(z.date())
+    .optional(),
+  fechaInicio: z.string()
+    .datetime({ message: 'Fecha de inicio inválida' })
+    .or(z.date())
+    .optional(),
+  asignadoA: z.string()
+    .uuid('ID de usuario asignado inválido')
+    .optional(),
+  notas: z.string()
+    .max(5000, 'Las notas no pueden exceder 5000 caracteres')
+    .optional()
+});
+
+export const taskUpdateSchema = taskCreateSchema.partial();
+
+// ====================================
+// DOCUMENTOS (DOCUMENTS)
+// ====================================
+
+export const documentCreateSchema = z.object({
+  nombre: z.string()
+    .min(1, 'El nombre es requerido')
+    .max(500, 'El nombre no puede exceder 500 caracteres')
+    .trim(),
+  tipo: z.enum([
+    'contrato',
+    'factura',
+    'recibo',
+    'escritura',
+    'cedula',
+    'seguro',
+    'certificado',
+    'otro'
+  ]),
+  buildingId: z.string()
+    .uuid('ID de edificio inválido')
+    .optional(),
+  unitId: z.string()
+    .uuid('ID de unidad inválido')
+    .optional(),
+  tenantId: z.string()
+    .uuid('ID de inquilino inválido')
+    .optional(),
+  contractId: z.string()
+    .uuid('ID de contrato inválido')
+    .optional(),
+  cloud_storage_path: z.string()
+    .min(1, 'La ruta del archivo es requerida')
+    .max(2000, 'La ruta del archivo no puede exceder 2000 caracteres'),
+  fileSize: z.number()
+    .positive('El tamaño del archivo debe ser mayor a 0')
+    .max(104857600, 'El tamaño del archivo no puede exceder 100MB'),
+  mimeType: z.string()
+    .max(200, 'El tipo MIME no puede exceder 200 caracteres')
+    .optional(),
+  descripcion: z.string()
+    .max(2000, 'La descripción no puede exceder 2000 caracteres')
+    .optional(),
+  fechaVencimiento: z.string()
+    .datetime({ message: 'Fecha de vencimiento inválida' })
+    .or(z.date())
+    .optional()
+});
+
+export const documentUpdateSchema = documentCreateSchema.partial()
+  .omit({ cloud_storage_path: true });
+
+// ====================================
 // TIPOS DE EXPORTACIÓN
 // ====================================
 
@@ -379,3 +506,9 @@ export type ProviderCreateInput = z.infer<typeof providerCreateSchema>;
 export type ProviderUpdateInput = z.infer<typeof providerUpdateSchema>;
 export type UserCreateInput = z.infer<typeof userCreateSchema>;
 export type UserUpdateInput = z.infer<typeof userUpdateSchema>;
+export type ExpenseCreateInput = z.infer<typeof expenseCreateSchema>;
+export type ExpenseUpdateInput = z.infer<typeof expenseUpdateSchema>;
+export type TaskCreateInput = z.infer<typeof taskCreateSchema>;
+export type TaskUpdateInput = z.infer<typeof taskUpdateSchema>;
+export type DocumentCreateInput = z.infer<typeof documentCreateSchema>;
+export type DocumentUpdateInput = z.infer<typeof documentUpdateSchema>;
