@@ -82,17 +82,13 @@ export async function POST(req: NextRequest) {
         companyId,
         nombre: validatedData.nombre,
         direccion: validatedData.direccion,
-        ciudad: validatedData.ciudad,
-        pais: validatedData.pais,
         tipo: (validatedData.tipo && ['residencial', 'mixto', 'comercial'].includes(validatedData.tipo)) ? validatedData.tipo as 'residencial' | 'mixto' | 'comercial' : 'residencial',
-        codigoPostal: validatedData.codigoPostal || '',
         anoConstructor: validatedData.anoConstructor || new Date().getFullYear(),
         numeroUnidades: validatedData.numeroUnidades || 0,
-        descripcion: validatedData.descripcion || null,
       },
     });
 
-    logger.info('Building created successfully:', { buildingId: building.id, companyId });
+    logger.info('Building created successfully', { buildingId: building.id, companyId });
     return NextResponse.json(building, { status: 201 });
   } catch (error: any) {
     logError(error, 'Error creating building');

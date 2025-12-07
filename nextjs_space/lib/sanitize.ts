@@ -29,17 +29,17 @@ export function sanitizeHtml(
     config.ALLOWED_ATTR = options.allowedAttributes;
   }
 
-  return DOMPurify.sanitize(dirty, config);
+  return String(DOMPurify.sanitize(dirty, config));
 }
 
 /**
  * Sanitiza texto plano (elimina todas las etiquetas HTML)
  */
 export function sanitizePlainText(text: string): string {
-  return DOMPurify.sanitize(text, {
+  return String(DOMPurify.sanitize(text, {
     ALLOWED_TAGS: [],
     ALLOWED_ATTR: [],
-  });
+  }));
 }
 
 /**

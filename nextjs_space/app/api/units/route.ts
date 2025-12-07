@@ -76,15 +76,15 @@ export async function POST(req: NextRequest) {
         numero: validatedData.numero,
         tipo: validatedData.tipo || 'vivienda',
         estado: validatedData.estado || 'disponible',
-        planta: validatedData.piso || null,
-        superficie: validatedData.superficie || 0,
+        planta: typeof validatedData.piso === 'number' ? validatedData.piso : (typeof validatedData.piso === 'string' ? parseInt(validatedData.piso, 10) || null : null),
+        superficie: typeof validatedData.superficie === 'number' ? validatedData.superficie : (typeof validatedData.superficie === 'string' ? parseFloat(validatedData.superficie) || 0 : 0),
         habitaciones: validatedData.habitaciones || null,
         banos: validatedData.banos || null,
         rentaMensual: validatedData.rentaMensual || 0,
       },
     });
 
-    logger.info('Unit created successfully:', { unitId: unit.id, buildingId: validatedData.buildingId });
+    logger.info({ message: 'Unit created successfully', unitId: unit.id, buildingId: validatedData.buildingId });
     return NextResponse.json(unit, { status: 201 });
   } catch (error) {
     logError(error, 'Error creating unit');

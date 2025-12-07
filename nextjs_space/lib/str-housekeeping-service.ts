@@ -582,7 +582,7 @@ export async function generateAutomaticTasks(companyId: string, diasAnticipacion
     }
   });
 
-  const tareasCreadas = [];
+  const tareasCreadas: any[] = [];
 
   for (const booking of bookings) {
     // Verificar si ya existe tarea para este booking

@@ -273,7 +273,15 @@ export async function getCenterOfCostsReport(companyId: string, periodo: string)
     },
   });
 
-  const report = [];
+  const report: Array<{
+    buildingId: string;
+    nombreEdificio: string;
+    totalUnidades: number;
+    ingresos: number;
+    gastos: number;
+    utilidad: number;
+    margen: number;
+  }> = [];
 
   for (const building of buildings) {
     const transactions = await prisma.accountingTransaction.findMany({

@@ -520,7 +520,7 @@ export async function getSuggestedPrice(
  * Formatea un breakdown de precio para mostrar
  */
 export function formatPriceBreakdown(breakdown: PriceBreakdown): string {
-  const parts = [];
+  const parts: string[] = [];
   
   parts.push(`Fecha: ${breakdown.date}`);
   parts.push(`Precio base: €${breakdown.basePrice}`);
@@ -552,7 +552,7 @@ export function formatPriceBreakdown(breakdown: PriceBreakdown): string {
  * Formatea el cálculo de una reserva para mostrar
  */
 export function formatBookingCalculation(calc: BookingPriceCalculation): string {
-  const parts = [];
+  const parts: string[] = [];
   
   parts.push(`**CÁLCULO DE RESERVA**`);
   parts.push(`Check-in: ${format(calc.checkIn, 'dd/MM/yyyy', { locale: es })}`);
