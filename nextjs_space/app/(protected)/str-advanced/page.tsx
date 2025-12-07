@@ -390,7 +390,6 @@ export default function STRAdvancedDashboard() {
         </CardContent>
       </Card>
     </div>
-      </div>
         </main>
       </div>
     </div>
