@@ -1,7 +1,7 @@
 'use client';
 
-import Sidebar from '@/components/layout/sidebar';
-import Header from '@/components/layout/header';
+import { Sidebar } from '@/components/layout/sidebar';
+import { Header } from '@/components/layout/header';
 
 import { useSession } from 'next-auth/react';
 import logger from '@/lib/logger';

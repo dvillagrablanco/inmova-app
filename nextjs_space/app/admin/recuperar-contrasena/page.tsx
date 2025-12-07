@@ -1,7 +1,7 @@
 'use client';
 
-import Sidebar from '@/components/layout/sidebar';
-import Header from '@/components/layout/header';
+import { Sidebar } from '@/components/layout/sidebar';
+import { Header } from '@/components/layout/header';
 
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
