@@ -331,10 +331,10 @@ async function handleCreateNotification(
     data: {
       companyId: context.companyId,
       userId: input.userId,
-      tipo: 'sistema',
+      tipo: 'alerta_sistema',
       titulo: input.titulo,
       mensaje: input.mensaje,
-      nivel: input.nivel || 'info',
+      prioridad: input.prioridad || input.nivel || 'bajo',
       leida: false,
     },
   });

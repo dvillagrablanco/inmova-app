@@ -531,19 +531,17 @@ async function searchBuildings(input: any, context: AssistantContext) {
     where: {
       companyId: context.companyId,
       OR: [
-        { name: { contains: query, mode: 'insensitive' } },
-        { address: { contains: query, mode: 'insensitive' } },
-        { city: { contains: query, mode: 'insensitive' } }
+        { nombre: { contains: query, mode: 'insensitive' } },
+        { direccion: { contains: query, mode: 'insensitive' } }
       ]
     },
     take: limit,
     select: {
       id: true,
-      name: true,
-      address: true,
-      city: true,
-      state: true,
-      totalUnits: true,
+      nombre: true,
+      direccion: true,
+      tipo: true,
+      numeroUnidades: true,
       _count: {
         select: {
           units: true
@@ -565,17 +563,17 @@ async function searchTenants(input: any, context: AssistantContext) {
   const where: any = {
     companyId: context.companyId,
     OR: [
-      { nombre: { contains: query, mode: 'insensitive' } },
+      { nombreCompleto: { contains: query, mode: 'insensitive' } },
       { email: { contains: query, mode: 'insensitive' } },
       { telefono: { contains: query, mode: 'insensitive' } }
     ]
   };
 
   if (buildingId) {
-    where.contratos = {
+    where.contracts = {
       some: {
-        unidad: {
-          edificioId: buildingId
+        unit: {
+          buildingId: buildingId
         }
       }
     };
@@ -586,19 +584,19 @@ async function searchTenants(input: any, context: AssistantContext) {
     take: limit,
     select: {
       id: true,
-      nombre: true,
+      nombreCompleto: true,
       email: true,
       telefono: true,
-      contratos: {
+      contracts: {
         where: {
           estado: 'activo'
         },
         select: {
           id: true,
-          unidad: {
+          unit: {
             select: {
               numero: true,
-              edificio: {
+              building: {
                 select: {
                   nombre: true
                 }
@@ -627,22 +625,22 @@ async function getBuildingDetails(input: any, context: AssistantContext) {
       companyId: context.companyId
     },
     include: {
-      unidades: {
+      units: {
         select: {
           id: true,
           numero: true,
           tipo: true,
           estado: true,
           metrosCuadrados: true,
-          contratos: {
+          contracts: {
             where: {
               estado: 'activo'
             },
             select: {
               id: true,
-              inquilino: {
+              tenant: {
                 select: {
-                  nombre: true,
+                  nombreCompleto: true,
                   email: true
                 }
               }
@@ -653,7 +651,7 @@ async function getBuildingDetails(input: any, context: AssistantContext) {
       },
       _count: {
         select: {
-          unidades: true
+          units: true
         }
       }
     }
@@ -678,37 +676,37 @@ async function getTenantDetails(input: any, context: AssistantContext) {
       companyId: context.companyId
     },
     include: {
-      contratos: {
+      contracts: {
         select: {
           id: true,
           fechaInicio: true,
           fechaFin: true,
           rentaMensual: true,
           estado: true,
-          unidad: {
+          unit: {
             select: {
               numero: true,
-              edificio: {
+              building: {
                 select: {
                   nombre: true,
                   direccion: true
                 }
               }
             }
+          },
+          payments: {
+            take: 10,
+            orderBy: {
+              fechaPago: 'desc'
+            },
+            select: {
+              id: true,
+              monto: true,
+              fechaPago: true,
+              estado: true,
+              metodoPago: true
+            }
           }
-        }
-      },
-      pagos: {
-        take: 10,
-        orderBy: {
-          fechaPago: 'desc'
-        },
-        select: {
-          id: true,
-          monto: true,
-          fechaPago: true,
-          estado: true,
-          concepto: true
         }
       }
     }
@@ -736,12 +734,12 @@ async function searchContracts(input: any, context: AssistantContext) {
   }
 
   if (tenantId) {
-    where.inquilinoId = tenantId;
+    where.tenantId = tenantId;
   }
 
   if (buildingId) {
-    where.unidad = {
-      edificioId: buildingId
+    where.unit = {
+      buildingId: buildingId
     };
   }
 
@@ -754,16 +752,16 @@ async function searchContracts(input: any, context: AssistantContext) {
       fechaFin: true,
       rentaMensual: true,
       estado: true,
-      inquilino: {
+      tenant: {
         select: {
-          nombre: true,
+          nombreCompleto: true,
           email: true
         }
       },
-      unidad: {
+      unit: {
         select: {
           numero: true,
-          edificio: {
+          building: {
             select: {
               nombre: true
             }
@@ -787,15 +785,20 @@ async function getPaymentStatus(input: any, context: AssistantContext) {
   const { contractId, tenantId, includeHistory = true } = input;
   
   const where: any = {
-    companyId: context.companyId
+    contract: {
+      companyId: context.companyId
+    }
   };
 
   if (contractId) {
-    where.contratoId = contractId;
+    where.contractId = contractId;
   }
 
   if (tenantId) {
-    where.inquilinoId = tenantId;
+    where.contract = {
+      ...where.contract,
+      tenantId: tenantId
+    };
   }
 
   const payments = await prisma.payment.findMany({
@@ -810,7 +813,7 @@ async function getPaymentStatus(input: any, context: AssistantContext) {
       fechaPago: true,
       fechaVencimiento: true,
       estado: true,
-      concepto: true,
+      periodo: true,
       metodoPago: true
     }
   });
@@ -835,15 +838,11 @@ async function createMaintenanceRequest(input: any, context: AssistantContext) {
   
   const request = await prisma.maintenanceRequest.create({
     data: {
-      companyId: context.companyId,
       titulo: title,
       descripcion: description,
-      unidadId: unitId,
-      edificioId: buildingId,
+      unitId: unitId,
       prioridad: priority,
-      categoria: category,
-      estado: 'pendiente',
-      solicitadoPor: context.userId
+      estado: 'pendiente'
     }
   });
 
@@ -859,7 +858,11 @@ async function searchMaintenanceRequests(input: any, context: AssistantContext) 
   const { status, buildingId, priority, limit = 10 } = input;
   
   const where: any = {
-    companyId: context.companyId
+    unit: {
+      building: {
+        companyId: context.companyId
+      }
+    }
   };
 
   if (status) {
@@ -867,7 +870,10 @@ async function searchMaintenanceRequests(input: any, context: AssistantContext) 
   }
 
   if (buildingId) {
-    where.edificioId = buildingId;
+    where.unit = {
+      ...where.unit,
+      buildingId: buildingId
+    };
   }
 
   if (priority) {
@@ -878,7 +884,7 @@ async function searchMaintenanceRequests(input: any, context: AssistantContext) 
     where,
     take: limit,
     orderBy: {
-      fechaCreacion: 'desc'
+      fechaSolicitud: 'desc'
     },
     select: {
       id: true,
@@ -886,16 +892,15 @@ async function searchMaintenanceRequests(input: any, context: AssistantContext) 
       descripcion: true,
       estado: true,
       prioridad: true,
-      categoria: true,
-      fechaCreacion: true,
-      edificio: {
+      fechaSolicitud: true,
+      unit: {
         select: {
-          nombre: true
-        }
-      },
-      unidad: {
-        select: {
-          numero: true
+          numero: true,
+          building: {
+            select: {
+              nombre: true
+            }
+          }
         }
       }
     }
@@ -920,7 +925,7 @@ async function createTask(input: any, context: AssistantContext) {
       prioridad: priority,
       asignadoA: assignedTo,
       creadoPor: context.userId,
-      fechaVencimiento: dueDate ? new Date(dueDate) : undefined
+      fechaLimite: dueDate ? new Date(dueDate) : undefined
     }
   });
 
@@ -955,7 +960,7 @@ async function searchTasks(input: any, context: AssistantContext) {
     where,
     take: limit,
     orderBy: {
-      fechaCreacion: 'desc'
+      createdAt: 'desc'
     },
     select: {
       id: true,
@@ -963,8 +968,8 @@ async function searchTasks(input: any, context: AssistantContext) {
       descripcion: true,
       estado: true,
       prioridad: true,
-      fechaVencimiento: true,
-      fechaCreacion: true
+      fechaLimite: true,
+      createdAt: true
     }
   });
 
