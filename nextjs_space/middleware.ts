@@ -21,8 +21,20 @@ const ROLE_PERMISSIONS = {
     '/documentos',
     '/candidatos',
     '/reportes',
-    '/admin',
     '/notificaciones',
+    // Páginas de admin permitidas para administrador
+    '/admin/usuarios',
+    '/admin/configuracion',
+    '/admin/personalizacion',
+    '/admin/importar',
+    '/admin/aprobaciones',
+    '/admin/modulos',
+    '/admin/reportes-programados',
+    '/admin/integraciones-contables',
+    '/admin/marketplace',
+    '/admin/legal',
+    '/admin/firma-digital',
+    '/admin/sales-team',
   ],
   gestor: [
     '/dashboard',
@@ -50,6 +62,18 @@ const ROLE_PERMISSIONS = {
     '/notificaciones',
   ],
 };
+
+// Rutas exclusivas de super_admin
+const SUPER_ADMIN_ONLY_ROUTES = [
+  '/admin/clientes',
+  '/admin/dashboard',
+  '/admin/activity',
+  '/admin/alertas',
+  '/admin/salud-sistema',
+  '/admin/metricas-uso',
+  '/admin/seguridad',
+  '/admin/facturacion-b2b',
+];
 
 export default withAuth(
   async function middleware(req) {
@@ -82,6 +106,17 @@ export default withAuth(
       applyRateLimitHeaders(response.headers, rateLimitResult);
       response.headers.set('x-nonce', nonce);
       
+      return applyStrictCSP(response, nonce);
+    }
+
+    // Verificar si la ruta es exclusiva de super_admin
+    const isSuperAdminRoute = SUPER_ADMIN_ONLY_ROUTES.some((route) =>
+      pathname.startsWith(route)
+    );
+
+    if (isSuperAdminRoute && userRole !== 'super_admin') {
+      const response = NextResponse.redirect(new URL('/unauthorized', req.url));
+      response.headers.set('x-nonce', nonce);
       return applyStrictCSP(response, nonce);
     }
 

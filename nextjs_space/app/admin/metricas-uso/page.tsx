@@ -62,8 +62,10 @@ export default function UsageMetricsPage() {
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');
+    } else if (status === 'authenticated' && session?.user?.role !== 'super_admin') {
+      router.push('/unauthorized');
     }
-  }, [status, router]);
+  }, [status, session, router]);
 
   const fetchMetrics = async () => {
     try {

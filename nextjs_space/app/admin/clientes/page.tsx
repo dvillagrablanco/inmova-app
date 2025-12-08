@@ -107,6 +107,13 @@ export default function ClientesAdminPage() {
     return null;
   }
 
+  // Authorization check - Only super_admin can access this page
+  const userRole = (session?.user as any)?.role;
+  if (userRole !== 'super_admin') {
+    router.push('/unauthorized');
+    return null;
+  }
+
   // Handlers
   const handleCreateCompany = async () => {
     if (!newCompany.nombre || !newCompany.emailContacto) {

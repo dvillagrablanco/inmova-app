@@ -113,7 +113,7 @@ interface Invoice {
 export default function InvoiceDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { data: session } = useSession() || {};
+  const { data: session, status } = useSession() || {};
   const [loading, setLoading] = useState(true);
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
@@ -133,11 +133,20 @@ export default function InvoiceDetailPage() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
 
+  // Authentication and Authorization check
   useEffect(() => {
-    if (params?.id) {
+    if (status === 'unauthenticated') {
+      router.push('/login');
+    } else if (status === 'authenticated' && session?.user?.role !== 'super_admin') {
+      router.push('/unauthorized');
+    }
+  }, [status, session, router]);
+
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user?.role === 'super_admin' && params?.id) {
       loadInvoice();
     }
-  }, [params?.id]);
+  }, [status, session, params?.id]);
 
   const loadInvoice = async () => {
     if (!params?.id) return;
