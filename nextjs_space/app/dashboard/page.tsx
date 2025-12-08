@@ -8,6 +8,7 @@ import { Header } from '@/components/layout/header';
 import { KPICard } from '@/components/ui/kpi-card';
 import { ContextualHelp } from '@/components/ui/contextual-help';
 import { LoadingState } from '@/components/ui/loading-state';
+import { SkeletonKPICards, SkeletonChart, SkeletonList } from '@/components/ui/skeleton-loaders';
 import {
   TrendingUp,
   Building2,
@@ -108,8 +109,41 @@ function DashboardPageContent() {
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="flex h-screen bg-gradient-bg items-center justify-center">
-        <LoadingState message="Cargando dashboard..." size="lg" />
+      <div className="flex h-screen bg-gradient-bg">
+        <Sidebar />
+        <div className="flex-1 ml-0 lg:ml-64 flex flex-col">
+          <Header />
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <div className="max-w-7xl mx-auto">
+              {/* Header */}
+              <div className="mb-8 space-y-2">
+                <div className="h-8 w-48 bg-gray-200 rounded animate-pulse" />
+                <div className="h-5 w-64 bg-gray-200 rounded animate-pulse" />
+              </div>
+
+              {/* KPIs Grid */}
+              <div className="mb-8">
+                <SkeletonKPICards count={4} />
+              </div>
+
+              {/* Financial KPIs */}
+              <div className="mb-8">
+                <div className="grid gap-4 md:grid-cols-3">
+                  <SkeletonKPICards count={3} />
+                </div>
+              </div>
+
+              {/* Charts */}
+              <div className="space-y-6">
+                <SkeletonChart height={300} />
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <SkeletonChart height={300} />
+                  <SkeletonChart height={300} />
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
       </div>
     );
   }

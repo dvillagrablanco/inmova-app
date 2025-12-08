@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
+import { MobileFormWizard, FormStep } from '@/components/ui/mobile-form-wizard';
 
 interface Unit {
   id: string;
@@ -180,141 +181,192 @@ export default function NuevoContratoPage() {
               <p className="text-muted-foreground">Crea un nuevo contrato de arrendamiento</p>
             </div>
 
-            {/* Formulario */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  Información del Contrato
-                </CardTitle>
-                <CardDescription>Completa los datos del contrato de arrendamiento</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid gap-6 md:grid-cols-2">
-                    {/* Unidad */}
-                    <div className="space-y-2">
-                      <Label htmlFor="unitId">Unidad *</Label>
-                      <Select
-                        value={formData.unitId}
-                        onValueChange={(value) => setFormData({ ...formData, unitId: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona una unidad" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {units.map((unit) => (
-                            <SelectItem key={unit.id} value={unit.id}>
-                              {unit.building.nombre} - {unit.numero}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+            {/* Formulario con Wizard para móvil */}
+            <form onSubmit={handleSubmit}>
+              <MobileFormWizard
+                steps={[
+                  {
+                    id: 'basic',
+                    title: 'Información Básica',
+                    description: 'Selecciona la unidad, inquilino y tipo de contrato',
+                    fields: (
+                      <div className="space-y-4">
+                        {/* Unidad */}
+                        <div className="space-y-2">
+                          <Label htmlFor="unitId">Unidad *</Label>
+                          <Select
+                            value={formData.unitId}
+                            onValueChange={(value) => setFormData({ ...formData, unitId: value })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecciona una unidad" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {units.map((unit) => (
+                                <SelectItem key={unit.id} value={unit.id}>
+                                  {unit.building.nombre} - {unit.numero}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
 
-                    {/* Inquilino */}
-                    <div className="space-y-2">
-                      <Label htmlFor="tenantId">Inquilino *</Label>
-                      <Select
-                        value={formData.tenantId}
-                        onValueChange={(value) => setFormData({ ...formData, tenantId: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona un inquilino" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {tenants.map((tenant) => (
-                            <SelectItem key={tenant.id} value={tenant.id}>
-                              {tenant.nombre} - {tenant.email}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                        {/* Inquilino */}
+                        <div className="space-y-2">
+                          <Label htmlFor="tenantId">Inquilino *</Label>
+                          <Select
+                            value={formData.tenantId}
+                            onValueChange={(value) => setFormData({ ...formData, tenantId: value })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecciona un inquilino" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {tenants.map((tenant) => (
+                                <SelectItem key={tenant.id} value={tenant.id}>
+                                  {tenant.nombre} - {tenant.email}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
 
-                    {/* Tipo de Contrato */}
-                    <div className="space-y-2">
-                      <Label htmlFor="tipo">Tipo de Contrato *</Label>
-                      <Select
-                        value={formData.tipo}
-                        onValueChange={(value) => setFormData({ ...formData, tipo: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="residencial">Residencial</SelectItem>
-                          <SelectItem value="comercial">Comercial</SelectItem>
-                          <SelectItem value="temporal">Temporal</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Renta Mensual */}
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Label htmlFor="rentaMensual">Renta Mensual (€) *</Label>
-                        <InfoTooltip content="Monto mensual que el inquilino debe pagar. Este valor se usará para generar automáticamente los pagos recurrentes." />
+                        {/* Tipo de Contrato */}
+                        <div className="space-y-2">
+                          <Label htmlFor="tipo">Tipo de Contrato *</Label>
+                          <Select
+                            value={formData.tipo}
+                            onValueChange={(value) => setFormData({ ...formData, tipo: value })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="residencial">Residencial</SelectItem>
+                              <SelectItem value="comercial">Comercial</SelectItem>
+                              <SelectItem value="temporal">Temporal</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
-                      <Input
-                        id="rentaMensual"
-                        name="rentaMensual"
-                        type="number"
-                        step="0.01"
-                        value={formData.rentaMensual}
-                        onChange={handleChange}
-                        required
-                        min="0"
-                      />
-                    </div>
+                    ),
+                  },
+                  {
+                    id: 'financial',
+                    title: 'Términos Financieros',
+                    description: 'Define la renta mensual y el depósito de garantía',
+                    fields: (
+                      <div className="space-y-4">
+                        {/* Renta Mensual */}
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="rentaMensual">Renta Mensual (€) *</Label>
+                            <InfoTooltip content="Monto mensual que el inquilino debe pagar. Este valor se usará para generar automáticamente los pagos recurrentes." />
+                          </div>
+                          <Input
+                            id="rentaMensual"
+                            name="rentaMensual"
+                            type="number"
+                            step="0.01"
+                            value={formData.rentaMensual}
+                            onChange={handleChange}
+                            required
+                            min="0"
+                            placeholder="Ej: 850.00"
+                          />
+                        </div>
 
-                    {/* Depósito */}
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Label htmlFor="deposito">Depósito (€) *</Label>
-                        <InfoTooltip content="Cantidad de dinero que se retiene como garantía. Típicamente equivale a 1-2 meses de renta." />
+                        {/* Depósito */}
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="deposito">Depósito (€) *</Label>
+                            <InfoTooltip content="Cantidad de dinero que se retiene como garantía. Típicamente equivale a 1-2 meses de renta." />
+                          </div>
+                          <Input
+                            id="deposito"
+                            name="deposito"
+                            type="number"
+                            step="0.01"
+                            value={formData.deposito}
+                            onChange={handleChange}
+                            required
+                            min="0"
+                            placeholder="Ej: 1700.00"
+                          />
+                        </div>
                       </div>
-                      <Input
-                        id="deposito"
-                        name="deposito"
-                        type="number"
-                        step="0.01"
-                        value={formData.deposito}
-                        onChange={handleChange}
-                        required
-                        min="0"
-                      />
-                    </div>
+                    ),
+                  },
+                  {
+                    id: 'dates',
+                    title: 'Fechas y Confirmación',
+                    description: 'Establece el período de vigencia del contrato',
+                    fields: (
+                      <div className="space-y-4">
+                        {/* Fecha de Inicio */}
+                        <div className="space-y-2">
+                          <Label htmlFor="fechaInicio">Fecha de Inicio *</Label>
+                          <Input
+                            id="fechaInicio"
+                            name="fechaInicio"
+                            type="date"
+                            value={formData.fechaInicio}
+                            onChange={handleChange}
+                            required
+                          />
+                        </div>
 
-                    {/* Fecha de Inicio */}
-                    <div className="space-y-2">
-                      <Label htmlFor="fechaInicio">Fecha de Inicio *</Label>
-                      <Input
-                        id="fechaInicio"
-                        name="fechaInicio"
-                        type="date"
-                        value={formData.fechaInicio}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
+                        {/* Fecha de Fin */}
+                        <div className="space-y-2">
+                          <Label htmlFor="fechaFin">Fecha de Fin *</Label>
+                          <Input
+                            id="fechaFin"
+                            name="fechaFin"
+                            type="date"
+                            value={formData.fechaFin}
+                            onChange={handleChange}
+                            required
+                          />
+                        </div>
 
-                    {/* Fecha de Fin */}
-                    <div className="space-y-2">
-                      <Label htmlFor="fechaFin">Fecha de Fin *</Label>
-                      <Input
-                        id="fechaFin"
-                        name="fechaFin"
-                        type="date"
-                        value={formData.fechaFin}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  {/* Botones */}
-                  <div className="flex gap-3 pt-4">
+                        {/* Resumen */}
+                        {formData.unitId && formData.tenantId && (
+                          <div className="mt-4 p-4 bg-muted/50 rounded-lg space-y-2">
+                            <h4 className="font-medium text-sm">Resumen del Contrato</h4>
+                            <div className="text-sm space-y-1">
+                              <p>
+                                <span className="text-muted-foreground">Unidad:</span>{' '}
+                                {units.find((u) => u.id === formData.unitId)?.building.nombre} -{' '}
+                                {units.find((u) => u.id === formData.unitId)?.numero}
+                              </p>
+                              <p>
+                                <span className="text-muted-foreground">Inquilino:</span>{' '}
+                                {tenants.find((t) => t.id === formData.tenantId)?.nombre}
+                              </p>
+                              <p>
+                                <span className="text-muted-foreground">Tipo:</span> {formData.tipo}
+                              </p>
+                              {formData.rentaMensual !== '0' && (
+                                <p>
+                                  <span className="text-muted-foreground">Renta:</span> €
+                                  {parseFloat(formData.rentaMensual).toFixed(2)}/mes
+                                </p>
+                              )}
+                              {formData.deposito !== '0' && (
+                                <p>
+                                  <span className="text-muted-foreground">Depósito:</span> €
+                                  {parseFloat(formData.deposito).toFixed(2)}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ),
+                  },
+                ]}
+                submitButton={
+                  <div className="flex gap-3">
                     <ButtonWithLoading
                       type="submit"
                       isLoading={isLoading}
@@ -333,9 +385,9 @@ export default function NuevoContratoPage() {
                       Cancelar
                     </Button>
                   </div>
-                </form>
-              </CardContent>
-            </Card>
+                }
+              />
+            </form>
           </div>
         </main>
       </div>

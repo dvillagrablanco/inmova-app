@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { authOptions } from '@/lib/auth-options';
 import { generateDemoData, hasDemoData } from '@/lib/demo-data-generator';
 import { logger } from '@/lib/logger';
 import { BusinessVertical } from '@prisma/client';
