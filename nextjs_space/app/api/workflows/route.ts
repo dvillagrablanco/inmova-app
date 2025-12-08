@@ -1,143 +1,88 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import prisma from '@/lib/prisma';
+import { authOptions } from '@/lib/auth-options';
+import {
+  createWorkflow,
+  getCompanyWorkflows,
+} from '@/lib/workflow-service';
+import logger, { logError } from '@/lib/logger';
+
+export const dynamic = 'force-dynamic';
 
 /**
- * GET /api/workflows - Listar workflows de la empresa
+ * GET /api/workflows - Obtiene workflows de la empresa
  */
-export async function GET(req: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+    if (!session?.user?.companyId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const { searchParams } = new URL(req.url);
+    const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
     const isActive = searchParams.get('isActive');
 
-    const where: any = {
-      companyId: session.user.companyId,
-    };
-
-    if (status) {
-      where.status = status;
-    }
-
-    if (isActive !== null) {
-      where.isActive = isActive === 'true';
-    }
-
-    const workflows = await prisma.workflow.findMany({
-      where,
-      include: {
-        actions: {
-          orderBy: {
-            orden: 'asc',
-          },
-        },
-        creator: {
-          select: {
-            id: true,
-            nombre: true,
-            email: true,
-          },
-        },
-        _count: {
-          select: {
-            executions: true,
-          },
-        },
-      },
-      orderBy: {
-        updatedAt: 'desc',
-      },
-    });
+    const workflows = await getCompanyWorkflows(
+      session.user.companyId,
+      {
+        ...(status && { status: status as any }),
+        ...(isActive !== null && { isActive: isActive === 'true' }),
+      }
+    );
 
     return NextResponse.json(workflows);
-  } catch (error: any) {
-    console.error('Error obteniendo workflows:', error);
+  } catch (error) {
+    logger.error({ context: 'Error obteniendo workflows' });
     return NextResponse.json(
-      { error: 'Error obteniendo workflows' },
+      { error: 'Error al obtener workflows' },
       { status: 500 }
     );
   }
 }
 
 /**
- * POST /api/workflows - Crear un nuevo workflow
+ * POST /api/workflows - Crea un nuevo workflow
  */
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+    if (!session?.user?.companyId || !session?.user?.id) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const body = await req.json();
-    const {
-      nombre,
-      descripcion,
-      triggerType,
-      triggerConfig,
-      actions,
-      isActive,
-    } = body;
+    const body = await request.json();
 
-    // Validaciones básicas
-    if (!nombre || !triggerType || !triggerConfig) {
+    // Validar campos requeridos
+    if (!body.nombre || !body.triggerType || !body.actions) {
       return NextResponse.json(
         { error: 'Faltan campos requeridos' },
         { status: 400 }
       );
     }
 
-    // Crear workflow con sus acciones
-    const workflow = await prisma.workflow.create({
-      data: {
-        companyId: session.user.companyId,
-        createdBy: session.user.id,
-        nombre,
-        descripcion,
-        triggerType,
-        triggerConfig,
-        isActive: isActive !== undefined ? isActive : false,
-        status: isActive ? 'activo' : 'borrador',
-        actions: {
-          create: actions?.map((action: any, index: number) => ({
-            orden: index + 1,
-            actionType: action.actionType,
-            config: action.config,
-            conditions: action.conditions || null,
-          })) || [],
-        },
-      },
-      include: {
-        actions: true,
-        creator: {
-          select: {
-            id: true,
-            nombre: true,
-            email: true,
-          },
-        },
-      },
+    const workflow = await createWorkflow({
+      companyId: session.user.companyId,
+      nombre: body.nombre,
+      descripcion: body.descripcion,
+      triggerType: body.triggerType,
+      triggerConfig: body.triggerConfig || {},
+      actions: body.actions,
+      createdBy: session.user.id,
+    });
+
+    logger.info('Workflow creado vía API', {
+      workflowId: workflow.id,
+      userId: session.user.id,
     });
 
     return NextResponse.json(workflow, { status: 201 });
-  } catch (error: any) {
-    console.error('Error creando workflow:', error);
+  } catch (error) {
+    logger.error({ context: 'Error creando workflow' });
     return NextResponse.json(
-      { error: 'Error creando workflow' },
+      { error: 'Error al crear workflow' },
       { status: 500 }
     );
   }

@@ -1,373 +1,82 @@
-const CACHE_NAME = 'inmova-v1';
-const STATIC_CACHE = 'inmova-static-v1';
-const DYNAMIC_CACHE = 'inmova-dynamic-v1';
-const API_CACHE = 'inmova-api-v1';
+/**
+ * Service Worker para notificaciones push
+ */
 
-// Recursos estáticos para cachear durante la instalación
-const STATIC_ASSETS = [
-  '/',
-  '/dashboard',
-  '/login',
-  '/offline',
-  '/manifest.json',
-  '/inmova-logo-icon.jpg',
-  '/inmova-logo-cover.jpg',
-];
+const CACHE_NAME = 'inmova-push-v1';
 
-// Instalación del Service Worker
+// Instalación del service worker
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing Service Worker...');
-  event.waitUntil(
-    caches.open(STATIC_CACHE).then((cache) => {
-      console.log('[SW] Precaching static assets');
-      return cache.addAll(STATIC_ASSETS.map(url => new Request(url, { cache: 'reload' })));
-    })
-  );
+  console.log('[SW] Service Worker instalado');
   self.skipWaiting();
 });
 
-// Activación del Service Worker
+// Activación del service worker
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating Service Worker...');
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE && cacheName !== API_CACHE) {
-            console.log('[SW] Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
-  );
-  return self.clients.claim();
+  console.log('[SW] Service Worker activado');
+  event.waitUntil(clients.claim());
 });
-
-// Estrategia de fetch
-self.addEventListener('fetch', (event) => {
-  const { request } = event;
-  const url = new URL(request.url);
-
-  // Ignorar requests no HTTP/HTTPS
-  if (!request.url.startsWith('http')) {
-    return;
-  }
-
-  // Estrategia para API calls (Network First con fallback a cache)
-  if (url.pathname.startsWith('/api/')) {
-    event.respondWith(networkFirstStrategy(request, API_CACHE));
-    return;
-  }
-
-  // Estrategia para recursos estáticos (Cache First)
-  if (
-    request.destination === 'image' ||
-    request.destination === 'font' ||
-    request.destination === 'style' ||
-    request.destination === 'script'
-  ) {
-    event.respondWith(cacheFirstStrategy(request, STATIC_CACHE));
-    return;
-  }
-
-  // Estrategia para páginas HTML (Network First con offline fallback)
-  if (request.mode === 'navigate' || request.headers.get('accept').includes('text/html')) {
-    event.respondWith(networkFirstWithOfflineFallback(request));
-    return;
-  }
-
-  // Por defecto: Network First
-  event.respondWith(networkFirstStrategy(request, DYNAMIC_CACHE));
-});
-
-// Estrategia Cache First
-async function cacheFirstStrategy(request, cacheName) {
-  const cache = await caches.open(cacheName);
-  
-  // Solo buscar en cache para peticiones GET
-  if (request.method === 'GET') {
-    const cached = await cache.match(request);
-    if (cached) {
-      return cached;
-    }
-  }
-
-  try {
-    const response = await fetch(request);
-    // Solo cachear peticiones GET exitosas
-    if (response.status === 200 && request.method === 'GET') {
-      cache.put(request, response.clone());
-    }
-    return response;
-  } catch (error) {
-    console.log('[SW] Fetch failed for:', request.url);
-    return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
-  }
-}
-
-// Estrategia Network First
-async function networkFirstStrategy(request, cacheName) {
-  const cache = await caches.open(cacheName);
-  
-  try {
-    const response = await fetch(request);
-    // Solo cachear peticiones GET exitosas
-    if (response.status === 200 && request.method === 'GET') {
-      cache.put(request, response.clone());
-    }
-    return response;
-  } catch (error) {
-    // Solo buscar en cache para peticiones GET
-    if (request.method === 'GET') {
-      const cached = await cache.match(request);
-      if (cached) {
-        return cached;
-      }
-    }
-    console.log('[SW] Network failed for:', request.url);
-    return new Response(JSON.stringify({ error: 'Offline' }), {
-      status: 503,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  }
-}
-
-// Estrategia Network First con página offline de respaldo
-async function networkFirstWithOfflineFallback(request) {
-  const cache = await caches.open(DYNAMIC_CACHE);
-  
-  try {
-    const response = await fetch(request);
-    // Solo cachear peticiones GET exitosas
-    if (response.status === 200 && request.method === 'GET') {
-      cache.put(request, response.clone());
-    }
-    return response;
-  } catch (error) {
-    // Solo buscar en cache para peticiones GET
-    if (request.method === 'GET') {
-      const cached = await cache.match(request);
-      if (cached) {
-        return cached;
-      }
-      
-      // Si no hay caché, intentar devolver la página offline
-      const offlinePage = await cache.match('/offline');
-      if (offlinePage) {
-        return offlinePage;
-      }
-    }
-    
-    // Último recurso: respuesta genérica
-    return new Response(
-      '<html><body><h1>Sin conexión</h1><p>Por favor, verifica tu conexión a internet.</p></body></html>',
-      { headers: { 'Content-Type': 'text/html' } }
-    );
-  }
-}
 
 // Manejo de notificaciones push
 self.addEventListener('push', (event) => {
-  console.log('[SW] Push notification received');
-  
-  let notificationData = {};
-  
-  try {
-    notificationData = event.data ? event.data.json() : {};
-  } catch (error) {
-    notificationData = {
-      title: 'INMOVA',
-      body: event.data ? event.data.text() : 'Nueva notificación',
-    };
+  console.log('[SW] Push recibido:', event);
+
+  let data = {};
+  if (event.data) {
+    try {
+      data = event.data.json();
+    } catch (e) {
+      data = { title: 'Notificación', body: event.data.text() };
+    }
   }
 
+  const title = data.title || 'INMOVA';
   const options = {
-    body: notificationData.body || 'Tienes una nueva notificación',
-    icon: '/inmova-logo-icon.jpg',
-    badge: '/inmova-logo-icon.jpg',
-    vibrate: [200, 100, 200],
-    tag: notificationData.tag || 'inmova-notification',
-    data: notificationData.data || {},
-    requireInteraction: notificationData.requireInteraction || false,
-    actions: notificationData.actions || [
-      { action: 'open', title: 'Ver', icon: '/inmova-logo-icon.jpg' },
-      { action: 'close', title: 'Cerrar', icon: '/inmova-logo-icon.jpg' },
-    ],
+    body: data.body || 'Tienes una nueva notificación',
+    icon: data.icon || '/icon-192x192.png',
+    badge: data.badge || '/icon-72x72.png',
+    image: data.image,
+    data: {
+      url: data.url || '/',
+      notificationId: data.notificationId,
+      ...data.metadata
+    },
+    tag: data.tag || 'default',
+    requireInteraction: data.requireInteraction || false,
+    actions: data.actions || []
   };
 
   event.waitUntil(
-    self.registration.showNotification(notificationData.title || 'INMOVA', options)
+    self.registration.showNotification(title, options)
   );
 });
 
 // Manejo de clicks en notificaciones
 self.addEventListener('notificationclick', (event) => {
-  console.log('[SW] Notification clicked:', event.action);
-  
+  console.log('[SW] Notification click:', event);
+
   event.notification.close();
 
-  if (event.action === 'close') {
-    return;
-  }
-
-  // Obtener URL de la notificación o usar dashboard por defecto
-  const urlToOpen = event.notification.data?.url || '/dashboard';
+  const urlToOpen = event.notification.data?.url || '/';
 
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      // Verificar si ya hay una ventana abierta
-      for (const client of clientList) {
-        if (client.url === urlToOpen && 'focus' in client) {
-          return client.focus();
+    clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clientList) => {
+        // Buscar si ya hay una ventana abierta
+        for (let i = 0; i < clientList.length; i++) {
+          const client = clientList[i];
+          if (client.url === urlToOpen && 'focus' in client) {
+            return client.focus();
+          }
         }
-      }
-      // Si no hay ventana abierta, abrir una nueva
-      if (clients.openWindow) {
-        return clients.openWindow(urlToOpen);
-      }
-    })
+        // Si no hay ventana abierta, abrir una nueva
+        if (clients.openWindow) {
+          return clients.openWindow(urlToOpen);
+        }
+      })
   );
 });
 
-// ================================================
-// BACKGROUND SYNC - Enhanced
-// ================================================
-self.addEventListener('sync', (event) => {
-  console.log('[SW] Background sync:', event.tag);
-  
-  if (event.tag === 'sync-data') {
-    event.waitUntil(syncPendingData());
-  }
-  
-  if (event.tag === 'sync-notifications') {
-    event.waitUntil(syncNotifications());
-  }
-  
-  if (event.tag === 'sync-updates') {
-    event.waitUntil(syncUpdates());
-  }
-});
-
-/**
- * Sync pending data when connection is restored
- */
-async function syncPendingData() {
-  try {
-    console.log('[SW] Syncing pending data...');
-    
-    // Get pending data from IndexedDB or cache
-    const pendingRequests = await getPendingRequests();
-    
-    if (pendingRequests.length === 0) {
-      console.log('[SW] No pending requests to sync');
-      return;
-    }
-    
-    // Process each pending request
-    for (const request of pendingRequests) {
-      try {
-        const response = await fetch(request.url, {
-          method: request.method,
-          headers: request.headers,
-          body: request.body
-        });
-        
-        if (response.ok) {
-          await removePendingRequest(request.id);
-          console.log('[SW] Synced request:', request.url);
-        }
-      } catch (error) {
-        console.error('[SW] Failed to sync request:', request.url, error);
-      }
-    }
-    
-    // Notify clients about sync completion
-    await notifyClients('sync-complete', { 
-      synced: pendingRequests.length 
-    });
-    
-  } catch (error) {
-    console.error('[SW] Sync failed:', error);
-  }
-}
-
-/**
- * Sync notifications from server
- */
-async function syncNotifications() {
-  try {
-    const response = await fetch('/api/notifications?onlyUnread=true');
-    if (response.ok) {
-      const data = await response.json();
-      await notifyClients('notifications-synced', data);
-    }
-  } catch (error) {
-    console.error('[SW] Notification sync failed:', error);
-  }
-}
-
-/**
- * Sync app updates
- */
-async function syncUpdates() {
-  try {
-    // Check for app updates
-    const cacheNames = await caches.keys();
-    const currentVersion = CACHE_VERSION;
-    
-    // Update static cache if needed
-    await caches.open(STATIC_CACHE).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
-    });
-    
-    await notifyClients('updates-synced', { version: currentVersion });
-  } catch (error) {
-    console.error('[SW] Update sync failed:', error);
-  }
-}
-
-/**
- * Helper: Get pending requests (stub - implement with IndexedDB)
- */
-async function getPendingRequests() {
-  // TODO: Implement with IndexedDB
-  return [];
-}
-
-/**
- * Helper: Remove pending request (stub - implement with IndexedDB)
- */
-async function removePendingRequest(id) {
-  // TODO: Implement with IndexedDB
-  console.log('[SW] Removing pending request:', id);
-}
-
-/**
- * Helper: Notify all clients
- */
-async function notifyClients(type, data) {
-  const clients = await self.clients.matchAll();
-  clients.forEach(client => {
-    client.postMessage({ type, data });
-  });
-}
-
-// Manejo de mensajes del cliente
-self.addEventListener('message', (event) => {
-  console.log('[SW] Message received:', event.data);
-  
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
-  
-  if (event.data && event.data.type === 'CLEAR_CACHE') {
-    event.waitUntil(
-      caches.keys().then((cacheNames) => {
-        return Promise.all(
-          cacheNames.map((cacheName) => caches.delete(cacheName))
-        );
-      })
-    );
-  }
+// Manejo de cierre de notificaciones
+self.addEventListener('notificationclose', (event) => {
+  console.log('[SW] Notification closed:', event);
 });

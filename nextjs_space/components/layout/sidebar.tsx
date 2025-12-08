@@ -223,6 +223,7 @@ const coreNavItems = [
 // Automatización y Soporte
 const automatizacionNavItems = [
   { name: 'Automatización', href: '/automatizacion', icon: Zap, roles: ['administrador', 'gestor', 'operador'] },
+  { name: 'Workflows', href: '/workflows', icon: Zap, roles: ['administrador', 'gestor', 'operador'] },
   { name: 'Soporte', href: '/soporte', icon: HeadphonesIcon, roles: ['administrador', 'gestor', 'operador'] },
   { name: 'Base de Conocimientos', href: '/knowledge-base', icon: BookOpen, roles: ['administrador', 'gestor', 'operador'] },
 ];

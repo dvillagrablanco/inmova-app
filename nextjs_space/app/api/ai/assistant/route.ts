@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import {
-  detectIntent,
-  executeAction,
-  generateContextualResponse,
-  AssistantContext
-} from '@/lib/ai-enhanced-assistant-service';
+import { chatWithClaude, AssistantContext } from '@/lib/claude-assistant-service';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -14,7 +9,7 @@ export const maxDuration = 60;
 
 /**
  * POST /api/ai/assistant
- * Asistente IA avanzado con detección de intenciones y ejecución automática
+ * Asistente IA avanzado con Claude y Tool Calling
  */
 export async function POST(request: NextRequest) {
   try {
@@ -38,56 +33,27 @@ export async function POST(request: NextRequest) {
 
     // Construir contexto del usuario
     const context: AssistantContext = {
-      userId: session?.user?.id,
-      userType: session?.user?.companyId ? 'admin' : 'tenant',
+      userId: session?.user?.id || '',
+      userType: session?.user?.role || 'admin',
       userName: session?.user?.name || 'Usuario',
       userEmail: session?.user?.email || '',
       companyId: session?.user?.companyId || '',
       conversationHistory
     };
 
-    logger.info(`🧠 AI Assistant - New message from ${context.userName} (${context.userType})`);
+    logger.info(`🤖 Claude Assistant - New message from ${context.userName} (${context.userType})`);
 
-    // 1. Detectar intención
-    const intentResult = await detectIntent(message, context);
+    // Usar el nuevo servicio de Claude con tool calling
+    const response = await chatWithClaude(message, context);
 
-    // 2. Si la intención requiere acción, ejecutarla
-    let actionResult: any = null;
-    if (
-      intentResult.confidence > 0.7 &&
-      ['create_maintenance_request', 'check_payment', 'view_contract', 'schedule_visit', 'document_request'].includes(intentResult.intent)
-    ) {
-      actionResult = await executeAction(intentResult, context);
-      
-      return NextResponse.json({
-        type: 'action_executed',
-        intent: intentResult.intent,
-        confidence: intentResult.confidence,
-        action: actionResult,
-        response: actionResult?.message || 'Acción ejecutada',
-        entities: intentResult.entities
-      });
-    }
-
-    // 3. Si no es una acción, generar respuesta contextual
-    const response = await generateContextualResponse(
-      message,
-      context,
-      intentResult.response
-    );
-
-    return NextResponse.json({
-      type: 'conversational',
-      response,
-      intent: intentResult.intent,
-      confidence: intentResult.confidence
-    });
+    return NextResponse.json(response);
   } catch (error) {
     logger.error('Error en asistente IA:', error);
     return NextResponse.json(
       {
-        error: 'Error procesando mensaje',
-        response: 'Lo siento, hubo un error. Por favor, inténtalo de nuevo.'
+        type: 'text',
+        content: 'Lo siento, hubo un error. Por favor, inténtalo de nuevo.',
+        error: 'Error procesando mensaje'
       },
       { status: 500 }
     );

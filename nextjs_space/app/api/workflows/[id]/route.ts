@@ -1,54 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import prisma from '@/lib/prisma';
+import { authOptions } from '@/lib/auth-options';
+import {
+  toggleWorkflow,
+  deleteWorkflow,
+  executeWorkflow,
+} from '@/lib/workflow-service';
+import { prisma } from '@/lib/db';
+import logger, { logError } from '@/lib/logger';
 
-type RouteParams = {
-  params: Promise<{ id: string }>;
-};
+export const dynamic = 'force-dynamic';
 
 /**
- * GET /api/workflows/[id] - Obtener un workflow específico
+ * GET /api/workflows/[id] - Obtiene un workflow específico
  */
 export async function GET(
-  req: NextRequest,
-  { params }: RouteParams
+  request: NextRequest,
+  { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+    if (!session?.user?.companyId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
-
-    const { id } = await params;
 
     const workflow = await prisma.workflow.findFirst({
       where: {
-        id,
+        id: params.id,
         companyId: session.user.companyId,
       },
       include: {
         actions: {
-          orderBy: {
-            orden: 'asc',
-          },
-        },
-        creator: {
-          select: {
-            id: true,
-            nombre: true,
-            email: true,
-          },
+          orderBy: { orden: 'asc' },
         },
         executions: {
           take: 10,
-          orderBy: {
-            startedAt: 'desc',
-          },
+          orderBy: { startedAt: 'desc' },
         },
       },
     });
@@ -61,161 +49,122 @@ export async function GET(
     }
 
     return NextResponse.json(workflow);
-  } catch (error: any) {
-    console.error('Error obteniendo workflow:', error);
+  } catch (error) {
+    logger.error({ context: 'Error obteniendo workflow' });
     return NextResponse.json(
-      { error: 'Error obteniendo workflow' },
+      { error: 'Error al obtener workflow' },
       { status: 500 }
     );
   }
 }
 
 /**
- * PUT /api/workflows/[id] - Actualizar un workflow
+ * PATCH /api/workflows/[id] - Actualiza un workflow
  */
-export async function PUT(
-  req: NextRequest,
-  { params }: RouteParams
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+    if (!session?.user?.companyId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const { id } = await params;
-    const body = await req.json();
+    const body = await request.json();
 
     // Verificar que el workflow pertenece a la empresa
-    const existingWorkflow = await prisma.workflow.findFirst({
+    const existing = await prisma.workflow.findFirst({
       where: {
-        id,
+        id: params.id,
         companyId: session.user.companyId,
       },
     });
 
-    if (!existingWorkflow) {
+    if (!existing) {
       return NextResponse.json(
         { error: 'Workflow no encontrado' },
         { status: 404 }
       );
     }
 
-    const {
-      nombre,
-      descripcion,
-      triggerType,
-      triggerConfig,
-      actions,
-      isActive,
-      status,
-    } = body;
-
-    // Eliminar acciones existentes si se envían nuevas
-    if (actions) {
-      await prisma.workflowAction.deleteMany({
-        where: {
-          workflowId: id,
-        },
-      });
+    // Manejar acción especial de activar/desactivar
+    if (body.action === 'toggle') {
+      const workflow = await toggleWorkflow(params.id, body.isActive);
+      return NextResponse.json(workflow);
     }
 
-    // Actualizar workflow
-    const updatedWorkflow = await prisma.workflow.update({
-      where: { id },
-      data: {
-        ...(nombre && { nombre }),
-        ...(descripcion !== undefined && { descripcion }),
-        ...(triggerType && { triggerType }),
-        ...(triggerConfig && { triggerConfig }),
-        ...(isActive !== undefined && { isActive }),
-        ...(status && { status }),
-        version: existingWorkflow.version + 1,
-        ...(actions && {
-          actions: {
-            create: actions.map((action: any, index: number) => ({
-              orden: index + 1,
-              actionType: action.actionType,
-              config: action.config,
-              conditions: action.conditions || null,
-            })),
-          },
-        }),
-      },
+    // Manejar acción especial de ejecutar
+    if (body.action === 'execute') {
+      const result = await executeWorkflow(params.id, body.triggerData || {});
+      return NextResponse.json(result);
+    }
+
+    // Actualización general
+    const updateData: any = {};
+    if (body.nombre) updateData.nombre = body.nombre;
+    if (body.descripcion !== undefined) updateData.descripcion = body.descripcion;
+    if (body.triggerConfig) updateData.triggerConfig = body.triggerConfig;
+
+    const workflow = await prisma.workflow.update({
+      where: { id: params.id },
+      data: updateData,
       include: {
         actions: {
-          orderBy: {
-            orden: 'asc',
-          },
-        },
-        creator: {
-          select: {
-            id: true,
-            nombre: true,
-            email: true,
-          },
+          orderBy: { orden: 'asc' },
         },
       },
     });
 
-    return NextResponse.json(updatedWorkflow);
-  } catch (error: any) {
-    console.error('Error actualizando workflow:', error);
+    logger.info('Workflow actualizado', { workflowId: params.id });
+
+    return NextResponse.json(workflow);
+  } catch (error) {
+    logger.error({ context: 'Error actualizando workflow' });
     return NextResponse.json(
-      { error: 'Error actualizando workflow' },
+      { error: 'Error al actualizar workflow' },
       { status: 500 }
     );
   }
 }
 
 /**
- * DELETE /api/workflows/[id] - Eliminar un workflow
+ * DELETE /api/workflows/[id] - Elimina un workflow
  */
 export async function DELETE(
-  req: NextRequest,
-  { params }: RouteParams
+  request: NextRequest,
+  { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+    if (!session?.user?.companyId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const { id } = await params;
-
     // Verificar que el workflow pertenece a la empresa
-    const workflow = await prisma.workflow.findFirst({
+    const existing = await prisma.workflow.findFirst({
       where: {
-        id,
+        id: params.id,
         companyId: session.user.companyId,
       },
     });
 
-    if (!workflow) {
+    if (!existing) {
       return NextResponse.json(
         { error: 'Workflow no encontrado' },
         { status: 404 }
       );
     }
 
-    // Eliminar workflow (cascade elimina acciones y ejecuciones)
-    await prisma.workflow.delete({
-      where: { id },
-    });
+    await deleteWorkflow(params.id);
 
-    return NextResponse.json({ message: 'Workflow eliminado correctamente' });
-  } catch (error: any) {
-    console.error('Error eliminando workflow:', error);
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    logger.error({ context: 'Error eliminando workflow' });
     return NextResponse.json(
-      { error: 'Error eliminando workflow' },
+      { error: 'Error al eliminar workflow' },
       { status: 500 }
     );
   }
