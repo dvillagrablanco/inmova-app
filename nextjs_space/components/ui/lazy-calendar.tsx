@@ -12,8 +12,9 @@ const CalendarComponent = lazy(() =>
   }))
 );
 
-interface LazyCalendarProps extends DayPickerProps {
+interface LazyCalendarProps {
   loadingComponent?: React.ReactNode;
+  [key: string]: any;
 }
 
 export function LazyCalendar({ loadingComponent, ...props }: LazyCalendarProps) {
