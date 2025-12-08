@@ -70,8 +70,8 @@ export function EnhancedEmptyState({
       icon={config.icon}
       title={customTitle || config.title}
       description={customDescription || config.description}
-      illustration={config.illustration}
-      helpText={customHelpText || config.helpText}
+      illustration={'illustration' in config ? config.illustration : undefined}
+      helpText={customHelpText || ('helpText' in config ? config.helpText : undefined)}
       actions={actions.length > 0 ? actions : undefined}
       chatSupport={chatSupport}
       className={className}

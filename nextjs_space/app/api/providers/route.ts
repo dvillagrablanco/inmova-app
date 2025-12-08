@@ -104,9 +104,15 @@ export async function POST(req: NextRequest) {
 
     const provider = await prisma.provider.create({
       data: {
-        ...validatedData,
         companyId: user.companyId,
-      },
+        nombre: validatedData.nombre,
+        email: validatedData.email,
+        telefono: validatedData.telefono,
+        direccion: validatedData.direccion,
+        tipo: validatedData.tipo,
+        notas: validatedData.notas,
+        rating: validatedData.rating,
+      } as any,
     });
 
     logger.info(`Proveedor creado: ${provider.id}`, { userId: user.id, providerId: provider.id });
