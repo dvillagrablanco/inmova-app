@@ -28,6 +28,7 @@ import {
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
 import { LoadingState } from '@/components/ui/loading-state';
+import { MobileFormWizard, FormStep } from '@/components/ui/mobile-form-wizard';
 
 export default function NuevoEdificioPage() {
   const router = useRouter();
@@ -133,95 +134,134 @@ export default function NuevoEdificioPage() {
               <p className="text-muted-foreground">Registra un nuevo edificio en tu cartera</p>
             </div>
 
-            {/* Formulario */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Building2 className="h-5 w-5" />
-                  Información del Edificio
-                </CardTitle>
-                <CardDescription>Completa los datos básicos del edificio</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid gap-6 md:grid-cols-2">
-                    {/* Nombre */}
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="nombre">Nombre del Edificio *</Label>
-                      <Input
-                        id="nombre"
-                        name="nombre"
-                        value={formData.nombre}
-                        onChange={handleChange}
-                        required
-                        placeholder="Ej: Torre Vista Hermosa"
-                      />
-                    </div>
+            {/* Formulario con Wizard para móvil */}
+            <form onSubmit={handleSubmit}>
+              <MobileFormWizard
+                steps={[
+                  {
+                    id: 'basic',
+                    title: 'Información Básica',
+                    description: 'Identifica el edificio y su ubicación',
+                    fields: (
+                      <div className="space-y-4">
+                        {/* Nombre */}
+                        <div className="space-y-2">
+                          <Label htmlFor="nombre">Nombre del Edificio *</Label>
+                          <Input
+                            id="nombre"
+                            name="nombre"
+                            value={formData.nombre}
+                            onChange={handleChange}
+                            required
+                            placeholder="Ej: Torre Vista Hermosa"
+                          />
+                        </div>
 
-                    {/* Dirección */}
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="direccion">Dirección Completa *</Label>
-                      <Input
-                        id="direccion"
-                        name="direccion"
-                        value={formData.direccion}
-                        onChange={handleChange}
-                        required
-                        placeholder="Calle, número, ciudad, código postal"
-                      />
-                    </div>
+                        {/* Dirección */}
+                        <div className="space-y-2">
+                          <Label htmlFor="direccion">Dirección Completa *</Label>
+                          <Input
+                            id="direccion"
+                            name="direccion"
+                            value={formData.direccion}
+                            onChange={handleChange}
+                            required
+                            placeholder="Calle, número, ciudad, código postal"
+                          />
+                        </div>
+                      </div>
+                    ),
+                  },
+                  {
+                    id: 'characteristics',
+                    title: 'Características',
+                    description: 'Define las propiedades del edificio',
+                    fields: (
+                      <div className="space-y-4">
+                        {/* Tipo */}
+                        <div className="space-y-2">
+                          <Label htmlFor="tipo">Tipo de Edificio *</Label>
+                          <Select
+                            value={formData.tipo}
+                            onValueChange={(value) => setFormData({ ...formData, tipo: value })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="residencial">Residencial</SelectItem>
+                              <SelectItem value="comercial">Comercial</SelectItem>
+                              <SelectItem value="mixto">Mixto</SelectItem>
+                              <SelectItem value="industrial">Industrial</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
 
-                    {/* Tipo */}
-                    <div className="space-y-2">
-                      <Label htmlFor="tipo">Tipo de Edificio *</Label>
-                      <Select
-                        value={formData.tipo}
-                        onValueChange={(value) => setFormData({ ...formData, tipo: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="residencial">Residencial</SelectItem>
-                          <SelectItem value="comercial">Comercial</SelectItem>
-                          <SelectItem value="mixto">Mixto</SelectItem>
-                          <SelectItem value="industrial">Industrial</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                        {/* Año de Construcción */}
+                        <div className="space-y-2">
+                          <Label htmlFor="anoConstructor">Año de Construcción *</Label>
+                          <Input
+                            id="anoConstructor"
+                            name="anoConstructor"
+                            type="number"
+                            value={formData.anoConstructor}
+                            onChange={handleChange}
+                            required
+                            min="1900"
+                            max={new Date().getFullYear()}
+                            placeholder="2020"
+                          />
+                        </div>
 
-                    {/* Año de Construcción */}
-                    <div className="space-y-2">
-                      <Label htmlFor="anoConstructor">Año de Construcción *</Label>
-                      <Input
-                        id="anoConstructor"
-                        name="anoConstructor"
-                        type="number"
-                        value={formData.anoConstructor}
-                        onChange={handleChange}
-                        required
-                        min="1900"
-                        max={new Date().getFullYear()}
-                      />
-                    </div>
+                        {/* Número de Unidades */}
+                        <div className="space-y-2">
+                          <Label htmlFor="numeroUnidades">Número de Unidades *</Label>
+                          <Input
+                            id="numeroUnidades"
+                            name="numeroUnidades"
+                            type="number"
+                            value={formData.numeroUnidades}
+                            onChange={handleChange}
+                            required
+                            min="0"
+                            placeholder="12"
+                          />
+                        </div>
 
-                    {/* Número de Unidades */}
-                    <div className="space-y-2">
-                      <Label htmlFor="numeroUnidades">Número de Unidades *</Label>
-                      <Input
-                        id="numeroUnidades"
-                        name="numeroUnidades"
-                        type="number"
-                        value={formData.numeroUnidades}
-                        onChange={handleChange}
-                        required
-                        min="0"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Botones */}
-                  <div className="flex gap-3 pt-4">
+                        {/* Resumen */}
+                        {formData.nombre && formData.direccion && (
+                          <div className="mt-4 p-4 bg-muted/50 rounded-lg space-y-2">
+                            <h4 className="font-medium text-sm">Resumen del Edificio</h4>
+                            <div className="text-sm space-y-1">
+                              <p>
+                                <span className="text-muted-foreground">Nombre:</span> {formData.nombre}
+                              </p>
+                              <p>
+                                <span className="text-muted-foreground">Dirección:</span>{' '}
+                                {formData.direccion}
+                              </p>
+                              <p>
+                                <span className="text-muted-foreground">Tipo:</span> {formData.tipo}
+                              </p>
+                              <p>
+                                <span className="text-muted-foreground">Año:</span>{' '}
+                                {formData.anoConstructor}
+                              </p>
+                              {formData.numeroUnidades !== '0' && (
+                                <p>
+                                  <span className="text-muted-foreground">Unidades:</span>{' '}
+                                  {formData.numeroUnidades}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ),
+                  },
+                ]}
+                submitButton={
+                  <div className="flex gap-3">
                     <Button type="submit" disabled={isLoading}>
                       {isLoading ? (
                         <>
@@ -244,9 +284,9 @@ export default function NuevoEdificioPage() {
                       Cancelar
                     </Button>
                   </div>
-                </form>
-              </CardContent>
-            </Card>
+                }
+              />
+            </form>
           </div>
         </main>
       </div>

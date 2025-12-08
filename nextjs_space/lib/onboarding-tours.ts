@@ -1,3 +1,4 @@
+import React from 'react';
 import { BusinessVertical } from '@prisma/client';
 import { Step } from 'react-joyride';
 

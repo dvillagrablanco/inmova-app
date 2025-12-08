@@ -517,6 +517,7 @@ export function Sidebar() {
       <div className="relative group">
         <Link
           href={item.href}
+          prefetch={true}
           onClick={() => setIsMobileMenuOpen(false)}
           data-tour={item.dataTour || undefined}
           className={cn(

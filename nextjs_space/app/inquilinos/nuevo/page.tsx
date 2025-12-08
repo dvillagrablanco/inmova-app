@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
+import { MobileFormWizard, FormStep } from '@/components/ui/mobile-form-wizard';
 
 export default function NuevoInquilinoPage() {
   const router = useRouter();
@@ -144,163 +145,203 @@ export default function NuevoInquilinoPage() {
               <p className="text-muted-foreground">Registra un nuevo inquilino en el sistema</p>
             </div>
 
-            {/* Formulario */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Información del Inquilino
-                </CardTitle>
-                <CardDescription>Completa los datos personales del inquilino</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid gap-6 md:grid-cols-2">
-                    {/* Nombre */}
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="nombre">Nombre Completo *</Label>
-                      <Input
-                        id="nombre"
-                        name="nombre"
-                        value={formData.nombre}
-                        onChange={handleChange}
-                        required
-                        placeholder="Juan Pérez García"
-                      />
-                    </div>
+            {/* Formulario con Wizard para móvil */}
+            <form onSubmit={handleSubmit}>
+              <MobileFormWizard
+                steps={[
+                  {
+                    id: 'personal',
+                    title: 'Información Personal',
+                    description: 'Datos básicos de contacto del inquilino',
+                    fields: (
+                      <div className="space-y-4">
+                        {/* Nombre */}
+                        <div className="space-y-2">
+                          <Label htmlFor="nombre">Nombre Completo *</Label>
+                          <Input
+                            id="nombre"
+                            name="nombre"
+                            value={formData.nombre}
+                            onChange={handleChange}
+                            required
+                            placeholder="Juan Pérez García"
+                          />
+                        </div>
 
-                    {/* Email */}
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Correo Electrónico *</Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                        placeholder="juan.perez@email.com"
-                      />
-                    </div>
+                        {/* Email */}
+                        <div className="space-y-2">
+                          <Label htmlFor="email">Correo Electrónico *</Label>
+                          <Input
+                            id="email"
+                            name="email"
+                            type="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            required
+                            placeholder="juan.perez@email.com"
+                          />
+                        </div>
 
-                    {/* Teléfono */}
-                    <div className="space-y-2">
-                      <Label htmlFor="telefono">Teléfono *</Label>
-                      <Input
-                        id="telefono"
-                        name="telefono"
-                        value={formData.telefono}
-                        onChange={handleChange}
-                        required
-                        placeholder="+34 600 123 456"
-                      />
-                    </div>
+                        {/* Teléfono */}
+                        <div className="space-y-2">
+                          <Label htmlFor="telefono">Teléfono *</Label>
+                          <Input
+                            id="telefono"
+                            name="telefono"
+                            value={formData.telefono}
+                            onChange={handleChange}
+                            required
+                            placeholder="+34 600 123 456"
+                          />
+                        </div>
+                      </div>
+                    ),
+                  },
+                  {
+                    id: 'documentation',
+                    title: 'Documentación',
+                    description: 'Información de identificación legal',
+                    fields: (
+                      <div className="space-y-4">
+                        {/* Tipo de Documento */}
+                        <div className="space-y-2">
+                          <Label htmlFor="tipoDocumento">Tipo de Documento</Label>
+                          <Select
+                            value={formData.tipoDocumento}
+                            onValueChange={(value) =>
+                              setFormData({ ...formData, tipoDocumento: value })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="dni">DNI</SelectItem>
+                              <SelectItem value="nie">NIE</SelectItem>
+                              <SelectItem value="pasaporte">Pasaporte</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
 
-                    {/* Tipo de Documento */}
-                    <div className="space-y-2">
-                      <Label htmlFor="tipoDocumento">Tipo de Documento</Label>
-                      <Select
-                        value={formData.tipoDocumento}
-                        onValueChange={(value) =>
-                          setFormData({ ...formData, tipoDocumento: value })
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="dni">DNI</SelectItem>
-                          <SelectItem value="nie">NIE</SelectItem>
-                          <SelectItem value="pasaporte">Pasaporte</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                        {/* Documento de Identidad */}
+                        <div className="space-y-2">
+                          <Label htmlFor="documentoIdentidad">Número de Documento *</Label>
+                          <Input
+                            id="documentoIdentidad"
+                            name="documentoIdentidad"
+                            value={formData.documentoIdentidad}
+                            onChange={handleChange}
+                            required
+                            placeholder="12345678A"
+                          />
+                        </div>
 
-                    {/* Documento de Identidad */}
-                    <div className="space-y-2">
-                      <Label htmlFor="documentoIdentidad">Número de Documento *</Label>
-                      <Input
-                        id="documentoIdentidad"
-                        name="documentoIdentidad"
-                        value={formData.documentoIdentidad}
-                        onChange={handleChange}
-                        required
-                        placeholder="12345678A"
-                      />
-                    </div>
+                        {/* Fecha de Nacimiento */}
+                        <div className="space-y-2">
+                          <Label htmlFor="fechaNacimiento">Fecha de Nacimiento</Label>
+                          <Input
+                            id="fechaNacimiento"
+                            name="fechaNacimiento"
+                            type="date"
+                            value={formData.fechaNacimiento}
+                            onChange={handleChange}
+                          />
+                        </div>
 
-                    {/* Fecha de Nacimiento */}
-                    <div className="space-y-2">
-                      <Label htmlFor="fechaNacimiento">Fecha de Nacimiento</Label>
-                      <Input
-                        id="fechaNacimiento"
-                        name="fechaNacimiento"
-                        type="date"
-                        value={formData.fechaNacimiento}
-                        onChange={handleChange}
-                      />
-                    </div>
+                        {/* Nacionalidad */}
+                        <div className="space-y-2">
+                          <Label htmlFor="nacionalidad">Nacionalidad</Label>
+                          <Input
+                            id="nacionalidad"
+                            name="nacionalidad"
+                            value={formData.nacionalidad}
+                            onChange={handleChange}
+                            placeholder="Española"
+                          />
+                        </div>
+                      </div>
+                    ),
+                  },
+                  {
+                    id: 'additional',
+                    title: 'Información Adicional',
+                    description: 'Datos complementarios del inquilino',
+                    fields: (
+                      <div className="space-y-4">
+                        {/* Estado Civil */}
+                        <div className="space-y-2">
+                          <Label htmlFor="estadoCivil">Estado Civil</Label>
+                          <Select
+                            value={formData.estadoCivil}
+                            onValueChange={(value) => setFormData({ ...formData, estadoCivil: value })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="soltero">Soltero/a</SelectItem>
+                              <SelectItem value="casado">Casado/a</SelectItem>
+                              <SelectItem value="divorciado">Divorciado/a</SelectItem>
+                              <SelectItem value="viudo">Viudo/a</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
 
-                    {/* Nacionalidad */}
-                    <div className="space-y-2">
-                      <Label htmlFor="nacionalidad">Nacionalidad</Label>
-                      <Input
-                        id="nacionalidad"
-                        name="nacionalidad"
-                        value={formData.nacionalidad}
-                        onChange={handleChange}
-                        placeholder="Española"
-                      />
-                    </div>
+                        {/* Profesión */}
+                        <div className="space-y-2">
+                          <Label htmlFor="profesion">Profesión</Label>
+                          <Input
+                            id="profesion"
+                            name="profesion"
+                            value={formData.profesion}
+                            onChange={handleChange}
+                            placeholder="Ingeniero de Software"
+                          />
+                        </div>
 
-                    {/* Estado Civil */}
-                    <div className="space-y-2">
-                      <Label htmlFor="estadoCivil">Estado Civil</Label>
-                      <Select
-                        value={formData.estadoCivil}
-                        onValueChange={(value) => setFormData({ ...formData, estadoCivil: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="soltero">Soltero/a</SelectItem>
-                          <SelectItem value="casado">Casado/a</SelectItem>
-                          <SelectItem value="divorciado">Divorciado/a</SelectItem>
-                          <SelectItem value="viudo">Viudo/a</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                        {/* Ingresos Mensuales */}
+                        <div className="space-y-2">
+                          <Label htmlFor="ingresosMensuales">Ingresos Mensuales (€)</Label>
+                          <Input
+                            id="ingresosMensuales"
+                            name="ingresosMensuales"
+                            type="number"
+                            step="0.01"
+                            value={formData.ingresosMensuales}
+                            onChange={handleChange}
+                            min="0"
+                            placeholder="2500.00"
+                          />
+                        </div>
 
-                    {/* Profesión */}
-                    <div className="space-y-2">
-                      <Label htmlFor="profesion">Profesión</Label>
-                      <Input
-                        id="profesion"
-                        name="profesion"
-                        value={formData.profesion}
-                        onChange={handleChange}
-                        placeholder="Ingeniero de Software"
-                      />
-                    </div>
-
-                    {/* Ingresos Mensuales */}
-                    <div className="space-y-2">
-                      <Label htmlFor="ingresosMensuales">Ingresos Mensuales (€)</Label>
-                      <Input
-                        id="ingresosMensuales"
-                        name="ingresosMensuales"
-                        type="number"
-                        step="0.01"
-                        value={formData.ingresosMensuales}
-                        onChange={handleChange}
-                        min="0"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Botones */}
-                  <div className="flex gap-3 pt-4">
+                        {/* Resumen */}
+                        {formData.nombre && formData.email && (
+                          <div className="mt-4 p-4 bg-muted/50 rounded-lg space-y-2">
+                            <h4 className="font-medium text-sm">Resumen del Inquilino</h4>
+                            <div className="text-sm space-y-1">
+                              <p>
+                                <span className="text-muted-foreground">Nombre:</span> {formData.nombre}
+                              </p>
+                              <p>
+                                <span className="text-muted-foreground">Email:</span> {formData.email}
+                              </p>
+                              <p>
+                                <span className="text-muted-foreground">Teléfono:</span>{' '}
+                                {formData.telefono}
+                              </p>
+                              <p>
+                                <span className="text-muted-foreground">Documento:</span>{' '}
+                                {formData.tipoDocumento.toUpperCase()} - {formData.documentoIdentidad}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ),
+                  },
+                ]}
+                submitButton={
+                  <div className="flex gap-3">
                     <Button type="submit" disabled={isLoading}>
                       {isLoading ? (
                         <>
@@ -323,9 +364,9 @@ export default function NuevoInquilinoPage() {
                       Cancelar
                     </Button>
                   </div>
-                </form>
-              </CardContent>
-            </Card>
+                }
+              />
+            </form>
           </div>
         </main>
       </div>
