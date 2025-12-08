@@ -1,41 +1,57 @@
 {
-  "buildCommand": "NODE_OPTIONS='--max-old-space-size=8192' yarn build",
+  "version": 2,
+  "buildCommand": "yarn build",
+  "devCommand": "yarn dev",
   "installCommand": "yarn install",
   "framework": "nextjs",
   "regions": ["iad1"],
+  "env": {
+    "DATABASE_URL": "@database-url",
+    "NEXTAUTH_SECRET": "@nextauth-secret",
+    "NEXTAUTH_URL": "@nextauth-url",
+    "AWS_PROFILE": "@aws-profile",
+    "AWS_REGION": "@aws-region",
+    "AWS_BUCKET_NAME": "@aws-bucket-name",
+    "AWS_FOLDER_PREFIX": "@aws-folder-prefix",
+    "STRIPE_SECRET_KEY": "@stripe-secret-key",
+    "STRIPE_PUBLISHABLE_KEY": "@stripe-publishable-key",
+    "STRIPE_WEBHOOK_SECRET": "@stripe-webhook-secret",
+    "ABACUSAI_API_KEY": "@abacusai-api-key",
+    "CRON_SECRET": "@cron-secret",
+    "ENCRYPTION_KEY": "@encryption-key"
+  },
   "build": {
     "env": {
-      "NODE_OPTIONS": "--max-old-space-size=8192"
+      "DATABASE_URL": "@database-url",
+      "NEXTAUTH_SECRET": "@nextauth-secret"
     }
-  },
-  "env": {
-    "NODE_OPTIONS": "--max-old-space-size=4096"
   },
   "functions": {
-    "app/**/*": {
-      "memory": 3008,
-      "maxDuration": 60
-    },
-    "api/**/*": {
-      "memory": 3008,
+    "app/api/**/*.ts": {
       "maxDuration": 60
     }
   },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
         {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
           "key": "X-Content-Type-Options",
           "value": "nosniff"
         },
         {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "X-XSS-Protection",
-          "value": "1; mode=block"
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
         }
       ]
     }
