@@ -40,169 +40,206 @@ export async function GET(request: Request) {
     const fechaInicio = new Date(now);
     fechaInicio.setMonth(fechaInicio.getMonth() - meses);
 
-    // Obtener todos los edificios con sus relaciones filtrados por empresa
-    const buildings = await prisma.building.findMany({
-      where: { companyId },
-      include: {
-        units: {
-          include: {
-            contracts: {
-              include: {
-                payments: true,
-              },
-            },
-          },
-        },
-        expenses: true,
-      },
-    });
-
     if (tipo === 'por_propiedad') {
-      // Reporte por propiedad
-      const reportes: PropertyReport[] = buildings.map((building) => {
-        const unidades = building.units.length;
-        const unidadesOcupadas = building.units.filter((u) => u.estado === 'ocupada').length;
-        const tasaOcupacion = unidades > 0 ? (unidadesOcupadas / unidades) * 100 : 0;
+      // Optimización: Usar agregaciones SQL nativas
+      const reportes: PropertyReport[] = await prisma.$queryRaw`
+        WITH building_stats AS (
+          SELECT 
+            b.id,
+            b.nombre,
+            b.direccion,
+            COUNT(DISTINCT u.id) as total_units,
+            COUNT(DISTINCT CASE WHEN u.estado = 'ocupada' THEN u.id END) as occupied_units
+          FROM "Building" b
+          LEFT JOIN "Unit" u ON u."buildingId" = b.id
+          WHERE b."companyId" = ${companyId}
+          GROUP BY b.id, b.nombre, b.direccion
+        ),
+        building_income AS (
+          SELECT 
+            b.id as building_id,
+            COALESCE(SUM(p.monto), 0) as total_income
+          FROM "Building" b
+          LEFT JOIN "Unit" u ON u."buildingId" = b.id
+          LEFT JOIN "Contract" c ON c."unitId" = u.id
+          LEFT JOIN "Payment" p ON p."contractId" = c.id
+          WHERE b."companyId" = ${companyId}
+            AND p.estado = 'pagado'
+            AND p."fechaVencimiento" >= ${fechaInicio}
+          GROUP BY b.id
+        ),
+        building_expenses AS (
+          SELECT 
+            b.id as building_id,
+            COALESCE(SUM(e.monto), 0) as total_expenses
+          FROM "Building" b
+          LEFT JOIN "Expense" e ON e."buildingId" = b.id
+          WHERE b."companyId" = ${companyId}
+            AND e.fecha >= ${fechaInicio}
+          GROUP BY b.id
+        )
+        SELECT 
+          bs.id,
+          bs.nombre,
+          bs.direccion,
+          COALESCE(bi.total_income, 0)::float as "ingresosBrutos",
+          COALESCE(be.total_expenses, 0)::float as gastos,
+          (COALESCE(bi.total_income, 0) - COALESCE(be.total_expenses, 0))::float as "ingresosNetos",
+          bs.total_units::int as unidades,
+          bs.occupied_units::int as "unidadesOcupadas",
+          CASE 
+            WHEN bs.total_units > 0 THEN (bs.occupied_units::float / bs.total_units::float * 100)
+            ELSE 0 
+          END::float as "tasaOcupacion"
+        FROM building_stats bs
+        LEFT JOIN building_income bi ON bi.building_id = bs.id
+        LEFT JOIN building_expenses be ON be.building_id = bs.id
+        ORDER BY bs.nombre
+      `;
 
-        // Calcular ingresos de pagos
-        let ingresosBrutos = 0;
-        building.units.forEach((unit) => {
-          unit.contracts.forEach((contract) => {
-            contract.payments.forEach((payment) => {
-              const paymentDate = new Date(payment.fechaVencimiento);
-              if (payment.estado === 'pagado' && paymentDate >= fechaInicio) {
-                ingresosBrutos += payment.monto;
-              }
-            });
-          });
-        });
-
-        // Calcular gastos
-        const gastos = building.expenses
-          .filter((e) => new Date(e.fecha) >= fechaInicio)
-          .reduce((sum, e) => sum + e.monto, 0);
-
-        const ingresosNetos = ingresosBrutos - gastos;
-        const rentabilidadBruta = ingresosBrutos > 0 ? (ingresosBrutos / (ingresosBrutos + gastos)) * 100 : 0;
-        const rentabilidadNeta = ingresosBrutos > 0 ? (ingresosNetos / ingresosBrutos) * 100 : 0;
-
-        // ROI simplificado: (Ingresos Netos / Gastos) * 100
-        const roi = gastos > 0 ? (ingresosNetos / gastos) * 100 : 0;
+      // Calcular métricas adicionales
+      const reportesConMetricas = reportes.map((r: any) => {
+        const rentabilidadBruta = r.ingresosBrutos > 0 
+          ? (r.ingresosBrutos / (r.ingresosBrutos + r.gastos)) * 100 
+          : 0;
+        const rentabilidadNeta = r.ingresosBrutos > 0 
+          ? (r.ingresosNetos / r.ingresosBrutos) * 100 
+          : 0;
+        const roi = r.gastos > 0 ? (r.ingresosNetos / r.gastos) * 100 : 0;
 
         return {
-          id: building.id,
-          nombre: building.nombre,
-          direccion: building.direccion,
-          ingresosBrutos: Math.round(ingresosBrutos * 100) / 100,
-          gastos: Math.round(gastos * 100) / 100,
-          ingresosNetos: Math.round(ingresosNetos * 100) / 100,
+          ...r,
+          ingresosBrutos: Math.round(r.ingresosBrutos * 100) / 100,
+          gastos: Math.round(r.gastos * 100) / 100,
+          ingresosNetos: Math.round(r.ingresosNetos * 100) / 100,
           rentabilidadBruta: Math.round(rentabilidadBruta * 10) / 10,
           rentabilidadNeta: Math.round(rentabilidadNeta * 10) / 10,
           roi: Math.round(roi * 10) / 10,
-          unidades,
-          unidadesOcupadas,
-          tasaOcupacion: Math.round(tasaOcupacion * 10) / 10,
+          tasaOcupacion: Math.round(r.tasaOcupacion * 10) / 10,
         };
       });
 
-      return NextResponse.json({ reportes, periodo: meses });
+      return NextResponse.json({ reportes: reportesConMetricas, periodo: meses });
     }
 
     if (tipo === 'flujo_caja') {
-      // Reporte de flujo de caja mensual
-      const flujoCaja: any[] = [];
-      for (let i = meses - 1; i >= 0; i--) {
-        const mes = new Date(now);
-        mes.setMonth(mes.getMonth() - i);
-        const mesInicio = new Date(mes.getFullYear(), mes.getMonth(), 1);
-        const mesFin = new Date(mes.getFullYear(), mes.getMonth() + 1, 0);
+      // Optimización: Usar agregación SQL para flujo de caja
+      const flujoCajaData: any[] = await prisma.$queryRaw`
+        WITH RECURSIVE months AS (
+          SELECT 
+            DATE_TRUNC('month', ${fechaInicio}::timestamp) as month_start,
+            DATE_TRUNC('month', ${fechaInicio}::timestamp) + INTERVAL '1 month' - INTERVAL '1 day' as month_end
+          UNION ALL
+          SELECT 
+            month_start + INTERVAL '1 month',
+            month_end + INTERVAL '1 month'
+          FROM months
+          WHERE month_start < ${now}
+        ),
+        monthly_income AS (
+          SELECT 
+            DATE_TRUNC('month', p."fechaVencimiento") as month,
+            SUM(p.monto) as income
+          FROM "Payment" p
+          JOIN "Contract" c ON c.id = p."contractId"
+          JOIN "Unit" u ON u.id = c."unitId"
+          JOIN "Building" b ON b.id = u."buildingId"
+          WHERE b."companyId" = ${companyId}
+            AND p.estado = 'pagado'
+            AND p."fechaVencimiento" >= ${fechaInicio}
+            AND p."fechaVencimiento" <= ${now}
+          GROUP BY DATE_TRUNC('month', p."fechaVencimiento")
+        ),
+        monthly_expenses AS (
+          SELECT 
+            DATE_TRUNC('month', e.fecha) as month,
+            SUM(e.monto) as expenses
+          FROM "Expense" e
+          JOIN "Building" b ON b.id = e."buildingId"
+          WHERE b."companyId" = ${companyId}
+            AND e.fecha >= ${fechaInicio}
+            AND e.fecha <= ${now}
+          GROUP BY DATE_TRUNC('month', e.fecha)
+        )
+        SELECT 
+          m.month_start,
+          COALESCE(i.income, 0)::float as ingresos,
+          COALESCE(e.expenses, 0)::float as gastos
+        FROM months m
+        LEFT JOIN monthly_income i ON i.month = m.month_start
+        LEFT JOIN monthly_expenses e ON e.month = m.month_start
+        ORDER BY m.month_start
+      `;
 
-        // Ingresos del mes
-        let ingresos = 0;
-        buildings.forEach((building) => {
-          building.units.forEach((unit) => {
-            unit.contracts.forEach((contract) => {
-              contract.payments.forEach((payment) => {
-                const paymentDate = new Date(payment.fechaVencimiento);
-                if (
-                  payment.estado === 'pagado' &&
-                  paymentDate >= mesInicio &&
-                  paymentDate <= mesFin
-                ) {
-                  ingresos += payment.monto;
-                }
-              });
-            });
-          });
-        });
-
-        // Gastos del mes
-        let gastos = 0;
-        buildings.forEach((building) => {
-          building.expenses.forEach((expense) => {
-            const expenseDate = new Date(expense.fecha);
-            if (expenseDate >= mesInicio && expenseDate <= mesFin) {
-              gastos += expense.monto;
-            }
-          });
-        });
-
-        flujoCaja.push({
-          mes: mes.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' }),
-          ingresos: Math.round(ingresos * 100) / 100,
-          gastos: Math.round(gastos * 100) / 100,
-          neto: Math.round((ingresos - gastos) * 100) / 100,
-        });
-      }
+      const flujoCaja = flujoCajaData.map((item: any) => ({
+        mes: new Date(item.month_start).toLocaleDateString('es-ES', { month: 'short', year: 'numeric' }),
+        ingresos: Math.round(item.ingresos * 100) / 100,
+        gastos: Math.round(item.gastos * 100) / 100,
+        neto: Math.round((item.ingresos - item.gastos) * 100) / 100,
+      }));
 
       return NextResponse.json({ flujoCaja, periodo: meses });
     }
 
-    // Reporte global (por defecto)
-    let ingresosBrutosTotal = 0;
-    let gastosTotal = 0;
-    let unidadesTotal = 0;
-    let unidadesOcupadasTotal = 0;
+    // Reporte global (por defecto) - Optimizado con agregaciones SQL
+    const globalStats: any = await prisma.$queryRaw`
+      WITH company_income AS (
+        SELECT COALESCE(SUM(p.monto), 0) as total_income
+        FROM "Payment" p
+        JOIN "Contract" c ON c.id = p."contractId"
+        JOIN "Unit" u ON u.id = c."unitId"
+        JOIN "Building" b ON b.id = u."buildingId"
+        WHERE b."companyId" = ${companyId}
+          AND p.estado = 'pagado'
+          AND p."fechaVencimiento" >= ${fechaInicio}
+      ),
+      company_expenses AS (
+        SELECT COALESCE(SUM(e.monto), 0) as total_expenses
+        FROM "Expense" e
+        JOIN "Building" b ON b.id = e."buildingId"
+        WHERE b."companyId" = ${companyId}
+          AND e.fecha >= ${fechaInicio}
+      ),
+      company_units AS (
+        SELECT 
+          COUNT(*) as total_units,
+          COUNT(CASE WHEN u.estado = 'ocupada' THEN 1 END) as occupied_units
+        FROM "Unit" u
+        JOIN "Building" b ON b.id = u."buildingId"
+        WHERE b."companyId" = ${companyId}
+      )
+      SELECT 
+        ci.total_income::float as "ingresosBrutos",
+        ce.total_expenses::float as gastos,
+        cu.total_units::int as unidades,
+        cu.occupied_units::int as "unidadesOcupadas"
+      FROM company_income ci, company_expenses ce, company_units cu
+    `;
 
-    buildings.forEach((building) => {
-      unidadesTotal += building.units.length;
-      unidadesOcupadasTotal += building.units.filter((u) => u.estado === 'ocupada').length;
-
-      building.units.forEach((unit) => {
-        unit.contracts.forEach((contract) => {
-          contract.payments.forEach((payment) => {
-            const paymentDate = new Date(payment.fechaVencimiento);
-            if (payment.estado === 'pagado' && paymentDate >= fechaInicio) {
-              ingresosBrutosTotal += payment.monto;
-            }
-          });
-        });
-      });
-
-      building.expenses.forEach((expense) => {
-        if (new Date(expense.fecha) >= fechaInicio) {
-          gastosTotal += expense.monto;
-        }
-      });
-    });
-
-    const ingresosNetosTotal = ingresosBrutosTotal - gastosTotal;
-    const rentabilidadBruta = ingresosBrutosTotal > 0 ? (ingresosBrutosTotal / (ingresosBrutosTotal + gastosTotal)) * 100 : 0;
-    const rentabilidadNeta = ingresosBrutosTotal > 0 ? (ingresosNetosTotal / ingresosBrutosTotal) * 100 : 0;
-    const roiGlobal = gastosTotal > 0 ? (ingresosNetosTotal / gastosTotal) * 100 : 0;
-    const tasaOcupacionGlobal = unidadesTotal > 0 ? (unidadesOcupadasTotal / unidadesTotal) * 100 : 0;
+    const stats = globalStats[0];
+    const ingresosNetos = stats.ingresosBrutos - stats.gastos;
+    const rentabilidadBruta = stats.ingresosBrutos > 0 
+      ? (stats.ingresosBrutos / (stats.ingresosBrutos + stats.gastos)) * 100 
+      : 0;
+    const rentabilidadNeta = stats.ingresosBrutos > 0 
+      ? (ingresosNetos / stats.ingresosBrutos) * 100 
+      : 0;
+    const roi = stats.gastos > 0 ? (ingresosNetos / stats.gastos) * 100 : 0;
+    const tasaOcupacion = stats.unidades > 0 
+      ? (stats.unidadesOcupadas / stats.unidades) * 100 
+      : 0;
 
     return NextResponse.json({
       global: {
-        ingresosBrutos: Math.round(ingresosBrutosTotal * 100) / 100,
-        gastos: Math.round(gastosTotal * 100) / 100,
-        ingresosNetos: Math.round(ingresosNetosTotal * 100) / 100,
+        ingresosBrutos: Math.round(stats.ingresosBrutos * 100) / 100,
+        gastos: Math.round(stats.gastos * 100) / 100,
+        ingresosNetos: Math.round(ingresosNetos * 100) / 100,
         rentabilidadBruta: Math.round(rentabilidadBruta * 10) / 10,
         rentabilidadNeta: Math.round(rentabilidadNeta * 10) / 10,
-        roi: Math.round(roiGlobal * 10) / 10,
-        unidades: unidadesTotal,
-        unidadesOcupadas: unidadesOcupadasTotal,
-        tasaOcupacion: Math.round(tasaOcupacionGlobal * 10) / 10,
+        roi: Math.round(roi * 10) / 10,
+        unidades: stats.unidades,
+        unidadesOcupadas: stats.unidadesOcupadas,
+        tasaOcupacion: Math.round(tasaOcupacion * 10) / 10,
       },
       periodo: meses,
     });
