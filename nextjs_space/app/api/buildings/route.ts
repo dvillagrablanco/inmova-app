@@ -65,6 +65,31 @@ export async function POST(req: NextRequest) {
     await invalidateDashboardCache(companyId);
 
     logger.info('Building created successfully', { buildingId: building.id, companyId });
+
+    // 🚀 AUTO-PUBLICACIÓN EN REDES SOCIALES (async, no bloqueante)
+    const userId = user.id;
+    (async () => {
+      try {
+        const { autoPublishProperty } = await import('@/lib/social-media-service');
+        await autoPublishProperty(
+          companyId,
+          userId,
+          {
+            type: 'building',
+            id: building.id,
+            name: building.nombre,
+            address: building.direccion || undefined,
+          },
+          {
+            scheduleMinutesDelay: 5 // Publicar en 5 minutos para permitir agregar foto
+          }
+        );
+      } catch (socialError) {
+        // No queremos que falle la creación si falla la publicación social
+        logger.error('Error en autopublicación de edificio:', socialError);
+      }
+    })();
+
     return NextResponse.json(building, { status: 201 });
   } catch (error: any) {
     logError(error, { context: 'Error creating building' });

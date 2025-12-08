@@ -109,6 +109,42 @@ export async function POST(req: NextRequest) {
     }
 
     logger.info('Unit created successfully', { unitId: unit.id, buildingId: validatedData.buildingId });
+
+    // 🚀 AUTO-PUBLICACIÓN EN REDES SOCIALES (async, no bloqueante) 
+    const userId = session?.user?.id;
+    if (companyId && userId) {
+      (async () => {
+        try {
+          const { autoPublishProperty } = await import('@/lib/social-media-service');
+          
+          // Obtener datos del edificio para el address
+          const building = await prisma.building.findUnique({
+            where: { id: validatedData.buildingId },
+            select: { nombre: true, direccion: true }
+          });
+
+          await autoPublishProperty(
+            companyId,
+            userId,
+            {
+              type: 'unit',
+              id: unit.id,
+              name: `${building?.nombre || 'Propiedad'} - ${unit.numero}`,
+              address: building?.direccion || undefined,
+              precio: unit.rentaMensual || undefined,
+              superficie: unit.superficie || undefined,
+              habitaciones: unit.habitaciones || undefined,
+            },
+            {
+              scheduleMinutesDelay: 10 // Publicar en 10 minutos para permitir agregar fotos
+            }
+          );
+        } catch (socialError) {
+          logger.error('Error en autopublicación de unidad:', socialError);
+        }
+      })();
+    }
+
     return NextResponse.json(unit, { status: 201 });
   } catch (error: any) {
     logError(error, { context: 'Error creating unit' });
