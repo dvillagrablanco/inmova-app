@@ -92,7 +92,7 @@ interface BillingStats {
 }
 
 export default function B2BBillingDashboard() {
-  const { data: session } = useSession() || {};
+  const { data: session, status } = useSession() || {};
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<BillingStats | null>(null);
@@ -101,11 +101,20 @@ export default function B2BBillingDashboard() {
   const [isGeneratingMonthly, setIsGeneratingMonthly] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
+  // Authentication and Authorization check
   useEffect(() => {
-    if (session?.user) {
+    if (status === 'unauthenticated') {
+      router.push('/login');
+    } else if (status === 'authenticated' && session?.user?.role !== 'super_admin') {
+      router.push('/unauthorized');
+    }
+  }, [status, session, router]);
+
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user?.role === 'super_admin') {
       loadData();
     }
-  }, [session]);
+  }, [status, session]);
 
   const loadData = async () => {
     try {
