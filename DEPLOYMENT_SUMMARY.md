@@ -1,421 +1,397 @@
-# 🎯 Resumen de Deployment - INMOVA
+# 📦 Resumen de Configuración de Deployment
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                                                             │
-│   ██╗███╗   ██╗███╗   ███╗ ██████╗ ██╗   ██╗ █████╗       │
-│   ██║████╗  ██║████╗ ████║██╔═══██╗██║   ██║██╔══██╗      │
-│   ██║██╔██╗ ██║██╔████╔██║██║   ██║██║   ██║███████║      │
-│   ██║██║╚██╗██║██║╚██╔╝██║██║   ██║╚██╗ ██╔╝██╔══██║      │
-│   ██║██║ ╚████║██║ ╚═╝ ██║╚██████╔╝ ╚████╔╝ ██║  ██║      │
-│   ╚═╝╚═╝  ╚═══╝╚═╝     ╚═╝ ╚═════╝   ╚═══╝  ╚═╝  ╚═╝      │
-│                                                             │
-│             Sistema de Gestión Inmobiliaria                 │
-│                   Deployment Guide                          │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-```
+## ✅ Archivos Creados
 
-## 📦 Paquete Completo de Deployment
+### 📁 Configuración de Vercel
+- `.github/workflows/deploy-vercel.yml` - Workflow de GitHub Actions para CI/CD
+- `nextjs_space/vercel.json` - Configuración de Vercel
+- `nextjs_space/.env.example` - Plantilla de variables de entorno
 
-### ✅ Documentación Creada
+### 📜 Scripts de Deployment
+- `scripts/deploy.sh` - Script para deployment manual
+- `scripts/setup-vercel.sh` - Script de configuración inicial
+- `scripts/README.md` - Documentación de scripts
 
-```
-📁 homming_vidaro/
-│
-├── 📘 INDEX.md                      ← Índice de toda la documentación
-├── 📗 README.md                     ← Documentación principal del proyecto
-├── 🚀 QUICK_START.md                ← Guía rápida (25 minutos)
-├── 📖 VERCEL_DEPLOYMENT_GUIDE.md    ← Guía completa paso a paso
-├── ✅ DEPLOYMENT_CHECKLIST.md       ← Lista de verificación
-├── 🔐 ENV_EXAMPLES.md               ← Guía de variables de entorno
-├── 📝 SCRIPTS_TO_ADD.md             ← Scripts recomendados
-├── 📊 DEPLOYMENT_SUMMARY.md         ← Este archivo
-│
-├── 🤖 setup-vercel.sh               ← Script automatizado (ejecutable)
-├── 📄 .gitignore                    ← Archivos a ignorar en Git
-├── 📄 vercel.json                   ← Configuración de Vercel
-│
-└── 📁 nextjs_space/
-    ├── 📄 .env.example              ← Template de variables
-    └── 📁 scripts/
-        └── 🔍 check-env.js          ← Verificar variables
-```
+### 📖 Documentación
+- `DEPLOYMENT_GUIDE.md` - Guía completa de deployment (+ PDF)
+- `QUICK_START.md` - Guía de inicio rápido (+ PDF)
+- `DEPLOYMENT_SUMMARY.md` - Este archivo
+
+### 🔐 Seguridad
+- `.gitignore` - Actualizado para proteger credenciales
 
 ---
 
-## 🎯 Rutas Rápidas
+## 🎯 Próximos Pasos
 
-### Para Empezar AHORA (25 minutos)
+### 1️⃣ Obtener Token de Vercel (2 min)
 
-```bash
-# 1. Lee la guía rápida
-cat QUICK_START.md
+**URL**: https://vercel.com/account/tokens
 
-# 2. Ejecuta el script de setup
-./setup-vercel.sh
-
-# 3. Sigue las instrucciones
-```
-
-### Para Entender TODO (1-2 horas)
-
-```
-1. INDEX.md                  (5 min)  - Panorama general
-2. README.md                 (10 min) - Arquitectura del proyecto
-3. VERCEL_DEPLOYMENT_GUIDE.md (30 min) - Deployment completo
-4. ENV_EXAMPLES.md           (20 min) - Configuración detallada
-5. DEPLOYMENT_CHECKLIST.md   (15 min) - Verificación final
-```
+**Pasos:**
+1. Inicia sesión en Vercel
+2. Ve a Settings → Tokens
+3. Clic en "Create Token"
+4. Nombre: `inmova-deployment-token`
+5. Alcance: Full Account
+6. Expiración: 1 año
+7. Copia el token (solo se muestra una vez)
 
 ---
 
-## 🚀 3 Pasos para Deployment
+### 2️⃣ Configurar Proyecto (3 min)
 
+```bash
+# Ejecutar desde la raíz del proyecto
+./scripts/setup-vercel.sh
 ```
-╔═══════════════════════════════════════════════════════════════╗
-║  PASO 1: PREPARACIÓN LOCAL (10 minutos)                      ║
-╚═══════════════════════════════════════════════════════════════╝
 
-$ ./setup-vercel.sh
-$ git push -u origin main
+**Este script:**
+- ✅ Instala/verifica Vercel CLI
+- ✅ Te autentica en Vercel
+- ✅ Vincula el proyecto
+- ✅ Guarda tu token en .env
+- ✅ Extrae Project ID y Org ID
 
-✅ Código en GitHub
-
-
-╔═══════════════════════════════════════════════════════════════╗
-║  PASO 2: CONFIGURAR SERVICIOS (10 minutos)                   ║
-╚═══════════════════════════════════════════════════════════════╝
-
-1. Supabase → Crear proyecto → Copiar DATABASE_URL
-2. Stripe   → Obtener API keys
-3. AWS S3   → Configurar bucket (opcional)
-
-✅ Credenciales listas
-
-
-╔═══════════════════════════════════════════════════════════════╗
-║  PASO 3: DEPLOY EN VERCEL (10 minutos)                       ║
-╚═══════════════════════════════════════════════════════════════╝
-
-1. vercel.com/new → Import Git Repository
-2. Configurar variables de entorno
-3. Deploy
-
-✅ App en producción
-```
+**Lo que necesitarás:**
+- Tu token de Vercel (del paso 1)
+- Acceso a tu cuenta de Vercel
 
 ---
 
-## 📋 Checklist Express
+### 3️⃣ Configurar Variables de Entorno (5 min)
 
-### Antes de Deploy
-```
-□ Código en GitHub
-□ .env configurado localmente
-□ Build local exitoso (yarn build)
-□ Tests pasan
+**En Vercel Dashboard:**
+
+1. Ve a: https://vercel.com/dashboard
+2. Selecciona tu proyecto (o créalo)
+3. Settings → Environment Variables
+4. Agrega cada variable de tu `.env`:
+
+**Variables críticas:**
+```bash
+DATABASE_URL=postgresql://...
+NEXTAUTH_SECRET=...
+NEXTAUTH_URL=https://inmova.app
+AWS_PROFILE=hosted_storage
+AWS_REGION=us-west-2
+AWS_BUCKET_NAME=...
+AWS_FOLDER_PREFIX=...
+STRIPE_SECRET_KEY=sk_...
+STRIPE_PUBLISHABLE_KEY=pk_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_...
+CRON_SECRET=...
+ENCRYPTION_KEY=...
+VAPID_PRIVATE_KEY=...
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=...
 ```
 
-### Durante Deploy
-```
-□ Proyecto importado en Vercel
-□ Variables de entorno configuradas
-□ Build command: cd nextjs_space && yarn build
-□ Output directory: nextjs_space/.next
-```
-
-### Después de Deploy
-```
-□ URL funciona
-□ Login funciona
-□ Base de datos conectada
-□ Archivos S3 funcionan (si aplica)
-□ Pagos Stripe funcionan (si aplica)
-```
+**Para cada variable:**
+- Selecciona: Production ✅ Preview ✅ Development ⬜
+- Clic en "Save"
 
 ---
 
-## 🔐 Variables Esenciales
-
-### Mínimo Requerido
+### 4️⃣ Primer Deployment Manual (2 min)
 
 ```bash
-DATABASE_URL="postgresql://..."
-NEXTAUTH_SECRET="..." # openssl rand -base64 32
-NEXTAUTH_URL="https://tu-dominio.vercel.app"
+# Preview (temporal)
+./scripts/deploy.sh
+
+# O Production (inmova.app)
+./scripts/deploy.sh prod
 ```
 
-### Recomendado
-
-```bash
-# + Mínimo requerido
-AWS_REGION="us-west-2"
-AWS_BUCKET_NAME="tu-bucket"
-STRIPE_SECRET_KEY="sk_test_..."
-STRIPE_PUBLISHABLE_KEY="pk_test_..."
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..."
-```
-
-### Completo
-
-```bash
-# Ver ENV_EXAMPLES.md para lista completa
-```
+**Verificar:**
+1. Abre la URL proporcionada
+2. Verifica que la app cargue
+3. Prueba login/autenticación
+4. Verifica conexión a DB
 
 ---
 
-## 🛠️ Comandos Útiles
+### 5️⃣ Configurar CI/CD con GitHub (5 min)
 
-### Setup y Verificación
+**En GitHub:**
 
-```bash
-# Setup completo
-./setup-vercel.sh
+1. Ve a tu repositorio
+2. Settings → Secrets and variables → Actions
+3. Clic en "New repository secret"
+4. Agrega estos secrets:
 
-# Verificar variables
-cd nextjs_space && node scripts/check-env.js
+```
+Nombre: VERCEL_TOKEN
+Valor: <tu_token_de_vercel>
 
-# Build local
-cd nextjs_space && yarn build
+Nombre: VERCEL_ORG_ID
+Valor: <del archivo nextjs_space/.env>
 
-# Ver status de Git
-git status
+Nombre: VERCEL_PROJECT_ID
+Valor: <del archivo nextjs_space/.env>
+
+Nombre: DATABASE_URL
+Valor: <tu_database_url>
+
+Nombre: NEXTAUTH_SECRET
+Valor: <tu_nextauth_secret>
+
+Nombre: NEXTAUTH_URL
+Valor: https://inmova.app
 ```
 
-### Base de Datos
+**Flujo automático activado:**
+- Push a `main` → Deploy a producción
+- Pull Request → Deploy preview + comentario en PR
+- Manual → Actions → "Run workflow"
+
+---
+
+## 📋 Checklist Completo
+
+### ✅ Configuración Inicial
+
+- [ ] Token de Vercel obtenido
+- [ ] Ejecutado `./scripts/setup-vercel.sh`
+- [ ] Proyecto vinculado con Vercel
+- [ ] VERCEL_TOKEN en `.env`
+- [ ] VERCEL_ORG_ID en `.env`
+- [ ] VERCEL_PROJECT_ID en `.env`
+
+### ✅ Variables de Entorno
+
+**En Vercel Dashboard:**
+- [ ] DATABASE_URL
+- [ ] NEXTAUTH_SECRET
+- [ ] NEXTAUTH_URL
+- [ ] AWS_PROFILE
+- [ ] AWS_REGION
+- [ ] AWS_BUCKET_NAME
+- [ ] AWS_FOLDER_PREFIX
+- [ ] STRIPE_SECRET_KEY
+- [ ] STRIPE_PUBLISHABLE_KEY
+- [ ] STRIPE_WEBHOOK_SECRET
+- [ ] NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+- [ ] CRON_SECRET
+- [ ] ENCRYPTION_KEY
+- [ ] VAPID_PRIVATE_KEY
+- [ ] NEXT_PUBLIC_VAPID_PUBLIC_KEY
+- [ ] Todas las variables de Redsys/Bankinter
+- [ ] Todas las variables de DocuSign
+- [ ] Todas las variables de ContaSimple
+
+### ✅ GitHub Secrets (para CI/CD)
+
+- [ ] VERCEL_TOKEN
+- [ ] VERCEL_ORG_ID
+- [ ] VERCEL_PROJECT_ID
+- [ ] DATABASE_URL
+- [ ] NEXTAUTH_SECRET
+- [ ] NEXTAUTH_URL
+
+### ✅ Primer Deployment
+
+- [ ] Build local exitoso
+- [ ] Deployment preview exitoso
+- [ ] App carga correctamente
+- [ ] Login funciona
+- [ ] Conexión a DB verificada
+- [ ] Deployment a producción exitoso
+
+---
+
+## 🚀 Comandos Rápidos
+
+### Deployment Manual
+
+```bash
+# Preview
+./scripts/deploy.sh
+
+# Production
+./scripts/deploy.sh prod
+```
+
+### Vercel CLI
+
+```bash
+# Logs en tiempo real
+vercel logs --follow
+
+# Listar deployments
+vercel ls
+
+# Rollback
+vercel rollback [deployment-url]
+
+# Info del proyecto
+vercel inspect
+
+# Ver variables de entorno
+vercel env ls
+```
+
+### Desarrollo Local
 
 ```bash
 cd nextjs_space
 
-# Generar cliente Prisma
-yarn prisma generate
+# Instalar
+yarn install
 
-# Ejecutar migraciones
+# Prisma
+yarn prisma generate
 yarn prisma migrate deploy
 
-# Cargar datos de prueba
-yarn prisma db seed
+# Dev
+yarn dev
 
-# Abrir Prisma Studio
-yarn prisma studio
-```
-
-### Deployment
-
-```bash
-# Push a GitHub (deploy automático)
-git add .
-git commit -m "Update"
-git push
-
-# Con Vercel CLI
-vercel
-vercel --prod
-```
-
----
-
-## 🌐 URLs Importantes
-
-| Servicio | URL |
-|----------|-----|
-| **Vercel Dashboard** | https://vercel.com/dashboard |
-| **Supabase Dashboard** | https://supabase.com/dashboard |
-| **Stripe Dashboard** | https://dashboard.stripe.com |
-| **AWS Console** | https://console.aws.amazon.com |
-| **Tu App** | https://inmova.app |
-
----
-
-## 📚 Documentación por Necesidad
-
-```
-┌────────────────────────────────────────────────────────────┐
-│ "Necesito desplegar RÁPIDO"                               │
-│ → QUICK_START.md                                          │
-└────────────────────────────────────────────────────────────┘
-
-┌────────────────────────────────────────────────────────────┐
-│ "Necesito entender TODO"                                  │
-│ → VERCEL_DEPLOYMENT_GUIDE.md                              │
-└────────────────────────────────────────────────────────────┘
-
-┌────────────────────────────────────────────────────────────┐
-│ "¿Qué variables de entorno necesito?"                     │
-│ → ENV_EXAMPLES.md                                         │
-└────────────────────────────────────────────────────────────┘
-
-┌────────────────────────────────────────────────────────────┐
-│ "¿Estoy listo para hacer deploy?"                         │
-│ → DEPLOYMENT_CHECKLIST.md                                 │
-└────────────────────────────────────────────────────────────┘
-
-┌────────────────────────────────────────────────────────────┐
-│ "¿Qué scripts puedo agregar?"                             │
-│ → SCRIPTS_TO_ADD.md                                       │
-└────────────────────────────────────────────────────────────┘
-
-┌────────────────────────────────────────────────────────────┐
-│ "¿Qué es este proyecto?"                                  │
-│ → README.md                                               │
-└────────────────────────────────────────────────────────────┘
-
-┌────────────────────────────────────────────────────────────┐
-│ "¿Dónde encuentro todo?"                                  │
-│ → INDEX.md                                                │
-└────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 🎓 Niveles de Expertise
-
-### 🟢 Principiante
-```
-1. Lee QUICK_START.md
-2. Ejecuta setup-vercel.sh
-3. Sigue las instrucciones en pantalla
-4. Usa DEPLOYMENT_CHECKLIST.md
-```
-
-### 🟡 Intermedio
-```
-1. Lee README.md para contexto
-2. Estudia VERCEL_DEPLOYMENT_GUIDE.md
-3. Personaliza con ENV_EXAMPLES.md
-4. Agrega scripts de SCRIPTS_TO_ADD.md
-```
-
-### 🔴 Avanzado
-```
-1. Revisa toda la documentación
-2. Personaliza vercel.json
-3. Optimiza next.config.js
-4. Implementa CI/CD personalizado
-5. Agrega monitoring y alertas
-```
-
----
-
-## 🐛 Problemas Comunes
-
-### Build Failed
-```bash
-# Verificar localmente primero
-cd nextjs_space
-yarn install
+# Build
 yarn build
 
-# Ver logs en Vercel Dashboard
+# Start
+yarn start
 ```
 
-### Database Connection Error
-```
-1. Verifica DATABASE_URL en Vercel
-2. Enable Connection Pooling en Supabase
-3. Usa la URI de pooling
+---
+
+## 🔍 Verificación de Deployment
+
+### Checklist Post-Deployment:
+
+**Funcionalidad básica:**
+- [ ] Página principal carga
+- [ ] Navegación funciona
+- [ ] Imágenes/assets cargan
+
+**Autenticación:**
+- [ ] Login funciona
+- [ ] Registro funciona
+- [ ] Logout funciona
+- [ ] Sesión persiste
+
+**Base de datos:**
+- [ ] Datos se muestran
+- [ ] CRUD funciona
+- [ ] Migraciones aplicadas
+
+**Integraciones:**
+- [ ] Stripe funciona
+- [ ] AWS S3 uploads funcionan
+- [ ] Push notifications funcionan
+- [ ] APIs externas responden
+
+**Performance:**
+- [ ] Tiempo de carga < 3s
+- [ ] No hay errores en consola
+- [ ] No hay memory leaks
+- [ ] Lighthouse score > 80
+
+---
+
+## 🆘 Troubleshooting Rápido
+
+### Error: "Invalid token"
+```bash
+# Regenera token en Vercel
+# Actualiza en .env y GitHub Secrets
 ```
 
-### Variables Missing
+### Error: "Build failed"
 ```bash
 cd nextjs_space
-node scripts/check-env.js
+rm -rf node_modules .next
+yarn install
+yarn prisma generate
+yarn build
 ```
 
----
-
-## 💡 Tips Pro
-
-### Automatización
+### Error: "DATABASE_URL not defined"
 ```bash
-# Alias útiles (agregar a ~/.bashrc o ~/.zshrc)
-alias inmova-dev="cd /home/ubuntu/homming_vidaro/nextjs_space && yarn dev"
-alias inmova-build="cd /home/ubuntu/homming_vidaro/nextjs_space && yarn build"
-alias inmova-deploy="cd /home/ubuntu/homming_vidaro && git push"
-alias inmova-check="cd /home/ubuntu/homming_vidaro/nextjs_space && node scripts/check-env.js"
+# Verifica en Vercel Dashboard
+# Settings → Environment Variables
+# Agrega DATABASE_URL para Production y Preview
 ```
 
-### Workflow Recomendado
-```
-develop → test → commit → push → auto-deploy
-   ↓        ↓       ↓       ↓         ↓
-  local   local   local  GitHub   Vercel
+### Error: "Module not found"
+```bash
+cd nextjs_space
+yarn install
+yarn prisma generate
 ```
 
-### Ramas de Git
-```
-main        → Producción (inmova.app)
-develop     → Staging (preview en Vercel)
-feature/*   → Features (preview en Vercel)
+### Deployment lento
+```bash
+# Aumenta timeout en vercel.json
+# "maxDuration": 60
 ```
 
 ---
 
-## 📞 Soporte
+## 📊 Monitoreo
 
-### Auto-ayuda
-1. 📖 Busca en la documentación
-2. 🔍 Revisa troubleshooting en cada guía
-3. ✅ Usa DEPLOYMENT_CHECKLIST.md
+### Vercel Dashboard
+- **URL**: https://vercel.com/dashboard
+- **Analytics**: Métricas de tráfico
+- **Logs**: Errores en tiempo real
+- **Deployments**: Historial completo
 
-### Community
-1. 🐛 GitHub Issues
-2. 💬 Discussions
-
-### Contacto Directo
-- 📧 Email: soporte@inmova.com
-- 🌐 Web: https://inmova.app
+### GitHub Actions
+- **URL**: https://github.com/[tu-repo]/actions
+- **Workflows**: Estado de deployments
+- **Logs**: Logs detallados de CI/CD
 
 ---
 
-## 🎉 ¡Felicitaciones!
+## 📚 Documentación
 
-Si llegaste aquí, tienes todo lo necesario para:
+### Guías creadas:
+1. **QUICK_START.md** - Inicio rápido (léelo primero)
+2. **DEPLOYMENT_GUIDE.md** - Guía completa y detallada
+3. **scripts/README.md** - Documentación de scripts
+4. **DEPLOYMENT_SUMMARY.md** - Este resumen
 
-✅ Desplegar tu aplicación en Vercel
-✅ Configurar todos los servicios necesarios
-✅ Mantener y actualizar tu app
-✅ Resolver problemas comunes
-✅ Optimizar tu workflow
-
----
-
-## 🚦 Estado del Proyecto
-
-```
-Stack:        ✅ Next.js 14.2 + TypeScript
-Database:     ✅ PostgreSQL + Prisma
-Auth:         ✅ NextAuth.js
-Storage:      ✅ AWS S3
-Payments:     ✅ Stripe
-Deployment:   ✅ Vercel + GitHub
-Docs:         ✅ Completa
-
-Status:       🟢 LISTO PARA PRODUCCIÓN
-```
+### Recursos externos:
+- [Vercel Docs](https://vercel.com/docs)
+- [Vercel CLI](https://vercel.com/docs/cli)
+- [GitHub Actions](https://docs.github.com/en/actions)
+- [Next.js Deployment](https://nextjs.org/docs/deployment)
 
 ---
 
-## 🎯 Siguiente Paso
+## ⚡ TL;DR (Versión Ultra Rápida)
 
 ```bash
-# ¿Listo? ¡Empieza ahora!
-./setup-vercel.sh
-```
+# 1. Obtener token: https://vercel.com/account/tokens
+# 2. Setup
+./scripts/setup-vercel.sh
 
-O lee primero:
-- **Rápido**: [QUICK_START.md](./QUICK_START.md)
-- **Completo**: [VERCEL_DEPLOYMENT_GUIDE.md](./VERCEL_DEPLOYMENT_GUIDE.md)
+# 3. Agregar variables en Vercel Dashboard
+#    https://vercel.com/dashboard → Settings → Environment Variables
+
+# 4. Deploy
+./scripts/deploy.sh prod
+
+# 5. Para CI/CD: Agregar secrets en GitHub
+#    Settings → Secrets → VERCEL_TOKEN, etc.
+```
 
 ---
 
-<div align="center">
+## 🎉 ¡Felicidades!
 
-**🚀 ¡A desplegar se ha dicho! 🚀**
+Tu proyecto INMOVA ahora está configurado para deployments automáticos a Vercel.
 
-Made with ❤️ for INMOVA
+**Próximos pasos:**
+1. Lee [QUICK_START.md](QUICK_START.md) para comenzar
+2. Haz tu primer deployment
+3. Configura CI/CD en GitHub
+4. Monitorea en Vercel Dashboard
 
-[Docs](./INDEX.md) · [Quick Start](./QUICK_START.md) · [Full Guide](./VERCEL_DEPLOYMENT_GUIDE.md)
+**¿Problemas?** Consulta [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
 
-</div>
+---
+
+**Última actualización:** Diciembre 2024  
+**Versión:** 1.0.0  
+**Mantenido por:** Equipo INMOVA
