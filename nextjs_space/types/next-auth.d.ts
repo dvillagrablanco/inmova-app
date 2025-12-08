@@ -14,6 +14,7 @@ declare module 'next-auth' {
     companyId: string;
     tenantId?: string;
     profileId?: string;
+    businessVertical?: string;
   }
 
   interface Session {
@@ -25,6 +26,7 @@ declare module 'next-auth' {
       companyId: string;
       tenantId?: string;
       profileId?: string;
+      businessVertical?: string;
     };
   }
 }
