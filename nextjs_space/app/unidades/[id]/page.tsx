@@ -23,7 +23,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import Image from 'next/image';
+import { OptimizedImage } from '@/components/ui/optimized-image';
 import logger, { logError } from '@/lib/logger';
 import { ShareButtons } from '@/components/ui/share-buttons';
 import { SocialPreview } from '@/components/seo/SocialPreview';
@@ -204,11 +204,12 @@ export default function UnidadDetailPage() {
                           key={idx}
                           className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden group"
                         >
-                          <Image
+                          <OptimizedImage
                             src={img}
                             alt={`Foto ${idx + 1} de ${unit.numero}`}
                             fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-200"
+                            objectFit="cover"
+                            className="group-hover:scale-105 transition-transform duration-200"
                           />
                         </div>
                       ))}

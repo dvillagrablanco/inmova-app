@@ -13,7 +13,7 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -25,10 +25,75 @@ export async function GET() {
       return NextResponse.json({ error: 'CompanyId no encontrado' }, { status: 400 });
     }
 
-    // Usar datos cacheados
-    const contractsWithExpiration = await cachedContracts(companyId);
+    // Obtener parámetros de paginación
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '15');
+    const skip = (page - 1) * limit;
 
-    return NextResponse.json(contractsWithExpiration);
+    // Si no hay paginación solicitada, usar cache
+    const usePagination = searchParams.has('page') || searchParams.has('limit');
+
+    if (!usePagination) {
+      // Usar datos cacheados
+      const contractsWithExpiration = await cachedContracts(companyId);
+      return NextResponse.json(contractsWithExpiration);
+    }
+
+    // Paginación activada: consulta directa
+    const [contracts, total] = await Promise.all([
+      prisma.contract.findMany({
+        where: {
+          unit: {
+            building: {
+              companyId,
+            },
+          },
+        },
+        include: {
+          unit: {
+            include: {
+              building: true,
+            },
+          },
+          tenant: true,
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.contract.count({
+        where: {
+          unit: {
+            building: {
+              companyId,
+            },
+          },
+        },
+      }),
+    ]);
+
+    // Calcular días hasta vencimiento para cada contrato
+    const contractsWithExpiration = contracts.map(contract => {
+      const daysUntilExpiration = Math.ceil(
+        (new Date(contract.fechaFin).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
+      );
+      return {
+        ...contract,
+        diasHastaVencimiento: daysUntilExpiration,
+      };
+    });
+
+    return NextResponse.json({
+      data: contractsWithExpiration,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasMore: skip + limit < total,
+      },
+    });
   } catch (error) {
     logger.error('Error fetching contracts:', error);
     return NextResponse.json({ error: 'Error al obtener contratos' }, { status: 500 });

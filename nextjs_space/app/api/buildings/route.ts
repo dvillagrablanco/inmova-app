@@ -7,15 +7,65 @@ import { cachedBuildings, invalidateBuildingsCache, invalidateDashboardCache } f
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const user = await requireAuth();
     const companyId = user.companyId;
 
-    // Usar datos cacheados
-    const buildingsWithMetrics = await cachedBuildings(companyId);
+    // Obtener parámetros de paginación
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const skip = (page - 1) * limit;
 
-    return NextResponse.json(buildingsWithMetrics);
+    // Si no hay paginación solicitada (página 1 con limit 10 o sin params), usar cache
+    const usePagination = searchParams.has('page') || searchParams.has('limit');
+    
+    if (!usePagination) {
+      // Usar datos cacheados para vista completa (por compatibilidad)
+      const buildingsWithMetrics = await cachedBuildings(companyId);
+      return NextResponse.json(buildingsWithMetrics);
+    }
+
+    // Paginación: consulta directa sin cache
+    const [buildings, total] = await Promise.all([
+      prisma.building.findMany({
+        where: { companyId },
+        include: {
+          units: {
+            select: {
+              id: true,
+              estado: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.building.count({
+        where: { companyId },
+      }),
+    ]);
+
+    // Calcular métricas para cada edificio
+    const buildingsWithMetrics = buildings.map(building => ({
+      ...building,
+      totalUnidades: building.units.length,
+      unidadesOcupadas: building.units.filter((u: any) => u.estado === 'ocupada').length,
+      unidadesDisponibles: building.units.filter((u: any) => u.estado === 'disponible').length,
+    }));
+
+    return NextResponse.json({
+      data: buildingsWithMetrics,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasMore: skip + limit < total,
+      },
+    });
   } catch (error: any) {
     logger.error('Error fetching buildings:', error);
     if (error.message === 'No autenticado') {

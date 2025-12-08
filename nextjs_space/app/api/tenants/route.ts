@@ -6,26 +6,70 @@ import { tenantCreateSchema } from '@/lib/validations';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const user = await requireAuth();
 
-    const tenants = await prisma.tenant.findMany({
-      where: { companyId: user.companyId },
-      include: {
-        units: {
-          include: {
-            building: true,
+    // Obtener parámetros de paginación
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const skip = (page - 1) * limit;
+
+    // Si no hay paginación solicitada, devolver todos (compatibilidad)
+    const usePagination = searchParams.has('page') || searchParams.has('limit');
+
+    if (!usePagination) {
+      const tenants = await prisma.tenant.findMany({
+        where: { companyId: user.companyId },
+        include: {
+          units: {
+            include: {
+              building: true,
+            },
+          },
+          contracts: {
+            where: { estado: 'activo' },
           },
         },
-        contracts: {
-          where: { estado: 'activo' },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+        orderBy: { createdAt: 'desc' },
+      });
+      return NextResponse.json(tenants);
+    }
 
-    return NextResponse.json(tenants);
+    // Paginación activada
+    const [tenants, total] = await Promise.all([
+      prisma.tenant.findMany({
+        where: { companyId: user.companyId },
+        include: {
+          units: {
+            include: {
+              building: true,
+            },
+          },
+          contracts: {
+            where: { estado: 'activo' },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.tenant.count({
+        where: { companyId: user.companyId },
+      }),
+    ]);
+
+    return NextResponse.json({
+      data: tenants,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasMore: skip + limit < total,
+      },
+    });
   } catch (error: any) {
     logger.error('Error fetching tenants:', error);
     if (error.message === 'No autenticado') {

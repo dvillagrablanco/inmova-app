@@ -5,11 +5,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Mail, Lock, AlertCircle, ArrowLeft, Building2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { loginSchema, type LoginFormData } from '@/lib/form-schemas';
 import { AccessibleInputField } from '@/components/forms/AccessibleFormField';
+import { OptimizedImage } from '@/components/ui/optimized-image';
 import { useState } from 'react';
 
 export default function LoginPage() {
@@ -91,15 +91,15 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           {/* Logo */}
           <div className="text-center mb-8 animate-fade-in">
-            <div className="relative w-48 h-16 mx-auto mb-4">
-              <Image
-                src="/inmova-logo-cover.jpg"
-                alt="INMOVA - Logotipo de la plataforma integral de gestión inmobiliaria profesional"
-                fill
-                className="object-contain"
-                priority
-              />
-            </div>
+            <OptimizedImage
+              src="/inmova-logo-cover.jpg"
+              alt="INMOVA - Logotipo de la plataforma integral de gestión inmobiliaria profesional"
+              width={192}
+              height={64}
+              className="mx-auto mb-4"
+              objectFit="contain"
+              priority
+            />
             <h1 className="text-2xl font-bold text-white">Bienvenido</h1>
             <p className="text-gray-400 text-sm mt-2">Sistema de Gestión Inmobiliaria</p>
           </div>

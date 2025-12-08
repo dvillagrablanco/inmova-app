@@ -37,7 +37,7 @@ export const selectUnitMinimal = {
   tipo: true,
   estado: true,
   superficie: true,
-  precio: true,
+  rentaMensual: true,
 } satisfies Prisma.UnitSelect;
 
 export const selectTenantMinimal = {
@@ -51,7 +51,7 @@ export const selectContractMinimal = {
   id: true,
   fechaInicio: true,
   fechaFin: true,
-  precio: true,
+  rentaMensual: true,
   estado: true,
 } satisfies Prisma.ContractSelect;
 
