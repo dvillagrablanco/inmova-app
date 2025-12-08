@@ -1,154 +1,330 @@
 /**
- * Rate Limiting Service - Enhanced
- * Protects APIs from abuse and ensures fair usage with advanced features
+ * Rate Limiting distribuido usando Upstash Rate Limit
+ * Con fallback a rate limiting in-memory si Redis no está disponible
  */
 
-import rateLimit from 'next-rate-limit';
-import { NextRequest, NextResponse } from 'next/server';
+import { Ratelimit } from '@upstash/ratelimit';
+import { redis } from './redis-config';
 import logger from './logger';
 
-interface RateLimitConfig {
-  windowMs: number;
-  max: number;
-  message?: string;
-  skipSuccessfulRequests?: boolean;
-  skipFailedRequests?: boolean;
-}
+/**
+ * Configuraciones de rate limit predefinidas
+ */
+export const RATE_LIMITS = {
+  // API endpoints públicos
+  PUBLIC_API: {
+    requests: 100,
+    window: '1 m', // 100 requests por minuto
+  },
+  
+  // API endpoints autenticados (más permisivos)
+  AUTHENTICATED_API: {
+    requests: 300,
+    window: '1 m', // 300 requests por minuto
+  },
+  
+  // Operaciones de escritura (más restrictivo)
+  WRITE_OPERATIONS: {
+    requests: 50,
+    window: '1 m', // 50 requests por minuto
+  },
+  
+  // Login attempts (muy restrictivo)
+  LOGIN_ATTEMPTS: {
+    requests: 5,
+    window: '15 m', // 5 intentos cada 15 minutos
+  },
+  
+  // Password reset
+  PASSWORD_RESET: {
+    requests: 3,
+    window: '1 h', // 3 intentos por hora
+  },
+  
+  // Email sending
+  EMAIL_SEND: {
+    requests: 20,
+    window: '1 h', // 20 emails por hora
+  },
+  
+  // Report generation (costoso)
+  REPORT_GENERATION: {
+    requests: 10,
+    window: '1 h', // 10 reportes por hora
+  },
+  
+  // File uploads
+  FILE_UPLOAD: {
+    requests: 30,
+    window: '1 h', // 30 archivos por hora
+  },
+} as const;
 
-// Define rate limit configurations for different endpoint types
-export const rateLimitConfigs = {
-  // Strict limits for authentication endpoints
-  auth: {
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5, // 5 attempts
-    message: 'Demasiados intentos de autenticación. Por favor, intente más tarde.',
-    skipSuccessfulRequests: true, // Solo contar intentos fallidos
-  },
-  
-  // Standard limits for API endpoints
-  api: {
-    windowMs: 60 * 1000, // 1 minute
-    max: 100, // 100 requests per minute (aumentado)
-    message: 'Demasiadas solicitudes. Por favor, intente más tarde.',
-  },
-  
-  // Relaxed limits for read-only endpoints
-  read: {
-    windowMs: 60 * 1000, // 1 minute
-    max: 200, // 200 requests per minute (aumentado)
-    message: 'Demasiadas solicitudes de lectura. Por favor, intente más tarde.',
-  },
-  
-  // Strict limits for write operations
-  write: {
-    windowMs: 60 * 1000, // 1 minute
-    max: 50, // 50 requests per minute (aumentado)
-    message: 'Demasiadas operaciones de escritura. Por favor, intente más tarde.',
-  },
-  
-  // Very strict limits for expensive operations (exports, reports)
-  expensive: {
-    windowMs: 60 * 60 * 1000, // 1 hour
-    max: 10, // 10 requests per hour
-    message: 'Límite de operaciones costosas alcanzado. Por favor, intente más tarde.',
-  },
-  
-  // Limits for file uploads
-  upload: {
-    windowMs: 60 * 1000, // 1 minute
-    max: 20, // 20 uploads per minute
-    message: 'Demasiadas cargas de archivos. Por favor, intente más tarde.',
-  },
-  
-  // Limits for search operations
-  search: {
-    windowMs: 60 * 1000, // 1 minute
-    max: 120, // 120 searches per minute
-    message: 'Demasiadas búsquedas. Por favor, intente más tarde.',
-  },
-  
-  // Public endpoints (landing page, etc.)
-  public: {
-    windowMs: 60 * 1000, // 1 minute
-    max: 300, // 300 requests per minute
-    message: 'Límite de solicitudes alcanzado. Por favor, intente más tarde.',
-  },
-};
+/**
+ * Tipo para identificar el tipo de rate limit
+ */
+export type RateLimitType = keyof typeof RATE_LIMITS;
 
-// Create rate limiter instance
-const limiter = rateLimit({
-  interval: 60 * 1000, // 1 minute
-  uniqueTokenPerInterval: 500,
-});
+/**
+ * Cache in-memory para fallback cuando Redis no está disponible
+ */
+class InMemoryRateLimiter {
+  private store: Map<string, { count: number; resetAt: number }> = new Map();
 
-// Get client identifier (IP or user ID)
-function getClientId(request: NextRequest): string {
-  // Try to get user ID from session/headers first
-  const userId = request.headers.get('x-user-id');
-  if (userId) return `user:${userId}`;
-  
-  // Fallback to IP address
-  const forwarded = request.headers.get('x-forwarded-for');
-  const ip = forwarded ? forwarded.split(',')[0] : request.headers.get('x-real-ip') || 'unknown';
-  return `ip:${ip}`;
-}
+  constructor() {
+    // Limpiar entradas expiradas cada minuto
+    setInterval(() => this.cleanup(), 60000);
+  }
 
-// Apply rate limiting middleware
-export async function applyRateLimit(
-  request: NextRequest,
-  type: keyof typeof rateLimitConfigs = 'api'
-): Promise<NextResponse | null> {
-  try {
-    const clientId = getClientId(request);
-    const config = rateLimitConfigs[type];
-    
-    // Use checkNext which returns headers
-    const headers = await limiter.checkNext(request, config.max);
-    
-    // Check if rate limit was exceeded
-    const remaining = headers.get('X-RateLimit-Remaining');
-    if (remaining && parseInt(remaining) < 0) {
-      throw new Error('Rate limit exceeded');
+  private cleanup(): void {
+    const now = Date.now();
+    for (const [key, value] of this.store.entries()) {
+      if (now > value.resetAt) {
+        this.store.delete(key);
+      }
     }
-    
-    // Successfully passed rate limit
-    return null;
-  } catch (error) {
-    // Rate limit exceeded
-    const config = rateLimitConfigs[type];
-    const clientId = getClientId(request);
-    
-    logger.warn('Rate limit exceeded', {
-      clientId,
-      type,
-      path: request.nextUrl.pathname,
-    });
-    
-    return NextResponse.json(
-      {
-        error: config.message,
-        retryAfter: Math.ceil(config.windowMs / 1000),
-      },
+  }
+
+  check(key: string, limit: number, windowMs: number): { success: boolean; remaining: number; reset: Date } {
+    const now = Date.now();
+    const entry = this.store.get(key);
+
+    // Si no existe o ya expiró, crear nueva entrada
+    if (!entry || now > entry.resetAt) {
+      const resetAt = now + windowMs;
+      this.store.set(key, { count: 1, resetAt });
+      return {
+        success: true,
+        remaining: limit - 1,
+        reset: new Date(resetAt),
+      };
+    }
+
+    // Si alcanzó el límite
+    if (entry.count >= limit) {
+      return {
+        success: false,
+        remaining: 0,
+        reset: new Date(entry.resetAt),
+      };
+    }
+
+    // Incrementar contador
+    entry.count++;
+    this.store.set(key, entry);
+
+    return {
+      success: true,
+      remaining: limit - entry.count,
+      reset: new Date(entry.resetAt),
+    };
+  }
+}
+
+const inMemoryLimiter = new InMemoryRateLimiter();
+
+/**
+ * Convierte string de duración a milisegundos
+ */
+function parseDuration(duration: string): number {
+  const match = duration.match(/(\d+)\s*(ms|s|m|h|d)/);
+  if (!match) return 60000; // default 1 minuto
+
+  const value = parseInt(match[1]);
+  const unit = match[2];
+
+  const multipliers: Record<string, number> = {
+    ms: 1,
+    s: 1000,
+    m: 60000,
+    h: 3600000,
+    d: 86400000,
+  };
+
+  return value * (multipliers[unit] || 1000);
+}
+
+/**
+ * Crea un rate limiter para un tipo específico
+ */
+export function createRateLimiter(type: RateLimitType): Ratelimit | null {
+  const config = RATE_LIMITS[type];
+  
+  // Si Redis está disponible, usar Upstash Rate Limit
+  if (redis) {
+    try {
+      return new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(config.requests, config.window),
+        prefix: `ratelimit:${type.toLowerCase()}`,
+        analytics: true,
+      });
+    } catch (error) {
+      logger.error(`Failed to create rate limiter for ${type}:`, error);
+    }
+  }
+  
+  // Redis no disponible, usar fallback in-memory
+  logger.warn(`Redis not available, using in-memory rate limiter for ${type}`);
+  return null;
+}
+
+/**
+ * Cache de rate limiters
+ */
+const rateLimiters: Partial<Record<RateLimitType, Ratelimit | null>> = {};
+
+/**
+ * Obtiene o crea un rate limiter para un tipo
+ */
+function getRateLimiter(type: RateLimitType): Ratelimit | null {
+  if (!rateLimiters[type]) {
+    rateLimiters[type] = createRateLimiter(type);
+  }
+  return rateLimiters[type] || null;
+}
+
+/**
+ * Verifica si una operación está permitida según el rate limit
+ */
+export async function checkRateLimit(
+  type: RateLimitType,
+  identifier: string
+): Promise<{
+  success: boolean;
+  limit: number;
+  remaining: number;
+  reset: Date;
+}> {
+  const limiter = getRateLimiter(type);
+  const config = RATE_LIMITS[type];
+
+  // Si hay Redis disponible, usar Upstash
+  if (limiter) {
+    try {
+      const result = await limiter.limit(identifier);
+      
+      return {
+        success: result.success,
+        limit: result.limit,
+        remaining: result.remaining,
+        reset: new Date(result.reset),
+      };
+    } catch (error) {
+      logger.error(`Rate limit check failed for ${type}:`, error);
+      // En caso de error, permitir la operación para no bloquear el servicio
+      return {
+        success: true,
+        limit: config.requests,
+        remaining: config.requests,
+        reset: new Date(Date.now() + parseDuration(config.window)),
+      };
+    }
+  }
+
+  // Fallback a rate limiter in-memory
+  const windowMs = parseDuration(config.window);
+  const result = inMemoryLimiter.check(
+    `${type}:${identifier}`,
+    config.requests,
+    windowMs
+  );
+
+  return {
+    success: result.success,
+    limit: config.requests,
+    remaining: result.remaining,
+    reset: result.reset,
+  };
+}
+
+/**
+ * Middleware helper para aplicar rate limiting en API routes
+ */
+export async function withRateLimit(
+  type: RateLimitType,
+  identifier: string,
+  handler: () => Promise<Response>
+): Promise<Response> {
+  const result = await checkRateLimit(type, identifier);
+
+  // Agregar headers de rate limit
+  const headers = new Headers({
+    'X-RateLimit-Limit': result.limit.toString(),
+    'X-RateLimit-Remaining': result.remaining.toString(),
+    'X-RateLimit-Reset': result.reset.toISOString(),
+  });
+
+  // Si excedió el límite
+  if (!result.success) {
+    const retryAfter = Math.ceil((result.reset.getTime() - Date.now()) / 1000);
+    headers.set('Retry-After', retryAfter.toString());
+
+    return new Response(
+      JSON.stringify({
+        error: 'Too many requests',
+        message: `Rate limit exceeded. Try again in ${retryAfter} seconds.`,
+        retryAfter,
+      }),
       {
         status: 429,
         headers: {
-          'Retry-After': String(Math.ceil(config.windowMs / 1000)),
-          'X-RateLimit-Limit': String(config.max),
-          'X-RateLimit-Remaining': '0',
-          'X-RateLimit-Reset': String(Date.now() + config.windowMs),
+          'Content-Type': 'application/json',
+          ...Object.fromEntries(headers.entries()),
         },
       }
     );
   }
+
+  // Ejecutar el handler y agregar headers
+  const response = await handler();
+  
+  // Clonar response para agregar headers
+  const newResponse = new Response(response.body, response);
+  headers.forEach((value, key) => {
+    newResponse.headers.set(key, value);
+  });
+
+  return newResponse;
 }
 
-// Middleware wrapper for easy integration
-export function withRateLimit(type: keyof typeof rateLimitConfigs = 'api') {
-  return async (request: NextRequest) => {
-    const rateLimitResponse = await applyRateLimit(request, type);
-    if (rateLimitResponse) {
-      return rateLimitResponse;
-    }
-    return null; // Continue to next middleware/handler
+/**
+ * Helper para obtener un identificador único del request
+ * Usa IP, user ID, o API key según disponibilidad
+ */
+export function getRequestIdentifier(
+  request: Request,
+  userId?: string
+): string {
+  // Preferir user ID si está autenticado
+  if (userId) {
+    return `user:${userId}`;
+  }
+
+  // Obtener IP del request
+  const forwarded = request.headers.get('x-forwarded-for');
+  const ip = forwarded ? forwarded.split(',')[0].trim() : 'unknown';
+
+  return `ip:${ip}`;
+}
+
+/**
+ * Obtiene estadísticas de rate limiting
+ */
+export async function getRateLimitStats(type: RateLimitType): Promise<any> {
+  const limiter = getRateLimiter(type);
+  
+  if (!limiter) {
+    return {
+      available: false,
+      fallback: 'in-memory',
+      config: RATE_LIMITS[type],
+    };
+  }
+
+  return {
+    available: true,
+    config: RATE_LIMITS[type],
+    storage: 'redis',
   };
 }

@@ -112,8 +112,8 @@ export async function POST(req: NextRequest) {
 
     // Invalidar cachés relacionados
     if (companyId) {
-      invalidatePaymentsCache(companyId);
-      invalidateDashboardCache(companyId);
+      await invalidatePaymentsCache(companyId);
+      await invalidateDashboardCache(companyId);
     }
 
     logger.info('Payment created successfully', { paymentId: payment.id });

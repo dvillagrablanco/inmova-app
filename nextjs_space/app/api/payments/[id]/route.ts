@@ -197,8 +197,8 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     // Invalidar cachés relacionados
     const companyId = payment.contract.unit.building.companyId;
     if (companyId) {
-      invalidatePaymentsCache(companyId);
-      invalidateDashboardCache(companyId);
+      await invalidatePaymentsCache(companyId);
+      await invalidateDashboardCache(companyId);
     }
 
     return NextResponse.json(payment);
@@ -223,8 +223,8 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
     // Invalidar cachés relacionados
     if (companyId) {
-      invalidatePaymentsCache(companyId);
-      invalidateDashboardCache(companyId);
+      await invalidatePaymentsCache(companyId);
+      await invalidateDashboardCache(companyId);
     }
 
     return NextResponse.json({ message: 'Pago eliminado' });
