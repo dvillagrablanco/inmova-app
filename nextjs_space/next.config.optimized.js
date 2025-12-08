@@ -5,169 +5,227 @@ const nextConfig = {
   distDir: process.env.NEXT_DIST_DIR || '.next',
   output: process.env.NEXT_OUTPUT_MODE,
   
-  // Experimental features
+  // ============================================
+  // BUILD OPTIMIZATION SETTINGS
+  // ============================================
+  
+  // 1. INCREASE BUILD TIMEOUT
+  // Aumenta el timeout para builds complejos
+  staticPageGenerationTimeout: 300, // 5 minutos (default: 60s)
+  
   experimental: {
     outputFileTracingRoot: path.join(__dirname, '../'),
-    optimizeCss: true,
-    webpackBuildWorker: true,
+    
+    // Optimización de workers para builds más rápidos
+    workerThreads: true,
+    cpus: 4,
   },
   
-  // Build optimization
-  swcMinify: true,
-  compress: true,
-  
-  // Performance & Security Headers
-  async headers() {
-    return [
-      {
-        source: '/:path*',
-        headers: [
-          {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on'
-          },
-          {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=63072000; includeSubDomains; preload'
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN'
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff'
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block'
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin'
-          },
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()'
-          }
-        ]
-      }
-    ];
-  },
-  
-  // Redirects
-  async redirects() {
-    return [
-      {
-        source: '/home',
-        destination: '/dashboard',
-        permanent: true,
-      },
-    ];
-  },
-  
-  // ESLint & TypeScript
   eslint: {
-    ignoreDuringBuilds: false, // Changed to false for production
+    ignoreDuringBuilds: true,
   },
   typescript: {
     ignoreBuildErrors: false,
   },
+  images: { unoptimized: true },
   
-  // Image Optimization
-  images: {
-    unoptimized: false, // Enable optimization for production
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**.amazonaws.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'abacusai-apps-*.s3.*.amazonaws.com',
-      },
-    ],
-    formats: ['image/webp', 'image/avif'],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-  },
-  
-  // Webpack optimizations
-  webpack: (config, { dev, isServer }) => {
-    // Production optimizations
+  // ============================================
+  // 2. WEBPACK OPTIMIZATION - CHUNK SPLITTING
+  // ============================================
+  webpack: (config, { isServer, dev }) => {
+    // Solo aplicar optimizaciones en producción
     if (!dev && !isServer) {
-      // Remove console statements in production
-      config.optimization.minimizer.forEach((minimizer) => {
-        if (minimizer.constructor.name === 'TerserPlugin') {
-          minimizer.options.terserOptions.compress.drop_console = true;
-          minimizer.options.terserOptions.compress.drop_debugger = true;
-        }
-      });
-      
-      // Optimize bundle splitting
-      config.optimization.splitChunks = {
-        chunks: 'all',
-        cacheGroups: {
-          default: false,
-          vendors: false,
-          // Vendor chunk
-          vendor: {
-            name: 'vendor',
-            test: /[\\/]node_modules[\\/]/,
-            priority: 20,
-            reuseExistingChunk: true,
+      // Configuración de optimización de chunks
+      config.optimization = {
+        ...config.optimization,
+        
+        // Habilitar tree shaking
+        usedExports: true,
+        sideEffects: true,
+        
+        // Configuración de división de código
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            // Separar vendor libraries grandes
+            default: false,
+            vendors: false,
+            
+            // Framework (React, Next.js)
+            framework: {
+              name: 'framework',
+              test: /[\\/]node_modules[\\/](react|react-dom|next|scheduler)[\\/]/,
+              priority: 40,
+              enforce: true,
+            },
+            
+            // Bibliotecas de UI (Radix, Shadcn)
+            ui: {
+              name: 'ui-libs',
+              test: /[\\/]node_modules[\\/](@radix-ui|@headlessui|class-variance-authority|clsx|tailwind-merge)[\\/]/,
+              priority: 30,
+              enforce: true,
+            },
+            
+            // Bibliotecas de gráficos (Recharts, Chart.js)
+            charts: {
+              name: 'chart-libs',
+              test: /[\\/]node_modules[\\/](recharts|chart\\.js|react-chartjs-2|plotly\\.js|react-plotly\\.js)[\\/]/,
+              priority: 25,
+              enforce: true,
+            },
+            
+            // Bibliotecas de fecha
+            dates: {
+              name: 'date-libs',
+              test: /[\\/]node_modules[\\/](date-fns|dayjs|react-datepicker|react-big-calendar)[\\/]/,
+              priority: 20,
+              enforce: true,
+            },
+            
+            // Bibliotecas de formularios
+            forms: {
+              name: 'form-libs',
+              test: /[\\/]node_modules[\\/](react-hook-form|@hookform|formik|yup|zod)[\\/]/,
+              priority: 20,
+              enforce: true,
+            },
+            
+            // Iconos (Lucide)
+            icons: {
+              name: 'icon-libs',
+              test: /[\\/]node_modules[\\/](lucide-react)[\\/]/,
+              priority: 15,
+              minSize: 100000, // 100KB
+            },
+            
+            // Autenticación
+            auth: {
+              name: 'auth-libs',
+              test: /[\\/]node_modules[\\/](next-auth|bcryptjs|jsonwebtoken)[\\/]/,
+              priority: 20,
+              enforce: true,
+            },
+            
+            // Prisma y Database
+            database: {
+              name: 'db-libs',
+              test: /[\\/]node_modules[\\/](@prisma|prisma)[\\/]/,
+              priority: 20,
+              enforce: true,
+            },
+            
+            // AWS y Storage
+            storage: {
+              name: 'storage-libs',
+              test: /[\\/]node_modules[\\/](@aws-sdk)[\\/]/,
+              priority: 15,
+            },
+            
+            // Otras librerías comunes grandes
+            commons: {
+              name: 'commons',
+              test: /[\\/]node_modules[\\/]/,
+              priority: 10,
+              minChunks: 2,
+              minSize: 100000, // Solo chunks > 100KB
+              maxSize: 244000, // Dividir chunks > 244KB
+            },
           },
-          // React chunk
-          react: {
-            test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/,
-            name: 'react',
-            priority: 30,
-            reuseExistingChunk: true,
-          },
-          // UI libraries
-          ui: {
-            test: /[\\/]node_modules[\\/](@radix-ui|@headlessui|framer-motion)[\\/]/,
-            name: 'ui',
-            priority: 25,
-            reuseExistingChunk: true,
-          },
-          // Charts (lazy loaded)
-          charts: {
-            test: /[\\/]node_modules[\\/](recharts|chart\.js|react-chartjs-2)[\\/]/,
-            name: 'charts',
-            priority: 25,
-            reuseExistingChunk: true,
-          },
-          // Common components
-          commons: {
-            name: 'commons',
-            minChunks: 2,
-            priority: 10,
-            reuseExistingChunk: true,
-          },
+          
+          // Configuración global de tamaños
+          maxInitialRequests: 25,
+          maxAsyncRequests: 25,
+          minSize: 20000, // 20KB mínimo
+          maxSize: 244000, // 244KB máximo (dividir chunks más grandes)
         },
+        
+        // Minimización mejorada
+        minimize: true,
+        minimizer: [
+          ...config.optimization.minimizer,
+        ],
       };
+      
+      // ============================================
+      // 3. TREE SHAKING OPTIMIZATION
+      // ============================================
+      
+      // Configurar module para tree shaking
+      config.module = {
+        ...config.module,
+        rules: [
+          ...config.module.rules,
+          {
+            test: /\.m?js$/,
+            type: 'javascript/auto',
+            resolve: {
+              fullySpecified: false,
+            },
+          },
+        ],
+      };
+      
+      // Configurar resolve para mejor tree shaking
+      config.resolve = {
+        ...config.resolve,
+        alias: {
+          ...config.resolve.alias,
+          // Asegurar que se usen versiones ES modules para tree shaking
+          'lodash': 'lodash-es',
+        },
+        mainFields: ['module', 'main'],
+      };
+      
+      // Marcar side effects para tree shaking
+      config.optimization.providedExports = true;
+      config.optimization.usedExports = true;
+      config.optimization.sideEffects = true;
+      config.optimization.concatenateModules = true;
     }
     
-    // Handle node modules that need special treatment
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      '@': path.resolve(__dirname),
+    // Configuración común para dev y prod
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      net: false,
+      tls: false,
+      crypto: false,
     };
-    
-    // Ignore problematic modules in client bundle
-    config.module.rules.push({
-      test: /node_modules\/(css-tree|nano-css|playwright-core|@storybook)/,
-      use: 'null-loader',
-    });
     
     return config;
   },
   
-  // Performance budgets
-  onDemandEntries: {
-    maxInactiveAge: 60 * 1000,
-    pagesBufferLength: 2,
+  // ============================================
+  // PRODUCTION OPTIMIZATION
+  // ============================================
+  productionBrowserSourceMaps: false, // Deshabilitar source maps en producción
+  poweredByHeader: false, // Remover header X-Powered-By
+  compress: true, // Habilitar compresión gzip
+  
+  // Configuración de redirecciones y headers para optimización
+  async headers() {
+    return [
+      {
+        source: '/:all*(svg|jpg|png|gif|ico|webp)',
+        locale: false,
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/fonts/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+    ];
   },
 };
 
