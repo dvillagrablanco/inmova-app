@@ -41,7 +41,7 @@ yarn-error.log*
 next-env.d.ts
 
 # prisma
-prisma/migrations
+# prisma/migrations (comentado para permitir migraciones en Vercel)
 
 # scripts
 scripts/seed-demo-data.ts
