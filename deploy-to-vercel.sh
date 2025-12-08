@@ -1,168 +1,95 @@
 #!/bin/bash
 
-# ============================================
-# INMOVA - Script de Preparación para Vercel
-# ============================================
+# Script mejorado para deployment en Vercel
+# Autor: INMOVA Team
+# Fecha: $(date +%Y-%m-%d)
 
 set -e  # Exit on error
 
-echo "🚀 Preparando INMOVA para deployment en Vercel..."
-echo ""
-
 # Colors
+RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-RED='\033[0;31m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
+
+echo -e "${BLUE}"
+echo "================================="
+echo "  INMOVA - Vercel Deployment"
+echo "================================="
+echo -e "${NC}"
 
 # Check if we're in the right directory
 if [ ! -f "nextjs_space/package.json" ]; then
-    echo -e "${RED}❌ Error: No se encuentra nextjs_space/package.json${NC}"
-    echo "Por favor ejecuta este script desde el directorio raíz del proyecto."
+    echo -e "${RED}Error: Execute este script desde la raíz del proyecto${NC}"
     exit 1
 fi
 
-echo -e "${GREEN}✅ Directorio correcto detectado${NC}"
-echo ""
-
-# Step 1: Check Node and Yarn
-echo "🔍 Verificando dependencias..."
-if ! command -v node &> /dev/null; then
-    echo -e "${RED}❌ Node.js no está instalado${NC}"
+# Check if vercel CLI is installed
+if ! command -v vercel &> /dev/null && ! command -v npx &> /dev/null; then
+    echo -e "${RED}Error: Ni 'vercel' ni 'npx' están disponibles${NC}"
+    echo "Instala Vercel CLI con: npm install -g vercel"
     exit 1
 fi
 
-if ! command -v yarn &> /dev/null; then
-    echo -e "${YELLOW}⚠️  Yarn no está instalado. Instalando...${NC}"
-    npm install -g yarn
+# Use vercel or npx vercel
+if command -v vercel &> /dev/null; then
+    VERCEL_CMD="vercel"
+else
+    VERCEL_CMD="npx vercel"
 fi
 
-echo -e "${GREEN}✅ Node $(node -v) y Yarn $(yarn -v) detectados${NC}"
+echo -e "${YELLOW}Usando comando: $VERCEL_CMD${NC}"
 echo ""
 
-# Step 2: Install dependencies
-echo "📦 Instalando dependencias..."
+# Move to nextjs_space directory
 cd nextjs_space
-yarn install --frozen-lockfile
-echo -e "${GREEN}✅ Dependencias instaladas${NC}"
-echo ""
 
-# Step 3: Generate Prisma Client
-echo "💾 Generando Prisma Client..."
-yarn prisma generate
-echo -e "${GREEN}✅ Prisma Client generado${NC}"
-echo ""
-
-# Step 4: Check for .env file
-echo "🔐 Verificando variables de entorno..."
-if [ ! -f ".env" ] && [ ! -f ".env.local" ]; then
-    echo -e "${YELLOW}⚠️  No se encontró archivo .env${NC}"
-    echo "Por favor crea un archivo .env basado en .env.example"
-    echo "O configura las variables de entorno en Vercel después del deployment."
+echo -e "${GREEN}➤ Paso 1: Verificando autenticación...${NC}"
+if $VERCEL_CMD whoami &> /dev/null; then
+    USER=$($VERCEL_CMD whoami)
+    echo -e "${GREEN}✔ Autenticado como: $USER${NC}"
 else
-    echo -e "${GREEN}✅ Archivo de variables de entorno encontrado${NC}"
-fi
-echo ""
-
-# Step 5: Test build
-echo "🛠️  Probando build del proyecto..."
-if yarn build; then
-    echo -e "${GREEN}✅ Build exitoso${NC}"
-else
-    echo -e "${RED}❌ Build falló${NC}"
-    echo "Por favor revisa los errores antes de deployar a Vercel."
+    echo -e "${YELLOW}⚠ No estás autenticado${NC}"
+    echo "Por favor, ejecuta: $VERCEL_CMD login"
+    echo "Email: dvillagra@vidaroinversiones.com"
     exit 1
 fi
+
 echo ""
-
-# Step 6: Initialize git if not already
-cd ..
-if [ ! -d ".git" ]; then
-    echo "📋 Inicializando repositorio Git..."
-    git init
-    
-    # Create .gitignore
-    cat > .gitignore << 'EOF'
-# Dependencies
-node_modules
-.pnp
-.pnp.js
-
-# Testing
-coverage
-
-# Next.js
-.next
-out
-build
-dist
-.build
-
-# Production
-.vercel
-
-# Misc
-.DS_Store
-*.pem
-
-# Debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Local env files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# IDE
-.vscode
-.idea
-*.swp
-*.swo
-*~
-
-# OS
-Thumbs.db
-EOF
-    
-    echo -e "${GREEN}✅ Repositorio Git inicializado${NC}"
+echo -e "${GREEN}➤ Paso 2: Vinculando proyecto (si es necesario)...${NC}"
+if [ ! -d ".vercel" ]; then
+    echo -e "${YELLOW}No se encontró vinculación con Vercel${NC}"
+    echo "Ejecutando: $VERCEL_CMD link"
+    $VERCEL_CMD link
 else
-    echo -e "${GREEN}✅ Repositorio Git ya existe${NC}"
+    echo -e "${GREEN}✔ Proyecto ya vinculado${NC}"
 fi
-echo ""
 
-# Step 7: Summary
 echo ""
-echo "========================================"
-echo -e "${GREEN}✅ ¡Proyecto listo para Vercel!${NC}"
-echo "========================================"
-echo ""
-echo "Próximos pasos:"
-echo ""
-echo "1. Commitea tus cambios:"
-echo "   git add ."
-echo "   git commit -m 'Preparado para Vercel'"
-echo ""
-echo "2. Crea un repositorio en GitHub:"
-echo "   https://github.com/new"
-echo ""
-echo "3. Sube el código:"
-echo "   git remote add origin https://github.com/TU_USUARIO/inmova-app.git"
-echo "   git branch -M main"
-echo "   git push -u origin main"
-echo ""
-echo "4. Importa en Vercel:"
-echo "   https://vercel.com/new"
-echo ""
-echo "5. Configura variables de entorno en Vercel (ver .env.example)"
-echo ""
-echo "6. Después del primer deploy, ejecuta migraciones:"
-echo "   vercel env pull .env.local"
-echo "   cd nextjs_space && yarn prisma db push"
-echo ""
-echo "📚 Documentación completa: DEPLOYMENT_VERCEL.md"
-echo "⚡ Quick Start: QUICK_START_VERCEL.md"
-echo ""
+echo -e "${GREEN}➤ Paso 3: Desplegando a producción...${NC}"
+echo -e "${YELLOW}Esto puede tardar varios minutos...${NC}"
+
+# Deploy to production
+if $VERCEL_CMD --prod; then
+    echo ""
+    echo -e "${GREEN}=================================${NC}"
+    echo -e "${GREEN}✔ ¡Deployment exitoso!${NC}"
+    echo -e "${GREEN}=================================${NC}"
+    echo ""
+    echo "Tu aplicación está desplegada en:"
+    echo -e "${BLUE}https://inmova.app${NC}"
+    echo ""
+    echo "Panel de control de Vercel:"
+    echo -e "${BLUE}https://vercel.com/dashboard${NC}"
+    echo ""
+else
+    echo ""
+    echo -e "${RED}=================================${NC}"
+    echo -e "${RED}✖ Error en el deployment${NC}"
+    echo -e "${RED}=================================${NC}"
+    echo ""
+    echo "Por favor revisa los logs arriba para más detalles."
+    echo "También puedes revisar en: https://vercel.com/dashboard"
+    exit 1
+fi
