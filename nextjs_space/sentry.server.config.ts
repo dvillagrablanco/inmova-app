@@ -4,34 +4,42 @@
 
 import * as Sentry from '@sentry/nextjs';
 
-Sentry.init({
-  dsn: process.env.SENTRY_DSN,
-  
-  // Adjust this value in production, or use tracesSampler for greater control
-  tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
-  
-  // Setting this option to true will print useful information to the console while you're setting up Sentry.
-  debug: process.env.NODE_ENV === 'development',
-  
-  environment: process.env.NODE_ENV,
-  
-  integrations: [
-    Sentry.httpIntegration(),
-    Sentry.prismaIntegration(),
-  ],
-  
-  beforeSend(event) {
-    // Filter PII in production
-    if (process.env.NODE_ENV === 'production') {
-      // Remove sensitive data
-      if (event.request?.cookies) {
-        delete event.request.cookies;
+const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN;
+
+if (SENTRY_DSN && !SENTRY_DSN.includes('placeholder')) {
+  Sentry.init({
+    dsn: SENTRY_DSN,
+
+    // Adjust this value in production, or use tracesSampler for greater control
+    tracesSampleRate: 0.1,
+
+    // Setting this option to true will print useful information to the console while you're setting up Sentry.
+    debug: false,
+
+    // Capture 100% of transactions for performance monitoring
+    // In production, you might want to adjust this
+    environment: process.env.NODE_ENV || 'development',
+
+    beforeSend(event, hint) {
+      // Filter out specific errors if needed
+      const error = hint.originalException;
+      
+      if (error instanceof Error) {
+        // Don't send certain database connection errors (might be temporary)
+        if (error.message && error.message.includes('ECONNREFUSED')) {
+          console.error('[Sentry] Filtered ECONNREFUSED error:', error.message);
+          return null;
+        }
       }
-      if (event.request?.headers) {
-        delete event.request.headers.cookie;
-        delete event.request.headers.authorization;
-      }
-    }
-    return event;
-  },
-});
+      
+      return event;
+    },
+
+    // Additional context for server-side errors
+    integrations: [
+      // Add custom integrations here if needed
+    ],
+  });
+} else {
+  console.warn('[Sentry] DSN not configured. Error tracking disabled.');
+}
