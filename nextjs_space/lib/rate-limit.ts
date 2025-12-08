@@ -154,7 +154,7 @@ export function createRateLimiter(type: RateLimitType): Ratelimit | null {
   if (redis) {
     try {
       return new Ratelimit({
-        redis,
+        redis: redis as any, // Type cast necesario para compatibilidad ioredis <-> upstash
         limiter: Ratelimit.slidingWindow(config.requests, config.window),
         prefix: `ratelimit:${type.toLowerCase()}`,
         analytics: true,

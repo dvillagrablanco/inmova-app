@@ -22,7 +22,6 @@ function getReportQueue(): Queue | null {
           type: 'exponential',
           delay: 5000,
         },
-        timeout: 300000, // 5 minutos de timeout
       },
     });
   }

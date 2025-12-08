@@ -302,7 +302,7 @@ export async function getBuildingOccupancyStats(buildingId: string) {
     prisma.unit.count({ where: { buildingId } }),
     prisma.unit.count({ where: { buildingId, estado: 'ocupada' } }),
     prisma.unit.count({ where: { buildingId, estado: 'disponible' } }),
-    prisma.unit.count({ where: { buildingId, estado: 'mantenimiento' } }),
+    prisma.unit.count({ where: { buildingId, estado: 'en_mantenimiento' } }),
   ]);
 
   const occupancyRate = total > 0 ? (occupied / total) * 100 : 0;

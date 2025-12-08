@@ -12,7 +12,7 @@ interface DemoDataConfig {
 
 // Configuraciones de datos demo por vertical
 const DEMO_DATA_CONFIGS: Record<BusinessVertical, DemoDataConfig> = {
-  traditional_rental: {
+  alquiler_tradicional: {
     buildings: 2,
     units: 6,
     tenants: 4,
@@ -202,17 +202,15 @@ export async function generateDemoData(
 
         const contract = await prisma.contract.create({
           data: {
-            companyId,
             unitId: unit.id,
             tenantId: tenant.id,
-            fecha_inicio: startDate,
-            fecha_fin: endDate,
-            monto_renta: unit.precio_renta,
-            dia_pago: 5,
+            fechaInicio: startDate,
+            fechaFin: endDate,
+            rentaMensual: unit.precio_renta,
+            diaPago: 5,
             deposito: unit.precio_renta * 2,
             estado: 'activo',
-            tipo_contrato: 'Vivienda',
-            duracion_meses: 12,
+            tipo: 'residencial',
           },
         });
         generatedData.contracts.push(contract);

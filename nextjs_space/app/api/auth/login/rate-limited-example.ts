@@ -13,11 +13,12 @@ import logger, { logSecurityEvent } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   // ✅ PASO 1: Aplicar rate limiting PRIMERO
-  const rateLimitResponse = await checkRateLimit(request, 'LOGIN_ATTEMPTS');
-  if (rateLimitResponse) {
+  const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+  const rateLimitResponse = await checkRateLimit('LOGIN_ATTEMPTS', ip);
+  if (!rateLimitResponse.success) {
     // Si se excedió el rate limit, retornar 429 inmediatamente
     logger.warn('Rate limit exceeded on login attempt', {
-      ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip'),
+      ip,
     });
     return rateLimitResponse;
   }

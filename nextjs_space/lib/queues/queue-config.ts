@@ -98,9 +98,19 @@ export function createWorker(
     return null;
   }
 
+  if (!redis) {
+    logger.warn(`Cannot create worker for queue "${name}" - Redis not available`);
+    return null;
+  }
+
   try {
     const worker = new Worker(name, processor, {
-      ...defaultWorkerOptions,
+      connection: redis,
+      concurrency: 5,
+      limiter: {
+        max: 10,
+        duration: 1000,
+      },
       ...options,
     });
 

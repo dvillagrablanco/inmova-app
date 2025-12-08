@@ -45,7 +45,6 @@ export async function sendPushNotification(
     const subscriptions = await prisma.pushSubscription.findMany({
       where: {
         userId,
-        isActive: true,
       },
     });
 
@@ -75,13 +74,12 @@ export async function sendPushNotification(
             subscriptionId: sub.id,
           });
         } catch (error: any) {
-          // Si la suscripción expiró o es inválida, desactivarla
+          // Si la suscripción expiró o es inválida, eliminarla
           if (error.statusCode === 410 || error.statusCode === 404) {
-            await prisma.pushSubscription.update({
+            await prisma.pushSubscription.delete({
               where: { id: sub.id },
-              data: { isActive: false },
             });
-            logger.info('Suscripción push desactivada', { subscriptionId: sub.id });
+            logger.info('Suscripción push eliminada (inválida)', { subscriptionId: sub.id });
           }
           throw error;
         }
@@ -153,10 +151,7 @@ export async function subscribePushNotification(
 
     if (existing) {
       // Reactivar si estaba inactiva
-      await prisma.pushSubscription.update({
-        where: { id: existing.id },
-        data: { isActive: true },
-      });
+      // Subscription already exists and is active
       return { success: true, subscriptionId: existing.id };
     }
 
@@ -167,7 +162,6 @@ export async function subscribePushNotification(
         endpoint: subscription.endpoint,
         p256dh: subscription.keys.p256dh,
         auth: subscription.keys.auth,
-        isActive: true,
       },
     });
 
@@ -191,13 +185,10 @@ export async function unsubscribePushNotification(
   endpoint: string
 ): Promise<{ success: boolean }> {
   try {
-    await prisma.pushSubscription.updateMany({
+    await prisma.pushSubscription.deleteMany({
       where: {
         userId,
         endpoint,
-      },
-      data: {
-        isActive: false,
       },
     });
 
