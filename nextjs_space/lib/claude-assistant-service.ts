@@ -980,11 +980,21 @@ async function getDashboardStats(input: any, context: AssistantContext) {
   
   const [buildingsCount, unitsCount, tenantsCount, contractsCount] = await Promise.all([
     prisma.building.count({ where: { companyId: context.companyId } }),
-    prisma.unit.count({ where: { companyId: context.companyId } }),
+    prisma.unit.count({ 
+      where: { 
+        building: {
+          companyId: context.companyId
+        }
+      } 
+    }),
     prisma.tenant.count({ where: { companyId: context.companyId } }),
     prisma.contract.count({ 
       where: { 
-        companyId: context.companyId,
+        unit: {
+          building: {
+            companyId: context.companyId
+          }
+        },
         estado: 'activo'
       } 
     })
@@ -1000,7 +1010,15 @@ async function getDashboardStats(input: any, context: AssistantContext) {
   if (includeFinancial) {
     const payments = await prisma.payment.groupBy({
       by: ['estado'],
-      where: { companyId: context.companyId },
+      where: {
+        contract: {
+          unit: {
+            building: {
+              companyId: context.companyId
+            }
+          }
+        }
+      },
       _sum: { monto: true },
       _count: true
     });
@@ -1017,7 +1035,13 @@ async function getDashboardStats(input: any, context: AssistantContext) {
   if (includeMaintenance) {
     const maintenance = await prisma.maintenanceRequest.groupBy({
       by: ['estado'],
-      where: { companyId: context.companyId },
+      where: {
+        unit: {
+          building: {
+            companyId: context.companyId
+          }
+        }
+      },
       _count: true
     });
 
@@ -1056,23 +1080,23 @@ async function searchUnits(input: any, context: AssistantContext) {
       numero: true,
       tipo: true,
       estado: true,
-      metrosCuadrados: true,
-      precioRenta: true,
-      edificio: {
+      superficie: true,
+      rentaMensual: true,
+      building: {
         select: {
           nombre: true,
           direccion: true
         }
       },
-      contratos: {
+      contracts: {
         where: {
           estado: 'activo'
         },
         select: {
           id: true,
-          inquilino: {
+          tenant: {
             select: {
-              nombre: true
+              nombreCompleto: true
             }
           }
         },

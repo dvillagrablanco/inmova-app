@@ -35,18 +35,21 @@ export function SetupProgressWidget({ className }: SetupProgressWidgetProps) {
       return;
     }
 
-    if (!session?.user?.businessVertical) {
+    // TODO: Obtener businessVertical de la compañía del usuario
+    // Por ahora, usamos un valor por defecto si no está disponible
+    const userBusinessVertical = (session?.user as any)?.businessVertical;
+    if (!userBusinessVertical) {
       return;
     }
 
-    const tour = getUserVerticalTour(session.user.businessVertical as BusinessVertical);
+    const tour = getUserVerticalTour(userBusinessVertical as BusinessVertical);
     if (!tour) {
       return;
     }
 
     // Cargar estado de las acciones desde localStorage o API
     loadSetupActionsState(tour.setupActions);
-  }, [session?.user?.businessVertical]);
+  }, [session?.user]);
 
   const loadSetupActionsState = async (actions: SetupAction[]) => {
     try {
