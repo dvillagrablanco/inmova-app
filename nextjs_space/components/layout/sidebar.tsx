@@ -209,12 +209,12 @@ const CORE_MODULES = [
 // Navegación core - Funcionalidades principales
 const coreNavItems = [
   { name: 'Inicio', href: '/home', icon: Home, roles: ['administrador', 'gestor', 'operador'] },
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['administrador', 'gestor', 'operador'] },
-  { name: 'Edificios', href: '/edificios', icon: Building2, roles: ['administrador', 'gestor'] },
-  { name: 'Unidades', href: '/unidades', icon: Home, roles: ['administrador', 'gestor'] },
-  { name: 'Inquilinos', href: '/inquilinos', icon: Users, roles: ['administrador', 'gestor'] },
-  { name: 'Contratos', href: '/contratos', icon: FileText, roles: ['administrador', 'gestor'] },
-  { name: 'Pagos', href: '/pagos', icon: CreditCard, roles: ['administrador', 'gestor'] },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['administrador', 'gestor', 'operador'], dataTour: 'dashboard-link' },
+  { name: 'Edificios', href: '/edificios', icon: Building2, roles: ['administrador', 'gestor'], dataTour: 'edificios-menu' },
+  { name: 'Unidades', href: '/unidades', icon: Home, roles: ['administrador', 'gestor'], dataTour: 'unidades-menu' },
+  { name: 'Inquilinos', href: '/inquilinos', icon: Users, roles: ['administrador', 'gestor'], dataTour: 'inquilinos-menu' },
+  { name: 'Contratos', href: '/contratos', icon: FileText, roles: ['administrador', 'gestor'], dataTour: 'contratos-menu' },
+  { name: 'Pagos', href: '/pagos', icon: CreditCard, roles: ['administrador', 'gestor'], dataTour: 'pagos-menu' },
   { name: 'Mantenimiento', href: '/mantenimiento', icon: Wrench, roles: ['administrador', 'gestor', 'operador'] },
   { name: 'Calendario', href: '/calendario', icon: Calendar, roles: ['administrador', 'gestor'] },
   { name: 'Chat', href: '/chat', icon: MessageSquare, roles: ['administrador', 'gestor'] },
@@ -518,6 +518,7 @@ export function Sidebar() {
         <Link
           href={item.href}
           onClick={() => setIsMobileMenuOpen(false)}
+          data-tour={item.dataTour || undefined}
           className={cn(
             'flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 text-sm',
             isActive
