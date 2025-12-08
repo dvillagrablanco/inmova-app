@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger, { logError } from '@/lib/logger';
+import { invalidateBuildingsCache, invalidateDashboardCache } from '@/lib/api-cache-helpers';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,6 +44,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const companyId = session.user?.companyId;
     const body = await req.json();
     const { nombre, direccion, tipo, anoConstructor, numeroUnidades } = body;
 
@@ -56,6 +58,12 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         numeroUnidades: numeroUnidades ? parseInt(numeroUnidades) : undefined,
       },
     });
+
+    // Invalidar cachés relacionados
+    if (companyId) {
+      invalidateBuildingsCache(companyId);
+      invalidateDashboardCache(companyId);
+    }
 
     return NextResponse.json(building);
   } catch (error) {
@@ -71,9 +79,17 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const companyId = session.user?.companyId;
+
     await prisma.building.delete({
       where: { id: params.id },
     });
+
+    // Invalidar cachés relacionados
+    if (companyId) {
+      invalidateBuildingsCache(companyId);
+      invalidateDashboardCache(companyId);
+    }
 
     return NextResponse.json({ message: 'Edificio eliminado' });
   } catch (error) {

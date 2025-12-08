@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger, { logError } from '@/lib/logger';
 import { paymentCreateSchema } from '@/lib/validations';
+import { cachedPayments, invalidatePaymentsCache, invalidateDashboardCache } from '@/lib/api-cache-helpers';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,31 +15,49 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const companyId = session.user?.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'CompanyId no encontrado' }, { status: 400 });
+    }
+
     const { searchParams } = new URL(req.url);
     const estado = searchParams.get('estado');
     const contractId = searchParams.get('contractId');
 
-    const where: any = {};
-    if (estado) where.estado = estado;
-    if (contractId) where.contractId = contractId;
+    // Si hay filtros, no usar caché (por ahora)
+    const hasFilters = estado || contractId;
 
-    const payments = await prisma.payment.findMany({
-      where,
-      include: {
+    if (hasFilters) {
+      const where: any = {
         contract: {
-          include: {
-            unit: {
-              include: {
-                building: true,
+          unit: { building: { companyId } },
+        },
+      };
+      if (estado) where.estado = estado;
+      if (contractId) where.contractId = contractId;
+
+      const payments = await prisma.payment.findMany({
+        where,
+        include: {
+          contract: {
+            include: {
+              unit: {
+                include: {
+                  building: true,
+                },
               },
+              tenant: true,
             },
-            tenant: true,
           },
         },
-      },
-      orderBy: { fechaVencimiento: 'desc' },
-    });
+        orderBy: { fechaVencimiento: 'desc' },
+      });
 
+      return NextResponse.json(payments);
+    }
+
+    // Sin filtros, usar caché
+    const payments = await cachedPayments(companyId);
     return NextResponse.json(payments);
   } catch (error) {
     logger.error('Error fetching payments:', error);
@@ -77,6 +96,7 @@ export async function POST(req: NextRequest) {
     }
 
     const validatedData = validationResult.data;
+    const companyId = session.user?.companyId;
 
     const payment = await prisma.payment.create({
       data: {
@@ -89,6 +109,12 @@ export async function POST(req: NextRequest) {
         metodoPago: validatedData.metodoPago || null,
       },
     });
+
+    // Invalidar cachés relacionados
+    if (companyId) {
+      invalidatePaymentsCache(companyId);
+      invalidateDashboardCache(companyId);
+    }
 
     logger.info('Payment created successfully', { paymentId: payment.id });
     return NextResponse.json(payment, { status: 201 });

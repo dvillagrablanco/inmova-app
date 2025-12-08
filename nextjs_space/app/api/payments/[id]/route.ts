@@ -7,6 +7,7 @@ import { paymentReceiptEmail } from '@/lib/email-templates';
 import { sendEmail } from '@/lib/email-config';
 import { uploadFile } from '@/lib/s3';
 import logger, { logError } from '@/lib/logger';
+import { invalidatePaymentsCache, invalidateDashboardCache } from '@/lib/api-cache-helpers';
 
 export const dynamic = 'force-dynamic';
 
@@ -193,6 +194,13 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       }
     }
 
+    // Invalidar cachés relacionados
+    const companyId = payment.contract.unit.building.companyId;
+    if (companyId) {
+      invalidatePaymentsCache(companyId);
+      invalidateDashboardCache(companyId);
+    }
+
     return NextResponse.json(payment);
   } catch (error) {
     logger.error('Error updating payment:', error);
@@ -207,9 +215,17 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const companyId = session.user?.companyId;
+
     await prisma.payment.delete({
       where: { id: params.id },
     });
+
+    // Invalidar cachés relacionados
+    if (companyId) {
+      invalidatePaymentsCache(companyId);
+      invalidateDashboardCache(companyId);
+    }
 
     return NextResponse.json({ message: 'Pago eliminado' });
   } catch (error) {

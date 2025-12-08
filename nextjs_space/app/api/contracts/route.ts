@@ -4,6 +4,12 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger, { logError } from '@/lib/logger';
 import { contractCreateSchema } from '@/lib/validations';
+import { 
+  cachedContracts, 
+  invalidateContractsCache, 
+  invalidateUnitsCache, 
+  invalidateDashboardCache 
+} from '@/lib/api-cache-helpers';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,30 +20,13 @@ export async function GET() {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const contracts = await prisma.contract.findMany({
-      include: {
-        unit: {
-          include: {
-            building: true,
-          },
-        },
-        tenant: true,
-        payments: true,
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+    const companyId = session.user?.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'CompanyId no encontrado' }, { status: 400 });
+    }
 
-    // Add days until expiration
-    const contractsWithExpiration = contracts.map((contract) => {
-      const today = new Date();
-      const fechaFin = new Date(contract.fechaFin);
-      const diasHastaVencimiento = Math.ceil((fechaFin.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-      
-      return {
-        ...contract,
-        diasHastaVencimiento,
-      };
-    });
+    // Usar datos cacheados
+    const contractsWithExpiration = await cachedContracts(companyId);
 
     return NextResponse.json(contractsWithExpiration);
   } catch (error) {
@@ -71,6 +60,7 @@ export async function POST(req: NextRequest) {
     }
 
     const validatedData = validationResult.data;
+    const companyId = session.user?.companyId;
 
     const contract = await prisma.contract.create({
       data: {
@@ -95,6 +85,13 @@ export async function POST(req: NextRequest) {
         tenantId: validatedData.tenantId,
       },
     });
+
+    // Invalidar cachés relacionados
+    if (companyId) {
+      invalidateContractsCache(companyId);
+      invalidateUnitsCache(companyId);
+      invalidateDashboardCache(companyId);
+    }
 
     logger.info('Contract created successfully', { contractId: contract.id });
     return NextResponse.json(contract, { status: 201 });
