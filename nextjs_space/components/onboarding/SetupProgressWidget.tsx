@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Circle, ChevronRight, X, Sparkles, Database, Loader2 } from 'lucide-react';
 import { BusinessVertical } from '@prisma/client';
 import { getUserVerticalTour, calculateSetupProgress, getNextRecommendedAction, SetupAction } from '@/lib/onboarding-tours';
-import { logger } from '@/lib/logger';
+import logger from '@/lib/logger';
 import { cn } from '@/lib/utils';
 
 interface SetupProgressWidgetProps {

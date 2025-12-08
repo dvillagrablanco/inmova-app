@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { sendPushNotificationToUser } from '@/lib/push-notifications';
+// Temporarily disabled - function not implemented
+// import { sendPushNotificationToUser } from '@/lib/push-notifications';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -18,29 +19,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Permisos insuficientes' }, { status: 403 });
     }
 
-    const { userId, title, body, url, tag } = await request.json();
-
-    if (!userId || !title || !body) {
-      return NextResponse.json(
-        { error: 'Datos incompletos' },
-        { status: 400 }
-      );
-    }
-
-    const result = await sendPushNotificationToUser(userId, {
-      title,
-      body,
-      data: {
-        url: url || '/dashboard',
-      },
-      tag: tag || 'inmova-notification',
-    });
-
-    return NextResponse.json(result);
-  } catch (error: any) {
-    logger.error('Error sending push notification:', error);
+    // Temporarily disabled - function not implemented
     return NextResponse.json(
-      { error: error.message || 'Error al enviar notificación' },
+      { error: 'Funcionalidad en desarrollo' },
+      { status: 501 }
+    );
+
+  } catch (error) {
+    logError(error as Error, {
+      context: 'POST /api/push-notifications/send',
+    });
+    return NextResponse.json(
+      { error: 'Error al enviar notificación push' },
       { status: 500 }
     );
   }
