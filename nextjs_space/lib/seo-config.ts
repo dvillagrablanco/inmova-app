@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 
-const baseUrl = 'https://inmova.app'
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://inmova.app'
 
 export const defaultMetadata: Metadata = {
   metadataBase: new URL(baseUrl),

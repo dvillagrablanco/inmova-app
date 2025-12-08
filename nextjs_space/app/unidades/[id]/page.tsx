@@ -25,6 +25,8 @@ import {
 } from '@/components/ui/breadcrumb';
 import Image from 'next/image';
 import logger, { logError } from '@/lib/logger';
+import { ShareButtons } from '@/components/ui/share-buttons';
+import { SocialPreview } from '@/components/seo/SocialPreview';
 
 export default function UnidadDetailPage() {
   const router = useRouter();
@@ -156,7 +158,33 @@ export default function UnidadDetailPage() {
                   </p>
                 </div>
               </div>
+
+              {/* Botones para compartir */}
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-medium text-gray-700">Compartir esta propiedad</h3>
+                    <ShareButtons
+                      url={`${typeof window !== 'undefined' ? window.location.origin : ''}/unidades/${unit?.id}`}
+                      title={`${unit?.building?.nombre} - Unidad ${unit?.numero}`}
+                      description={`${unit?.tipo || 'Propiedad'} de ${unit?.superficie}m² con ${unit?.habitaciones || 0} habitaciones y ${unit?.banos || 0} baños. Renta: €${unit?.rentaMensual?.toLocaleString('es-ES')}/mes`}
+                      hashtags={['inmova', 'inmobiliaria', 'alquiler']}
+                      variant="inline"
+                      size="sm"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
+
+            {/* Preview de redes sociales */}
+            <SocialPreview
+              title={`${unit?.building?.nombre} - Unidad ${unit?.numero}`}
+              description={`${unit?.tipo || 'Propiedad'} de ${unit?.superficie}m² con ${unit?.habitaciones || 0} habitaciones y ${unit?.banos || 0} baños. Renta: €${unit?.rentaMensual?.toLocaleString('es-ES')}/mes`}
+              url={`${typeof window !== 'undefined' ? window.location.origin : ''}/unidades/${unit?.id}`}
+              image={unit?.imagenes?.[0] || '/inmova-property-default.jpg'}
+              siteName="INMOVA"
+            />
 
             {/* Galería de Fotos y Multimedia */}
             {(unit?.imagenes?.length > 0 || unit?.tourVirtual || unit?.planos?.length > 0) && (
