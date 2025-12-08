@@ -44,7 +44,7 @@ function createTransporter(): Transporter {
 
   // Configuración para SendGrid
   if (process.env.SENDGRID_API_KEY) {
-    transporter = nodemailer.createTransporter({
+    transporter = nodemailer.createTransport({
       host: 'smtp.sendgrid.net',
       port: 587,
       secure: false,
@@ -56,7 +56,7 @@ function createTransporter(): Transporter {
   }
   // Configuración SMTP genérica
   else if (process.env.SMTP_HOST) {
-    transporter = nodemailer.createTransporter({
+    transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: parseInt(process.env.SMTP_PORT || '587'),
       secure: process.env.SMTP_SECURE === 'true',
@@ -70,7 +70,7 @@ function createTransporter(): Transporter {
   else if (process.env.NODE_ENV === 'development') {
     console.warn('⚠️  No email provider configured. Using console logging.');
     // En desarrollo, solo loguear
-    transporter = nodemailer.createTransporter({
+    transporter = nodemailer.createTransport({
       streamTransport: true,
       newline: 'unix',
       buffer: true,

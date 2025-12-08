@@ -108,7 +108,7 @@ export async function getCached<T>(
   try {
     // Try to get from cache
     const cached = await client.get(key);
-    if (cached) {
+    if (cached && typeof cached === 'string') {
       logger.debug(`Cache HIT: ${key}`);
       return JSON.parse(cached) as T;
     }
@@ -141,11 +141,13 @@ export async function invalidateCache(keyOrPattern: string): Promise<void> {
     // If pattern contains *, use SCAN to delete multiple keys
     if (keyOrPattern.includes('*')) {
       const keys: string[] = [];
-      for await (const key of client.scanIterator({ MATCH: keyOrPattern, COUNT: 100 })) {
-        keys.push(key);
+      for await (const foundKey of client.scanIterator({ MATCH: keyOrPattern, COUNT: 100 })) {
+        if (typeof foundKey === 'string') {
+          keys.push(foundKey);
+        }
       }
       if (keys.length > 0) {
-        await client.del(keys);
+        await Promise.all(keys.map(k => client.del(k)));
         logger.info(`Invalidated ${keys.length} cache keys matching: ${keyOrPattern}`);
       }
     } else {
