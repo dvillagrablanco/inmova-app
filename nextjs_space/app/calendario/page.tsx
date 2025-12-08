@@ -54,7 +54,7 @@ import {
   FileText,
   Bell,
 } from 'lucide-react';
-import { Calendar, dateFnsLocalizer, View, Views } from 'react-big-calendar';
+import { Calendar, dateFnsLocalizer, View, Views } from '@/components/ui/lazy-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { toast } from 'sonner';
 import {
