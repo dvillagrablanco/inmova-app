@@ -1,19 +1,24 @@
 import { NextResponse } from 'next/server';
-import { getPublicVapidKey } from '@/lib/push-notifications';
-import logger, { logError } from '@/lib/logger';
+// Temporarily disabled - function not implemented
+// import { getPublicVapidKey } from '@/lib/push-notifications';
 
 export const dynamic = 'force-dynamic';
 
-
 export async function GET() {
   try {
-    const publicKey = getPublicVapidKey();
+    const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
     
+    if (!publicKey) {
+      return NextResponse.json(
+        { error: 'VAPID public key not configured' },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({ publicKey });
-  } catch (error: any) {
-    logger.error('Error getting public key:', error);
+  } catch (error) {
     return NextResponse.json(
-      { error: 'Error al obtener la clave pública', details: error.message },
+      { error: 'Error al obtener la clave pública' },
       { status: 500 }
     );
   }

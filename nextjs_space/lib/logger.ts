@@ -228,3 +228,4 @@ export const logPerformance = (operation: string, duration: number, metadata?: R
 };
 
 export default logger;
+export { logger };
