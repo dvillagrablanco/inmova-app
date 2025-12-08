@@ -102,12 +102,18 @@ export async function POST(request: NextRequest) {
 
     const suggestion = await prisma.suggestion.create({
       data: {
-        ...validatedData,
         companyId: user.companyId,
         userId: user.id,
         nombreRemitente: user.name,
         emailRemitente: user.email,
-      },
+        titulo: validatedData.titulo,
+        descripcion: validatedData.descripcion,
+        prioridad: validatedData.prioridad,
+        categoria: validatedData.categoria,
+        navegador: validatedData.navegador,
+        sistemaOperativo: validatedData.sistemaOperativo,
+        urlOrigen: validatedData.urlOrigen,
+      } as any,
       include: {
         company: {
           select: {
@@ -133,7 +139,7 @@ export async function POST(request: NextRequest) {
             userId: admin.id,
             tipo: 'info',
             titulo: '💡 Nueva Sugerencia',
-            mensaje: `${user.name} (${suggestion.company.nombre}) envió: "${validatedData.titulo}"`,
+            mensaje: `${user.name} (${(suggestion as any).company?.nombre || 'Empresa'}) envió: "${validatedData.titulo}"`,
             leida: false,
             entityId: suggestion.id,
             entityType: 'suggestion',
