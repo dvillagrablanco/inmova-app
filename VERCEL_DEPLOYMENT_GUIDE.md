@@ -1,420 +1,209 @@
-# Guía de Deployment en Vercel - INMOVA
+# Guía de Deployment Automático en Vercel para INMOVA
 
-## 📋 Prerrequisitos
+## 📋 Resumen
 
-- Cuenta de Vercel (https://vercel.com)
-- Cuenta de GitHub con el repositorio del proyecto
-- Acceso a la base de datos PostgreSQL (Supabase o similar)
-- Variables de entorno configuradas
+Esta guía te ayudará a configurar el deployment automático de INMOVA en Vercel usando GitHub Actions.
 
-## 🚀 Paso 1: Preparar el Repositorio en GitHub
+## 🚀 Paso 1: Obtener las Credenciales de Vercel
 
-### 1.1 Asegúrate de que el proyecto esté en GitHub
+### 1.1 Token de Vercel
 
-```bash
-# Si aún no has inicializado git
-cd /home/ubuntu/homming_vidaro
-git init
+1. Ve a [Vercel Dashboard](https://vercel.com/account/tokens)
+2. Inicia sesión con:
+   - Email: `dvillagra@vidaroinversiones.com`
+   - Contraseña: `Pucela00`
+3. Haz clic en "Create Token"
+4. Dale un nombre descriptivo: `GitHub Actions INMOVA`
+5. Selecciona el scope: `Full Account`
+6. Copia el token generado (lo necesitarás en el Paso 2)
 
-# Agrega todos los archivos
-git add .
+### 1.2 Organization ID y Project ID
 
-# Haz el primer commit
-git commit -m "Initial commit - INMOVA project"
+#### Opción A: Proyecto Existente
 
-# Conecta con tu repositorio de GitHub
-git remote add origin https://github.com/TU_USUARIO/TU_REPO.git
+Si ya tienes un proyecto en Vercel:
 
-# Sube los cambios
-git push -u origin main
-```
+1. Ve a [Vercel Dashboard](https://vercel.com/dashboard)
+2. Selecciona tu proyecto "INMOVA" o "homming-vidaro"
+3. Ve a Settings → General
+4. Copia:
+   - **Project ID**: Se encuentra en la sección "Project ID"
+   - **Organization ID**: Ejecuta este comando en tu terminal local:
+     ```bash
+     vercel teams ls
+     ```
 
-### 1.2 Archivos importantes ya configurados
+#### Opción B: Crear Nuevo Proyecto
 
-✅ `vercel.json` - Configuración de Vercel
-✅ `next.config.js` - Configuración de Next.js
-✅ `.env` - Variables de entorno (NO subir a GitHub)
-✅ `package.json` - Dependencias del proyecto
+Si necesitas crear un nuevo proyecto:
 
-### 1.3 Crea un archivo `.gitignore` si no existe
+1. Ve a [Vercel Dashboard](https://vercel.com/new)
+2. Conecta tu repositorio de GitHub: `dvillagrab/inmova-app`
+3. Configura el proyecto:
+   - **Framework Preset**: Next.js
+   - **Root Directory**: `nextjs_space`
+   - **Build Command**: `yarn build`
+   - **Output Directory**: `.next`
+   - **Install Command**: `yarn install`
 
-```bash
-# En el directorio raíz del proyecto
-cat > .gitignore << 'EOF'
-# dependencies
-node_modules/
-.pnp
-.pnp.js
-yarn-error.log
+4. **NO HAGAS DEPLOY TODAVÍA**, solo guarda el proyecto
+5. Una vez creado, ve a Settings → General y copia:
+   - **Project ID**
+   - **Organization ID** (ejecuta `vercel teams ls` en terminal)
 
-# testing
-coverage/
-.nyc_output
+## 🔐 Paso 2: Configurar Secrets en GitHub
 
-# next.js
-.next/
-out/
-build/
-dist/
+1. Ve a tu repositorio: https://github.com/dvillagrab/inmova-app
+2. Ve a Settings → Secrets and variables → Actions
+3. Haz clic en "New repository secret" y añade estos 3 secrets:
 
-# production
-/build
+   **Secret 1: VERCEL_TOKEN**
+   - Name: `VERCEL_TOKEN`
+   - Value: El token que copiaste en el Paso 1.1
 
-# misc
-.DS_Store
-*.pem
+   **Secret 2: VERCEL_ORG_ID**
+   - Name: `VERCEL_ORG_ID`
+   - Value: El Organization ID del Paso 1.2
 
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+   **Secret 3: VERCEL_PROJECT_ID**
+   - Name: `VERCEL_PROJECT_ID`
+   - Value: El Project ID del Paso 1.2
 
-# local env files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+## 📦 Paso 3: Configurar Variables de Entorno en Vercel
 
-# vercel
-.vercel
+Ve a tu proyecto en Vercel → Settings → Environment Variables y añade:
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+### Variables Requeridas:
 
-# prisma
-prisma/migrations/
+```env
+DATABASE_URL=postgresql://role_587683780:5kWw7vKJBDp9ZA2Jfkt5BdWrAjR0XDe5@db-587683780.db003.hosteddb.reai.io:5432/587683780?connect_timeout=15
 
-# IDE
-.vscode/
-.idea/
-EOF
-```
-
-## 🌐 Paso 2: Configurar Vercel
-
-### 2.1 Crear Nuevo Proyecto en Vercel
-
-1. Ve a https://vercel.com/new
-2. Selecciona "Import Git Repository"
-3. Conecta tu cuenta de GitHub si no lo has hecho
-4. Busca y selecciona tu repositorio `homming_vidaro`
-
-### 2.2 Configuración del Proyecto
-
-**Framework Preset:** Next.js
-
-**Root Directory:** Deja en blanco o selecciona la carpeta raíz
-
-**Build Settings:**
-- Build Command: `cd nextjs_space && yarn build`
-- Output Directory: `nextjs_space/.next`
-- Install Command: `cd nextjs_space && yarn install`
-
-### 2.3 Variables de Entorno
-
-En la sección "Environment Variables" de Vercel, agrega todas estas variables:
-
-#### Variables de Base de Datos
-```bash
-DATABASE_URL=postgresql://usuario:contraseña@host:5432/database
-```
-
-#### Variables de Autenticación
-```bash
 NEXTAUTH_SECRET=wJqizZO73C6pU4tjLTNwzjeoGLaMWvr9
-NEXTAUTH_URL=https://tu-dominio.vercel.app
+
+NEXTAUTH_URL=https://inmova.app
+
+AWS_PROFILE=default
+AWS_REGION=us-east-1
+AWS_BUCKET_NAME=abacus-test-file-hosting
+AWS_FOLDER_PREFIX=homming_vidaro/
+
+STRIPE_SECRET_KEY=(obtener de tu cuenta de Stripe)
+STRIPE_PUBLISHABLE_KEY=(obtener de tu cuenta de Stripe)
+STRIPE_WEBHOOK_SECRET=(obtener de tu cuenta de Stripe)
+
+ABACUSAI_API_KEY=(si aplica)
+
+CRON_SECRET=(generar un secreto aleatorio)
+ENCRYPTION_KEY=(generar un secreto aleatorio)
 ```
 
-#### Variables de AWS S3
-```bash
-AWS_PROFILE=hosted_storage
-AWS_REGION=us-west-2
-AWS_BUCKET_NAME=tu-bucket-name
-AWS_FOLDER_PREFIX=tu-folder/
-```
+**Importante**: Marca todas las variables como disponibles para "Production", "Preview", y "Development" según necesites.
 
-#### Variables de Stripe
-```bash
-STRIPE_SECRET_KEY=sk_test_tu_clave_aqui
-STRIPE_PUBLISHABLE_KEY=pk_test_tu_clave_aqui
-STRIPE_WEBHOOK_SECRET=whsec_tu_secret_aqui
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_tu_clave_aqui
-```
+## 🎯 Paso 4: Configurar Custom Domain (Opcional)
 
-#### Variables de Notificaciones Push
-```bash
-NEXT_PUBLIC_VAPID_PUBLIC_KEY=BEl62iUYgUivxIkv69yViEuiBIa-Ib27SzV9p3F-Jq-6-kxq9RwD9qdL4U3JfYxSh_Vu_WG2cEg8u7kJ7-vQTmE
-VAPID_PRIVATE_KEY=p-K-PxeghWxVyGxvxHYVsT3xhp5fKWvUqNfNqN-J4XM
-```
+Si quieres usar el dominio `inmova.app`:
 
-#### Variables de Abacus AI
-```bash
-ABACUSAI_API_KEY=a66d474df9e547058d3b977b3771d53b
-```
+1. Ve a tu proyecto en Vercel → Settings → Domains
+2. Añade el dominio: `inmova.app` y `www.inmova.app`
+3. Sigue las instrucciones de Vercel para configurar los DNS records en tu proveedor de dominio
 
-#### Variables de Video
-```bash
-NEXT_PUBLIC_VIDEO_URL=https://www.youtube.com/embed/zm55Gdl5G1Q
-```
+## 🚀 Paso 5: Hacer el Primer Deploy
 
-#### Variables de Seguridad
-```bash
-CRON_SECRET=inmova-cron-secret-2024-secure-key-xyz789
-ENCRYPTION_KEY=151b21e7b3a0ebb00a2ff5288f3575c9d4167305d3a84ccd385564955adefd2b
-```
+### Opción A: Desde GitHub (Automático)
 
-> **IMPORTANTE:** Marca estas variables como disponibles para los 3 ambientes: Production, Preview y Development
+1. Haz commit y push de tus cambios:
+   ```bash
+   git add .
+   git commit -m "chore: setup Vercel deployment workflow"
+   git push origin main
+   ```
 
-## 🗄️ Paso 3: Configurar Base de Datos (Supabase)
+2. Ve a tu repositorio → Actions
+3. Verás el workflow "Deploy to Vercel" ejecutándose
+4. Espera a que termine (tarda unos 5-10 minutos)
+5. ¡Tu aplicación estará desplegada! 🎉
 
-### 3.1 Crear Proyecto en Supabase
+### Opción B: Deploy Manual desde tu Máquina
 
-1. Ve a https://supabase.com/dashboard
-2. Crea un nuevo proyecto
-3. Anota la URL de conexión de PostgreSQL
-
-### 3.2 Obtener la URL de Conexión
-
-1. En tu proyecto de Supabase, ve a **Settings** → **Database**
-2. Busca la sección "Connection string"
-3. Selecciona "URI" y copia la cadena de conexión
-4. Reemplaza `[YOUR-PASSWORD]` con tu contraseña
-
-Ejemplo:
-```
-postgresql://postgres.xxxxx:TU_PASSWORD@aws-0-us-west-1.pooler.supabase.com:5432/postgres
-```
-
-### 3.3 Actualizar Variable de Entorno en Vercel
-
-Actualiza `DATABASE_URL` en Vercel con la URL de Supabase.
-
-### 3.4 Ejecutar Migraciones de Prisma
-
-Después del primer deployment, necesitas ejecutar las migraciones:
+Si quieres hacer un deploy manual primero:
 
 ```bash
-# Opción 1: Desde tu máquina local
-cd nextjs_space
-DATABASE_URL="tu_url_de_supabase" npx prisma migrate deploy
-DATABASE_URL="tu_url_de_supabase" npx prisma db seed
+cd /home/ubuntu/homming_vidaro/nextjs_space
 
-# Opción 2: Usar Vercel CLI
-vercel env pull .env.local
-yarn prisma migrate deploy
-yarn prisma db seed
+# Login (solo la primera vez)
+npx vercel login
+
+# Link al proyecto
+npx vercel link
+
+# Deploy a producción
+npx vercel --prod
 ```
 
-## 🔗 Paso 4: Integración con GitHub
+## 🔄 Deployment Automático
 
-### 4.1 Configurar Deploy Automático
+Una vez configurado todo:
 
-Vercel automáticamente desplegará cuando:
-- Hagas push a la rama `main` (producción)
-- Hagas push a otras ramas (preview)
-- Crees un Pull Request (preview)
+✅ Cada push a `main` o `master` desplegará automáticamente a producción
+✅ También puedes hacer deploy manual desde GitHub Actions → Run workflow
+✅ Los deployments fallidos no afectarán a tu aplicación en producción
 
-### 4.2 Proteger Rama Principal
+## 📊 Monitoreo
 
-En GitHub, ve a **Settings** → **Branches** → **Add rule**:
+- **Vercel Dashboard**: https://vercel.com/dashboard
+- **GitHub Actions**: https://github.com/dvillagrab/inmova-app/actions
+- **Logs de Deployment**: Disponibles en ambas plataformas
 
-- Branch name pattern: `main`
-- ✅ Require pull request reviews before merging
-- ✅ Require status checks to pass before merging
-- ✅ Vercel – Production
+## ⚠️ Troubleshooting
 
-### 4.3 Configurar Webhooks (Opcional)
+### Error: "Project not found"
 
-Vercel configura automáticamente los webhooks necesarios con GitHub.
+- Verifica que `VERCEL_PROJECT_ID` sea correcto
+- Verifica que el token tenga permisos suficientes
 
-## 🎯 Paso 5: Deploy Inicial
+### Error: "Invalid token"
 
-### 5.1 Hacer Deploy
+- Genera un nuevo token en Vercel
+- Actualiza el secret `VERCEL_TOKEN` en GitHub
 
-1. Haz clic en **Deploy** en Vercel
-2. Espera a que se complete el build (puede tardar 5-10 minutos)
-3. Vercel te dará una URL de producción: `https://tu-proyecto.vercel.app`
+### Error de Build
 
-### 5.2 Verificar el Deploy
+- Revisa los logs en GitHub Actions
+- Verifica que todas las variables de entorno estén configuradas en Vercel
+- Asegúrate de que el proyecto compile localmente primero
 
-1. Ve a la URL proporcionada
-2. Verifica que la aplicación cargue correctamente
-3. Prueba el login con las credenciales:
-   - **Super Admin:** `superadmin@inmova.com` / `superadmin123`
-   - **Admin:** `admin@inmova.com` / `admin123`
+### Error de Database Connection
 
-## 🛠️ Paso 6: Configuraciones Adicionales
+- Verifica que `DATABASE_URL` esté configurada correctamente en Vercel
+- Asegúrate de que la base de datos permita conexiones desde las IPs de Vercel
 
-### 6.1 Configurar Dominio Personalizado
+## 🆘 Soporte
 
-1. En Vercel, ve a **Settings** → **Domains**
-2. Agrega tu dominio: `inmova.app` o `www.inmova.app`
-3. Sigue las instrucciones para configurar los registros DNS
+Si necesitas ayuda:
 
-### 6.2 Configurar Cron Jobs
+1. Revisa los logs en GitHub Actions
+2. Revisa los logs en Vercel Dashboard
+3. Consulta la [documentación oficial de Vercel](https://vercel.com/docs)
+4. Abre un issue en el repositorio de GitHub
 
-Los cron jobs ya están configurados en `vercel.json`:
+## 📝 Notas Importantes
 
-```json
-"crons": [
-  {
-    "path": "/api/cron/notifications",
-    "schedule": "0 9 * * *"
-  },
-  {
-    "path": "/api/cron/calendar-sync",
-    "schedule": "0 */6 * * *"
-  },
-  {
-    "path": "/api/cron/cleanup",
-    "schedule": "0 2 * * 0"
-  }
-]
-```
+- El primer deployment puede tardar más tiempo (10-15 minutos)
+- Los siguientes deployments serán más rápidos (3-5 minutos)
+- Vercel generará automáticamente previews para pull requests
+- Cada preview tendrá su propia URL única
+- Los deployments a producción solo ocurren en `main` o `master`
 
-> **Nota:** Los cron jobs solo funcionan en planes Pro de Vercel.
+## ✅ Checklist Final
 
-### 6.3 Configurar Analytics (Opcional)
-
-1. Ve a **Analytics** en Vercel
-2. Activa Vercel Analytics
-3. Agrega el código en tu `app/layout.tsx`:
-
-```tsx
-import { Analytics } from '@vercel/analytics/react';
-
-export default function RootLayout({ children }) {
-  return (
-    <html>
-      <body>
-        {children}
-        <Analytics />
-      </body>
-    </html>
-  );
-}
-```
-
-## 🔍 Troubleshooting
-
-### Error: "Module not found"
-
-**Solución:**
-```bash
-# Verifica que todas las dependencias estén instaladas
-cd nextjs_space
-yarn install
-```
-
-### Error: "Database connection failed"
-
-**Solución:**
-1. Verifica que `DATABASE_URL` esté correctamente configurada en Vercel
-2. Asegúrate de que Supabase permita conexiones desde cualquier IP
-3. En Supabase: **Settings** → **Database** → **Connection pooling** → Enable
-
-### Error: "Build failed"
-
-**Solución:**
-1. Revisa los logs en Vercel
-2. Verifica que `next.config.js` esté correctamente configurado
-3. Asegúrate de que `typescript.ignoreBuildErrors` esté en `false`
-
-### Error: "Prisma Client not generated"
-
-**Solución:**
-```bash
-# Genera el cliente de Prisma localmente
-cd nextjs_space
-yarn prisma generate
-
-# Agrega un build script en package.json
-"postinstall": "prisma generate"
-```
-
-## 📊 Monitoreo Post-Deploy
-
-### Verificar Métricas
-
-1. **Build Time:** Debe ser < 5 minutos
-2. **Function Execution:** Debe ser < 10 segundos
-3. **Edge Network:** Debe usar la región más cercana
-
-### Logs y Debugging
-
-```bash
-# Instalar Vercel CLI
-npm i -g vercel
-
-# Login
-vercel login
-
-# Ver logs en tiempo real
-vercel logs
-
-# Ver logs de una función específica
-vercel logs --since 1h
-```
-
-## 🔄 Workflow de Desarrollo
-
-### Desarrollo Local
-```bash
-cd nextjs_space
-yarn dev
-# Visita http://localhost:3000
-```
-
-### Preview Deploy (Staging)
-```bash
-# Crea una rama de feature
-git checkout -b feature/nueva-funcionalidad
-
-# Haz cambios y commit
-git add .
-git commit -m "feat: nueva funcionalidad"
-
-# Push a GitHub
-git push origin feature/nueva-funcionalidad
-
-# Vercel creará automáticamente un deploy de preview
-```
-
-### Production Deploy
-```bash
-# Merge a main a través de Pull Request en GitHub
-# O directamente:
-git checkout main
-git merge feature/nueva-funcionalidad
-git push origin main
-
-# Vercel desplegará automáticamente a producción
-```
-
-## 🎉 ¡Deployment Completo!
-
-Tu aplicación INMOVA ahora está desplegada en Vercel con:
-
-✅ Deploy automático desde GitHub
-✅ Base de datos PostgreSQL en Supabase
-✅ Variables de entorno configuradas
-✅ SSL/HTTPS automático
-✅ CDN global
-✅ Cron jobs configurados
-✅ Dominios personalizados (opcional)
-
-## 📞 Soporte
-
-Si necesitas ayuda adicional:
-
-- **Vercel Documentation:** https://vercel.com/docs
-- **Supabase Documentation:** https://supabase.com/docs
-- **Next.js Documentation:** https://nextjs.org/docs
+- [ ] Token de Vercel obtenido y configurado en GitHub Secrets
+- [ ] Organization ID configurado en GitHub Secrets
+- [ ] Project ID configurado en GitHub Secrets
+- [ ] Variables de entorno configuradas en Vercel
+- [ ] Custom domain configurado (opcional)
+- [ ] Primer deployment exitoso
+- [ ] GitHub Actions workflow funcionando
 
 ---
 
-**Última actualización:** Diciembre 2024
-**Versión:** 1.0
-**Proyecto:** INMOVA - Sistema de Gestión Inmobiliaria
+**¡Tu aplicación INMOVA ahora se despliega automáticamente en Vercel!** 🎉
