@@ -12,7 +12,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { applyRateLimit } from '@/lib/rate-limit';
-import { withCache, CACHE_TTL, deleteCached } from '@/lib/redis';
+import { getCached, CACHE_TTL, invalidateCache, companyKey } from '@/lib/redis';
 import { prisma } from '@/lib/db';
 import logger, { logError, logPerformance } from '@/lib/logger';
 
@@ -41,8 +41,9 @@ export async function GET(request: NextRequest) {
 
   try {
     // ✅ 3. Caché con Redis
-    const stats = await withCache(
-      `dashboard:stats:${companyId}`,
+    const cacheKey = companyKey(companyId, 'dashboard:stats');
+    const stats = await getCached(
+      cacheKey,
       async () => {
         logger.info('Fetching dashboard stats from database', { companyId, userId });
 
@@ -147,7 +148,8 @@ export async function DELETE(request: NextRequest) {
 
   try {
     // Invalidar caché
-    await deleteCached(`dashboard:stats:${companyId}`);
+    const cacheKey = companyKey(companyId, 'dashboard:stats');
+    await invalidateCache(cacheKey);
     
     logger.info('Dashboard cache invalidated', { companyId });
 
