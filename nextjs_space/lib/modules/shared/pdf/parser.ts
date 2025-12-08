@@ -21,7 +21,6 @@ export async function parsePDF(pdfBuffer: Buffer): Promise<PDFParseResult> {
       text: 'Extracted text from PDF',
       metadata: {
         title: 'Document',
-        pages: 1,
       },
       pages: 1,
       extracted: {},

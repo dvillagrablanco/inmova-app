@@ -631,7 +631,7 @@ async function getBuildingDetails(input: any, context: AssistantContext) {
           numero: true,
           tipo: true,
           estado: true,
-          metrosCuadrados: true,
+          superficie: true,
           contracts: {
             where: {
               estado: 'activo'

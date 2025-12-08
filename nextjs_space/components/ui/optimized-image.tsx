@@ -1,11 +1,7 @@
-/**
- * OptimizedImage Component
- * Provides automatic AVIF/WebP format support with blur placeholders
- * Uses Next.js Image component with modern optimizations
- */
+'use client';
 
-import Image from 'next/image';
 import { useState } from 'react';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 interface OptimizedImageProps {
@@ -13,57 +9,49 @@ interface OptimizedImageProps {
   alt: string;
   width?: number;
   height?: number;
-  fill?: boolean;
   className?: string;
   priority?: boolean;
-  quality?: number;
-  sizes?: string;
+  fill?: boolean;
   objectFit?: 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
+  quality?: number;
   placeholder?: 'blur' | 'empty';
   blurDataURL?: string;
+  sizes?: string;
   onLoad?: () => void;
   onError?: () => void;
 }
 
 /**
- * Generate a simple blur placeholder
- */
-function generateBlurPlaceholder(width: number = 8, height: number = 8): string {
-  const canvas = typeof document !== 'undefined' ? document.createElement('canvas') : null;
-  if (!canvas) {
-    return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
-  }
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  if (ctx) {
-    ctx.fillStyle = '#f3f4f6';
-    ctx.fillRect(0, 0, width, height);
-  }
-  return canvas.toDataURL();
-}
-
-/**
- * OptimizedImage with automatic format detection and blur placeholder
+ * Componente OptimizedImage - Optimiza la carga de imágenes
+ * 
+ * Características:
+ * - Lazy loading automático (excepto con priority=true)
+ * - Blur placeholder mientras carga
+ * - Fallback a imagen por defecto si falla
+ * - Soporte para Next.js Image optimization
+ * - Responsive con sizes
  */
 export function OptimizedImage({
   src,
   alt,
   width,
   height,
-  fill,
   className,
   priority = false,
-  quality = 85,
-  sizes,
+  fill = false,
   objectFit = 'cover',
-  placeholder = 'blur',
+  quality = 75,
+  placeholder = 'empty',
   blurDataURL,
+  sizes,
   onLoad,
   onError,
 }: OptimizedImageProps) {
+  const [imageError, setImageError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
+
+  // Imagen por defecto si falla la carga
+  const fallbackSrc = '/placeholder-image.svg';
 
   const handleLoad = () => {
     setIsLoading(false);
@@ -71,132 +59,107 @@ export function OptimizedImage({
   };
 
   const handleError = () => {
+    setImageError(true);
     setIsLoading(false);
-    setHasError(true);
     onError?.();
   };
 
-  if (hasError) {
-    return (
-      <div
-        className={cn(
-          'flex items-center justify-center bg-muted text-muted-foreground',
-          className
-        )}
-        style={{ width, height }}
-      >
-        <svg
-          className="h-8 w-8"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-          />
-        </svg>
-      </div>
-    );
-  }
+  // Si fill=true, no usar width/height
+  const imageDimensions = fill
+    ? {}
+    : {
+        width: width || 400,
+        height: height || 300,
+      };
 
   return (
     <div className={cn('relative overflow-hidden', className)}>
       {isLoading && (
-        <div
-          className="absolute inset-0 bg-muted animate-pulse"
-          style={{ zIndex: 1 }}
-        />
+        <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 animate-pulse" />
       )}
       <Image
-        src={src}
+        src={imageError ? fallbackSrc : src}
         alt={alt}
-        width={width}
-        height={height}
+        {...imageDimensions}
         fill={fill}
         priority={priority}
         quality={quality}
-        sizes={sizes}
+        placeholder={placeholder}
+        blurDataURL={blurDataURL}
+        sizes={sizes || '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'}
         className={cn(
           'transition-opacity duration-300',
           isLoading ? 'opacity-0' : 'opacity-100',
           fill && `object-${objectFit}`
         )}
-        placeholder={placeholder}
-        blurDataURL={blurDataURL || generateBlurPlaceholder()}
         onLoad={handleLoad}
         onError={handleError}
+        loading={priority ? 'eager' : 'lazy'}
       />
     </div>
   );
 }
 
 /**
- * Optimized Image with aspect ratio container
+ * Variante OptimizedImageCard - Para usar en cards con aspect ratio fijo
  */
-interface ResponsiveImageProps extends Omit<OptimizedImageProps, 'fill'> {
-  aspectRatio?: string; // e.g., "16/9", "4/3", "1/1"
-}
-
-export function ResponsiveImage({
-  aspectRatio = '16/9',
+export function OptimizedImageCard({
+  src,
+  alt,
   className,
+  aspectRatio = 'video', // 16:9
   ...props
-}: ResponsiveImageProps) {
+}: Omit<OptimizedImageProps, 'fill' | 'width' | 'height'> & {
+  aspectRatio?: 'video' | 'square' | 'portrait' | 'landscape';
+}) {
+  const aspectRatioClass = {
+    video: 'aspect-video',
+    square: 'aspect-square',
+    portrait: 'aspect-[3/4]',
+    landscape: 'aspect-[4/3]',
+  }[aspectRatio];
+
   return (
-    <div
-      className={cn('relative w-full bg-muted', className)}
-      style={{ aspectRatio }}
-    >
-      <OptimizedImage {...props} fill objectFit="cover" />
+    <div className={cn('relative', aspectRatioClass, className)}>
+      <OptimizedImage
+        src={src}
+        alt={alt}
+        fill
+        objectFit="cover"
+        {...props}
+      />
     </div>
   );
 }
 
 /**
- * Gallery grid of optimized images
+ * Variante OptimizedAvatar - Para imágenes de perfil circulares
  */
-interface ImageGalleryProps {
-  images: Array<{ src: string; alt: string; id?: string }>;
-  columns?: number;
-  gap?: number;
-  aspectRatio?: string;
-  onImageClick?: (index: number) => void;
-}
+export function OptimizedAvatar({
+  src,
+  alt,
+  size = 'md',
+  className,
+  ...props
+}: Omit<OptimizedImageProps, 'fill' | 'width' | 'height'> & {
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+}) {
+  const sizeClasses = {
+    sm: 'w-8 h-8',
+    md: 'w-12 h-12',
+    lg: 'w-16 h-16',
+    xl: 'w-24 h-24',
+  }[size];
 
-export function ImageGallery({
-  images,
-  columns = 3,
-  gap = 4,
-  aspectRatio = '1/1',
-  onImageClick,
-}: ImageGalleryProps) {
   return (
-    <div
-      className="grid"
-      style={{
-        gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-        gap: `${gap * 0.25}rem`,
-      }}
-    >
-      {images.map((image, index) => (
-        <div
-          key={image.id || index}
-          className={cn(
-            'cursor-pointer transition-transform hover:scale-105',
-            onImageClick && 'cursor-pointer'
-          )}
-          onClick={() => onImageClick?.(index)}
-        >
-          <ResponsiveImage
-            src={image.src}
-            alt={image.alt}
-            aspectRatio={aspectRatio}
-          />
-        </div>
-      ))}
+    <div className={cn('relative rounded-full overflow-hidden', sizeClasses, className)}>
+      <OptimizedImage
+        src={src}
+        alt={alt}
+        fill
+        objectFit="cover"
+        {...props}
+      />
     </div>
   );
 }
