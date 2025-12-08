@@ -1,34 +1,24 @@
-/**
- * Lazy-loaded Calendar Component
- * Calendar components can be heavy with date manipulation libraries
- */
-import { lazy, Suspense } from 'react';
-import type { DayPickerProps } from 'react-day-picker';
+'use client';
 
-// Lazy load Calendar
-const CalendarComponent = lazy(() => 
-  import('@/components/ui/calendar').then(module => ({ 
-    default: module.Calendar 
-  }))
-);
+import dynamic from 'next/dynamic';
+import { ComponentType } from 'react';
+import type { CalendarProps } from 'react-big-calendar';
 
-interface LazyCalendarProps {
-  loadingComponent?: React.ReactNode;
-  [key: string]: any;
-}
+// Lazy load react-big-calendar for better performance
+const BigCalendar = dynamic(
+  () => import('react-big-calendar').then(mod => mod.Calendar as any),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center h-[600px] bg-gradient-bg rounded-lg">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    ),
+  }
+) as ComponentType<CalendarProps>;
 
-export function LazyCalendar({ loadingComponent, ...props }: LazyCalendarProps) {
-  const defaultLoading = (
-    <div className="flex items-center justify-center h-72 bg-muted/50 rounded-lg animate-pulse">
-      <div className="text-sm text-muted-foreground">Cargando calendario...</div>
-    </div>
-  );
+export { BigCalendar as Calendar };
 
-  return (
-    <Suspense fallback={loadingComponent || defaultLoading}>
-      <CalendarComponent {...props} />
-    </Suspense>
-  );
-}
-
-export default LazyCalendar;
+// Export other react-big-calendar utilities
+export { dateFnsLocalizer, Views } from 'react-big-calendar';
+export type { View } from 'react-big-calendar';
