@@ -4,7 +4,7 @@
  */
 
 import { prisma } from './db';
-import getRedisClient from './redis';
+import { getRedisClient } from './redis';
 import logger from './logger';
 
 export interface HealthStatus {
