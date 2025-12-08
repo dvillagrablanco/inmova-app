@@ -103,9 +103,9 @@ export async function POST(req: NextRequest) {
 
     // Invalidar cachés relacionados
     if (companyId) {
-      invalidateUnitsCache(companyId);
-      invalidateBuildingsCache(companyId);
-      invalidateDashboardCache(companyId);
+      await invalidateUnitsCache(companyId);
+      await invalidateBuildingsCache(companyId);
+      await invalidateDashboardCache(companyId);
     }
 
     logger.info('Unit created successfully', { unitId: unit.id, buildingId: validatedData.buildingId });

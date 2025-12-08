@@ -66,9 +66,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     // Invalidar cachés relacionados
     if (companyId) {
-      invalidateContractsCache(companyId);
-      invalidateUnitsCache(companyId);
-      invalidateDashboardCache(companyId);
+      await invalidateContractsCache(companyId);
+      await invalidateUnitsCache(companyId);
+      await invalidateDashboardCache(companyId);
     }
 
     return NextResponse.json(contract);
@@ -93,9 +93,9 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
     // Invalidar cachés relacionados
     if (companyId) {
-      invalidateContractsCache(companyId);
-      invalidateUnitsCache(companyId);
-      invalidateDashboardCache(companyId);
+      await invalidateContractsCache(companyId);
+      await invalidateUnitsCache(companyId);
+      await invalidateDashboardCache(companyId);
     }
 
     return NextResponse.json({ message: 'Contrato eliminado' });

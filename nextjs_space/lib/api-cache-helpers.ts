@@ -4,7 +4,7 @@
  */
 
 import { prisma } from './db';
-import { withCache, cacheService } from './cache-service';
+import { withCache, cacheService } from './redis-cache-service';
 import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
 
 // TTLs específicos por tipo de dato (en milisegundos)
@@ -454,51 +454,52 @@ export async function cachedAnalytics(companyId: string, type: string) {
 /**
  * CACHE INVALIDATION HELPERS
  * Funciones para invalidar caché cuando se modifican datos
+ * NOTA: Estas funciones son asíncronas al usar Redis
  */
 
-export function invalidateDashboardCache(companyId: string): void {
-  cacheService.delete(`dashboard:stats:${companyId}`);
+export async function invalidateDashboardCache(companyId: string): Promise<void> {
+  await cacheService.delete(`dashboard:stats:${companyId}`);
 }
 
-export function invalidateBuildingsCache(companyId: string): void {
-  cacheService.delete(`buildings:list:${companyId}`);
+export async function invalidateBuildingsCache(companyId: string): Promise<void> {
+  await cacheService.delete(`buildings:list:${companyId}`);
 }
 
-export function invalidateUnitsCache(companyId: string): void {
-  cacheService.delete(`units:list:${companyId}`);
+export async function invalidateUnitsCache(companyId: string): Promise<void> {
+  await cacheService.delete(`units:list:${companyId}`);
 }
 
-export function invalidatePaymentsCache(companyId: string): void {
-  cacheService.delete(`payments:list:${companyId}`);
+export async function invalidatePaymentsCache(companyId: string): Promise<void> {
+  await cacheService.delete(`payments:list:${companyId}`);
 }
 
-export function invalidateContractsCache(companyId: string): void {
-  cacheService.delete(`contracts:list:${companyId}`);
+export async function invalidateContractsCache(companyId: string): Promise<void> {
+  await cacheService.delete(`contracts:list:${companyId}`);
 }
 
-export function invalidateTenantsCache(companyId: string): void {
-  cacheService.delete(`tenants:list:${companyId}`);
+export async function invalidateTenantsCache(companyId: string): Promise<void> {
+  await cacheService.delete(`tenants:list:${companyId}`);
 }
 
-export function invalidateExpensesCache(companyId: string): void {
-  cacheService.delete(`expenses:list:${companyId}`);
+export async function invalidateExpensesCache(companyId: string): Promise<void> {
+  await cacheService.delete(`expenses:list:${companyId}`);
 }
 
-export function invalidateMaintenanceCache(companyId: string): void {
-  cacheService.delete(`maintenance:list:${companyId}`);
+export async function invalidateMaintenanceCache(companyId: string): Promise<void> {
+  await cacheService.delete(`maintenance:list:${companyId}`);
 }
 
-export function invalidateAnalyticsCache(companyId: string, type?: string): void {
+export async function invalidateAnalyticsCache(companyId: string, type?: string): Promise<void> {
   if (type) {
-    cacheService.delete(`analytics:${type}:${companyId}`);
+    await cacheService.delete(`analytics:${type}:${companyId}`);
   } else {
-    cacheService.invalidateByPattern(`analytics:`);
+    await cacheService.invalidateByPattern(`analytics:`);
   }
 }
 
 /**
  * Invalida todo el caché de una empresa
  */
-export function invalidateCompanyCache(companyId: string): void {
-  cacheService.invalidateByPattern(companyId);
+export async function invalidateCompanyCache(companyId: string): Promise<void> {
+  await cacheService.invalidateByPattern(companyId);
 }

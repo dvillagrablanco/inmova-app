@@ -70,9 +70,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     // Invalidar cachés relacionados
     if (companyId) {
-      invalidateUnitsCache(companyId);
-      invalidateBuildingsCache(companyId);
-      invalidateDashboardCache(companyId);
+      await invalidateUnitsCache(companyId);
+      await invalidateBuildingsCache(companyId);
+      await invalidateDashboardCache(companyId);
     }
 
     return NextResponse.json(unit);
@@ -97,9 +97,9 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
     // Invalidar cachés relacionados
     if (companyId) {
-      invalidateUnitsCache(companyId);
-      invalidateBuildingsCache(companyId);
-      invalidateDashboardCache(companyId);
+      await invalidateUnitsCache(companyId);
+      await invalidateBuildingsCache(companyId);
+      await invalidateDashboardCache(companyId);
     }
 
     return NextResponse.json({ message: 'Unidad eliminada' });

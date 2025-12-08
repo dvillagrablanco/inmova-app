@@ -88,9 +88,9 @@ export async function POST(req: NextRequest) {
 
     // Invalidar cachés relacionados
     if (companyId) {
-      invalidateContractsCache(companyId);
-      invalidateUnitsCache(companyId);
-      invalidateDashboardCache(companyId);
+      await invalidateContractsCache(companyId);
+      await invalidateUnitsCache(companyId);
+      await invalidateDashboardCache(companyId);
     }
 
     logger.info('Contract created successfully', { contractId: contract.id });

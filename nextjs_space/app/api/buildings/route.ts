@@ -61,8 +61,8 @@ export async function POST(req: NextRequest) {
     });
 
     // Invalidar cachés relacionados
-    invalidateBuildingsCache(companyId);
-    invalidateDashboardCache(companyId);
+    await invalidateBuildingsCache(companyId);
+    await invalidateDashboardCache(companyId);
 
     logger.info('Building created successfully', { buildingId: building.id, companyId });
     return NextResponse.json(building, { status: 201 });

@@ -61,8 +61,8 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     // Invalidar cachés relacionados
     if (companyId) {
-      invalidateBuildingsCache(companyId);
-      invalidateDashboardCache(companyId);
+      await invalidateBuildingsCache(companyId);
+      await invalidateDashboardCache(companyId);
     }
 
     return NextResponse.json(building);
@@ -87,8 +87,8 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
     // Invalidar cachés relacionados
     if (companyId) {
-      invalidateBuildingsCache(companyId);
-      invalidateDashboardCache(companyId);
+      await invalidateBuildingsCache(companyId);
+      await invalidateDashboardCache(companyId);
     }
 
     return NextResponse.json({ message: 'Edificio eliminado' });
