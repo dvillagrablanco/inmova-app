@@ -97,9 +97,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const units = await prisma.unit.findMany({
       where: {
         estado: 'disponible',
-        building: {
-          activo: true,
-        },
       },
       select: {
         id: true,
@@ -120,9 +117,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // URLs dinámicas de edificios (solo activos)
     const buildings = await prisma.building.findMany({
-      where: {
-        activo: true,
-      },
+      where: {},
       select: {
         id: true,
         updatedAt: true,

@@ -30,8 +30,8 @@ export interface SetupAction {
 
 // Tours específicos por vertical
 export const VERTICAL_TOURS: Record<BusinessVertical, VerticalTour> = {
-  traditional_rental: {
-    id: 'traditional_rental',
+  alquiler_tradicional: {
+    id: 'alquiler_tradicional',
     name: 'Alquiler Tradicional',
     description: 'Configuración inicial para gestión de alquileres tradicionales',
     steps: [
@@ -236,8 +236,8 @@ export const VERTICAL_TOURS: Record<BusinessVertical, VerticalTour> = {
     ],
   },
   
-  str: {
-    id: 'str',
+  str_vacacional: {
+    id: 'str_vacacional',
     name: 'Alquiler Turístico (STR)',
     description: 'Configuración para alquileres de corta estancia',
     steps: [
@@ -431,8 +431,8 @@ export const VERTICAL_TOURS: Record<BusinessVertical, VerticalTour> = {
     ],
   },
   
-  construction: {
-    id: 'construction',
+  construccion: {
+    id: 'construccion',
     name: 'Construcción/Desarrollo',
     description: 'Gestión de proyectos de construcción',
     steps: [
@@ -519,8 +519,8 @@ export const VERTICAL_TOURS: Record<BusinessVertical, VerticalTour> = {
     ],
   },
   
-  professional: {
-    id: 'professional',
+  servicios_profesionales: {
+    id: 'servicios_profesionales',
     name: 'Servicios Profesionales',
     description: 'Para arquitectos, topógrafos y consultores',
     steps: [
@@ -603,6 +603,57 @@ export const VERTICAL_TOURS: Record<BusinessVertical, VerticalTour> = {
         icon: 'Receipt',
         completed: false,
         weight: 25,
+      },
+    ],
+  },
+
+  mixto: {
+    id: 'mixto',
+    name: 'Modelo Mixto',
+    description: 'Configuración para múltiples verticales de negocio',
+    steps: [
+      {
+        target: 'body',
+        content: (
+          <div className="space-y-3">
+            <h3 className="text-lg font-bold">Bienvenido a INMOVA - Modelo Mixto</h3>
+            <p className="text-sm">
+              Has seleccionado un modelo mixto. Esta configuración te permite gestionar múltiples tipos de propiedades y negocios inmobiliarios.
+            </p>
+            <p className="text-sm font-medium">Duración estimada: 5 minutos</p>
+          </div>
+        ),
+        placement: 'center',
+        disableBeacon: true,
+      },
+    ],
+    setupActions: [
+      {
+        id: 'crear_primera_propiedad',
+        title: 'Crear primera propiedad',
+        description: 'Añade tu primera propiedad al sistema',
+        route: '/inmuebles',
+        icon: 'Building',
+        completed: false,
+        weight: 40,
+      },
+      {
+        id: 'configurar_usuarios',
+        title: 'Configurar usuarios',
+        description: 'Invita a tu equipo y asigna roles',
+        route: '/configuracion/usuarios',
+        icon: 'Users',
+        completed: false,
+        weight: 30,
+      },
+      {
+        id: 'configurar_facturacion',
+        title: 'Configurar facturación',
+        description: 'Establece tus preferencias de facturación',
+        route: '/contabilidad',
+        icon: 'Receipt',
+        completed: false,
+        weight: 30,
       },
     ],
   },

@@ -183,7 +183,6 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
               content: pdfBuffer,
             },
           ],
-          companyName: payment.contract.unit.building.company.nombre,
         });
 
         logger.info(`✅ Recibo generado y enviado para pago ${payment.id}`);

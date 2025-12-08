@@ -82,7 +82,7 @@ export function useSWRWithOptimistic<T>(
       if (optimisticData) {
         const newData =
           typeof optimisticData === 'function'
-            ? optimisticData(data)
+            ? (optimisticData as (current: T) => T)(data)
             : optimisticData;
         await mutate(newData, false);
       }
