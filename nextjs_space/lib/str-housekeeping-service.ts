@@ -112,7 +112,7 @@ export async function createHousekeepingTask(input: CreateTaskInput) {
   }
 
   // Si hay checklist, cargarla
-  let checklistData = null;
+  let checklistData: any = null;
   if (rest.checklistId) {
     const checklist = await prisma.sTRHousekeepingChecklist.findUnique({
       where: { id: rest.checklistId }

@@ -98,8 +98,8 @@ export async function POST(req: NextRequest) {
 
     logger.info('Contract created successfully', { contractId: contract.id });
     return NextResponse.json(contract, { status: 201 });
-  } catch (error) {
-    logError(error, 'Error creating contract');
+  } catch (error: any) {
+    logError(error, { context: 'Error creating contract' });
     return NextResponse.json({ error: 'Error al crear contrato' }, { status: 500 });
   }
 }

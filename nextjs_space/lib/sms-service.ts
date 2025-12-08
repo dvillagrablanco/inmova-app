@@ -375,7 +375,7 @@ export async function instalarPlantillasPredefinidas(
   creadoPor: string
 ) {
   
-  const plantillasCreadas = [];
+  const plantillasCreadas: any[] = [];
   
   for (const plantilla of PLANTILLAS_PREDEFINIDAS) {
     const existe = await prisma.sMSTemplate.findFirst({
@@ -551,7 +551,7 @@ export async function generarSMSAutomaticos(evento: string, companyId: string) {
     return [];
   }
   
-  const smsGenerados = [];
+  const smsGenerados: any[] = [];
   
   // Según el evento, buscar destinatarios
   if (evento === 'pago_vencimiento_3dias') {

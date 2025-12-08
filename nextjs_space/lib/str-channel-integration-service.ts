@@ -306,7 +306,7 @@ export async function syncCalendar(
     }
 
     // En modo DEMO: generar calendario simulado
-    const days = [];
+    const days: Date[] = [];
     let currentDate = startOfDay(startDate);
     const end = startOfDay(endDate);
 
