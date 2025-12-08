@@ -1,60 +1,98 @@
-// @ts-nocheck
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { sendPushNotificationToUser, sendPushNotificationToUsers, sendPushNotificationToCompany } from '@/lib/push-notifications';
-import logger, { logError } from '@/lib/logger';
+import { sendPushNotification } from '@/lib/push-service';
+import logger from '@/lib/logger';
+import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-
+/**
+ * POST /api/push/send
+ * Envía una notificación push a uno o más usuarios
+ */
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.id) {
+    if (!session?.user?.companyId) {
       return NextResponse.json(
-        { error: 'No autorizado' },
+        { error: 'No autenticado' },
         { status: 401 }
       );
     }
 
-    const { userId, userIds, companyId, payload } = await request.json();
+    const body = await request.json();
+    const {
+      userIds, // Array de IDs de usuarios o 'all'
+      title,
+      body: messageBody,
+      url,
+      icon,
+      tag,
+      requireInteraction,
+      metadata
+    } = body;
 
-    if (!payload || !payload.title || !payload.body) {
+    if (!title || !messageBody) {
       return NextResponse.json(
-        { error: 'Payload inválido. Se requieren title y body.' },
+        { error: 'Título y mensaje son requeridos' },
         { status: 400 }
       );
     }
 
-    let result;
+    const notification = {
+      title,
+      body: messageBody,
+      url: url || '/',
+      icon: icon || '/icon-192x192.png',
+      tag: tag || 'default',
+      requireInteraction: requireInteraction || false,
+      metadata: metadata || {}
+    };
 
-    if (userId) {
-      // Enviar a un usuario específico
-      result = await sendPushNotificationToUser(userId, payload);
-    } else if (userIds && Array.isArray(userIds)) {
-      // Enviar a múltiples usuarios
-      result = await sendPushNotificationToUsers(userIds, payload);
-    } else if (companyId) {
-      // Enviar a todos los usuarios de una empresa
-      result = await sendPushNotificationToCompany(companyId, payload);
+    let targetUserIds: string[] = [];
+    
+    if (userIds === 'all') {
+      // Enviar a todos los usuarios de la compañía
+      const users = await prisma.user.findMany({
+        where: { companyId: session.user.companyId },
+        select: { id: true }
+      });
+      targetUserIds = users.map(u => u.id);
+    } else if (Array.isArray(userIds)) {
+      targetUserIds = userIds;
     } else {
       return NextResponse.json(
-        { error: 'Se requiere userId, userIds o companyId' },
+        { error: 'userIds debe ser un array o "all"' },
         { status: 400 }
       );
     }
+
+    // Enviar notificaciones
+    const results = await Promise.allSettled(
+      targetUserIds.map(userId => 
+        sendPushNotification(userId, notification)
+      )
+    );
+
+    const successful = results.filter(r => r.status === 'fulfilled').length;
+    const failed = results.filter(r => r.status === 'rejected').length;
+
+    logger.info(
+      `Push notifications sent: ${successful} successful, ${failed} failed`,
+      { companyId: session.user.companyId }
+    );
 
     return NextResponse.json({
       success: true,
-      message: `Notificaciones enviadas: ${result.success} exitosas, ${result.failed} fallidas`,
-      ...result
+      sent: successful,
+      failed: failed,
+      total: results.length
     });
-  } catch (error: any) {
-    logger.error('Error sending push notification:', error);
+  } catch (error) {
+    logger.error('Error enviando push notifications:', error);
     return NextResponse.json(
-      { error: 'Error al enviar notificación', details: error.message },
+      { error: 'Error enviando notificaciones' },
       { status: 500 }
     );
   }

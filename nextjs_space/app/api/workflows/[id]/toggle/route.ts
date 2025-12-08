@@ -1,35 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import prisma from '@/lib/prisma';
+import { authOptions } from '@/lib/auth-options';
+import { prisma } from '@/lib/db';
+import { logger, logError } from '@/lib/logger';
 
-type RouteParams = {
-  params: Promise<{ id: string }>;
-};
+export const dynamic = 'force-dynamic';
 
 /**
- * POST /api/workflows/[id]/toggle - Activar/Desactivar un workflow
+ * POST /api/workflows/[id]/toggle - Activa/desactiva un workflow
  */
 export async function POST(
-  req: NextRequest,
-  { params }: RouteParams
+  request: NextRequest,
+  { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+    if (!session?.user?.companyId) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const { id } = await params;
-
-    // Verificar que el workflow pertenece a la empresa
+    // Verificar que el workflow existe y pertenece a la empresa
     const workflow = await prisma.workflow.findFirst({
       where: {
-        id,
+        id: params.id,
         companyId: session.user.companyId,
       },
     });
@@ -42,19 +35,28 @@ export async function POST(
     }
 
     // Toggle isActive
-    const updatedWorkflow = await prisma.workflow.update({
-      where: { id },
+    const updated = await prisma.workflow.update({
+      where: { id: params.id },
       data: {
         isActive: !workflow.isActive,
-        status: !workflow.isActive ? 'activo' : 'inactivo',
       },
     });
 
-    return NextResponse.json(updatedWorkflow);
-  } catch (error: any) {
-    console.error('Error cambiando estado del workflow:', error);
+    logger.info(
+      `Workflow ${updated.isActive ? 'activated' : 'deactivated'}: ${updated.id}`,
+      {
+        metadata: {
+          workflowId: updated.id,
+          userId: session.user.id,
+        }
+      }
+    );
+
+    return NextResponse.json({ success: true, isActive: updated.isActive });
+  } catch (error) {
+    logger.error('POST /api/workflows/[id]/toggle', { error });
     return NextResponse.json(
-      { error: 'Error cambiando estado del workflow' },
+      { error: 'Error al cambiar estado del workflow' },
       { status: 500 }
     );
   }
