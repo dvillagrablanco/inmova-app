@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger, { logError } from '@/lib/logger';
+import { invalidateContractsCache, invalidateUnitsCache, invalidateDashboardCache } from '@/lib/api-cache-helpers';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,6 +48,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const companyId = session.user?.companyId;
     const body = await req.json();
     const { fechaInicio, fechaFin, rentaMensual, deposito, estado, tipo } = body;
 
@@ -62,6 +64,13 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       },
     });
 
+    // Invalidar cachés relacionados
+    if (companyId) {
+      invalidateContractsCache(companyId);
+      invalidateUnitsCache(companyId);
+      invalidateDashboardCache(companyId);
+    }
+
     return NextResponse.json(contract);
   } catch (error) {
     logger.error('Error updating contract:', error);
@@ -76,9 +85,18 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const companyId = session.user?.companyId;
+
     await prisma.contract.delete({
       where: { id: params.id },
     });
+
+    // Invalidar cachés relacionados
+    if (companyId) {
+      invalidateContractsCache(companyId);
+      invalidateUnitsCache(companyId);
+      invalidateDashboardCache(companyId);
+    }
 
     return NextResponse.json({ message: 'Contrato eliminado' });
   } catch (error) {
