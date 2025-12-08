@@ -368,3 +368,147 @@ export async function getSocialMediaStats(companyId: string) {
     totalImpresiones: metricsSum._sum.impresiones || 0,
   };
 }
+
+/**
+ * Generar contenido automático para una nueva propiedad
+ */
+export async function generatePropertyPostContent(propertyData: {
+  type: 'building' | 'unit';
+  name: string;
+  address?: string;
+  precio?: number;
+  superficie?: number;
+  habitaciones?: number;
+  imageUrl?: string;
+}) {
+  const { type, name, address, precio, superficie, habitaciones, imageUrl } = propertyData;
+
+  let mensaje = '';
+  const hashtags = ['#InmovaApp', '#PropTech', '#GestiónInmobiliaria'];
+
+  if (type === 'building') {
+    mensaje = `🏢 ¡Nuevo edificio incorporado a nuestra cartera!\n\n` +
+      `📍 ${name}${address ? `\n${address}` : ''}\n\n` +
+      `Gestionado con tecnología INMOVA para máxima eficiencia operativa.\n\n` +
+      `#NuevaPropiedad #Inmobiliaria ${hashtags.join(' ')}`;
+  } else {
+    mensaje = `🏠 ¡Nueva propiedad disponible!\n\n` +
+      `${name}\n` +
+      `${habitaciones ? `🛏️ ${habitaciones} habitaciones\n` : ''}` +
+      `${superficie ? `📐 ${superficie} m²\n` : ''}` +
+      `${precio ? `💰 ${precio.toLocaleString('es-ES')}€/mes\n` : ''}\n` +
+      `${address || ''}\n\n` +
+      `Contáctanos para más información.\n\n` +
+      `#PropiedadDisponible #Alquiler ${hashtags.join(' ')}`;
+  }
+
+  return {
+    mensaje,
+    imagenesUrls: imageUrl ? [imageUrl] : [],
+    hashtags
+  };
+}
+
+/**
+ * Publicar automáticamente en redes sociales cuando se crea una propiedad
+ */
+export async function autoPublishProperty(
+  companyId: string,
+  userId: string,
+  propertyData: {
+    type: 'building' | 'unit';
+    id: string;
+    name: string;
+    address?: string;
+    precio?: number;
+    superficie?: number;
+    habitaciones?: number;
+    imageUrl?: string;
+  },
+  options?: {
+    platforms?: SocialMediaPlatform[];
+    scheduleMinutesDelay?: number;
+  }
+) {
+  try {
+    // Obtener cuentas activas
+    const accounts = await getConnectedAccounts(companyId);
+    
+    if (accounts.length === 0) {
+      logger.info('No hay cuentas de redes sociales conectadas para autopublicar');
+      return {
+        success: false,
+        published: 0,
+        failed: 0,
+        total: 0,
+        message: 'No hay cuentas conectadas'
+      };
+    }
+
+    // Generar contenido
+    const postContent = await generatePropertyPostContent(propertyData);
+
+    // Filtrar cuentas por plataforma si se especifica
+    let targetAccounts = accounts;
+    if (options?.platforms) {
+      targetAccounts = accounts.filter(acc => 
+        options.platforms!.includes(acc.platform)
+      );
+    }
+
+    if (targetAccounts.length === 0) {
+      return {
+        success: false,
+        published: 0,
+        failed: 0,
+        total: 0,
+        message: 'No hay cuentas para las plataformas especificadas'
+      };
+    }
+
+    // Crear posts en cada cuenta
+    const publishPromises = targetAccounts.map(async (account) => {
+      const scheduledFor = options?.scheduleMinutesDelay 
+        ? new Date(Date.now() + options.scheduleMinutesDelay * 60 * 1000)
+        : undefined;
+
+      return publishToSocialMedia(
+        account.id,
+        {
+          mensaje: postContent.mensaje,
+          imagenesUrls: postContent.imagenesUrls,
+        },
+        userId,
+        scheduledFor
+      );
+    });
+
+    const results = await Promise.allSettled(publishPromises);
+    
+    const successful = results.filter(r => r.status === 'fulfilled' && r.value.success).length;
+    const failed = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value.success)).length;
+
+    logger.info(`Autopublicación de propiedad: ${successful} éxitos, ${failed} fallos`);
+
+    return {
+      success: successful > 0,
+      published: successful,
+      failed,
+      total: results.length,
+      message: `Publicado en ${successful} de ${results.length} cuentas`
+    };
+  } catch (error) {
+    logError(new Error(error instanceof Error ? error.message : 'Error en autopublicación'), {
+      companyId,
+      propertyId: propertyData.id
+    });
+    
+    return {
+      success: false,
+      published: 0,
+      failed: 1,
+      total: 1,
+      message: 'Error en autopublicación'
+    };
+  }
+}

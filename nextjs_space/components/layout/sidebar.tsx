@@ -59,6 +59,7 @@ import {
   Zap,
   BookOpen,
   Scan,
+  Share2,
 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -92,6 +93,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/notificaciones': 'notificaciones',
   '/incidencias': 'incidencias',
   '/ocr': 'ocr',
+  '/redes-sociales': 'redes_sociales',
   '/admin/dashboard': 'admin_dashboard',
   '/admin/clientes': 'gestion_clientes',
   '/admin/planes': 'admin_planes',
@@ -224,6 +226,7 @@ const coreNavItems = [
 const automatizacionNavItems = [
   { name: 'Automatización', href: '/automatizacion', icon: Zap, roles: ['administrador', 'gestor', 'operador'] },
   { name: 'Workflows', href: '/workflows', icon: Zap, roles: ['administrador', 'gestor', 'operador'] },
+  { name: 'Redes Sociales', href: '/redes-sociales', icon: Share2, roles: ['administrador', 'gestor'] },
   { name: 'Soporte', href: '/soporte', icon: HeadphonesIcon, roles: ['administrador', 'gestor', 'operador'] },
   { name: 'Base de Conocimientos', href: '/knowledge-base', icon: BookOpen, roles: ['administrador', 'gestor', 'operador'] },
 ];

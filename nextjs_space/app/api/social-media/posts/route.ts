@@ -19,10 +19,11 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type');
+    const statsParam = searchParams.get('stats');
 
-    if (type === 'stats') {
+    if (type === 'stats' || statsParam === 'true') {
       const stats = await getSocialMediaStats(session.user.companyId);
-      return NextResponse.json({ success: true, stats });
+      return NextResponse.json(stats);
     }
 
     const accountId = searchParams.get('accountId') || undefined;
@@ -33,7 +34,7 @@ export async function GET(request: NextRequest) {
       estado,
     });
 
-    return NextResponse.json({ success: true, posts });
+    return NextResponse.json(posts);
   } catch (error) {
     return NextResponse.json(
       { error: 'Error al obtener posts' },
@@ -50,13 +51,15 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { accountId, content, programar } = body;
+    const { accountId, content, programar, scheduledFor } = body;
+
+    const scheduleDate = scheduledFor || programar;
 
     const result = await publishToSocialMedia(
       accountId,
       content,
       session.user.id,
-      programar ? new Date(programar) : undefined
+      scheduleDate ? new Date(scheduleDate) : undefined
     );
 
     return NextResponse.json(result);
