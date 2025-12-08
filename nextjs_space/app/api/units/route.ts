@@ -5,6 +5,8 @@ import { authOptions } from '@/lib/auth-options';
 import logger, { logError } from '@/lib/logger';
 import { unitCreateSchema } from '@/lib/validations';
 import { cachedUnits, invalidateUnitsCache, invalidateBuildingsCache, invalidateDashboardCache } from '@/lib/api-cache-helpers';
+import { getPaginationParams, buildPaginationResponse } from '@/lib/pagination-helper';
+import { selectBuildingMinimal, selectTenantMinimal, selectContractMinimal } from '@/lib/query-optimizer';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,24 +26,81 @@ export async function GET(req: NextRequest) {
     const buildingId = searchParams.get('buildingId');
     const estado = searchParams.get('estado');
     const tipo = searchParams.get('tipo');
+    const usePagination = searchParams.get('paginate') === 'true';
 
-    // Si hay filtros, no usar caché (por ahora)
+    // Si hay filtros o se solicita paginación, no usar caché
     const hasFilters = buildingId || estado || tipo;
 
-    if (hasFilters) {
+    if (hasFilters || usePagination) {
       const where: any = { building: { companyId } };
       if (buildingId) where.buildingId = buildingId;
       if (estado) where.estado = estado;
       if (tipo) where.tipo = tipo;
 
+      // Paginación si se solicita
+      if (usePagination) {
+        const { skip, take, page, limit } = getPaginationParams(searchParams);
+        
+        const [units, total] = await Promise.all([
+          prisma.unit.findMany({
+            where,
+            select: {
+              id: true,
+              numero: true,
+              tipo: true,
+              estado: true,
+              planta: true,
+              superficie: true,
+              habitaciones: true,
+              banos: true,
+              rentaMensual: true,
+              createdAt: true,
+              building: {
+                select: selectBuildingMinimal,
+              },
+              tenant: {
+                select: selectTenantMinimal,
+              },
+              contracts: {
+                where: { estado: 'activo' },
+                take: 1,
+                select: selectContractMinimal,
+              },
+            },
+            orderBy: { createdAt: 'desc' },
+            skip,
+            take,
+          }),
+          prisma.unit.count({ where }),
+        ]);
+
+        return NextResponse.json(buildPaginationResponse(units, total, page, limit));
+      }
+
+      // Sin paginación pero con filtros
       const units = await prisma.unit.findMany({
         where,
-        include: {
-          building: true,
-          tenant: true,
+        select: {
+          id: true,
+          numero: true,
+          tipo: true,
+          estado: true,
+          planta: true,
+          superficie: true,
+          habitaciones: true,
+          banos: true,
+          rentaMensual: true,
+          createdAt: true,
+          building: {
+            select: selectBuildingMinimal,
+          },
+          tenant: {
+            select: selectTenantMinimal,
+          },
           contracts: {
             where: { estado: 'activo' },
             take: 1,
+            select: selectContractMinimal,
           },
         },
         orderBy: { createdAt: 'desc' },
@@ -50,7 +109,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(units);
     }
 
-    // Sin filtros, usar caché
+    // Sin filtros, usar caché (compatibilidad con código existente)
     const units = await cachedUnits(companyId);
     return NextResponse.json(units);
   } catch (error) {
