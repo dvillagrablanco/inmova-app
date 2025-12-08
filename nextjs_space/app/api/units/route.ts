@@ -84,10 +84,10 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    logger.info({ message: 'Unit created successfully', unitId: unit.id, buildingId: validatedData.buildingId });
+    logger.info('Unit created successfully', { unitId: unit.id, buildingId: validatedData.buildingId });
     return NextResponse.json(unit, { status: 201 });
-  } catch (error) {
-    logError(error, 'Error creating unit');
+  } catch (error: any) {
+    logError(error, { context: 'Error creating unit' });
     return NextResponse.json({ error: 'Error al crear unidad' }, { status: 500 });
   }
 }

@@ -79,7 +79,7 @@ export async function analizarPrecioOptimo(
   else if ([0, 1, 11].includes(mesActual)) factores.estacionalidad = 0.95; // Invierno
 
   // Calcular factor total
-  const factorTotal = Object.values(factores).reduce((a, b) => a * b, 1);
+  const factorTotal: number = Object.values(factores).reduce((a: number, b: number) => a * b, 1);
   let precioSugerido = precioMercado * factorTotal;
 
   // Aplicar estrategia

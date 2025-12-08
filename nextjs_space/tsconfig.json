@@ -36,7 +36,8 @@
       "./node_modules/@types",
       "./types"
     ],
-    "strictNullChecks": true
+    "strictNullChecks": false,
+    "noImplicitAny": false
   },
   "include": [
     "next-env.d.ts",

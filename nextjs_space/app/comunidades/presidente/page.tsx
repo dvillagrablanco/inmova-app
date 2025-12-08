@@ -11,6 +11,8 @@ import { ArrowLeft } from 'lucide-react';
 
 export default function PresidentePage() {
   const { data: session, status } = useSession();
+  const router = useRouter();
+
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -22,7 +24,6 @@ export default function PresidentePage() {
     return <div className="flex items-center justify-center min-h-screen">Cargando...</div>;
   }
 
-  const router = useRouter();
 
   return (
     <div className="flex h-screen overflow-hidden bg-gradient-bg">

@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
     logger.info('Building created successfully', { buildingId: building.id, companyId });
     return NextResponse.json(building, { status: 201 });
   } catch (error: any) {
-    logError(error, 'Error creating building');
+    logError(error, { context: 'Error creating building' });
     if (error.message?.includes('permiso')) {
       return forbiddenResponse(error.message);
     }

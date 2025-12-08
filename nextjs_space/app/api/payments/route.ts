@@ -92,8 +92,8 @@ export async function POST(req: NextRequest) {
 
     logger.info('Payment created successfully', { paymentId: payment.id });
     return NextResponse.json(payment, { status: 201 });
-  } catch (error) {
-    logError(error, 'Error creating payment');
+  } catch (error: any) {
+    logError(error, { context: 'Error creating payment' });
     return NextResponse.json({ error: 'Error al crear pago' }, { status: 500 });
   }
 }
