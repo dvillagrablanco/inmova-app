@@ -6,14 +6,14 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { applyRateLimit } from '@/lib/rate-limit';
+import { checkRateLimit } from '@/lib/rate-limit';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import logger, { logSecurityEvent } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   // ✅ PASO 1: Aplicar rate limiting PRIMERO
-  const rateLimitResponse = await applyRateLimit(request, 'auth');
+  const rateLimitResponse = await checkRateLimit(request, 'LOGIN_ATTEMPTS');
   if (rateLimitResponse) {
     // Si se excedió el rate limit, retornar 429 inmediatamente
     logger.warn('Rate limit exceeded on login attempt', {

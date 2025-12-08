@@ -181,7 +181,6 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
             {
               filename,
               content: pdfBuffer,
-              contentType: 'application/pdf',
             },
           ],
           companyName: payment.contract.unit.building.company.nombre,

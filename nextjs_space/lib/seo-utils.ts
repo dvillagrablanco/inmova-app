@@ -62,7 +62,7 @@ export function generateMetaTags(config: SEOConfig): Metadata {
         alt: title,
       })),
       locale,
-      type,
+      type: type as any,
     },
     twitter: {
       card: 'summary_large_image',
