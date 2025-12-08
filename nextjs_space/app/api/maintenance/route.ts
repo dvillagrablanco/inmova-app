@@ -13,14 +13,63 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const companyId = session.user?.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'CompanyId no encontrado' }, { status: 400 });
+    }
+
     const { searchParams } = new URL(req.url);
     const estado = searchParams.get('estado');
     const prioridad = searchParams.get('prioridad');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '15');
+    const skip = (page - 1) * limit;
 
-    const where: any = {};
+    const where: any = {
+      unit: {
+        building: {
+          companyId,
+        },
+      },
+    };
     if (estado) where.estado = estado;
     if (prioridad) where.prioridad = prioridad;
 
+    // Verificar si se está usando paginación
+    const usePagination = searchParams.has('page') || searchParams.has('limit');
+
+    if (usePagination) {
+      const [maintenanceRequests, total] = await Promise.all([
+        prisma.maintenanceRequest.findMany({
+          where,
+          include: {
+            unit: {
+              include: {
+                building: true,
+                tenant: true,
+              },
+            },
+          },
+          orderBy: { fechaSolicitud: 'desc' },
+          skip,
+          take: limit,
+        }),
+        prisma.maintenanceRequest.count({ where }),
+      ]);
+
+      return NextResponse.json({
+        data: maintenanceRequests,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+          hasMore: skip + limit < total,
+        },
+      });
+    }
+
+    // Sin paginación (para compatibilidad con código existente)
     const maintenanceRequests = await prisma.maintenanceRequest.findMany({
       where,
       include: {

@@ -23,11 +23,15 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const estado = searchParams.get('estado');
     const contractId = searchParams.get('contractId');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const skip = (page - 1) * limit;
 
-    // Si hay filtros, no usar caché (por ahora)
+    // Si hay filtros o paginación, no usar caché
     const hasFilters = estado || contractId;
+    const usePagination = searchParams.has('page') || searchParams.has('limit');
 
-    if (hasFilters) {
+    if (hasFilters || usePagination) {
       const where: any = {
         contract: {
           unit: { building: { companyId } },
@@ -36,6 +40,43 @@ export async function GET(req: NextRequest) {
       if (estado) where.estado = estado;
       if (contractId) where.contractId = contractId;
 
+      // Con paginación
+      if (usePagination) {
+        const [payments, total] = await Promise.all([
+          prisma.payment.findMany({
+            where,
+            include: {
+              contract: {
+                include: {
+                  unit: {
+                    include: {
+                      building: true,
+                    },
+                  },
+                  tenant: true,
+                },
+              },
+            },
+            orderBy: { fechaVencimiento: 'desc' },
+            skip,
+            take: limit,
+          }),
+          prisma.payment.count({ where }),
+        ]);
+
+        return NextResponse.json({
+          data: payments,
+          pagination: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+            hasMore: skip + limit < total,
+          },
+        });
+      }
+
+      // Sin paginación pero con filtros
       const payments = await prisma.payment.findMany({
         where,
         include: {
@@ -56,7 +97,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(payments);
     }
 
-    // Sin filtros, usar caché
+    // Sin filtros ni paginación, usar caché
     const payments = await cachedPayments(companyId);
     return NextResponse.json(payments);
   } catch (error) {
