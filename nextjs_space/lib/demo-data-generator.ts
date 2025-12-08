@@ -24,7 +24,7 @@ const DEMO_DATA_CONFIGS: Record<BusinessVertical, DemoDataConfig> = {
     tenants: 6,
     contracts: 5,
   },
-  str: {
+  str_vacacional: {
     buildings: 1,
     units: 4,
     tenants: 0, // STR no tiene inquilinos tradicionales
@@ -36,17 +36,23 @@ const DEMO_DATA_CONFIGS: Record<BusinessVertical, DemoDataConfig> = {
     tenants: 0,
     contracts: 0,
   },
-  construction: {
+  construccion: {
     buildings: 1,
     units: 5,
     tenants: 0,
     contracts: 0,
   },
-  professional: {
+  servicios_profesionales: {
     buildings: 3,
     units: 8,
     tenants: 3,
     contracts: 2,
+  },
+  mixto: {
+    buildings: 2,
+    units: 6,
+    tenants: 4,
+    contracts: 3,
   },
 };
 
@@ -125,14 +131,9 @@ export async function generateDemoData(
             companyId,
             nombre: `${buildingData.nombre} (Demo)`,
             direccion: buildingData.direccion,
-            ciudad: buildingData.ciudad,
-            cp: buildingData.cp,
-            pais: 'España',
-            tipo_propiedad: 'Alquiler',
-            ano_construccion: buildingData.ano_construccion,
-            num_plantas: Math.floor(Math.random() * 5) + 3,
-            num_unidades: Math.floor(Math.random() * 10) + 5,
-            metros_cuadrados: Math.floor(Math.random() * 500) + 1000,
+            tipo: 'residencial',
+            anoConstructor: buildingData.ano_construccion,
+            numeroUnidades: Math.floor(Math.random() * 10) + 5,
           },
         });
         generatedData.buildings.push(building);
@@ -151,16 +152,14 @@ export async function generateDemoData(
 
           const unit = await prisma.unit.create({
             data: {
-              companyId,
               buildingId: building.id,
-              numero_unidad: `${planta}${puerta}`,
-              tipo,
-              superficie_m2: Math.floor(Math.random() * 50) + 50,
+              numero: `${planta}${puerta}`,
+              tipo: tipo as any,
+              superficie: Math.floor(Math.random() * 50) + 50,
               habitaciones: Math.floor(Math.random() * 3) + 1,
               banos: Math.floor(Math.random() * 2) + 1,
-              precio_renta: Math.floor(Math.random() * 500) + 500,
+              rentaMensual: Math.floor(Math.random() * 500) + 500,
               estado: DEMO_UNIT_STATUSES[Math.floor(Math.random() * DEMO_UNIT_STATUSES.length)] as any,
-              fecha_disponibilidad: new Date(),
             },
           });
           generatedData.units.push(unit);
@@ -175,15 +174,14 @@ export async function generateDemoData(
         const tenant = await prisma.tenant.create({
           data: {
             companyId,
-            nombre: tenantData.nombre,
-            apellidos: tenantData.apellidos,
+            nombreCompleto: `${tenantData.nombre} ${tenantData.apellidos}`,
             email: `demo_${Date.now()}_${i}_${tenantData.email}`,
             telefono: tenantData.telefono,
             dni: `12345678${String.fromCharCode(65 + i)}`,
-            fecha_nacimiento: new Date(1990 + Math.floor(Math.random() * 20), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28)),
+            fechaNacimiento: new Date(1990 + Math.floor(Math.random() * 20), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28)),
             nacionalidad: 'Española',
-            estado_civil: 'Soltero/a',
-            ocupacion: 'Empleado',
+            estadoCivil: 'soltero',
+            situacionLaboral: 'empleado',
           },
         });
         generatedData.tenants.push(tenant);

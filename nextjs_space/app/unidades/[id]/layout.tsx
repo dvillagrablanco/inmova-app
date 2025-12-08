@@ -43,14 +43,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const propertyData = {
       id: unit.id,
       titulo: `${unit.building?.nombre || 'Edificio'} - Unidad ${unit.numero}`,
-      descripcion: unit.descripcion || undefined,
+      descripcion: `${unit.tipo} de ${unit.superficie}m² con ${unit.habitaciones} habitaciones y ${unit.banos} baños`,
       precio: unit.rentaMensual || undefined,
       tipo: unit.tipo || undefined,
       superficie: unit.superficie || undefined,
       habitaciones: unit.habitaciones || undefined,
       banos: unit.banos || undefined,
       direccion: unit.building?.direccion || undefined,
-      ciudad: unit.building?.ciudad || undefined,
       estado: unit.estado || undefined,
       imagenes: unit.imagenes || [],
       buildingNombre: unit.building?.nombre || undefined,
@@ -86,14 +85,13 @@ export default async function UnidadDetailLayout({ params, children }: Props) {
     const propertyData = {
       id: unit.id,
       titulo: `${unit.building?.nombre || 'Edificio'} - Unidad ${unit.numero}`,
-      descripcion: unit.descripcion || undefined,
+      descripcion: `${unit.tipo} de ${unit.superficie}m² con ${unit.habitaciones} habitaciones y ${unit.banos} baños`,
       precio: unit.rentaMensual || undefined,
       tipo: unit.tipo || undefined,
       superficie: unit.superficie || undefined,
       habitaciones: unit.habitaciones || undefined,
       banos: unit.banos || undefined,
       direccion: unit.building?.direccion || undefined,
-      ciudad: unit.building?.ciudad || undefined,
       estado: unit.estado || undefined,
       imagenes: unit.imagenes || [],
     };
@@ -114,7 +112,7 @@ export default async function UnidadDetailLayout({ params, children }: Props) {
 
     return (
       <>
-        <StructuredDataScript data={[propertySchema, organizationSchema, breadcrumbSchema]} />
+        <StructuredDataScript data={[propertySchema, organizationSchema, breadcrumbSchema] as unknown as Record<string, unknown>[]} />
         {children}
       </>
     );
