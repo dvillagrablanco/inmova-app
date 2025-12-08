@@ -370,8 +370,8 @@ export class WorkflowEngine {
         userId: notificationUserId || null,
         titulo: notificationTitle || 'Notificación automática',
         mensaje: notificationMessage || '',
-        tipo: 'workflow',
-        leido: false,
+        tipo: 'info',
+        leida: false,
       },
     });
 
@@ -420,8 +420,8 @@ export class WorkflowEngine {
         descripcion: taskDescription || '',
         asignadoA: taskAssignedTo || null,
         prioridad: (taskPriority as any) || 'media',
-        fechaVencimiento: taskDueDate ? new Date(taskDueDate) : null,
-        completado: false,
+        fechaLimite: taskDueDate ? new Date(taskDueDate) : null,
+        creadoPor: taskAssignedTo || companyId,
       },
     });
 
@@ -444,14 +444,12 @@ export class WorkflowEngine {
       incidentUnitId,
     } = config;
 
-    const incident = await prisma.maintenance.create({
+    const incident = await prisma.maintenanceRequest.create({
       data: {
-        companyId,
+        unitId: incidentUnitId || '',
         titulo: incidentTitle || 'Incidencia automática',
         descripcion: incidentDescription || '',
         prioridad: (incidentPriority as any) || 'media',
-        edificioId: incidentBuildingId || null,
-        unidadId: incidentUnitId || null,
         estado: 'pendiente',
       },
     });

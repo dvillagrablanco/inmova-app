@@ -179,7 +179,7 @@ export async function finalizeContract(contractId: string) {
     // 3. Actualizar estado del contrato
     await tx.contract.update({
       where: { id: contractId },
-      data: { estado: 'finalizado' },
+      data: { estado: 'cancelado' },
     });
 
     // 4. Liberar unidad
@@ -289,7 +289,7 @@ export async function createBuildingWithUnits(data: {
   };
   units: Array<{
     numero: string;
-    tipo: 'apartamento' | 'local' | 'oficina' | 'parking';
+    tipo: 'vivienda' | 'local' | 'garaje' | 'trastero';
     superficie: number;
     rentaMensual: number;
     habitaciones?: number;
@@ -381,7 +381,7 @@ export async function transferTenantBetweenUnits(data: {
     // 3. Finalizar contrato actual
     await tx.contract.update({
       where: { id: data.currentContractId },
-      data: { estado: 'finalizado' },
+      data: { estado: 'cancelado' },
     });
 
     // 4. Liberar unidad actual

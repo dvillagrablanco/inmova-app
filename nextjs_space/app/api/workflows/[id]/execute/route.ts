@@ -110,7 +110,7 @@ export async function POST(
       throw actionError;
     }
   } catch (error) {
-    logError(error as Error, 'POST /api/workflows/[id]/execute');
+    logError(error as Error, { context: 'POST /api/workflows/[id]/execute' });
     return NextResponse.json(
       { error: 'Error al ejecutar workflow' },
       { status: 500 }

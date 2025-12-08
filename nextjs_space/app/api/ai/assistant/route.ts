@@ -7,6 +7,26 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
+// Helper function to map user role to assistant context user type
+function mapUserRole(role: string | undefined): 'tenant' | 'landlord' | 'admin' | 'provider' | 'operador' | 'gestor' {
+  switch (role) {
+    case 'super_admin':
+    case 'administrador':
+    case 'admin':
+      return 'admin';
+    case 'gestor':
+      return 'gestor';
+    case 'operador':
+      return 'operador';
+    case 'tenant':
+      return 'tenant';
+    case 'soporte':
+      return 'provider';
+    default:
+      return 'admin';
+  }
+}
+
 /**
  * POST /api/ai/assistant
  * Asistente IA avanzado con Claude y Tool Calling
@@ -34,7 +54,7 @@ export async function POST(request: NextRequest) {
     // Construir contexto del usuario
     const context: AssistantContext = {
       userId: session?.user?.id || '',
-      userType: session?.user?.role || 'admin',
+      userType: mapUserRole(session?.user?.role),
       userName: session?.user?.name || 'Usuario',
       userEmail: session?.user?.email || '',
       companyId: session?.user?.companyId || '',

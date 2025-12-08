@@ -50,7 +50,7 @@ export async function GET(
 
     return NextResponse.json(workflow);
   } catch (error) {
-    logger.error({ context: 'Error obteniendo workflow' });
+    logger.error('Error obteniendo workflow');
     return NextResponse.json(
       { error: 'Error al obtener workflow' },
       { status: 500 }
@@ -121,7 +121,7 @@ export async function PATCH(
 
     return NextResponse.json(workflow);
   } catch (error) {
-    logger.error({ context: 'Error actualizando workflow' });
+    logger.error('Error actualizando workflow');
     return NextResponse.json(
       { error: 'Error al actualizar workflow' },
       { status: 500 }
@@ -162,7 +162,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    logger.error({ context: 'Error eliminando workflow' });
+    logger.error('Error eliminando workflow');
     return NextResponse.json(
       { error: 'Error al eliminar workflow' },
       { status: 500 }

@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(workflows);
   } catch (error) {
-    logger.error({ context: 'Error obteniendo workflows' });
+    logger.error('Error obteniendo workflows');
     return NextResponse.json(
       { error: 'Error al obtener workflows' },
       { status: 500 }
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(workflow, { status: 201 });
   } catch (error) {
-    logger.error({ context: 'Error creando workflow' });
+    logger.error('Error creando workflow');
     return NextResponse.json(
       { error: 'Error al crear workflow' },
       { status: 500 }

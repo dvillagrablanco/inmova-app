@@ -14,7 +14,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const businessVertical = session.user.businessVertical as BusinessVertical | undefined;
+    // Obtener businessVertical desde la base de datos
+    const { prisma } = await import('@/lib/db');
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { businessVertical: true },
+    });
+
+    const businessVertical = user?.businessVertical;
 
     if (!businessVertical) {
       return NextResponse.json(

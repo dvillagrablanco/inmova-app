@@ -111,7 +111,6 @@ export const sendPaymentReminders = async (companyId: string) => {
         subject: emailTemplate.subject,
         html: emailTemplate.html,
         text: emailTemplate.text,
-        companyName: company.nombre,
       });
 
       if (result.success) {
@@ -238,7 +237,6 @@ export const sendContractExpirationAlerts = async (companyId: string) => {
         subject: emailTemplate.subject,
         html: emailTemplate.html,
         text: emailTemplate.text,
-        companyName: company.nombre,
       });
 
       if (result.success) {
@@ -369,7 +367,6 @@ export const sendMaintenanceNotifications = async (companyId: string) => {
         subject: emailTemplate.subject,
         html: emailTemplate.html,
         text: emailTemplate.text,
-        companyName: company.nombre,
       });
 
       if (result.success) {
