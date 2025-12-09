@@ -1,7 +1,19 @@
 {
-  "buildCommand": "cd nextjs_space && yarn build",
+  "buildCommand": "cd nextjs_space && yarn install && yarn prisma generate && yarn build",
+  "outputDirectory": "nextjs_space/.next",
   "devCommand": "cd nextjs_space && yarn dev",
   "installCommand": "cd nextjs_space && yarn install",
   "framework": "nextjs",
-  "outputDirectory": "nextjs_space/.next"
+  "regions": ["iad1"],
+  "env": {
+    "DATABASE_URL": "@database_url",
+    "NEXTAUTH_SECRET": "@nextauth_secret",
+    "NEXTAUTH_URL": "@nextauth_url"
+  },
+  "build": {
+    "env": {
+      "NEXT_PUBLIC_BASE_URL": "@next_public_base_url",
+      "NODE_ENV": "production"
+    }
+  }
 }
