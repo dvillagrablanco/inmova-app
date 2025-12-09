@@ -1,11 +1,7 @@
+#!/usr/bin/env node
 /**
- * Script para ejecutar auditorías de Lighthouse automáticamente
- * 
- * Uso:
- *   yarn lighthouse:audit
- * 
- * O manualmente:
- *   node scripts/lighthouse-audit.js
+ * Script para ejecutar auditorías de Lighthouse
+ * Verifica Performance > 80 y Accessibility > 90
  */
 
 const lighthouse = require('lighthouse');
@@ -13,174 +9,143 @@ const chromeLauncher = require('chrome-launcher');
 const fs = require('fs');
 const path = require('path');
 
-// Configuración de páginas a auditar
-const PAGES_TO_AUDIT = [
-  { name: 'Home', url: 'http://localhost:3000' },
-  { name: 'Dashboard', url: 'http://localhost:3000/dashboard' },
-  { name: 'Edificios', url: 'http://localhost:3000/edificios' },
-  { name: 'Contratos', url: 'http://localhost:3000/contratos' },
-  { name: 'Pagos', url: 'http://localhost:3000/pagos' },
-];
-
-// Configuración de Lighthouse
-const lighthouseConfig = {
-  extends: 'lighthouse:default',
-  settings: {
-    onlyCategories: ['performance', 'accessibility', 'best-practices', 'seo'],
-    formFactor: 'desktop',
-    throttling: {
-      rttMs: 40,
-      throughputKbps: 10240,
-      cpuSlowdownMultiplier: 1,
-      requestLatencyMs: 0,
-      downloadThroughputKbps: 0,
-      uploadThroughputKbps: 0,
-    },
-    screenEmulation: {
-      mobile: false,
-      width: 1350,
-      height: 940,
-      deviceScaleFactor: 1,
-      disabled: false,
-    },
-  },
+const THRESHOLDS = {
+  performance: 80,
+  accessibility: 90,
+  'best-practices': 80,
+  seo: 80,
 };
 
-async function runLighthouse(url, name) {
-  console.log(`\n🔍 Ejecutando auditoría de Lighthouse para: ${name}`);
-  console.log(`   URL: ${url}`);
+const URLS_TO_TEST = [
+  'http://localhost:3000',
+  'http://localhost:3000/login',
+  'http://localhost:3000/dashboard',
+  'http://localhost:3000/edificios',
+  'http://localhost:3000/unidades',
+];
 
+async function runLighthouse(url) {
+  console.log(`\n\u26a1 Auditando: ${url}`);
+  
   const chrome = await chromeLauncher.launch({ chromeFlags: ['--headless'] });
-  const options = {
-    logLevel: 'info',
-    output: 'json',
-    port: chrome.port,
-  };
-
+  
   try {
-    const runnerResult = await lighthouse(url, options, lighthouseConfig);
-    const reportJson = runnerResult.lhr;
+    const options = {
+      logLevel: 'info',
+      output: 'json',
+      onlyCategories: ['performance', 'accessibility', 'best-practices', 'seo'],
+      port: chrome.port,
+    };
 
-    // Extraer métricas clave
+    const runnerResult = await lighthouse(url, options);
+    
+    // Extraer scores
+    const categories = runnerResult.lhr.categories;
     const scores = {
-      performance: reportJson.categories.performance.score * 100,
-      accessibility: reportJson.categories.accessibility.score * 100,
-      bestPractices: reportJson.categories['best-practices'].score * 100,
-      seo: reportJson.categories.seo.score * 100,
+      performance: Math.round(categories.performance.score * 100),
+      accessibility: Math.round(categories.accessibility.score * 100),
+      'best-practices': Math.round(categories['best-practices'].score * 100),
+      seo: Math.round(categories.seo.score * 100),
     };
 
-    const metrics = {
-      fcp: reportJson.audits['first-contentful-paint'].numericValue,
-      lcp: reportJson.audits['largest-contentful-paint'].numericValue,
-      cls: reportJson.audits['cumulative-layout-shift'].numericValue,
-      tbt: reportJson.audits['total-blocking-time'].numericValue,
-      tti: reportJson.audits['interactive'].numericValue,
-      si: reportJson.audits['speed-index'].numericValue,
+    // Verificar umbrales
+    const failures = [];
+    Object.entries(THRESHOLDS).forEach(([category, threshold]) => {
+      const score = scores[category];
+      const passed = score >= threshold;
+      const emoji = passed ? '✅' : '❌';
+      
+      console.log(`${emoji} ${category}: ${score}/100 (umbral: ${threshold})`);
+      
+      if (!passed) {
+        failures.push({ category, score, threshold });
+      }
+    });
+
+    return {
+      url,
+      scores,
+      failures,
+      passed: failures.length === 0,
     };
-
-    // Mostrar resultados en consola
-    console.log('\n📊 Puntuaciones:');
-    console.log(`   Performance:     ${scores.performance.toFixed(0)}`);
-    console.log(`   Accessibility:   ${scores.accessibility.toFixed(0)}`);
-    console.log(`   Best Practices:  ${scores.bestPractices.toFixed(0)}`);
-    console.log(`   SEO:             ${scores.seo.toFixed(0)}`);
-
-    console.log('\n⚡ Métricas Core Web Vitals:');
-    console.log(`   FCP: ${(metrics.fcp / 1000).toFixed(2)}s`);
-    console.log(`   LCP: ${(metrics.lcp / 1000).toFixed(2)}s`);
-    console.log(`   CLS: ${metrics.cls.toFixed(3)}`);
-    console.log(`   TBT: ${metrics.tbt.toFixed(0)}ms`);
-    console.log(`   TTI: ${(metrics.tti / 1000).toFixed(2)}s`);
-    console.log(`   SI:  ${(metrics.si / 1000).toFixed(2)}s`);
-
-    // Guardar reporte completo
-    const reportsDir = path.join(__dirname, '..', 'lighthouse-reports');
-    if (!fs.existsSync(reportsDir)) {
-      fs.mkdirSync(reportsDir, { recursive: true });
-    }
-
-    const timestamp = new Date().toISOString().replace(/:/g, '-').split('.')[0];
-    const fileName = `${name.toLowerCase().replace(/\s+/g, '-')}-${timestamp}.json`;
-    const filePath = path.join(reportsDir, fileName);
-
-    fs.writeFileSync(filePath, JSON.stringify(reportJson, null, 2));
-    console.log(`\n💾 Reporte guardado en: ${filePath}`);
-
-    return { name, scores, metrics, reportPath: filePath };
-  } catch (error) {
-    console.error(`❌ Error en auditoría para ${name}:`, error.message);
-    return null;
+    
   } finally {
     await chrome.kill();
   }
 }
 
-async function runAllAudits() {
-  console.log('\n🚀 Iniciando auditorías de Lighthouse...');
-  console.log('   Asegúrate de que el servidor esté corriendo en http://localhost:3000\n');
-
+async function main() {
+  console.log('🚀 Iniciando auditorías Lighthouse...');
+  console.log(`Umbrales: Performance > ${THRESHOLDS.performance}, Accessibility > ${THRESHOLDS.accessibility}\n`);
+  
   const results = [];
-
-  for (const page of PAGES_TO_AUDIT) {
-    const result = await runLighthouse(page.url, page.name);
-    if (result) {
+  
+  for (const url of URLS_TO_TEST) {
+    try {
+      const result = await runLighthouse(url);
       results.push(result);
+    } catch (error) {
+      console.error(`❌ Error auditando ${url}:`, error.message);
+      results.push({
+        url,
+        error: error.message,
+        passed: false,
+      });
     }
-    // Esperar un poco entre auditorías
-    await new Promise(resolve => setTimeout(resolve, 2000));
   }
-
-  // Generar reporte resumen
-  console.log('\n\n📈 RESUMEN DE AUDITORÍAS');
-  console.log('═'.repeat(80));
+  
+  // Resumen
+  console.log('\n' + '='.repeat(60));
+  console.log('📊 RESUMEN DE AUDITORÍAS');
+  console.log('='.repeat(60));
+  
+  const passedCount = results.filter(r => r.passed).length;
+  const totalCount = results.length;
+  
+  console.log(`\nResultados: ${passedCount}/${totalCount} páginas pasaron todos los umbrales\n`);
   
   results.forEach(result => {
-    console.log(`\n${result.name}:`);
-    console.log(`  Performance:     ${result.scores.performance.toFixed(0)}`);
-    console.log(`  Accessibility:   ${result.scores.accessibility.toFixed(0)}`);
-    console.log(`  Best Practices:  ${result.scores.bestPractices.toFixed(0)}`);
-    console.log(`  SEO:             ${result.scores.seo.toFixed(0)}`);
+    if (result.passed) {
+      console.log(`✅ ${result.url}`);
+    } else {
+      console.log(`❌ ${result.url}`);
+      if (result.failures) {
+        result.failures.forEach(f => {
+          console.log(`   - ${f.category}: ${f.score}/${f.threshold}`);
+        });
+      }
+      if (result.error) {
+        console.log(`   - Error: ${result.error}`);
+      }
+    }
   });
-
-  // Calcular promedios
-  const avgScores = {
-    performance: results.reduce((sum, r) => sum + r.scores.performance, 0) / results.length,
-    accessibility: results.reduce((sum, r) => sum + r.scores.accessibility, 0) / results.length,
-    bestPractices: results.reduce((sum, r) => sum + r.scores.bestPractices, 0) / results.length,
-    seo: results.reduce((sum, r) => sum + r.scores.seo, 0) / results.length,
-  };
-
-  console.log('\n\nPROMEDIO GENERAL:');
-  console.log(`  Performance:     ${avgScores.performance.toFixed(0)}`);
-  console.log(`  Accessibility:   ${avgScores.accessibility.toFixed(0)}`);
-  console.log(`  Best Practices:  ${avgScores.bestPractices.toFixed(0)}`);
-  console.log(`  SEO:             ${avgScores.seo.toFixed(0)}`);
-  console.log('\n');
-
-  // Guardar resumen
-  const summaryPath = path.join(__dirname, '..', 'lighthouse-reports', 'summary.json');
-  fs.writeFileSync(
-    summaryPath,
-    JSON.stringify(
-      {
-        timestamp: new Date().toISOString(),
-        results,
-        averages: avgScores,
-      },
-      null,
-      2
-    )
-  );
-
-  console.log(`✅ Auditorías completadas. Resumen guardado en: ${summaryPath}\n`);
+  
+  // Guardar reporte
+  const reportDir = path.join(__dirname, '../lighthouse-reports');
+  if (!fs.existsSync(reportDir)) {
+    fs.mkdirSync(reportDir, { recursive: true });
+  }
+  
+  const reportPath = path.join(reportDir, `lighthouse-${Date.now()}.json`);
+  fs.writeFileSync(reportPath, JSON.stringify(results, null, 2));
+  console.log(`\n💾 Reporte guardado en: ${reportPath}`);
+  
+  // Exit code
+  const allPassed = passedCount === totalCount;
+  if (allPassed) {
+    console.log('\n✅ Todas las auditorías pasaron exitosamente!');
+    process.exit(0);
+  } else {
+    console.log('\n❌ Algunas auditorías fallaron. Revisar umbrales.');
+    process.exit(1);
+  }
 }
 
-// Ejecutar auditorías
 if (require.main === module) {
-  runAllAudits().catch(error => {
-    console.error('Error ejecutando auditorías:', error);
+  main().catch(err => {
+    console.error('🔥 Error fatal:', err);
     process.exit(1);
   });
 }
 
-module.exports = { runLighthouse, runAllAudits };
+module.exports = { runLighthouse };
