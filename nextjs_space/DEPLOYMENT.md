@@ -1,286 +1,241 @@
-# Guía de Despliegue y Rollback - INMOVA
+# Guía de Deployment - INMOVA
 
-## 🚀 Proceso de Despliegue
+## 📋 Prerrequisitos
 
-### Pre-Despliegue
+### Cuentas Necesarias
+1. **GitHub** - Para el repositorio de código
+2. **Vercel** - Para el hosting
+3. **PostgreSQL Database** (recomendado: Vercel Postgres, Supabase, o Neon)
+4. **AWS S3** - Para almacenamiento de archivos
+5. **Stripe** - Para pagos (opcional pero recomendado)
 
-1. **Verificar Tests**
-   ```bash
-   cd nextjs_space
-   yarn test
-   ```
+## 🚀 Pasos de Deployment
 
-2. **Build Local**
-   ```bash
-   yarn build
-   ```
-
-3. **Verificar Migraciones de Base de Datos**
-   ```bash
-   yarn prisma migrate status
-   yarn prisma migrate deploy # Si hay migraciones pendientes
-   ```
-
-### Despliegue Producción
-1. **Crear Tag de Versión**
-   ```bash
-   git tag -a v1.0.x -m "Release v1.0.x: Descripción de cambios"
-   git push origin v1.0.x
-   ```
-
-2. **Deploy**
-   - El pipeline de GitHub Actions se ejecutará automáticamente
-   - Monitorear logs en GitHub Actions
-   - Verificar health check: `https://inmova.app/api/health`
-
-3. **Post-Despliegue**
-   - Verificar funcionamiento en producción
-   - Monitorear logs de errores
-   - Verificar métricas de rendimiento
-
----
-
-## 🔄 Estrategia de Rollback
-
-### Nivel 1: Rollback Rápido (Frontend)
-
-**Cuando usar:** Errores de UI, bugs visuales, problemas de JavaScript.
+### 1. Preparar el Repositorio en GitHub
 
 ```bash
-# Revertir a la última versión estable
-git revert <commit-hash>
-git push origin main
+# Inicializar git (si no está inicializado)
+git init
 
-# O desplegar tag anterior
-git checkout v1.0.x-1
-git push origin main --force
+# Agregar todos los archivos
+git add .
+
+# Hacer commit
+git commit -m "Initial commit - INMOVA platform"
+
+# Crear repositorio en GitHub y conectar
+git remote add origin https://github.com/tu-usuario/tu-repo.git
+git branch -M main
+git push -u origin main
 ```
 
-**Tiempo estimado:** 2-5 minutos
+### 2. Configurar Base de Datos PostgreSQL
 
----
+#### Opción A: Vercel Postgres (Recomendado)
+1. Ve a tu dashboard de Vercel
+2. Selecciona "Storage" > "Create Database"
+3. Elige "Postgres"
+4. Copia la `DATABASE_URL`
 
-### Nivel 2: Rollback con Base de Datos
+#### Opción B: Supabase
+1. Crea un proyecto en [supabase.com](https://supabase.com)
+2. Ve a Settings > Database
+3. Copia la Connection String (Transaction Pooler)
 
-**Cuando usar:** Cambios en schema de BD, migraciones problemáticas.
+#### Opción C: Neon
+1. Crea una cuenta en [neon.tech](https://neon.tech)
+2. Crea un nuevo proyecto
+3. Copia la Connection String
 
-#### Paso 1: Revertir Código
+### 3. Ejecutar Migraciones de Prisma
+
 ```bash
-git revert <commit-hash>
-git push origin main
+# Instalar dependencias
+yarn install
+
+# Generar cliente de Prisma
+yarn prisma generate
+
+# Ejecutar migraciones
+yarn prisma migrate deploy
+
+# Opcional: Seed inicial de datos
+yarn prisma db seed
 ```
 
-#### Paso 2: Revertir Migraciones
-```bash
-# Listar migraciones
-yarn prisma migrate status
+### 4. Configurar Variables de Entorno en Vercel
 
-# Revertir última migración (NO RECOMENDADO EN PRODUCCIÓN)
-# yarn prisma migrate reset
+1. Ve a tu proyecto en Vercel
+2. Settings > Environment Variables
+3. Agrega las siguientes variables (ver `.env.example`):
 
-# MEJOR: Crear migración de reversión
-yarn prisma migrate dev --name rollback_feature_x
+#### Variables Requeridas:
+```
+DATABASE_URL=postgresql://...
+NEXTAUTH_SECRET=<genera-uno-con-openssl>
+NEXTAUTH_URL=https://tu-dominio.vercel.app
+AWS_REGION=us-west-2
+AWS_BUCKET_NAME=tu-bucket
+AWS_ACCESS_KEY_ID=tu-access-key
+AWS_SECRET_ACCESS_KEY=tu-secret-key
+STRIPE_SECRET_KEY=sk_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_...
 ```
 
-**⚠️ IMPORTANTE:**
-- **NUNCA** usar `prisma migrate reset` en producción
-- Siempre crear migraciones "forward" para revertir cambios
-- Hacer backup de BD antes de cualquier revert
-
-**Tiempo estimado:** 10-20 minutos
-
----
-
-### Nivel 3: Rollback Completo (Disaster Recovery)
-
-**Cuando usar:** Corrupción de datos, pérdida de servicio crítica.
-
-#### Paso 1: Backup de Base de Datos
+#### Generar NEXTAUTH_SECRET:
 ```bash
-# Crear backup antes de cualquier cambio
-pg_dump $DATABASE_URL > backup_$(date +%Y%m%d_%H%M%S).sql
+openssl rand -base64 32
 ```
 
-#### Paso 2: Restaurar Versión Completa
+### 5. Configurar AWS S3
+
+1. Crea un bucket en AWS S3
+2. Configura CORS:
+```json
+[
+  {
+    "AllowedHeaders": ["*"],
+    "AllowedMethods": ["GET", "PUT", "POST", "DELETE"],
+    "AllowedOrigins": ["https://tu-dominio.vercel.app"],
+    "ExposeHeaders": ["ETag"]
+  }
+]
+```
+3. Crea un usuario IAM con permisos de S3
+4. Guarda las credenciales
+
+### 6. Deploy en Vercel
+
+#### Opción A: Desde el Dashboard de Vercel
+1. Ve a [vercel.com](https://vercel.com)
+2. "Add New" > "Project"
+3. Importa tu repositorio de GitHub
+4. Configura las variables de entorno
+5. Deploy!
+
+#### Opción B: Desde CLI
 ```bash
-# 1. Revertir código a tag estable
-git checkout v1.0.x-stable
-git push origin main --force
+# Instalar Vercel CLI
+npm i -g vercel
 
-# 2. Restaurar base de datos desde backup
-psql $DATABASE_URL < backup_YYYYMMDD_HHMMSS.sql
+# Login
+vercel login
 
-# 3. Verificar integridad
-yarn prisma migrate status
+# Deploy
+vercel --prod
+```
+
+### 7. Configurar Dominio Personalizado (Opcional)
+
+1. En Vercel, ve a Settings > Domains
+2. Agrega tu dominio (ejemplo: `inmova.app`)
+3. Actualiza los DNS según las instrucciones
+4. Actualiza `NEXTAUTH_URL` con tu dominio
+
+### 8. Post-Deployment
+
+#### Crear Usuario Administrador
+```bash
+# Conecta a tu base de datos de producción
+# Opción 1: Desde Vercel CLI
+vercel env pull
+
+# Opción 2: Ejecuta el script de creación
+node scripts/create-admin-user.ts
+```
+
+#### Verificar Configuración
+1. ✅ La aplicación carga correctamente
+2. ✅ Puedes hacer login
+3. ✅ Las imágenes se cargan (S3)
+4. ✅ Los pagos funcionan (Stripe - en modo test)
+5. ✅ Las notificaciones funcionan
+
+## 🔧 Configuración Adicional
+
+### Webhooks de Stripe
+1. Ve a Stripe Dashboard > Developers > Webhooks
+2. Agrega endpoint: `https://tu-dominio.vercel.app/api/stripe/webhook`
+3. Selecciona eventos necesarios
+4. Copia el Signing Secret
+5. Agrega como `STRIPE_WEBHOOK_SECRET` en Vercel
+
+### Configurar Notificaciones Push (Opcional)
+```bash
+# Generar VAPID keys
+npx web-push generate-vapid-keys
+```
+Agrega las keys en Vercel como:
+- `NEXT_PUBLIC_VAPID_PUBLIC_KEY`
+- `VAPID_PRIVATE_KEY`
+
+### Configurar Sentry (Monitoreo de Errores)
+1. Crea proyecto en [sentry.io](https://sentry.io)
+2. Copia el DSN
+3. Agrega como `NEXT_PUBLIC_SENTRY_DSN` en Vercel
+
+## 📊 Monitoreo y Mantenimiento
+
+### Logs
+```bash
+# Ver logs en tiempo real
+vercel logs tu-proyecto --follow
+```
+
+### Analytics
+- Vercel Analytics (incluido)
+- Vercel Speed Insights (incluido)
+- Google Analytics (configurar en código)
+
+### Backups de Base de Datos
+```bash
+# Backup manual
+pg_dump $DATABASE_URL > backup.sql
+```
+
+Configura backups automáticos en tu proveedor de base de datos.
+
+## 🐛 Troubleshooting
+
+### Error: Prisma Client no encontrado
+```bash
+# Regenerar cliente
 yarn prisma generate
 ```
 
-**Tiempo estimado:** 30-60 minutos
+### Error: Variables de entorno no definidas
+- Verifica que todas las variables estén en Vercel
+- Verifica que `NEXT_PUBLIC_` esté en variables que necesitan estar en el cliente
 
----
+### Error: Base de datos no conecta
+- Verifica que la DATABASE_URL sea correcta
+- Verifica que el IP de Vercel esté whitelisted en tu DB
 
-## 📄 Checklist de Rollback
-
-### Antes del Rollback
-- [ ] Identificar la causa raíz del problema
-- [ ] Determinar el nivel de rollback necesario
-- [ ] Notificar al equipo del rollback inminente
-- [ ] Crear backup de base de datos actual
-- [ ] Documentar el estado actual del sistema
-
-### Durante el Rollback
-- [ ] Ejecutar rollback según el nivel correspondiente
-- [ ] Monitorear logs y errores
-- [ ] Verificar health check endpoint
-- [ ] Probar funcionalidad crítica
-
-### Después del Rollback
-- [ ] Verificar que el sistema funciona correctamente
-- [ ] Documentar el incidente y causa
-- [ ] Crear plan de corrección
-- [ ] Actualizar documentación y runbooks
-- [ ] Comunicar resolución al equipo
-
----
-
-## 📊 Monitoreo Post-Rollback
-
-### Health Checks
+### Build falla
 ```bash
-# Verificar salud del sistema
-curl -H "Authorization: Bearer $CRON_SECRET" https://inmova.app/api/health
+# Limpiar caché
+rm -rf .next node_modules
+yarn install
+yarn build
 ```
 
-### Métricas Clave
-- [ ] Tiempo de respuesta de APIs < 500ms
-- [ ] Tasa de errores < 1%
-- [ ] Conexiones de BD estables
-- [ ] Memoria < 80% uso
+## 📚 Recursos
 
-### Logs a Revisar
-```bash
-# Logs de aplicación
-tail -f /var/log/inmova/app.log
+- [Documentación de Next.js](https://nextjs.org/docs)
+- [Documentación de Vercel](https://vercel.com/docs)
+- [Documentación de Prisma](https://www.prisma.io/docs)
+- [Documentación de Stripe](https://stripe.com/docs)
 
-# Logs de Prisma
-tail -f /var/log/inmova/prisma.log
+## 🆘 Soporte
 
-# Logs de Next.js
-tail -f /var/log/inmova/nextjs.log
-```
+Si encuentras problemas:
+1. Revisa los logs en Vercel
+2. Verifica las variables de entorno
+3. Consulta la documentación
+4. Contacta al equipo de desarrollo
 
 ---
 
-## 📞 Contactos de Emergencia
-
-### Equipo Técnico
-- **DevOps Lead:** [Nombre] - [Email/Teléfono]
-- **Backend Lead:** [Nombre] - [Email/Teléfono]
-- **DBA:** [Nombre] - [Email/Teléfono]
-
-### Escalación
-1. **Nivel 1 (5 min):** Equipo de desarrollo
-2. **Nivel 2 (15 min):** Tech Lead
-3. **Nivel 3 (30 min):** CTO/Director Técnico
-
----
-
-## 📝 Plantilla de Incident Report
-
-```markdown
-# Incident Report: [YYYY-MM-DD]
-
-## Resumen
-- **Fecha/Hora:** 
-- **Duración:** 
-- **Impacto:** 
-- **Severidad:** P1 / P2 / P3 / P4
-
-## Descripción
-[Qué sucedió]
-
-## Causa Raíz
-[Por qué sucedió]
-
-## Acción Tomada
-[Cómo se resolvió]
-
-## Rollback Ejecutado
-- **Tipo:** Nivel 1 / 2 / 3
-- **Versión anterior:** v1.0.x
-- **Resultado:** Éxito / Parcial / Fallo
-
-## Prevención Futura
-[Cómo evitar que vuelva a suceder]
-
-## Action Items
-- [ ] Item 1
-- [ ] Item 2
-
-## Timeline
-| Hora | Evento |
-|------|--------|
-| 14:00 | Detección del problema |
-| 14:05 | Inicio de investigación |
-| 14:15 | Decisión de rollback |
-| 14:20 | Rollback ejecutado |
-| 14:30 | Verificación completada |
-```
-
----
-
-## 🔒 Backups Automáticos
-
-### Configuración de Backups
-
-**Frecuencia:**
-- **Diario:** 02:00 AM (retención: 7 días)
-- **Semanal:** Domingo 03:00 AM (retención: 4 semanas)
-- **Mensual:** Día 1 a las 04:00 AM (retención: 12 meses)
-
-**Ubicación:** S3 / Cloud Storage
-
-**Verificación:**
-```bash
-# Listar backups disponibles
-ls -lh /backups/database/
-
-# Verificar integridad
-pg_restore --list backup_file.sql
-```
-
----
-
-## ✅ Testing de Rollback
-
-### Simulacro Trimestral
-
-1. **Preparación** (15 min)
-   - Crear entorno de staging idéntico a producción
-   - Notificar al equipo del simulacro
-
-2. **Ejecución** (30 min)
-   - Ejecutar rollback completo en staging
-   - Documentar tiempos y problemas
-
-3. **Revisión** (15 min)
-   - Analizar resultados
-   - Actualizar procedimientos
-   - Entrenar al equipo
-
-**Próximo Simulacro:** [Fecha]
-
----
-
-## 📖 Referencias
-
-- [Next.js Deployment Docs](https://nextjs.org/docs/deployment)
-- [Prisma Migration Docs](https://www.prisma.io/docs/concepts/components/prisma-migrate)
-- [PostgreSQL Backup & Recovery](https://www.postgresql.org/docs/current/backup.html)
-- [Git Revert vs Reset](https://git-scm.com/docs/git-revert)
-
----
-
-**Última actualización:** Diciembre 2024  
+**Última actualización:** Diciembre 2025  
 **Versión:** 1.0  
-**Responsable:** Equipo DevOps INMOVA
+**Plataforma:** INMOVA - Sistema de Gestión Inmobiliaria
