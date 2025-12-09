@@ -1,40 +1,29 @@
 {
-  "version": 2,
   "buildCommand": "yarn build",
+  "outputDirectory": ".next",
   "devCommand": "yarn dev",
   "installCommand": "yarn install",
   "framework": "nextjs",
   "regions": ["iad1"],
   "env": {
-    "DATABASE_URL": "@database-url",
-    "NEXTAUTH_SECRET": "@nextauth-secret",
-    "NEXTAUTH_URL": "@nextauth-url",
-    "AWS_PROFILE": "@aws-profile",
-    "AWS_REGION": "@aws-region",
-    "AWS_BUCKET_NAME": "@aws-bucket-name",
-    "AWS_FOLDER_PREFIX": "@aws-folder-prefix",
-    "STRIPE_SECRET_KEY": "@stripe-secret-key",
-    "STRIPE_PUBLISHABLE_KEY": "@stripe-publishable-key",
-    "STRIPE_WEBHOOK_SECRET": "@stripe-webhook-secret",
-    "ABACUSAI_API_KEY": "@abacusai-api-key",
-    "CRON_SECRET": "@cron-secret",
-    "ENCRYPTION_KEY": "@encryption-key"
+    "NODE_ENV": "production"
   },
   "build": {
     "env": {
-      "DATABASE_URL": "@database-url",
-      "NEXTAUTH_SECRET": "@nextauth-secret"
+      "NEXT_PUBLIC_BASE_URL": "@next_public_base_url",
+      "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY": "@next_public_stripe_publishable_key",
+      "NEXT_PUBLIC_VAPID_PUBLIC_KEY": "@next_public_vapid_public_key"
     }
   },
   "functions": {
-    "app/api/**/*.ts": {
+    "app/api/**/*": {
       "maxDuration": 60
     }
   },
   "rewrites": [
     {
-      "source": "/(.*)",
-      "destination": "/"
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
     }
   ],
   "headers": [
@@ -42,12 +31,16 @@
       "source": "/(.*)",
       "headers": [
         {
-          "key": "X-Frame-Options",
-          "value": "SAMEORIGIN"
-        },
-        {
           "key": "X-Content-Type-Options",
           "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
         },
         {
           "key": "Referrer-Policy",
