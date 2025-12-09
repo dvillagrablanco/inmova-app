@@ -318,10 +318,49 @@ textarea:disabled {
   @apply opacity-50 cursor-not-allowed;
 }
 
-/* Improve focus for keyboard navigation */
+/* ========================================
+   WCAG 2.1 AA ACCESSIBILITY - Focus Indicators
+   Ensures 4.5:1 contrast ratio and visible focus
+   ======================================== */
+
+/* Enhanced focus for keyboard navigation - ALL interactive elements */
 button:focus-visible,
-a:focus-visible {
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible,
+[role="link"]:focus-visible,
+[tabindex]:not([tabindex="-1"]):focus-visible {
+  @apply ring-4 ring-indigo-600 ring-offset-4 ring-offset-background outline-none;
+}
+
+/* Focus within for complex components */
+.focus-within\:ring-visible:focus-within {
   @apply ring-2 ring-indigo-500 ring-offset-2;
+}
+
+/* Skip Link - WCAG Required for keyboard navigation */
+.skip-link {
+  @apply sr-only;
+}
+
+.skip-link:focus {
+  @apply not-sr-only absolute top-4 left-4 z-50 px-4 py-2 bg-primary text-primary-foreground rounded-md shadow-lg ring-4 ring-primary/50;
+}
+
+/* Visible focus state for form controls */
+input:focus,
+textarea:focus,
+select:focus {
+  @apply border-primary ring-2 ring-primary/20;
+}
+
+/* Error focus state - higher priority */
+input[aria-invalid="true"]:focus,
+textarea[aria-invalid="true"]:focus,
+select[aria-invalid="true"]:focus {
+  @apply border-red-500 ring-2 ring-red-500/20;
 }
 
 /* Print styles */
