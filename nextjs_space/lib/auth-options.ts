@@ -1,3 +1,4 @@
+/// <reference path="../types/next-auth.d.ts" />
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';

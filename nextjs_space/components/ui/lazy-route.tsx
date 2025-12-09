@@ -29,7 +29,7 @@ export function createLazyRoute<P = {}>(
   } = options;
 
   const LazyComponent = dynamic(importFn, {
-    loading: () => fallback || <LoadingState message={loadingMessage} fullScreen />,
+    loading: () => (fallback as React.ReactElement) || <LoadingState message={loadingMessage} fullScreen />,
     ssr,
   });
 
