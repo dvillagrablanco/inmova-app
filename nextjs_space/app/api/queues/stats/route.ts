@@ -12,6 +12,8 @@ import { getSyncQueueStats } from '@/lib/queues/sync-queue';
 import { isRedisAvailable, getRedisStats } from '@/lib/redis-config';
 import logger from '@/lib/logger';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/queues/stats
  * Obtiene estadísticas de todas las colas y Redis

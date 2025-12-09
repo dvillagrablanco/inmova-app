@@ -8,6 +8,8 @@ import { authOptions } from '@/lib/auth-options';
 import { checkRateLimit, getRequestIdentifier } from '@/lib/rate-limit';
 import logger from '@/lib/logger';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/test-rate-limit
  * Endpoint de prueba para verificar rate limiting
