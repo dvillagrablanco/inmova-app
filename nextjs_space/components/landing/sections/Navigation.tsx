@@ -12,7 +12,7 @@ export function Navigation() {
 
   const menuItems = [
     { href: '#features', label: 'Características' },
-    { href: '#vertical', label: 'Verticales' },
+    { href: '#accesos', label: 'Accesos' },
     { href: '#pricing', label: 'Precios' },
     { href: '#integraciones', label: 'Integraciones' },
   ];
