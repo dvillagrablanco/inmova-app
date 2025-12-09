@@ -18,7 +18,14 @@
     "analyze": "ANALYZE=true yarn build",
     "analyze:server": "ANALYZE=true BUNDLE_ANALYZE=server yarn build",
     "analyze:browser": "ANALYZE=true BUNDLE_ANALYZE=browser yarn build",
-    "lighthouse:audit": "node scripts/lighthouse-audit.js"
+    "lighthouse:audit": "node scripts/lighthouse-audit.js",
+    "db:backup": "tsx scripts/db-backup.ts",
+    "db:restore": "tsx scripts/db-restore.ts",
+    "db:verify": "tsx scripts/db-verify-integrity.ts",
+    "db:optimize": "tsx scripts/db-optimize.ts",
+    "db:migrate": "prisma migrate deploy",
+    "db:seed": "prisma db seed",
+    "db:status": "prisma migrate status"
   },
   "prisma": {
     "seed": "tsx --require dotenv/config scripts/seed.ts"
