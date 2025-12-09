@@ -4,6 +4,7 @@ import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { useRouter, useParams } from 'next/navigation';
 import { Building2, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -174,11 +175,16 @@ export default function AcceptInvitationPage() {
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             {invitation?.partner?.logo ? (
-              <img
-                src={invitation.partner.logo}
-                alt={invitation.partner.nombre}
-                className="h-16 object-contain"
-              />
+              <div className="relative h-16 w-32 bg-muted rounded-lg overflow-hidden">
+                <Image
+                  src={invitation.partner.logo}
+                  alt={invitation.partner.nombre}
+                  fill
+                  className="object-contain"
+                  sizes="128px"
+                  priority
+                />
+              </div>
             ) : (
               <div className="bg-primary p-4 rounded-2xl">
                 <Building2 className="h-12 w-12 text-white" />

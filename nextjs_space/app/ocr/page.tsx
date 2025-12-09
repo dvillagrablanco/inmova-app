@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -279,11 +280,16 @@ export default function OCRPage() {
                 <CardContent>
                   <div className="flex flex-col md:flex-row gap-6">
                     <div className="flex-1">
-                      <img
-                        src={previewUrl}
-                        alt="Preview"
-                        className="w-full max-h-96 object-contain rounded-lg border"
-                      />
+                      <div className="relative w-full aspect-[4/3] bg-muted rounded-lg border overflow-hidden">
+                        <Image
+                          src={previewUrl}
+                          alt="Preview del documento"
+                          fill
+                          className="object-contain"
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                          priority
+                        />
+                      </div>
                     </div>
                     <div className="flex-1 flex flex-col justify-center gap-4">
                       <div className="p-4 bg-blue-50 rounded-lg">

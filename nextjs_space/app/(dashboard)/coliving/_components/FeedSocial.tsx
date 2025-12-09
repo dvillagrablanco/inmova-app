@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import logger from '@/lib/logger';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -178,11 +179,12 @@ export default function FeedSocial() {
                         key={idx}
                         className="aspect-video relative bg-gray-100 rounded-lg overflow-hidden"
                       >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
+                        <Image
                           src={img}
                           alt={`Imagen ${idx + 1} de ${post.imagenes?.length || 0} en la publicación de ${post.profile?.tenant?.nombreCompleto || 'residente'}`}
-                          className="w-full h-full object-cover"
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 50vw, 300px"
                         />
                       </div>
                     ))}

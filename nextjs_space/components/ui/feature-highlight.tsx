@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Lightbulb, ArrowRight, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -124,11 +125,15 @@ export function FeatureHighlightBanner({
                 {/* Optional Image */}
                 {feature.imageUrl && (
                   <div className="hidden lg:block flex-shrink-0">
-                    <img
-                      src={feature.imageUrl}
-                      alt={feature.title}
-                      className="w-32 h-32 object-cover rounded-lg shadow-lg"
-                    />
+                    <div className="relative w-32 h-32 bg-muted rounded-lg shadow-lg overflow-hidden">
+                      <Image
+                        src={feature.imageUrl}
+                        alt={feature.title}
+                        fill
+                        className="object-cover"
+                        sizes="128px"
+                      />
+                    </div>
                   </div>
                 )}
               </div>
