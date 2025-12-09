@@ -96,115 +96,125 @@ async function main() {
   });
 
   // ====================
-  // PARTNERS B2B SYSTEM
+  // PARTNERS B2B SYSTEM - DATOS DE EJEMPLO (OPCIONAL)
   // ====================
-  console.log('\n🤝 Creando Partners de ejemplo...');
+  // Nota: Estos datos son ejemplos para demostrar el sistema B2B.
+  // En producción, los partners reales se crearán a través de la interfaz.
+  // Puedes comentar esta sección si no deseas datos de ejemplo.
+  
+  const INCLUDE_EXAMPLE_PARTNERS = false; // Cambiar a true para incluir partners de ejemplo
 
-  // Partner 1: Banco Santander
-  let partnerBanco = await prisma.partner.findFirst({
-    where: { email: 'partners@bancosantander.es' }
-  });
+  if (INCLUDE_EXAMPLE_PARTNERS) {
+    console.log('\n🤝 Creando Partners de ejemplo...');
 
-  if (!partnerBanco) {
-    const hashedPasswordPartner = await bcrypt.hash('Partner2025!', 10);
-    partnerBanco = await prisma.partner.create({
-      data: {
-        nombre: 'Banco Santander',
-        razonSocial: 'Banco Santander S.A.',
-        cif: 'A39000013',
-        tipo: 'BANCO',
-        contactoNombre: 'María González',
-        contactoEmail: 'maria.gonzalez@bancosantander.es',
-        contactoTelefono: '+34 912 345 678',
-        email: 'partners@bancosantander.es',
-        password: hashedPasswordPartner,
-        estado: 'ACTIVE',
-        activo: true,
-        fechaActivacion: new Date(),
-        comisionPorcentaje: 60.0, // 60% por tener muchos clientes
-      },
+    // Partner 1: Banco Santander
+    let partnerBanco = await prisma.partner.findFirst({
+      where: { email: 'partners@bancosantander.es' }
     });
-    console.log('✅ Partner Banco Santander creado');
-  }
 
-  // Partner 2: Multifamily Office
-  let partnerOffice = await prisma.partner.findFirst({
-    where: { email: 'partners@abanteasesores.com' }
-  });
+    if (!partnerBanco) {
+      const hashedPasswordPartner = await bcrypt.hash('Partner2025!', 10);
+      partnerBanco = await prisma.partner.create({
+        data: {
+          nombre: 'Banco Santander',
+          razonSocial: 'Banco Santander S.A.',
+          cif: 'A39000013',
+          tipo: 'BANCO',
+          contactoNombre: 'María González',
+          contactoEmail: 'maria.gonzalez@bancosantander.es',
+          contactoTelefono: '+34 912 345 678',
+          email: 'partners@bancosantander.es',
+          password: hashedPasswordPartner,
+          estado: 'ACTIVE',
+          activo: true,
+          fechaActivacion: new Date(),
+          comisionPorcentaje: 60.0,
+        },
+      });
+      console.log('✅ Partner Banco Santander creado');
+    }
 
-  if (!partnerOffice) {
-    const hashedPasswordPartner = await bcrypt.hash('Partner2025!', 10);
-    partnerOffice = await prisma.partner.create({
-      data: {
-        nombre: 'Abante Asesores',
-        razonSocial: 'Abante Asesores S.L.',
-        cif: 'B84200976',
-        tipo: 'MULTIFAMILY_OFFICE',
-        contactoNombre: 'Carlos Martínez',
-        contactoEmail: 'carlos.martinez@abanteasesores.com',
-        contactoTelefono: '+34 915 555 000',
-        email: 'partners@abanteasesores.com',
-        password: hashedPasswordPartner,
-        estado: 'ACTIVE',
-        activo: true,
-        fechaActivacion: new Date(),
-        comisionPorcentaje: 50.0,
-      },
+    // Partner 2: Multifamily Office
+    let partnerOffice = await prisma.partner.findFirst({
+      where: { email: 'partners@abanteasesores.com' }
     });
-    console.log('✅ Partner Abante Asesores creado');
-  }
 
-  // Partner 3: Plataforma de Membresía
-  let partnerPlatform = await prisma.partner.findFirst({
-    where: { email: 'partners@zona3.com' }
-  });
+    if (!partnerOffice) {
+      const hashedPasswordPartner = await bcrypt.hash('Partner2025!', 10);
+      partnerOffice = await prisma.partner.create({
+        data: {
+          nombre: 'Abante Asesores',
+          razonSocial: 'Abante Asesores S.L.',
+          cif: 'B84200976',
+          tipo: 'MULTIFAMILY_OFFICE',
+          contactoNombre: 'Carlos Martínez',
+          contactoEmail: 'carlos.martinez@abanteasesores.com',
+          contactoTelefono: '+34 915 555 000',
+          email: 'partners@abanteasesores.com',
+          password: hashedPasswordPartner,
+          estado: 'ACTIVE',
+          activo: true,
+          fechaActivacion: new Date(),
+          comisionPorcentaje: 50.0,
+        },
+      });
+      console.log('✅ Partner Abante Asesores creado');
+    }
 
-  if (!partnerPlatform) {
-    const hashedPasswordPartner = await bcrypt.hash('Partner2025!', 10);
-    partnerPlatform = await prisma.partner.create({
-      data: {
-        nombre: 'Zona 3',
-        razonSocial: 'Zona 3 Coworking S.L.',
-        cif: 'B87654321',
-        tipo: 'PLATAFORMA_MEMBRESIA',
-        contactoNombre: 'Laura Fernández',
-        contactoEmail: 'laura.fernandez@zona3.com',
-        contactoTelefono: '+34 910 000 111',
-        email: 'partners@zona3.com',
-        password: hashedPasswordPartner,
-        estado: 'ACTIVE',
-        activo: true,
-        fechaActivacion: new Date(),
-        comisionPorcentaje: 40.0,
-      },
+    // Partner 3: Plataforma de Membresía
+    let partnerPlatform = await prisma.partner.findFirst({
+      where: { email: 'partners@zona3.com' }
     });
-    console.log('✅ Partner Zona 3 creado');
-  }
 
-  // Partner 4: Pendiente de aprobación
-  let partnerPending = await prisma.partner.findFirst({
-    where: { email: 'partners@nuevoconsultor.com' }
-  });
+    if (!partnerPlatform) {
+      const hashedPasswordPartner = await bcrypt.hash('Partner2025!', 10);
+      partnerPlatform = await prisma.partner.create({
+        data: {
+          nombre: 'Zona 3',
+          razonSocial: 'Zona 3 Coworking S.L.',
+          cif: 'B87654321',
+          tipo: 'PLATAFORMA_MEMBRESIA',
+          contactoNombre: 'Laura Fernández',
+          contactoEmail: 'laura.fernandez@zona3.com',
+          contactoTelefono: '+34 910 000 111',
+          email: 'partners@zona3.com',
+          password: hashedPasswordPartner,
+          estado: 'ACTIVE',
+          activo: true,
+          fechaActivacion: new Date(),
+          comisionPorcentaje: 40.0,
+        },
+      });
+      console.log('✅ Partner Zona 3 creado');
+    }
 
-  if (!partnerPending) {
-    const hashedPasswordPartner = await bcrypt.hash('Partner2025!', 10);
-    partnerPending = await prisma.partner.create({
-      data: {
-        nombre: 'Nuevo Consultor Inmobiliario',
-        razonSocial: 'Nuevo Consultor S.L.',
-        cif: 'B99887766',
-        tipo: 'CONSULTORA',
-        contactoNombre: 'Pedro López',
-        contactoEmail: 'pedro.lopez@nuevoconsultor.com',
-        contactoTelefono: '+34 600 111 222',
-        email: 'partners@nuevoconsultor.com',
-        password: hashedPasswordPartner,
-        estado: 'PENDING', // Pendiente de aprobación
-        activo: false,
-        comisionPorcentaje: 20.0,
-      },
+    // Partner 4: Pendiente de aprobación
+    let partnerPending = await prisma.partner.findFirst({
+      where: { email: 'partners@nuevoconsultor.com' }
     });
-    console.log('✅ Partner Nuevo Consultor creado (PENDIENTE)');
+
+    if (!partnerPending) {
+      const hashedPasswordPartner = await bcrypt.hash('Partner2025!', 10);
+      partnerPending = await prisma.partner.create({
+        data: {
+          nombre: 'Nuevo Consultor Inmobiliario',
+          razonSocial: 'Nuevo Consultor S.L.',
+          cif: 'B99887766',
+          tipo: 'CONSULTORA',
+          contactoNombre: 'Pedro López',
+          contactoEmail: 'pedro.lopez@nuevoconsultor.com',
+          contactoTelefono: '+34 600 111 222',
+          email: 'partners@nuevoconsultor.com',
+          password: hashedPasswordPartner,
+          estado: 'PENDING',
+          activo: false,
+          comisionPorcentaje: 20.0,
+        },
+      });
+      console.log('✅ Partner Nuevo Consultor creado (PENDIENTE)');
+    }
+  } else {
+    console.log('\n⏭️  Omitiendo creación de partners de ejemplo (INCLUDE_EXAMPLE_PARTNERS = false)');
   }
 
   console.log('\n✅ Seed completado exitosamente');
