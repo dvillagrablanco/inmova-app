@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import logger from '@/lib/logger';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -118,17 +119,17 @@ export default function GruposInteres() {
           grupos.map((grupo) => (
             <Card key={grupo.id} className="overflow-hidden hover:shadow-lg transition-shadow">
               {/* Imagen del grupo */}
-              {grupo.imagen && (
+              {grupo.imagen ? (
                 <div className="aspect-video relative bg-gradient-to-br from-purple-100 to-pink-100">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <Image
                     src={grupo.imagen}
                     alt={grupo.nombre}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 400px"
                   />
                 </div>
-              )}
-              {!grupo.imagen && (
+              ) : (
                 <div className="aspect-video relative bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
                   <span className="text-6xl">{grupo.icono || '👥'}</span>
                 </div>

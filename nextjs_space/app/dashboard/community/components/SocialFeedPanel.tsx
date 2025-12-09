@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -303,7 +304,15 @@ export default function SocialFeedPanel() {
                 {post.multimedia?.length > 0 && (
                   <div className="mt-3 grid gap-2">
                     {post.multimedia.map((url, i) => (
-                      <img key={i} src={url} alt="" className="rounded-lg max-h-96 object-cover" />
+                      <div key={i} className="relative aspect-video bg-muted rounded-lg overflow-hidden max-h-96">
+                        <Image
+                          src={url}
+                          alt={`Imagen ${i + 1} de publicación`}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 600px"
+                        />
+                      </div>
                     ))}
                   </div>
                 )}

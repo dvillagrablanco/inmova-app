@@ -1,112 +1,158 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getWebVitals } from '@/lib/web-vitals';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Activity, Zap, Layout, Clock, Server } from 'lucide-react';
+import { Card } from './ui/card';
+import { Badge } from './ui/badge';
+import { Activity, Zap, HardDrive, Clock } from 'lucide-react';
 
-interface VitalMetric {
-  name: string;
-  value: number;
-  rating: 'good' | 'needs-improvement' | 'poor';
+interface PerformanceMetrics {
+  fps: number;
+  memory: number;
+  loadTime: number;
+  resourceCount: number;
 }
 
+/**
+ * Componente de monitoreo de performance en tiempo real
+ * Solo visible en desarrollo
+ */
 export function PerformanceMonitor() {
-  const [metrics, setMetrics] = useState<VitalMetric[]>([]);
+  const [metrics, setMetrics] = useState<PerformanceMetrics>({
+    fps: 60,
+    memory: 0,
+    loadTime: 0,
+    resourceCount: 0,
+  });
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Solo mostrar en desarrollo
-    if (process.env.NODE_ENV === 'development') {
-      setIsVisible(true);
-      
-      // Actualizar métricas cada 2 segundos
-      const interval = setInterval(() => {
-        const vitals = getWebVitals();
-        setMetrics(vitals);
-      }, 2000);
+    // Solo en desarrollo
+    if (process.env.NODE_ENV !== 'development') return;
 
-      return () => clearInterval(interval);
-    }
+    // Toggle visibility con Ctrl+Shift+P
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'P') {
+        setIsVisible(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+
+    // FPS Monitor
+    let frameCount = 0;
+    let lastTime = performance.now();
+    let animationFrameId: number;
+
+    const measureFPS = () => {
+      frameCount++;
+      const currentTime = performance.now();
+
+      if (currentTime >= lastTime + 1000) {
+        const fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
+        frameCount = 0;
+        lastTime = currentTime;
+
+        setMetrics(prev => ({ ...prev, fps }));
+      }
+
+      animationFrameId = requestAnimationFrame(measureFPS);
+    };
+
+    measureFPS();
+
+    // Memory Monitor
+    const measureMemory = () => {
+      if ('memory' in performance) {
+        const memory = (performance as any).memory;
+        const usedMB = Math.round(memory.usedJSHeapSize / 1048576);
+        setMetrics(prev => ({ ...prev, memory: usedMB }));
+      }
+    };
+
+    const memoryInterval = setInterval(measureMemory, 2000);
+
+    // Load Time
+    const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+    setMetrics(prev => ({ ...prev, loadTime: Math.round(loadTime) }));
+
+    // Resource Count
+    const resources = performance.getEntriesByType('resource');
+    setMetrics(prev => ({ ...prev, resourceCount: resources.length }));
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+      cancelAnimationFrame(animationFrameId);
+      clearInterval(memoryInterval);
+    };
   }, []);
 
-  if (!isVisible || metrics.length === 0) return null;
+  if (process.env.NODE_ENV !== 'development' || !isVisible) {
+    return null;
+  }
 
-  const getIcon = (name: string) => {
-    switch (name) {
-      case 'LCP': return <Clock className="h-4 w-4" />;
-      case 'FID': return <Zap className="h-4 w-4" />;
-      case 'CLS': return <Layout className="h-4 w-4" />;
-      case 'FCP': return <Activity className="h-4 w-4" />;
-      case 'TTFB': return <Server className="h-4 w-4" />;
-      default: return <Activity className="h-4 w-4" />;
-    }
+  const getFPSColor = (fps: number) => {
+    if (fps >= 55) return 'text-green-500';
+    if (fps >= 30) return 'text-yellow-500';
+    return 'text-red-500';
   };
 
-  const getColor = (rating: string) => {
-    switch (rating) {
-      case 'good': return 'bg-green-100 text-green-800 border-green-200';
-      case 'needs-improvement': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'poor': return 'bg-red-100 text-red-800 border-red-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
-  const getLabel = (name: string) => {
-    const labels: Record<string, string> = {
-      LCP: 'Largest Contentful Paint',
-      FID: 'First Input Delay',
-      CLS: 'Cumulative Layout Shift',
-      FCP: 'First Contentful Paint',
-      TTFB: 'Time to First Byte',
-      INP: 'Interaction to Next Paint',
-    };
-    return labels[name] || name;
+  const getMemoryColor = (memory: number) => {
+    if (memory < 100) return 'text-green-500';
+    if (memory < 200) return 'text-yellow-500';
+    return 'text-red-500';
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 max-w-sm">
-      <Card className="shadow-lg border-2">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm flex items-center gap-2">
-            <Activity className="h-4 w-4 text-indigo-600" />
-            Core Web Vitals
-          </CardTitle>
-          <CardDescription className="text-xs">
-            Métricas de performance en tiempo real
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {metrics.map((metric, index) => (
-              <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                <div className="flex items-center gap-2">
-                  {getIcon(metric.name)}
-                  <div>
-                    <div className="text-xs font-medium">{metric.name}</div>
-                    <div className="text-xs text-gray-500">{getLabel(metric.name)}</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold">
-                    {metric.name === 'CLS' 
-                      ? metric.value.toFixed(3)
-                      : `${metric.value.toFixed(0)}ms`
-                    }
-                  </span>
-                  <Badge className={`text-xs ${getColor(metric.rating)}`}>
-                    {metric.rating === 'good' ? '✓' : metric.rating === 'needs-improvement' ? '!' : '✗'}
-                  </Badge>
-                </div>
-              </div>
-            ))}
+    <Card className="fixed bottom-4 right-4 z-50 p-3 bg-background/95 backdrop-blur shadow-lg border">
+      <div className="flex items-center gap-2 mb-2">
+        <Activity className="h-4 w-4" />
+        <span className="text-xs font-semibold">Performance Monitor</span>
+        <Badge variant="outline" className="text-xs">
+          DEV
+        </Badge>
+      </div>
+
+      <div className="space-y-1.5 text-xs">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-1.5">
+            <Zap className="h-3 w-3 text-muted-foreground" />
+            <span className="text-muted-foreground">FPS:</span>
           </div>
-          <div className="mt-3 pt-3 border-t text-xs text-gray-500 text-center">
-            Solo visible en desarrollo
+          <span className={`font-mono font-semibold ${getFPSColor(metrics.fps)}`}>
+            {metrics.fps}
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-1.5">
+            <HardDrive className="h-3 w-3 text-muted-foreground" />
+            <span className="text-muted-foreground">Memory:</span>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+          <span className={`font-mono font-semibold ${getMemoryColor(metrics.memory)}`}>
+            {metrics.memory} MB
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-1.5">
+            <Clock className="h-3 w-3 text-muted-foreground" />
+            <span className="text-muted-foreground">Load:</span>
+          </div>
+          <span className="font-mono font-semibold">{metrics.loadTime}ms</span>
+        </div>
+
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-1.5">
+            <Activity className="h-3 w-3 text-muted-foreground" />
+            <span className="text-muted-foreground">Resources:</span>
+          </div>
+          <span className="font-mono font-semibold">{metrics.resourceCount}</span>
+        </div>
+      </div>
+
+      <div className="mt-2 pt-2 border-t text-xs text-muted-foreground">
+        Press <kbd className="px-1 py-0.5 bg-muted rounded">Ctrl+Shift+P</kbd> to toggle
+      </div>
+    </Card>
   );
 }
