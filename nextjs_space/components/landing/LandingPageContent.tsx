@@ -15,6 +15,7 @@ import { HeroSection } from '@/components/landing/sections/HeroSection';
 import { PromoSection } from '@/components/landing/sections/PromoSection';
 import { StatsSection } from '@/components/landing/sections/StatsSection';
 import { FeaturesSection } from '@/components/landing/sections/FeaturesSection';
+import { AccessPortalsSection } from '@/components/landing/sections/AccessPortalsSection';
 import { CompetitorComparisonSection } from '@/components/landing/sections/CompetitorComparisonSection';
 import { PricingSection } from '@/components/landing/sections/PricingSection';
 import { IntegrationsSection } from '@/components/landing/sections/IntegrationsSection';
@@ -40,6 +41,9 @@ export function LandingPageContent() {
 
         {/* Features & Verticals */}
         <FeaturesSection />
+
+        {/* Access Portals Section */}
+        <AccessPortalsSection />
 
         {/* Competitor Comparison Section */}
         <CompetitorComparisonSection />
