@@ -9,8 +9,7 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import logger, { logError } from '@/lib/logger';
 
-// @ts-ignore - SwaggerUI types conflict with Next.js dynamic
-const SwaggerUI = dynamic(() => import('swagger-ui-react'), { ssr: false });
+const SwaggerUI = dynamic(() => import('swagger-ui-react'), { ssr: false }) as any;
 
 export default function ApiDocsPage() {
   const router = useRouter();
@@ -150,6 +149,7 @@ export default function ApiDocsPage() {
               </div>
             ) : spec ? (
               <div className="swagger-wrapper">
+                {/* @ts-ignore - SwaggerUI types conflict with Next.js dynamic import */}
                 <SwaggerUI spec={spec} />
               </div>
             ) : (
