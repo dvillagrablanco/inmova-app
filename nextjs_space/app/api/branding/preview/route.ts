@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { generateCSSVariables } from '@/lib/branding-service';
-import { BrandingConfig } from '@prisma/client';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -34,7 +33,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     
     // Crear un objeto temporal de configuración para la preview
-    const previewConfig: BrandingConfig = {
+    const previewConfig = {
       id: 'preview',
       companyId: session?.user?.companyId!,
       appName: body.appName || 'INMOVA',

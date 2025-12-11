@@ -5,7 +5,6 @@ import {
   connectChannel,
   ChannelCredentials,
 } from '@/lib/str-channel-integration-service';
-import { ChannelType } from '@prisma/client';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -32,7 +31,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validar que el canal es válido
-    if (!Object.values(ChannelType).includes(channel)) {
+    if (!["airbnb", "booking", "vrbo", "homeaway"].includes(channel)) {
       return NextResponse.json(
         { error: 'Canal no válido' },
         { status: 400 },
@@ -52,7 +51,7 @@ export async function POST(request: NextRequest) {
     const result = await connectChannel(
       companyId,
       listingId,
-      channel as ChannelType,
+      channel as any,
       credentials as ChannelCredentials,
     );
 

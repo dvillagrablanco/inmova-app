@@ -3,7 +3,6 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { obtenerEventosCalendario } from '@/lib/calendar-service';
-import { CalendarEventType, CalendarEventPriority } from '@prisma/client';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -37,7 +36,7 @@ export async function GET(request: NextRequest) {
     const filtros: any = {};
 
     if (tipo) {
-      filtros.tipo = tipo.split(',') as CalendarEventType[];
+      filtros.tipo = tipo.split(',') as any[];
     }
 
     if (buildingId) {

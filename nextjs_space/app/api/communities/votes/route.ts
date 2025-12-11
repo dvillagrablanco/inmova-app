@@ -7,7 +7,6 @@ import {
   getVotingResults,
   CreateVotingParams,
 } from '@/lib/services/community-management-service';
-import { VoteType } from '@prisma/client';
 import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -81,7 +80,7 @@ export async function POST(req: NextRequest) {
         opciones: body.opciones,
         fechaInicio: new Date(body.fechaInicio),
         fechaFin: new Date(body.fechaFin),
-        tipo: body.tipo as VoteType,
+        tipo: body.tipo as any,
         totalElegibles: body.totalElegibles,
         creadoPor: session.user.id!,
       };
