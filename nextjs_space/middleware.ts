@@ -50,6 +50,7 @@ const ROLE_PERMISSIONS = {
     '/candidatos',
     '/reportes',
     '/notificaciones',
+    '/test-auth',
   ],
   operador: [
     '/dashboard',
@@ -174,5 +175,6 @@ export const config = {
     '/reportes/:path*',
     '/admin/:path*',
     '/notificaciones/:path*',
+    '/test-auth/:path*',
   ],
 };

@@ -11,11 +11,16 @@ import { NextResponse } from 'next/server';
  */
 export function generateNonce(): string {
   // Generar un UUID y convertirlo a base64 para usarlo como nonce
-  // Esto es compatible con Edge Runtime
+  // Implementación compatible con Edge Runtime
   const uuid = crypto.randomUUID();
-  // Convertir UUID a bytes y luego a base64
+  // Convertir UUID directamente a base64 sin spread operator
+  // que puede causar problemas con arrays grandes
   const buffer = new TextEncoder().encode(uuid);
-  return btoa(String.fromCharCode(...buffer)).substring(0, 24);
+  let binary = '';
+  for (let i = 0; i < buffer.length; i++) {
+    binary += String.fromCharCode(buffer[i]);
+  }
+  return btoa(binary).substring(0, 24);
 }
 
 /**
