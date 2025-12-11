@@ -11,7 +11,6 @@
  */
 
 import dynamic from 'next/dynamic';
-import type { ComponentType } from 'react';
 
 // Componente de carga genérico
 const ChartLoader = () => (
@@ -22,154 +21,154 @@ const ChartLoader = () => (
 
 // Lazy load Recharts components
 export const LineChart = dynamic(
-  () => import('recharts').then((mod) => mod.LineChart as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.LineChart),
   { loading: () => <ChartLoader />, ssr: false }
-);
+) as any;
 
 export const BarChart = dynamic(
-  () => import('recharts').then((mod) => mod.BarChart as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.BarChart),
   { loading: () => <ChartLoader />, ssr: false }
-);
+) as any;
 
 export const AreaChart = dynamic(
-  () => import('recharts').then((mod) => mod.AreaChart as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.AreaChart),
   { loading: () => <ChartLoader />, ssr: false }
-);
+) as any;
 
 export const PieChart = dynamic(
-  () => import('recharts').then((mod) => mod.PieChart as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.PieChart),
   { loading: () => <ChartLoader />, ssr: false }
-);
+) as any;
 
 export const RadarChart = dynamic(
-  () => import('recharts').then((mod) => mod.RadarChart as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.RadarChart),
   { loading: () => <ChartLoader />, ssr: false }
-);
+) as any;
 
 export const ScatterChart = dynamic(
-  () => import('recharts').then((mod) => mod.ScatterChart as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.ScatterChart),
   { loading: () => <ChartLoader />, ssr: false }
-);
+) as any;
 
 export const ComposedChart = dynamic(
-  () => import('recharts').then((mod) => mod.ComposedChart as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.ComposedChart),
   { loading: () => <ChartLoader />, ssr: false }
-);
+) as any;
 
 // Chart elements
 export const Line = dynamic(
-  () => import('recharts').then((mod) => mod.Line as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.Line),
   { ssr: false }
-);
+) as any;
 
 export const Bar = dynamic(
-  () => import('recharts').then((mod) => mod.Bar as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.Bar),
   { ssr: false }
-);
+) as any;
 
 export const Area = dynamic(
-  () => import('recharts').then((mod) => mod.Area as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.Area),
   { ssr: false }
-);
+) as any;
 
 export const Pie = dynamic(
-  () => import('recharts').then((mod) => mod.Pie as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.Pie),
   { ssr: false }
-);
+) as any;
 
 export const Radar = dynamic(
-  () => import('recharts').then((mod) => mod.Radar as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.Radar),
   { ssr: false }
-);
+) as any;
 
 export const Scatter = dynamic(
-  () => import('recharts').then((mod) => mod.Scatter as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.Scatter),
   { ssr: false }
-);
+) as any;
 
 // Axes and Grid
 export const XAxis = dynamic(
-  () => import('recharts').then((mod) => mod.XAxis as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.XAxis),
   { ssr: false }
-);
+) as any;
 
 export const YAxis = dynamic(
-  () => import('recharts').then((mod) => mod.YAxis as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.YAxis),
   { ssr: false }
-);
+) as any;
 
 export const ZAxis = dynamic(
-  () => import('recharts').then((mod) => mod.ZAxis as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.ZAxis),
   { ssr: false }
-);
+) as any;
 
 export const CartesianGrid = dynamic(
-  () => import('recharts').then((mod) => mod.CartesianGrid as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.CartesianGrid),
   { ssr: false }
-);
+) as any;
 
 export const PolarGrid = dynamic(
-  () => import('recharts').then((mod) => mod.PolarGrid as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.PolarGrid),
   { ssr: false }
-);
+) as any;
 
 export const PolarAngleAxis = dynamic(
-  () => import('recharts').then((mod) => mod.PolarAngleAxis as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.PolarAngleAxis),
   { ssr: false }
-);
+) as any;
 
 export const PolarRadiusAxis = dynamic(
-  () => import('recharts').then((mod) => mod.PolarRadiusAxis as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.PolarRadiusAxis),
   { ssr: false }
-);
+) as any;
 
 // Accessories
 export const Tooltip = dynamic(
-  () => import('recharts').then((mod) => mod.Tooltip as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.Tooltip),
   { ssr: false }
-);
+) as any;
 
 export const Legend = dynamic(
-  () => import('recharts').then((mod) => mod.Legend as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.Legend),
   { ssr: false }
-);
+) as any;
 
 export const Cell = dynamic(
-  () => import('recharts').then((mod) => mod.Cell as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.Cell),
   { ssr: false }
-);
+) as any;
 
 export const ResponsiveContainer = dynamic(
-  () => import('recharts').then((mod) => mod.ResponsiveContainer as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.ResponsiveContainer),
   { ssr: false }
-);
+) as any;
 
 export const Brush = dynamic(
-  () => import('recharts').then((mod) => mod.Brush as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.Brush),
   { ssr: false }
-);
+) as any;
 
 export const ReferenceLine = dynamic(
-  () => import('recharts').then((mod) => mod.ReferenceLine as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.ReferenceLine),
   { ssr: false }
-);
+) as any;
 
 export const ReferenceArea = dynamic(
-  () => import('recharts').then((mod) => mod.ReferenceArea as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.ReferenceArea),
   { ssr: false }
-);
+) as any;
 
 export const ReferenceDot = dynamic(
-  () => import('recharts').then((mod) => mod.ReferenceDot as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.ReferenceDot),
   { ssr: false }
-);
+) as any;
 
 export const Label = dynamic(
-  () => import('recharts').then((mod) => mod.Label as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.Label),
   { ssr: false }
-);
+) as any;
 
 export const LabelList = dynamic(
-  () => import('recharts').then((mod) => mod.LabelList as ComponentType<any>),
+  () => import('recharts').then((mod) => mod.LabelList),
   { ssr: false }
-);
+) as any;
