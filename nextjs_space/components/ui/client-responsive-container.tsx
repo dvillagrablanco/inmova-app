@@ -53,7 +53,7 @@ export function ClientResponsiveContainer({
   // After hydration, render the actual ResponsiveContainer
   return (
     <RechartsResponsiveContainer width={width as any} height={height as any} {...props}>
-      {children}
+      {children as any}
     </RechartsResponsiveContainer>
   );
 }
