@@ -4,94 +4,42 @@ import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ComponentType } from 'react';
 
-// Lazy loading de componentes de gráficos principales
-export const LazyBarChart = dynamic(
-  () => import('recharts').then((mod) => mod.BarChart as any),
-  {
-    loading: () => <Skeleton className="w-full h-[300px]" />,
-    ssr: false,
-  }
-);
+// Re-exportar directamente desde recharts (sin dynamic loading)
+// para evitar problemas con WidthProvider
+import {
+  BarChart,
+  LineChart,
+  PieChart,
+  AreaChart,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  Bar,
+  Line,
+  Area,
+  Pie,
+  Cell,
+} from 'recharts';
 
-export const LazyLineChart = dynamic(
-  () => import('recharts').then((mod) => mod.LineChart as any),
-  {
-    loading: () => <Skeleton className="w-full h-[300px]" />,
-    ssr: false,
-  }
-);
-
-export const LazyPieChart = dynamic(
-  () => import('recharts').then((mod) => mod.PieChart as any),
-  {
-    loading: () => <Skeleton className="w-full h-[300px]" />,
-    ssr: false,
-  }
-);
-
-export const LazyAreaChart = dynamic(
-  () => import('recharts').then((mod) => mod.AreaChart as any),
-  {
-    loading: () => <Skeleton className="w-full h-[300px]" />,
-    ssr: false,
-  }
-);
-
-// Lazy loading de componentes auxiliares de recharts
-export const LazyXAxis = dynamic(
-  () => import('recharts').then((mod) => mod.XAxis as any),
-  { ssr: false }
-);
-
-export const LazyYAxis = dynamic(
-  () => import('recharts').then((mod) => mod.YAxis as any),
-  { ssr: false }
-);
-
-export const LazyCartesianGrid = dynamic(
-  () => import('recharts').then((mod) => mod.CartesianGrid as any),
-  { ssr: false }
-);
-
-export const LazyTooltip = dynamic(
-  () => import('recharts').then((mod) => mod.Tooltip as any),
-  { ssr: false }
-);
-
-export const LazyLegend = dynamic(
-  () => import('recharts').then((mod) => mod.Legend as any),
-  { ssr: false }
-);
-
-export const LazyResponsiveContainer = dynamic(
-  () => import('recharts').then((mod) => mod.ResponsiveContainer as any),
-  { ssr: false }
-);
-
-export const LazyBar = dynamic(
-  () => import('recharts').then((mod) => mod.Bar as any),
-  { ssr: false }
-);
-
-export const LazyLine = dynamic(
-  () => import('recharts').then((mod) => mod.Line as any),
-  { ssr: false }
-);
-
-export const LazyArea = dynamic(
-  () => import('recharts').then((mod) => mod.Area as any),
-  { ssr: false }
-);
-
-export const LazyPie = dynamic(
-  () => import('recharts').then((mod) => mod.Pie as any),
-  { ssr: false }
-);
-
-export const LazyCell = dynamic(
-  () => import('recharts').then((mod) => mod.Cell as any),
-  { ssr: false }
-);
+// Exports con el prefijo "Lazy" para mantener compatibilidad
+export const LazyBarChart = BarChart;
+export const LazyLineChart = LineChart;
+export const LazyPieChart = PieChart;
+export const LazyAreaChart = AreaChart;
+export const LazyXAxis = XAxis;
+export const LazyYAxis = YAxis;
+export const LazyCartesianGrid = CartesianGrid;
+export const LazyTooltip = Tooltip;
+export const LazyLegend = Legend;
+export const LazyResponsiveContainer = ResponsiveContainer;
+export const LazyBar = Bar;
+export const LazyLine = Line;
+export const LazyArea = Area;
+export const LazyPie = Pie;
+export const LazyCell = Cell;
 
 // Componente genérico para lazy loading de cualquier componente
 interface LazyComponentProps {
