@@ -6,7 +6,6 @@ import {
   connectSocialMediaAccount,
   disconnectSocialMediaAccount,
 } from '@/lib/social-media-service';
-import { SocialMediaPlatform } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     const account = await connectSocialMediaAccount(
       session.user.companyId,
-      platform as SocialMediaPlatform,
+      platform as any,
       accountName,
       accountId,
       accessToken,

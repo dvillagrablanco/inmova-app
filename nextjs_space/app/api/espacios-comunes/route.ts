@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { CommonSpaceType } from '@prisma/client';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -17,7 +16,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const buildingId = searchParams.get('buildingId');
-    const tipo = searchParams.get('tipo') as CommonSpaceType | null;
+    const tipo = searchParams.get('tipo') as any | null;
     const activo = searchParams.get('activo');
 
     const espacios = await prisma.commonSpace.findMany({

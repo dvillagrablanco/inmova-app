@@ -7,7 +7,6 @@ import {
   markFeeAsPaid,
   GenerateFeesParams,
 } from '@/lib/services/community-management-service';
-import { CuotaTipo } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -67,7 +66,7 @@ export async function POST(req: NextRequest) {
         buildingId: body.buildingId,
         companyId: body.companyId,
         periodo: body.periodo,
-        tipo: body.tipo as CuotaTipo,
+        tipo: body.tipo as any,
         montoPorUnidad: body.montoPorUnidad,
       };
 

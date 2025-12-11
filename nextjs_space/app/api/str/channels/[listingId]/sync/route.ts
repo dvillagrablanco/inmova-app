@@ -6,7 +6,6 @@ import {
   importBookings,
   updateChannelPrices,
 } from '@/lib/str-channel-integration-service';
-import { ChannelType } from '@prisma/client';
 import { addDays } from 'date-fns';
 import logger, { logError } from '@/lib/logger';
 
@@ -38,7 +37,7 @@ export async function POST(
     }
 
     // Validar que el canal es válido
-    if (!Object.values(ChannelType).includes(channel)) {
+    if (!["airbnb", "booking", "vrbo", "homeaway"].includes(channel)) {
       return NextResponse.json(
         { error: 'Canal no válido' },
         { status: 400 },
@@ -68,7 +67,7 @@ export async function POST(
           : addDays(new Date(), 90);
         result = await syncCalendar(
           listingId,
-          channel as ChannelType,
+          channel as any,
           startDate,
           endDate,
         );
@@ -76,7 +75,7 @@ export async function POST(
 
       case 'bookings':
         // Importar reservas
-        result = await importBookings(companyId, listingId, channel as ChannelType);
+        result = await importBookings(companyId, listingId, channel as any);
         break;
 
       case 'prices':
@@ -89,7 +88,7 @@ export async function POST(
         }
         result = await updateChannelPrices(
           listingId,
-          channel as ChannelType,
+          channel as any,
           data.priceUpdates,
         );
         break;

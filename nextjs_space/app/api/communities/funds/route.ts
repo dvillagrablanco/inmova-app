@@ -6,7 +6,6 @@ import {
   addFundMovement,
   CreateFundParams,
 } from '@/lib/services/community-management-service';
-import { FondoTipo } from '@prisma/client';
 import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -69,7 +68,7 @@ export async function POST(req: NextRequest) {
       const params: CreateFundParams = {
         buildingId: body.buildingId,
         companyId: body.companyId,
-        tipo: body.tipo as FondoTipo,
+        tipo: body.tipo as any,
         nombre: body.nombre,
         saldoActual: body.saldoActual || 0,
         objetivo: body.objetivo,

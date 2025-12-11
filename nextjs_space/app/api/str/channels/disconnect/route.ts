@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { disconnectChannel } from '@/lib/str-channel-integration-service';
-import { ChannelType } from '@prisma/client';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -29,7 +28,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validar que el canal es válido
-    if (!Object.values(ChannelType).includes(channel)) {
+    if (!["airbnb", "booking", "vrbo", "homeaway"].includes(channel)) {
       return NextResponse.json(
         { error: 'Canal no válido' },
         { status: 400 },
@@ -38,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     logger.info(`[STR API] Desconectando canal ${channel} de listing ${listingId}`);
 
-    const success = await disconnectChannel(listingId, channel as ChannelType);
+    const success = await disconnectChannel(listingId, channel as any);
 
     if (success) {
       return NextResponse.json({

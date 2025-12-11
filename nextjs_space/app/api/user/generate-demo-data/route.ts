@@ -3,7 +3,6 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { generateDemoData, hasDemoData } from '@/lib/demo-data-generator';
 import logger from '@/lib/logger';
-import { BusinessVertical } from '@prisma/client';
 
 // POST: Generar datos demo para el usuario
 export async function POST(request: NextRequest) {

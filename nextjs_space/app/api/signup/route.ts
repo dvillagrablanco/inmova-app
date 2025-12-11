@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/db';
-import { UserRole, BusinessVertical } from '@prisma/client';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -30,13 +29,13 @@ export async function POST(req: NextRequest) {
     }
 
     // Validar que el role sea un valor válido del enum UserRole
-    const validRoles: UserRole[] = ['administrador', 'gestor', 'operador'];
-    const userRole: UserRole = role && validRoles.includes(role as UserRole) 
-      ? (role as UserRole) 
+    const validRoles: any[] = ['administrador', 'gestor', 'operador'];
+    const userRole: any = role && validRoles.includes(role as any) 
+      ? (role as any) 
       : 'gestor';
 
     // Validar que el businessVertical sea un valor válido del enum BusinessVertical
-    const validVerticals: BusinessVertical[] = [
+    const validVerticals: any[] = [
       'alquiler_tradicional', 
       'str_vacacional', 
       'coliving', 
@@ -45,8 +44,8 @@ export async function POST(req: NextRequest) {
       'servicios_profesionales', 
       'mixto'
     ];
-    const userVertical: BusinessVertical | undefined = businessVertical && validVerticals.includes(businessVertical as BusinessVertical) 
-      ? (businessVertical as BusinessVertical) 
+    const userVertical: any | undefined = businessVertical && validVerticals.includes(businessVertical as any) 
+      ? (businessVertical as any) 
       : undefined;
 
     const hashedPassword = await bcrypt.hash(password, 10);

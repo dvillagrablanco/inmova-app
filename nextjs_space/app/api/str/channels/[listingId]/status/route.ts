@@ -6,7 +6,6 @@ import {
   getSupportedChannels,
   getChannelConfig,
 } from '@/lib/str-channel-integration-service';
-import { ChannelType } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { logError } from '@/lib/logger';
 

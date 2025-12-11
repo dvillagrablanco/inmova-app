@@ -3,7 +3,6 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { enviarSMS, crearPlantilla } from '@/lib/sms-service';
-import { SMSTipo, SMSEstado } from '@prisma/client';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -28,9 +27,9 @@ export async function GET(request: NextRequest) {
       companyId: session?.user?.companyId
     };
 
-    if (estado) where.estado = estado as SMSEstado;
+    if (estado) where.estado = estado as any;
     if (tenantId) where.tenantId = tenantId;
-    if (tipo) where.tipo = tipo as SMSTipo;
+    if (tipo) where.tipo = tipo as any;
 
     const smsLogs = await prisma.sMSLog.findMany({
       where,
@@ -90,7 +89,7 @@ export async function POST(request: NextRequest) {
       {
         tenantId,
         templateId,
-        tipo: tipo as SMSTipo,
+        tipo: tipo as any,
         mensaje,
         fechaProgramada: fechaProgramada ? new Date(fechaProgramada) : undefined,
         relacionadoCon,

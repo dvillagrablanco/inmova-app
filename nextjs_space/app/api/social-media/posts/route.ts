@@ -6,7 +6,6 @@ import {
   publishToSocialMedia,
   getSocialMediaStats,
 } from '@/lib/social-media-service';
-import { SocialPostStatus } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,7 +26,7 @@ export async function GET(request: NextRequest) {
     }
 
     const accountId = searchParams.get('accountId') || undefined;
-    const estado = searchParams.get('estado') as SocialPostStatus | undefined;
+    const estado = searchParams.get('estado') as any | undefined;
 
     const posts = await getCompanyPosts(session.user.companyId, {
       accountId,

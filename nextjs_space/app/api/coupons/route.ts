@@ -6,7 +6,6 @@ import {
   getCompanyCoupons,
   validateCoupon,
 } from '@/lib/coupon-service';
-import { CouponType, CouponStatus } from '@prisma/client';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -19,7 +18,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const estado = searchParams.get('estado') as CouponStatus | null;
+    const estado = searchParams.get('estado') as any | null;
     const activo = searchParams.get('activo');
 
     const filters: any = {};
@@ -101,7 +100,7 @@ export async function POST(request: NextRequest) {
     const coupon = await createCoupon({
       companyId: session.user.companyId,
       codigo,
-      tipo: tipo as CouponType,
+      tipo: tipo as any,
       valor: parseFloat(valor),
       descripcion,
       usosMaximos: usosMaximos ? parseInt(usosMaximos) : undefined,
