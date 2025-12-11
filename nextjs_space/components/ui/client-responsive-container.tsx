@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { ResponsiveContainer as RechartsResponsiveContainer } from 'recharts';
 
 interface ClientResponsiveContainerProps {
-  width?: number | `${number}%`;
-  height?: number | `${number}%`;
+  width?: string | number;
+  height?: string | number;
   children?: React.ReactNode;
   [key: string]: any;
 }
@@ -52,7 +52,7 @@ export function ClientResponsiveContainer({
 
   // After hydration, render the actual ResponsiveContainer
   return (
-    <RechartsResponsiveContainer width={width as any} height={height as any} {...props}>
+    <RechartsResponsiveContainer width={width} height={height} {...props}>
       {children}
     </RechartsResponsiveContainer>
   );
