@@ -3108,6 +3108,11 @@
   resolved "https://registry.yarnpkg.com/@jsdevtools/ono/-/ono-7.1.3.tgz#9df03bbd7c696a5c58885c34aa06da41c8543796"
   integrity sha512-4JQNk+3mVzK3xh2rqd6RB4J46qUR19azEHBneZyTZM+c456qOrbbM/5xcR8huNCCcbVt7+UmizG6GuUvPvKUYg==
 
+"@kurkle/color@^0.3.0":
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/@kurkle/color/-/color-0.3.4.tgz#4d4ff677e1609214fc71c580125ddddd86abcabf"
+  integrity sha512-M5UknZPHRu3DEDWoipU6sE8PdkZ6Z/S+v4dD+Ke8IaNlpdSQah50lz1KtcFBa2vsdOnwbbnxJwVM4wty6udA5w==
+
 "@mapbox/geojson-rewind@^0.5.2":
   version "0.5.2"
   resolved "https://registry.yarnpkg.com/@mapbox/geojson-rewind/-/geojson-rewind-0.5.2.tgz#591a5d71a9cd1da1a0bf3420b3bea31b0fc7946a"
@@ -7296,6 +7301,11 @@
     pg-protocol "*"
     pg-types "^2.2.0"
 
+"@types/plotly.js@*":
+  version "3.0.8"
+  resolved "https://registry.yarnpkg.com/@types/plotly.js/-/plotly.js-3.0.8.tgz#2102e91ccb14c318bc8324bf36244bd9fedb4332"
+  integrity sha512-FjmSFaLmHVgBIBL6H0yX5k/AB3a7FQzjKBlRUF8YT6HiXMArE+hbXYIZXZ/42SBrdL05LWEog0zPqEaIDNsAiw==
+
 "@types/prismjs@^1.0.0":
   version "1.26.5"
   resolved "https://registry.yarnpkg.com/@types/prismjs/-/prismjs-1.26.5.tgz#72499abbb4c4ec9982446509d2f14fb8483869d6"
@@ -7353,11 +7363,12 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react-grid-layout@^1.3.6":
-  version "1.3.6"
-  resolved "https://registry.yarnpkg.com/@types/react-grid-layout/-/react-grid-layout-1.3.6.tgz#394f9995df1192b7d0cfe33ce017ec70356e7e73"
-  integrity sha512-Cw7+sb3yyjtmxwwJiXtEXcu5h4cgs+sCGkHwHXsFmPyV30bf14LeD/fa2LwQovuD2HWxCcjIdNhDlcYGj95qGA==
+"@types/react-plotly.js@^2.6.3":
+  version "2.6.4"
+  resolved "https://registry.yarnpkg.com/@types/react-plotly.js/-/react-plotly.js-2.6.4.tgz#39af9f236887540a060e1598c3efb44924622bdd"
+  integrity sha512-AU6w1u3qEGM0NmBA69PaOgNc0KPFA/+qkH6Uu9EBTJ45/WYOUoXi9AF5O15PRM2klpHSiHAAs4WnlI+OZAFmUA==
   dependencies:
+    "@types/plotly.js" "*"
     "@types/react" "*"
 
 "@types/react-transition-group@^4.4.0":
@@ -9461,6 +9472,13 @@ character-reference-invalid@^2.0.0:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/character-reference-invalid/-/character-reference-invalid-2.0.1.tgz#85c66b041e43b47210faf401278abf808ac45cb9"
   integrity sha512-iBZ4F4wRbyORVsu0jPV7gXkOsGYjGHPmAyv+HiHG8gi5PtC9KI2j1+v8/tlibRvjoWX027ypmG/n0HtO5t7unw==
+
+chart.js@4.4.9:
+  version "4.4.9"
+  resolved "https://registry.yarnpkg.com/chart.js/-/chart.js-4.4.9.tgz#602e2fc2462f0f7bb7b255eaa1b51f56a43a1362"
+  integrity sha512-EyZ9wWKgpAU0fLJ43YAEIF8sr5F2W3LqbS40ZJyHIner2lY14ufqv2VMp69MAiZ2rpwxEUxEhIH/0U3xyRynxg==
+  dependencies:
+    "@kurkle/color" "^0.3.0"
 
 check-error@^2.1.1:
   version "2.1.1"
@@ -11699,11 +11717,6 @@ fast-diff@^1.1.2:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/fast-diff/-/fast-diff-1.3.0.tgz#ece407fa550a64d638536cd727e129c61616e0f0"
   integrity sha512-VxPP4NqbUjj6MaAOafWeUn2cXWLcCtljklUtZf0Ind4XQ+QPtmA0b18zZy0jIQx+ExRVCR/ZQpBmik5lXshNsw==
-
-fast-equals@^4.0.3:
-  version "4.0.3"
-  resolved "https://registry.yarnpkg.com/fast-equals/-/fast-equals-4.0.3.tgz#72884cc805ec3c6679b99875f6b7654f39f0e8c7"
-  integrity sha512-G3BSX9cfKttjr+2o1O22tYMLq0DPluZnYtq1rXumE1SpL/F/SLIfHx08WYQoWSIpeMYf8sRbJ8++71+v6Pnxfg==
 
 fast-fifo@^1.2.0, fast-fifo@^1.3.2:
   version "1.3.2"
@@ -14148,7 +14161,7 @@ lodash.once@^4.0.0:
   resolved "https://registry.yarnpkg.com/lodash.once/-/lodash.once-4.1.1.tgz#0dd3971213c7c56df880977d504c88fb471a97ac"
   integrity sha512-Sb487aTOCr9drQVL8pIxOzVhafOjZN9UU54hiN8PU3uAiSV7lx1yYNpbNmex2PK6dSJoNTSJUUswT651yww3Mg==
 
-lodash@^4.15.0, lodash@^4.17.20, lodash@^4.17.21:
+lodash@4.17.21, lodash@^4.15.0, lodash@^4.17.20, lodash@^4.17.21:
   version "4.17.21"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
@@ -15853,7 +15866,7 @@ promisepipe@3.0.0:
   resolved "https://registry.yarnpkg.com/promisepipe/-/promisepipe-3.0.0.tgz#c9b6e5aa861ef5fcce6134f6f75e14f8f30bd3b2"
   integrity sha512-V6TbZDJ/ZswevgkDNpGt/YqNCiZP9ASfgU+p83uJE6NrGtvSGoOcHLiDCqkMs2+yg7F5qHdLV8d0aS8O26G/KA==
 
-prop-types@15.x, prop-types@^15.6.0, prop-types@^15.6.2, prop-types@^15.7.2, prop-types@^15.8.1:
+prop-types@^15.6.0, prop-types@^15.6.2, prop-types@^15.7.2, prop-types@^15.8.1:
   version "15.8.1"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.8.1.tgz#67d87bf1a694f48435cf332c24af10214a3140b5"
   integrity sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==
@@ -16105,6 +16118,11 @@ react-big-calendar@^1.19.4:
     react-overlays "^5.2.1"
     uncontrollable "^7.2.1"
 
+react-chartjs-2@5.3.0:
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/react-chartjs-2/-/react-chartjs-2-5.3.0.tgz#2d3286339a742bc7f77b5829c33ebab215f714cc"
+  integrity sha512-UfZZFnDsERI3c3CZGxzvNJd02SHjaSJ8kgW1djn65H1KK8rehwTjyrRKOG3VTMG8wtHZ5rgAO5oTHtHi9GCCmw==
+
 react-confetti@6.1.0:
   version "6.1.0"
   resolved "https://registry.yarnpkg.com/react-confetti/-/react-confetti-6.1.0.tgz#03dc4340d955acd10b174dbf301f374a06e29ce6"
@@ -16205,14 +16223,6 @@ react-dom@18.2.0:
   dependencies:
     scheduler "^0.27.0"
 
-react-draggable@^4.0.3, react-draggable@^4.4.6:
-  version "4.5.0"
-  resolved "https://registry.yarnpkg.com/react-draggable/-/react-draggable-4.5.0.tgz#0b274ccb6965fcf97ed38fcf7e3cc223bc48cdf5"
-  integrity sha512-VC+HBLEZ0XJxnOxVAZsdRi8rD04Iz3SiiKOoYzamjylUcju/hP9np/aZdLHf/7WOD268WMoNJMvYfB5yAK45cw==
-  dependencies:
-    clsx "^2.1.1"
-    prop-types "^15.8.1"
-
 react-fast-compare@^2.0.1:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/react-fast-compare/-/react-fast-compare-2.0.4.tgz#e84b4d455b0fec113e0402c329352715196f81f9"
@@ -16228,18 +16238,6 @@ react-floater@^0.7.9:
     popper.js "^1.16.0"
     prop-types "^15.8.1"
     tree-changes "^0.9.1"
-
-react-grid-layout@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/react-grid-layout/-/react-grid-layout-2.0.0.tgz#b2f82b2f445d089741afe966cbbb6fe3c5937622"
-  integrity sha512-RcSej/qs+47OYKu4eELZMBBzREu067/92Zouis/UvCWvBXEKFtj46vTecTvmZTKFqILGZjPFGtgsQySI+LMjSQ==
-  dependencies:
-    clsx "^2.1.1"
-    fast-equals "^4.0.3"
-    prop-types "^15.8.1"
-    react-draggable "^4.4.6"
-    react-resizable "^3.0.5"
-    resize-observer-polyfill "^1.5.1"
 
 react-hook-form@7.53.0:
   version "7.53.0"
@@ -16345,6 +16343,13 @@ react-overlays@^5.2.1:
     uncontrollable "^7.2.1"
     warning "^4.0.3"
 
+react-plotly.js@^2.6.0:
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/react-plotly.js/-/react-plotly.js-2.6.0.tgz#ad6b68ee64f1b5cfa142ee92c59687f9c2c09209"
+  integrity sha512-g93xcyhAVCSt9kV1svqG1clAEdL6k3U+jjuSzfTV7owaSU9Go6Ph8bl25J+jKfKvIGAEYpe4qj++WHJuc9IaeA==
+  dependencies:
+    prop-types "^15.8.1"
+
 "react-redux@8.x.x || 9.x.x", react-redux@^9.2.0:
   version "9.2.0"
   resolved "https://registry.yarnpkg.com/react-redux/-/react-redux-9.2.0.tgz#96c3ab23fb9a3af2cb4654be4b51c989e32366f5"
@@ -16408,14 +16413,6 @@ react-resizable-panels@2.1.3:
   version "2.1.3"
   resolved "https://registry.yarnpkg.com/react-resizable-panels/-/react-resizable-panels-2.1.3.tgz#4a8255c9293d6dffacada553c27249d266a482b4"
   integrity sha512-Zz0sCro6aUubL+hYh67eTnn5vxAu+HUZ7+IXvGjsBCBaudDEpIyZyDGE3vcgKi2w6IN3rYH+WXO+MwpgMSOpaQ==
-
-react-resizable@^3.0.5:
-  version "3.0.5"
-  resolved "https://registry.yarnpkg.com/react-resizable/-/react-resizable-3.0.5.tgz#362721f2efbd094976f1780ae13f1ad7739786c1"
-  integrity sha512-vKpeHhI5OZvYn82kXOs1bC8aOXktGU5AmKAgaZS4F5JPburCtbmDPqE7Pzp+1kN4+Wb81LlF33VpGwWwtXem+w==
-  dependencies:
-    prop-types "15.x"
-    react-draggable "^4.0.3"
 
 react-select@5.8.0:
   version "5.8.0"
@@ -17160,11 +17157,6 @@ serialize-javascript@^6.0.2:
   integrity sha512-Saa1xPByTTq2gdeFZYLLo+RFE35NHZkAbqZeWNd3BpzppeVisAqpDjcp8dyf6uIvEqJRd46jemmyA4iFIeVk8g==
   dependencies:
     randombytes "^2.1.0"
-
-server-only@^0.0.1:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/server-only/-/server-only-0.0.1.tgz#0f366bb6afb618c37c9255a314535dc412cd1c9e"
-  integrity sha512-qepMx2JxAa5jjfzxG79yPPq+8BuFToHd1hm7kI+Z4zAq1ftQiP7HcxMhDDItrbtwVeLg/cY2JnKnrcFkmiswNA==
 
 set-blocking@^2.0.0:
   version "2.0.0"
