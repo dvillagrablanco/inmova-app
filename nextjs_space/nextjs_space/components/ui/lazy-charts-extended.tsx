@@ -8,11 +8,12 @@
  * recharts se ejecute solo en el cliente.
  * 
  * IMPORTANTE: NO usar dynamic() con recharts - causa errores con WidthProvider
+ * ResponsiveContainer usa un wrapper especial para manejar SSR correctamente
  */
 
 'use client';
 
-// Importar todos los componentes directamente desde recharts
+// Importar componentes directamente desde recharts
 // Sin dynamic loading para evitar problemas con WidthProvider
 export {
   LineChart,
@@ -38,7 +39,6 @@ export {
   Tooltip,
   Legend,
   Cell,
-  ResponsiveContainer,
   Brush,
   ReferenceLine,
   ReferenceArea,
@@ -46,3 +46,6 @@ export {
   Label,
   LabelList,
 } from 'recharts';
+
+// Export ResponsiveContainer using our custom SSR-safe wrapper
+export { ClientResponsiveContainer as ResponsiveContainer } from './client-responsive-container';
