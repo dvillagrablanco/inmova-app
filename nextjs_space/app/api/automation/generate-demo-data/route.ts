@@ -3,7 +3,6 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
-import type { Building, Unit, Tenant } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -234,7 +233,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Crear edificios
-    const createdBuildings: Building[] = [];
+    const createdBuildings = [];
     for (const edificio of DEMO_DATA.edificios) {
       const building = await prisma.building.create({
         data: {
@@ -252,7 +251,7 @@ export async function POST(request: NextRequest) {
       DEMO_DATA.unidades.slice(5, 7)  // Coliving
     ];
 
-    const createdUnits: Unit[] = [];
+    const createdUnits = [];
     for (let i = 0; i < createdBuildings.length; i++) {
       const building = createdBuildings[i];
       const unidades = unidadesPorEdificio[i];
@@ -269,7 +268,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Crear inquilinos
-    const createdTenants: Tenant[] = [];
+    const createdTenants = [];
     for (const inquilino of DEMO_DATA.inquilinos) {
       const tenant = await prisma.tenant.create({
         data: {
