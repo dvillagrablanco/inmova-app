@@ -75,7 +75,8 @@ export async function GET(request: NextRequest) {
       where: { id: { in: contractIds } },
       select: { id: true, tenantId: true, unitId: true },
     });
-    const contractMap = new Map(contracts.map(c => [c.id, c]));
+    type ContractData = { id: string; tenantId: string | null; unitId: string };
+    const contractMap = new Map<string, ContractData>(contracts.map(c => [c.id, c]));
     // Si hay filtro de companyId, obtener units con buildings y filtrar
     let filteredPayments = recentPayments;
     if (companyId) {
@@ -90,7 +91,7 @@ export async function GET(request: NextRequest) {
       const validUnitIds = new Set(units.map(u => u.id));
       filteredPayments = recentPayments.filter(p => {
         const contract = contractMap.get(p.contractId);
-        return contract && validUnitIds.has(contract.unitId);
+        return contract !== undefined && validUnitIds.has(contract.unitId);
       });
     }
     // Obtener nombres de inquilinos
