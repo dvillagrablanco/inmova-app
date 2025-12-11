@@ -9,7 +9,6 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { createB2BInvoice, generateMonthlyInvoices } from '@/lib/b2b-billing-service';
-import { InvoiceStatus } from '@prisma/client';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -23,7 +22,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const companyId = searchParams.get('companyId');
-    const estado = searchParams.get('estado') as InvoiceStatus | null;
+    const estado = searchParams.get('estado') as string | null;
     const periodo = searchParams.get('periodo');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
