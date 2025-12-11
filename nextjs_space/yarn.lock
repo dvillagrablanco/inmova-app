@@ -16569,22 +16569,7 @@ recast@^0.23.5:
     tiny-invariant "^1.3.3"
     tslib "^2.0.1"
 
-recharts@^3.5.1:
-  version "3.5.1"
-  resolved "https://registry.yarnpkg.com/recharts/-/recharts-3.5.1.tgz#e0aace20004e28309b23574b91daa96b7c9bf852"
-  integrity sha512-+v+HJojK7gnEgG6h+b2u7k8HH7FhyFUzAc4+cPrsjL4Otdgqr/ecXzAnHciqlzV1ko064eNcsdzrYOM78kankA==
-  dependencies:
-    "@reduxjs/toolkit" "1.x.x || 2.x.x"
-    clsx "^2.1.1"
-    decimal.js-light "^2.5.1"
-    es-toolkit "^1.39.3"
-    eventemitter3 "^5.0.1"
-    immer "^10.1.1"
-    react-redux "8.x.x || 9.x.x"
-    reselect "5.1.1"
-    tiny-invariant "^1.3.3"
-    use-sync-external-store "^1.2.2"
-    victory-vendor "^37.0.2"
+
 
 redent@^3.0.0:
   version "3.0.0"
