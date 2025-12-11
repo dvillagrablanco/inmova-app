@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
-import { Building, Unit, Tenant } from '@prisma/client';
+import type { Building, Unit, Tenant } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
