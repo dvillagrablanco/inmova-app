@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { Providers } from '@/components/providers';
 import { SkipLink } from '@/components/ui/skip-link';
 import { WebVitalsInit } from '@/components/WebVitalsInit';
