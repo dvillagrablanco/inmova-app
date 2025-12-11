@@ -16,13 +16,15 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer,
   Bar,
   Line,
   Area,
   Pie,
   Cell,
 } from 'recharts';
+
+// Import SSR-safe ResponsiveContainer wrapper
+import { ClientResponsiveContainer } from './client-responsive-container';
 
 // Exports con el prefijo "Lazy" para mantener compatibilidad
 export const LazyBarChart = BarChart;
@@ -34,7 +36,7 @@ export const LazyYAxis = YAxis;
 export const LazyCartesianGrid = CartesianGrid;
 export const LazyTooltip = Tooltip;
 export const LazyLegend = Legend;
-export const LazyResponsiveContainer = ResponsiveContainer;
+export const LazyResponsiveContainer = ClientResponsiveContainer;
 export const LazyBar = Bar;
 export const LazyLine = Line;
 export const LazyArea = Area;
