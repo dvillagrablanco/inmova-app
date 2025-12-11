@@ -31,7 +31,7 @@ import {
   PieChart,
   Pie,
   Cell,
-} from 'recharts';
+} from '@/components/ui/lazy-charts-extended';
 
 interface AnalyticsData {
   trends: any[];
