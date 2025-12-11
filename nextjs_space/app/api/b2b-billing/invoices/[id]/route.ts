@@ -9,7 +9,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { InvoiceStatus } from '@prisma/client';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -137,7 +136,7 @@ export async function DELETE(
     const invoice = await prisma.b2BInvoice.update({
       where: { id: params.id },
       data: {
-        estado: InvoiceStatus.CANCELADA,
+        estado: 'CANCELADA',
       }
     });
 
