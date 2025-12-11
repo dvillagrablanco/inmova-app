@@ -1,0 +1,4 @@
+# Este archivo fuerza un rebuild completo en Vercel sin cache
+# Generado el: $(date)
+# Commit: $(git rev-parse HEAD)
+# Propósito: Aplicar downgrade de recharts 2.12.7 y SSR-safe wrapper
