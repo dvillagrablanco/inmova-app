@@ -1,275 +1,374 @@
-# INMOVA - Property Management Platform
+# INMOVA - Plataforma de Gestión Inmobiliaria Multi-Vertical
 
-🏢 Comprehensive multi-vertical property management system built with Next.js, TypeScript, and Prisma.
+## 🏢 Descripción General
 
-## 🚀 Features
+INMOVA es una plataforma SaaS completa de gestión inmobiliaria diseñada para profesionales del sector. Ofrece **88 módulos profesionales** organizados en **7 verticales de negocio**, eliminando la fragmentación de software y reduciendo costos operativos hasta en un 70%.
 
-### Core Functionality
-- 🏗️ **Building Management** - Complete building portfolio management
-- 🏠 **Unit Management** - Individual unit tracking and management
-- 👥 **Tenant Management** - Tenant profiles, contracts, and communication
-- 📝 **Contract Management** - Digital contracts with e-signatures
-- 💳 **Payment Processing** - Integrated payment tracking and processing
-- 🔧 **Maintenance** - Work orders, preventive maintenance, and tracking
-- 📦 **Provider Management** - Service provider network and orders
-- 📊 **Analytics & Reports** - Comprehensive dashboards and reporting
+### Verticales Soportadas
 
-### Advanced Features
-- 🤖 **AI Assistant** - Intelligent recommendations and automation
-- 🔒 **Role-Based Access** - Granular permissions (Super Admin, Admin, Manager, Operator)
-- 🌍 **Multi-Language** - Spanish, English, French, Portuguese
-- 📱 **PWA Ready** - Mobile-first, offline-capable
-- 🔍 **Global Search** - Fast fuzzy search with keyboard shortcuts
-- ♿ **Accessibility** - WCAG 2.1 AA compliant
-- 🚀 **Performance** - Optimized with React Query, lazy loading, virtualization
+- 🏠 **Alquiler Tradicional**: Gestión completa de rentas a largo plazo
+- 🏢 **Coliving**: Administración de espacios compartidos y comunidades
+- 🏖️ **Short-Term Rental (STR)**: Sincronización con Airbnb, Booking.com y más
+- 🏗️ **House Flipping**: Proyectos de renovación y reventa
+- 🏗️ **Construcción**: Gestión de proyectos de obra nueva
+- 👔 **Servicios Profesionales**: Arquitectura, topografía, valoraciones
+- 🏘️ **Administración de Fincas**: Comunidades de propietarios
 
-### Multi-Vertical Support
-- 🏙️ **Traditional Rental** - Residential and commercial properties
-- 🌴 **Short-Term Rental (STR)** - Vacation rentals, Airbnb integration
-- 🚶 **Room Rental** - Individual room management in shared properties
-- 🏭 **Construction Projects** - Project management with phases
-- 🏢 **Professional Services** - Architecture, engineering billing
-- 🔄 **Property Flipping** - Deal analysis and ROI tracking
+## 🚀 Inicio Rápido
 
-## 🛠️ Tech Stack
+### Requisitos Previos
 
-### Frontend
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **UI Components**: Radix UI, shadcn/ui
-- **State Management**: React Query, Zustand
-- **Forms**: React Hook Form + Zod
-- **Animation**: Framer Motion
-- **Charts**: Recharts, Plotly
+- Node.js 20.x o superior
+- PostgreSQL 14.x o superior
+- Yarn 1.22.x o superior
+- AWS S3 bucket (para almacenamiento de archivos)
 
-### Backend
-- **Runtime**: Node.js
-- **ORM**: Prisma
-- **Database**: PostgreSQL
-- **Authentication**: NextAuth.js
-- **File Storage**: AWS S3
-- **Caching**: Redis (Upstash)
+### Instalación
 
-### DevOps & Testing
-- **Testing**: Vitest, Playwright
-- **CI/CD**: GitHub Actions
-- **Containerization**: Docker, Docker Compose
-- **Monitoring**: Sentry (optional)
-- **Linting**: ESLint, Prettier
-
-## 💻 Installation
-
-### Prerequisites
-- Node.js 20+
-- PostgreSQL 15+
-- Yarn
-- AWS Account (for S3)
-- Upstash Redis (optional, for rate limiting)
-
-### Quick Start
-
-1. **Clone the repository**
 ```bash
-git clone https://github.com/yourusername/inmova.git
-cd inmova
-```
+# 1. Clonar el repositorio
+git clone <repository-url>
+cd homming_vidaro/nextjs_space
 
-2. **Install dependencies**
-```bash
+# 2. Instalar dependencias
 yarn install
-```
 
-3. **Setup environment variables**
-```bash
+# 3. Configurar variables de entorno
 cp .env.example .env
-```
+# Editar .env con tus credenciales
 
-Edit `.env` with your configuration:
-```env
-# Database
-DATABASE_URL="postgresql://user:password@localhost:5432/inmova_db"
-
-# NextAuth
-NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="your-secret-key-here"
-
-# AWS S3
-AWS_ACCESS_KEY_ID="your-access-key"
-AWS_SECRET_ACCESS_KEY="your-secret-key"
-AWS_REGION="us-east-1"
-AWS_BUCKET_NAME="your-bucket-name"
-
-# Encryption
-ENCRYPTION_KEY="your-encryption-key"
-
-# Redis (optional)
-UPSTASH_REDIS_REST_URL="your-redis-url"
-UPSTASH_REDIS_REST_TOKEN="your-redis-token"
-```
-
-4. **Setup database**
-```bash
-yarn prisma migrate deploy
+# 4. Configurar base de datos
 yarn prisma generate
-```
+yarn prisma migrate deploy
 
-5. **Seed database (optional)**
-```bash
+# 5. Poblar datos iniciales (opcional)
 yarn prisma db seed
-```
 
-6. **Run development server**
-```bash
+# 6. Iniciar servidor de desarrollo
 yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+La aplicación estará disponible en `http://localhost:3000`
 
-### Docker Setup
+## 🔧 Configuración
 
-For production deployment:
+### Variables de Entorno Esenciales
+
+Consulta el archivo `.env.example` para ver todas las variables requeridas.
+
+**Obligatorias para funcionar:**
+- `DATABASE_URL`: Conexión a PostgreSQL
+- `NEXTAUTH_SECRET`: Secret para NextAuth.js
+- `NEXTAUTH_URL`: URL base de la aplicación
+- `AWS_BUCKET_NAME`: Bucket S3 para archivos
+- `AWS_FOLDER_PREFIX`: Prefijo de carpeta en S3
+
+**Opcionales (funcionalidades adicionales):**
+- Stripe: Para pagos en línea
+- SendGrid: Para emails transaccionales
+- Google Analytics: Para métricas
+- Sentry: Para monitoreo de errores
+
+### Usuarios por Defecto
+
+Después de ejecutar el seed:
+
+**Super Administrador:**
+- Email: `superadmin@inmova.com`
+- Password: `superadmin123`
+
+**Administrador:**
+- Email: `admin@inmova.com`
+- Password: `admin123`
+
+**Gestor:**
+- Email: `gestor@inmova.com`
+- Password: `gestor123`
+
+⚠️ **IMPORTANTE:** Cambia estas contraseñas en producción.
+
+## 📁 Estructura del Proyecto
+
+```
+homming_vidaro/nextjs_space/
+├── app/                    # Next.js App Router
+│   ├── api/               # API Routes
+│   ├── dashboard/         # Dashboard principal
+│   ├── edificios/         # Gestión de edificios
+│   ├── unidades/          # Gestión de unidades
+│   ├── inquilinos/        # Gestión de inquilinos
+│   ├── contratos/         # Gestión de contratos
+│   ├── pagos/             # Gestión de pagos
+│   └── [...]/             # Otros módulos
+├── components/            # Componentes React reutilizables
+│   ├── ui/               # Componentes UI base (Shadcn)
+│   ├── layout/           # Header, Sidebar, etc.
+│   └── forms/            # Formularios especializados
+├── lib/                  # Utilidades y servicios
+│   ├── db.ts            # Cliente Prisma
+│   ├── auth-options.ts  # Configuración NextAuth
+│   ├── permissions.ts   # Sistema de permisos
+│   └── [services]/      # Servicios de negocio
+├── prisma/              # Esquema y migraciones Prisma
+│   ├── schema.prisma    # Modelos de datos
+│   └── migrations/      # Migraciones de BD
+├── public/              # Archivos estáticos
+└── scripts/             # Scripts de utilidad
+```
+
+## 🗄️ Base de Datos
+
+### Ejecutar Migraciones
 
 ```bash
-# Build and start services
-docker-compose up -d
+# Desarrollo
+yarn prisma migrate dev --name descripcion_cambio
 
-# Run migrations
-docker-compose exec app yarn prisma migrate deploy
+# Producción
+yarn prisma migrate deploy
 
-# View logs
-docker-compose logs -f app
+# Ver estado de migraciones
+yarn prisma migrate status
 ```
 
-## 🧠 Architecture
+### Prisma Studio
 
-```
-app/
-├── api/              # API routes
-├── admin/            # Admin pages
-├── dashboard/        # Dashboard
-├── edificios/        # Buildings
-├── unidades/         # Units
-├── inquilinos/       # Tenants
-└── ...
+Para explorar y editar datos:
 
-components/
-├── ui/               # Reusable UI components
-├── layout/           # Layout components
-└── dashboard/        # Dashboard components
-
-lib/
-├── db.ts             # Prisma client
-├── auth-options.ts   # NextAuth config
-├── hooks/            # Custom React hooks
-├── react-query/      # React Query hooks
-├── security/         # Security utilities
-└── ...
-
-prisma/
-└── schema.prisma     # Database schema
-
-scripts/
-├── seed.ts           # Database seeding
-└── ...
-```
-
-## 🧩 Testing
-
-### Unit Tests
 ```bash
-yarn test              # Run tests in watch mode
-yarn test:ci           # Run tests once with coverage
+yarn prisma studio
+# Abre en http://localhost:5555
 ```
 
-### E2E Tests
+## 🧪 Testing
+
 ```bash
-yarn test:e2e          # Run E2E tests
-yarn test:e2e:ui       # Run E2E tests with UI
+# Ejecutar tests
+yarn test
+
+# Tests con cobertura
+yarn test:coverage
+
+# Linter
+yarn lint
+
+# Formateo de código
+yarn format
 ```
 
-### Test Coverage
+## 📦 Despliegue
+
+### Build de Producción
+
 ```bash
-yarn test:ci
-```
-
-## 🚀 Deployment
-
-### Environment Setup
-1. Configure production environment variables
-2. Setup PostgreSQL database
-3. Configure AWS S3 bucket
-4. Setup Redis (optional)
-
-### Build
-```bash
+# Crear build optimizado
 yarn build
-```
 
-### Start Production Server
-```bash
+# Iniciar servidor de producción
 yarn start
 ```
 
-### Docker Deployment
+### Variables de Entorno en Producción
+
+Asegúrate de configurar todas las variables en tu plataforma de hosting:
+
+- Vercel: Project Settings > Environment Variables
+- AWS: Secrets Manager o Parameter Store
+- Docker: Archivo `.env` o variables del contenedor
+
+### Dominio Personalizado
+
+La aplicación está configurada para desplegarse en `inmova.app`. Para cambiar:
+
+1. Actualiza `NEXTAUTH_URL` en `.env`
+2. Configura DNS en tu proveedor
+3. Actualiza `hostname` en `next.config.js` si usas optimización de imágenes
+
+## 🔐 Seguridad
+
+### Autenticación
+
+- Sistema basado en NextAuth.js v4
+- Sesiones con JWT
+- Cookies HttpOnly para tokens
+- Protección contra timing attacks
+- Hash de contraseñas con bcrypt (10 rounds)
+
+### Permisos por Rol
+
+- **Super Admin**: Acceso total al sistema
+- **Administrador**: Gestión completa de su empresa
+- **Gestor**: Operaciones diarias y reportes
+- **Operador**: Tareas específicas asignadas
+- **Tenant**: Portal del inquilino
+
+### Content Security Policy
+
+CSP estricto implementado en middleware para prevenir XSS.
+
+### Rate Limiting
+
+Límites de peticiones configurados por ruta para prevenir abuso.
+
+## 🔌 Integraciones de Terceros
+
+### Configuradas (Requieren Credenciales)
+
+- **Stripe**: Pagos recurrentes y únicos
+- **Google Analytics**: Métricas y análisis
+- **SendGrid**: Emails transaccionales
+- **AWS S3**: Almacenamiento de archivos
+
+### Preparadas (Demo Mode)
+
+- **Bankinter Open Banking**: PSD2 para verificación de ingresos
+- **Zucchetti**: ERP para contabilidad
+- **DocuSign**: Firma digital de contratos
+- **ContaSimple, Sage, Holded, A3, Alegra**: Sistemas contables
+
+Ver `DOCS/INTEGRACIONES.md` para guías detalladas.
+
+## 📊 Módulos Principales
+
+### Core (Siempre Activos)
+- Dashboard Analytics
+- Gestión de Edificios
+- Gestión de Unidades
+- Gestión de Inquilinos
+- Contratos y Pagos
+- Mantenimiento
+- Calendario Unificado
+- Chat con Inquilinos
+
+### Avanzados (Activables)
+- Screening de Candidatos con IA
+- Valoraciones Automáticas
+- Publicaciones Multi-Portal
+- Open Banking (PSD2)
+- Firma Digital
+- IoT y Smart Buildings
+- ESG y Sostenibilidad
+- Marketplace de Servicios
+- Blockchain y Tokenización
+- Y más de 70 módulos adicionales...
+
+Ver lista completa en `/admin/modulos`
+
+## 🌐 Internacionalización
+
+Actualmente soporta:
+- 🇪🇸 Español (por defecto)
+- 🇬🇧 Inglés (parcial)
+
+Para agregar idiomas, ver `lib/i18n-config.ts`
+
+## 🎨 Personalización (White Label)
+
+INMOVA soporta personalización completa de marca:
+
+1. Accede a `/admin/personalizacion`
+2. Configura:
+   - Nombre de la aplicación
+   - Logos y favicon
+   - Colores primarios/secundarios
+   - Tipografías
+   - Metadata SEO
+
+Los cambios se aplican en tiempo real mediante CSS variables.
+
+## 📱 Progressive Web App (PWA)
+
+- Instalable en escritorio y móvil
+- Service Worker para cache
+- Notificaciones push (requiere configuración)
+- Funciona offline (limitado)
+
+## 🐛 Troubleshooting
+
+### Error: "DATABASE_URL not found"
+
 ```bash
-docker-compose -f docker-compose.prod.yml up -d
+# Verifica que .env existe y tiene DATABASE_URL
+cat .env | grep DATABASE_URL
+
+# Si no existe, créalo
+echo 'DATABASE_URL="postgresql://user:password@localhost:5432/inmova"' > .env
 ```
 
-## 🔐 Security Features
+### Error: "Module not found" después de actualizar
 
-- 🔒 **Rate Limiting** - API rate limiting with Redis
-- 🛡️ **CSP Headers** - Content Security Policy
-- 🔑 **Encryption** - AES-256-GCM encryption for sensitive data
-- ✅ **Input Validation** - Zod schema validation
-- 🔍 **SQL Injection Protection** - Prisma ORM
-- 🌐 **CORS** - Configurable CORS policies
-- 👤 **RBAC** - Role-based access control
+```bash
+# Limpia cache y reinstala
+rm -rf .next node_modules
+yarn install
+```
 
-## ♿ Accessibility
+### Prisma: "Migration conflict"
 
-- **WCAG 2.1 AA** compliant
-- **Keyboard Navigation** - Full keyboard support
-- **Screen Reader** - ARIA labels and live regions
-- **High Contrast Mode** - System preference support
-- **Focus Management** - Proper focus trapping in modals
+```bash
+# Resetea base de datos (⚠️ BORRA DATOS)
+yarn prisma migrate reset
 
-## 📈 Performance
+# O aplica manualmente
+yarn prisma migrate resolve --applied <migration_name>
+```
 
-- **React Query** - Intelligent caching and background updates
-- **Lazy Loading** - Code splitting for heavy components
-- **Virtualization** - Efficient rendering of large lists
-- **Image Optimization** - Next.js Image component
-- **Bundle Optimization** - Tree shaking and minification
+### Build falla por TypeScript
 
-## 📚 Documentation
+```bash
+# Modo temporal: ignora errores TS (no recomendado)
+# Edita next.config.js:
+typescript: { ignoreBuildErrors: true }
 
-- [API Documentation](./docs/API.md)
-- [Database Schema](./docs/DATABASE.md)
-- [Contributing Guide](./CONTRIBUTING.md)
-- [Deployment Guide](./docs/DEPLOYMENT.md)
-- [Security Guide](./docs/SECURITY.md)
+# Solución correcta: corrige errores
+yarn tsc --noEmit
+```
 
-## 🤝 Contributing
+## 🤝 Contribuir
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed contribution guidelines.
+### Flujo de Trabajo
 
-## 📝 License
+1. Crea una rama desde `main`
+2. Realiza cambios y commits descriptivos
+3. Ejecuta tests y linter
+4. Crea Pull Request con descripción detallada
+5. Espera revisión del equipo
 
-This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
+### Convenciones de Código
 
-## 📧 Support
+- TypeScript estricto
+- ESLint + Prettier configurados
+- Componentes funcionales con hooks
+- Nombres en español para UI visible al usuario
+- Nombres en inglés para código interno
 
-For support, email support@inmova.app or open an issue.
+## 📞 Soporte
 
-## 🌟 Acknowledgments
+### Documentación
 
-- Built with [Next.js](https://nextjs.org/)
-- UI components from [shadcn/ui](https://ui.shadcn.com/)
-- Icons from [Lucide](https://lucide.dev/)
+- Guías de integración: `/DOCS/INTEGRACIONES.md`
+- Mejoras Super Admin: `/MEJORAS_SUPERADMIN.md`
+- Módulo Room Rental: `/MODELO_ALQUILER_HABITACIONES.md`
+
+### Contacto
+
+- 📧 Email: soporte@inmova.com
+- 📧 Técnico: dev@inmova.com
+- 🌐 Web: https://inmova.app
+- 📱 Teléfono: +34 XXX XXX XXX
+
+### Empresa
+
+**Enxames Investments SL**
+- Desarrollador y propietario de INMOVA
+- Equipo de ingenieros especializados en PropTech
+
+## 📄 Licencia
+
+Propietario © 2026 Enxames Investments SL. Todos los derechos reservados.
 
 ---
 
-**Version**: 2.0.0  
-**Last Updated**: December 2024  
-**Status**: Production Ready ✅
+**Última actualización:** Enero 2026  
+**Versión:** 2.0.0  
+**Hostname actual:** inmova.app
