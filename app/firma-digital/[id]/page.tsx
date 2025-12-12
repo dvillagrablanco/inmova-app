@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * Página de detalle de documento de firma
  */
