@@ -1,10 +1,10 @@
+'use client';
+
 export const dynamic = 'force-dynamic';
 
 /**
  * Página de gestión de Templates de Contratos
  */
-
-'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
