@@ -4,7 +4,7 @@
  */
 
 import { prisma } from './db';
-import { WorkflowStatus, WorkflowTriggerType, WorkflowActionType } from '@prisma/client';
+import type {WorkflowStatus, WorkflowTriggerType, WorkflowActionType } from '@prisma/client';
 import logger from './logger';
 
 /**

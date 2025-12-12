@@ -9,7 +9,7 @@
  */
 
 import { prisma } from './db';
-import { PublicacionEstado } from '@prisma/client';
+import type {PublicacionEstado } from '@prisma/client';
 
 interface DatosPublicacion {
   unitId: string;

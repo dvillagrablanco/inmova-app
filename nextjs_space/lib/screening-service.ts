@@ -12,7 +12,7 @@
  */
 
 import { prisma } from './db';
-import { ScreeningEstado, RiskLevel } from '@prisma/client';
+import type {ScreeningEstado, RiskLevel } from '@prisma/client';
 
 interface ResultadoScreening {
   scoringTotal: number;

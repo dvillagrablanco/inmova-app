@@ -1,5 +1,5 @@
 import { prisma } from './db';
-import { SocialMediaPlatform, SocialPostStatus } from '@prisma/client';
+import type {SocialMediaPlatform, SocialPostStatus } from '@prisma/client';
 import logger, { logError } from '@/lib/logger';
 
 /**

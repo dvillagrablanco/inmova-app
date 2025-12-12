@@ -1,5 +1,5 @@
 import { prisma } from './db';
-import { CouponType, CouponStatus } from '@prisma/client';
+import type {CouponType, CouponStatus } from '@prisma/client';
 import { addDays } from 'date-fns';
 
 /**
