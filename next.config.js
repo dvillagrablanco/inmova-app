@@ -1,13 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   reactStrictMode: false,
   eslint: {
-    ignoreDuringBuilds: true, // Ignora errores de estilo
+    ignoreDuringBuilds: true,
   },
   typescript: {
-    ignoreBuildErrors: true, // Ignora errores de tipos
+    ignoreBuildErrors: true,
   },
-  // Solución para errores de memoria/webpack en builds grandes
   experimental: {
     workerThreads: false,
     cpus: 1,
