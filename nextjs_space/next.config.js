@@ -2,7 +2,8 @@ const path = require('path');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
+  distDir: process.env.NEXT_DIST_DIR || '.next',
+  output: process.env.NEXT_OUTPUT_MODE,
   experimental: {
     outputFileTracingRoot: path.join(__dirname, '../'),
   },
@@ -10,7 +11,7 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   images: { unoptimized: true },
 };
