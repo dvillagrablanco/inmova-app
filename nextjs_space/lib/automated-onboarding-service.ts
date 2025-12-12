@@ -4,7 +4,6 @@
  */
 
 import { prisma } from './db';
-import { UserRole } from '@prisma/client';
 import logger, { logError } from '@/lib/logger';
 
 // Tipos de negocio soportados
