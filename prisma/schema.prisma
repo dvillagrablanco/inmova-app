@@ -1,7 +1,7 @@
 generator client {
     provider = "prisma-client-js"
     binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
-    output = "/home/ubuntu/homming_vidaro/nextjs_space/node_modules/.prisma/client"
+    output = "/home/ubuntu/homming_vidaro/nextjs_space/nextjs_space/node_modules/.prisma/client"
 }
 
 datasource db {
@@ -211,19 +211,19 @@ model User {
   companyId        String
   activo           Boolean           @default(true)
   businessVertical BusinessVertical?
-  setupProgress    String? // JSON string con las acciones completadas del onboarding
+  setupProgress    String?           // JSON string con las acciones completadas del onboarding
   resetToken       String?           @unique
   resetTokenExpiry DateTime?
-
+  
   // Multi-Factor Authentication (MFA)
-  mfaEnabled       Boolean   @default(false)
-  mfaSecret        String? // Encrypted TOTP secret
-  mfaBackupCodes   String[]  @default([]) // Encrypted backup codes
+  mfaEnabled       Boolean           @default(false)
+  mfaSecret        String?           // Encrypted TOTP secret
+  mfaBackupCodes   String[]          @default([]) // Encrypted backup codes
   mfaVerifiedAt    DateTime?
-  mfaRecoveryCodes Int       @default(10) // Count of remaining codes
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  mfaRecoveryCodes Int               @default(10) // Count of remaining codes
+  
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 
   company              Company                  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   notifications        Notification[]
@@ -275,13 +275,12 @@ model User {
   // Sistema de Notificaciones Avanzado - Fase 2
   notificationLogs         NotificationLog[]
   userNotificationSettings UserNotificationSettings?
-
+  
   // Soporte e interacciones de ayuda
   supportInteractions SupportInteraction[]
 
   // Workflows creados por el usuario
   createdWorkflows Workflow[]
-  ContractTemplate ContractTemplate[]
 
   @@index([email])
   @@index([companyId])
@@ -369,12 +368,12 @@ model Building {
   ownerBuildings OwnerBuilding[]
 
   // Gestión de Comunidades
-  communityMinutes    CommunityMinute[]
-  communityFees       CommunityFee[]
-  communityFunds      CommunityFund[]
-  financialAlerts     FinancialAlert[]
-  cashFlowForecasts   CashFlowForecast[]
-  buildingInspections BuildingInspection[]
+  communityMinutes     CommunityMinute[]
+  communityFees        CommunityFee[]
+  communityFunds       CommunityFund[]
+  financialAlerts      FinancialAlert[]
+  cashFlowForecasts    CashFlowForecast[]
+  buildingInspections  BuildingInspection[]
 
   // Coliving
   colivingGroups        ColivingGroup[]
@@ -382,8 +381,6 @@ model Building {
   colivingEvents        ColivingEvent[]
   smartLocks            SmartLock[]
   colivingPackages      ColivingPackage[]
-  // Administrador de Fincas
-  communityManagement   CommunityManagement?
 
   // Índices optimizados para consultas frecuentes
   @@index([companyId])
@@ -391,6 +388,8 @@ model Building {
   @@index([companyId, createdAt])
   @@index([companyId, tipo, anoConstructor]) // Nuevo: búsqueda por tipo y año
   @@map("buildings")
+  // Administrador de Fincas
+  communityManagement CommunityManagement?
 }
 
 model Tenant {
@@ -482,16 +481,16 @@ model Tenant {
   colivingPackages        ColivingPackage[]
 
   // Coliving - Analytics y Métricas Avanzadas
-  npsSurveys         NPSSurvey[]
-  tenantProfile      TenantProfile?
-  spaceWaitlists     SpaceWaitlist[]
-  reservationCredits ReservationCredits?
-  spaceRatings       SpaceRating[]
+  npsSurveys          NPSSurvey[]
+  tenantProfile       TenantProfile?
+  spaceWaitlists      SpaceWaitlist[]
+  reservationCredits  ReservationCredits?
+  spaceRatings        SpaceRating[]
 
   // Community Management - Pack 1
-  eventAttendances          EventAttendee[]
-  eventComments             EventComment[]
-  postReactions             PostReaction[]
+  eventAttendances        EventAttendee[]
+  eventComments           EventComment[]
+  postReactions           PostReaction[]
   announcementConfirmations AnnouncementConfirmation[]
 
   // Índices optimizados para consultas frecuentes
@@ -577,8 +576,8 @@ model Unit {
   roomSharedSpaces RoomSharedSpace[]
 
   // Gestión de Comunidades
-  communityFees            CommunityFee[]
-  habitabilityCertificates HabitabilityCertificate[]
+  communityFees              CommunityFee[]
+  habitabilityCertificates   HabitabilityCertificate[]
 
   // Coliving
   colivingCheckInOuts ColivingCheckInOut[]
@@ -1168,7 +1167,7 @@ model Company {
   communityInvoices    CommunityInvoice[]    @relation
   cashBookEntries      CashBookEntry[]       @relation
   communityReports     CommunityReport[]     @relation
-  professionalProjects ProfessionalProject[] @relation
+  professionalProjects ProfessionalProject[]  @relation
 
   // Room Rental Module
   rooms            Room[]
@@ -1187,7 +1186,7 @@ model Company {
   discountCoupons DiscountCoupon[]
 
   // Sistema de Partners B2B
-  partnerClients     PartnerClient[]
+  partnerClients PartnerClient[]
   partnerCommissions Commission[]
 
   // Facturación B2B
@@ -1234,32 +1233,32 @@ model Company {
   notificationLogs      NotificationLog[]
 
   // Gestión de Comunidades
-  communityMinutes         CommunityMinute[]
-  communityFees            CommunityFee[]
-  communityFunds           CommunityFund[]
-  financialAlerts          FinancialAlert[]
-  cashFlowForecasts        CashFlowForecast[]
-  depositManagements       DepositManagement[]
-  badDebtProvisions        BadDebtProvision[]
-  habitabilityCertificates HabitabilityCertificate[]
-  modelo347Records         Modelo347Record[]
-  modelo180Records         Modelo180Record[]
-  buildingInspections      BuildingInspection[]
+  communityMinutes            CommunityMinute[]
+  communityFees               CommunityFee[]
+  communityFunds              CommunityFund[]
+  financialAlerts             FinancialAlert[]
+  cashFlowForecasts           CashFlowForecast[]
+  depositManagements          DepositManagement[]
+  badDebtProvisions           BadDebtProvision[]
+  habitabilityCertificates    HabitabilityCertificate[]
+  modelo347Records            Modelo347Record[]
+  modelo180Records            Modelo180Record[]
+  buildingInspections         BuildingInspection[]
 
   // Coliving - Red Social y Servicios Premium
-  colivingProfiles        ColivingProfile[]
-  colivingMatches         ColivingMatch[]
-  colivingGroups          ColivingGroup[]
-  colivingActivityPosts   ColivingActivityPost[]
-  colivingEvents          ColivingEvent[]
-  colivingServices        ColivingService[]
-  colivingServiceBookings ColivingServiceBooking[]
-  colivingCheckInOuts     ColivingCheckInOut[]
-  smartLocks              SmartLock[]
-  colivingPackages        ColivingPackage[]
+  colivingProfiles            ColivingProfile[]
+  colivingMatches             ColivingMatch[]
+  colivingGroups              ColivingGroup[]
+  colivingActivityPosts       ColivingActivityPost[]
+  colivingEvents              ColivingEvent[]
+  colivingServices            ColivingService[]
+  colivingServiceBookings     ColivingServiceBooking[]
+  colivingCheckInOuts         ColivingCheckInOut[]
+  smartLocks                  SmartLock[]
+  colivingPackages            ColivingPackage[]
 
   // Equipo Comercial Externo
-  salesLeads SalesLead[]
+  salesLeads                  SalesLead[]
 
   // Coliving - Analytics y Métricas Avanzadas
   colivingAnalytics           ColivingAnalytics[]
@@ -1277,10 +1276,9 @@ model Company {
   housekeepingInventory  STRHousekeepingInventory[]
   housekeepingChecklists STRHousekeepingChecklist[]
 
-  // Workflows y Automatización Inteligente
-  workflows        Workflow[]
-  ContractTemplate ContractTemplate[]
 
+  // Workflows y Automatización Inteligente
+  workflows Workflow[]
   @@map("company")
 }
 
@@ -2830,16 +2828,8 @@ model MorosidadHistorial {
 // ALTA PRIORIDAD 3: FIRMA DIGITAL (SIGNATURIT)
 // ============================================
 
-enum ProveedorFirma {
-  docusign
-  signaturit
-  otro
-}
-
 enum SignatureStatus {
-  borrador // Documento creado pero no enviado
   pendiente // Enviado pero no firmado
-  parcialmente_firmado // Algunos firmantes han firmado
   firmado // Firmado por todas las partes
   rechazado // Rechazado por algún firmante
   cancelado // Cancelado por el administrador
@@ -2851,73 +2841,42 @@ enum SignerStatus {
   visto
   firmado
   rechazado
-  expirado
-}
-
-enum TipoContrato {
-  arrendamiento_vivienda
-  arrendamiento_comercial
-  arrendamiento_temporal
-  compraventa
-  gestion_inmobiliaria
-  otro
-}
-
-enum EventoFirma {
-  creado
-  enviado
-  visualizado
-  firmado
-  completado
-  cancelado
-  expirado
-  recordatorio_enviado
-  rechazado
 }
 
 model DocumentoFirma {
-  id            String       @id @default(cuid())
+  id            String  @id @default(cuid())
   companyId     String
-  company       Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company       Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
   titulo        String
-  descripcion   String?      @db.Text
-  tipoDocumento TipoContrato @default(arrendamiento_vivienda)
+  descripcion   String? @db.Text
+  tipoDocumento String // "contrato", "adenda", "finiquito", "acta", "otro"
 
   // Relaciones
   contractId String?
-  contract   Contract?         @relation(fields: [contractId], references: [id], onDelete: SetNull)
+  contract   Contract? @relation(fields: [contractId], references: [id], onDelete: SetNull)
   tenantId   String?
-  tenant     Tenant?           @relation(fields: [tenantId], references: [id], onDelete: SetNull)
-  templateId String?
-  template   ContractTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  tenant     Tenant?   @relation(fields: [tenantId], references: [id], onDelete: SetNull)
 
-  // Proveedor de firma (DocuSign, Signaturit, etc.)
-  proveedor    ProveedorFirma  @default(docusign)
-  proveedorId  String?         @unique // ID del documento en el proveedor (signaturitId o docusignEnvelopeId)
-  proveedorUrl String?         @db.Text // URL para acceder al documento en el proveedor
-  estado       SignatureStatus @default(borrador)
-
-  // Archivo PDF
-  urlDocumento       String? @db.Text // URL del documento original
-  urlFirmado         String? @db.Text // URL del documento firmado
-  cloud_storage_path String? // Ruta en S3/Cloud Storage
-  isPublic           Boolean @default(false)
+  // Signaturit Integration
+  signaturitId String?         @unique // ID del documento en Signaturit
+  estado       SignatureStatus @default(pendiente)
+  urlDocumento String?         @db.Text // URL del documento original
+  urlFirmado   String?         @db.Text // URL del documento firmado
 
   // Firmantes
   firmantes Firmante[]
 
   // Configuración
-  requiereOrden    Boolean   @default(false) // Firma secuencial
-  diasExpiracion   Int       @default(30)
-  fechaExpiracion  DateTime?
-  recordatorios    Boolean   @default(true)
-  diasRecordatorio Int       @default(3) // Enviar recordatorio cada X días
+  requiereOrden    Boolean  @default(false) // Firma secuencial
+  diasExpiracion   Int      @default(30)
+  fechaExpiracion  DateTime
+  recordatorios    Boolean  @default(true)
+  diasRecordatorio Int      @default(3) // Enviar recordatorio cada X días
 
   // Timestamps
   creadoPor         String
   createdBy         User?     @relation("DocumentosCreados", fields: [creadoPor], references: [id], onDelete: SetNull)
   createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
   enviadoEn         DateTime?
   completadoEn      DateTime?
   canceladoEn       DateTime?
@@ -2925,19 +2884,14 @@ model DocumentoFirma {
   motivoCancelacion String?   @db.Text
 
   // Metadata
-  metadata    Json? // Datos adicionales del proveedor
+  metadata    Json? // Datos adicionales de Signaturit
   certificado String? @db.Text // Certificado de firma digital
-
-  // Audit log
-  auditLog SignatureAuditLog[]
 
   @@index([companyId])
   @@index([estado])
   @@index([contractId])
   @@index([tenantId])
-  @@index([templateId])
-  @@index([proveedorId])
-  @@index([proveedor])
+  @@index([signaturitId])
   @@index([fechaExpiracion])
   @@map("documentos_firma")
 }
@@ -2951,13 +2905,12 @@ model Firmante {
   nombre   String
   email    String
   telefono String?
-  rol      String // "inquilino", "propietario", "fiador", "testigo", "avalista", "gestor", "otro"
+  rol      String // "inquilino", "propietario", "fiador", "testigo"
   orden    Int     @default(1) // Para firma secuencial
 
-  // Integración con proveedor (genérico para DocuSign/Signaturit/etc)
-  proveedorRecipientId String? // ID del recipiente en el proveedor
-  urlFirma             String?      @db.Text // URL única para que firme
-  estado               SignerStatus @default(pendiente)
+  // Signaturit
+  signaturitId String? // ID del firmante en Signaturit
+  estado       SignerStatus @default(pendiente)
 
   // Timestamps
   enviadoEn     DateTime?
@@ -2970,14 +2923,10 @@ model Firmante {
   recordatoriosEnviados Int       @default(0)
   ultimoRecordatorio    DateTime?
 
-  // Metadata (auditoría de firma)
+  // Metadata
   ipFirma         String?
   geolocalizacion String?
   dispositivo     String?
-
-  // Audit
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
   @@index([documentoId])
   @@index([email])
@@ -2986,89 +2935,20 @@ model Firmante {
 }
 
 model SignatureWebhook {
-  id               String         @id @default(cuid())
-  proveedor        ProveedorFirma // docusign, signaturit, otro
-  proveedorEventId String // ID del evento en el proveedor
-  tipo             String // "document_completed", "signature_completed", etc.
-  documentoId      String?
-  payload          Json // Payload completo del webhook
-  procesado        Boolean        @default(false)
-  errorProceso     String?        @db.Text
-  createdAt        DateTime       @default(now())
-  procesadoEn      DateTime?
+  id           String    @id @default(cuid())
+  signaturitId String // ID del evento en Signaturit
+  tipo         String // "document_completed", "signature_completed", etc.
+  documentoId  String?
+  payload      Json // Payload completo del webhook
+  procesado    Boolean   @default(false)
+  errorProceso String?   @db.Text
+  createdAt    DateTime  @default(now())
+  procesadoEn  DateTime?
 
-  @@index([proveedorEventId])
-  @@index([proveedor])
+  @@index([signaturitId])
   @@index([tipo])
   @@index([procesado])
   @@map("signature_webhooks")
-}
-
-// Plantillas de contratos predefinidas
-model ContractTemplate {
-  id        String @id @default(cuid())
-  companyId String
-
-  // Información básica
-  nombre      String
-  descripcion String?
-  tipo        TipoContrato
-
-  // Contenido del contrato (HTML/Markdown)
-  contenido String @db.Text
-
-  // Variables dinámicas que se pueden usar en el template
-  // Ejemplo: {{INQUILINO_NOMBRE}}, {{RENTA_MENSUAL}}, etc.
-  variables Json?
-
-  // Estado
-  activo Boolean @default(true)
-
-  // Audit
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  createdBy String?
-
-  // Relaciones
-  company   Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  creator   User?            @relation(fields: [createdBy], references: [id])
-  documents DocumentoFirma[]
-
-  @@index([companyId])
-  @@index([tipo])
-  @@index([activo])
-  @@map("contract_templates")
-}
-
-// Log de auditoría de eventos de firma
-model SignatureAuditLog {
-  id          String @id @default(cuid())
-  documentoId String
-
-  // Tipo de evento
-  evento      EventoFirma
-  descripcion String?
-
-  // Datos del evento
-  firmanteEmail  String?
-  firmanteNombre String?
-  ipAddress      String?
-  userAgent      String? @db.Text
-  ubicacion      String?
-
-  // Datos adicionales del proveedor
-  proveedorData Json?
-
-  // Audit
-  createdAt DateTime @default(now())
-
-  // Relaciones
-  documento DocumentoFirma @relation(fields: [documentoId], references: [id], onDelete: Cascade)
-
-  @@index([documentoId])
-  @@index([evento])
-  @@index([createdAt])
-  @@map("signature_audit_log")
 }
 
 // ============================================
@@ -3799,10 +3679,10 @@ model CommonSpace {
   activo Boolean @default(true)
 
   // Relaciones
-  reservations           SpaceReservation[]
-  waitlists              SpaceWaitlist[]
-  ratings                SpaceRating[]
-  maintenancePredictions SpaceMaintenancePrediction[]
+  reservations               SpaceReservation[]
+  waitlists                  SpaceWaitlist[]
+  ratings                    SpaceRating[]
+  maintenancePredictions     SpaceMaintenancePrediction[]
 
   // Auditoría
   createdAt DateTime @default(now())
@@ -3849,11 +3729,11 @@ model SpaceReservation {
   fechaCancelacion  DateTime?
 
   // Gestión de No-Shows y Penalizaciones
-  noShow            Boolean   @default(false)
-  penaltyApplied    Boolean   @default(false)
-  penaltyCredits    Int? // Créditos descontados por penalización
-  checkInConfirmado Boolean   @default(false)
-  horaCheckIn       DateTime? // Hora real de check-in
+  noShow                 Boolean @default(false)
+  penaltyApplied         Boolean @default(false)
+  penaltyCredits         Int?    // Créditos descontados por penalización
+  checkInConfirmado      Boolean @default(false)
+  horaCheckIn            DateTime? // Hora real de check-in
 
   // Relaciones
   rating SpaceRating?
@@ -6727,8 +6607,8 @@ model STRSeasonPricing {
 // ==========================================
 
 enum ChannelSyncDirection {
-  push // Solo envía datos al canal
-  pull // Solo recibe datos del canal  
+  push      // Solo envía datos al canal
+  pull      // Solo recibe datos del canal  
   bidirectional // Sincronización bidireccional
 }
 
@@ -6747,24 +6627,24 @@ model STRSyncHistory {
   id String @id @default(cuid())
 
   channelSyncId String
-
-  tipoEvento SyncEventType
-  direccion  ChannelSyncDirection @default(push)
-
+  
+  tipoEvento    SyncEventType
+  direccion     ChannelSyncDirection @default(push)
+  
   // Datos del evento
-  payload   Json?
-  respuesta Json?
-
+  payload       Json?
+  respuesta     Json?
+  
   // Estado
-  exitoso      Boolean @default(false)
-  mensajeError String? @db.Text
-  codigoError  String?
-  reintentos   Int     @default(0)
-
+  exitoso       Boolean @default(false)
+  mensajeError  String? @db.Text
+  codigoError   String?
+  reintentos    Int @default(0)
+  
   // Timing
-  iniciadoEn   DateTime  @default(now())
-  finalizadoEn DateTime?
-  duracionMs   Int?
+  iniciadoEn    DateTime @default(now())
+  finalizadoEn  DateTime?
+  duracionMs    Int?
 
   createdAt DateTime @default(now())
 
@@ -6782,24 +6662,24 @@ model STRChannelPricing {
   listingId String
   listing   STRListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
-  canal ChannelType
+  canal     ChannelType
 
   // Ajuste de precios por canal
-  ajusteTipo  String @default("porcentaje") // porcentaje, fijo
-  ajusteValor Float  @default(0) // +10% o +20€
-
+  ajusteTipo        String @default("porcentaje") // porcentaje, fijo
+  ajusteValor       Float @default(0) // +10% o +20€
+  
   // Comisión del canal
-  comisionCanal     Float   @default(0) // % de comisión
+  comisionCanal     Float @default(0) // % de comisión
   compensarComision Boolean @default(false)
 
   // Precios mínimos y máximos por canal
-  precioMinimo Float?
-  precioMaximo Float?
+  precioMinimo      Float?
+  precioMaximo      Float?
 
   // Descuentos específicos del canal
-  descuentoSemana  Float? // % descuento 7+ noches
-  descuentoMes     Float? // % descuento 28+ noches
-  descuentoLastMin Float? // % descuento última hora
+  descuentoSemana   Float? // % descuento 7+ noches
+  descuentoMes      Float? // % descuento 28+ noches
+  descuentoLastMin  Float? // % descuento última hora
 
   activo Boolean @default(true)
 
@@ -6820,20 +6700,20 @@ model STRDynamicPricingRule {
 
   nombre      String
   descripcion String?
-  prioridad   Int     @default(0) // Mayor prioridad primero
+  prioridad   Int @default(0) // Mayor prioridad primero
 
   // Condiciones (JSON para flexibilidad)
   condiciones Json // {diasAntelacion: {min: 0, max: 7}, ocupacion: {min: 80}}
-
+  
   // Acción
   accionTipo  String // ajuste_porcentaje, precio_fijo, multiplicador
   accionValor Float
 
   // Aplicabilidad
-  aplicarCanales ChannelType[] @default([])
-  diasSemana     Int[]         @default([]) // 0=Dom, 6=Sab
-  fechaInicio    DateTime?
-  fechaFin       DateTime?
+  aplicarCanales  ChannelType[] @default([])
+  diasSemana      Int[] @default([]) // 0=Dom, 6=Sab
+  fechaInicio     DateTime?
+  fechaFin        DateTime?
 
   activo Boolean @default(true)
 
@@ -6853,16 +6733,16 @@ model STRCompetitorAnalysis {
   listing   STRListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   // Competidor
-  competidorUrl    String
-  competidorNombre String?
-  canal            ChannelType
+  competidorUrl     String
+  competidorNombre  String?
+  canal             ChannelType
 
   // Datos capturados
   precioCapturado   Float
   ocupacionEstimada Float?
   ratingCapturado   Float?
-
-  fechaCaptura DateTime @default(now())
+  
+  fechaCaptura      DateTime @default(now())
 
   createdAt DateTime @default(now())
 
@@ -6875,37 +6755,37 @@ model STRCompetitorAnalysis {
 model STRChannelMetrics {
   id String @id @default(cuid())
 
-  listingId String
-  listing   STRListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
-
-  canal   ChannelType
-  periodo DateTime    @db.Date // Fecha del periodo (día)
+  listingId   String
+  listing     STRListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  
+  canal       ChannelType
+  periodo     DateTime @db.Date // Fecha del periodo (día)
 
   // Métricas de reservas
-  reservasRecibidas   Int @default(0)
-  reservasCanceladas  Int @default(0)
-  reservasModificadas Int @default(0)
-  nochesReservadas    Int @default(0)
+  reservasRecibidas     Int @default(0)
+  reservasCanceladas    Int @default(0)
+  reservasModificadas   Int @default(0)
+  nochesReservadas      Int @default(0)
 
   // Métricas financieras
-  ingresosBrutos  Float @default(0)
-  comisionesCanal Float @default(0)
-  ingresosNetos   Float @default(0)
-
+  ingresosBrutos        Float @default(0)
+  comisionesCanal       Float @default(0)
+  ingresosNetos         Float @default(0)
+  
   // ADR (Average Daily Rate)
-  adr Float @default(0)
-
+  adr                   Float @default(0)
+  
   // Ocupación
-  tasaOcupacion Float @default(0)
-
+  tasaOcupacion         Float @default(0)
+  
   // Calificaciones
-  reviewsRecibidas Int    @default(0)
-  ratingPromedio   Float?
+  reviewsRecibidas      Int @default(0)
+  ratingPromedio        Float?
 
   // Visibilidad (si disponible)
-  impresiones    Int?
-  clics          Int?
-  conversionRate Float?
+  impresiones           Int?
+  clics                 Int?
+  conversionRate        Float?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -6952,8 +6832,8 @@ model STRHousekeepingTask {
   booking   STRBooking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
 
   // Tipo y estado
-  tipo   TurnoverType       @default(check_out)
-  status HousekeepingStatus @default(pendiente)
+  tipo        TurnoverType @default(check_out)
+  status      HousekeepingStatus @default(pendiente)
 
   // Fechas
   fechaProgramada DateTime
@@ -6961,19 +6841,19 @@ model STRHousekeepingTask {
   fechaFin        DateTime?
 
   // Asignación
-  asignadoA      String?
-  staff          STRHousekeepingStaff? @relation(fields: [asignadoA], references: [id], onDelete: SetNull)
-  asignadoNombre String?
-
+  asignadoA       String?
+  staff           STRHousekeepingStaff? @relation(fields: [asignadoA], references: [id], onDelete: SetNull)
+  asignadoNombre  String?
+  
   // Detalles
-  notas                   String? @db.Text
+  notas           String? @db.Text
   instruccionesEspeciales String? @db.Text
-  prioridad               Int     @default(0) // 0=normal, 1=alta, 2=urgente
+  prioridad       Int @default(0) // 0=normal, 1=alta, 2=urgente
 
   // Checklist completado
   checklistCompletado Json? // {items: [{nombre, completado, notas}]}
-  fotosAntes          String[] @default([])
-  fotosDespues        String[] @default([])
+  fotosAntes      String[] @default([])
+  fotosDespues    String[] @default([])
 
   // Tiempo estimado y real
   tiempoEstimadoMin Int?
@@ -6984,13 +6864,13 @@ model STRHousekeepingTask {
   costoManoObra   Float @default(0)
 
   // Check-in/out del personal
-  checkInTime      DateTime?
-  checkOutTime     DateTime?
+  checkInTime     DateTime?
+  checkOutTime    DateTime?
   ubicacionCheckIn Json? // {lat, lng}
 
   // Incidencias
-  incidencias      String[] @default([])
-  requiereAtencion Boolean  @default(false)
+  incidencias     String[] @default([])
+  requiereAtencion Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -7011,23 +6891,23 @@ model STRHousekeepingStaff {
   company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   // Información del personal
-  nombre   String
-  email    String?
-  telefono String
-  foto     String?
-
+  nombre          String
+  email           String?
+  telefono        String
+  foto            String?
+  
   // Tipo
-  tipo          String  @default("interno") // interno, externo, empresa
-  empresaNombre String? // Si es empresa externa
+  tipo            String @default("interno") // interno, externo, empresa
+  empresaNombre   String? // Si es empresa externa
 
   // Disponibilidad
   activo          Boolean @default(true)
-  diasDisponibles Int[]   @default([1, 2, 3, 4, 5]) // 0=Dom, 6=Sab
-  horaInicio      String  @default("08:00")
-  horaFin         String  @default("18:00")
+  diasDisponibles Int[] @default([1, 2, 3, 4, 5]) // 0=Dom, 6=Sab
+  horaInicio      String @default("08:00")
+  horaFin         String @default("18:00")
 
   // Capacidades
-  capacidadDiaria Int      @default(4) // Turnovers por día
+  capacidadDiaria Int @default(4) // Turnovers por día
   zonasTrabajo    String[] @default([]) // IDs de edificios o zonas
 
   // Tarifas
@@ -7035,13 +6915,13 @@ model STRHousekeepingStaff {
   tarifaPorHora     Float?
 
   // Estadísticas
-  tareasCompletadas    Int    @default(0)
+  tareasCompletadas   Int @default(0)
   calificacionPromedio Float?
-  tiempoPromedioMin    Int?
+  tiempoPromedioMin   Int?
 
   // Credenciales app móvil
-  pinAcceso String?
-  appToken  String?
+  pinAcceso       String?
+  appToken        String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -7063,25 +6943,25 @@ model STRHousekeepingInventory {
   listingId String?
 
   // Artículo
-  nombre    String
-  categoria String // limpieza, amenities, ropa_cama, cocina
-  sku       String?
-
+  nombre          String
+  categoria       String // limpieza, amenities, ropa_cama, cocina
+  sku             String?
+  
   // Stock
-  stockActual Int  @default(0)
-  stockMinimo Int  @default(5)
-  stockOptimo Int?
-
+  stockActual     Int @default(0)
+  stockMinimo     Int @default(5)
+  stockOptimo     Int?
+  
   // Ubicación
-  ubicacion String? // Almacén o unidad
+  ubicacion       String? // Almacén o unidad
 
   // Costos
-  costoUnitario Float?
-  proveedorId   String?
+  costoUnitario   Float?
+  proveedorId     String?
 
   // Control
   fechaUltimoConteo DateTime?
-  alertaStockBajo   Boolean   @default(false)
+  alertaStockBajo   Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -7104,12 +6984,12 @@ model STRInventoryMovement {
   inventory   STRHousekeepingInventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
 
   // Movimiento
-  tipo     String // entrada, salida, ajuste
-  cantidad Int
-  motivo   String? // compra, uso, dañado, perdido
+  tipo        String // entrada, salida, ajuste
+  cantidad    Int
+  motivo      String? // compra, uso, dañado, perdido
 
   // Referencia
-  taskId String? // Tarea de housekeeping relacionada
+  taskId      String? // Tarea de housekeeping relacionada
 
   // Registro
   registradoPor String?
@@ -7129,13 +7009,13 @@ model STRHousekeepingChecklist {
   companyId String
   company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
-  nombre      String
-  descripcion String?
-  tipo        TurnoverType @default(check_out)
-
+  nombre        String
+  descripcion   String?
+  tipo          TurnoverType @default(check_out)
+  
   // Items del checklist
-  items Json // [{id, nombre, categoria, obligatorio, orden}]
-
+  items         Json // [{id, nombre, categoria, obligatorio, orden}]
+  
   // Tiempo estimado
   tiempoEstimadoMin Int?
 
@@ -8872,15 +8752,15 @@ model OwnerAlert {
 
 // Automatización
 model Automation {
-  id        String  @id @default(cuid())
-  companyId String
-  userId    String? // Usuario que creó la automatización
+  id          String  @id @default(cuid())
+  companyId   String
+  userId      String? // Usuario que creó la automatización
 
   // Información Básica
-  nombre      String
-  descripcion String? @db.Text
-  tipo        String // 'recordatorio', 'notificacion', 'accion', 'workflow'
-  plantillaId String? // Referencia a plantilla si se usó una
+  nombre       String
+  descripcion  String?  @db.Text
+  tipo         String // 'recordatorio', 'notificacion', 'accion', 'workflow'
+  plantillaId  String? // Referencia a plantilla si se usó una
 
   // Trigger (Disparador)
   triggerType   String // 'fecha', 'evento', 'condicion', 'manual'
@@ -8893,15 +8773,15 @@ model Automation {
   acciones Json @db.JsonB // Acciones a ejecutar
 
   // Configuración de Ejecución
-  activa             Boolean @default(true)
-  prioridad          String  @default("media") // 'baja', 'media', 'alta'
-  notificarEjecucion Boolean @default(false)
-
+  activa             Boolean   @default(true)
+  prioridad          String    @default("media") // 'baja', 'media', 'alta'
+  notificarEjecucion Boolean   @default(false)
+  
   // Estadísticas
-  vecesEjecutada   Int       @default(0)
-  ultimaEjecucion  DateTime?
-  proximaEjecucion DateTime?
-
+  vecesEjecutada    Int       @default(0)
+  ultimaEjecucion   DateTime?
+  proximaEjecucion  DateTime?
+  
   // Auditoría
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -8924,10 +8804,10 @@ model AutomationExecution {
   companyId    String
 
   // Resultado de la Ejecución
-  estado   String // 'exitosa', 'fallida', 'parcial'
-  mensaje  String?
-  detalles Json?   @db.JsonB // Detalles de la ejecución
-  duracion Int? // Duración en milisegundos
+  estado       String  // 'exitosa', 'fallida', 'parcial'
+  mensaje      String?
+  detalles     Json?   @db.JsonB // Detalles de la ejecución
+  duracion     Int? // Duración en milisegundos
 
   // Datos del Contexto
   contexto Json? @db.JsonB // Datos del contexto en el momento de la ejecución
@@ -8949,26 +8829,26 @@ model AutomationTemplate {
   id String @id @default(cuid())
 
   // Información Básica
-  nombre      String
-  descripcion String  @db.Text
-  categoria   String // 'inquilinos', 'pagos', 'mantenimiento', 'comunicacion', 'reportes'
-  icono       String? // Icono para UI
-
+  nombre       String
+  descripcion  String  @db.Text
+  categoria    String // 'inquilinos', 'pagos', 'mantenimiento', 'comunicacion', 'reportes'
+  icono        String? // Icono para UI
+  
   // Configuración
-  plantilla  Json  @db.JsonB // Configuración de la plantilla
-  parametros Json? @db.JsonB // Parámetros configurables
-
+  plantilla    Json    @db.JsonB // Configuración de la plantilla
+  parametros   Json?   @db.JsonB // Parámetros configurables
+  
   // Disponibilidad
-  vertical    String? // Vertical específico o null para todos
-  nivelAcceso String  @default("todos") // 'todos', 'premium', 'enterprise'
-  popular     Boolean @default(false)
-
+  vertical     String? // Vertical específico o null para todos
+  nivelAcceso  String  @default("todos") // 'todos', 'premium', 'enterprise'
+  popular      Boolean @default(false)
+  
   // Estadísticas
-  vecesUsada Int @default(0)
-
+  vecesUsada   Int     @default(0)
+  
   // Auditoría
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@index([categoria])
   @@index([popular])
@@ -8991,34 +8871,34 @@ model NotificationRule {
   activa      Boolean @default(true)
 
   // Configuración del Trigger
-  tipoEvento   String // 'pago_vencido', 'contrato_expira', 'mantenimiento_urgente', etc.
-  condiciones  Json   @db.JsonB // Condiciones que deben cumplirse
-  diasAnticipo Int? // Días de anticipación para notificar (null = inmediato)
-
+  tipoEvento    String // 'pago_vencido', 'contrato_expira', 'mantenimiento_urgente', etc.
+  condiciones   Json   @db.JsonB // Condiciones que deben cumplirse
+  diasAnticipo  Int? // Días de anticipación para notificar (null = inmediato)
+  
   // Configuración de Canales
   canales Json @db.JsonB // {email: true, push: false, sms: true}
-
+  
   // Destinatarios
-  rolesDestinatarios  String[] // ['administrador', 'gestor', 'tenant']
+  rolesDestinatarios String[] // ['administrador', 'gestor', 'tenant']
   usuariosEspecificos String[] @default([]) // IDs de usuarios específicos
-
+  
   // Plantilla
-  templateId String?
-  asunto     String? // Para email
-  mensaje    String    @db.Text // Mensaje con variables
-  prioridad  RiskLevel @default(bajo)
-
+  templateId  String?
+  asunto      String? // Para email
+  mensaje     String  @db.Text // Mensaje con variables
+  prioridad   RiskLevel @default(bajo)
+  
   // Estadísticas
-  vecesEjecutada  Int       @default(0)
+  vecesEjecutada Int @default(0)
   ultimaEjecucion DateTime?
-
+  
   // Auditoría
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   creadoPor String
 
-  company  Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  template NotificationTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  company  Company                   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  template NotificationTemplate?     @relation(fields: [templateId], references: [id], onDelete: SetNull)
   logs     NotificationLog[]
 
   @@index([companyId, activa])
@@ -9031,31 +8911,31 @@ model NotificationTemplate {
   id String @id @default(cuid())
 
   // Información Básica
-  companyId String? // null = plantilla global del sistema
+  companyId String?  // null = plantilla global del sistema
   nombre    String
   categoria String // 'pagos', 'contratos', 'mantenimiento', 'general'
-
+  
   // Contenido
-  asuntoEmail  String? // Para notificaciones email
+  asuntoEmail String? // Para notificaciones email
   mensajeEmail String? @db.Text
-  mensajePush  String?
-  mensajeSMS   String?
-
+  mensajePush String?
+  mensajeSMS String?
+  
   // Variables disponibles
   variables String[] @default([]) // ['nombre_inquilino', 'monto', 'fecha_vencimiento']
-
+  
   // Configuración
   esPlantillaGlobal Boolean @default(false)
-  activa            Boolean @default(true)
-
+  activa Boolean @default(true)
+  
   // Estadísticas
   vecesUsada Int @default(0)
-
+  
   // Auditoría
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  company Company?           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
   rules   NotificationRule[]
   logs    NotificationLog[]
 
@@ -9073,37 +8953,37 @@ model NotificationLog {
   userId     String? // Usuario destinatario
   ruleId     String? // Regla que generó la notificación
   templateId String? // Plantilla utilizada
-
+  
   // Información de la Notificación
-  tipo         NotificationType
-  canal        String // 'email', 'push', 'sms', 'in_app'
+  tipo       NotificationType
+  canal      String // 'email', 'push', 'sms', 'in_app'
   destinatario String // Email, teléfono o userId
-
+  
   // Contenido
   asunto  String?
-  mensaje String  @db.Text
-
+  mensaje String @db.Text
+  
   // Estado
-  estado   String // 'enviado', 'fallido', 'leido', 'pendiente'
-  intentos Int     @default(1)
-  errorMsg String? @db.Text
-
+  estado     String // 'enviado', 'fallido', 'leido', 'pendiente'
+  intentos   Int @default(1)
+  errorMsg   String? @db.Text
+  
   // Metadatos
-  metadatos Json?    @db.JsonB // Datos adicionales del contexto
+  metadatos Json? @db.JsonB // Datos adicionales del contexto
   costoSMS  Decimal? @db.Decimal(10, 4) // Para SMS
-
+  
   // Interacción
-  leida        Boolean   @default(false)
-  fechaLeida   DateTime?
+  leida       Boolean @default(false)
+  fechaLeida  DateTime?
   accionTomada String? // 'click_cta', 'dismissed', etc.
-
+  
   // Auditoría
   enviadoEn DateTime @default(now())
-
-  company  Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  user     User?                 @relation(fields: [userId], references: [id], onDelete: SetNull)
-  rule     NotificationRule?     @relation(fields: [ruleId], references: [id], onDelete: SetNull)
-  template NotificationTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  
+  company  Company                   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user     User?                     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  rule     NotificationRule?         @relation(fields: [ruleId], references: [id], onDelete: SetNull)
+  template NotificationTemplate?     @relation(fields: [templateId], references: [id], onDelete: SetNull)
 
   @@index([companyId, enviadoEn])
   @@index([userId, leida])
@@ -9120,22 +9000,22 @@ model UserNotificationSettings {
 
   // Configuración de Horarios Silenciosos
   quietHoursEnabled Boolean @default(false)
-  quietHoursStart   String  @default("22:00")
-  quietHoursEnd     String  @default("08:00")
-
+  quietHoursStart   String @default("22:00")
+  quietHoursEnd     String @default("08:00")
+  
   // Días de no molestar
   quietDays String[] @default([]) // ['sabado', 'domingo']
-
+  
   // Agrupación de Notificaciones
   batchNotifications Boolean @default(false)
   batchInterval      Int     @default(60) // minutos
-
+  
   // Preferencias de Idioma
   language String @default("es")
-
+  
   // Preferencias por Tipo de Notificación (sobrescribe NotificationPreference)
   customRules Json? @db.JsonB // Reglas personalizadas adicionales
-
+  
   // Auditoría
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -9147,22 +9027,22 @@ model UserNotificationSettings {
 
 // Interacciones de Soporte para análisis de chatbot y asistencia
 model SupportInteraction {
-  id         String  @id @default(cuid())
-  userId     String
-  type       String // 'chatbot', 'ticket', 'email', 'phone'
-  question   String  @db.Text
-  response   String  @db.Text
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // 'chatbot', 'ticket', 'email', 'phone'
+  question  String   @db.Text
+  response  String   @db.Text
   confidence Float?
-  intent     String? // 'greeting', 'how_to', 'pricing', 'support', 'knowledge_base'
-  sentiment  String? // 'positive', 'neutral', 'negative'
-  urgency    String? // 'low', 'medium', 'high', 'critical'
-  resolved   Boolean @default(false)
-
+  intent    String?  // 'greeting', 'how_to', 'pricing', 'support', 'knowledge_base'
+  sentiment String?  // 'positive', 'neutral', 'negative'
+  urgency   String?  // 'low', 'medium', 'high', 'critical'
+  resolved  Boolean  @default(false)
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
+  
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  
   @@index([userId, createdAt])
   @@index([type])
   @@index([sentiment])
@@ -9194,32 +9074,32 @@ enum FondoTipo {
 
 // Libro de actas digital
 model CommunityMinute {
-  id         String   @id @default(uuid())
-  companyId  String
-  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  buildingId String
-  building   Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
-
-  numeroActa   Int
-  fecha        DateTime
-  convocatoria String     @db.Text
-  asistentes   Json // Array de propietarios presentes
-  ordenDia     Json // Array de puntos del orden del día
-  acuerdos     Json // Array de acuerdos alcanzados
-  estado       ActaEstado @default(borrador)
-
+  id            String      @id @default(uuid())
+  companyId     String
+  company       Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  buildingId    String
+  building      Building    @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  
+  numeroActa    Int
+  fecha         DateTime
+  convocatoria  String      @db.Text
+  asistentes    Json        // Array de propietarios presentes
+  ordenDia      Json        // Array de puntos del orden del día
+  acuerdos      Json        // Array de acuerdos alcanzados
+  estado        ActaEstado  @default(borrador)
+  
   // Adjuntos y firmas simuladas
-  documentos      Json? // Array de URLs de documentos adjuntos
-  firmasDigitales Json? // Simulación de firmas (no real)
-
-  creadoPor       String
-  aprobadoPor     String?
+  documentos    Json?       // Array de URLs de documentos adjuntos
+  firmasDigitales Json?     // Simulación de firmas (no real)
+  
+  creadoPor     String
+  aprobadoPor   String?
   fechaAprobacion DateTime?
-  observaciones   String?   @db.Text
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  observaciones String?     @db.Text
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
   @@unique([companyId, buildingId, numeroActa])
   @@index([companyId, buildingId])
   @@index([fecha])
@@ -9228,38 +9108,38 @@ model CommunityMinute {
 
 // Gestión de cuotas de comunidad
 model CommunityFee {
-  id         String   @id @default(uuid())
-  companyId  String
-  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  buildingId String
-  building   Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
-  unitId     String?
-  unit       Unit?    @relation(fields: [unitId], references: [id], onDelete: SetNull)
-
-  tipo         CuotaTipo
-  periodo      String // "2024-Q1", "2024-01", etc
-  concepto     String
-  importeBase  Float
-  coeficiente  Float     @default(1.0) // Coeficiente de participación
-  importeTotal Float
-
+  id            String      @id @default(uuid())
+  companyId     String
+  company       Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  buildingId    String
+  building      Building    @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  unitId        String?
+  unit          Unit?       @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  
+  tipo          CuotaTipo
+  periodo       String      // "2024-Q1", "2024-01", etc
+  concepto      String
+  importeBase   Float
+  coeficiente   Float       @default(1.0) // Coeficiente de participación
+  importeTotal  Float
+  
   fechaVencimiento DateTime
-  fechaPago        DateTime?
-  estado           PaymentStatus @default(pendiente)
-  metodoPago       String?
-  referenciaPago   String?
-
+  fechaPago     DateTime?
+  estado        PaymentStatus @default(pendiente)
+  metodoPago    String?
+  referenciaPago String?
+  
   // Desglose de la cuota
   gastosCorrientes Float @default(0)
-  fondoReserva     Float @default(0)
-  seguros          Float @default(0)
-  mantenimiento    Float @default(0)
-  otros            Float @default(0)
-
-  notas     String?  @db.Text
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  fondoReserva    Float @default(0)
+  seguros         Float @default(0)
+  mantenimiento   Float @default(0)
+  otros           Float @default(0)
+  
+  notas         String?     @db.Text
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
   @@index([companyId, buildingId])
   @@index([unitId])
   @@index([periodo, estado])
@@ -9268,32 +9148,32 @@ model CommunityFee {
 
 // Fondos de reserva y derramas
 model CommunityFund {
-  id         String   @id @default(uuid())
-  companyId  String
-  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  buildingId String
-  building   Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
-
-  tipo        FondoTipo
-  nombre      String
-  descripcion String?   @db.Text
-
-  saldoActual   Float  @default(0)
+  id            String      @id @default(uuid())
+  companyId     String
+  company       Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  buildingId    String
+  building      Building    @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  
+  tipo          FondoTipo
+  nombre        String
+  descripcion   String?     @db.Text
+  
+  saldoActual   Float       @default(0)
   saldoObjetivo Float?
-
+  
   // Movimientos y contribuciones
-  aportacionMensual Float @default(0)
-  totalAportaciones Float @default(0)
-  totalGastos       Float @default(0)
-
-  movimientos Json // Array de movimientos del fondo
-
-  fechaCreacion DateTime @default(now())
-  activo        Boolean  @default(true)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  aportacionMensual Float   @default(0)
+  totalAportaciones Float   @default(0)
+  totalGastos       Float   @default(0)
+  
+  movimientos   Json        // Array de movimientos del fondo
+  
+  fechaCreacion DateTime    @default(now())
+  activo        Boolean     @default(true)
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
   @@index([companyId, buildingId])
   @@index([tipo, activo])
   @@map("community_funds")
@@ -9301,30 +9181,30 @@ model CommunityFund {
 
 // Alertas financieras y contables
 model FinancialAlert {
-  id         String    @id @default(uuid())
-  companyId  String
-  company    Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  buildingId String?
-  building   Building? @relation(fields: [buildingId], references: [id], onDelete: Cascade)
-
-  tipo        String // 'cash_flow', 'descuadre', 'impago', 'fianza'
-  titulo      String
-  descripcion String    @db.Text
-  severidad   RiskLevel
-
-  monto           Float?
-  fechaDeteccion  DateTime  @default(now())
+  id            String      @id @default(uuid())
+  companyId     String
+  company       Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  buildingId    String?
+  building      Building?   @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  
+  tipo          String      // 'cash_flow', 'descuadre', 'impago', 'fianza'
+  titulo        String
+  descripcion   String      @db.Text
+  severidad     RiskLevel
+  
+  monto         Float?
+  fechaDeteccion DateTime   @default(now())
   fechaResolucion DateTime?
-
-  estado       String  @default("pendiente") // pendiente, revisando, resuelto
-  responsable  String?
-  accionTomada String? @db.Text
-
-  metadata Json? // Datos adicionales
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  
+  estado        String      @default("pendiente") // pendiente, revisando, resuelto
+  responsable   String?
+  accionTomada  String?     @db.Text
+  
+  metadata      Json?       // Datos adicionales
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
   @@index([companyId, tipo, estado])
   @@index([severidad, fechaDeteccion])
   @@map("financial_alerts")
@@ -9332,38 +9212,38 @@ model FinancialAlert {
 
 // Previsión de cash flow
 model CashFlowForecast {
-  id         String    @id @default(uuid())
-  companyId  String
-  company    Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  buildingId String?
-  building   Building? @relation(fields: [buildingId], references: [id], onDelete: Cascade)
-
-  mes String // "2024-06"
-
+  id            String      @id @default(uuid())
+  companyId     String
+  company       Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  buildingId    String?
+  building      Building?   @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  
+  mes           String      // "2024-06"
+  
   // Ingresos previstos
-  ingresosPrevistos   Float @default(0)
-  ingresosRecurrentes Float @default(0)
-  ingresosVariables   Float @default(0)
-
+  ingresosPrevistos    Float @default(0)
+  ingresosRecurrentes  Float @default(0)
+  ingresosVariables    Float @default(0)
+  
   // Gastos previstos
-  gastosPrevistos   Float @default(0)
-  gastosRecurrentes Float @default(0)
-  gastosVariables   Float @default(0)
-
+  gastosPrevistos      Float @default(0)
+  gastosRecurrentes    Float @default(0)
+  gastosVariables      Float @default(0)
+  
   // Resultado
-  saldoFinal Float @default(0)
-  confianza  Float @default(0.8) // 0-1
-
+  saldoFinal           Float @default(0)
+  confianza            Float @default(0.8) // 0-1
+  
   // Escenarios
-  escenarioOptimista Float @default(0)
-  escenarioPesimista Float @default(0)
-
-  calculadoEn   DateTime @default(now())
-  basadoEnDatos Json? // Fuentes de datos utilizadas
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  escenarioOptimista   Float @default(0)
+  escenarioPesimista   Float @default(0)
+  
+  calculadoEn          DateTime @default(now())
+  basadoEnDatos        Json?   // Fuentes de datos utilizadas
+  
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  
   @@unique([companyId, buildingId, mes])
   @@index([companyId, mes])
   @@map("cash_flow_forecasts")
@@ -9371,33 +9251,33 @@ model CashFlowForecast {
 
 // Gestión de fianzas
 model DepositManagement {
-  id         String   @id @default(uuid())
-  companyId  String
-  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  contractId String   @unique
-  contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
-
-  importeFianza Float
-  tipoFianza    String // 'legal', 'adicional', 'aval'
-
+  id            String      @id @default(uuid())
+  companyId     String
+  company       Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  contractId    String      @unique
+  contract      Contract    @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  
+  importeFianza         Float
+  tipoFianza            String // 'legal', 'adicional', 'aval'
+  
   // Depósito legal
-  depositadoOficialmente Boolean   @default(false)
+  depositadoOficialmente Boolean @default(false)
   entidadDeposito        String?
   numeroDeposito         String?
   fechaDeposito          DateTime?
-
+  
   // Devolución
-  devuelto          Boolean   @default(false)
-  importeDevuelto   Float?
-  deducciones       Float     @default(0)
-  motivoDeducciones String?   @db.Text
-  fechaDevolucion   DateTime?
-
-  documentos Json? // URLs de documentos
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  devuelto              Boolean @default(false)
+  importeDevuelto       Float?
+  deducciones           Float   @default(0)
+  motivoDeducciones     String? @db.Text
+  fechaDevolucion       DateTime?
+  
+  documentos            Json?   // URLs de documentos
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
   @@index([companyId])
   @@index([depositadoOficialmente, devuelto])
   @@map("deposit_management")
@@ -9405,31 +9285,31 @@ model DepositManagement {
 
 // Provisión de impagos
 model BadDebtProvision {
-  id        String  @id @default(uuid())
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  paymentId String  @unique
-  payment   Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
-
-  montoOriginal   Float
-  diasRetraso     Int
-  categoriaRiesgo RiskLevel
-
+  id            String      @id @default(uuid())
+  companyId     String
+  company       Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  paymentId     String      @unique
+  payment       Payment     @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  
+  montoOriginal         Float
+  diasRetraso           Int
+  categoriaRiesgo       RiskLevel
+  
   // Provisión automática según antigüedad
-  porcentajeProvision Float // 0-100
-  montoProvision      Float
-
+  porcentajeProvision   Float // 0-100
+  montoProvision        Float
+  
   // Seguimiento
-  gestionado        Boolean   @default(false)
-  recuperado        Boolean   @default(false)
-  montoRecuperado   Float     @default(0)
-  fechaRecuperacion DateTime?
-
-  metodosGestion Json? // Array de acciones tomadas
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  gestionado            Boolean @default(false)
+  recuperado            Boolean @default(false)
+  montoRecuperado       Float   @default(0)
+  fechaRecuperacion     DateTime?
+  
+  metodosGestion        Json?   // Array de acciones tomadas
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
   @@index([companyId, categoriaRiesgo])
   @@index([gestionado, recuperado])
   @@map("bad_debt_provisions")
@@ -9437,34 +9317,34 @@ model BadDebtProvision {
 
 // Cédulas de habitabilidad
 model HabitabilityCertificate {
-  id        String  @id @default(uuid())
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  unitId    String
-  unit      Unit    @relation(fields: [unitId], references: [id], onDelete: Cascade)
-
-  numeroCedula String
-  tipo         String // 'primera_ocupacion', 'segunda_ocupacion'
-  estado       String // 'vigente', 'vencida', 'renovacion_pendiente'
-
-  fechaEmision       DateTime
-  fechaVencimiento   DateTime?
+  id                String      @id @default(uuid())
+  companyId         String
+  company           Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  unitId            String
+  unit              Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  
+  numeroCedula      String
+  tipo              String      // 'primera_ocupacion', 'segunda_ocupacion'
+  estado            String      // 'vigente', 'vencida', 'renovacion_pendiente'
+  
+  fechaEmision      DateTime
+  fechaVencimiento  DateTime?
   vigenciaIndefinida Boolean   @default(false)
-
-  superficieUtil     Float?
+  
+  superficieUtil    Float?
   numeroHabitaciones Int?
-
+  
   organismoExpedidor String
-  registroNumero     String?
-
-  documentoURL     String?
-  documentoStorage String?
-
-  alertaEnviada Boolean @default(false)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  registroNumero    String?
+  
+  documentoURL      String?
+  documentoStorage  String?
+  
+  alertaEnviada     Boolean   @default(false)
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
   @@unique([unitId, numeroCedula])
   @@index([companyId, estado])
   @@index([fechaVencimiento, alertaEnviada])
@@ -9473,43 +9353,43 @@ model HabitabilityCertificate {
 
 // Modelo 347 - Declaración anual de operaciones
 model Modelo347Record {
-  id        String  @id @default(uuid())
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  ejercicio Int // Año fiscal
-  trimestre Int? // 1-4, null para anual
-
+  id                String      @id @default(uuid())
+  companyId         String
+  company           Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  ejercicio         Int         // Año fiscal
+  trimestre         Int?        // 1-4, null para anual
+  
   // Datos de la operación
-  nifDeclarante         String
+  nifDeclarante     String
   razonSocialDeclarante String
-
-  nifDeclarado         String
+  
+  nifDeclarado      String
   razonSocialDeclarado String
-  tipoOperacion        String // 'A' compras, 'B' ventas
-
+  tipoOperacion     String      // 'A' compras, 'B' ventas
+  
   importeAnual      Float
-  importeTrimestre1 Float @default(0)
-  importeTrimestre2 Float @default(0)
-  importeTrimestre3 Float @default(0)
-  importeTrimestre4 Float @default(0)
-
+  importeTrimestre1 Float       @default(0)
+  importeTrimestre2 Float       @default(0)
+  importeTrimestre3 Float       @default(0)
+  importeTrimestre4 Float       @default(0)
+  
   // Metadata
-  generadoAutomaticamente Boolean   @default(true)
-  revisado                Boolean   @default(false)
-  revisadoPor             String?
-  fechaRevision           DateTime?
-
+  generadoAutomaticamente Boolean @default(true)
+  revisado              Boolean @default(false)
+  revisadoPor           String?
+  fechaRevision         DateTime?
+  
   // Presentación
-  presentado         Boolean   @default(false)
-  fechaPresentacion  DateTime?
-  numeroJustificante String?
-
-  archivoGenerado String? // Path del fichero generado
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  presentado            Boolean @default(false)
+  fechaPresentacion     DateTime?
+  numeroJustificante    String?
+  
+  archivoGenerado       String? // Path del fichero generado
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
   @@unique([companyId, ejercicio, nifDeclarado])
   @@index([companyId, ejercicio])
   @@index([presentado])
@@ -9518,85 +9398,88 @@ model Modelo347Record {
 
 // Modelo 180 - Retenciones e ingresos a cuenta
 model Modelo180Record {
-  id        String  @id @default(uuid())
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  ejercicio Int
-  trimestre Int // 1-4
-
+  id                String      @id @default(uuid())
+  companyId         String
+  company           Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  ejercicio         Int
+  trimestre         Int         // 1-4
+  
   // Arrendador (propietario)
-  nifArrendador    String
-  nombreArrendador String
-
+  nifArrendador     String
+  nombreArrendador  String
+  
   // Arrendatario (inquilino)
-  nifArrendatario    String
+  nifArrendatario   String
   nombreArrendatario String
-
+  
   // Importes
-  baseImponible   Float
-  tipoRetencion   Float // Porcentaje (19%, 24%, etc)
-  importeRetenido Float
-
+  baseImponible     Float
+  tipoRetencion     Float       // Porcentaje (19%, 24%, etc)
+  importeRetenido   Float
+  
   // Inmueble
-  situacionInmueble    String // Provincia/municipio
+  situacionInmueble String      // Provincia/municipio
   referencialCatastral String?
-
+  
   // Procesamiento
-  incluidoDeclaracion Boolean @default(false)
-  revisado            Boolean @default(false)
-
-  presentado         Boolean   @default(false)
-  fechaPresentacion  DateTime?
-  numeroJustificante String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  incluidoDeclaracion Boolean   @default(false)
+  revisado            Boolean   @default(false)
+  
+  presentado          Boolean   @default(false)
+  fechaPresentacion   DateTime?
+  numeroJustificante  String?
+  
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  
   @@unique([companyId, ejercicio, trimestre, nifArrendatario])
   @@index([companyId, ejercicio, trimestre])
   @@index([presentado])
   @@map("modelo_180_records")
 }
 
+
 // Inspecciones Técnicas de Edificios (ITE)
 model BuildingInspection {
-  id         String   @id @default(uuid())
-  companyId  String
-  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  buildingId String
-  building   Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
-
-  tipo   String // 'ITE', 'IEE', 'ITEEVA'
-  estado String // 'vigente', 'vencida', 'pendiente'
-
+  id                String      @id @default(uuid())
+  companyId         String
+  company           Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  buildingId        String
+  building          Building    @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  
+  tipo              String      // 'ITE', 'IEE', 'ITEEVA'
+  estado            String      // 'vigente', 'vencida', 'pendiente'
+  
   fechaInspeccion   DateTime
   fechaVencimiento  DateTime
   proximaInspeccion DateTime?
-
-  resultado String // 'favorable', 'desfavorable', 'condicionado'
-
-  tecnicoNombre  String
-  tecnicoColegio String
-  numeroRegistro String?
-
+  
+  resultado         String      // 'favorable', 'desfavorable', 'condicionado'
+  
+  tecnicoNombre     String
+  tecnicoColegio    String
+  numeroRegistro    String?
+  
   deficienciasEncontradas Json? // Array de deficiencias
-  accionesRequeridas      Json? // Array de acciones correctivas
-
-  certificadoURL String?
-  documentos     Json? // URLs de documentos adjuntos
-
-  alertasEnviadas Boolean @default(false)
-  recordatorios   Json? // Array de recordatorios enviados
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  accionesRequeridas     Json? // Array de acciones correctivas
+  
+  certificadoURL    String?
+  documentos        Json?     // URLs de documentos adjuntos
+  
+  alertasEnviadas   Boolean   @default(false)
+  recordatorios     Json?     // Array de recordatorios enviados
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
   @@index([companyId, buildingId])
   @@index([fechaVencimiento, estado])
   @@index([alertasEnviadas])
   @@map("building_inspections")
 }
+
+
 
 // ============================================
 // ADMINISTRADOR DE FINCAS (Community Property Manager)
@@ -9624,37 +9507,37 @@ enum TipoInformeComunidad {
 
 // Comunidades gestionadas por el administrador
 model CommunityManagement {
-  id         String   @id @default(uuid())
-  companyId  String
-  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  buildingId String   @unique
-  building   Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
-
+  id                    String   @id @default(uuid())
+  companyId             String
+  company               Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  buildingId            String   @unique
+  building              Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  
   // Datos de la comunidad
-  nombreComunidad String
-  cif             String?
-  direccion       String
-  codigoPostal    String?
-  ciudad          String?
-  provincia       String?
-
+  nombreComunidad       String
+  cif                   String?
+  direccion             String
+  codigoPostal          String?
+  ciudad                String?
+  provincia             String?
+  
   // Configuración de honorarios
-  honorariosFijos      Float? // € mensuales
-  honorariosPorcentaje Float? // % sobre presupuesto
-
+  honorariosFijos       Float?   // € mensuales
+  honorariosPorcentaje  Float?   // % sobre presupuesto
+  
   // Estado
-  activa      Boolean   @default(true)
-  fechaInicio DateTime  @default(now())
-  fechaFin    DateTime?
-
+  activa                Boolean  @default(true)
+  fechaInicio           DateTime @default(now())
+  fechaFin              DateTime?
+  
   // Relaciones
-  facturas        CommunityInvoice[]
-  movimientosCaja CashBookEntry[]
-  informes        CommunityReport[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  facturas              CommunityInvoice[]
+  movimientosCaja       CashBookEntry[]
+  informes              CommunityReport[]
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
   @@index([companyId])
   @@index([buildingId])
   @@map("community_management")
@@ -9662,39 +9545,39 @@ model CommunityManagement {
 
 // Facturación por comunidad
 model CommunityInvoice {
-  id          String              @id @default(uuid())
-  companyId   String
-  company     Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  communityId String
-  community   CommunityManagement @relation(fields: [communityId], references: [id], onDelete: Cascade)
-
+  id                    String   @id @default(uuid())
+  companyId             String
+  company               Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  communityId           String
+  community             CommunityManagement @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  
   // Datos de la factura
-  numeroFactura    String   @unique
-  fechaEmision     DateTime @default(now())
-  fechaVencimiento DateTime
-  periodo          String // "2024-Q1", "2024-12", etc
-
+  numeroFactura         String   @unique
+  fechaEmision          DateTime @default(now())
+  fechaVencimiento      DateTime
+  periodo               String   // "2024-Q1", "2024-12", etc
+  
   // Conceptos
-  honorarios     Float @default(0)
-  gastosGestion  Float @default(0)
-  otrosConceptos Json? // Array de conceptos adicionales
-
+  honorarios            Float    @default(0)
+  gastosGestion         Float    @default(0)
+  otrosConceptos        Json?    // Array de conceptos adicionales
+  
   // Importes
-  baseImponible Float
-  iva           Float
-  totalFactura  Float
-
+  baseImponible         Float
+  iva                   Float
+  totalFactura          Float
+  
   // Estado
-  estado     EstadoFacturaComunidad @default(borrador)
-  fechaPago  DateTime?
-  metodoPago String?
-
+  estado                EstadoFacturaComunidad @default(borrador)
+  fechaPago             DateTime?
+  metodoPago            String?
+  
   // Documento
-  documentoUrl String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  documentoUrl          String?
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
   @@index([companyId])
   @@index([communityId])
   @@index([numeroFactura])
@@ -9704,40 +9587,40 @@ model CommunityInvoice {
 
 // Libro de caja digital por comunidad
 model CashBookEntry {
-  id          String              @id @default(uuid())
-  companyId   String
-  company     Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  communityId String
-  community   CommunityManagement @relation(fields: [communityId], references: [id], onDelete: Cascade)
-
+  id                    String   @id @default(uuid())
+  companyId             String
+  company               Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  communityId           String
+  community             CommunityManagement @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  
   // Datos del movimiento
-  fecha       DateTime           @default(now())
-  tipo        TipoMovimientoCaja
-  concepto    String
-  descripcion String?
-
+  fecha                 DateTime @default(now())
+  tipo                  TipoMovimientoCaja
+  concepto              String
+  descripcion           String?
+  
   // Importes
-  importe       Float
-  saldoAnterior Float
-  saldoActual   Float
-
+  importe               Float
+  saldoAnterior         Float
+  saldoActual           Float
+  
   // Categorización
-  categoria    String // cuotas, reparaciones, suministros, honorarios, etc
-  subcategoria String?
-
+  categoria             String   // cuotas, reparaciones, suministros, honorarios, etc
+  subcategoria          String?
+  
   // Referencias
-  facturaId String? // Referencia a factura si aplica
-  pagoId    String? // Referencia a pago si aplica
-
+  facturaId             String?  // Referencia a factura si aplica
+  pagoId                String?  // Referencia a pago si aplica
+  
   // Documento justificativo
-  documentoUrl String?
-
+  documentoUrl          String?
+  
   // Usuario que registra
-  registradoPor String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  registradoPor         String
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
   @@index([companyId])
   @@index([communityId])
   @@index([fecha])
@@ -9748,185 +9631,184 @@ model CashBookEntry {
 
 // Informes trimestrales/anuales
 model CommunityReport {
-  id          String              @id @default(uuid())
-  companyId   String
-  company     Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  communityId String
-  community   CommunityManagement @relation(fields: [communityId], references: [id], onDelete: Cascade)
-
+  id                    String   @id @default(uuid())
+  companyId             String
+  company               Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  communityId           String
+  community             CommunityManagement @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  
   // Tipo y período
-  tipo        TipoInformeComunidad
-  periodo     String // "2024-Q1", "2024", etc
-  fechaInicio DateTime
-  fechaFin    DateTime
-
+  tipo                  TipoInformeComunidad
+  periodo               String   // "2024-Q1", "2024", etc
+  fechaInicio           DateTime
+  fechaFin              DateTime
+  
   // Resumen financiero
-  totalIngresos Float @default(0)
-  totalGastos   Float @default(0)
-  saldoInicial  Float @default(0)
-  saldoFinal    Float @default(0)
-
+  totalIngresos         Float    @default(0)
+  totalGastos           Float    @default(0)
+  saldoInicial          Float    @default(0)
+  saldoFinal            Float    @default(0)
+  
   // Desglose
-  detalleIngresos Json? // Desglose de ingresos por categoría
-  detalleGastos   Json? // Desglose de gastos por categoría
-
+  detalleIngresos       Json?    // Desglose de ingresos por categoría
+  detalleGastos         Json?    // Desglose de gastos por categoría
+  
   // Datos adicionales
-  morosos       Json? // Lista de morosos y deudas
-  fondosReserva Float   @default(0)
-  observaciones String?
-
+  morosos               Json?    // Lista de morosos y deudas
+  fondosReserva         Float    @default(0)
+  observaciones         String?
+  
   // Documento generado
-  documentoUrl String?
-  generadoEn   DateTime @default(now())
-  generadoPor  String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  documentoUrl          String?
+  generadoEn            DateTime @default(now())
+  generadoPor           String
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
   @@index([companyId])
   @@index([communityId])
   @@index([tipo])
   @@index([periodo])
   @@map("community_reports")
 }
-
 // ========================================
 // 🏘️ COLIVING - RED SOCIAL Y COMUNIDAD
 // ========================================
 
 model ColivingProfile {
-  id        String  @id @default(cuid())
-  tenantId  String  @unique
-  tenant    Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
+  id                String   @id @default(cuid())
+  tenantId          String   @unique
+  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  companyId         String
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
   // Información del perfil
-  bio           String? @db.Text
-  intereses     Json // array de strings: ["yoga", "networking", "cocina"]
-  profesion     String?
-  idiomas       Json // array de strings: ["es", "en", "fr"]
-  redesSociales Json? // {instagram: "@user", linkedin: "profile"}
-
+  bio               String?  @db.Text
+  intereses         Json     // array de strings: ["yoga", "networking", "cocina"]
+  profesion         String?
+  idiomas           Json     // array de strings: ["es", "en", "fr"]
+  redesSociales     Json?    // {instagram: "@user", linkedin: "profile"}
+  
   // Preferencias de matching
-  buscoCompañeros Boolean @default(true)
-  interesCompartir Json // array: ["coche", "recetas", "eventos"]
-  disponibilidad   Json // {lunes: ["18:00-21:00"], martes: ["19:00-22:00"]}
-
+  buscoCompañeros   Boolean  @default(true)
+  interesCompartir  Json     // array: ["coche", "recetas", "eventos"]
+  disponibilidad    Json     // {lunes: ["18:00-21:00"], martes: ["19:00-22:00"]}
+  
   // Gamificación
-  puntosReputacion Int    @default(0)
-  nivel            String @default("bronce") // bronce, plata, oro, platino
-  badges           Json   @default("[]") // array de badges ganados
-
+  puntosReputacion  Int      @default(0)
+  nivel             String   @default("bronce") // bronce, plata, oro, platino
+  badges            Json     @default("[]") // array de badges ganados
+  
   // Privacidad
-  perfilPublico   Boolean @default(true)
-  mostrarContacto Boolean @default(false)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  matches         ColivingMatch[]
-  gruposParticipa ColivingGroupMember[]
-  actividades     ColivingActivityPost[]
-  eventosAsiste   ColivingEventAttendance[]
+  perfilPublico     Boolean  @default(true)
+  mostrarContacto   Boolean  @default(false)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  matches           ColivingMatch[]
+  gruposParticipa   ColivingGroupMember[]
+  actividades       ColivingActivityPost[]
+  eventosAsiste     ColivingEventAttendance[]
 
   @@index([companyId])
   @@index([tenantId])
 }
 
 model ColivingMatch {
-  id         String          @id @default(cuid())
-  profile1Id String
-  profile1   ColivingProfile @relation(fields: [profile1Id], references: [id], onDelete: Cascade)
-  profile2Id String
-  companyId  String
-  company    Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  scoreCompatibilidad Int // 0-100
+  id              String   @id @default(cuid())
+  profile1Id      String
+  profile1        ColivingProfile @relation(fields: [profile1Id], references: [id], onDelete: Cascade)
+  profile2Id      String
+  companyId       String
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  scoreCompatibilidad Int  // 0-100
   interesesComunes    Json // array de intereses compartidos
-  estado              String  @default("sugerido") // sugerido, aceptado, rechazado
+  estado              String @default("sugerido") // sugerido, aceptado, rechazado
   mensajeIntroduccion String? @db.Text
-
-  fechaMatch      DateTime  @default(now())
+  
+  fechaMatch      DateTime @default(now())
   fechaAceptacion DateTime?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([profile1Id, profile2Id])
   @@index([profile1Id])
   @@index([companyId])
+  @@unique([profile1Id, profile2Id])
 }
 
 model ColivingGroup {
-  id         String    @id @default(cuid())
-  companyId  String
-  company    Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  buildingId String?
-  building   Building? @relation(fields: [buildingId], references: [id], onDelete: SetNull)
-
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  buildingId  String?
+  building    Building? @relation(fields: [buildingId], references: [id], onDelete: SetNull)
+  
   nombre      String
-  descripcion String  @db.Text
-  categoria   String // yoga, networking, cocina, deportes, cultura, etc.
-  icono       String? // emoji o nombre de icono
-  imagen      String? // URL de imagen del grupo
-
-  esPublico   Boolean @default(true)
-  maxMiembros Int? // límite de miembros
-  reglas      String? @db.Text
-
-  adminId String // tenant que administra
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  miembros ColivingGroupMember[]
-  eventos  ColivingEvent[]
+  descripcion String   @db.Text
+  categoria   String   // yoga, networking, cocina, deportes, cultura, etc.
+  icono       String?  // emoji o nombre de icono
+  imagen      String?  // URL de imagen del grupo
+  
+  esPublico   Boolean  @default(true)
+  maxMiembros Int?     // límite de miembros
+  reglas      String?  @db.Text
+  
+  adminId     String   // tenant que administra
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  miembros    ColivingGroupMember[]
+  eventos     ColivingEvent[]
 
   @@index([companyId])
   @@index([buildingId])
 }
 
 model ColivingGroupMember {
-  id        String          @id @default(cuid())
+  id        String   @id @default(cuid())
   groupId   String
-  group     ColivingGroup   @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  group     ColivingGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
   profileId String
   profile   ColivingProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
-
-  rol        String   @default("miembro") // admin, moderador, miembro
+  
+  rol       String   @default("miembro") // admin, moderador, miembro
   fechaUnion DateTime @default(now())
-  activo     Boolean  @default(true)
-
+  activo    Boolean  @default(true)
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([groupId, profileId])
   @@index([groupId])
   @@index([profileId])
+  @@unique([groupId, profileId])
 }
 
 model ColivingActivityPost {
-  id         String          @id @default(cuid())
-  companyId  String
-  company    Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  buildingId String?
-  building   Building?       @relation(fields: [buildingId], references: [id], onDelete: SetNull)
-  profileId  String
-  profile    ColivingProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
-
-  tipo      String // post, evento, pregunta, logro
-  contenido String @db.Text
-  imagenes  Json? // array de URLs
-  hashtags  Json? // array de strings
-
-  likes       Json @default("[]") // array de tenantIds
-  comentarios Json @default("[]") // array de {tenantId, texto, fecha}
-
-  visibilidad String @default("comunidad") // comunidad, edificio, publico
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  buildingId  String?
+  building    Building? @relation(fields: [buildingId], references: [id], onDelete: SetNull)
+  profileId   String
+  profile     ColivingProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  
+  tipo        String   // post, evento, pregunta, logro
+  contenido   String   @db.Text
+  imagenes    Json?    // array de URLs
+  hashtags    Json?    // array de strings
+  
+  likes       Json     @default("[]") // array de tenantIds
+  comentarios Json     @default("[]") // array de {tenantId, texto, fecha}
+  
+  visibilidad String   @default("comunidad") // comunidad, edificio, publico
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([companyId])
   @@index([buildingId])
@@ -9934,33 +9816,33 @@ model ColivingActivityPost {
 }
 
 model ColivingEvent {
-  id         String         @id @default(cuid())
-  companyId  String
-  company    Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  buildingId String?
-  building   Building?      @relation(fields: [buildingId], references: [id], onDelete: SetNull)
-  groupId    String?
-  group      ColivingGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
-
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  buildingId  String?
+  building    Building? @relation(fields: [buildingId], references: [id], onDelete: SetNull)
+  groupId     String?
+  group       ColivingGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  
   titulo      String
   descripcion String   @db.Text
-  tipo        String // social, deportivo, cultural, networking
+  tipo        String   // social, deportivo, cultural, networking
   fecha       DateTime
-  duracion    Int // minutos
+  duracion    Int      // minutos
   ubicacion   String
   capacidad   Int?
-
+  
   requiereInscripcion Boolean @default(false)
-  costo               Float?  @default(0)
-  organizador         String // tenantId
-
-  imagen    String?
-  etiquetas Json? // array de strings
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  asistentes ColivingEventAttendance[]
+  costo       Float?   @default(0)
+  organizador String   // tenantId
+  
+  imagen      String?
+  etiquetas   Json?    // array de strings
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  asistentes  ColivingEventAttendance[]
 
   @@index([companyId])
   @@index([buildingId])
@@ -9968,21 +9850,21 @@ model ColivingEvent {
 }
 
 model ColivingEventAttendance {
-  id        String          @id @default(cuid())
+  id        String   @id @default(cuid())
   eventId   String
-  event     ColivingEvent   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  event     ColivingEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
   profileId String
   profile   ColivingProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
-
-  estado String  @default("confirmado") // confirmado, pendiente, cancelado
-  notas  String?
-
+  
+  estado    String   @default("confirmado") // confirmado, pendiente, cancelado
+  notas     String?
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([eventId, profileId])
   @@index([eventId])
   @@index([profileId])
+  @@unique([eventId, profileId])
 }
 
 // ========================================
@@ -9990,60 +9872,60 @@ model ColivingEventAttendance {
 // ========================================
 
 model ColivingService {
-  id        String  @id @default(cuid())
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
   nombre      String
-  descripcion String  @db.Text
-  categoria   String // limpieza, lavanderia, chef, trainer, masajes, etc.
+  descripcion String   @db.Text
+  categoria   String   // limpieza, lavanderia, chef, trainer, masajes, etc.
   icono       String?
-
-  precioBase Float
-  unidad     String // por hora, por servicio, por día
-  duracion   Int? // minutos si aplica
-
-  disponible        Boolean @default(true)
-  proveedorExterno  String? // nombre del proveedor
+  
+  precioBase  Float
+  unidad      String   // por hora, por servicio, por día
+  duracion    Int?     // minutos si aplica
+  
+  disponible  Boolean  @default(true)
+  proveedorExterno String? // nombre del proveedor
   contactoProveedor String?
-
-  imagenes   Json? // array de URLs
-  requisitos String? @db.Text
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  reservas ColivingServiceBooking[]
+  
+  imagenes    Json?    // array de URLs
+  requisitos  String?  @db.Text
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  reservas    ColivingServiceBooking[]
 
   @@index([companyId])
   @@index([categoria])
 }
 
 model ColivingServiceBooking {
-  id        String          @id @default(cuid())
-  serviceId String
-  service   ColivingService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-  tenantId  String
-  tenant    Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  companyId String
-  company   Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
+  id          String   @id @default(cuid())
+  serviceId   String
+  service     ColivingService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
   fechaServicio DateTime
-  horaInicio    String // "14:00"
-  duracion      Int // minutos
-
-  ubicacion String // número de habitación/unidad
-  estado    String @default("pendiente") // pendiente, confirmado, en_progreso, completado, cancelado
-
-  precioTotal             Float
-  notas                   String? @db.Text
+  horaInicio  String   // "14:00"
+  duracion    Int      // minutos
+  
+  ubicacion   String   // número de habitación/unidad
+  estado      String   @default("pendiente") // pendiente, confirmado, en_progreso, completado, cancelado
+  
+  precioTotal Float
+  notas       String?  @db.Text
   instruccionesEspeciales String? @db.Text
-
-  valoracion Int? // 1-5 estrellas
-  comentario String? @db.Text
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  
+  valoracion  Int?     // 1-5 estrellas
+  comentario  String?  @db.Text
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([serviceId])
   @@index([tenantId])
@@ -10052,43 +9934,43 @@ model ColivingServiceBooking {
 }
 
 model ColivingCheckInOut {
-  id        String  @id @default(cuid())
-  tenantId  String
-  tenant    Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  unitId    String
-  unit      Unit    @relation(fields: [unitId], references: [id], onDelete: Cascade)
-  roomId    String?
-  room      Room?   @relation(fields: [roomId], references: [id], onDelete: SetNull)
-
-  tipo   String // check_in, check_out
-  metodo String // digital, presencial, automatico
-
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  unitId      String
+  unit        Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  roomId      String?
+  room        Room?    @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  
+  tipo        String   // check_in, check_out
+  metodo      String   // digital, presencial, automatico
+  
   fechaProgramada DateTime
-  fechaReal       DateTime?
-
-  estado String @default("pendiente") // pendiente, completado, cancelado
-
+  fechaReal   DateTime?
+  
+  estado      String   @default("pendiente") // pendiente, completado, cancelado
+  
   // Check-in digital
   documentosVerificados Boolean @default(false)
-  firmaDigital          String? // URL del documento firmado
-  codigoAcceso          String? // código temporal para SmartLock
-
+  firmaDigital String?  // URL del documento firmado
+  codigoAcceso String?  // código temporal para SmartLock
+  
   // Inventario
   inventarioEntrada Json? // estado de la habitación al entrar
   inventarioSalida  Json? // estado de la habitación al salir
   fotosEntrada      Json? // array de URLs
   fotosSalida       Json? // array de URLs
-
+  
   // Llaves
   llaveDigitalEnviada Boolean @default(false)
   llaveDigitalActiva  Boolean @default(false)
-
-  notas String? @db.Text
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  
+  notas       String?  @db.Text
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([tenantId])
   @@index([companyId])
@@ -10097,41 +9979,41 @@ model ColivingCheckInOut {
 }
 
 model SmartLock {
-  id         String   @id @default(cuid())
-  companyId  String
-  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  buildingId String
-  building   Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
-  unitId     String?
-  unit       Unit?    @relation(fields: [unitId], references: [id], onDelete: SetNull)
-  roomId     String?
-  room       Room?    @relation(fields: [roomId], references: [id], onDelete: SetNull)
-
-  nombre    String // "Habitación 101 - Puerta Principal"
-  ubicacion String
-
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  buildingId  String
+  building    Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  unitId      String?
+  unit        Unit?    @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  roomId      String?
+  room        Room?    @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  
+  nombre      String   // "Habitación 101 - Puerta Principal"
+  ubicacion   String
+  
   // Integración API
-  marca       String // August, Yale, Schlage, TTLock, etc.
+  marca       String   // August, Yale, Schlage, TTLock, etc.
   modelo      String
-  numeroSerie String  @unique
+  numeroSerie String   @unique
   apiEndpoint String?
-  apiKey      String? // encriptada
-
+  apiKey      String?  // encriptada
+  
   // Estado
-  estado         String    @default("activo") // activo, inactivo, mantenimiento
-  bateria        Int? // porcentaje
-  conectado      Boolean   @default(true)
+  estado      String   @default("activo") // activo, inactivo, mantenimiento
+  bateria     Int?     // porcentaje
+  conectado   Boolean  @default(true)
   ultimaConexion DateTime?
-
+  
   // Configuración
-  modoAcceso        String  @default("codigo") // codigo, tarjeta, biometrico, app
-  autoBloqueo       Boolean @default(true)
-  tiempoAutoBloqueo Int     @default(30) // segundos
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  accesos SmartLockAccess[]
+  modoAcceso  String   @default("codigo") // codigo, tarjeta, biometrico, app
+  autoBloqueo Boolean  @default(true)
+  tiempoAutoBloqueo Int @default(30) // segundos
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  accesos     SmartLockAccess[]
 
   @@index([companyId])
   @@index([buildingId])
@@ -10140,63 +10022,63 @@ model SmartLock {
 }
 
 model SmartLockAccess {
-  id       String    @id @default(cuid())
-  lockId   String
-  lock     SmartLock @relation(fields: [lockId], references: [id], onDelete: Cascade)
-  tenantId String
-  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-
-  tipoAcceso   String // permanente, temporal, invitado
+  id          String   @id @default(cuid())
+  lockId      String
+  lock        SmartLock @relation(fields: [lockId], references: [id], onDelete: Cascade)
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  tipoAcceso  String   // permanente, temporal, invitado
   codigoAcceso String? // código PIN o token
-
+  
   fechaInicio DateTime
   fechaFin    DateTime?
-
-  activo         Boolean @default(true)
-  usosPermitidos Int? // null = ilimitado
-  usosRealizados Int     @default(0)
-
+  
+  activo      Boolean  @default(true)
+  usosPermitidos Int?  // null = ilimitado
+  usosRealizados Int   @default(0)
+  
   // Log de accesos
-  ultimoAcceso     DateTime?
-  historialAccesos Json      @default("[]") // array de {fecha, exito, metodo}
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  ultimoAcceso DateTime?
+  historialAccesos Json @default("[]") // array de {fecha, exito, metodo}
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([lockId])
   @@index([tenantId])
 }
 
 model ColivingPackage {
-  id         String   @id @default(cuid())
-  companyId  String
-  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  tenantId   String
-  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  buildingId String
-  building   Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
-
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  buildingId  String
+  building    Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  
   numeroSeguimiento String?
-  remitente         String
-  empresa           String? // compañía de envío
-
-  fechaLlegada  DateTime  @default(now())
+  remitente   String
+  empresa     String?  // compañía de envío
+  
+  fechaLlegada DateTime @default(now())
   fechaRecogida DateTime?
-
-  estado           String  @default("pendiente") // pendiente, notificado, recogido
+  
+  estado      String   @default("pendiente") // pendiente, notificado, recogido
   ubicacionAlmacen String? // donde está guardado
-
-  tamano                String? // pequeño, mediano, grande
+  
+  tamano      String?  // pequeño, mediano, grande
   requiereRefrigeracion Boolean @default(false)
-  requiereFirma         Boolean @default(false)
-
+  requiereFirma Boolean @default(false)
+  
   fotoComprobante String? // URL
-  notificado      Boolean @default(false)
-
-  notas String? @db.Text
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  notificado  Boolean  @default(false)
+  
+  notas       String?  @db.Text
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([tenantId])
   @@index([companyId])
@@ -10209,91 +10091,78 @@ model ColivingPackage {
 // ============================================
 
 model Partner {
-  id String @id @default(cuid())
-
+  id          String   @id @default(cuid())
+  
   // Información básica
   nombre      String
   razonSocial String
-  cif         String      @unique
+  cif         String   @unique
   tipo        PartnerType @default(BANCO) // BANCO, MULTIFAMILY_OFFICE, PLATAFORMA_MEMBRESIA, etc.
-  codigo      String?     @unique // Código único para URLs de tracking: ?partner=codigo
-
+  
   // Contacto principal
-  contactoNombre   String
-  contactoEmail    String  @unique
+  contactoNombre String
+  contactoEmail String @unique
   contactoTelefono String?
-  sitioWeb         String?
-
+  
   // Autenticación
-  email    String @unique
-  password String // hasheado
-
-  // Personalización White Label y Landing
-  logo                 String?
-  coloresPrimarios     Json? // {primary, secondary, accent}
+  email       String   @unique
+  password    String   // hasheado
+  
+  // Personalización White Label
+  logo        String?
+  coloresPrimarios Json? // {primary, secondary, accent}
   dominioPersonalizado String? @unique
-  logoHeader           String? // URL logo específico para header de landing
-  logoFooter           String? // URL logo específico para footer de landing
-  mensajeBienvenida    String? @db.Text // Mensaje personalizado en landing page
-
+  
   // Comisiones
   comisionPorcentaje Float @default(20.0) // 20% por defecto
-  comisionRecurrente Float @default(0) // Comisión mensual recurrente
-  umbralComision     Int   @default(1) // clientes necesarios para tier
-
+  umbralComision Int @default(1) // clientes necesarios para tier
+  
   // Estado
-  estado          PartnerStatus @default(PENDING) // PENDING, ACTIVE, SUSPENDED
-  activo          Boolean       @default(true)
+  estado      PartnerStatus @default(PENDING) // PENDING, ACTIVE, SUSPENDED
+  activo      Boolean  @default(true)
   fechaActivacion DateTime?
-
-  // Métricas de Red Comercial
-  totalLeads        Int @default(0)
-  totalConversiones Int @default(0)
-
+  
   // Configuración
-  config Json    @default("{}") // configuraciones adicionales
-  notas  String? @db.Text
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  config      Json @default("{}") // configuraciones adicionales
+  notas       String?  @db.Text
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
   // Relaciones
-  clientes     PartnerClient[]
+  clientes    PartnerClient[]
   invitaciones PartnerInvitation[]
-  comisiones   Commission[]
-  salesReps    SalesRepresentative[] // Red comercial asociada al partner
-  leads        SalesLead[] // Leads originados por el partner
+  comisiones  Commission[]
 
   @@index([email])
-  @@index([codigo])
   @@index([estado])
   @@index([tipo])
 }
 
 model PartnerClient {
-  id String @id @default(cuid())
-
-  partnerId String
-  partner   Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
-
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
+  id          String   @id @default(cuid())
+  
+  partnerId   String
+  partner     Partner  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
   // Estado
-  estado           String    @default("activo") // activo, suspendido, cancelado
-  fechaActivacion  DateTime  @default(now())
+  estado      String   @default("activo") // activo, suspendido, cancelado
+  fechaActivacion DateTime @default(now())
   fechaCancelacion DateTime?
-
+  
   // Tracking
   origenInvitacion String? // email, landing, directo
-  codigoReferido   String? // código único de referencia
-
+  codigoReferido String?  // código único de referencia
+  
   // Comisiones generadas
-  totalComisionGenerada Float     @default(0)
-  ultimaComisionFecha   DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  totalComisionGenerada Float @default(0)
+  ultimaComisionFecha DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@unique([partnerId, companyId])
   @@index([partnerId])
@@ -10302,36 +10171,36 @@ model PartnerClient {
 }
 
 model Commission {
-  id String @id @default(cuid())
-
-  partnerId String
-  partner   Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
-
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id])
-
+  id          String   @id @default(cuid())
+  
+  partnerId   String
+  partner     Partner  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+  
   // Detalles de la comisión
-  periodo       String // "2025-12" formato año-mes
-  montoBruto    Float // precio total del cliente
-  porcentaje    Float // % de comisión aplicado
-  montoComision Float // cantidad para el partner
-
+  periodo     String   // "2025-12" formato año-mes
+  montoBruto  Float    // precio total del cliente
+  porcentaje  Float    // % de comisión aplicado
+  montoComision Float  // cantidad para el partner
+  
   // Suscripción relacionada
-  planId     String?
-  planNombre String?
-
+  planId      String?
+  planNombre  String?
+  
   // Estado
-  estado          CommissionStatus @default(PENDING) // PENDING, APPROVED, PAID
+  estado      CommissionStatus @default(PENDING) // PENDING, APPROVED, PAID
   fechaAprobacion DateTime?
-  fechaPago       DateTime?
-  referenciaPago  String?
-
+  fechaPago   DateTime?
+  referenciaPago String?
+  
   // Metadata
   clientesActivos Int
-  notas           String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  notas       String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@unique([partnerId, companyId, periodo])
   @@index([partnerId])
@@ -10341,34 +10210,34 @@ model Commission {
 }
 
 model PartnerInvitation {
-  id String @id @default(cuid())
-
-  partnerId String
-  partner   Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
-
+  id          String   @id @default(cuid())
+  
+  partnerId   String
+  partner     Partner  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  
   // Destinatario
-  email    String
-  nombre   String?
-  telefono String?
-
+  email       String
+  nombre      String?
+  telefono    String?
+  
   // Invitación
-  token   String  @unique
-  mensaje String? @db.Text
-
+  token       String   @unique
+  mensaje     String?  @db.Text
+  
   // Estado
-  estado        PartnerInvitationStatus @default(PENDING) // PENDING, ACCEPTED, EXPIRED, CANCELLED
-  enviadoFecha  DateTime                @default(now())
+  estado      PartnerInvitationStatus @default(PENDING) // PENDING, ACCEPTED, EXPIRED, CANCELLED
+  enviadoFecha DateTime @default(now())
   aceptadoFecha DateTime?
-  expiraFecha   DateTime // típicamente +30 días
-
+  expiraFecha DateTime // típicamente +30 días
+  
   // Resultado
-  companyId String? // ID de la company creada si aceptó
-
+  companyId   String?  // ID de la company creada si aceptó
+  
   // Metadata
-  metadata Json @default("{}") // info adicional
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  metadata    Json @default("{}") // info adicional
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([partnerId])
   @@index([email])
@@ -10388,24 +10257,24 @@ enum PartnerType {
 }
 
 enum PartnerStatus {
-  PENDING // En revisión
-  ACTIVE // Activo y operando
-  SUSPENDED // Suspendido temporalmente
-  CANCELLED // Cancelado permanentemente
+  PENDING     // En revisión
+  ACTIVE      // Activo y operando
+  SUSPENDED   // Suspendido temporalmente
+  CANCELLED   // Cancelado permanentemente
 }
 
 enum CommissionStatus {
-  PENDING // Pendiente de aprobación
-  APPROVED // Aprobada, pendiente de pago
-  PAID // Pagada
-  CANCELLED // Cancelada
+  PENDING     // Pendiente de aprobación
+  APPROVED    // Aprobada, pendiente de pago
+  PAID        // Pagada
+  CANCELLED   // Cancelada
 }
 
 enum PartnerInvitationStatus {
-  PENDING // Enviada, esperando respuesta
-  ACCEPTED // Aceptada por el cliente
-  EXPIRED // Expirada sin respuesta
-  CANCELLED // Cancelada por el partner
+  PENDING     // Enviada, esperando respuesta
+  ACCEPTED    // Aceptada por el cliente
+  EXPIRED     // Expirada sin respuesta
+  CANCELLED   // Cancelada por el partner
 }
 
 // ====================================
@@ -10413,202 +10282,192 @@ enum PartnerInvitationStatus {
 // ====================================
 
 enum SalesRepStatus {
-  ACTIVO // Comercial activo
-  INACTIVO // Temporalmente inactivo
-  SUSPENDIDO // Suspendido por incumplimiento
-  CANCELADO // Dado de baja definitivamente
+  ACTIVO       // Comercial activo
+  INACTIVO     // Temporalmente inactivo
+  SUSPENDIDO   // Suspendido por incumplimiento
+  CANCELADO    // Dado de baja definitivamente
 }
 
 enum LeadStatus {
-  NUEVO // Lead recién captado
-  CONTACTADO // Contacto inicial realizado
-  CALIFICADO // Lead calificado (interés confirmado)
-  DEMO // Demo programada/realizada
-  PROPUESTA // Propuesta enviada
-  NEGOCIACION // En negociación
+  NUEVO          // Lead recién captado
+  CONTACTADO     // Contacto inicial realizado
+  CALIFICADO     // Lead calificado (interés confirmado)
+  DEMO           // Demo programada/realizada
+  PROPUESTA      // Propuesta enviada
+  NEGOCIACION    // En negociación
   CERRADO_GANADO // Cliente conseguido
   CERRADO_PERDIDO // Lead perdido
-  DESCARTADO // Lead descartado (no califica)
+  DESCARTADO     // Lead descartado (no califica)
 }
 
 enum SalesCommissionType {
-  CAPTACION // Comisión por captación inicial
-  RECURRENTE // Comisión recurrente mensual
-  REACTIVACION // Comisión por reactivación de cliente
-  BONIFICACION // Bonificación por objetivos
-  NIVEL2 // Comisión de nivel 2 (por sub-afiliados)
+  CAPTACION      // Comisión por captación inicial
+  RECURRENTE     // Comisión recurrente mensual
+  REACTIVACION   // Comisión por reactivación de cliente
+  BONIFICACION   // Bonificación por objetivos
+  NIVEL2         // Comisión de nivel 2 (por sub-afiliados)
 }
 
 enum SalesCommissionStatus {
-  PENDIENTE // Pendiente de aprobación
-  APROBADA // Aprobada, pendiente de pago
-  PAGADA // Pagada al comercial
-  CANCELADA // Cancelada
-  RETENIDA // Retenida por verificación
+  PENDIENTE      // Pendiente de aprobación
+  APROBADA       // Aprobada, pendiente de pago
+  PAGADA         // Pagada al comercial
+  CANCELADA      // Cancelada
+  RETENIDA       // Retenida por verificación
 }
 
 // Comercial Externo (Autónomo/Freelance)
 model SalesRepresentative {
-  id String @id @default(cuid())
-
+  id          String   @id @default(cuid())
+  
   // Información personal
-  nombre             String
-  apellidos          String
-  nombreCompleto     String // nombre + apellidos concatenado
-  dni                String  @unique
-  email              String  @unique
-  telefono           String
+  nombre      String
+  apellidos   String
+  nombreCompleto String // nombre + apellidos concatenado
+  dni         String   @unique
+  email       String   @unique
+  telefono    String
   telefonoSecundario String?
-
+  
   // Datos fiscales
-  numeroAutonomo String? // Nº seguridad social autónomo
-  iban           String? // Para pagos
-  direccion      String?
-  ciudad         String?
-  codigoPostal   String?
-  pais           String  @default("España")
-
+  numeroAutonomo String?  // Nº seguridad social autónomo
+  iban        String?     // Para pagos
+  direccion   String?
+  ciudad      String?
+  codigoPostal String?
+  pais        String @default("España")
+  
   // Configuración comercial
-  codigoReferido       String @unique // Código único para tracking (ej: "COM-JUAN-2024")
-  comisionCaptacion    Float  @default(150.0) // Comisión fija por captación exitosa (€)
-  comisionRecurrente   Float  @default(10.0) // % comisión recurrente mensual
-  bonificacionObjetivo Float  @default(500.0) // Bonificación por cumplir objetivos mensuales
-
+  codigoReferido String  @unique // Código único para tracking (ej: "COM-JUAN-2024")
+  comisionCaptacion Float @default(150.0) // Comisión fija por captación exitosa (€)
+  comisionRecurrente Float @default(10.0) // % comisión recurrente mensual
+  bonificacionObjetivo Float @default(500.0) // Bonificación por cumplir objetivos mensuales
+  
   // Objetivos mensuales
-  objetivoLeadsMes        Int @default(10) // Leads esperados al mes
+  objetivoLeadsMes Int @default(10) // Leads esperados al mes
   objetivoConversionesMes Int @default(2) // Conversiones esperadas al mes
-
+  
   // Autenticación (para portal comercial)
-  password     String // hasheado
+  password    String  // hasheado
   ultimoAcceso DateTime?
-
+  
   // Estado y tracking
-  estado     SalesRepStatus @default(ACTIVO)
-  activo     Boolean        @default(true)
-  fechaAlta  DateTime       @default(now())
-  fechaBaja  DateTime?
-  motivoBaja String?        @db.Text
-
+  estado      SalesRepStatus @default(ACTIVO)
+  activo      Boolean  @default(true)
+  fechaAlta   DateTime @default(now())
+  fechaBaja   DateTime?
+  motivoBaja  String?  @db.Text
+  
   // Métricas acumuladas
-  totalLeadsGenerados   Int   @default(0)
-  totalConversiones     Int   @default(0)
+  totalLeadsGenerados Int @default(0)
+  totalConversiones Int @default(0)
   totalComisionGenerada Float @default(0)
-  tasaConversion        Float @default(0) // Calculado automáticamente
-
+  tasaConversion Float @default(0) // Calculado automáticamente
+  
   // Notas internas
-  notas         String? @db.Text
+  notas       String?  @db.Text
   documentacion String? @db.Text // URLs de documentos escaneados
-
+  
   // API Keys y configuración avanzada (Fase 2 Partners)
-  apiKey     String? @unique
-  apiSecret  String? // Hash del secret
-  apiEnabled Boolean @default(false)
-
+  apiKey      String?  @unique
+  apiSecret   String?  // Hash del secret
+  apiEnabled  Boolean  @default(false)
+  
   // White Label (Fase 2 Partners)
   whiteLabelEnabled Boolean @default(false)
-  whiteLabelConfig  Json? // Configuración de branding personalizado
-
+  whiteLabelConfig  Json?  // Configuración de branding personalizado
+  
   // Sistema de afiliados nivel 2 (Fase 3 Partners)
-  nivel            Int                   @default(1) // 1=partner principal, 2=sub-afiliado
+  nivel            Int @default(1) // 1=partner principal, 2=sub-afiliado
   parentSalesRepId String?
-  parentSalesRep   SalesRepresentative?  @relation("SubAffiliates", fields: [parentSalesRepId], references: [id])
+  parentSalesRep   SalesRepresentative? @relation("SubAffiliates", fields: [parentSalesRepId], references: [id])
   subAffiliates    SalesRepresentative[] @relation("SubAffiliates")
-
-  // Relación con Partner (nuevo)
-  partnerId String?
-  partner   Partner? @relation(fields: [partnerId], references: [id], onDelete: SetNull)
-
+  
   // Relaciones
-  leads                 SalesLead[]
-  comisiones            SalesCommission[]
-  objetivos             SalesTarget[]
+  leads       SalesLead[]
+  comisiones  SalesCommission[]
+  objetivos   SalesTarget[]
   certificationsAwarded PartnerCertificationAwarded[]
   materialsDownloaded   MaterialDownload[]
-
+  
   // Metadata
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
   // Company asignada (para multi-tenancy interno)
-  companyId String @default("global") // "global" para comerciales que trabajan para INMOVA directamente
-
+  companyId   String   @default("global") // "global" para comerciales que trabajan para INMOVA directamente
+  
   @@index([email])
   @@index([estado])
   @@index([codigoReferido])
   @@index([activo])
   @@index([apiKey])
   @@index([parentSalesRepId])
-  @@index([partnerId])
 }
 
 // Lead captado por comercial
 model SalesLead {
-  id String @id @default(cuid())
-
+  id          String   @id @default(cuid())
+  
   // Comercial responsable
-  salesRepId String
-  salesRep   SalesRepresentative @relation(fields: [salesRepId], references: [id], onDelete: Cascade)
-
-  // Partner de origen (nuevo)
-  partnerId String?
-  partner   Partner? @relation(fields: [partnerId], references: [id], onDelete: SetNull)
-
+  salesRepId  String
+  salesRep    SalesRepresentative @relation(fields: [salesRepId], references: [id], onDelete: Cascade)
+  
   // Información del lead
-  nombreContacto   String
-  emailContacto    String
+  nombreContacto String
+  emailContacto String
   telefonoContacto String?
-  nombreEmpresa    String
-  sector           String? // Sector inmobiliario
-  tipoCliente      String? // "alquiler_tradicional", "coliving", "str", etc.
-
+  nombreEmpresa String
+  sector      String?      // Sector inmobiliario
+  tipoCliente String?      // "alquiler_tradicional", "coliving", "str", etc.
+  
   // Tamaño del cliente potencial
   propiedadesEstimadas Int? // Número estimado de propiedades
-  presupuestoMensual   Float? // Presupuesto mensual estimado
-
+  presupuestoMensual Float? // Presupuesto mensual estimado
+  
   // Estado del lead
-  estado             LeadStatus @default(NUEVO)
-  prioridad          String     @default("media") // baja, media, alta
-  probabilidadCierre Int        @default(50) // 0-100%
-
+  estado      LeadStatus @default(NUEVO)
+  prioridad   String @default("media") // baja, media, alta
+  probabilidadCierre Int @default(50) // 0-100%
+  
   // Tracking de seguimiento
-  fechaCaptura        DateTime  @default(now())
+  fechaCaptura DateTime @default(now())
   fechaPrimerContacto DateTime?
   fechaUltimoContacto DateTime?
-  proximoSeguimiento  DateTime?
-
+  proximoSeguimiento DateTime?
+  
   // Fuente del lead
   origenCaptura String? // "linkedin", "evento", "referido", "cold_call", etc.
   codigoRastreo String? // Código de tracking de campaña
-
+  
   // Interacciones
-  numeroLlamadas  Int @default(0)
-  numeroEmails    Int @default(0)
+  numeroLlamadas Int @default(0)
+  numeroEmails Int @default(0)
   numeroReuniones Int @default(0)
-
+  
   // Conversión
-  convertido      Boolean   @default(false)
+  convertido  Boolean @default(false)
   fechaConversion DateTime?
-  companyId       String? // ID de la company creada si se convirtió
-  company         Company?  @relation(fields: [companyId], references: [id], onDelete: SetNull)
-
+  companyId   String? // ID de la company creada si se convirtió
+  company     Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  
   // Plan suscrito (si se convirtió)
   planSuscrito String? // Tier del plan contratado
-  valorMensual Float? // MRR generado
-
+  valorMensual Float?  // MRR generado
+  
   // Notas y motivos
-  notas         String? @db.Text
+  notas       String?  @db.Text
   motivoRechazo String? @db.Text // Si estado = CERRADO_PERDIDO
-
+  
   // Relaciones
-  comisiones SalesCommission[]
-
+  comisiones  SalesCommission[]
+  
   // Metadata
-  metadata  Json     @default("{}") // Información adicional
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  metadata    Json @default("{}") // Información adicional
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
   @@index([salesRepId])
-  @@index([partnerId])
   @@index([estado])
   @@index([convertido])
   @@index([companyId])
@@ -10617,52 +10476,52 @@ model SalesLead {
 
 // Comisiones del equipo comercial
 model SalesCommission {
-  id String @id @default(cuid())
-
+  id          String   @id @default(cuid())
+  
   // Comercial
-  salesRepId String
-  salesRep   SalesRepresentative @relation(fields: [salesRepId], references: [id], onDelete: Cascade)
-
+  salesRepId  String
+  salesRep    SalesRepresentative @relation(fields: [salesRepId], references: [id], onDelete: Cascade)
+  
   // Lead/Cliente relacionado
-  leadId String?
-  lead   SalesLead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
-
-  companyId String? // Cliente que generó la comisión
-
+  leadId      String?
+  lead        SalesLead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  
+  companyId   String? // Cliente que generó la comisión
+  
   // Tipo y monto
   tipo        SalesCommissionType
   descripcion String
   periodo     String? // "2024-01" para comisiones recurrentes
-
+  
   // Importes
-  montoBase     Float // Importe base de la operación
-  porcentaje    Float? // % aplicado (si aplica)
+  montoBase   Float   // Importe base de la operación
+  porcentaje  Float?  // % aplicado (si aplica)
   montoComision Float // Comisión calculada
-
+  
   // Retenciones (impuestos, IRPF)
   retencionIRPF Float @default(0) // % o monto fijo
-  montoNeto     Float // Monto después de retenciones
-
+  montoNeto   Float   // Monto después de retenciones
+  
   // Estado
-  estado          SalesCommissionStatus @default(PENDIENTE)
-  fechaGeneracion DateTime              @default(now())
+  estado      SalesCommissionStatus @default(PENDIENTE)
+  fechaGeneracion DateTime @default(now())
   fechaAprobacion DateTime?
-  fechaPago       DateTime?
-
+  fechaPago   DateTime?
+  
   // Aprobación
-  aprobadoPor    String? // ID del usuario que aprobó
+  aprobadoPor String? // ID del usuario que aprobó
   notaAprobacion String? @db.Text
-
+  
   // Pago
-  referenciaPago  String? // Número de transferencia/factura
-  metodoPago      String? // "transferencia", "cheque", etc.
+  referenciaPago String? // Número de transferencia/factura
+  metodoPago  String? // "transferencia", "cheque", etc.
   comprobantePago String? // URL del comprobante
-
+  
   // Metadata
-  metadata  Json     @default("{}") // Información adicional
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  metadata    Json @default("{}") // Información adicional
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
   @@index([salesRepId])
   @@index([leadId])
   @@index([estado])
@@ -10672,48 +10531,48 @@ model SalesCommission {
 
 // Objetivos de ventas
 model SalesTarget {
-  id String @id @default(cuid())
-
+  id          String   @id @default(cuid())
+  
   // Comercial
-  salesRepId String
-  salesRep   SalesRepresentative @relation(fields: [salesRepId], references: [id], onDelete: Cascade)
-
+  salesRepId  String
+  salesRep    SalesRepresentative @relation(fields: [salesRepId], references: [id], onDelete: Cascade)
+  
   // Período
-  periodo      String // "2024-01", "Q1-2024", "2024"
-  tipoObjetivo String // "mensual", "trimestral", "anual"
-
+  periodo     String  // "2024-01", "Q1-2024", "2024"
+  tipoObjetivo String  // "mensual", "trimestral", "anual"
+  
   // Objetivos
-  objetivoLeads        Int // Número de leads a captar
+  objetivoLeads Int // Número de leads a captar
   objetivoConversiones Int // Número de conversiones
-  objetivoMRR          Float // MRR a generar
-
+  objetivoMRR Float // MRR a generar
+  
   // Progreso actual
-  leadsGenerados       Int   @default(0)
-  conversionesLogradas Int   @default(0)
-  mrrGenerado          Float @default(0)
-
+  leadsGenerados Int @default(0)
+  conversionesLogradas Int @default(0)
+  mrrGenerado Float @default(0)
+  
   // Porcentajes de cumplimiento
-  porcentajeLeads        Float @default(0) // 0-100%
+  porcentajeLeads Float @default(0) // 0-100%
   porcentajeConversiones Float @default(0)
-  porcentajeMRR          Float @default(0)
-
+  porcentajeMRR Float @default(0)
+  
   // Estado
-  cumplido           Boolean @default(false)
+  cumplido    Boolean @default(false)
   bonificacionPagada Boolean @default(false)
-  montoBonificacion  Float?
-
+  montoBonificacion Float?
+  
   // Fechas
   fechaInicio DateTime
   fechaFin    DateTime
-
+  
   // Metadata
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([salesRepId, periodo])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
   @@index([salesRepId])
   @@index([periodo])
   @@index([cumplido])
+  @@unique([salesRepId, periodo])
 }
 
 // ====================================
@@ -10722,76 +10581,76 @@ model SalesTarget {
 
 // Materiales de Marketing para Partners
 model MarketingMaterial {
-  id String @id @default(cuid())
-
-  tipo        String // "banner", "email_template", "landing_page", "video", "documento"
+  id          String   @id @default(cuid())
+  
+  tipo        String   // "banner", "email_template", "landing_page", "video", "documento"
   titulo      String
   descripcion String   @db.Text
-  url         String? // URL del recurso (imagen, video, etc)
+  url         String?  // URL del recurso (imagen, video, etc)
   contenido   String?  @db.Text // Contenido HTML/texto para templates
   tags        String[] // Para búsqueda y filtrado
-
-  activo Boolean @default(true)
-
-  downloads MaterialDownload[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  
+  activo      Boolean  @default(true)
+  
+  downloads   MaterialDownload[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
   @@index([tipo])
   @@index([activo])
 }
 
 // Tracking de descargas de materiales por partners
 model MaterialDownload {
-  id String @id @default(cuid())
-
-  salesRepId String
-  salesRep   SalesRepresentative @relation(fields: [salesRepId], references: [id], onDelete: Cascade)
-
-  materialId String
-  material   MarketingMaterial @relation(fields: [materialId], references: [id], onDelete: Cascade)
-
+  id          String   @id @default(cuid())
+  
+  salesRepId  String
+  salesRep    SalesRepresentative @relation(fields: [salesRepId], references: [id], onDelete: Cascade)
+  
+  materialId  String
+  material    MarketingMaterial @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  
   fechaDescarga DateTime @default(now())
-
+  
   @@index([salesRepId])
   @@index([materialId])
 }
 
 // Certificaciones disponibles para Partners
 model PartnerCertification {
-  id String @id @default(cuid())
-
+  id          String   @id @default(cuid())
+  
   nombre      String
   descripcion String   @db.Text
-  nivel       String // "basico", "intermedio", "avanzado", "experto"
+  nivel       String   // "basico", "intermedio", "avanzado", "experto"
   requisitos  String[] // Lista de requisitos para obtenerla
   beneficios  String[] // Beneficios de tener esta certificación
-
-  activo Boolean @default(true)
-
-  awarded PartnerCertificationAwarded[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  
+  activo      Boolean  @default(true)
+  
+  awarded     PartnerCertificationAwarded[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
   @@index([nivel])
   @@index([activo])
 }
 
 // Certificaciones otorgadas a Partners
 model PartnerCertificationAwarded {
-  id String @id @default(cuid())
-
-  salesRepId String
-  salesRep   SalesRepresentative @relation(fields: [salesRepId], references: [id], onDelete: Cascade)
-
+  id              String   @id @default(cuid())
+  
+  salesRepId      String
+  salesRep        SalesRepresentative @relation(fields: [salesRepId], references: [id], onDelete: Cascade)
+  
   certificationId String
   certification   PartnerCertification @relation(fields: [certificationId], references: [id], onDelete: Cascade)
-
-  fechaObtencion    DateTime @default(now())
-  certificadoNumero String   @unique // Número único de certificado
-
+  
+  fechaObtencion  DateTime @default(now())
+  certificadoNumero String @unique // Número único de certificado
+  
   @@index([salesRepId])
   @@index([certificationId])
 }
@@ -10801,9 +10660,9 @@ model PartnerCertificationAwarded {
 // ==========================================
 
 enum NPSCategory {
-  promotor // 9-10
-  pasivo // 7-8
-  detractor // 0-6
+  promotor     // 9-10
+  pasivo       // 7-8
+  detractor    // 0-6
 }
 
 enum PredictionStatus {
@@ -10820,9 +10679,9 @@ model ColivingAnalytics {
   company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   // Periodo de análisis
-  periodo DateTime // Primer día del mes analizado
-  mes     Int
-  anio    Int
+  periodo     DateTime // Primer día del mes analizado
+  mes         Int
+  anio        Int
 
   // Métricas de Rotación (Churn)
   totalColivers         Int // Total de colivers activos al inicio del periodo
@@ -10836,23 +10695,23 @@ model ColivingAnalytics {
   ltvMaximo   Float
 
   // Net Promoter Score (NPS)
-  totalEncuestas Int    @default(0)
-  promotores     Int    @default(0)
-  pasivos        Int    @default(0)
-  detractores    Int    @default(0)
+  totalEncuestas Int @default(0)
+  promotores     Int @default(0)
+  pasivos        Int @default(0)
+  detractores    Int @default(0)
   npsScore       Float? // (promotores - detractores) / total * 100
 
   // Análisis de perfil ideal
-  perfilIdealEdadMin       Int?
-  perfilIdealEdadMax       Int?
-  perfilIdealOcupacion     String? // estudiante, profesional, freelance
-  perfilIdealIngresoMin    Float?
+  perfilIdealEdadMin      Int?
+  perfilIdealEdadMax      Int?
+  perfilIdealOcupacion    String? // estudiante, profesional, freelance
+  perfilIdealIngresoMin   Float?
   perfilIdealEstanciaMeses Int? // Estancia promedio óptima
 
   // Predicción de disponibilidad
-  prediccionOcupacionProximoMes           Float? // % estimado de ocupación para el próximo mes
+  prediccionOcupacionProximoMes   Float? // % estimado de ocupación para el próximo mes
   prediccionDisponibilidadRoomsProximoMes Int? // Número estimado de habitaciones disponibles
-  nivelConfianzaPrediccion                PredictionStatus @default(neutro)
+  nivelConfianzaPrediccion             PredictionStatus @default(neutro)
 
   // Metadata
   createdAt DateTime @default(now())
@@ -10877,9 +10736,9 @@ model NPSSurvey {
   // Encuesta
   score         Int // 0-10
   categoria     NPSCategory
-  comentario    String?     @db.Text
+  comentario    String?      @db.Text
   fechaEncuesta DateTime
-  respondido    Boolean     @default(false)
+  respondido    Boolean      @default(false)
 
   // Metadata
   createdAt DateTime @default(now())
@@ -10899,24 +10758,24 @@ model TenantProfile {
   tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   // Perfil demográfico
-  edad      Int?
-  ocupacion String? // estudiante, profesional, freelance, emprendedor
-  ingresos  Float?
-  idiomas   String[] @default([])
+  edad       Int?
+  ocupacion  String? // estudiante, profesional, freelance, emprendedor
+  ingresos   Float?
+  idiomas    String[] @default([])
 
   // Comportamiento
-  horariosActividad    String? @db.Text // Descripción de horarios preferidos
-  nivelSociabilidad    Int?    @default(5) // 1-10
-  estiloVida           String? // tranquilo, social, deportista, workaholic
-  preferenciaLimpieza  Int?    @default(5) // 1-10
-  toleranciaRuido      Int?    @default(5) // 1-10
-  frecuenciaUsoComunes String? // alta, media, baja
+  horariosActividad       String? @db.Text // Descripción de horarios preferidos
+  nivelSociabilidad       Int?    @default(5) // 1-10
+  estiloVida              String? // tranquilo, social, deportista, workaholic
+  preferenciaLimpieza     Int?    @default(5) // 1-10
+  toleranciaRuido         Int?    @default(5) // 1-10
+  frecuenciaUsoComunes    String? // alta, media, baja
 
   // Historial
-  numeroConvivientes    Int    @default(0)
-  incidentesReportados  Int    @default(0)
-  puntuacionConvivencia Float? // Promedio de ratings de convivientes
-  mesesEnColiving       Int    @default(0)
+  numeroConvivientes      Int    @default(0)
+  incidentesReportados    Int    @default(0)
+  puntuacionConvivencia   Float? // Promedio de ratings de convivientes
+  mesesEnColiving         Int    @default(0)
 
   // Preferencias
   prefiereHabitacionPrivada Boolean @default(false)
@@ -10957,12 +10816,12 @@ model SpaceWaitlist {
   tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   // Solicitud
-  fechaSolicitud DateTime @default(now())
-  fechaDeseada   DateTime
-  horaInicio     String // Formato "HH:mm"
-  horaFin        String // Formato "HH:mm"
-  duracionHoras  Int
-  prioridad      Int      @default(1) // 1-10 (más alto = más prioridad)
+  fechaSolicitud      DateTime @default(now())
+  fechaDeseada        DateTime
+  horaInicio          String // Formato "HH:mm"
+  horaFin             String // Formato "HH:mm"
+  duracionHoras       Int
+  prioridad           Int      @default(1) // 1-10 (más alto = más prioridad)
 
   // Estado
   status          WaitlistStatus @default(activa)
@@ -10989,14 +10848,14 @@ model ReservationCredits {
   tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   // Créditos
-  creditosActuales    Int @default(10) // Créditos disponibles
-  creditosMaximos     Int @default(10) // Máximo de créditos por periodo
-  creditosUsados      Int @default(0) // Histórico de créditos usados
-  penalizacionesTotal Int @default(0) // Total de penalizaciones acumuladas
+  creditosActuales   Int   @default(10) // Créditos disponibles
+  creditosMaximos    Int   @default(10) // Máximo de créditos por periodo
+  creditosUsados     Int   @default(0) // Histórico de créditos usados
+  penalizacionesTotal Int   @default(0) // Total de penalizaciones acumuladas
 
   // Renovación
-  ultimaRecarga  DateTime @default(now())
-  proximaRecarga DateTime // Se recarga automáticamente cada mes
+  ultimaRecarga      DateTime @default(now())
+  proximaRecarga     DateTime // Se recarga automáticamente cada mes
 
   // Metadata
   createdAt DateTime @default(now())
@@ -11006,11 +10865,11 @@ model ReservationCredits {
 }
 
 enum RatingCategory {
-  excelente // 5 estrellas
-  muy_bueno // 4 estrellas
-  bueno // 3 estrellas
-  regular // 2 estrellas
-  malo // 1 estrella
+  excelente    // 5 estrellas
+  muy_bueno    // 4 estrellas
+  bueno        // 3 estrellas
+  regular      // 2 estrellas
+  malo         // 1 estrella
 }
 
 model SpaceRating {
@@ -11028,15 +10887,15 @@ model SpaceRating {
   tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   // Reservación relacionada
-  reservationId String           @unique
+  reservationId String          @unique
   reservation   SpaceReservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
 
   // Valoración
-  puntuacion        Int // 1-5 estrellas
-  categoria         RatingCategory
-  comentario        String?        @db.Text
-  aspectosPositivos String[]       @default([])
-  aspectosNegativos String[]       @default([])
+  puntuacion     Int // 1-5 estrellas
+  categoria      RatingCategory
+  comentario     String?        @db.Text
+  aspectosPositivos String[]    @default([])
+  aspectosNegativos String[]    @default([])
 
   // Fecha
   fechaRating DateTime @default(now())
@@ -11064,23 +10923,23 @@ model SpaceMaintenancePrediction {
   space   CommonSpace @relation(fields: [spaceId], references: [id], onDelete: Cascade)
 
   // Análisis
-  periodo                    DateTime @default(now())
-  horasUsoEstimadas          Float // Horas de uso en el periodo
-  numeroReservasCompletadas  Int
-  promedioPersonasPorReserva Float
-  indiceDesgaste             Float // 0-100 (más alto = más desgaste)
+  periodo                     DateTime @default(now())
+  horasUsoEstimadas           Float // Horas de uso en el periodo
+  numeroReservasCompletadas   Int
+  promedioPersonasPorReserva  Float
+  indiceDesgaste              Float // 0-100 (más alto = más desgaste)
 
   // Predicción
-  mantenimientoSugerido      Boolean   @default(false)
-  tipoMantenimientoSugerido  String? // preventivo, correctivo, profunda_limpieza
-  fechaSugeridaMantenimiento DateTime?
-  descripcionRecomendacion   String?   @db.Text
-  costoEstimado              Float?
+  mantenimientoSugerido       Boolean @default(false)
+  tipoMantenimientoSugerido   String? // preventivo, correctivo, profunda_limpieza
+  fechaSugeridaMantenimiento  DateTime?
+  descripcionRecomendacion    String? @db.Text
+  costoEstimado               Float?
 
   // Alertas
-  nivelUrgencia MaintenancePriority @default(baja)
-  alertaEnviada Boolean             @default(false)
-  fechaAlerta   DateTime?
+  nivelUrgencia  MaintenancePriority @default(baja)
+  alertaEnviada  Boolean             @default(false)
+  fechaAlerta    DateTime?
 
   // Metadata
   createdAt DateTime @default(now())
@@ -11092,6 +10951,7 @@ model SpaceMaintenancePrediction {
   @@index([mantenimientoSugerido])
   @@map("space_maintenance_predictions")
 }
+
 
 // ============================================================================
 // COMMUNITY MANAGEMENT ENHANCEMENTS - Pack 1
@@ -11139,16 +10999,16 @@ model EventAttendee {
   eventId String
 
   // Participante (puede ser tenant o usuario externo)
-  tenantId      String?
-  tenant        Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  tenantId     String?
+  tenant       Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
   nombreExterno String?
   emailExterno  String?
 
   // Estado
-  confirmado       Boolean  @default(false)
-  enListaEspera    Boolean  @default(false)
+  confirmado    Boolean   @default(false)
+  enListaEspera Boolean   @default(false)
   fechaInscripcion DateTime @default(now())
-  asistio          Boolean  @default(false)
+  asistio       Boolean   @default(false)
 
   // Metadata
   createdAt DateTime @default(now())
@@ -11167,12 +11027,12 @@ model EventComment {
   eventId String
 
   // Autor
-  tenantId    String?
-  tenant      Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
   autorNombre String?
 
   // Contenido
-  contenido String  @db.Text
+  contenido String @db.Text
   moderado  Boolean @default(false)
   visible   Boolean @default(true)
 
@@ -11219,9 +11079,9 @@ model AnnouncementConfirmation {
   userId   String?
 
   // Confirmación
-  leido             Boolean   @default(false)
-  fechaLectura      DateTime?
-  confirmado        Boolean   @default(false)
+  leido     Boolean  @default(false)
+  fechaLectura DateTime?
+  confirmado Boolean  @default(false)
   fechaConfirmacion DateTime?
 
   // Metadata
@@ -11248,30 +11108,30 @@ model CommunityEngagementMetrics {
   tipoPerido String   @default("diario") // diario, semanal, mensual
 
   // Métricas de eventos
-  eventosCreados         Int   @default(0)
-  eventosRealizados      Int   @default(0)
-  asistenciaTotalEventos Int   @default(0)
+  eventosCreados       Int @default(0)
+  eventosRealizados    Int @default(0)
+  asistenciaTotalEventos Int @default(0)
   tasaAsistenciaPromedio Float @default(0)
 
   // Métricas de posts
-  postsCreados     Int @default(0)
-  totalLikes       Int @default(0)
-  totalComentarios Int @default(0)
-  totalCompartidos Int @default(0)
-  vistasTotales    Int @default(0)
+  postsCreados         Int @default(0)
+  totalLikes           Int @default(0)
+  totalComentarios     Int @default(0)
+  totalCompartidos     Int @default(0)
+  vistasTotales        Int @default(0)
 
   // Métricas de anuncios
-  anunciosPublicados       Int   @default(0)
-  tasaLecturaAnuncios      Float @default(0)
+  anunciosPublicados   Int @default(0)
+  tasaLecturaAnuncios  Float @default(0)
   tasaConfirmacionAnuncios Float @default(0)
 
   // Participación general
-  usuariosActivos     Int @default(0)
-  nuevosParticipantes Int @default(0)
-  interaccionesTotal  Int @default(0)
+  usuariosActivos      Int @default(0)
+  nuevosParticipantes  Int @default(0)
+  interaccionesTotal   Int @default(0)
 
   // Sentimiento
-  sentimientoPromedio Float @default(0) // -1 a 1
+  sentimientoPromedio  Float @default(0) // -1 a 1
 
   // Metadata
   createdAt DateTime @default(now())
@@ -11283,6 +11143,7 @@ model CommunityEngagementMetrics {
   @@index([periodo])
   @@map("community_engagement_metrics")
 }
+
 
 // ===========================
 // WORKFLOWS Y AUTOMATIZACIÓN
@@ -11371,12 +11232,12 @@ model WorkflowAction {
 
 // Historial de ejecuciones
 model WorkflowExecution {
-  id         String    @id @default(cuid())
+  id         String   @id @default(cuid())
   workflowId String
   status     String // success, failed, running
-  startedAt  DateTime  @default(now())
+  startedAt  DateTime @default(now())
   finishedAt DateTime?
-
+  
   // Contexto de la ejecución
   triggerData Json? // datos que dispararon el workflow
   results     Json? // resultados de cada acción
