@@ -98,3 +98,6 @@ core
 /tmp/
 /.tmp/
 temp/
+nextjs_space/.build/
+.build/
+nextjs_space/.build/
