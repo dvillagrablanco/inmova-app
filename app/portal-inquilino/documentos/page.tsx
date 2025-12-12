@@ -1,4 +1,6 @@
 'use client';
+export const dynamic = 'force-dynamic';
+
 
 /**
  * Portal del Inquilino - Centro de Documentos

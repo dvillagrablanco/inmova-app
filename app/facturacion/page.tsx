@@ -1,4 +1,6 @@
 'use client';
+export const dynamic = 'force-dynamic';
+
 
 /**
  * Página de Facturación para Empresas Clientes

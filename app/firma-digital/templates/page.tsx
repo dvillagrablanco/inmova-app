@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * Página de gestión de Templates de Contratos
  */
