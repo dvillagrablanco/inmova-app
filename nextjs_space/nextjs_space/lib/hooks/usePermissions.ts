@@ -1,5 +1,5 @@
 import { useSession } from 'next-auth/react';
-import { UserRole } from '@prisma/client';
+import type { UserRole } from '@prisma/client';
 
 type Permission = 
   | 'read' 

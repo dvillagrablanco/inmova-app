@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Tenant } from '@prisma/client';
+import type { Tenant } from '@prisma/client';
 
 /**
  * Hook para obtener lista de inquilinos
