@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "yarn build",
+  "buildCommand": "prisma generate && yarn build",
   "devCommand": "yarn dev",
-  "installCommand": "yarn install",
+  "installCommand": "yarn install --frozen-lockfile",
   "framework": "nextjs",
   "outputDirectory": ".next",
   "env": {
