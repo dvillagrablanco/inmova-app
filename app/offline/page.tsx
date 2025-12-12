@@ -1,4 +1,6 @@
 'use client';
+export const dynamic = 'force-dynamic';
+
 
 import { useEffect, useState } from 'react';
 import { WifiOff, RefreshCw, Home, FileText, Users, Building2 } from 'lucide-react';

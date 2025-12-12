@@ -1,4 +1,6 @@
 'use client';
+export const dynamic = 'force-dynamic';
+
 
 import { LandingPageContent } from '@/components/landing/LandingPageContent';
 
