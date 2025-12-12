@@ -4,7 +4,7 @@
  */
 
 import { prisma } from './db';
-import { CommonSpaceType, ReservationStatus } from '@prisma/client';
+import type {CommonSpaceType, ReservationStatus } from '@prisma/client';
 import { addHours, format, isAfter, isBefore, parseISO } from 'date-fns';
 import logger, { logError } from '@/lib/logger';
 

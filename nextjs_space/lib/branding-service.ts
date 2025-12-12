@@ -1,6 +1,6 @@
 import 'server-only';
 import { prisma } from './db';
-import { BrandingConfig } from '@prisma/client';
+import type {BrandingConfig } from '@prisma/client';
 import logger from '@/lib/logger';
 import { BrandingConfigData, getDefaultBranding as getDefaultBrandingUtil } from './branding-utils';
 
