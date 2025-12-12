@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db';
-import { SignatureStatus, SignerStatus } from '@prisma/client';
+import { SignatureStatus, SignerStatus, TipoContrato } from '@prisma/client';
 import logger, { logError } from '@/lib/logger';
 
 // ============================================================================
@@ -30,7 +30,7 @@ interface CrearDocumentoFirmaParams {
   contractId?: string;
   tenantId?: string;
   titulo: string;
-  tipoDocumento: string;
+  tipoDocumento: TipoContrato;
   documentUrl: string;
   mensaje?: string;
   firmantes: FirmanteData[];
