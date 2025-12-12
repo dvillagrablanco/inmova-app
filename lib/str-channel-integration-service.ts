@@ -9,7 +9,7 @@
  */
 
 import { prisma } from './db';
-import type { ChannelType, BookingStatus } from '@prisma/client';
+import { ChannelType, BookingStatus } from '@prisma/client';
 import { addDays, startOfDay, endOfDay } from 'date-fns';
 import logger, { logError } from '@/lib/logger';
 

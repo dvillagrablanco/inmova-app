@@ -1,9 +1,67 @@
+# Dependencies
 node_modules
+yarn.lock
+package-lock.json
+
+# Build outputs
 .next
+.build
 out
-.env
-.env.local
-.DS_Store
+dist
+build
+
+# Testing
+coverage
+.nyc_output
+__tests__
+e2e
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# Logs
+logs
 *.log
-.vercel
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment (will be configured in Vercel dashboard)
+.env
+.env.*
+
+# Documentation
+*.md
+docs
+DOCS
+
+# Scripts
+scripts
+
+# Backups
+backups
+
+# Uploads (should be in cloud storage)
+uploads
+Uploads
+
+# Git
 .git
+.gitignore
+
+# Misc
+*.pdf
+*.xlsx
+*.docx

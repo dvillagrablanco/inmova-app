@@ -1,0 +1,673 @@
+/**
+ * Helpers específicos de caché para cada endpoint de API
+ * Cada helper define su propia lógica de caché, TTL e invalidación
+ */
+
+import { prisma } from './db';
+import { withCache, cacheService } from './redis-cache-service';
+import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
+
+// TTLs específicos por tipo de dato (en milisegundos)
+const TTL_DASHBOARD = 5 * 60 * 1000; // 5 minutos
+const TTL_BUILDINGS = 10 * 60 * 1000; // 10 minutos
+const TTL_UNITS = 10 * 60 * 1000; // 10 minutos
+const TTL_PAYMENTS = 3 * 60 * 1000; // 3 minutos (más dinámico)
+const TTL_CONTRACTS = 10 * 60 * 1000; // 10 minutos
+const TTL_TENANTS = 10 * 60 * 1000; // 10 minutos
+const TTL_EXPENSES = 5 * 60 * 1000; // 5 minutos
+const TTL_MAINTENANCE = 5 * 60 * 1000; // 5 minutos
+const TTL_ANALYTICS = 15 * 60 * 1000; // 15 minutos (menos crítico)
+
+/**
+ * DASHBOARD STATS
+ * Cachea las estadísticas del dashboard principal
+ */
+export async function cachedDashboardStats(companyId: string) {
+  const cacheKey = `dashboard:stats:${companyId}`;
+
+  return withCache(
+    cacheKey,
+    async () => {
+      // Consultas originales del dashboard
+      const [totalBuildings, totalUnits, totalTenants, activeContracts] = await Promise.all([
+        prisma.building.count({ where: { companyId } }),
+        prisma.unit.count({
+          where: { building: { companyId } },
+        }),
+        prisma.tenant.count({ where: { companyId } }),
+        prisma.contract.count({
+          where: {
+            unit: { building: { companyId } },
+            estado: 'activo',
+          },
+        }),
+      ]);
+
+      // Cálculo de ocupación
+      const occupancyRate = totalUnits > 0 ? (activeContracts / totalUnits) * 100 : 0;
+
+      // Ingresos del mes actual
+      const currentMonth = new Date();
+      const startDate = startOfMonth(currentMonth);
+      const endDate = endOfMonth(currentMonth);
+
+      const paymentsCurrentMonth = await prisma.payment.aggregate({
+        where: {
+          contract: {
+            unit: { building: { companyId } },
+          },
+          fechaVencimiento: {
+            gte: startDate,
+            lte: endDate,
+          },
+          estado: 'pagado',
+        },
+        _sum: { monto: true },
+      });
+
+      const monthlyIncome = paymentsCurrentMonth._sum.monto || 0;
+
+      // Gastos del mes actual
+      const expensesCurrentMonth = await prisma.expense.aggregate({
+        where: {
+          building: { companyId },
+          fecha: {
+            gte: startDate,
+            lte: endDate,
+          },
+        },
+        _sum: { monto: true },
+      });
+
+      const totalExpenses = Number(expensesCurrentMonth._sum.monto) || 0;
+      const netIncome = Number(monthlyIncome) - totalExpenses;
+      const netMargin = Number(monthlyIncome) > 0 ? Number(((netIncome / Number(monthlyIncome)) * 100).toFixed(2)) : 0;
+
+      // Pagos pendientes y atrasados (morosidad)
+      const now = new Date();
+      const [pendingPaymentsCount, overduePaymentsCount, totalPayments] = await Promise.all([
+        prisma.payment.count({
+          where: {
+            contract: {
+              unit: { building: { companyId } },
+            },
+            estado: 'pendiente',
+          },
+        }),
+        prisma.payment.count({
+          where: {
+            contract: {
+              unit: { building: { companyId } },
+            },
+            estado: 'pendiente',
+            fechaVencimiento: {
+              lt: now,
+            },
+          },
+        }),
+        prisma.payment.count({
+          where: {
+            contract: {
+              unit: { building: { companyId } },
+            },
+          },
+        }),
+      ]);
+
+      const defaultRate = totalPayments > 0 ? Number(((overduePaymentsCount / totalPayments) * 100).toFixed(2)) : 0;
+
+      // Solicitudes de mantenimiento pendientes
+      const pendingMaintenance = await prisma.maintenanceRequest.count({
+        where: {
+          unit: { building: { companyId } },
+          estado: 'pendiente',
+        },
+      });
+
+      // Ingresos históricos (últimos 6 meses)
+      const monthlyIncome6: Array<{ mes: string; ingresos: number }> = [];
+      for (let i = 5; i >= 0; i--) {
+        const monthDate = subMonths(currentMonth, i);
+        const monthStart = startOfMonth(monthDate);
+        const monthEnd = endOfMonth(monthDate);
+
+        const monthPayments = await prisma.payment.aggregate({
+          where: {
+            contract: {
+              unit: { building: { companyId } },
+            },
+            fechaVencimiento: {
+              gte: monthStart,
+              lte: monthEnd,
+            },
+            estado: 'pagado',
+          },
+          _sum: { monto: true },
+        });
+
+        monthlyIncome6.push({
+          mes: monthDate.toLocaleDateString('es-ES', { month: 'short' }),
+          ingresos: Number(monthPayments._sum.monto) || 0,
+        });
+      }
+
+      // Datos para gráficas adicionales
+      const buildings = await prisma.building.findMany({
+        where: { companyId },
+        include: {
+          units: true,
+        },
+      });
+
+      const occupancyChartData = buildings.map(b => {
+        const total = b.units.length;
+        const ocupadas = b.units.filter(u => u.estado === 'ocupada').length;
+        const disponibles = total - ocupadas;
+        return {
+          name: b.nombre,
+          ocupadas,
+          disponibles,
+          total,
+        };
+      });
+
+      // Gastos por categoría (últimos 3 meses para el pie chart)
+      const threeMonthsAgo = subMonths(currentMonth, 3);
+      const expenses = await prisma.expense.groupBy({
+        by: ['categoria'],
+        where: {
+          building: { companyId },
+          fecha: {
+            gte: threeMonthsAgo,
+          },
+        },
+        _sum: {
+          monto: true,
+        },
+      });
+
+      const expensesChartData = expenses.map(e => ({
+        name: e.categoria || 'Otros',
+        value: Number(e._sum.monto) || 0,
+      }));
+
+      // Pagos pendientes (lista)
+      const pagosPendientesList = await prisma.payment.findMany({
+        where: {
+          contract: {
+            unit: { building: { companyId } },
+          },
+          estado: 'pendiente',
+        },
+        include: {
+          contract: {
+            include: {
+              unit: true,
+              tenant: true,
+            },
+          },
+        },
+        take: 5,
+        orderBy: {
+          fechaVencimiento: 'asc',
+        },
+      });
+
+      // Contratos próximos a vencer (próximos 60 días)
+      const sixtyDaysFromNow = new Date();
+      sixtyDaysFromNow.setDate(sixtyDaysFromNow.getDate() + 60);
+      
+      const contractsExpiringSoon = await prisma.contract.findMany({
+        where: {
+          unit: { building: { companyId } },
+          estado: 'activo',
+          fechaFin: {
+            gte: now,
+            lte: sixtyDaysFromNow,
+          },
+        },
+        include: {
+          tenant: true,
+          unit: {
+            include: {
+              building: true,
+            },
+          },
+        },
+        take: 5,
+        orderBy: {
+          fechaFin: 'asc',
+        },
+      });
+
+      // Solicitudes de mantenimiento (lista)
+      const maintenanceRequests = await prisma.maintenanceRequest.findMany({
+        where: {
+          unit: { building: { companyId } },
+          estado: 'pendiente',
+        },
+        include: {
+          unit: {
+            include: {
+              building: true,
+            },
+          },
+        },
+        take: 5,
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+
+      // Unidades disponibles
+      const unidadesDisponibles = await prisma.unit.findMany({
+        where: {
+          building: { companyId },
+          estado: 'disponible',
+        },
+        include: {
+          building: true,
+        },
+        take: 5,
+        orderBy: {
+          rentaMensual: 'desc',
+        },
+      });
+
+      return {
+        kpis: {
+          ingresosTotalesMensuales: Number(monthlyIncome),
+          numeroPropiedades: totalBuildings,
+          tasaOcupacion: Number(occupancyRate.toFixed(2)),
+          tasaMorosidad: defaultRate,
+          ingresosNetos: netIncome,
+          gastosTotales: totalExpenses,
+          margenNeto: netMargin,
+        },
+        monthlyIncome: monthlyIncome6,
+        occupancyChartData,
+        expensesChartData,
+        pagosPendientes: pagosPendientesList,
+        contractsExpiringSoon,
+        maintenanceRequests,
+        unidadesDisponibles,
+      };
+    },
+    TTL_DASHBOARD
+  );
+}
+
+/**
+ * BUILDINGS
+ * Cachea la lista de edificios con métricas calculadas
+ */
+export async function cachedBuildings(companyId: string) {
+  const cacheKey = `buildings:list:${companyId}`;
+
+  return withCache(
+    cacheKey,
+    async () => {
+      const buildings = await prisma.building.findMany({
+        where: { companyId },
+        include: {
+          units: {
+            include: {
+              tenant: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      // Calcular métricas para cada edificio
+      const buildingsWithMetrics = buildings.map((building) => {
+        const totalUnits = building.units.length;
+        const occupiedUnits = building.units.filter((u) => u.estado === 'ocupada').length;
+        const ocupacionPct = totalUnits > 0 ? (occupiedUnits / totalUnits) * 100 : 0;
+        const ingresosMensuales = building.units
+          .filter((u) => u.estado === 'ocupada')
+          .reduce((sum, u) => sum + u.rentaMensual, 0);
+
+        return {
+          ...building,
+          metrics: {
+            totalUnits,
+            occupiedUnits,
+            ocupacionPct: Math.round(ocupacionPct * 10) / 10,
+            ingresosMensuales: Math.round(ingresosMensuales * 100) / 100,
+          },
+        };
+      });
+
+      return buildingsWithMetrics;
+    },
+    TTL_BUILDINGS
+  );
+}
+
+/**
+ * UNITS
+ * Cachea la lista de unidades
+ */
+export async function cachedUnits(companyId: string) {
+  const cacheKey = `units:list:${companyId}`;
+
+  return withCache(
+    cacheKey,
+    async () => {
+      return prisma.unit.findMany({
+        where: { building: { companyId } },
+        include: {
+          building: {
+            select: {
+              id: true,
+              nombre: true,
+              direccion: true,
+            },
+          },
+          contracts: {
+            where: { estado: 'activo' },
+            take: 1,
+            include: {
+              tenant: {
+                select: {
+                  id: true,
+                  nombreCompleto: true,
+                  email: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+    },
+    TTL_UNITS
+  );
+}
+
+/**
+ * PAYMENTS
+ * Cachea la lista de pagos
+ */
+export async function cachedPayments(companyId: string) {
+  const cacheKey = `payments:list:${companyId}`;
+
+  return withCache(
+    cacheKey,
+    async () => {
+      return prisma.payment.findMany({
+        where: {
+          contract: {
+            unit: { building: { companyId } },
+          },
+        },
+        include: {
+          contract: {
+            include: {
+              tenant: {
+                select: {
+                  id: true,
+                  nombreCompleto: true,
+                  email: true,
+                },
+              },
+              unit: {
+                select: {
+                  id: true,
+                  numero: true,
+                  building: {
+                    select: {
+                      id: true,
+                      nombre: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        orderBy: { fechaVencimiento: 'desc' },
+        take: 100, // Limitar a los 100 más recientes
+      });
+    },
+    TTL_PAYMENTS
+  );
+}
+
+/**
+ * CONTRACTS
+ * Cachea la lista de contratos con días hasta vencimiento
+ */
+export async function cachedContracts(companyId: string) {
+  const cacheKey = `contracts:list:${companyId}`;
+
+  return withCache(
+    cacheKey,
+    async () => {
+      const contracts = await prisma.contract.findMany({
+        where: {
+          unit: { building: { companyId } },
+        },
+        include: {
+          unit: {
+            include: {
+              building: true,
+            },
+          },
+          tenant: true,
+          payments: true,
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      // Agregar días hasta el vencimiento
+      const contractsWithExpiration = contracts.map((contract) => {
+        const today = new Date();
+        const fechaFin = new Date(contract.fechaFin);
+        const diasHastaVencimiento = Math.ceil((fechaFin.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        
+        return {
+          ...contract,
+          diasHastaVencimiento,
+        };
+      });
+
+      return contractsWithExpiration;
+    },
+    TTL_CONTRACTS
+  );
+}
+
+/**
+ * TENANTS
+ * Cachea la lista de inquilinos
+ */
+export async function cachedTenants(companyId: string) {
+  const cacheKey = `tenants:list:${companyId}`;
+
+  return withCache(
+    cacheKey,
+    async () => {
+      return prisma.tenant.findMany({
+        where: { companyId },
+        include: {
+          contracts: {
+            where: { estado: 'activo' },
+            take: 1,
+            include: {
+              unit: {
+                select: {
+                  numero: true,
+                  building: {
+                    select: {
+                      nombre: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          _count: {
+            select: {
+              contracts: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+    },
+    TTL_TENANTS
+  );
+}
+
+/**
+ * EXPENSES
+ * Cachea la lista de gastos
+ */
+export async function cachedExpenses(companyId: string) {
+  const cacheKey = `expenses:list:${companyId}`;
+
+  return withCache(
+    cacheKey,
+    async () => {
+      return prisma.expense.findMany({
+        where: {
+          building: { companyId },
+        },
+        include: {
+          building: {
+            select: {
+              id: true,
+              nombre: true,
+            },
+          },
+          unit: {
+            select: {
+              id: true,
+              numero: true,
+            },
+          },
+        },
+        orderBy: { fecha: 'desc' },
+        take: 100, // Limitar a los 100 más recientes
+      });
+    },
+    TTL_EXPENSES
+  );
+}
+
+/**
+ * MAINTENANCE
+ * Cachea la lista de solicitudes de mantenimiento
+ */
+export async function cachedMaintenance(companyId: string) {
+  const cacheKey = `maintenance:list:${companyId}`;
+
+  return withCache(
+    cacheKey,
+    async () => {
+      return prisma.maintenanceRequest.findMany({
+        where: {
+          unit: { building: { companyId } },
+        },
+        include: {
+          unit: {
+            select: {
+              numero: true,
+              building: {
+                select: {
+                  nombre: true,
+                },
+              },
+            },
+          },
+          provider: {
+            select: {
+              nombre: true,
+            },
+          },
+        },
+        orderBy: { fechaSolicitud: 'desc' },
+        take: 100, // Limitar a los 100 más recientes
+      });
+    },
+    TTL_MAINTENANCE
+  );
+}
+
+/**
+ * ANALYTICS
+ * Cachea datos de analytics (genérico)
+ */
+export async function cachedAnalytics(companyId: string, type: string) {
+  const cacheKey = `analytics:${type}:${companyId}`;
+
+  return withCache(
+    cacheKey,
+    async () => {
+      // Aquí puedes implementar diferentes tipos de analytics
+      // Por ahora devolvemos un objeto básico
+      return {
+        type,
+        companyId,
+        data: [],
+        timestamp: new Date(),
+      };
+    },
+    TTL_ANALYTICS
+  );
+}
+
+/**
+ * CACHE INVALIDATION HELPERS
+ * Funciones para invalidar caché cuando se modifican datos
+ * NOTA: Estas funciones son asíncronas al usar Redis
+ */
+
+export async function invalidateDashboardCache(companyId: string): Promise<void> {
+  await cacheService.delete(`dashboard:stats:${companyId}`);
+}
+
+export async function invalidateBuildingsCache(companyId: string): Promise<void> {
+  await cacheService.delete(`buildings:list:${companyId}`);
+}
+
+export async function invalidateUnitsCache(companyId: string): Promise<void> {
+  await cacheService.delete(`units:list:${companyId}`);
+}
+
+export async function invalidatePaymentsCache(companyId: string): Promise<void> {
+  await cacheService.delete(`payments:list:${companyId}`);
+}
+
+export async function invalidateContractsCache(companyId: string): Promise<void> {
+  await cacheService.delete(`contracts:list:${companyId}`);
+}
+
+export async function invalidateTenantsCache(companyId: string): Promise<void> {
+  await cacheService.delete(`tenants:list:${companyId}`);
+}
+
+export async function invalidateExpensesCache(companyId: string): Promise<void> {
+  await cacheService.delete(`expenses:list:${companyId}`);
+}
+
+export async function invalidateMaintenanceCache(companyId: string): Promise<void> {
+  await cacheService.delete(`maintenance:list:${companyId}`);
+}
+
+export async function invalidateAnalyticsCache(companyId: string, type?: string): Promise<void> {
+  if (type) {
+    await cacheService.delete(`analytics:${type}:${companyId}`);
+  } else {
+    await cacheService.invalidateByPattern(`analytics:`);
+  }
+}
+
+/**
+ * Invalida todo el caché de una empresa
+ */
+export async function invalidateCompanyCache(companyId: string): Promise<void> {
+  await cacheService.invalidateByPattern(companyId);
+}

@@ -1,0 +1,906 @@
+yarn run v1.22.22
+$ next build
+  ▲ Next.js 14.2.28
+  - Environments: .env
+  - Experiments (use with caution):
+    · outputFileTracingRoot
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/235) ...
+   Generating static pages (58/235) 
+   Generating static pages (117/235) 
+   Generating static pages (176/235) 
+ ✓ Generating static pages (235/235)
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                          Size     First Load JS
+┌ ○ /                                                270 B           135 kB
+├ ○ /_not-found                                      880 B          88.6 kB
+├ ○ /admin-fincas                                    2.36 kB         259 kB
+├ ○ /admin-fincas/comunidades                        1.93 kB         258 kB
+├ ○ /admin-fincas/facturas                           1.91 kB         258 kB
+├ ○ /admin-fincas/informes                           2.1 kB          259 kB
+├ ○ /admin-fincas/libro-caja                         3.13 kB         266 kB
+├ ○ /admin/activity                                  3.82 kB         267 kB
+├ ○ /admin/alertas                                   3.94 kB         267 kB
+├ ○ /admin/aprobaciones                              5.05 kB         261 kB
+├ ○ /admin/backup-restore                            3.5 kB          260 kB
+├ ○ /admin/clientes                                  10.3 kB         273 kB
+├ ƒ /admin/clientes/[id]                             7.13 kB         270 kB
+├ ○ /admin/clientes/comparar                         3.29 kB         260 kB
+├ ○ /admin/configuracion                             4.32 kB         261 kB
+├ ○ /admin/dashboard                                 6.04 kB         370 kB
+├ ○ /admin/facturacion-b2b                           4.79 kB         268 kB
+├ ƒ /admin/facturacion-b2b/[id]                      6.68 kB         270 kB
+├ ○ /admin/firma-digital                             10.2 kB         273 kB
+├ ○ /admin/importar                                  8.39 kB         271 kB
+├ ○ /admin/integraciones-contables                   8.23 kB         265 kB
+├ ○ /admin/legal                                     9.56 kB         272 kB
+├ ○ /admin/marketplace                               9.31 kB         272 kB
+├ ○ /admin/metricas-uso                              4.05 kB         375 kB
+├ ○ /admin/modulos                                   6.69 kB         263 kB
+├ ○ /admin/ocr-import                                5.29 kB         262 kB
+├ ○ /admin/personalizacion                           8.7 kB          272 kB
+├ ○ /admin/planes                                    5.45 kB         265 kB
+├ ○ /admin/plantillas-sms                            10.9 kB         274 kB
+├ ○ /admin/portales-externos                         5.01 kB         261 kB
+├ ○ /admin/recuperar-contrasena                      5.75 kB         109 kB
+├ ○ /admin/reportes-programados                      9.01 kB         274 kB
+├ ○ /admin/salud-sistema                             3.79 kB         260 kB
+├ ○ /admin/seguridad                                 4.43 kB         267 kB
+├ ○ /admin/sugerencias                               3.2 kB          270 kB
+├ ○ /admin/usuarios                                  7.88 kB         274 kB
+├ ○ /analytics                                       5.87 kB         370 kB
+├ ○ /anuncios                                        9.11 kB         272 kB
+├ ○ /api-docs                                        8.93 kB         104 kB
+├ ƒ /api/accounting/[provider]/config                0 B                0 B
+├ ƒ /api/accounting/[provider]/disconnect            0 B                0 B
+├ ƒ /api/accounting/[provider]/test                  0 B                0 B
+├ ƒ /api/accounting/a3/create-invoice                0 B                0 B
+├ ƒ /api/accounting/a3/register-payment              0 B                0 B
+├ ƒ /api/accounting/a3/status                        0 B                0 B
+├ ƒ /api/accounting/a3/sync-customers                0 B                0 B
+├ ƒ /api/accounting/alegra/create-invoice            0 B                0 B
+├ ƒ /api/accounting/alegra/register-expense          0 B                0 B
+├ ƒ /api/accounting/alegra/register-payment          0 B                0 B
+├ ƒ /api/accounting/alegra/status                    0 B                0 B
+├ ƒ /api/accounting/alegra/sync-customers            0 B                0 B
+├ ƒ /api/accounting/analytics                        0 B                0 B
+├ ƒ /api/accounting/balance                          0 B                0 B
+├ ƒ /api/accounting/cash-flow                        0 B                0 B
+├ ƒ /api/accounting/contasimple/customers            0 B                0 B
+├ ƒ /api/accounting/contasimple/expenses             0 B                0 B
+├ ƒ /api/accounting/contasimple/invoices             0 B                0 B
+├ ƒ /api/accounting/contasimple/payments             0 B                0 B
+├ ƒ /api/accounting/contasimple/status               0 B                0 B
+├ ƒ /api/accounting/contasimple/test-connection      0 B                0 B
+├ ƒ /api/accounting/cost-centers                     0 B                0 B
+├ ƒ /api/accounting/dashboard                        0 B                0 B
+├ ƒ /api/accounting/holded/create-invoice            0 B                0 B
+├ ƒ /api/accounting/holded/register-expense          0 B                0 B
+├ ƒ /api/accounting/holded/register-payment          0 B                0 B
+├ ƒ /api/accounting/holded/status                    0 B                0 B
+├ ƒ /api/accounting/holded/sync-customers            0 B                0 B
+├ ƒ /api/accounting/profit-loss                      0 B                0 B
+├ ƒ /api/accounting/ratios                           0 B                0 B
+├ ƒ /api/accounting/sage/create-invoice              0 B                0 B
+├ ƒ /api/accounting/sage/register-payment            0 B                0 B
+├ ƒ /api/accounting/sage/status                      0 B                0 B
+├ ƒ /api/accounting/sage/sync-customers              0 B                0 B
+├ ƒ /api/accounting/status                           0 B                0 B
+├ ƒ /api/accounting/sync                             0 B                0 B
+├ ƒ /api/accounting/sync-zucchetti                   0 B                0 B
+├ ƒ /api/accounting/tax-summary                      0 B                0 B
+├ ƒ /api/accounting/transactions                     0 B                0 B
+├ ƒ /api/accounting/zucchetti/customers              0 B                0 B
+├ ƒ /api/accounting/zucchetti/invoices               0 B                0 B
+├ ƒ /api/accounting/zucchetti/payments               0 B                0 B
+├ ƒ /api/accounting/zucchetti/status                 0 B                0 B
+├ ƒ /api/admin-fincas/cash-book                      0 B                0 B
+├ ƒ /api/admin-fincas/cash-book/[id]                 0 B                0 B
+├ ƒ /api/admin-fincas/communities                    0 B                0 B
+├ ƒ /api/admin-fincas/communities/[id]               0 B                0 B
+├ ƒ /api/admin-fincas/dashboard                      0 B                0 B
+├ ƒ /api/admin-fincas/invoices                       0 B                0 B
+├ ƒ /api/admin-fincas/invoices/[id]                  0 B                0 B
+├ ƒ /api/admin-fincas/reports                        0 B                0 B
+├ ƒ /api/admin-fincas/reports/[id]                   0 B                0 B
+├ ƒ /api/admin/activity-timeline                     0 B                0 B
+├ ƒ /api/admin/alerts                                0 B                0 B
+├ ƒ /api/admin/backup                                0 B                0 B
+├ ƒ /api/admin/companies                             0 B                0 B
+├ ƒ /api/admin/companies/[id]                        0 B                0 B
+├ ƒ /api/admin/companies/[id]/access                 0 B                0 B
+├ ƒ /api/admin/companies/[id]/category               0 B                0 B
+├ ƒ /api/admin/companies/[id]/stats                  0 B                0 B
+├ ƒ /api/admin/companies/[id]/tags                   0 B                0 B
+├ ƒ /api/admin/companies/bulk                        0 B                0 B
+├ ƒ /api/admin/companies/compare                     0 B                0 B
+├ ƒ /api/admin/companies/switch-company              0 B                0 B
+├ ƒ /api/admin/dashboard-stats                       0 B                0 B
+├ ƒ /api/admin/external-portals                      0 B                0 B
+├ ƒ /api/admin/firma-digital/documentos              0 B                0 B
+├ ƒ /api/admin/firma-digital/documentos/[id]         0 B                0 B
+├ ƒ /api/admin/impersonate                           0 B                0 B
+├ ƒ /api/admin/legal/templates                       0 B                0 B
+├ ƒ /api/admin/legal/templates/[id]                  0 B                0 B
+├ ƒ /api/admin/marketplace/services                  0 B                0 B
+├ ƒ /api/admin/marketplace/services/[id]             0 B                0 B
+├ ƒ /api/admin/notifications                         0 B                0 B
+├ ƒ /api/admin/ocr-import                            0 B                0 B
+├ ƒ /api/admin/password-recovery                     0 B                0 B
+├ ƒ /api/admin/security-alerts                       0 B                0 B
+├ ƒ /api/admin/subscription-plans                    0 B                0 B
+├ ƒ /api/admin/subscription-plans/[id]               0 B                0 B
+├ ƒ /api/admin/subscription/change-plan              0 B                0 B
+├ ƒ /api/admin/system-health                         0 B                0 B
+├ ƒ /api/admin/tags                                  0 B                0 B
+├ ƒ /api/admin/usage-metrics                         0 B                0 B
+├ ƒ /api/ai/assistant                                0 B                0 B
+├ ƒ /api/ai/chat                                     0 B                0 B
+├ ƒ /api/ai/detect-business-model                    0 B                0 B
+├ ƒ /api/ai/detect-intent                            0 B                0 B
+├ ƒ /api/ai/suggestions                              0 B                0 B
+├ ƒ /api/analytics/building-metrics                  0 B                0 B
+├ ƒ /api/analytics/snapshot                          0 B                0 B
+├ ƒ /api/analytics/tenant-behavior                   0 B                0 B
+├ ƒ /api/analytics/trends                            0 B                0 B
+├ ƒ /api/analytics/web-vitals                        0 B                0 B
+├ ƒ /api/approvals                                   0 B                0 B
+├ ƒ /api/approvals/[id]                              0 B                0 B
+├ ƒ /api/approvals/request                           0 B                0 B
+├ ƒ /api/approvals/stats                             0 B                0 B
+├ ƒ /api/audit-logs                                  0 B                0 B
+├ ƒ /api/audit/reports                               0 B                0 B
+├ ƒ /api/audit/security-events                       0 B                0 B
+├ ƒ /api/audit/stats                                 0 B                0 B
+├ ƒ /api/auth-propietario/login                      0 B                0 B
+├ ƒ /api/auth-propietario/logout                     0 B                0 B
+├ ƒ /api/auth-propietario/me                         0 B                0 B
+├ ƒ /api/auth-proveedor/forgot-password              0 B                0 B
+├ ƒ /api/auth-proveedor/login                        0 B                0 B
+├ ƒ /api/auth-proveedor/logout                       0 B                0 B
+├ ƒ /api/auth-proveedor/me                           0 B                0 B
+├ ƒ /api/auth-proveedor/register                     0 B                0 B
+├ ƒ /api/auth-proveedor/reset-password               0 B                0 B
+├ ƒ /api/auth-tenant/[...nextauth]                   0 B                0 B
+├ ƒ /api/auth/[...nextauth]                          0 B                0 B
+├ ƒ /api/auth/mfa/disable                            0 B                0 B
+├ ƒ /api/auth/mfa/regenerate-codes                   0 B                0 B
+├ ƒ /api/auth/mfa/setup                              0 B                0 B
+├ ƒ /api/auth/mfa/status                             0 B                0 B
+├ ƒ /api/auth/mfa/verify                             0 B                0 B
+├ ƒ /api/auth/validate-password                      0 B                0 B
+├ ƒ /api/automation-templates                        0 B                0 B
+├ ƒ /api/automation/generate-contract                0 B                0 B
+├ ƒ /api/automation/generate-demo-data               0 B                0 B
+├ ƒ /api/automation/run                              0 B                0 B
+├ ƒ /api/automations                                 0 B                0 B
+├ ƒ /api/automations/[id]                            0 B                0 B
+├ ƒ /api/automations/[id]/executions                 0 B                0 B
+├ ƒ /api/automations/[id]/toggle                     0 B                0 B
+├ ƒ /api/b2b-billing/invoices                        0 B                0 B
+├ ƒ /api/b2b-billing/invoices/[id]                   0 B                0 B
+├ ƒ /api/b2b-billing/invoices/[id]/pdf               0 B                0 B
+├ ƒ /api/b2b-billing/notifications                   0 B                0 B
+├ ƒ /api/b2b-billing/payments                        0 B                0 B
+├ ƒ /api/b2b-billing/reports                         0 B                0 B
+├ ƒ /api/b2b-billing/stripe-payment                  0 B                0 B
+├ ƒ /api/b2b-billing/subscriptions                   0 B                0 B
+├ ƒ /api/b2b-billing/webhook                         0 B                0 B
+├ ƒ /api/backup/create                               0 B                0 B
+├ ƒ /api/backup/list                                 0 B                0 B
+├ ƒ /api/bi/alerts                                   0 B                0 B
+├ ƒ /api/bi/dashboard                                0 B                0 B
+├ ƒ /api/bi/export                                   0 B                0 B
+├ ƒ /api/bi/reports                                  0 B                0 B
+├ ƒ /api/bi/segments                                 0 B                0 B
+├ ƒ /api/bi/stats                                    0 B                0 B
+├ ƒ /api/bi/widgets                                  0 B                0 B
+├ ƒ /api/branding                                    0 B                0 B
+├ ƒ /api/branding/preview                            0 B                0 B
+├ ƒ /api/buildings                                   0 B                0 B
+├ ƒ /api/buildings/[id]                              0 B                0 B
+├ ƒ /api/calendar                                    0 B                0 B
+├ ƒ /api/calendar/[id]                               0 B                0 B
+├ ƒ /api/calendar/sync                               0 B                0 B
+├ ƒ /api/candidates                                  0 B                0 B
+├ ƒ /api/candidates/[id]                             0 B                0 B
+├ ƒ /api/certificaciones                             0 B                0 B
+├ ƒ /api/certificaciones/[id]                        0 B                0 B
+├ ƒ /api/chat/conversations                          0 B                0 B
+├ ƒ /api/chat/conversations/[id]                     0 B                0 B
+├ ƒ /api/chat/messages                               0 B                0 B
+├ ƒ /api/chatbot/actions                             0 B                0 B
+├ ƒ /api/chatbot/conversations                       0 B                0 B
+├ ƒ /api/chatbot/messages                            0 B                0 B
+├ ƒ /api/coliving/bookings                           0 B                0 B
+├ ƒ /api/coliving/checkinout                         0 B                0 B
+├ ƒ /api/coliving/checkinout/[id]/complete           0 B                0 B
+├ ƒ /api/coliving/events                             0 B                0 B
+├ ƒ /api/coliving/events/[id]/attend                 0 B                0 B
+├ ƒ /api/coliving/feed                               0 B                0 B
+├ ƒ /api/coliving/feed/[id]/comment                  0 B                0 B
+├ ƒ /api/coliving/feed/[id]/like                     0 B                0 B
+├ ƒ /api/coliving/groups                             0 B                0 B
+├ ƒ /api/coliving/groups/[id]/join                   0 B                0 B
+├ ƒ /api/coliving/matches                            0 B                0 B
+├ ƒ /api/coliving/matches/[id]/accept                0 B                0 B
+├ ƒ /api/coliving/packages                           0 B                0 B
+├ ƒ /api/coliving/packages/[id]/collect              0 B                0 B
+├ ƒ /api/coliving/packages/[id]/notify               0 B                0 B
+├ ƒ /api/coliving/profiles                           0 B                0 B
+├ ƒ /api/coliving/services                           0 B                0 B
+├ ƒ /api/coliving/smartlocks                         0 B                0 B
+├ ƒ /api/coliving/smartlocks/access                  0 B                0 B
+├ ƒ /api/communities/fees                            0 B                0 B
+├ ƒ /api/communities/funds                           0 B                0 B
+├ ƒ /api/communities/minutes                         0 B                0 B
+├ ƒ /api/communities/votes                           0 B                0 B
+├ ƒ /api/community/announcements                     0 B                0 B
+├ ƒ /api/community/engagement                        0 B                0 B
+├ ƒ /api/community/events                            0 B                0 B
+├ ƒ /api/community/events/[id]                       0 B                0 B
+├ ƒ /api/community/events/[id]/attendees             0 B                0 B
+├ ƒ /api/community/posts                             0 B                0 B
+├ ƒ /api/community/posts/[id]                        0 B                0 B
+├ ƒ /api/community/posts/[id]/reactions              0 B                0 B
+├ ƒ /api/company                                     0 B                0 B
+├ ƒ /api/compliance/certificates                     0 B                0 B
+├ ƒ /api/compliance/inspections                      0 B                0 B
+├ ƒ /api/compliance/modelo180                        0 B                0 B
+├ ƒ /api/compliance/modelo347                        0 B                0 B
+├ ƒ /api/comunidades                                 0 B                0 B
+├ ƒ /api/comunidades/actas                           0 B                0 B
+├ ƒ /api/comunidades/cuotas                          0 B                0 B
+├ ƒ /api/construction/projects                       0 B                0 B
+├ ƒ /api/contracts                                   0 B                0 B
+├ ƒ /api/contracts/[id]                              0 B                0 B
+├ ƒ /api/coupons                                     0 B                0 B
+├ ƒ /api/coupons/[id]                                0 B                0 B
+├ ƒ /api/crm/activities                              0 B                0 B
+├ ƒ /api/crm/leads                                   0 B                0 B
+├ ƒ /api/crm/leads/[id]                              0 B                0 B
+├ ƒ /api/crm/stats                                   0 B                0 B
+├ ƒ /api/cron/create-cleaning-tasks                  0 B                0 B
+├ ƒ /api/cron/execute                                0 B                0 B
+├ ƒ /api/cron/process-contract-renewals              0 B                0 B
+├ ƒ /api/cron/process-payment-reminders              0 B                0 B
+├ ƒ /api/cron/process-preventive-maintenance         0 B                0 B
+├ ƒ /api/cron/process-scheduled-reports              0 B                0 B
+├ ƒ /api/cron/sync-availability                      0 B                0 B
+├ ƒ /api/cron/sync-ical                              0 B                0 B
+├ ƒ /api/csrf-token                                  0 B                0 B
+├ ƒ /api/dashboard                                   0 B                0 B
+├ ƒ /api/dashboard/alerts                            0 B                0 B
+├ ƒ /api/dashboard/analytics                         0 B                0 B
+├ ƒ /api/dashboard/preferences                       0 B                0 B
+├ ƒ /api/dashboard/stats-cached-example              0 B                0 B
+├ ƒ /api/dashboard/widgets                           0 B                0 B
+├ ƒ /api/digital-signature                           0 B                0 B
+├ ƒ /api/digital-signature/[id]                      0 B                0 B
+├ ƒ /api/digital-signature/[id]/cancel               0 B                0 B
+├ ƒ /api/digital-signature/[id]/reject               0 B                0 B
+├ ƒ /api/digital-signature/[id]/reminder             0 B                0 B
+├ ƒ /api/digital-signature/[id]/sign                 0 B                0 B
+├ ƒ /api/digital-signature/webhook                   0 B                0 B
+├ ƒ /api/docs                                        0 B                0 B
+├ ƒ /api/documents                                   0 B                0 B
+├ ƒ /api/documents/[id]                              0 B                0 B
+├ ƒ /api/documents/[id]/download                     0 B                0 B
+├ ƒ /api/documents/[id]/share                        0 B                0 B
+├ ƒ /api/documents/[id]/versions                     0 B                0 B
+├ ƒ /api/documents/folders                           0 B                0 B
+├ ƒ /api/documents/folders/[id]                      0 B                0 B
+├ ƒ /api/documents/tags                              0 B                0 B
+├ ƒ /api/documents/templates                         0 B                0 B
+├ ƒ /api/energy/alerts                               0 B                0 B
+├ ƒ /api/energy/readings                             0 B                0 B
+├ ƒ /api/energy/stats                                0 B                0 B
+├ ƒ /api/espacios-comunes                            0 B                0 B
+├ ƒ /api/espacios-comunes/[id]                       0 B                0 B
+├ ƒ /api/expenses                                    0 B                0 B
+├ ƒ /api/expenses/[id]                               0 B                0 B
+├ ƒ /api/export                                      0 B                0 B
+├ ƒ /api/export/data                                 0 B                0 B
+├ ƒ /api/finanzas/cashflow                           0 B                0 B
+├ ƒ /api/flipping/metrics                            0 B                0 B
+├ ƒ /api/flipping/project-status                     0 B                0 B
+├ ƒ /api/flipping/projects                           0 B                0 B
+├ ƒ /api/flipping/roi-analysis                       0 B                0 B
+├ ƒ /api/galerias                                    0 B                0 B
+├ ƒ /api/galerias/[id]/items                         0 B                0 B
+├ ƒ /api/health                                      0 B                0 B
+├ ƒ /api/health/liveness                             0 B                0 B
+├ ƒ /api/health/readiness                            0 B                0 B
+├ ƒ /api/import                                      0 B                0 B
+├ ƒ /api/import/execute                              0 B                0 B
+├ ƒ /api/import/template                             0 B                0 B
+├ ƒ /api/import/validate                             0 B                0 B
+├ ƒ /api/incidencias                                 0 B                0 B
+├ ƒ /api/incidencias/[id]                            0 B                0 B
+├ ƒ /api/inspections                                 0 B                0 B
+├ ƒ /api/inspections/[id]                            0 B                0 B
+├ ƒ /api/landing/capture-lead                        0 B                0 B
+├ ƒ /api/legal/compliance                            0 B                0 B
+├ ƒ /api/legal/inspections                           0 B                0 B
+├ ƒ /api/legal/inspections/[id]                      0 B                0 B
+├ ƒ /api/legal/insurance                             0 B                0 B
+├ ƒ /api/legal/insurance/[id]                        0 B                0 B
+├ ƒ /api/legal/templates                             0 B                0 B
+├ ƒ /api/legal/templates/[id]                        0 B                0 B
+├ ƒ /api/maintenance                                 0 B                0 B
+├ ƒ /api/maintenance-pro/budgets                     0 B                0 B
+├ ƒ /api/maintenance-pro/diagnostics                 0 B                0 B
+├ ƒ /api/maintenance-pro/history                     0 B                0 B
+├ ƒ /api/maintenance-pro/inventory                   0 B                0 B
+├ ƒ /api/maintenance-pro/inventory/[id]              0 B                0 B
+├ ƒ /api/maintenance-pro/metrics                     0 B                0 B
+├ ƒ /api/maintenance-pro/predictions                 0 B                0 B
+├ ƒ /api/maintenance-schedule                        0 B                0 B
+├ ƒ /api/maintenance-schedule/[id]                   0 B                0 B
+├ ƒ /api/maintenance-schedule/[id]/complete          0 B                0 B
+├ ƒ /api/maintenance/[id]                            0 B                0 B
+├ ƒ /api/maintenance/[id]/photos                     0 B                0 B
+├ ƒ /api/marketplace/jobs                            0 B                0 B
+├ ƒ /api/marketplace/jobs/[id]                       0 B                0 B
+├ ƒ /api/marketplace/quotes                          0 B                0 B
+├ ƒ /api/marketplace/quotes/[id]                     0 B                0 B
+├ ƒ /api/marketplace/reviews                         0 B                0 B
+├ ƒ /api/marketplace/reviews/[id]                    0 B                0 B
+├ ƒ /api/marketplace/stats                           0 B                0 B
+├ ƒ /api/modules                                     0 B                0 B
+├ ƒ /api/modules/activate                            0 B                0 B
+├ ƒ /api/modules/active                              0 B                0 B
+├ ƒ /api/modules/catalog                             0 B                0 B
+├ ƒ /api/modules/company                             0 B                0 B
+├ ƒ /api/modules/current-plan                        0 B                0 B
+├ ƒ /api/modules/toggle                              0 B                0 B
+├ ƒ /api/morosidad/predicciones                      0 B                0 B
+├ ƒ /api/morosidad/predicciones/generar-todas        0 B                0 B
+├ ƒ /api/notification-logs                           0 B                0 B
+├ ƒ /api/notification-preferences                    0 B                0 B
+├ ƒ /api/notification-rules                          0 B                0 B
+├ ƒ /api/notification-rules/[id]                     0 B                0 B
+├ ƒ /api/notification-templates                      0 B                0 B
+├ ƒ /api/notification-templates/[id]                 0 B                0 B
+├ ƒ /api/notifications                               0 B                0 B
+├ ƒ /api/notifications/[id]                          0 B                0 B
+├ ƒ /api/notifications/[id]/read                     0 B                0 B
+├ ƒ /api/notifications/mark-all-read                 0 B                0 B
+├ ƒ /api/onboarding/progress                         0 B                0 B
+├ ƒ /api/open-banking/bankinter/callback             0 B                0 B
+├ ƒ /api/open-banking/bankinter/connect              0 B                0 B
+├ ƒ /api/open-banking/bankinter/payment              0 B                0 B
+├ ƒ /api/open-banking/bankinter/reconcile            0 B                0 B
+├ ƒ /api/open-banking/bankinter/status               0 B                0 B
+├ ƒ /api/open-banking/bankinter/sync                 0 B                0 B
+├ ƒ /api/open-banking/connections                    0 B                0 B
+├ ƒ /api/open-banking/redsys/.disabled/accounts      0 B                0 B
+├ ƒ /api/open-banking/redsys/.disabled/authorize     0 B                0 B
+├ ƒ /api/open-banking/redsys/.disabled/callback      0 B                0 B
+├ ƒ /api/open-banking/redsys/.disabled/consents      0 B                0 B
+├ ƒ /api/open-banking/redsys/.disabled/payments      0 B                0 B
+├ ƒ /api/open-banking/redsys/.disabled/transactions  0 B                0 B
+├ ƒ /api/open-banking/verify-income                  0 B                0 B
+├ ƒ /api/operador/maintenance-history                0 B                0 B
+├ ƒ /api/operador/stats                              0 B                0 B
+├ ƒ /api/operador/work-orders                        0 B                0 B
+├ ƒ /api/operador/work-orders/[id]/check-in          0 B                0 B
+├ ƒ /api/operador/work-orders/[id]/check-out         0 B                0 B
+├ ƒ /api/operador/work-orders/[id]/photos            0 B                0 B
+├ ƒ /api/operador/work-orders/[id]/report            0 B                0 B
+├ ƒ /api/operador/work-orders/history                0 B                0 B
+├ ƒ /api/ordenes-trabajo                             0 B                0 B
+├ ƒ /api/ordenes-trabajo/[id]                        0 B                0 B
+├ ƒ /api/owner-notifications                         0 B                0 B
+├ ƒ /api/owners                                      0 B                0 B
+├ ƒ /api/owners/[id]                                 0 B                0 B
+├ ƒ /api/owners/[id]/buildings                       0 B                0 B
+├ ƒ /api/owners/[id]/buildings/[buildingId]          0 B                0 B
+├ ƒ /api/partners/accept-invitation                  0 B                0 B
+├ ƒ /api/partners/calculate-commissions              0 B                0 B
+├ ƒ /api/partners/commissions                        0 B                0 B
+├ ƒ /api/partners/dashboard                          0 B                0 B
+├ ƒ /api/partners/invitations                        0 B                0 B
+├ ƒ /api/partners/login                              0 B                0 B
+├ ƒ /api/partners/register                           0 B                0 B
+├ ƒ /api/payments                                    0 B                0 B
+├ ƒ /api/payments/[id]                               0 B                0 B
+├ ƒ /api/payments/[id]/receipt                       0 B                0 B
+├ ƒ /api/payments/receipt/[id]                       0 B                0 B
+├ ƒ /api/photos                                      0 B                0 B
+├ ƒ /api/portal-inquilino/cambiar-password           0 B                0 B
+├ ƒ /api/portal-inquilino/chat/conversations         0 B                0 B
+├ ƒ /api/portal-inquilino/chat/messages              0 B                0 B
+├ ƒ /api/portal-inquilino/dashboard                  0 B                0 B
+├ ƒ /api/portal-inquilino/documents                  0 B                0 B
+├ ƒ /api/portal-inquilino/documents/shared           0 B                0 B
+├ ƒ /api/portal-inquilino/invitations/create         0 B                0 B
+├ ƒ /api/portal-inquilino/invitations/validate       0 B                0 B
+├ ƒ /api/portal-inquilino/login                      0 B                0 B
+├ ƒ /api/portal-inquilino/maintenance                0 B                0 B
+├ ƒ /api/portal-inquilino/onboarding                 0 B                0 B
+├ ƒ /api/portal-inquilino/password-reset/confirm     0 B                0 B
+├ ƒ /api/portal-inquilino/password-reset/request     0 B                0 B
+├ ƒ /api/portal-inquilino/payments                   0 B                0 B
+├ ƒ /api/portal-inquilino/perfil                     0 B                0 B
+├ ƒ /api/portal-inquilino/ratings                    0 B                0 B
+├ ƒ /api/portal-inquilino/register                   0 B                0 B
+├ ƒ /api/portal-propietario/documents                0 B                0 B
+├ ƒ /api/portal-propietario/maintenance              0 B                0 B
+├ ƒ /api/portal-propietario/messages                 0 B                0 B
+├ ƒ /api/portal-propietario/settings                 0 B                0 B
+├ ƒ /api/portal-proveedor/availability               0 B                0 B
+├ ƒ /api/portal-proveedor/chat/conversations         0 B                0 B
+├ ƒ /api/portal-proveedor/chat/messages              0 B                0 B
+├ ƒ /api/portal-proveedor/dashboard                  0 B                0 B
+├ ƒ /api/portal-proveedor/invoices                   0 B                0 B
+├ ƒ /api/portal-proveedor/invoices/[id]              0 B                0 B
+├ ƒ /api/portal-proveedor/invoices/[id]/pdf          0 B                0 B
+├ ƒ /api/portal-proveedor/invoices/[id]/submit       0 B                0 B
+├ ƒ /api/portal-proveedor/quotes                     0 B                0 B
+├ ƒ /api/portal-proveedor/quotes/[id]                0 B                0 B
+├ ƒ /api/portal-proveedor/reviews                    0 B                0 B
+├ ƒ /api/portal-proveedor/work-orders/[id]/accept    0 B                0 B
+├ ƒ /api/portal-proveedor/work-orders/[id]/reject    0 B                0 B
+├ ƒ /api/portal-proveedor/work-orders/[id]/start     0 B                0 B
+├ ƒ /api/predictions                                 0 B                0 B
+├ ƒ /api/predictions/occupancy                       0 B                0 B
+├ ƒ /api/predictions/revenue                         0 B                0 B
+├ ƒ /api/professional/projects                       0 B                0 B
+├ ƒ /api/providers                                   0 B                0 B
+├ ƒ /api/providers/[id]                              0 B                0 B
+├ ƒ /api/providers/performance/[id]                  0 B                0 B
+├ ƒ /api/providers/recommend                         0 B                0 B
+├ ƒ /api/providers/stats                             0 B                0 B
+├ ƒ /api/push-notifications/public-key               0 B                0 B
+├ ƒ /api/push-notifications/send                     0 B                0 B
+├ ƒ /api/push-notifications/subscribe                0 B                0 B
+├ ƒ /api/push-notifications/unsubscribe              0 B                0 B
+├ ƒ /api/push/public-key                             0 B                0 B
+├ ƒ /api/push/send                                   0 B                0 B
+├ ƒ /api/push/subscribe                              0 B                0 B
+├ ƒ /api/push/unsubscribe                            0 B                0 B
+├ ƒ /api/push/vapid-keys                             0 B                0 B
+├ ƒ /api/queues/stats                                0 B                0 B
+├ ƒ /api/recommendations                             0 B                0 B
+├ ƒ /api/recommendations/[id]                        0 B                0 B
+├ ƒ /api/recordatorios                               0 B                0 B
+├ ƒ /api/reminders                                   0 B                0 B
+├ ƒ /api/renewals                                    0 B                0 B
+├ ƒ /api/renewals/[id]                               0 B                0 B
+├ ƒ /api/renewals/analyze                            0 B                0 B
+├ ƒ /api/renewals/create                             0 B                0 B
+├ ƒ /api/renewals/stats                              0 B                0 B
+├ ƒ /api/renovaciones/contratos                      0 B                0 B
+├ ƒ /api/reports                                     0 B                0 B
+├ ƒ /api/reuniones/[id]/generar-acta                 0 B                0 B
+├ ƒ /api/reviews                                     0 B                0 B
+├ ƒ /api/room-rental/[unitId]/dashboard              0 B                0 B
+├ ƒ /api/room-rental/[unitId]/reports                0 B                0 B
+├ ƒ /api/room-rental/analytics                       0 B                0 B
+├ ƒ /api/room-rental/cleaning-schedule               0 B                0 B
+├ ƒ /api/room-rental/contracts                       0 B                0 B
+├ ƒ /api/room-rental/contracts/[id]                  0 B                0 B
+├ ƒ /api/room-rental/payments                        0 B                0 B
+├ ƒ /api/room-rental/proration                       0 B                0 B
+├ ƒ /api/room-rental/rooms                           0 B                0 B
+├ ƒ /api/room-rental/rooms/[id]                      0 B                0 B
+├ ƒ /api/scheduled-reports                           0 B                0 B
+├ ƒ /api/scheduled-reports/[id]                      0 B                0 B
+├ ƒ /api/scheduled-reports/[id]/history              0 B                0 B
+├ ƒ /api/scheduled-reports/[id]/send                 0 B                0 B
+├ ƒ /api/scheduled-reports/templates                 0 B                0 B
+├ ƒ /api/search                                      0 B                0 B
+├ ƒ /api/search/global                               0 B                0 B
+├ ƒ /api/search/history                              0 B                0 B
+├ ƒ /api/search/saved                                0 B                0 B
+├ ƒ /api/seguros                                     0 B                0 B
+├ ƒ /api/seguros/[id]/documents                      0 B                0 B
+├ ƒ /api/setup/complete                              0 B                0 B
+├ ƒ /api/signup                                      0 B                0 B
+├ ƒ /api/sms                                         0 B                0 B
+├ ƒ /api/sms/templates                               0 B                0 B
+├ ƒ /api/sms/templates/[id]                          0 B                0 B
+├ ƒ /api/social-media/accounts                       0 B                0 B
+├ ƒ /api/social-media/posts                          0 B                0 B
+├ ƒ /api/social-media/posts/[id]                     0 B                0 B
+├ ƒ /api/str-housekeeping/checklists                 0 B                0 B
+├ ƒ /api/str-housekeeping/checklists/[id]            0 B                0 B
+├ ƒ /api/str-housekeeping/inventory                  0 B                0 B
+├ ƒ /api/str-housekeeping/inventory/[id]             0 B                0 B
+├ ƒ /api/str-housekeeping/inventory/[id]/movement    0 B                0 B
+├ ƒ /api/str-housekeeping/staff                      0 B                0 B
+├ ƒ /api/str-housekeeping/staff/[id]                 0 B                0 B
+├ ƒ /api/str-housekeeping/tasks                      0 B                0 B
+├ ƒ /api/str-housekeeping/tasks/[id]                 0 B                0 B
+├ ƒ /api/str/bookings                                0 B                0 B
+├ ƒ /api/str/channel-manager                         0 B                0 B
+├ ƒ /api/str/channel-manager/dynamic-rules           0 B                0 B
+├ ƒ /api/str/channel-manager/metrics                 0 B                0 B
+├ ƒ /api/str/channel-manager/pricing                 0 B                0 B
+├ ƒ /api/str/channel-performance                     0 B                0 B
+├ ƒ /api/str/channels                                0 B                0 B
+├ ƒ /api/str/channels/[listingId]/status             0 B                0 B
+├ ƒ /api/str/channels/[listingId]/sync               0 B                0 B
+├ ƒ /api/str/channels/connect                        0 B                0 B
+├ ƒ /api/str/channels/disconnect                     0 B                0 B
+├ ƒ /api/str/dashboard                               0 B                0 B
+├ ƒ /api/str/listings                                0 B                0 B
+├ ƒ /api/str/listings/[id]                           0 B                0 B
+├ ƒ /api/str/metrics                                 0 B                0 B
+├ ƒ /api/str/revenue-history                         0 B                0 B
+├ ƒ /api/stripe/cancel-subscription                  0 B                0 B
+├ ƒ /api/stripe/create-payment-intent                0 B                0 B
+├ ƒ /api/stripe/create-subscription                  0 B                0 B
+├ ƒ /api/stripe/payment-methods                      0 B                0 B
+├ ƒ /api/stripe/payments                             0 B                0 B
+├ ƒ /api/stripe/stats                                0 B                0 B
+├ ƒ /api/stripe/webhook                              0 B                0 B
+├ ƒ /api/suggestions                                 0 B                0 B
+├ ƒ /api/suggestions/[id]                            0 B                0 B
+├ ƒ /api/suggestions/stats                           0 B                0 B
+├ ƒ /api/support/ai-ticket                           0 B                0 B
+├ ƒ /api/support/ai-ticket/[id]                      0 B                0 B
+├ ƒ /api/support/categorize-ticket                   0 B                0 B
+├ ƒ /api/support/chatbot                             0 B                0 B
+├ ƒ /api/support/knowledge-search                    0 B                0 B
+├ ƒ /api/support/tickets                             0 B                0 B
+├ ƒ /api/support/tickets/analyze                     0 B                0 B
+├ ƒ /api/system/health                               0 B                0 B
+├ ƒ /api/tasks                                       0 B                0 B
+├ ƒ /api/tasks/[id]                                  0 B                0 B
+├ ƒ /api/tasks/my-day                                0 B                0 B
+├ ƒ /api/tasks/prioritized                           0 B                0 B
+├ ƒ /api/tenants                                     0 B                0 B
+├ ƒ /api/tenants/[id]                                0 B                0 B
+├ ƒ /api/test-rate-limit                             0 B                0 B
+├ ƒ /api/test/automations                            0 B                0 B
+├ ƒ /api/treasury/alerts                             0 B                0 B
+├ ƒ /api/treasury/deposits                           0 B                0 B
+├ ƒ /api/treasury/forecast                           0 B                0 B
+├ ƒ /api/treasury/provisions                         0 B                0 B
+├ ƒ /api/units                                       0 B                0 B
+├ ƒ /api/units/[id]                                  0 B                0 B
+├ ƒ /api/user/companies                              0 B                0 B
+├ ƒ /api/user/generate-demo-data                     0 B                0 B
+├ ƒ /api/user/notification-preferences               0 B                0 B
+├ ƒ /api/user/profile                                0 B                0 B
+├ ƒ /api/user/setup-progress                         0 B                0 B
+├ ƒ /api/user/switch-company                         0 B                0 B
+├ ƒ /api/users                                       0 B                0 B
+├ ƒ /api/users/[id]                                  0 B                0 B
+├ ƒ /api/visits                                      0 B                0 B
+├ ƒ /api/visits/[id]                                 0 B                0 B
+├ ƒ /api/votaciones/[id]/votar                       0 B                0 B
+├ ƒ /api/workflows                                   0 B                0 B
+├ ƒ /api/workflows/[id]                              0 B                0 B
+├ ƒ /api/workflows/[id]/execute                      0 B                0 B
+├ ƒ /api/workflows/[id]/toggle                       0 B                0 B
+├ ƒ /api/workflows/executions                        0 B                0 B
+├ ○ /asistente-ia                                    4.39 kB         261 kB
+├ ○ /auditoria                                       6.27 kB         269 kB
+├ ○ /automatizacion                                  7.52 kB         270 kB
+├ ○ /automatizacion-resumen                          6.4 kB          110 kB
+├ ○ /bi                                              6.65 kB         377 kB
+├ ○ /blockchain                                      3.04 kB         259 kB
+├ ○ /calendario                                      62 kB           333 kB
+├ ○ /candidatos                                      7.01 kB         270 kB
+├ ○ /candidatos/nuevo                                4.32 kB         267 kB
+├ ○ /certificaciones                                 6.81 kB         270 kB
+├ ○ /chat                                            5.1 kB          262 kB
+├ ○ /coliving                                        8.44 kB         265 kB
+├ ○ /comparativa/homming                             13.6 kB         117 kB
+├ ○ /comunidad-social                                2.15 kB         259 kB
+├ ○ /comunidades                                     3.84 kB         260 kB
+├ ○ /comunidades/actas                               1.47 kB         258 kB
+├ ○ /comunidades/cumplimiento                        1.48 kB         258 kB
+├ ○ /comunidades/cuotas                              1.47 kB         258 kB
+├ ○ /comunidades/finanzas                            1.47 kB         258 kB
+├ ○ /comunidades/fondos                              1.47 kB         258 kB
+├ ○ /comunidades/presidente                          1.48 kB         258 kB
+├ ○ /comunidades/renovaciones                        1.48 kB         258 kB
+├ ○ /comunidades/votaciones                          1.48 kB         258 kB
+├ ○ /configuracion/notificaciones                    8.96 kB         272 kB
+├ ○ /construction                                    12.5 kB         131 kB
+├ ○ /construction/projects                           4.1 kB          267 kB
+├ ○ /contabilidad                                    72.4 kB         197 kB
+├ ○ /contratos                                       6.12 kB         275 kB
+├ ƒ /contratos/[id]                                  5.81 kB         262 kB
+├ ○ /contratos/nuevo                                 3.28 kB         273 kB
+├ ○ /crm                                             6.76 kB         270 kB
+├ ○ /cupones                                         7.73 kB         271 kB
+├ ○ /dashboard                                       18.6 kB         426 kB
+├ ○ /dashboard/community                             11.2 kB         384 kB
+├ ○ /documentos                                      7.44 kB         270 kB
+├ ○ /economia-circular                               2.69 kB         259 kB
+├ ○ /edificios                                       5.37 kB         279 kB
+├ ƒ /edificios/[id]                                  6.91 kB         263 kB
+├ ○ /edificios/nuevo                                 2.73 kB         269 kB
+├ ○ /ejemplo-ux                                      7.33 kB         270 kB
+├ ○ /energia                                         8.17 kB         379 kB
+├ ○ /esg                                             2.77 kB         259 kB
+├ ○ /facturacion                                     5.57 kB         262 kB
+├ ○ /firma-digital                                   6.5 kB          269 kB
+├ ○ /flipping                                        4.09 kB         261 kB
+├ ○ /flipping/dashboard                              4.54 kB         369 kB
+├ ○ /flipping/projects                               4.18 kB         267 kB
+├ ○ /galerias                                        5.96 kB         269 kB
+├ ○ /gastos                                          7.33 kB         270 kB
+├ ○ /guia-ux                                         7.4 kB          264 kB
+├ ○ /home                                            13.2 kB         306 kB
+├ ○ /incidencias                                     5.77 kB         269 kB
+├ ○ /inquilinos                                      6.53 kB         276 kB
+├ ƒ /inquilinos/[id]                                 2.51 kB         259 kB
+├ ○ /inquilinos/nuevo                                2.74 kB         269 kB
+├ ○ /inspecciones                                    5.3 kB          268 kB
+├ ○ /knowledge-base                                  15.4 kB         119 kB
+├ ○ /landing                                         271 B           135 kB
+├ ○ /landing/blog                                    3.79 kB         107 kB
+├ ○ /landing/calculadora-roi                         10.9 kB         141 kB
+├ ○ /landing/campanas/launch2025                     7.97 kB         112 kB
+├ ○ /landing/casos-exito                             4.06 kB         108 kB
+├ ○ /landing/contacto                                5.37 kB         117 kB
+├ ○ /landing/demo                                    5.53 kB         109 kB
+├ ○ /landing/legal/cookies                           2.96 kB         107 kB
+├ ○ /landing/legal/gdpr                              2.96 kB         107 kB
+├ ○ /landing/legal/privacidad                        2.87 kB         107 kB
+├ ○ /landing/legal/terminos                          2.89 kB         107 kB
+├ ○ /landing/migracion                               14.1 kB         118 kB
+├ ○ /landing/modulos/coliving                        8.76 kB         112 kB
+├ ○ /landing/modulos/house-flipping                  8.85 kB         113 kB
+├ ○ /landing/sobre-nosotros                          5.42 kB         109 kB
+├ ○ /landing/webinars                                8.31 kB         112 kB
+├ ○ /legal                                           4.31 kB         261 kB
+├ ○ /login                                           3.25 kB         178 kB
+├ ○ /mantenimiento                                   13.9 kB         277 kB
+├ ○ /mantenimiento-preventivo                        7.55 kB         264 kB
+├ ○ /mantenimiento-pro                               7.96 kB         379 kB
+├ ○ /mantenimiento/nuevo                             4.13 kB         267 kB
+├ ○ /marketplace                                     8.9 kB          272 kB
+├ ○ /notificaciones                                  4.95 kB         270 kB
+├ ○ /notificaciones/historial                        6.85 kB         270 kB
+├ ○ /notificaciones/plantillas                       9.41 kB         272 kB
+├ ○ /notificaciones/reglas                           9.62 kB         273 kB
+├ ○ /ocr                                             280 kB          537 kB
+├ ○ /offline                                         4.82 kB         109 kB
+├ ○ /open-banking                                    6.59 kB         263 kB
+├ ○ /operador/dashboard                              3.95 kB         260 kB
+├ ○ /operador/maintenance-history                    4.47 kB         267 kB
+├ ƒ /operador/work-orders/[id]                       6.34 kB         263 kB
+├ ○ /operador/work-orders/history                    4.31 kB         267 kB
+├ ○ /ordenes-trabajo                                 8.52 kB         271 kB
+├ ○ /pagos                                           8.31 kB         273 kB
+├ ○ /pagos/nuevo                                     4.12 kB         267 kB
+├ ○ /partners                                        684 B           257 kB
+├ ○ /partners-program                                6.03 kB         115 kB
+├ ƒ /partners/accept/[token]                         3.36 kB         260 kB
+├ ○ /partners/clients                                2.35 kB         259 kB
+├ ○ /partners/commissions                            3.68 kB         267 kB
+├ ○ /partners/dashboard                              3.13 kB         260 kB
+├ ○ /partners/invitations                            3.71 kB         260 kB
+├ ○ /partners/login                                  4.27 kB         108 kB
+├ ○ /partners/register                               4.62 kB         135 kB
+├ ○ /partners/settings                               3.11 kB         260 kB
+├ ○ /perfil                                          6.42 kB         263 kB
+├ ○ /plantillas                                      7.1 kB          264 kB
+├ ○ /portal-comercial                                3.03 kB         259 kB
+├ ○ /portal-comercial/comisiones                     4.21 kB         267 kB
+├ ○ /portal-comercial/leads                          4.63 kB         268 kB
+├ ƒ /portal-comercial/leads/[id]                     4.76 kB         268 kB
+├ ○ /portal-comercial/objetivos                      3.33 kB         260 kB
+├ ○ /portal-inquilino/chat                           6.13 kB         135 kB
+├ ○ /portal-inquilino/chatbot                        2.97 kB        97.9 kB
+├ ○ /portal-inquilino/dashboard                      8.74 kB         142 kB
+├ ○ /portal-inquilino/documentos                     7.89 kB         141 kB
+├ ○ /portal-inquilino/login                          4.59 kB         117 kB
+├ ○ /portal-inquilino/mantenimiento                  4.93 kB         143 kB
+├ ○ /portal-inquilino/pagos                          11.2 kB         124 kB
+├ ○ /portal-inquilino/password-reset                 4.07 kB         116 kB
+├ ƒ /portal-inquilino/password-reset/[token]         5.01 kB         117 kB
+├ ○ /portal-inquilino/perfil                         11.1 kB         133 kB
+├ ○ /portal-inquilino/register                       5.37 kB         117 kB
+├ ○ /portal-inquilino/valoraciones                   5.93 kB         145 kB
+├ ○ /portal-propietario                              11.2 kB         264 kB
+├ ○ /portal-propietario/configuracion                6.73 kB         136 kB
+├ ○ /portal-propietario/login                        5.2 kB          117 kB
+├ ○ /portal-proveedor/chat                           6.13 kB         263 kB
+├ ○ /portal-proveedor/dashboard                      2.61 kB         259 kB
+├ ○ /portal-proveedor/facturas                       6.33 kB         269 kB
+├ ƒ /portal-proveedor/facturas/[id]                  10.7 kB         112 kB
+├ ○ /portal-proveedor/facturas/nueva                 7.93 kB         129 kB
+├ ○ /portal-proveedor/forgot-password                4.7 kB          117 kB
+├ ○ /portal-proveedor/login                          4.6 kB          116 kB
+├ ○ /portal-proveedor/ordenes                        4.21 kB         267 kB
+├ ○ /portal-proveedor/presupuestos                   6.31 kB         269 kB
+├ ○ /portal-proveedor/presupuestos/nuevo             6.95 kB         270 kB
+├ ○ /portal-proveedor/register                       4.83 kB         143 kB
+├ ○ /portal-proveedor/reseñas                        8.52 kB         110 kB
+├ ○ /portal-proveedor/reset-password                 4.81 kB         117 kB
+├ ○ /professional                                    4.16 kB         261 kB
+├ ○ /professional/projects                           4.01 kB         267 kB
+├ ○ /proveedores                                     5.85 kB         262 kB
+├ ○ /publicaciones                                   4.66 kB         268 kB
+├ ○ /recordatorios                                   6.63 kB         270 kB
+├ ○ /redes-sociales                                  8.04 kB         271 kB
+├ ○ /register                                        4.67 kB         179 kB
+├ ○ /reportes                                        6.23 kB         407 kB
+├ ○ /reservas                                        7.29 kB         270 kB
+├ ○ /reuniones                                       5.63 kB         269 kB
+├ ○ /reviews                                         4.16 kB         261 kB
+├ ○ /robots.txt                                      0 B                0 B
+├ ○ /room-rental                                     2.95 kB         259 kB
+├ ƒ /room-rental/[unitId]                            4.29 kB         267 kB
+├ ƒ /room-rental/[unitId]/dashboard                  4.11 kB         261 kB
+├ ƒ /room-rental/[unitId]/proration                  5.2 kB          268 kB
+├ ƒ /room-rental/[unitId]/reports                    5.08 kB         268 kB
+├ ƒ /room-rental/[unitId]/rooms/[roomId]             6.53 kB         269 kB
+├ ○ /screening                                       3.71 kB         260 kB
+├ ○ /seguridad-compliance                            2.34 kB         259 kB
+├ ○ /seguros                                         6.17 kB         269 kB
+├ ○ /sitemap.xml                                     0 B                0 B
+├ ○ /sms                                             6.07 kB         269 kB
+├ ○ /soporte                                         3.37 kB         303 kB
+├ ○ /str                                             5.25 kB         369 kB
+├ ○ /str-advanced                                    3.14 kB         260 kB
+├ ○ /str-advanced/channel-manager                    5.71 kB         262 kB
+├ ○ /str-advanced/guest-experience                   3.76 kB         260 kB
+├ ○ /str-advanced/housekeeping                       3.48 kB         260 kB
+├ ○ /str-advanced/legal                              3.91 kB         260 kB
+├ ○ /str-advanced/revenue                            3.82 kB         260 kB
+├ ○ /str-housekeeping                                5.92 kB         269 kB
+├ ○ /str-housekeeping/inventory                      4.56 kB         267 kB
+├ ○ /str-housekeeping/staff                          4.12 kB         267 kB
+├ ○ /str/bookings                                    4.24 kB         267 kB
+├ ○ /str/channels                                    4.2 kB          267 kB
+├ ○ /str/dashboard                                   4.68 kB         369 kB
+├ ○ /str/listings                                    4.27 kB         267 kB
+├ ƒ /str/listings/[id]                               8.21 kB         265 kB
+├ ƒ /str/listings/[id]/channels                      8.94 kB         265 kB
+├ ○ /str/settings/integrations                       10.5 kB         273 kB
+├ ○ /sugerencias                                     2.51 kB         269 kB
+├ ○ /tareas                                          6.89 kB         270 kB
+├ ○ /test-auth                                       432 B          97.8 kB
+├ ○ /traditional-rental                              2.23 kB         259 kB
+├ ○ /traditional-rental/communities                  3.73 kB         260 kB
+├ ○ /traditional-rental/compliance                   3.4 kB          260 kB
+├ ○ /traditional-rental/renewals                     2.28 kB         259 kB
+├ ○ /traditional-rental/treasury                     1.78 kB         258 kB
+├ ○ /unauthorized                                    2.86 kB        97.8 kB
+├ ○ /unidades                                        6.01 kB         273 kB
+├ ƒ /unidades/[id]                                   7.39 kB         264 kB
+├ ○ /unidades/nuevo                                  2.67 kB         269 kB
+├ ○ /valoraciones                                    5.2 kB          268 kB
+├ ○ /visitas                                         17.5 kB         280 kB
+├ ○ /votaciones                                      8.26 kB         271 kB
+└ ○ /workflows                                       5.29 kB         268 kB
++ First Load JS shared by all                        87.7 kB
+  ├ chunks/3194-89523ff67aa0a439.js                  31.8 kB
+  ├ chunks/ba57f82b-8b9f3f87a73407a7.js              53.6 kB
+  └ other shared chunks (total)                      2.3 kB
+
+Route (pages)                                        Size     First Load JS
+┌ ƒ /api/coliving/analytics                          0 B            85.6 kB
+├ ƒ /api/coliving/nps-surveys                        0 B            85.6 kB
+├ ƒ /api/coliving/spaces/credits                     0 B            85.6 kB
+├ ƒ /api/coliving/spaces/maintenance                 0 B            85.6 kB
+├ ƒ /api/coliving/spaces/ratings                     0 B            85.6 kB
+├ ƒ /api/coliving/spaces/reservations-checkin        0 B            85.6 kB
+├ ƒ /api/coliving/spaces/waitlist                    0 B            85.6 kB
+├ ƒ /api/coliving/spaces/waitlist-convert            0 B            85.6 kB
+├ ƒ /api/coliving/tenant-profiles                    0 B            85.6 kB
+├ ƒ /api/cron/monthly-commissions                    0 B            85.6 kB
+├ ƒ /api/cron/monthly-goals-reminder                 0 B            85.6 kB
+├ ƒ /api/cron/update-metrics                         0 B            85.6 kB
+├ ƒ /api/partners/analytics/[salesRepId]             0 B            85.6 kB
+├ ƒ /api/partners/api-keys/generate                  0 B            85.6 kB
+├ ƒ /api/partners/api-keys/revoke                    0 B            85.6 kB
+├ ƒ /api/partners/certifications                     0 B            85.6 kB
+├ ƒ /api/partners/certifications/[salesRepId]        0 B            85.6 kB
+├ ƒ /api/partners/certifications/award               0 B            85.6 kB
+├ ƒ /api/partners/marketing-materials                0 B            85.6 kB
+├ ƒ /api/partners/marketing-materials/download       0 B            85.6 kB
+├ ƒ /api/partners/public/leads/create                0 B            85.6 kB
+├ ƒ /api/partners/public/register                    0 B            85.6 kB
+├ ƒ /api/partners/sub-affiliates                     0 B            85.6 kB
+├ ƒ /api/partners/white-label/[id]                   0 B            85.6 kB
+├ ƒ /api/partners/white-label/configure              0 B            85.6 kB
+├ ƒ /api/reports/commissions                         0 B            85.6 kB
+├ ƒ /api/reports/leads                               0 B            85.6 kB
+├ ƒ /api/reports/sales-reps                          0 B            85.6 kB
+├ ƒ /api/reports/targets                             0 B            85.6 kB
+├ ƒ /api/sales-team/commissions                      0 B            85.6 kB
+├ ƒ /api/sales-team/commissions/[id]/approve         0 B            85.6 kB
+├ ƒ /api/sales-team/commissions/[id]/pay             0 B            85.6 kB
+├ ƒ /api/sales-team/dashboard                        0 B            85.6 kB
+├ ƒ /api/sales-team/leads                            0 B            85.6 kB
+├ ƒ /api/sales-team/leads/[id]                       0 B            85.6 kB
+├ ƒ /api/sales-team/leads/[id]/convert               0 B            85.6 kB
+├ ƒ /api/sales-team/leads/[id]/interaction           0 B            85.6 kB
+├ ƒ /api/sales-team/representatives                  0 B            85.6 kB
+├ ƒ /api/sales-team/representatives/[id]             0 B            85.6 kB
+├ ƒ /api/sales-team/representatives/[id]/dashboard   0 B            85.6 kB
+├ ○ /sales-portal                                    12.9 kB         109 kB
+└ ○ /sales-portal/leads/new                          30.1 kB         126 kB
++ First Load JS shared by all                        85.6 kB
+  ├ chunks/framework-8a6c5a408d03ebfd.js             44.9 kB
+  ├ chunks/main-8341c99b37efb546.js                  38.4 kB
+  └ other shared chunks (total)                      2.27 kB
+
+ƒ Middleware                                         63.2 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+Done in 110.53s.
+exit_code=0

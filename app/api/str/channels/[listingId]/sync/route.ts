@@ -6,7 +6,7 @@ import {
   importBookings,
   updateChannelPrices,
 } from '@/lib/str-channel-integration-service';
-import type { ChannelType } from '@prisma/client';
+import { ChannelType } from '@prisma/client';
 import { addDays } from 'date-fns';
 import logger, { logError } from '@/lib/logger';
 

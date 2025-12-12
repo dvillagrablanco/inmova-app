@@ -4,7 +4,7 @@
  */
 
 import { prisma } from './db';
-import type { HousekeepingStatus, TurnoverType } from '@prisma/client';
+import { HousekeepingStatus, TurnoverType } from '@prisma/client';
 import { addDays, addHours, differenceInHours, startOfDay, endOfDay } from 'date-fns';
 
 // ==================== INTERFACES ====================
