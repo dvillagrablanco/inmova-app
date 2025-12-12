@@ -1,6 +1,15 @@
 import React from 'react';
-import { BusinessVertical } from '@prisma/client';
 import { Step } from 'react-joyride';
+
+// Tipo local para BusinessVertical (replica el enum de Prisma)
+export type BusinessVertical = 
+  | 'alquiler_tradicional'
+  | 'str_vacacional'
+  | 'coliving'
+  | 'construccion'
+  | 'flipping'
+  | 'servicios_profesionales'
+  | 'mixto';
 
 // Definición de tours por vertical
 export interface OnboardingStep extends Step {
