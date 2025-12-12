@@ -9,7 +9,14 @@
  * - TTFB (Time to First Byte): < 600ms
  */
 
-import { Metric } from 'web-vitals';
+// Definir tipo Metric localmente para evitar dependencia directa
+export interface Metric {
+  name: string;
+  value: number;
+  delta: number;
+  id: string;
+  navigationType: 'navigate' | 'reload' | 'back-forward' | 'prerender';
+}
 
 interface VitalReport {
   name: string;
@@ -103,7 +110,16 @@ export async function initWebVitals() {
   if (typeof window === 'undefined') return;
 
   try {
-    const { onCLS, onFCP, onLCP, onTTFB, onINP } = await import('web-vitals');
+    // Intentar importar web-vitals dinámicamente
+    // Si no está disponible, fallar silenciosamente
+    const webVitals = await import('web-vitals').catch(() => null);
+    
+    if (!webVitals) {
+      // Web vitals no disponible, continuar sin él
+      return;
+    }
+    
+    const { onCLS, onFCP, onLCP, onTTFB, onINP } = webVitals;
     
     onCLS(reportWebVitals);
     onFCP(reportWebVitals);
@@ -115,12 +131,12 @@ export async function initWebVitals() {
       onINP(reportWebVitals);
     }
   } catch (error) {
-    console.error('Error initializing web vitals:', error);
+    // Error silencioso - web vitals es opcional
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('Web vitals not available:', error);
+    }
   }
 }
-
-// Exportar para Next.js App Router
-export type { Metric };
 
 // Agregar tipos globales
 declare global {
