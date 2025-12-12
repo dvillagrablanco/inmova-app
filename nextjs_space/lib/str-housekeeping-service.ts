@@ -3,8 +3,8 @@
  * Servicio completo para gestión de limpieza y turnover en propiedades STR
  */
 
-import { prisma } from './db';
-import type {HousekeepingStatus, TurnoverType } from '@prisma/client';
+import { prisma } from '@/lib/db';
+import { HousekeepingStatus, TurnoverType } from '@prisma/client';
 import { addDays, addHours, differenceInHours, startOfDay, endOfDay } from 'date-fns';
 
 // ==================== INTERFACES ====================

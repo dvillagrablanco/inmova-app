@@ -3,7 +3,7 @@
  * Gestiona flujos de onboarding personalizados sin intervención humana
  */
 
-import { prisma } from './db';
+import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
 
 // Tipos de negocio soportados

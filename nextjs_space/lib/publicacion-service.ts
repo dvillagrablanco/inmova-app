@@ -8,7 +8,7 @@
  * que el usuario puede copiar/pegar manualmente
  */
 
-import { prisma } from './db';
+import { prisma } from '@/lib/db';
 import type {PublicacionEstado } from '@prisma/client';
 
 interface DatosPublicacion {

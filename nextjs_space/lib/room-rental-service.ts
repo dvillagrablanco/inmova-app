@@ -4,7 +4,7 @@
  * Incluye: prorrateo de suministros, normas de convivencia, limpieza, analytics
  */
 
-import { prisma } from './db';
+import { prisma } from '@/lib/db';
 import type {RoomPayment } from '@prisma/client';
 import { addMonths, differenceInDays, format, startOfMonth, endOfMonth } from 'date-fns';
 import { es } from 'date-fns/locale';

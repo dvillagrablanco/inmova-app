@@ -1,4 +1,4 @@
-import { prisma } from './db';
+import { prisma } from '@/lib/db';
 import type {CouponType, CouponStatus } from '@prisma/client';
 import { addDays } from 'date-fns';
 

@@ -8,8 +8,8 @@
  * integraciones reales, se requieren credenciales API de cada plataforma.
  */
 
-import { prisma } from './db';
-import type {ChannelType, BookingStatus } from '@prisma/client';
+import { prisma } from '@/lib/db';
+import { ChannelType, BookingStatus } from '@prisma/client';
 import { addDays, startOfDay, endOfDay } from 'date-fns';
 import logger, { logError } from '@/lib/logger';
 

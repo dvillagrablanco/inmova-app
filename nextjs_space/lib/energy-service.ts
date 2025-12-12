@@ -1,4 +1,4 @@
-import { prisma } from './db';
+import { prisma } from '@/lib/db';
 import type {EnergyType, AlertType } from '@prisma/client';
 import { format, subMonths } from 'date-fns';
 

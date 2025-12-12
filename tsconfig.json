@@ -22,6 +22,7 @@
     "assumeChangesOnlyAffectDirectDependencies": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
+    "baseUrl": ".",
     "plugins": [
       {
         "name": "next"
