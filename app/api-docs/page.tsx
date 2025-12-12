@@ -9,9 +9,11 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import logger, { logError } from '@/lib/logger';
 
-
-// @ts-ignore - SwaggerUI types conflict with Next.js dynamic
-const SwaggerUI = dynamic(() => import('swagger-ui-react'), { ssr: false });
+// Dynamic import with proper TypeScript handling
+const SwaggerUI = dynamic<any>(
+  () => import('swagger-ui-react').then((mod) => mod.default),
+  { ssr: false }
+);
 
 export default function ApiDocsPage() {
   const router = useRouter();
