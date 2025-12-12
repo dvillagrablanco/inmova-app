@@ -32,6 +32,13 @@ ENV NODE_OPTIONS="--max-old-space-size=4096"
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN yarn build
 
+# DEBUG: List the standalone output structure to understand where server.js is
+RUN echo "=== Listing .next/standalone structure ===" && \
+    ls -la .next/standalone/ || echo "standalone directory not found" && \
+    echo "=== Checking for server.js ===" && \
+    find .next/standalone -name "server.js" -type f 2>/dev/null || echo "server.js not found in standalone" && \
+    echo "=== End debug ==="
+
 # Production image, copy all the files and run next
 FROM base AS runner
 WORKDIR /app
