@@ -1,0 +1,67 @@
+# ============================================
+# RAILWAY ENVIRONMENT VARIABLES
+# Template para inmova-app deployment
+# ============================================
+
+# ============================================
+# CRÍTICAS (OBLIGATORIAS)
+# ============================================
+
+# Base de Datos
+DATABASE_URL=${{Postgres.DATABASE_URL}}
+
+# NextAuth (Autenticación)
+NEXTAUTH_SECRET=<openssl rand -base64 32>
+NEXTAUTH_URL=https://${{RAILWAY_PUBLIC_DOMAIN}}
+
+# Encriptación
+ENCRYPTION_KEY=<openssl rand -hex 16>
+
+# URL Base Pública
+NEXT_PUBLIC_BASE_URL=https://${{RAILWAY_PUBLIC_DOMAIN}}
+
+
+# ============================================
+# OPCIONALES (según funcionalidades activas)
+# ============================================
+
+# AWS S3 (Upload de archivos)
+# AWS_REGION=us-east-1
+# AWS_BUCKET_NAME=inmova-uploads
+# AWS_FOLDER_PREFIX=production/
+# AWS_ACCESS_KEY_ID=<tu_access_key>
+# AWS_SECRET_ACCESS_KEY=<tu_secret_key>
+
+# Abacus AI (LLM APIs)
+# ABACUSAI_API_KEY=<tu_api_key>
+
+# Cron Jobs
+# CRON_SECRET=<openssl rand -hex 32>
+
+# DocuSign (Firma Digital)
+# DOCUSIGN_INTEGRATION_KEY=<tu_integration_key>
+# DOCUSIGN_USER_ID=<tu_user_id>
+# DOCUSIGN_ACCOUNT_ID=<tu_account_id>
+# DOCUSIGN_PRIVATE_KEY=<tu_private_key_base64>
+# DOCUSIGN_BASE_PATH=https://demo.docusign.net/restapi
+# DOCUSIGN_OAUTH_BASE_PATH=https://account-d.docusign.com
+
+# Stripe (Pagos)
+# NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_xxx
+# STRIPE_SECRET_KEY=sk_test_xxx
+
+# Email (SendGrid, SES, etc.)
+# EMAIL_HOST=smtp.sendgrid.net
+# EMAIL_PORT=587
+# EMAIL_USER=apikey
+# EMAIL_PASSWORD=<tu_sendgrid_api_key>
+# EMAIL_FROM=noreply@inmova.app
+
+# Redis (Caché - opcional)
+# REDIS_URL=redis://user:password@host:port
+
+# Sentry (Monitoreo de errores)
+# NEXT_PUBLIC_SENTRY_DSN=https://xxx@xxx.ingest.sentry.io/xxx
+
+# Google Analytics
+# NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
