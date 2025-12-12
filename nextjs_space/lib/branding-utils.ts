@@ -1,8 +1,9 @@
-import { BrandingConfig } from '@prisma/client';
+import type { BrandingConfig } from '@prisma/client';
 
 /**
  * Utilidades de branding que NO acceden a la base de datos
  * Estas funciones son seguras para usar en componentes cliente
+ * IMPORTANTE: Usar 'import type' para evitar incluir Prisma Client en el bundle del cliente
  */
 
 export interface BrandingConfigData {
