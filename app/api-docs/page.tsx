@@ -10,10 +10,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import logger, { logError } from '@/lib/logger';
 
 // Dynamic import with proper TypeScript handling
-const SwaggerUI = dynamic<any>(
-  () => import('swagger-ui-react').then((mod) => mod.default),
+const SwaggerUI = dynamic(
+  () => import('swagger-ui-react'),
   { ssr: false }
-);
+) as any;
 
 export default function ApiDocsPage() {
   const router = useRouter();
