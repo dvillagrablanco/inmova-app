@@ -8,8 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Circle, ChevronRight, X, Sparkles, Database, Loader2 } from 'lucide-react';
-import { BusinessVertical } from '@prisma/client';
-import { getUserVerticalTour, calculateSetupProgress, getNextRecommendedAction, SetupAction } from '@/lib/onboarding-tours';
+import { getUserVerticalTour, calculateSetupProgress, getNextRecommendedAction, SetupAction, type BusinessVertical } from '@/lib/onboarding-tours';
 import logger from '@/lib/logger';
 import { cn } from '@/lib/utils';
 

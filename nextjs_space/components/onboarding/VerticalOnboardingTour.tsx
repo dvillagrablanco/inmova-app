@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { BusinessVertical } from '@prisma/client';
-import { getUserVerticalTour } from '@/lib/onboarding-tours';
+import { getUserVerticalTour, type BusinessVertical } from '@/lib/onboarding-tours';
 import logger from '@/lib/logger';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
