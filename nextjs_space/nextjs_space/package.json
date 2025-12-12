@@ -208,6 +208,7 @@
     "react-window": "^2.2.3",
     "recharts": "2.12.7",
     "redis": "^5.10.0",
+    "server-only": "^0.0.1",
     "sonner": "1.5.0",
     "stripe": "^20.0.0",
     "swagger-jsdoc": "^6.2.8",
