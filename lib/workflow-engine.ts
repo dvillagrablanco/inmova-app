@@ -1,4 +1,5 @@
-import type { Prisma, PrismaClient } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { Engine } from 'node-rules-engine';
 
 const prisma = new PrismaClient();

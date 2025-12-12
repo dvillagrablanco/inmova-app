@@ -1,0 +1,1 @@
+self.__REACT_LOADABLE_MANIFEST="{\"components/landing/LandingPageContent.tsx -> @/components/LandingChatbot\":{\"id\":\"components/landing/LandingPageContent.tsx -> @/components/LandingChatbot\",\"files\":[\"static/chunks/_app-pages-browser_components_LandingChatbot_tsx.js\"]}}"

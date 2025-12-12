@@ -9,7 +9,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { createB2BInvoice, generateMonthlyInvoices } from '@/lib/b2b-billing-service';
-import type { InvoiceStatus } from '@prisma/client';
+import { InvoiceStatus } from '@prisma/client';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';

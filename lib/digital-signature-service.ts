@@ -1,5 +1,5 @@
 import { prisma } from './db';
-import type { SignatureStatus, SignerStatus, TipoContrato } from '@prisma/client';
+import { SignatureStatus, SignerStatus, TipoContrato } from '@prisma/client';
 import logger, { logError } from '@/lib/logger';
 
 // ============================================================================

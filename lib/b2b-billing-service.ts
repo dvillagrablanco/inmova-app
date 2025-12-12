@@ -4,7 +4,7 @@
  */
 
 import { prisma } from './db';
-import type { InvoiceStatus } from '@prisma/client';
+import { InvoiceStatus } from '@prisma/client';
 import { addMonths, addDays, startOfMonth, endOfMonth, format, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
 

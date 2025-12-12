@@ -5,7 +5,7 @@ import {
   connectChannel,
   ChannelCredentials,
 } from '@/lib/str-channel-integration-service';
-import type { ChannelType } from '@prisma/client';
+import { ChannelType } from '@prisma/client';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
