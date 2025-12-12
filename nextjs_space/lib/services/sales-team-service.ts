@@ -6,7 +6,7 @@
 
 import type {SalesRepStatus, LeadStatus, SalesCommissionType, SalesCommissionStatus, SalesCommission } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-import { prisma } from '../db';
+import { prisma } from '@/lib/db';
 
 // ====================================
 // GESTIÓN DE COMERCIALES

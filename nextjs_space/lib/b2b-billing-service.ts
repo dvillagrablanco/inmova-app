@@ -3,8 +3,8 @@
  * Gestiona la facturación de INMOVA a las empresas clientes
  */
 
-import { prisma } from './db';
-import type {InvoiceStatus } from '@prisma/client';
+import { prisma } from '@/lib/db';
+import { InvoiceStatus } from '@prisma/client';
 import { addMonths, addDays, startOfMonth, endOfMonth, format, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
 

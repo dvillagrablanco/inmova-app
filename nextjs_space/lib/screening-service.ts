@@ -11,7 +11,7 @@
  * Sin integración con APIs externas - proceso manual guiado
  */
 
-import { prisma } from './db';
+import { prisma } from '@/lib/db';
 import type {ScreeningEstado, RiskLevel } from '@prisma/client';
 
 interface ResultadoScreening {

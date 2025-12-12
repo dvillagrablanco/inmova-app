@@ -10,7 +10,7 @@
  * Sin integración con APIs externas - utiliza datos locales
  */
 
-import { prisma } from './db';
+import { prisma } from '@/lib/db';
 import type {ValoracionMetodo, ValoracionFinalidad } from '@prisma/client';
 
 interface DatosPropiedad {

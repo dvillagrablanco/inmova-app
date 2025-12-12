@@ -73,4 +73,4 @@ core
 # Build artifacts (do not commit)
 .build/
 .deploy/
-nextjs_space/.build/
+nextjs_space/

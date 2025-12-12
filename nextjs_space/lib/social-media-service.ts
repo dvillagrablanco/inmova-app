@@ -1,4 +1,4 @@
-import { prisma } from './db';
+import { prisma } from '@/lib/db';
 import type {SocialMediaPlatform, SocialPostStatus } from '@prisma/client';
 import logger, { logError } from '@/lib/logger';
 

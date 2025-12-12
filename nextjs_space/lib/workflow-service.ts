@@ -3,9 +3,9 @@
  * Gestiona la creación, ejecución y monitoreo de workflows automatizados
  */
 
-import { prisma } from './db';
+import { prisma } from '@/lib/db';
 import type {WorkflowStatus, WorkflowTriggerType, WorkflowActionType } from '@prisma/client';
-import logger from './logger';
+import logger from '@/lib/logger';
 
 /**
  * Crea un nuevo workflow
