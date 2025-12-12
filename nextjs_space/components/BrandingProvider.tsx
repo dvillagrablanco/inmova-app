@@ -2,12 +2,11 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { BrandingConfig } from '@prisma/client';
-import { generateCSSVariables } from '@/lib/branding-utils';
+import { BrandingConfigData, generateCSSVariables } from '@/lib/branding-utils';
 import logger from '@/lib/logger';
 
 interface BrandingContextType {
-  branding: BrandingConfig | null;
+  branding: BrandingConfigData | null;
   isLoading: boolean;
   refreshBranding: () => Promise<void>;
 }
@@ -25,7 +24,7 @@ interface BrandingProviderProps {
 }
 
 export function BrandingProvider({ children }: BrandingProviderProps) {
-  const [branding, setBranding] = useState<BrandingConfig | null>(null);
+  const [branding, setBranding] = useState<BrandingConfigData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { data: session, status } = useSession();
 
@@ -69,7 +68,7 @@ export function BrandingProvider({ children }: BrandingProviderProps) {
 /**
  * Aplica la configuración de branding al DOM
  */
-function applyBrandingToDOM(config: BrandingConfig) {
+function applyBrandingToDOM(config: BrandingConfigData) {
   if (typeof document === 'undefined') return;
 
   // 1. Aplicar CSS Variables
