@@ -49,20 +49,19 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy the standalone output
-# This includes server.js, .next/, node_modules/, and package.json from the standalone build
-COPY --from=builder /app/.next/standalone/ ./
+# ALTERNATIVE APPROACH: Copy everything needed for 'yarn start' instead of standalone
+# This bypasses the server.js issue entirely
 
-# Copy static files (must be after standalone copy)
+# Copy the entire built application
+COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/static ./.next/static
-
-# Copy prisma schema for potential runtime usage
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/yarn.lock ./yarn.lock
 COPY --from=builder /app/prisma ./prisma
 
-# CRITICAL: Copy the generated Prisma Client (may already be in standalone, but ensuring it's there)
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+# Copy next.config.js (needed for next start)
+COPY --from=builder /app/next.config.js ./next.config.js
 
 RUN chown -R nextjs:nodejs /app
 
@@ -73,4 +72,6 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+# Use 'yarn start' instead of 'node server.js'
+# This runs 'next start' which doesn't require standalone mode
+CMD ["yarn", "start"]
