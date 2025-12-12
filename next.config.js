@@ -1,16 +1,19 @@
+const path = require('path');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
-  reactStrictMode: false,
+  experimental: {
+    outputFileTracingRoot: path.join(__dirname, '../'),
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
   typescript: {
     ignoreBuildErrors: true,
   },
-  experimental: {
-    workerThreads: false,
-    cpus: 1,
+  images: { 
+    unoptimized: true 
   },
 };
 
