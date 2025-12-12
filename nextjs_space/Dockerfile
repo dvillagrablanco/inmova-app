@@ -16,10 +16,15 @@ RUN yarn install --frozen-lockfile
 # Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /app
+
+# Copy node_modules from deps stage
 COPY --from=deps /app/node_modules ./node_modules
+
+# Copy all project files
 COPY . .
 
-# Generate Prisma Client again to be safe
+# CRITICAL: Generate Prisma Client AGAIN after copying all files
+# This ensures the client is in the correct location for Next.js build
 RUN yarn prisma generate
 
 # Build the application with increased memory
@@ -42,6 +47,10 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
+
+# CRITICAL: Also copy the generated Prisma Client
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
 RUN chown -R nextjs:nodejs /app
 
