@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
+// import 'react-big-calendar/lib/css/react-big-calendar.css'; // Desactivado temporalmente - requiere paquete react-big-calendar
 import { Providers } from '@/components/providers';
 import { SkipLink } from '@/components/ui/skip-link';
-import { WebVitalsInit } from '@/components/WebVitalsInit';
+// import { WebVitalsInit } from '@/components/WebVitalsInit'; // Desactivado temporalmente - requiere paquete web-vitals
 import { defaultMetadata } from '@/lib/seo-config';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -30,7 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SkipLink />
         <Providers>
           {children}
-          <WebVitalsInit />
+          {/* <WebVitalsInit /> */}
         </Providers>
       </body>
     </html>

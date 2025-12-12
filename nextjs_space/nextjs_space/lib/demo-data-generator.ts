@@ -1,4 +1,4 @@
-import { BusinessVertical } from '@prisma/client';
+import { type BusinessVertical } from '@/lib/onboarding-tours';
 import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 import * as bcrypt from 'bcryptjs';
