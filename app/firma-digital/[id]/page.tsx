@@ -1,7 +1,7 @@
+'use client';
+
 export const dynamic = 'force-dynamic';
 
-/**
- * Página de detalle de documento de firma
  */
 
 'use client';
