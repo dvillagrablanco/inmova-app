@@ -47,6 +47,8 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/yarn.lock ./yarn.lock
 
 # CRITICAL: Also copy the generated Prisma Client
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
