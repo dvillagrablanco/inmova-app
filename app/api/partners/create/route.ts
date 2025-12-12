@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * API: Crear nuevo partner
  * POST /api/partners/create

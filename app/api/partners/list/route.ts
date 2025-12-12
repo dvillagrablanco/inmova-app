@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * API: Listar partners activos
  * GET /api/partners/list

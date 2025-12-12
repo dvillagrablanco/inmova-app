@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /**
  * API: Obtener branding de partner
  * GET /api/partners/branding?code=CODIGO
