@@ -12,6 +12,7 @@
  * 3. Configurar DIRECT_URL para migraciones (sin PgBouncer)
  */
 
+import 'server-only'
 import { PrismaClient } from '@prisma/client'
 import logger from './logger'
 

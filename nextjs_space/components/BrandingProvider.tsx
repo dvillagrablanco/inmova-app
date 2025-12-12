@@ -3,8 +3,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { BrandingConfig } from '@prisma/client';
-import { generateCSSVariables } from '@/lib/branding-service';
-import logger, { logError } from '@/lib/logger';
+import { generateCSSVariables } from '@/lib/branding-utils';
+import logger from '@/lib/logger';
 
 interface BrandingContextType {
   branding: BrandingConfig | null;
