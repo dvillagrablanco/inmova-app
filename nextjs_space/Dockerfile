@@ -42,16 +42,18 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# CRITICAL: With outputFileTracingRoot, standalone creates nested structure
-# We need to copy from the nested nextjs_space directory
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone/nextjs_space ./
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/yarn.lock ./yarn.lock
+# Copy the standalone output
+# This includes server.js, .next/, node_modules/, and package.json from the standalone build
+COPY --from=builder /app/.next/standalone/ ./
 
-# CRITICAL: Also copy the generated Prisma Client
+# Copy static files (must be after standalone copy)
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/static ./.next/static
+
+# Copy prisma schema for potential runtime usage
+COPY --from=builder /app/prisma ./prisma
+
+# CRITICAL: Copy the generated Prisma Client (may already be in standalone, but ensuring it's there)
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
