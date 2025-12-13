@@ -1,19 +1,19 @@
-import type { BrandingConfig } from '@prisma/client';
-
 /**
  * Utilidades de branding que NO acceden a la base de datos
  * Estas funciones son seguras para usar en componentes cliente
- * IMPORTANTE: Usar 'import type' para evitar incluir Prisma Client en el bundle del cliente
+ * NO importa nada de @prisma/client para evitar incluirlo en el bundle del cliente
  */
 
 export interface BrandingConfigData {
+  id?: string;
+  companyId?: string;
   appName?: string;
   appDescription?: string;
   tagline?: string;
-  logoUrl?: string;
-  logoSmallUrl?: string;
-  faviconUrl?: string;
-  ogImageUrl?: string;
+  logoUrl?: string | null;
+  logoSmallUrl?: string | null;
+  faviconUrl?: string | null;
+  ogImageUrl?: string | null;
   primaryColor?: string;
   secondaryColor?: string;
   accentColor?: string;
@@ -23,23 +23,25 @@ export interface BrandingConfigData {
   warningColor?: string;
   errorColor?: string;
   fontFamily?: string;
-  headingFont?: string;
+  headingFont?: string | null;
   borderRadius?: string;
   sidebarPosition?: string;
   theme?: string;
-  footerText?: string;
-  contactEmail?: string;
-  contactPhone?: string;
-  websiteUrl?: string;
-  metaTitle?: string;
-  metaDescription?: string;
+  footerText?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  websiteUrl?: string | null;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
   activo?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 /**
  * Retorna la configuración por defecto de INMOVA
  */
-export function getDefaultBranding(companyId: string): BrandingConfig {
+export function getDefaultBranding(companyId: string): BrandingConfigData {
   return {
     id: 'default',
     companyId,
@@ -78,7 +80,7 @@ export function getDefaultBranding(companyId: string): BrandingConfig {
 /**
  * Genera las variables CSS dinámicas basadas en la configuración
  */
-export function generateCSSVariables(config: BrandingConfig): string {
+export function generateCSSVariables(config: BrandingConfigData): string {
   return `
     :root {
       --primary: ${config.primaryColor};
