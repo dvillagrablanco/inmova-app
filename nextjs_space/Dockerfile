@@ -6,7 +6,9 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Copy package files AND prisma schema FROM NEXTJS_SPACE SUBDIRECTORY
+# Copy package files AND prisma schema from the nested nextjs_space/ directory
+# Railway Root Directory is "nextjs_space/" so Docker context is /repo/nextjs_space/
+# The actual app code is in nextjs_space/nextjs_space/, so we need the prefix
 COPY nextjs_space/package.json nextjs_space/yarn.lock* ./
 COPY nextjs_space/prisma ./prisma
 
@@ -20,7 +22,7 @@ WORKDIR /app
 # Copy node_modules from deps stage
 COPY --from=deps /app/node_modules ./node_modules
 
-# Copy all project files FROM NEXTJS_SPACE SUBDIRECTORY
+# Copy all project files FROM the nested nextjs_space/ directory
 COPY nextjs_space/ .
 
 # CRITICAL: Generate Prisma Client AGAIN after copying all files
