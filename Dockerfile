@@ -7,8 +7,6 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Copy package files AND prisma schema
-# NOTE: Railway Root Directory is already set to "nextjs_space/"
-# So we don't need the "nextjs_space/" prefix here
 COPY package.json yarn.lock* ./
 COPY prisma ./prisma
 
