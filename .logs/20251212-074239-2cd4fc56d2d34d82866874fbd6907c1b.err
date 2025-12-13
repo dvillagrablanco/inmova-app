@@ -1,0 +1,71 @@
+warning ../package.json: No license field
+warning ../../../../../package.json: No license field
+warning next@14.2.28: This version has a security vulnerability. Please upgrade to a patched version. See https://nextjs.org/blog/security-update-2025-12-11 for more details.
+warning next-swagger-doc > swagger-jsdoc > glob@7.1.6: Glob versions prior to v9 are no longer supported
+warning next-swagger-doc > swagger-jsdoc > glob > inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+warning next-swagger-doc > swagger-jsdoc > swagger-parser > @apidevtools/swagger-parser > z-schema@5.0.6: has issues with node 14
+warning next-swagger-doc > swagger-jsdoc > swagger-parser > @apidevtools/swagger-parser > z-schema > lodash.get@4.4.2: This package is deprecated. Use the optional chaining (?.) operator instead.
+warning next-swagger-doc > swagger-jsdoc > swagger-parser > @apidevtools/swagger-parser > z-schema > lodash.isequal@4.5.0: This package is deprecated. Use require('node:util').isDeepStrictEqual instead.
+warning react-joyride > react-floater > popper.js@1.16.1: You can find the new Popper v2 at @popperjs/core, this package is dedicated to the legacy v1
+warning swagger-ui-react > swagger-client > node-fetch-commonjs > node-domexception@1.0.0: Use your platform's native DOMException instead
+warning @storybook/nextjs > @storybook/builder-webpack5 > webpack-dev-middleware > memfs@3.6.0: this will be v4
+warning @storybook/nextjs > @storybook/builder-webpack5 > fork-ts-checker-webpack-plugin > memfs@3.6.0: this will be v4
+warning @storybook/nextjs > @storybook/preset-react-webpack > @storybook/react-docgen-typescript-plugin > flat-cache > rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+warning @storybook/nextjs > @storybook/preset-react-webpack > @storybook/react-docgen-typescript-plugin > flat-cache > rimraf > glob@7.2.3: Glob versions prior to v9 are no longer supported
+warning @storybook/nextjs > @storybook/preset-react-webpack > @storybook/react-docgen-typescript-plugin > flat-cache > rimraf > glob > inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+warning @storybook/testing-library@0.2.2: In Storybook 8, this package functionality has been integrated to a new package called @storybook/test, which uses Vitest APIs for an improved experience. When upgrading to Storybook 8 with 'npx storybook@latest upgrade', you will get prompted and will get an automigration for the new package. Please migrate when you can.
+warning @types/react-datepicker@7.0.0: This is a stub types definition. react-datepicker provides its own type definitions, so you do not need this installed.
+warning @types/react-window@2.0.0: This is a stub types definition. react-window provides its own type definitions, so you do not need this installed.
+warning @types/twilio@3.19.3: This is a stub types definition. twilio provides its own type definitions, so you do not need this installed.
+warning jest > @jest/core > @jest/transform > babel-plugin-istanbul > test-exclude > glob@7.2.3: Glob versions prior to v9 are no longer supported
+warning vercel > @vercel/fun > path-match@1.2.4: This package is archived and no longer maintained. For support, visit https://github.com/expressjs/express/discussions
+warning chart.js@4.4.9: The engine "pnpm" appears to be invalid.
+warning bare-fs@4.5.2: The engine "bare" appears to be invalid.
+warning bare-os@3.6.2: The engine "bare" appears to be invalid.
+warning "@sentry/nextjs > @sentry/opentelemetry@10.30.0" has unmet peer dependency "@opentelemetry/context-async-hooks@^1.30.1 || ^2.1.0 || ^2.2.0".
+warning "@sentry/nextjs > @sentry/opentelemetry@10.30.0" has unmet peer dependency "@opentelemetry/core@^1.30.1 || ^2.1.0 || ^2.2.0".
+warning "@sentry/nextjs > @sentry/opentelemetry@10.30.0" has unmet peer dependency "@opentelemetry/sdk-trace-base@^1.30.1 || ^2.1.0 || ^2.2.0".
+warning "next-swagger-doc > swagger-jsdoc > swagger-parser > @apidevtools/swagger-parser@10.0.3" has unmet peer dependency "openapi-types@>=7".
+warning " > react-day-picker@8.10.1" has incorrect peer dependency "date-fns@^2.28.0 || ^3.0.0".
+warning "react-hot-toast > goober@2.1.18" has unmet peer dependency "csstype@^3.0.10".
+warning " > react-plotly.js@2.6.0" has unmet peer dependency "plotly.js@>1.34.0".
+warning " > @storybook/addon-essentials@8.6.14" has incorrect peer dependency "storybook@^8.6.14".
+warning "@storybook/addon-essentials > @storybook/addon-highlight@8.6.14" has incorrect peer dependency "storybook@^8.6.14".
+warning "@storybook/addon-essentials > @storybook/addon-toolbars@8.6.14" has incorrect peer dependency "storybook@^8.6.14".
+warning "@storybook/addon-essentials > @storybook/addon-outline@8.6.14" has incorrect peer dependency "storybook@^8.6.14".
+warning "@storybook/addon-essentials > @storybook/addon-measure@8.6.14" has incorrect peer dependency "storybook@^8.6.14".
+warning "@storybook/addon-essentials > @storybook/addon-actions@8.6.14" has incorrect peer dependency "storybook@^8.6.14".
+warning "@storybook/addon-essentials > @storybook/addon-backgrounds@8.6.14" has incorrect peer dependency "storybook@^8.6.14".
+warning "@storybook/addon-essentials > @storybook/addon-controls@8.6.14" has incorrect peer dependency "storybook@^8.6.14".
+warning "@storybook/addon-essentials > @storybook/addon-docs@8.6.14" has incorrect peer dependency "storybook@^8.6.14".
+warning "@storybook/addon-essentials > @storybook/addon-viewport@8.6.14" has incorrect peer dependency "storybook@^8.6.14".
+warning "@storybook/addon-essentials > @storybook/addon-docs > @storybook/react-dom-shim@8.6.14" has incorrect peer dependency "storybook@^8.6.14".
+warning "@storybook/addon-essentials > @storybook/addon-docs > @storybook/csf-plugin@8.6.14" has incorrect peer dependency "storybook@^8.6.14".
+warning "@storybook/addon-essentials > @storybook/addon-docs > @storybook/blocks@8.6.14" has incorrect peer dependency "storybook@^8.6.14".
+warning " > @storybook/addon-interactions@8.6.14" has incorrect peer dependency "storybook@^8.6.14".
+warning "@storybook/addon-interactions > @storybook/instrumenter@8.6.14" has incorrect peer dependency "storybook@^8.6.14".
+warning "@storybook/addon-interactions > @storybook/test@8.6.14" has incorrect peer dependency "storybook@^8.6.14".
+warning " > @tanstack/react-query-devtools@5.91.1" has incorrect peer dependency "@tanstack/react-query@^5.90.10".
+warning " > @typescript-eslint/eslint-plugin@7.0.0" has incorrect peer dependency "@typescript-eslint/parser@^6.0.0 || ^6.0.0-alpha".
+warning " > @typescript-eslint/eslint-plugin@7.0.0" has incorrect peer dependency "eslint@^8.56.0".
+warning "@typescript-eslint/eslint-plugin > @typescript-eslint/utils@7.0.0" has incorrect peer dependency "eslint@^8.56.0".
+warning "@typescript-eslint/eslint-plugin > @typescript-eslint/type-utils@7.0.0" has incorrect peer dependency "eslint@^8.56.0".
+warning " > @typescript-eslint/parser@7.0.0" has incorrect peer dependency "eslint@^8.56.0".
+warning " > eslint-plugin-prettier@5.1.3" has unmet peer dependency "prettier@>=3.0.0".
+warning " > eslint-plugin-react-hooks@4.6.0" has incorrect peer dependency "eslint@^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0".
+warning Workspaces can only be enabled in private projects.
+warning Workspaces can only be enabled in private projects.
+warning Workspaces can only be enabled in private projects.
+warning Workspaces can only be enabled in private projects.
+warning ../package.json: No license field
+warning ../../../../../package.json: No license field
+┌─────────────────────────────────────────────────────────┐
+│  Update available 6.7.0 -> 7.1.0                        │
+│                                                         │
+│  This is a major update - please follow the guide at    │
+│  https://pris.ly/d/major-version-upgrade                │
+│                                                         │
+│  Run the following to update                            │
+│    npm i --save-dev prisma@latest                       │
+│    npm i @prisma/client@latest                          │
+└─────────────────────────────────────────────────────────┘

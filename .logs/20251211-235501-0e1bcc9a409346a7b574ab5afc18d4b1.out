@@ -1,0 +1,27 @@
+Unlinked Node Modules
+yarn install v1.22.22
+[1/4] Resolving packages...
+success Already up-to-date.
+$ prisma generate
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v6.7.0) to ./node_modules/.prisma/client in 2.13s
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want to react to database changes in your app as they happen? Discover how with Pulse: https://pris.ly/tip-1-pulse
+
+Done in 5.29s.
+yarn run v1.22.22
+$ /home/ubuntu/homming_vidaro/nextjs_space/nextjs_space/node_modules/.bin/prisma generate
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v6.7.0) to ./node_modules/.prisma/client in 2.04s
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Interested in query caching in just a few lines of code? Try Accelerate today! https://pris.ly/tip-3-accelerate
+
+Done in 4.85s.
