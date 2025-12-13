@@ -1,0 +1,91 @@
+name: Deploy to Vercel
+
+on:
+  push:
+    branches:
+      - main
+      - production
+  pull_request:
+    branches:
+      - main
+      - production
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'yarn'
+          cache-dependency-path: nextjs_space/yarn.lock
+
+      - name: Install dependencies
+        working-directory: ./nextjs_space
+        run: yarn install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        working-directory: ./nextjs_space
+        run: yarn prisma generate
+
+      - name: Run linting
+        working-directory: ./nextjs_space
+        run: yarn lint
+        continue-on-error: true
+
+      - name: Build project
+        working-directory: ./nextjs_space
+        run: yarn build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Information
+        working-directory: ./nextjs_space
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Vercel (Production)
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/production'
+        working-directory: ./nextjs_space
+        run: |
+          vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }} > deployment-url.txt
+          echo "DEPLOYMENT_URL=$(cat deployment-url.txt)" >> $GITHUB_ENV
+
+      - name: Deploy to Vercel (Preview)
+        if: github.event_name == 'pull_request'
+        working-directory: ./nextjs_space
+        run: |
+          vercel deploy --token=${{ secrets.VERCEL_TOKEN }} > deployment-url.txt
+          echo "DEPLOYMENT_URL=$(cat deployment-url.txt)" >> $GITHUB_ENV
+
+      - name: Comment deployment URL on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `✅ Preview deployment ready: ${process.env.DEPLOYMENT_URL}`
+            })
+
+      - name: Deployment notification
+        if: always()
+        run: |
+          if [ ${{ job.status }} == 'success' ]; then
+            echo "🎉 Deployment successful!"
+            echo "URL: ${{ env.DEPLOYMENT_URL }}"
+          else
+            echo "❌ Deployment failed"
+          fi

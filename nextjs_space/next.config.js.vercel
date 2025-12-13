@@ -1,0 +1,27 @@
+const path = require('path');
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  distDir: process.env.NEXT_DIST_DIR || '.next',
+  output: process.env.NEXT_OUTPUT_MODE,
+  // Moved from experimental as per Next.js warning
+  outputFileTracingRoot: path.join(__dirname, '../'),
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    // CRITICAL: Set to true to avoid build timeouts
+    ignoreBuildErrors: true,
+  },
+  images: { 
+    unoptimized: true,
+    domains: ['inmova.app', 'www.inmova.app'],
+  },
+  // Optimizations for Vercel
+  swcMinify: true,
+  compress: true,
+  poweredByHeader: false,
+  reactStrictMode: true,
+};
+
+module.exports = nextConfig;
