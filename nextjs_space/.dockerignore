@@ -1,109 +1,64 @@
-# Dependencies
+# dependencies
 node_modules
-npm-debug.log
-yarn-error.log
-yarn-debug.log
-.pnpm-debug.log
+.pnp
+.pnp.js
 
-# Next.js build output
-.next
-out
-.build
-dist
-build
-
-# Testing
+# testing
 coverage
-.nyc_output
+
+# next.js
+.next/
+out/
+build
+dist/
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+
+# docs
+README.md
+*.md
+
+# tests
 __tests__
+e2e
 *.test.ts
 *.test.tsx
 *.spec.ts
 *.spec.tsx
 
-# IDE and Editor files
-.vscode
-.idea
-*.swp
-*.swo
-*~
-.DS_Store
-
-# Git
-.git
-.gitignore
-.gitattributes
-
-# Environment files (will be injected at runtime)
-.env
-.env.local
-.env.development
-.env.test
-.env.production
-.env.*.local
-
-# Documentation
-*.md
-*.pdf
-docs
-documentation
-
 # CI/CD
 .github
-.gitlab-ci.yml
-.travis.yml
-azure-pipelines.yml
 
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-
-# Misc
-.vercel
-.turbo
-*.tgz
-.cache
-.parcel-cache
-.npm
-.eslintcache
-.stylelintcache
-
-# Storybook
-.storybook
-storybook-static
-
-# Temporary files
-tmp
-temp
-*.tmp
-
-# Deployment artifacts
-.deploy
-Dockerfile*
-docker-compose*.yml
+# Docker
+Dockerfile
+docker-compose.yml
 .dockerignore
-
-# Railway/Vercel configs (not needed in container)
-railway.json
-railway.toml
-nixpacks.toml
-vercel.json
-
-# Backup files
-*.backup
-*.bak
-*.old
-backup/
-backups/
-
-# Large files that shouldn't be in container
-*.mp4
-*.mov
-*.avi
-*.zip
-*.tar
-*.gz

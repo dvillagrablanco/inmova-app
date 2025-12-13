@@ -1,0 +1,2110 @@
+{
+  "timestamp": "2025-12-07T20:46:41.280Z",
+  "summary": {
+    "totalFiles": 937,
+    "criticalIssues": 0,
+    "seriousIssues": 17,
+    "moderateIssues": 113,
+    "recommendations": 283,
+    "score": 0
+  },
+  "statistics": {
+    "imagesWithoutAlt": 0,
+    "semanticElements": 251,
+    "ariaAttributes": 89,
+    "headings": 639,
+    "skipLinks": 3,
+    "liveRegions": 17
+  },
+  "issues": {
+    "critical": [],
+    "serious": [
+      {
+        "file": "components/wizards/SetupWizard.tsx",
+        "type": "input-without-label",
+        "count": 3,
+        "message": "3 input(s) sin etiqueta accesible"
+      },
+      {
+        "file": "components/ui/photo-gallery.tsx",
+        "type": "input-without-label",
+        "count": 1,
+        "message": "1 input(s) sin etiqueta accesible"
+      },
+      {
+        "file": "components/ui/input.tsx",
+        "type": "input-without-label",
+        "count": 1,
+        "message": "1 input(s) sin etiqueta accesible"
+      },
+      {
+        "file": "components/operador/MobilePhotoCapture.tsx",
+        "type": "input-without-label",
+        "count": 1,
+        "message": "1 input(s) sin etiqueta accesible"
+      },
+      {
+        "file": "app/valoraciones/page.tsx",
+        "type": "input-without-label",
+        "count": 3,
+        "message": "3 input(s) sin etiqueta accesible"
+      },
+      {
+        "file": "app/room-rental/[unitId]/page.tsx",
+        "type": "input-without-label",
+        "count": 2,
+        "message": "2 input(s) sin etiqueta accesible"
+      },
+      {
+        "file": "app/room-rental/[unitId]/rooms/[roomId]/page.tsx",
+        "type": "input-without-label",
+        "count": 1,
+        "message": "1 input(s) sin etiqueta accesible"
+      },
+      {
+        "file": "app/reservas/page.tsx",
+        "type": "input-without-label",
+        "count": 1,
+        "message": "1 input(s) sin etiqueta accesible"
+      },
+      {
+        "file": "app/publicaciones/page.tsx",
+        "type": "input-without-label",
+        "count": 2,
+        "message": "2 input(s) sin etiqueta accesible"
+      },
+      {
+        "file": "app/notificaciones/page.tsx",
+        "type": "input-without-label",
+        "count": 2,
+        "message": "2 input(s) sin etiqueta accesible"
+      },
+      {
+        "file": "app/mantenimiento-preventivo/page.tsx",
+        "type": "input-without-label",
+        "count": 5,
+        "message": "5 input(s) sin etiqueta accesible"
+      },
+      {
+        "file": "app/mantenimiento/page.tsx",
+        "type": "input-without-label",
+        "count": 5,
+        "message": "5 input(s) sin etiqueta accesible"
+      },
+      {
+        "file": "app/landing/calculadora-roi/page.tsx",
+        "type": "input-without-label",
+        "count": 3,
+        "message": "3 input(s) sin etiqueta accesible"
+      },
+      {
+        "file": "app/contabilidad/page.tsx",
+        "type": "input-without-label",
+        "count": 1,
+        "message": "1 input(s) sin etiqueta accesible"
+      },
+      {
+        "file": "app/configuracion/notificaciones/page.tsx",
+        "type": "input-without-label",
+        "count": 2,
+        "message": "2 input(s) sin etiqueta accesible"
+      },
+      {
+        "file": "app/admin/planes/page.tsx",
+        "type": "input-without-label",
+        "count": 1,
+        "message": "1 input(s) sin etiqueta accesible"
+      },
+      {
+        "file": "app/admin/ocr-import/page.tsx",
+        "type": "input-without-label",
+        "count": 1,
+        "message": "1 input(s) sin etiqueta accesible"
+      }
+    ],
+    "moderate": [
+      {
+        "file": "app/votaciones/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/valoraciones/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/unidades/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/tareas/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/str-housekeeping/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/str-housekeeping/staff/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/str-housekeeping/inventory/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/str/settings/integrations/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/str/listings/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/str/channels/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/str/bookings/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/seguros/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h4"
+      },
+      {
+        "file": "app/screening/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/room-rental/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/room-rental/[unitId]/rooms/[roomId]/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/room-rental/[unitId]/reports/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/reviews/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/reuniones/page_base.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/register/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/recordatorios/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/publicaciones/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/proveedores/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/professional/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/professional/projects/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/portal-proveedor/dashboard/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/portal-proveedor/chat/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/portal-inquilino/mantenimiento/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h4"
+      },
+      {
+        "file": "app/portal-inquilino/documentos/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/portal-inquilino/chat/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/portal-comercial/leads/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/portal-comercial/comisiones/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/plantillas/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/perfil/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/partners-program/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h2 a h4"
+      },
+      {
+        "file": "app/partners/settings/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h4"
+      },
+      {
+        "file": "app/partners/register/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/partners/invitations/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/partners/dashboard/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/partners/commissions/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h4"
+      },
+      {
+        "file": "app/partners/clients/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/pagos/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/ordenes-trabajo/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/operador/work-orders/history/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/operador/work-orders/[id]/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/operador/maintenance-history/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/ocr/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/notificaciones/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/notificaciones/reglas/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/notificaciones/plantillas/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/notificaciones/historial/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/marketplace/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h2 a h4"
+      },
+      {
+        "file": "app/mantenimiento-pro/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/mantenimiento-preventivo/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/mantenimiento/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/landing/migracion/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/landing/demo/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/landing/contacto/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/knowledge-base/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/inquilinos/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/incidencias/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/gastos/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/galerias/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/flipping/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/flipping/projects/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/firma-digital/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/esg/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/edificios/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/documentos/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/crm/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h4"
+      },
+      {
+        "file": "app/contratos/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/contabilidad/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/construction/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/construction/projects/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/comunidades/votaciones/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/comunidades/renovaciones/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/comunidades/presidente/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/comunidades/fondos/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/comunidades/finanzas/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/comunidades/cuotas/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/comunidades/cumplimiento/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/comunidades/actas/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/chat/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/candidatos/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/blockchain/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h4"
+      },
+      {
+        "file": "app/automatizacion-resumen/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h2 a h4"
+      },
+      {
+        "file": "app/automatizacion/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/auditoria/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/admin/seguridad/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h4"
+      },
+      {
+        "file": "app/admin/reportes-programados/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/admin/plantillas-sms/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/admin/personalizacion/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/admin/ocr-import/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/admin/modulos/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h4"
+      },
+      {
+        "file": "app/admin/legal/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h4"
+      },
+      {
+        "file": "app/admin/integraciones-contables/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h4"
+      },
+      {
+        "file": "app/admin/firma-digital/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h4"
+      },
+      {
+        "file": "app/admin/configuracion/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/admin/clientes/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/admin/alertas/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/admin/activity/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/(protected)/str-advanced/revenue/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/(protected)/str-advanced/legal/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/(protected)/str-advanced/housekeeping/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/(protected)/str-advanced/guest-experience/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/(dashboard)/traditional-rental/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/(dashboard)/traditional-rental/treasury/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/(dashboard)/traditional-rental/renewals/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/(dashboard)/traditional-rental/compliance/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/(dashboard)/traditional-rental/communities/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/(dashboard)/admin-fincas/libro-caja/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/(dashboard)/admin-fincas/informes/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/(dashboard)/admin-fincas/facturas/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      },
+      {
+        "file": "app/(dashboard)/admin-fincas/comunidades/page.tsx",
+        "type": "heading-hierarchy",
+        "message": "Salto en jerarquía de encabezados: h1 a h3"
+      }
+    ]
+  },
+  "recommendations": [
+    {
+      "file": "components/layout/sidebar.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "components/layout/sidebar.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "components/layout/header.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "components/layout/header.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/layout.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/votaciones/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/visitas/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/valoraciones/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/unidades/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/unidades/nuevo/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/unidades/[id]/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/unauthorized/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/unauthorized/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/tareas/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/sugerencias/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/str-housekeeping/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/str-housekeeping/staff/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/str-housekeeping/inventory/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/str/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/str/settings/integrations/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/str/listings/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/str/listings/[id]/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/str/listings/[id]/channels/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/str/dashboard/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/str/channels/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/str/bookings/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/soporte/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/sms/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/seguros/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/seguridad-compliance/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/screening/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/room-rental/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/room-rental/[unitId]/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/room-rental/[unitId]/rooms/[roomId]/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/room-rental/[unitId]/reports/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/room-rental/[unitId]/proration/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/room-rental/[unitId]/dashboard/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/reviews/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/reuniones/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/reservas/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/reportes/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/register/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/register/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/recordatorios/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/publicaciones/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/proveedores/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/professional/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/professional/projects/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-proveedor/reseñas/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/portal-proveedor/reseñas/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-proveedor/reset-password/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/portal-proveedor/reset-password/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-proveedor/register/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/portal-proveedor/register/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-proveedor/presupuestos/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-proveedor/presupuestos/nuevo/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-proveedor/ordenes/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-proveedor/login/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/portal-proveedor/login/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-proveedor/forgot-password/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/portal-proveedor/forgot-password/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-proveedor/facturas/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-proveedor/facturas/nueva/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/portal-proveedor/facturas/nueva/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-proveedor/facturas/[id]/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/portal-proveedor/facturas/[id]/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-proveedor/dashboard/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-proveedor/chat/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-propietario/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-propietario/login/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/portal-propietario/login/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-propietario/configuracion/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/portal-propietario/configuracion/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-inquilino/valoraciones/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/portal-inquilino/valoraciones/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-inquilino/register/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/portal-inquilino/register/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-inquilino/perfil/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-inquilino/password-reset/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/portal-inquilino/password-reset/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-inquilino/password-reset/[token]/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/portal-inquilino/password-reset/[token]/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-inquilino/pagos/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/portal-inquilino/pagos/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-inquilino/mantenimiento/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-inquilino/login/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/portal-inquilino/login/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-inquilino/documentos/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/portal-inquilino/documentos/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-inquilino/dashboard/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-inquilino/chatbot/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/portal-inquilino/chatbot/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-inquilino/chat/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/portal-inquilino/chat/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-comercial/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-comercial/objetivos/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-comercial/leads/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-comercial/leads/[id]/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/portal-comercial/comisiones/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/plantillas/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/perfil/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/partners-program/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/partners-program/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/partners/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/partners/layout.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/partners/settings/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/partners/register/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/partners/register/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/partners/login/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/partners/login/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/partners/invitations/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/partners/dashboard/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/partners/commissions/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/partners/clients/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/partners/accept/[token]/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/pagos/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/pagos/nuevo/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/ordenes-trabajo/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/operador/work-orders/history/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/operador/work-orders/[id]/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/operador/maintenance-history/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/operador/dashboard/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/open-banking/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/offline/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/offline/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/ocr/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/notificaciones/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/notificaciones/reglas/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/notificaciones/plantillas/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/notificaciones/historial/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/marketplace/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/mantenimiento-pro/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/mantenimiento-preventivo/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/mantenimiento/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/mantenimiento/nuevo/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/login/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/login/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/legal/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/landing/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/landing/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/landing/webinars/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/landing/webinars/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/landing/sobre-nosotros/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/landing/sobre-nosotros/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/landing/modulos/house-flipping/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/landing/modulos/house-flipping/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/landing/modulos/coliving/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/landing/modulos/coliving/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/landing/migracion/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/landing/migracion/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/landing/legal/terminos/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/landing/legal/terminos/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/landing/legal/privacidad/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/landing/legal/privacidad/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/landing/legal/gdpr/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/landing/legal/gdpr/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/landing/legal/cookies/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/landing/legal/cookies/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/landing/demo/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/landing/demo/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/landing/contacto/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/landing/contacto/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/landing/casos-exito/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/landing/casos-exito/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/landing/campanas/launch2025/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/landing/campanas/launch2025/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/landing/calculadora-roi/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/landing/calculadora-roi/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/landing/blog/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/landing/blog/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/knowledge-base/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/knowledge-base/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/inspecciones/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/inquilinos/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/inquilinos/nuevo/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/inquilinos/[id]/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/incidencias/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/home/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/gastos/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/galerias/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/flipping/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/flipping/projects/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/flipping/dashboard/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/firma-digital/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/facturacion/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/esg/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/energia/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/edificios/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/edificios/nuevo/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/edificios/[id]/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/economia-circular/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/documentos/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/dashboard/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/dashboard/community/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/cupones/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/crm/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/contratos/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/contratos/nuevo/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/contratos/[id]/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/contabilidad/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/contabilidad/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/construction/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/construction/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/construction/projects/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/configuracion/notificaciones/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/comunidades/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/comunidades/votaciones/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/comunidades/renovaciones/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/comunidades/presidente/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/comunidades/fondos/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/comunidades/finanzas/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/comunidades/cuotas/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/comunidades/cumplimiento/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/comunidades/actas/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/comunidad-social/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/comparativa/layout.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/comparativa/layout.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/comparativa/homming/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/comparativa/homming/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/chat/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/certificaciones/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/candidatos/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/candidatos/nuevo/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/calendario/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/blockchain/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/bi/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/automatizacion-resumen/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/automatizacion-resumen/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/automatizacion/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/auditoria/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/asistente-ia/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/api-docs/page.tsx",
+      "type": "missing-main-landmark",
+      "message": "Página sin elemento <main>. Se recomienda envolver el contenido principal."
+    },
+    {
+      "file": "app/api-docs/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/anuncios/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/analytics/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/usuarios/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/sugerencias/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/seguridad/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/salud-sistema/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/reportes-programados/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/recuperar-contrasena/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/portales-externos/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/plantillas-sms/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/planes/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/personalizacion/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/ocr-import/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/modulos/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/metricas-uso/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/marketplace/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/legal/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/integraciones-contables/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/importar/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/firma-digital/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/facturacion-b2b/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/facturacion-b2b/[id]/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/dashboard/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/configuracion/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/clientes/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/clientes/comparar/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/clientes/[id]/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/backup-restore/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/aprobaciones/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/alertas/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/admin/activity/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/(protected)/str-advanced/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/(protected)/str-advanced/revenue/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/(protected)/str-advanced/legal/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/(protected)/str-advanced/housekeeping/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/(protected)/str-advanced/guest-experience/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/(protected)/str-advanced/channel-manager/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/(dashboard)/traditional-rental/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/(dashboard)/traditional-rental/treasury/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/(dashboard)/traditional-rental/renewals/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/(dashboard)/traditional-rental/compliance/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/(dashboard)/traditional-rental/communities/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/(dashboard)/coliving/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/(dashboard)/admin-fincas/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/(dashboard)/admin-fincas/libro-caja/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/(dashboard)/admin-fincas/informes/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/(dashboard)/admin-fincas/facturas/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    },
+    {
+      "file": "app/(dashboard)/admin-fincas/comunidades/page.tsx",
+      "type": "missing-skip-link",
+      "message": "Página sin link de salto. Mejora la experiencia con lectores de pantalla."
+    }
+  ]
+}
