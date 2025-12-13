@@ -29,7 +29,7 @@ START_TIME=$(date +%s)
 
 echo -e "${BLUE}╔═══════════════════════════════════════════════════════════╗${NC}"
 echo -e "${BLUE}║     INMOVA - Pre-Deployment Diagnosis                     ║${NC}"
-echo -e "${BLUE}║     Railway Deployment Validation                         ║${NC}"
+echo -e "${BLUE}║     Railway Deployment Validation (16 Checks)             ║${NC}"
 echo -e "${BLUE}╚═══════════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "${YELLOW}Starting comprehensive validation...${NC}"
@@ -338,9 +338,34 @@ fi
 echo ""
 
 # ============================================
-# TEST 15: Build Test (Optional, Time-Consuming)
+# TEST 15: Dockerfile Railway Compatibility
 # ============================================
-echo -e "${BLUE}[15/15]${NC} Next.js Build Test..."
+echo -e "${BLUE}[15/16]${NC} Checking Dockerfile Railway compatibility..."
+if [ -f "../Dockerfile" ]; then
+    # Check if Dockerfile uses "nextjs_space/" prefix in COPY commands
+    # This is REQUIRED because Railway Root Directory is "nextjs_space/"
+    # but the actual app code is in "nextjs_space/nextjs_space/"
+    COPY_WITH_PREFIX=$(grep -E "COPY nextjs_space/" ../Dockerfile 2>/dev/null || true)
+    if [ -n "$COPY_WITH_PREFIX" ]; then
+        echo -e "${GREEN}✓ Dockerfile uses 'nextjs_space/' prefix correctly${NC}"
+        echo -e "${GREEN}  This matches the nested directory structure${NC}"
+        ((PASSED++))
+    else
+        echo -e "${RED}✗ Dockerfile missing 'nextjs_space/' prefix in COPY commands${NC}"
+        echo -e "${RED}  Railway Root Directory is 'nextjs_space/' but app code is in 'nextjs_space/nextjs_space/'${NC}"
+        echo -e "${YELLOW}  Fix: Add 'nextjs_space/' prefix to COPY commands${NC}"
+        ((FAILED++))
+    fi
+else
+    echo -e "${YELLOW}⚠ Dockerfile not found in parent directory${NC}"
+    ((WARNINGS++))
+fi
+echo ""
+
+# ============================================
+# TEST 16: Build Test (Optional, Time-Consuming)
+# ============================================
+echo -e "${BLUE}[16/16]${NC} Next.js Build Test..."
 if [ "$1" = "--full" ]; then
     echo -e "${YELLOW}Running full Next.js build (this will take 5-10 minutes)...${NC}"
     if NODE_OPTIONS="--max-old-space-size=4096" yarn build > /tmp/nextjs-build.log 2>&1; then
