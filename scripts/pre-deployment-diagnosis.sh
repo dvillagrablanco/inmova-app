@@ -343,18 +343,18 @@ echo ""
 echo -e "${BLUE}[15/16]${NC} Checking Dockerfile Railway compatibility..."
 if [ -f "../Dockerfile" ]; then
     # Check if Dockerfile uses "nextjs_space/" prefix in COPY commands
-    # This is problematic if Railway Root Directory is set to "nextjs_space/"
-    PROBLEMATIC_COPY=$(grep -E "COPY nextjs_space/" ../Dockerfile 2>/dev/null || true)
-    if [ -n "$PROBLEMATIC_COPY" ]; then
-        echo -e "${RED}✗ Dockerfile uses 'nextjs_space/' prefix in COPY commands${NC}"
-        echo -e "${RED}  This will fail if Railway Root Directory is 'nextjs_space/'${NC}"
-        echo -e "${YELLOW}  Found:${NC}"
-        echo "$PROBLEMATIC_COPY" | head -3
-        echo -e "${YELLOW}  Fix: Remove 'nextjs_space/' prefix from COPY commands${NC}"
-        ((FAILED++))
-    else
-        echo -e "${GREEN}✓ Dockerfile COPY commands are compatible with Railway${NC}"
+    # This is REQUIRED because Railway Root Directory is "nextjs_space/"
+    # but the actual app code is in "nextjs_space/nextjs_space/"
+    COPY_WITH_PREFIX=$(grep -E "COPY nextjs_space/" ../Dockerfile 2>/dev/null || true)
+    if [ -n "$COPY_WITH_PREFIX" ]; then
+        echo -e "${GREEN}✓ Dockerfile uses 'nextjs_space/' prefix correctly${NC}"
+        echo -e "${GREEN}  This matches the nested directory structure${NC}"
         ((PASSED++))
+    else
+        echo -e "${RED}✗ Dockerfile missing 'nextjs_space/' prefix in COPY commands${NC}"
+        echo -e "${RED}  Railway Root Directory is 'nextjs_space/' but app code is in 'nextjs_space/nextjs_space/'${NC}"
+        echo -e "${YELLOW}  Fix: Add 'nextjs_space/' prefix to COPY commands${NC}"
+        ((FAILED++))
     fi
 else
     echo -e "${YELLOW}⚠ Dockerfile not found in parent directory${NC}"
