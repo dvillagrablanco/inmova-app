@@ -1,0 +1,15 @@
+# Ignorar directorios anidados problemáticos
+nextjs_space/
+app/
+opt/
+
+# Ignorar archivos de desarrollo
+node_modules/
+.next/
+.build/
+*.log
+.DS_Store
+
+# Ignorar backups
+*.tar.gz
+backups/
