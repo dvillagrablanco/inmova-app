@@ -3,8 +3,8 @@
  * Gestiona todos los eventos del sistema en un calendario centralizado
  */
 
-import { prisma } from '@/lib/db';
-import type {CalendarEventType, CalendarEventPriority } from '@prisma/client';
+import { prisma } from './db';
+import { CalendarEventType, CalendarEventPriority } from '@prisma/client';
 import { addDays, addMonths, startOfMonth, endOfMonth } from 'date-fns';
 import logger, { logError } from '@/lib/logger';
 

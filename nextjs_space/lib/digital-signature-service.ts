@@ -1,5 +1,5 @@
-import { prisma } from '@/lib/db';
-import { SignatureStatus, SignerStatus, TipoContrato, ProveedorFirma } from '@prisma/client';
+import { prisma } from './db';
+import { SignatureStatus, SignerStatus } from '@prisma/client';
 import logger, { logError } from '@/lib/logger';
 
 // ============================================================================
@@ -30,7 +30,7 @@ interface CrearDocumentoFirmaParams {
   contractId?: string;
   tenantId?: string;
   titulo: string;
-  tipoDocumento: TipoContrato;
+  tipoDocumento: string;
   documentUrl: string;
   mensaje?: string;
   firmantes: FirmanteData[];
@@ -170,11 +170,6 @@ export async function crearSolicitudFirma(params: CrearDocumentoFirmaParams) {
     providerMessage = '[MODO DEMO] Documento enviado para firma (simulado)';
   }
 
-  // Mapear provider a ProveedorFirma enum
-  const proveedorEnum = provider === 'docusign' ? ProveedorFirma.docusign 
-                      : provider === 'signaturit' ? ProveedorFirma.signaturit 
-                      : ProveedorFirma.otro;
-
   const documento = await prisma.documentoFirma.create({
     data: {
       companyId,
@@ -183,8 +178,7 @@ export async function crearSolicitudFirma(params: CrearDocumentoFirmaParams) {
       titulo,
       tipoDocumento,
       urlDocumento: documentUrl,
-      proveedorId: externalId,
-      proveedor: proveedorEnum,
+      signaturitId: externalId,
       estado: SignatureStatus.pendiente,
       diasExpiracion,
       fechaExpiracion,

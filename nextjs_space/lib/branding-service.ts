@@ -1,8 +1,8 @@
 import 'server-only';
-import { prisma } from '@/lib/db';
-import type {BrandingConfig } from '@prisma/client';
+import { prisma } from './db';
+import { BrandingConfig } from '@prisma/client';
 import logger from '@/lib/logger';
-import { BrandingConfigData, getDefaultBranding as getDefaultBrandingUtil } from '@/lib/branding-utils';
+import { BrandingConfigData, getDefaultBranding as getDefaultBrandingUtil } from './branding-utils';
 
 /**
  * Servicio de gestión de personalización White Label (Server-Side Only)
@@ -13,7 +13,7 @@ import { BrandingConfigData, getDefaultBranding as getDefaultBrandingUtil } from
  */
 
 // Re-exportar utilidades desde branding-utils para mantener compatibilidad
-export { generateCSSVariables, validateColorContrast, getDefaultBranding, type BrandingConfigData } from '@/lib/branding-utils';
+export { generateCSSVariables, validateColorContrast, getDefaultBranding, type BrandingConfigData } from './branding-utils';
 
 /**
  * Obtiene la configuración de branding para una empresa

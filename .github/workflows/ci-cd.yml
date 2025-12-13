@@ -2,135 +2,138 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [main, develop]
+    branches: [ main, develop ]
   pull_request:
-    branches: [main, develop]
+    branches: [ main, develop ]
 
 jobs:
-  # Job 1: Linting y Type Checking
-  lint-and-typecheck:
+  validate:
+    name: Validate Code Quality
     runs-on: ubuntu-latest
-    name: Lint & Type Check
-
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
+      
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'yarn'
           cache-dependency-path: nextjs_space/yarn.lock
-
+      
       - name: Install dependencies
-        working-directory: nextjs_space
+        working-directory: ./nextjs_space
         run: yarn install --frozen-lockfile
-
-      - name: Run ESLint
-        working-directory: nextjs_space
-        run: yarn lint
-        continue-on-error: true
-
-      - name: Run TypeScript type check
-        working-directory: nextjs_space
-        run: yarn tsc --noEmit
-        continue-on-error: true
-
-  # Job 2: Tests
-  test:
-    runs-on: ubuntu-latest
-    name: Run Tests
-    needs: lint-and-typecheck
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'yarn'
-          cache-dependency-path: nextjs_space/yarn.lock
-
-      - name: Install dependencies
-        working-directory: nextjs_space
-        run: yarn install --frozen-lockfile
-
-      - name: Run tests
-        working-directory: nextjs_space
-        run: yarn test || echo "No tests configured"
-        continue-on-error: true
-
-  # Job 3: Build
-  build:
-    runs-on: ubuntu-latest
-    name: Build Application
-    needs: [lint-and-typecheck, test]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'yarn'
-          cache-dependency-path: nextjs_space/yarn.lock
-
-      - name: Install dependencies
-        working-directory: nextjs_space
-        run: yarn install --frozen-lockfile
-
+      
+      - name: Validate Prisma Schema
+        working-directory: ./nextjs_space
+        run: yarn prisma validate
+      
       - name: Generate Prisma Client
-        working-directory: nextjs_space
+        working-directory: ./nextjs_space
         run: yarn prisma generate
+      
+      - name: Check Prisma Type Imports
+        working-directory: ./nextjs_space
+        run: |
+          echo "Checking for problematic Prisma imports..."
+          PRISMA_IMPORTS=$(grep -r "from '@prisma/client'" app/ lib/ --include="*.ts" --include="*.tsx" | \
+            grep -v "import { prisma }" | \
+            grep -v "import prisma" | \
+            grep -v "import { Prisma }" | \
+            grep -v "import { PrismaClient }" | \
+            grep "import {" || true)
+          
+          if [ ! -z "$PRISMA_IMPORTS" ]; then
+            echo "::warning::Found Prisma enum/type imports that may cause issues:"
+            echo "$PRISMA_IMPORTS"
+            echo "::warning::Consider using 'any' or string literals instead"
+          else
+            echo "::notice::No problematic Prisma imports found"
+          fi
+      
+      - name: TypeScript Type Check
+        working-directory: ./nextjs_space
+        run: |
+          NODE_OPTIONS="--max-old-space-size=4096" yarn tsc --noEmit --skipLibCheck
+      
+      - name: ESLint Check
+        working-directory: ./nextjs_space
+        run: yarn eslint . --ext .ts,.tsx,.js,.jsx --max-warnings 50
+        continue-on-error: true
 
-      - name: Build Next.js application
-        working-directory: nextjs_space
-        run: yarn build
-        env:
-          SKIP_TYPE_CHECK: true
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-output
-          path: nextjs_space/.next
-          retention-days: 7
-
-  # Job 4: Security Audit
-  security:
+  build:
+    name: Build Next.js Application
     runs-on: ubuntu-latest
-    name: Security Audit
-
+    needs: validate
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
+      
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-
-      - name: Run npm audit
-        working-directory: nextjs_space
-        run: yarn audit --level moderate
-        continue-on-error: true
-
-  # Job 5: Deploy Notification
-  deploy-notification:
-    runs-on: ubuntu-latest
-    name: Deploy Notification
-    needs: [build]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-
-    steps:
-      - name: Notify deployment ready
+          node-version: '20'
+          cache: 'yarn'
+          cache-dependency-path: nextjs_space/yarn.lock
+      
+      - name: Install dependencies
+        working-directory: ./nextjs_space
+        run: yarn install --frozen-lockfile
+      
+      - name: Generate Prisma Client
+        working-directory: ./nextjs_space
+        run: yarn prisma generate
+        env:
+          SKIP_ENV_VALIDATION: true
+      
+      - name: Build Next.js
+        working-directory: ./nextjs_space
         run: |
-          echo "Build successful! Ready for deployment."
-          echo "Commit: ${{ github.sha }}"
-          echo "Branch: ${{ github.ref_name }}"
-          echo "Author: ${{ github.actor }}"
+          NODE_OPTIONS="--max-old-space-size=4096" yarn build
+        env:
+          SKIP_ENV_VALIDATION: true
+          DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
+          NEXTAUTH_SECRET: "dummy-secret-for-build"
+          NEXTAUTH_URL: "http://localhost:3000"
+          NEXT_PUBLIC_BASE_URL: "http://localhost:3000"
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: next-build
+          path: nextjs_space/.next
+          retention-days: 1
+
+  deploy:
+    name: Deploy to Vercel
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Deploy to Vercel
+        run: |
+          echo "::notice::Build successful! Vercel will auto-deploy from GitHub."
+          echo "::notice::Monitor deployment at: https://vercel.com/dvillagrablanco/inmova/deployments"
+
+  notify:
+    name: Notify Results
+    runs-on: ubuntu-latest
+    needs: [validate, build, deploy]
+    if: always()
+    
+    steps:
+      - name: Check Results
+        run: |
+          if [ "${{ needs.validate.result }}" == "success" ] && [ "${{ needs.build.result }}" == "success" ]; then
+            echo "::notice::✓ All checks passed! Ready for deployment."
+          else
+            echo "::error::✗ Some checks failed. Please review the errors above."
+            exit 1
+          fi

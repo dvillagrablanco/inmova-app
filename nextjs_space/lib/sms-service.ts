@@ -9,8 +9,8 @@
  * - Integración real con Twilio
  */
 
-import { prisma } from '@/lib/db';
-import type {SMSTipo, SMSEstado } from '@prisma/client';
+import { prisma } from './db';
+import { SMSTipo, SMSEstado } from '@prisma/client';
 import twilio from 'twilio';
 import logger, { logError } from '@/lib/logger';
 

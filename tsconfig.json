@@ -1,77 +1,34 @@
 {
   "compilerOptions": {
-    "target": "es2020",
     "lib": [
       "dom",
       "dom.iterable",
-      "es5",
-      "es2020"
+      "esnext"
     ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
     "noEmit": true,
-    "esModuleInterop": true,
+    "incremental": true,
     "module": "esnext",
-    "moduleResolution": "bundler",
+    "esModuleInterop": true,
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "incremental": true,
-    "tsBuildInfoFile": ".next/tsbuildinfo",
-    "assumeChangesOnlyAffectDirectDependencies": true,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "baseUrl": ".",
     "plugins": [
       {
         "name": "next"
       }
-    ],
-    "paths": {
-      "@/*": [
-        "./*"
-      ]
-    },
-    "typeRoots": [
-      "./node_modules/@types",
-      "./types"
-    ],
-    "strictNullChecks": false,
-    "noImplicitAny": false
+    ]
   },
   "include": [
     "next-env.d.ts",
-    "types/**/*.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
     ".next/types/**/*.ts",
-    ".build/types/**/*.ts"
+    "**/*.ts",
+    "**/*.tsx"
   ],
   "exclude": [
-    "node_modules",
-    ".next",
-    ".build",
-    "out",
-    "dist",
-    "build",
-    "public",
-    "prisma/migrations",
-    "vitest.config.ts",
-    "vitest.setup.tsx",
-    "__tests__/**/*",
-    "**/*.test.ts",
-    "**/*.draft",
-    "**/*.draft/**",
-    "scripts/**/*",
-    "**/*.test.tsx",
-    "**/*.spec.ts",
-    "**/*.spec.tsx",
-    "e2e/**/*",
-    "stories/**/*",
-    ".storybook/**/*"
-  ],
-  "ts-node": {
-    "transpileOnly": true
-  }
+    "node_modules"
+  ]
 }

@@ -1,0 +1,726 @@
+// ==========================================
+// SISTEMA DE PARAMETRIZACIÓN MULTI-VERTICAL
+// ==========================================
+
+enum BusinessModel {
+  RESIDENCIAL_LARGA      // Alquileres tradicionales (actual)
+  TURISTICO_STR          // Short-Term Rental (Airbnb, Booking)
+  COLIVING_MEDIA         // Media estancia / Coliving
+  HOTEL_APARTHOT         // Hoteles y Apart-hotels
+  HOUSE_FLIPPING         // Inversión y renovación
+  CONSTRUCCION           // Constructores y promotores
+  SERVICIOS_PROF         // Arquitectos, aparejadores
+}
+
+model CompanyBusinessModel {
+  id                String        @id @default(cuid())
+  companyId         String
+  businessModel     BusinessModel
+  activo            Boolean       @default(true)
+  configuracion     Json?         // Configuración específica del modelo
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  company           Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, businessModel])
+  @@map("company_business_models")
+}
+
+// ==========================================
+// MÓDULO: SHORT-TERM RENTAL (STR) / TURÍSTICO
+// ==========================================
+
+enum ChannelType {
+  AIRBNB
+  BOOKING
+  VRBO
+  HOMEAWAY
+  WEB_PROPIA
+  EXPEDIA
+  TRIPADVISOR
+  OTROS
+}
+
+enum BookingStatus {
+  PENDIENTE
+  CONFIRMADA
+  CHECK_IN
+  CHECK_OUT
+  CANCELADA
+  NO_SHOW
+}
+
+enum SeasonType {
+  ALTA
+  MEDIA
+  BAJA
+  ESPECIAL
+}
+
+model STRListing {
+  id                String        @id @default(cuid())
+  companyId         String
+  unitId            String
+  titulo            String
+  descripcion       String        @db.Text
+  tipoPropiedad     String        // Apartment, House, Villa, Studio
+  capacidadMaxima   Int
+  numDormitorios    Int
+  numCamas          Int
+  numBanos          Int
+  
+  // Amenities
+  amenities         String[]      @default([])
+  reglasHospedaje   String[]      @default([])
+  
+  // Pricing base
+  precioPorNoche    Float
+  precioSemana      Float?
+  precioMes         Float?
+  
+  // Fees adicionales
+  tarifaLimpieza    Float         @default(0)
+  depositoSeguridad Float         @default(0)
+  comisionPlataforma Float        @default(0)
+  
+  // Settings
+  checkInTime       String        @default("15:00")
+  checkOutTime      String        @default("11:00")
+  cancelacionFlexible Boolean     @default(true)
+  reservaInstantanea Boolean      @default(false)
+  
+  // Multi-canal
+  sincronizarCanales Boolean      @default(true)
+  canalPrincipal    ChannelType?
+  
+  // Stats
+  totalReservas     Int           @default(0)
+  ratingPromedio    Float?
+  totalReviews      Int           @default(0)
+  tasaOcupacion     Float?
+  
+  activo            Boolean       @default(true)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  company           Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  unit              Unit          @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  
+  bookings          STRBooking[]
+  calendar          STRCalendar[]
+  channels          STRChannelSync[]
+  reviews           STRReview[]
+  seasonPricing     STRSeasonPricing[]
+
+  @@map("str_listings")
+}
+
+model STRBooking {
+  id                String        @id @default(cuid())
+  companyId         String
+  listingId         String
+  canal             ChannelType
+  reservaExternaId  String?       // ID de la plataforma externa
+  
+  // Guest info
+  guestNombre       String
+  guestEmail        String
+  guestTelefono     String?
+  guestPais         String?
+  numHuespedes      Int
+  
+  // Dates
+  checkInDate       DateTime
+  checkOutDate      DateTime
+  numNoches         Int
+  
+  // Pricing
+  precioTotal       Float
+  tarifaNocturna    Float
+  tarifaLimpieza    Float         @default(0)
+  tasasImpuestos    Float         @default(0)
+  comisionCanal     Float         @default(0)
+  ingresoNeto       Float
+  
+  // Payment
+  metodoPago        String?
+  estadoPago        String        @default("pendiente")
+  pagado            Boolean       @default(false)
+  
+  // Status
+  estado            BookingStatus @default(PENDIENTE)
+  confirmadaEn      DateTime?
+  checkInRealizado  DateTime?
+  checkOutRealizado DateTime?
+  canceladaEn       DateTime?
+  motivoCancelacion String?
+  
+  // Extra
+  notasEspeciales   String?       @db.Text
+  requiereLimpieza  Boolean       @default(true)
+  limpiezaRealizada Boolean       @default(false)
+  
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  company           Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  listing           STRListing    @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@map("str_bookings")
+}
+
+model STRCalendar {
+  id                String        @id @default(cuid())
+  listingId         String
+  fecha             DateTime      @db.Date
+  disponible        Boolean       @default(true)
+  precioPorNoche    Float
+  minimoNoches      Int           @default(1)
+  notas             String?
+  
+  // Sync info
+  sincronizado      Boolean       @default(false)
+  ultimaSync        DateTime?
+
+  listing           STRListing    @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([listingId, fecha])
+  @@map("str_calendar")
+}
+
+model STRChannelSync {
+  id                String        @id @default(cuid())
+  companyId         String
+  listingId         String
+  canal             ChannelType
+  
+  // Conexión
+  activo            Boolean       @default(true)
+  url               String?
+  apiKey            String?
+  externalId        String?       // ID en la plataforma externa
+  
+  // Sync settings
+  sincronizarPrecio Boolean       @default(true)
+  sincronizarCalendario Boolean   @default(true)
+  sincronizarReservas Boolean     @default(true)
+  
+  // Stats
+  ultimaSync        DateTime?
+  proximaSync       DateTime?
+  estadoSync        String        @default("pendiente")
+  erroresSync       Int           @default(0)
+  
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  company           Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  listing           STRListing    @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([listingId, canal])
+  @@map("str_channel_sync")
+}
+
+model STRReview {
+  id                String        @id @default(cuid())
+  listingId         String
+  bookingId         String?
+  canal             ChannelType
+  
+  // Review data
+  guestNombre       String
+  rating            Int           // 1-5
+  comentario        String        @db.Text
+  fecha             DateTime
+  
+  // Subcategorías
+  ratingLimpieza    Int?
+  ratingComunicacion Int?
+  ratingUbicacion   Int?
+  ratingPrecio      Int?
+  
+  // Respuesta
+  respuesta         String?       @db.Text
+  respondidoEn      DateTime?
+  
+  createdAt         DateTime      @default(now())
+
+  listing           STRListing    @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@map("str_reviews")
+}
+
+model STRSeasonPricing {
+  id                String        @id @default(cuid())
+  listingId         String
+  temporada         SeasonType
+  nombre            String        // "Verano 2024", "Navidad", etc.
+  
+  fechaInicio       DateTime      @db.Date
+  fechaFin          DateTime      @db.Date
+  
+  precioPorNoche    Float
+  minimoNoches      Int           @default(1)
+  
+  activo            Boolean       @default(true)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  listing           STRListing    @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@map("str_season_pricing")
+}
+
+// ==========================================
+// MÓDULO: HOUSE FLIPPING / INVERSIÓN
+// ==========================================
+
+enum ProjectStatus {
+  PROSPECTO
+  ANALISIS
+  ADQUISICION
+  RENOVACION
+  COMERCIALIZACION
+  VENDIDO
+  CANCELADO
+}
+
+enum RenovationCategory {
+  ESTRUCTURAL
+  FONTANERIA
+  ELECTRICIDAD
+  PINTURA
+  SUELOS
+  COCINA
+  BANOS
+  EXTERIORES
+  OTROS
+}
+
+model FlippingProject {
+  id                String        @id @default(cuid())
+  companyId         String
+  unitId            String?
+  buildingId        String?
+  
+  // Identificación
+  nombre            String
+  direccion         String
+  descripcion       String?       @db.Text
+  
+  // Datos de adquisición
+  precioCompra      Float
+  gastosCompra      Float         @default(0) // Notaría, impuestos, etc.
+  fechaCompra       DateTime?
+  
+  // Datos de renovación
+  presupuestoRenovacion Float
+  gastosRealesRenovacion Float    @default(0)
+  
+  // Datos de venta
+  precioVentaEstimado Float
+  precioVentaReal   Float?
+  gastosVenta       Float         @default(0)
+  fechaVenta        DateTime?
+  
+  // Financiación
+  financiado        Boolean       @default(false)
+  montoFinanciacion Float?
+  interesAnual      Float?
+  
+  // Timeline
+  fechaInicioObra   DateTime?
+  fechaFinObra      DateTime?
+  duracionEstimada  Int?          // días
+  duracionReal      Int?
+  
+  // ROI Calculado
+  inversionTotal    Float?
+  beneficioNeto     Float?
+  roiPorcentaje     Float?
+  
+  // Status
+  estado            ProjectStatus @default(PROSPECTO)
+  prioridad         String        @default("media")
+  
+  // Multimedia
+  fotosAntes        String[]      @default([])
+  fotosDespues      String[]      @default([])
+  documentos        String[]      @default([])
+  
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  completadoEn      DateTime?
+
+  company           Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  unit              Unit?         @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  building          Building?     @relation(fields: [buildingId], references: [id], onDelete: SetNull)
+  
+  renovations       FlippingRenovation[]
+  expenses          FlippingExpense[]
+  milestones        FlippingMilestone[]
+
+  @@map("flipping_projects")
+}
+
+model FlippingRenovation {
+  id                String        @id @default(cuid())
+  projectId         String
+  categoria         RenovationCategory
+  descripcion       String
+  
+  // Coste
+  presupuestado     Float
+  costoReal         Float?
+  
+  // Proveedor
+  proveedorNombre   String?
+  proveedorId       String?
+  
+  // Timeline
+  fechaInicio       DateTime?
+  fechaFin          DateTime?
+  
+  // Status
+  completado        Boolean       @default(false)
+  porcentajeAvance  Int           @default(0)
+  
+  notas             String?       @db.Text
+  fotosProgreso     String[]      @default([])
+  
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  project           FlippingProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("flipping_renovations")
+}
+
+model FlippingExpense {
+  id                String        @id @default(cuid())
+  projectId         String
+  concepto          String
+  categoria         String
+  monto             Float
+  fecha             DateTime
+  
+  proveedor         String?
+  factura           String?       // URL del documento
+  
+  createdAt         DateTime      @default(now())
+
+  project           FlippingProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("flipping_expenses")
+}
+
+model FlippingMilestone {
+  id                String        @id @default(cuid())
+  projectId         String
+  titulo            String
+  descripcion       String?
+  fechaPrevista     DateTime
+  fechaCompletado   DateTime?
+  completado        Boolean       @default(false)
+  
+  createdAt         DateTime      @default(now())
+
+  project           FlippingProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("flipping_milestones")
+}
+
+// ==========================================
+// MÓDULO: CONSTRUCCIÓN Y PROMOCIÓN
+// ==========================================
+
+enum ConstructionPhase {
+  PLANIFICACION
+  PERMISOS
+  CIMENTACION
+  ESTRUCTURA
+  CERRAMIENTOS
+  INSTALACIONES
+  ACABADOS
+  ENTREGA
+  GARANTIA
+}
+
+model ConstructionProject {
+  id                String        @id @default(cuid())
+  companyId         String
+  buildingId        String?
+  
+  // Identificación
+  nombre            String
+  descripcion       String        @db.Text
+  tipoProyecto      String        // "Obra Nueva", "Rehabilitación", "Ampliación"
+  
+  // Ubicación
+  direccion         String
+  parcela           String?
+  referenciaCatastral String?
+  
+  // Características
+  numViviendas      Int?
+  metrosConstruidos Float?
+  numPlantas        Int?
+  
+  // Presupuesto
+  presupuestoTotal  Float
+  gastosReales      Float         @default(0)
+  desviacionPresupuesto Float?
+  
+  // Timeline
+  fechaInicio       DateTime
+  fechaFinPrevista  DateTime
+  fechaFinReal      DateTime?
+  duracionMeses     Int
+  
+  // Fase actual
+  faseActual        ConstructionPhase @default(PLANIFICACION)
+  porcentajeAvance  Int           @default(0)
+  
+  // Permisos y certificaciones
+  licenciaObra      Boolean       @default(false)
+  certificadoFinal  Boolean       @default(false)
+  habitabilidad     Boolean       @default(false)
+  
+  // Documentación
+  planos            String[]      @default([])
+  permisos          String[]      @default([])
+  certificaciones   String[]      @default([])
+  fotosProgreso     String[]      @default([])
+  
+  // Equipo
+  arquitecto        String?
+  aparejador        String?
+  constructor       String?
+  
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  company           Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  building          Building?     @relation(fields: [buildingId], references: [id], onDelete: SetNull)
+  
+  workOrders        ConstructionWorkOrder[]
+  inspections       ConstructionInspection[]
+  suppliers         ConstructionSupplier[]
+
+  @@map("construction_projects")
+}
+
+model ConstructionWorkOrder {
+  id                String        @id @default(cuid())
+  projectId         String
+  fase              ConstructionPhase
+  
+  titulo            String
+  descripcion       String        @db.Text
+  
+  // Proveedor/Subcontratista
+  subcontratista    String
+  telefono          String?
+  email             String?
+  
+  // Presupuesto
+  presupuesto       Float
+  costoReal         Float?
+  
+  // Timeline
+  fechaInicio       DateTime
+  fechaFin          DateTime
+  
+  // Status
+  estado            String        @default("pendiente")
+  porcentajeAvance  Int           @default(0)
+  
+  // Certificación
+  certificadoCalidad Boolean      @default(false)
+  inspeccionada     Boolean       @default(false)
+  
+  documentos        String[]      @default([])
+  fotosEvidencia    String[]      @default([])
+  
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  project           ConstructionProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("construction_work_orders")
+}
+
+model ConstructionInspection {
+  id                String        @id @default(cuid())
+  projectId         String
+  fase              ConstructionPhase
+  
+  tipo              String        // "Técnica", "Seguridad", "Calidad"
+  inspector         String
+  fecha             DateTime
+  
+  resultado         String        // "Aprobada", "Con Observaciones", "Rechazada"
+  observaciones     String?       @db.Text
+  
+  // Defectos encontrados
+  defectosEncontrados Int         @default(0)
+  defectosCorregidos Int          @default(0)
+  
+  documentacion     String[]      @default([])
+  fotos             String[]      @default([])
+  
+  createdAt         DateTime      @default(now())
+
+  project           ConstructionProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("construction_inspections")
+}
+
+model ConstructionSupplier {
+  id                String        @id @default(cuid())
+  projectId         String
+  
+  nombre            String
+  tipoSuministro    String        // "Materiales", "Maquinaria", "Servicios"
+  
+  contacto          String?
+  telefono          String?
+  email             String?
+  
+  // Pedido
+  descripcion       String        @db.Text
+  presupuesto       Float
+  fechaEntrega      DateTime
+  entregado         Boolean       @default(false)
+  
+  factura           String?
+  
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  project           ConstructionProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("construction_suppliers")
+}
+
+// ==========================================
+// MÓDULO: SERVICIOS PROFESIONALES
+// ==========================================
+
+enum ProjectType {
+  PROYECTO_BASICO
+  PROYECTO_EJECUCION
+  DIRECCION_OBRA
+  CERTIFICACION_ENERGETICA
+  INSPECCION_TECNICA
+  TASACION
+  CONSULTORIA
+}
+
+enum ProjectProfessionalStatus {
+  PROPUESTA
+  ACEPTADO
+  EN_CURSO
+  REVISION
+  ENTREGADO
+  CERRADO
+  CANCELADO
+}
+
+model ProfessionalProject {
+  id                String        @id @default(cuid())
+  companyId         String
+  
+  // Cliente
+  clienteNombre     String
+  clienteEmail      String
+  clienteTelefono   String?
+  
+  // Proyecto
+  tipo              ProjectType
+  titulo            String
+  descripcion       String        @db.Text
+  
+  // Ubicación
+  direccion         String
+  municipio         String?
+  provincia         String?
+  
+  // Presupuesto
+  honorarios        Float
+  gastos            Float         @default(0)
+  total             Float
+  
+  // Timeline
+  fechaInicio       DateTime
+  fechaEntrega      DateTime
+  
+  // Estado
+  estado            ProjectProfessionalStatus @default(PROPUESTA)
+  porcentajeAvance  Int           @default(0)
+  
+  // Equipo
+  responsable       String
+  colaboradores     String[]      @default([])
+  
+  // Documentación
+  planos            String[]      @default([])
+  informes          String[]      @default([])
+  certificados      String[]      @default([])
+  
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  company           Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  deliverables      ProfessionalDeliverable[]
+  meetings          ProfessionalMeeting[]
+
+  @@map("professional_projects")
+}
+
+model ProfessionalDeliverable {
+  id                String        @id @default(cuid())
+  projectId         String
+  
+  nombre            String
+  descripcion       String?
+  fechaLimite       DateTime
+  
+  entregado         Boolean       @default(false)
+  fechaEntrega      DateTime?
+  
+  archivo           String?
+  comentarios       String?       @db.Text
+  
+  createdAt         DateTime      @default(now())
+
+  project           ProfessionalProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("professional_deliverables")
+}
+
+model ProfessionalMeeting {
+  id                String        @id @default(cuid())
+  projectId         String
+  
+  titulo            String
+  fecha             DateTime
+  duracion          Int           // minutos
+  
+  ubicacion         String?
+  online            Boolean       @default(false)
+  enlaceReunion     String?
+  
+  asistentes        String[]      @default([])
+  
+  agenda            String?       @db.Text
+  acta              String?       @db.Text
+  
+  createdAt         DateTime      @default(now())
+
+  project           ProfessionalProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("professional_meetings")
+}
