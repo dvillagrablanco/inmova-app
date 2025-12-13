@@ -1,0 +1,83 @@
+yarn run v1.22.22
+$ next build
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+  ▲ Next.js 14.2.28
+  - Experiments (use with caution):
+    · outputFileTracingRoot
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/235) ...
+   Generating static pages (58/235) 
+   Generating static pages (117/235) 
+   Generating static pages (176/235) 
+ ✓ Generating static pages (235/235)
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Received SIGINT, disconnecting Prisma... undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Received SIGTERM, disconnecting Prisma... undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+[INFO] Prisma disconnected successfully undefined
+   Finalizing page optimization ...
+   Collecting build traces ...
