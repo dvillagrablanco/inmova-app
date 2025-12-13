@@ -1,21 +1,19 @@
+const path = require('path');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Usar directorio .next estándar (sin variables ambiguas)
-  distDir: '.next',
-  
-  // IMPORTANTE: NO usar 'output: standalone' para compatibilidad con 'yarn start'
-  // El modo standalone requiere 'node server.js', no 'next start'
-  // Railway funciona mejor con el enfoque estándar
-  
+  distDir: process.env.NEXT_DIST_DIR || '.next',
+  output: process.env.NEXT_OUTPUT_MODE,
+  experimental: {
+    outputFileTracingRoot: path.join(__dirname, '../'),
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
   typescript: {
     ignoreBuildErrors: false,
   },
-  images: { 
-    unoptimized: true 
-  },
+  images: { unoptimized: true },
 };
 
 module.exports = nextConfig;
