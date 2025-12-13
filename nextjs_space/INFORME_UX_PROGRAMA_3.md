@@ -442,7 +442,7 @@ toast("Documento eliminado", {
 ## 📊 Puntuación General de UX
 
 | Requisito | Cumplimiento | Prioridad |
-|-----------|--------------|-----------||
+|-----------|--------------|-----------|
 | Responsive Design | 90% | ALTA |
 | Loading States | 85% | ALTA |
 | Empty States | 80% | MEDIA |

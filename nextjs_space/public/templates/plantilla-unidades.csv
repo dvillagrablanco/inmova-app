@@ -1,0 +1,4 @@
+Nombre del Edificio,Número/Código de Unidad,Tipo (vivienda/oficina/local/parking/trastero),Superficie (m²),Número de Habitaciones,Número de Baños,Planta,Renta Mensual (€),Estado (disponible/ocupada/mantenimiento),Amueblado (SI/NO),Tiene Balcón (SI/NO),Descripción,Notas
+Residencial Vista Mar,1A,vivienda,85,2,2,1,1200,ocupada,SI,SI,Apartamento luminoso con vistas,Contrato hasta 2027
+Residencial Vista Mar,2A,vivienda,95,3,2,2,1400,disponible,NO,SI,Amplio apartamento de 3 dormitorios,Disponible desde enero
+Edificio Comercial Centro,B1,oficina,120,0,2,1,1800,ocupada,SI,NO,Oficina moderna totalmente equipada,Inquilino empresa tecnológica
