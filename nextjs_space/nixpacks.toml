@@ -1,0 +1,8 @@
+[phases.setup]
+nixPkgs = ['nodejs-20_x', 'yarn']
+
+[phases.build]
+cmds = ['yarn install', 'npx prisma generate', 'yarn build']
+
+[start]
+cmd = 'node .next/standalone/server.js'
