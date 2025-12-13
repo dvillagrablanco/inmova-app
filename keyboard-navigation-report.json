@@ -1,0 +1,1069 @@
+{
+  "timestamp": "2025-12-07T20:46:39.307Z",
+  "summary": {
+    "totalFiles": 936,
+    "filesWithIssues": 33,
+    "criticalIssues": 150,
+    "recommendations": 35,
+    "score": 15
+  },
+  "patterns": {
+    "focusVisible": {
+      "count": 226,
+      "files": [
+        "components/ui/touch-optimized-button.tsx",
+        "components/ui/toggle.tsx",
+        "components/ui/toast.tsx",
+        "components/ui/textarea.tsx",
+        "components/ui/tabs.tsx",
+        "components/ui/switch.tsx",
+        "components/ui/slider.tsx",
+        "components/ui/skip-link.tsx",
+        "components/ui/sheet.tsx",
+        "components/ui/select.tsx",
+        "components/ui/resizable.tsx",
+        "components/ui/radio-group.tsx",
+        "components/ui/navigation-menu.tsx",
+        "components/ui/menubar.tsx",
+        "components/ui/input.tsx",
+        "components/ui/global-search-enhanced.tsx",
+        "components/ui/form-field-with-error.tsx",
+        "components/ui/dropdown-menu.tsx",
+        "components/ui/dialog.tsx",
+        "components/ui/context-menu.tsx",
+        "components/ui/checkbox.tsx",
+        "components/ui/calendar.tsx",
+        "components/ui/button.tsx",
+        "components/ui/badge.tsx",
+        "components/ui/animated-input.tsx",
+        "components/portal-inquilino/TenantOnboarding.tsx",
+        "components/portal-inquilino/RatingForm.tsx",
+        "components/layout/sidebar.tsx",
+        "components/layout/header.tsx",
+        "components/forms/AccessibleFormField.tsx",
+        "app/reportes/page.tsx",
+        "app/mantenimiento-preventivo/page.tsx",
+        "app/mantenimiento/page.tsx",
+        "app/landing/calculadora-roi/page.tsx",
+        "app/edificios/page.tsx",
+        "app/contratos/page.tsx"
+      ],
+      "description": "Estilos focus-visible para navegación por teclado"
+    },
+    "tabindex": {
+      "count": 4,
+      "files": [
+        "components/ui/responsive-data-table.tsx",
+        "components/ui/data-table.tsx",
+        "components/ui/accessible-card.tsx"
+      ],
+      "description": "Uso de tabindex para controlar orden de foco"
+    },
+    "ariaLabel": {
+      "count": 78,
+      "files": [
+        "components/LandingChatbot.tsx",
+        "components/ui/view-mode-toggle.tsx",
+        "components/ui/status-badge.tsx",
+        "components/ui/search-input.tsx",
+        "components/ui/responsive-data-table.tsx",
+        "components/ui/pagination.tsx",
+        "components/ui/module-quick-guide.tsx",
+        "components/ui/mobile-form-wizard.tsx",
+        "components/ui/mobile-drawer.tsx",
+        "components/ui/icon-button.tsx",
+        "components/ui/form-field-wrapper.tsx",
+        "components/ui/form-field-with-error.tsx",
+        "components/ui/feature-highlight.tsx",
+        "components/ui/enhanced-global-search.tsx",
+        "components/ui/empty-state-illustrations.tsx",
+        "components/ui/data-table.tsx",
+        "components/ui/copy-button.tsx",
+        "components/ui/breadcrumb.tsx",
+        "components/ui/accessible-icon.tsx",
+        "components/ui/accessible-card.tsx",
+        "components/pwa/ConnectivityIndicator.tsx",
+        "components/layout/sidebar.tsx",
+        "components/layout/header.tsx",
+        "components/forms/AccessibleFormField.tsx",
+        "app/register/page.tsx",
+        "app/login/page.tsx",
+        "app/inquilinos/page.tsx",
+        "app/edificios/page.tsx",
+        "app/dashboard/components/priority-alerts.tsx",
+        "app/contratos/page.tsx"
+      ],
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    "role": {
+      "count": 12,
+      "files": [
+        "components/ui/pagination.tsx",
+        "components/ui/form-field-wrapper.tsx",
+        "components/ui/form-field-with-error.tsx",
+        "components/ui/form-error.tsx",
+        "components/ui/breadcrumb.tsx",
+        "components/ui/alert.tsx",
+        "components/pwa/ConnectivityIndicator.tsx",
+        "components/forms/AccessibleFormField.tsx",
+        "app/register/page.tsx",
+        "app/login/page.tsx"
+      ],
+      "description": "Roles ARIA para semantica correcta"
+    },
+    "skipLink": {
+      "count": 1,
+      "files": [
+        "app/layout.tsx"
+      ],
+      "description": "Links de salto para navegación rápida"
+    },
+    "keyboardHandlers": {
+      "count": 12,
+      "files": [
+        "components/LandingChatbot.tsx",
+        "components/ui/responsive-data-table.tsx",
+        "components/ui/data-table.tsx",
+        "components/ui/coupon-input.tsx",
+        "components/ui/carousel.tsx",
+        "components/ui/accessible-card.tsx",
+        "components/automation/IntelligentSupportChatbot.tsx",
+        "components/automation/AIAssistant.tsx",
+        "app/portal-inquilino/chat/page.tsx",
+        "app/landing/campanas/launch2025/page.tsx",
+        "app/chat/page.tsx",
+        "app/asistente-ia/page.tsx"
+      ],
+      "description": "Manejadores de eventos de teclado"
+    }
+  },
+  "criticalIssues": [
+    {
+      "file": "components/LanguageSelector.tsx",
+      "missing": "focusVisible",
+      "description": "Estilos focus-visible para navegación por teclado"
+    },
+    {
+      "file": "components/LanguageSelector.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/LanguageSelector.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/LanguageSelector.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/LanguageSelector.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/ui/touch-optimized-button.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/ui/touch-optimized-button.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/touch-optimized-button.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/touch-optimized-button.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/ui/tabs.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/ui/tabs.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/tabs.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/tabs.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/ui/select.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/ui/select.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/select.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/select.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/ui/search-input.tsx",
+      "missing": "focusVisible",
+      "description": "Estilos focus-visible para navegación por teclado"
+    },
+    {
+      "file": "components/ui/search-input.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/search-input.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/search-input.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/ui/quick-access-menu.tsx",
+      "missing": "focusVisible",
+      "description": "Estilos focus-visible para navegación por teclado"
+    },
+    {
+      "file": "components/ui/quick-access-menu.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/ui/quick-access-menu.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/quick-access-menu.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/quick-access-menu.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/ui/navigation-menu.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/ui/navigation-menu.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/navigation-menu.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/navigation-menu.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/ui/menubar.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/ui/menubar.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/menubar.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/menubar.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/ui/lazy-tabs.tsx",
+      "missing": "focusVisible",
+      "description": "Estilos focus-visible para navegación por teclado"
+    },
+    {
+      "file": "components/ui/lazy-tabs.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/ui/lazy-tabs.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/lazy-tabs.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/lazy-tabs.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/ui/lazy-dialog.tsx",
+      "missing": "focusVisible",
+      "description": "Estilos focus-visible para navegación por teclado"
+    },
+    {
+      "file": "components/ui/lazy-dialog.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/ui/lazy-dialog.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/lazy-dialog.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/lazy-dialog.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/ui/input.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/ui/input.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/input.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/input.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/ui/input-otp.tsx",
+      "missing": "focusVisible",
+      "description": "Estilos focus-visible para navegación por teclado"
+    },
+    {
+      "file": "components/ui/input-otp.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/ui/input-otp.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/input-otp.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/input-otp.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/ui/icon-button.tsx",
+      "missing": "focusVisible",
+      "description": "Estilos focus-visible para navegación por teclado"
+    },
+    {
+      "file": "components/ui/icon-button.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/icon-button.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/icon-button.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/ui/dropdown-menu.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/ui/dropdown-menu.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/dropdown-menu.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/dropdown-menu.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/ui/dialog.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/ui/dialog.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/dialog.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/dialog.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/ui/delete-confirmation-dialog.tsx",
+      "missing": "focusVisible",
+      "description": "Estilos focus-visible para navegación por teclado"
+    },
+    {
+      "file": "components/ui/delete-confirmation-dialog.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/ui/delete-confirmation-dialog.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/delete-confirmation-dialog.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/delete-confirmation-dialog.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/ui/coupon-input.tsx",
+      "missing": "focusVisible",
+      "description": "Estilos focus-visible para navegación por teclado"
+    },
+    {
+      "file": "components/ui/coupon-input.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/ui/coupon-input.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/coupon-input.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/copy-button.tsx",
+      "missing": "focusVisible",
+      "description": "Estilos focus-visible para navegación por teclado"
+    },
+    {
+      "file": "components/ui/copy-button.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/copy-button.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/copy-button.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/ui/context-menu.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/ui/context-menu.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/context-menu.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/context-menu.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/ui/confirmation-dialog.tsx",
+      "missing": "focusVisible",
+      "description": "Estilos focus-visible para navegación por teclado"
+    },
+    {
+      "file": "components/ui/confirmation-dialog.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/ui/confirmation-dialog.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/confirmation-dialog.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/confirmation-dialog.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/ui/confirm-dialog.tsx",
+      "missing": "focusVisible",
+      "description": "Estilos focus-visible para navegación por teclado"
+    },
+    {
+      "file": "components/ui/confirm-dialog.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/ui/confirm-dialog.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/confirm-dialog.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/confirm-dialog.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/ui/button.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/ui/button.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/button.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/button.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/ui/button-with-loading.tsx",
+      "missing": "focusVisible",
+      "description": "Estilos focus-visible para navegación por teclado"
+    },
+    {
+      "file": "components/ui/button-with-loading.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/ui/button-with-loading.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/button-with-loading.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/button-with-loading.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/ui/back-button.tsx",
+      "missing": "focusVisible",
+      "description": "Estilos focus-visible para navegación por teclado"
+    },
+    {
+      "file": "components/ui/back-button.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/ui/back-button.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/back-button.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/back-button.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/ui/animated-modal.tsx",
+      "missing": "focusVisible",
+      "description": "Estilos focus-visible para navegación por teclado"
+    },
+    {
+      "file": "components/ui/animated-modal.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/ui/animated-modal.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/animated-modal.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/animated-modal.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/ui/animated-input.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/ui/animated-input.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/animated-input.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/animated-input.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/ui/animated-dropdown.tsx",
+      "missing": "focusVisible",
+      "description": "Estilos focus-visible para navegación por teclado"
+    },
+    {
+      "file": "components/ui/animated-dropdown.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/ui/animated-dropdown.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/animated-dropdown.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/animated-dropdown.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/ui/animated-button.tsx",
+      "missing": "focusVisible",
+      "description": "Estilos focus-visible para navegación por teclado"
+    },
+    {
+      "file": "components/ui/animated-button.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/ui/animated-button.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/animated-button.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/animated-button.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/ui/alert-dialog.tsx",
+      "missing": "focusVisible",
+      "description": "Estilos focus-visible para navegación por teclado"
+    },
+    {
+      "file": "components/ui/alert-dialog.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/ui/alert-dialog.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/alert-dialog.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/alert-dialog.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/ui/accordion.tsx",
+      "missing": "focusVisible",
+      "description": "Estilos focus-visible para navegación por teclado"
+    },
+    {
+      "file": "components/ui/accordion.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/ui/accordion.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/ui/accordion.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/ui/accordion.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/automation/WizardDialog.tsx",
+      "missing": "focusVisible",
+      "description": "Estilos focus-visible para navegación por teclado"
+    },
+    {
+      "file": "components/automation/WizardDialog.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/automation/WizardDialog.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/automation/WizardDialog.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/automation/WizardDialog.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "components/admin/ChangePlanDialog.tsx",
+      "missing": "focusVisible",
+      "description": "Estilos focus-visible para navegación por teclado"
+    },
+    {
+      "file": "components/admin/ChangePlanDialog.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "components/admin/ChangePlanDialog.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "components/admin/ChangePlanDialog.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "components/admin/ChangePlanDialog.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    },
+    {
+      "file": "app/components/LanguageSelector.tsx",
+      "missing": "focusVisible",
+      "description": "Estilos focus-visible para navegación por teclado"
+    },
+    {
+      "file": "app/components/LanguageSelector.tsx",
+      "missing": "ariaLabel",
+      "description": "Etiquetas aria-label para elementos interactivos"
+    },
+    {
+      "file": "app/components/LanguageSelector.tsx",
+      "missing": "role",
+      "description": "Roles ARIA para semantica correcta"
+    },
+    {
+      "file": "app/components/LanguageSelector.tsx",
+      "missing": "skipLink",
+      "description": "Links de salto para navegación rápida"
+    },
+    {
+      "file": "app/components/LanguageSelector.tsx",
+      "missing": "keyboardHandlers",
+      "description": "Manejadores de eventos de teclado"
+    }
+  ],
+  "recommendations": [
+    {
+      "file": "components/wizards/SetupWizard.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "components/wizards/SetupWizard.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "components/wizards/SetupWizard.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "components/ui/photo-gallery.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "components/ui/input.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "components/operador/MobilePhotoCapture.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/valoraciones/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/valoraciones/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/valoraciones/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/room-rental/[unitId]/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/room-rental/[unitId]/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/room-rental/[unitId]/rooms/[roomId]/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/reservas/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/publicaciones/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/publicaciones/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/notificaciones/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/notificaciones/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/mantenimiento-preventivo/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/mantenimiento-preventivo/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/mantenimiento-preventivo/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/mantenimiento-preventivo/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/mantenimiento-preventivo/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/mantenimiento/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/mantenimiento/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/mantenimiento/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/mantenimiento/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/mantenimiento/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/landing/calculadora-roi/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/landing/calculadora-roi/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/landing/calculadora-roi/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/contabilidad/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/configuracion/notificaciones/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/configuracion/notificaciones/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/admin/planes/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    },
+    {
+      "file": "app/admin/ocr-import/page.tsx",
+      "type": "input-without-label",
+      "message": "Input sin label asociado. Use <label>, aria-label o aria-labelledby."
+    }
+  ]
+}
