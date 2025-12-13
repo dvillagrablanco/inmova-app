@@ -1,0 +1,31 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "noEmit": true,
+    "incremental": true,
+    "tsBuildInfoFile": ".next/tsbuildinfo"
+  },
+  "exclude": [
+    "node_modules",
+    ".next",
+    ".build",
+    "out",
+    "dist",
+    "build",
+    "public",
+    "scripts",
+    "__tests__",
+    "e2e",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "**/*.draft",
+    "**/*.draft/**",
+    "vitest.config.ts",
+    "vitest.setup.tsx",
+    "stories",
+    ".storybook"
+  ]
+}

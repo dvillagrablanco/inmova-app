@@ -1,0 +1,25 @@
+# Allow all web crawlers to access all content
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /dashboard
+Disallow: /edificios
+Disallow: /unidades
+Disallow: /inquilinos
+Disallow: /contratos
+Disallow: /pagos
+Disallow: /mantenimiento
+Disallow: /proveedores
+Disallow: /documentos
+Disallow: /reportes
+Disallow: /gastos
+Disallow: /candidatos
+Disallow: /tareas
+Disallow: /notificaciones
+Disallow: /perfil
+Disallow: /calendario
+Disallow: /chat
+Disallow: /unauthorized
+
+Sitemap: https://inmova.app/sitemap.xml

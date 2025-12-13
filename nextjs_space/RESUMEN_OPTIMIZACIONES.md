@@ -1,538 +1,450 @@
-# 🚀 Resumen de Optimizaciones de Performance - INMOVA
+# 🚀 Resumen de Optimizaciones Implementadas - INMOVA
 
-**Fecha**: Diciembre 9, 2025  
-**Estado**: ✅ Completado y Verificado  
-**Checkpoint**: Guardado exitosamente
+## Estado: 🟢 Listo para Implementar
 
 ---
 
-## 🎯 Objetivos y Estado
+## 🏆 Objetivos de Rendimiento
 
-| Objetivo | Estado | Métrica Objetivo | Métrica Actual |
-|----------|--------|-----------------|----------------|
-| Bundle Size (gzip) | ✅ | < 500KB | ~420KB | 
-| Lazy Loading | ✅ | Componentes pesados | Charts, Dialogs, Tabs |
-| Images Optimized | ✅ | 100% Next.js Image | 100% (20 archivos) |
-| Cache Headers | ⚠️ | Configurado | Pendiente (next.config.optimized.js) |
-| CDN Assets | ✅ | Automático | Deployment activo |
-| API Response | ✅ | < 500ms | ~150ms (con cache) |
-| N+1 Queries | ✅ | Eliminadas | Include optimizado |
+| Métrica | Objetivo | Estado |
+|---------|----------|--------|
+| **Lighthouse Performance** | > 80 | ⏳ Pendiente de medir |
+| **First Contentful Paint (FCP)** | < 1.8s | ⏳ Pendiente de medir |
+| **Time to Interactive (TTI)** | < 3.8s | ⏳ Pendiente de medir |
+| **Bundle Size (gzipped)** | < 500KB | ⏳ Pendiente de medir |
+| **API Response Time** | < 500ms | ✅ Infraestructura lista |
 
 ---
 
-## ✅ Optimizaciones Completadas
+## ✅ Implementaciones Completadas
 
-### 1. Optimización de Imágenes (100% completado)
+### 1. Sistema de Caché con Redis
 
-**Archivos Migrados**: 7 archivos de `<img>` a `<Image>`
+**Archivos Creados:**
+- ✅ `lib/redis.ts` - Cliente Redis con reconexión automática
+- ✅ `lib/cache-helpers.ts` - Helpers para recursos específicos
+- ✅ `scripts/init-redis.ts` - Script de prueba de conexión
 
-1. `app/dashboard/community/components/SocialFeedPanel.tsx`
-   - Multimedia en posts del feed social
-   - Aspect ratio dinámico con lazy loading
+**Funcionalidades:**
+- ✅ Conexión Redis con manejo de errores
+- ✅ TTL configurable (SHORT, MEDIUM, LONG, DAY)
+- ✅ Invalidación por patrón (wildcards)
+- ✅ Fallback automático si Redis no está disponible
+- ✅ Helpers pre-configurados para:
+  - Dashboard stats
+  - Buildings
+  - Units
+  - Tenants
+  - Contracts
+  - Payments
+  - Analytics
 
-2. `app/ocr/page.tsx`
-   - Preview de documentos OCR
-   - Optimización con `priority={true}` para above-the-fold
-
-3. `app/(dashboard)/coliving/_components/FeedSocial.tsx`
-   - Imágenes de publicaciones
-   - Grid responsive con aspect ratio
-
-4. `app/(dashboard)/coliving/_components/EventosCalendario.tsx`
-   - Imágenes de eventos
-   - Lazy loading automático
-
-5. `app/(dashboard)/coliving/_components/GruposInteres.tsx`
-   - Imágenes de grupos de interés
-   - Fallback a iconos si no hay imagen
-
-6. `app/partners/accept/[token]/page.tsx`
-   - Logos de partners
-   - Optimización con sizes específicos
-
-7. `components/ui/feature-highlight.tsx`
-   - Imágenes de destacados de features
-   - Lazy loading condicional
-
-**Beneficios**:
-- ✅ 60-80% reducción en tamaño de imágenes
-- ✅ Formatos modernos: AVIF/WebP
-- ✅ Lazy loading automático
-- ✅ Responsive con sizes optimizados
-- ✅ Blur placeholder para mejor UX
+**Estado:** 🟡 Requiere configuración de REDIS_URL en .env
 
 ---
 
-### 2. Lazy Loading de Componentes
+### 2. Componentes Lazy-Loaded
 
-**Ya Implementado**:
-- ✅ `lazy-charts-extended.tsx` - Recharts
-- ✅ `lazy-dialog.tsx` - Dialogs pesados
-- ✅ `lazy-tabs.tsx` - Tabs complejas
+**Componentes Optimizados:**
+- ✅ `components/ui/lazy-charts-extended.tsx` - Charts pesados
+- ✅ `components/ui/lazy-dialog.tsx` - Diálogos modales
+- ✅ `components/ui/lazy-tabs.tsx` - Tabs con contenido pesado
+- ✅ `components/ui/lazy-plotly.tsx` - Plotly.js (~3MB)
+- ✅ `components/ui/lazy-calendar.tsx` - Calendario
+- ✅ `components/ui/lazy-data-table.tsx` - Tablas de datos
 
-**Impacto**:
-- ~150KB de charts cargados solo cuando se necesitan
-- Reducción del bundle inicial en ~35%
-
----
-
-### 3. Cache de API (Redis)
-
-**TTLs Configurados**: 9 endpoints
-
-```typescript
-const TTL_DASHBOARD = 5 * 60 * 1000;      // 5 minutos
-const TTL_BUILDINGS = 10 * 60 * 1000;     // 10 minutos
-const TTL_UNITS = 10 * 60 * 1000;         // 10 minutos
-const TTL_PAYMENTS = 3 * 60 * 1000;       // 3 minutos
-const TTL_CONTRACTS = 10 * 60 * 1000;     // 10 minutos
-const TTL_TENANTS = 10 * 60 * 1000;       // 10 minutos
-const TTL_EXPENSES = 5 * 60 * 1000;       // 5 minutos
-const TTL_MAINTENANCE = 5 * 60 * 1000;    // 5 minutos
-const TTL_ANALYTICS = 15 * 60 * 1000;     // 15 minutos
-```
-
-**Beneficios**:
-- ✅ Respuesta de API: 800ms → 150ms (-81%)
-- ✅ Carga en base de datos: -70%
-- ✅ Hit rate esperado: 80-90%
+**Beneficio:** Reducción del bundle inicial en ~40-50%
 
 ---
 
-### 4. Optimización de Base de Datos
+### 3. Utilities de Performance
 
-**Índices**: 724 índices optimizados
+**Archivo:** `lib/performance.ts`
 
-**Queries Optimizadas**:
-- ✅ N+1 queries eliminadas con `include`
-- ✅ Paginación offset-based y cursor-based
-- ✅ Agregaciones optimizadas
-- ✅ Queries paralelas con `Promise.all()`
-
-**Archivo**: `lib/database-optimization.ts`
-
-**Funciones Disponibles**:
-```typescript
-- paginateQuery()              // Paginación offset-based
-- paginateQueryCursor()        // Paginación cursor-based
-- getDashboardStatsOptimized() // Stats con queries paralelas
-- getBuildingsWithStats()      // Buildings con counts
-- getContractsWithDetails()    // Contracts con relaciones
-- getPaymentStats()            // Agregaciones de pagos
-- batchUpdate()                // Updates en batch
-- batchUpsert()                // Upserts en batch
-- softDelete()                 // Soft delete optimizado
-- fullTextSearch()             // Búsqueda full-text
-```
+**Funcionalidades:**
+- ✅ `measurePerformance()` - Medir tiempo de ejecución
+- ✅ `PerformanceTimer` - Clase para timing de APIs
+- ✅ `debounce()` - Limitar tasa de ejecución
+- ✅ `throttle()` - Control de frecuencia
+- ✅ `batchPromises()` - Ejecución paralela con límite
+- ✅ `memoize()` - Memoización de funciones costosas
 
 ---
 
-### 5. Nuevos Componentes y Utilidades
+### 4. Configuración de Bundle Analyzer
 
-#### 5.1. OptimizedImage Component
+**Archivos:**
+- ✅ `next.config.recommended.js` - Configuración optimizada
+- ✅ `package-scripts.json` - Scripts adicionales
 
-**Archivo**: `components/OptimizedImage.tsx`
-
-```typescript
-<OptimizedImage
-  src="/imagen.jpg"
-  alt="Descripción"
-  width={800}
-  height={600}
-  priority={false}
-/>
-
-<OptimizedImageWithAspectRatio
-  src="/imagen.jpg"
-  alt="Descripción"
-  aspectRatio="video"
-/>
-```
-
-**Features**:
-- ✅ Lazy loading automático
-- ✅ Blur placeholder
-- ✅ Error handling
-- ✅ Formatos modernos (AVIF/WebP)
-- ✅ Aspect ratio containers
-
-#### 5.2. Performance Hooks
-
-**Archivo**: `hooks/usePerformance.ts`
-
-```typescript
-- useLazyLoad()          // Intersection Observer para lazy loading
-- useViewportSize()      // Viewport con debounce
-- useScrollPosition()    // Scroll con throttle
-- useSlowConnection()    // Detectar conexión lenta
-- usePrefetch()          // Prefetch de recursos
-- useIdleCallback()      // Ejecutar en idle time
-- usePerformanceMonitor()// Medir performance
-- useVirtualScroll()     // Virtual scrolling
-- useImageLoad()         // Estado de carga de imagen
-- useBatchedUpdates()    // Batching de updates
-```
-
-#### 5.3. Performance Utils
-
-**Archivo**: `lib/performance-utils.ts`
-
-```typescript
-- supportsModernImageFormats() // Detectar soporte AVIF/WebP
-- getOptimalImageSize()        // Calcular tamaño óptimo
-- preloadCriticalResources()   // Preload de recursos
-- lazyLoadScript()             // Lazy load de scripts
-- isSlowConnection()           // Detectar conexión lenta
-- measurePerformance()         // Medir tiempo de ejecución
-- debounce()                   // Debounce function
-- throttle()                   // Throttle function
-- processInChunks()            // Procesar en chunks
-- memoizeWithTTL()             // Memoización con TTL
-- createIntersectionObserver() // Crear observer
-- addResourceHints()           // Añadir resource hints
-```
-
-#### 5.4. Performance Monitor
-
-**Archivo**: `components/PerformanceMonitor.tsx`
-
-**Cómo usar**: Presiona `Ctrl+Shift+P` en desarrollo
-
-**Métricas**:
-- 🎮 FPS en tiempo real
-- 💾 Uso de memoria (MB)
-- ⏱️ Tiempo de carga (ms)
-- 📊 Cantidad de recursos
-
----
-
-### 6. Scripts de Auditoría
-
-#### 6.1. Performance Audit
-
-**Archivo**: `scripts/performance-audit.js`
-
-```bash
-node scripts/performance-audit.js
-```
-
-**Verifica**:
-- Lazy loading de componentes
-- Optimización de imágenes
-- Configuración de Next.js
-- Cache de API
-- Índices de base de datos
-
-#### 6.2. Bundle Analyzer
-
-**Archivo**: `scripts/analyze-bundle.js`
-
-```bash
-node scripts/analyze-bundle.js
-```
-
-**Genera**:
-- Reporte HTML de bundle size
-- Análisis de chunks
-- Recomendaciones
-
----
-
-## ⚠️ Optimizaciones Pendientes
-
-### 1. Aplicar next.config.optimized.js
-
-**Archivo creado**: `next.config.optimized.js`
-
-**Para aplicar**:
-```bash
-cd /home/ubuntu/homming_vidaro/nextjs_space
-cp next.config.js next.config.backup.js
-cp next.config.optimized.js next.config.js
-yarn install
-yarn build
-```
-
-**Mejoras que incluye**:
-- ✅ SWC Minification
-- ✅ Compresión gzip
-- ✅ Optimización de imágenes habilitada
-- ✅ Cache headers configurados
+**Features:**
+- ✅ Bundle analyzer con `ANALYZE=true yarn build`
 - ✅ Code splitting optimizado
-- ✅ Bundle analyzer configurado
-- ✅ Tree-shaking mejorado
-
-**Impacto esperado**:
-- Bundle size: -35% (650KB → 420KB)
-- LCP: -34% (3.2s → 2.1s)
-- Page load: -38% (4.5s → 2.8s)
-
----
-
-## 📊 Métricas de Performance
-
-### Web Vitals
-
-| Métrica | Antes | Después | Objetivo | Estado |
-|---------|-------|---------|----------|--------|
-| LCP | 3.2s | 2.1s | < 2.5s | ✅ |
-| FID | 120ms | 45ms | < 100ms | ✅ |
-| CLS | 0.08 | 0.05 | < 0.1 | ✅ |
-| TTFB | 600ms | 350ms | < 600ms | ✅ |
-| FCP | 2.1s | 1.5s | < 1.8s | ✅ |
-
-### Lighthouse Scores
-
-| Categoría | Antes | Después | Objetivo | Estado |
-|-----------|-------|---------|----------|--------|
-| Performance | 75 | 92 | > 90 | ✅ |
-| Accessibility | 90 | 95 | > 90 | ✅ |
-| Best Practices | 83 | 88 | > 90 | ⚠️ |
-| SEO | 90 | 93 | > 90 | ✅ |
-
-### Bundle Size
-
-| Página | First Load JS | Objetivo | Estado |
-|--------|---------------|----------|--------|
-| /dashboard | 400KB | < 500KB | ✅ |
-| /edificios | 350KB | < 500KB | ✅ |
-| /pagos | 380KB | < 500KB | ✅ |
-| /analytics | 450KB | < 500KB | ✅ |
-| /bi | 480KB | < 500KB | ✅ |
+- ✅ Chunks separados para:
+  - React core (lib)
+  - Vendor dependencies
+  - Plotly.js (heavy)
+  - Chart.js
+  - Common code
 
 ---
 
-## 🛠️ Cómo Usar las Nuevas Herramientas
+### 5. Monitoring de Performance
 
-### 1. Performance Monitor (Dev Only)
+**Archivo:** `middleware-performance.ts`
 
-```typescript
-// Automáticamente disponible en desarrollo
-// Presiona Ctrl+Shift+P para mostrar/ocultar
+**Features:**
+- ✅ Tracking de tiempo de respuesta de APIs
+- ✅ Headers `X-Response-Time`
+- ✅ Logs automáticos para APIs lentas
+- ✅ Thresholds configurables (500ms, 1000ms)
+
+---
+
+### 6. Documentación Completa
+
+**Guías Creadas:**
+- ✅ `OPTIMIZACION_RENDIMIENTO.md` - Guía completa de optimización
+- ✅ `GUIA_OPTIMIZACION_APIS.md` - Paso a paso para optimizar APIs
+- ✅ `RESUMEN_OPTIMIZACIONES.md` - Este documento
+
+**Scripts:**
+- ✅ `scripts/init-redis.ts` - Probar conexión Redis
+- ✅ `scripts/analyze-performance.ts` - Análisis automático de performance
+
+**Ejemplos:**
+- ✅ `app/api/buildings-optimized-example/route.ts` - API optimizada de ejemplo
+
+---
+
+## 🟡 Pendiente de Implementar
+
+### 1. Configurar Redis
+
+**Acción Requerida:**
+```bash
+# Opción 1: Redis Local (Desarrollo)
+brew install redis  # macOS
+brew services start redis
+
+# Opción 2: Redis Cloud (Producción)
+# Crear cuenta en https://redis.com/try-free/
+# Copiar URL de conexión
+
+# Añadir a .env
+REDIS_URL=redis://localhost:6379
+# o
+REDIS_URL=redis://username:password@host:port
 ```
 
-### 2. OptimizedImage en tus componentes
-
-```typescript
-import { OptimizedImage } from '@/components/OptimizedImage';
-
-function MyComponent() {
-  return (
-    <OptimizedImage
-      src="/imagen.jpg"
-      alt="Mi imagen"
-      width={800}
-      height={600}
-      priority={false}
-    />
-  );
-}
-```
-
-### 3. Performance Hooks
-
-```typescript
-import { useLazyLoad, useSlowConnection } from '@/hooks/usePerformance';
-
-function MyComponent() {
-  const ref = useRef(null);
-  const { isVisible } = useLazyLoad(ref);
-  const isSlow = useSlowConnection();
-  
-  return (
-    <div ref={ref}>
-      {isVisible && <ExpensiveComponent />}
-      {isSlow && <LightweightVersion />}
-    </div>
-  );
-}
-```
-
-### 4. Database Optimization
-
-```typescript
-import { paginateQuery } from '@/lib/database-optimization';
-
-const result = await paginateQuery(
-  prisma.building,
-  { companyId },
-  { 
-    page: 1, 
-    limit: 25,
-    include: { units: true },
-    orderBy: { createdAt: 'desc' }
-  }
-);
-
-// result = {
-//   data: [...],
-//   pagination: {
-//     total: 100,
-//     page: 1,
-//     limit: 25,
-//     totalPages: 4,
-//     hasMore: true
-//   }
-// }
+**Verificar:**
+```bash
+cd nextjs_space
+yarn tsx scripts/init-redis.ts
 ```
 
 ---
 
-## 📝 Documentación Creada
+### 2. Aplicar Caché a APIs Críticas
 
-1. **OPTIMIZACION_RENDIMIENTO.md** - Guía completa de optimizaciones
-2. **COMO_APLICAR_OPTIMIZACIONES.md** - Pasos para aplicar cambios
-3. **RESUMEN_OPTIMIZACIONES.md** - Este documento
-4. **next.config.optimized.js** - Configuración optimizada de Next.js
+**APIs Prioritarias:**
 
----
+1. 🔴 **Alto impacto (Hacer primero):**
+   - [ ] `/api/dashboard` 
+   - [ ] `/api/buildings`
+   - [ ] `/api/units`
+   - [ ] `/api/payments`
+   - [ ] `/api/contracts`
 
-## 🚀 Próximos Pasos Recomendados
+2. 🟡 **Impacto medio:**
+   - [ ] `/api/tenants`
+   - [ ] `/api/expenses`
+   - [ ] `/api/maintenance`
+   - [ ] `/api/analytics/*`
 
-### Inmediatos
-
-1. ⚠️ **Aplicar next.config.optimized.js**
-   - Backup de configuración actual
-   - Aplicar nueva configuración
-   - Testing completo
-   - Deploy
-
-### Corto Plazo (1-2 semanas)
-
-2. 📊 **Monitoreo de Performance**
-   - Configurar Web Vitals en producción
-   - Lighthouse audits periódicas
-   - Análisis de bundle size
-
-3. 💾 **Optimización de Cache**
-   - Ajustar TTLs basado en uso real
-   - Implementar invalidación inteligente
-   - Cache de queries más usadas
-
-### Mediano Plazo (1-3 meses)
-
-4. 🧩 **Code Splitting Manual**
-   - Identificar componentes > 50KB
-   - Implementar lazy loading adicional
-   - Route-based code splitting
-
-5. ⚡ **Preload Critical Resources**
-   - Fonts preload
-   - Critical CSS inline
-   - Hero images preload
-
-6. 🌍 **CDN Configuration**
-   - Configurar CDN para assets estáticos
-   - Optimizar cache policies
-   - Geographic distribution
-
-### Largo Plazo (3-6 meses)
-
-7. 📦 **Service Worker**
-   - Offline support
-   - Background sync
-   - Push notifications
-
-8. 🧠 **Server Components**
-   - Migración a App Router
-   - Streaming SSR
-   - Selective hydration
-
-9. ⚡ **Edge Functions**
-   - APIs de baja latencia
-   - Geolocation-based routing
-   - A/B testing
+**Cómo aplicar:**
+Ver `GUIA_OPTIMIZACION_APIS.md` para instrucciones paso a paso
 
 ---
 
-## 👥 Soporte y Recursos
+### 3. Optimizar Queries Prisma
 
-### Documentación
+**Patrones a aplicar:**
 
-- 📚 [Next.js Performance](https://nextjs.org/docs/advanced-features/measuring-performance)
-- 🖼️ [Image Optimization](https://nextjs.org/docs/basic-features/image-optimization)
-- 📊 [Web Vitals](https://web.dev/vitals/)
-- 📦 [Bundle Analyzer](https://www.npmjs.com/package/@next/bundle-analyzer)
+```typescript
+// ❌ EVITAR
+const buildings = await prisma.building.findMany({
+  include: { units: true },
+});
 
-### Scripts Disponibles
+// ✅ CORRECTO
+const buildings = await prisma.building.findMany({
+  select: {
+    id: true,
+    nombre: true,
+    _count: { select: { units: true } },
+  },
+});
+```
+
+**Archivos a revisar:**
+- [ ] Todos los archivos en `app/api/*/route.ts`
+- [ ] Buscar `include:` y evaluar si es necesario
+- [ ] Buscar `findMany()` sin `take` o paginación
+
+---
+
+### 4. Activar Bundle Analyzer
+
+**Pasos:**
+
+1. **Analizar bundle actual:**
+```bash
+cd nextjs_space
+ANALYZE=true yarn build
+```
+
+2. **Revisar reporte:**
+Se abrirá en el navegador mostrando:
+- Tamaño de cada chunk
+- Dependencias más pesadas
+- Oportunidades de optimización
+
+3. **Identificar librerías pesadas** y aplicar lazy loading
+
+---
+
+### 5. Implementar Middleware de Performance
+
+**Acción:**
 
 ```bash
-# Auditoría de performance
-node scripts/performance-audit.js
+# Si no existe middleware.ts
+cp middleware-performance.ts middleware.ts
 
-# Análisis de bundle
-node scripts/analyze-bundle.js
-# O con yarn
+# Si existe, merge el código manualmente
+```
+
+**Beneficio:**
+- Logs automáticos de APIs lentas
+- Headers de tiempo de respuesta
+- Identificación de bottlenecks
+
+---
+
+### 6. Mediciones Baseline
+
+**Antes de optimizar, medir:**
+
+```bash
+# 1. Lighthouse Score
+lighthouse http://localhost:3000/dashboard --output=html --output-path=./lighthouse-before.html
+
+# 2. Tiempos de API (manualmente)
+curl -w "Time: %{time_total}s\n" http://localhost:3000/api/dashboard
+curl -w "Time: %{time_total}s\n" http://localhost:3000/api/buildings
+
+# 3. Bundle size
+yarn build
+# Ver tamaño en .next/static
+```
+
+**Guardar resultados para comparar después**
+
+---
+
+## 📊 Plan de Acción (4 Semanas)
+
+### Semana 1: Infraestructura
+- [ ] Día 1-2: Configurar Redis (local y producción)
+- [ ] Día 3: Probar conexión con `init-redis.ts`
+- [ ] Día 4: Medir baseline (Lighthouse + API times)
+- [ ] Día 5: Activar bundle analyzer
+
+### Semana 2: APIs Críticas
+- [ ] Día 1: Optimizar `/api/dashboard`
+- [ ] Día 2: Optimizar `/api/buildings`
+- [ ] Día 3: Optimizar `/api/units`
+- [ ] Día 4: Optimizar `/api/payments`
+- [ ] Día 5: Optimizar `/api/contracts`
+
+### Semana 3: APIs Secundarias + Queries
+- [ ] Día 1-2: Optimizar 5 APIs más
+- [ ] Día 3-4: Revisar y optimizar queries Prisma
+- [ ] Día 5: Implementar invalidación de caché en mutaciones
+
+### Semana 4: Mediciones y Ajustes
+- [ ] Día 1: Medir resultados post-optimización
+- [ ] Día 2: Comparar con baseline
+- [ ] Día 3: Ajustar TTLs según uso real
+- [ ] Día 4: Deployment a producción
+- [ ] Día 5: Monitoreo y documentación final
+
+---
+
+## 📝 Comandos Útiles
+
+### Testing
+
+```bash
+# Probar Redis
+yarn tsx scripts/init-redis.ts
+
+# Analizar performance
+yarn tsx scripts/analyze-performance.ts
+
+# Analizar bundle
 ANALYZE=true yarn build
 
-# Optimización de base de datos
-yarn db:optimize
-
-# Lighthouse audit
-yarn lighthouse:audit
+# Lighthouse
+lighthouse http://localhost:3000/dashboard --output=html
 ```
-
-### Contacto
-
-- **Email**: soporte@inmova.com
-- **Documentación**: `/docs/performance`
-
----
-
-## ✅ Checklist Final
 
 ### Desarrollo
 
-- [x] Migración de imágenes completada (7 archivos)
-- [x] Lazy loading verificado (3 componentes)
-- [x] Cache de API implementado (9 endpoints)
-- [x] Optimización de queries (724 índices)
-- [x] Componentes y hooks creados
-- [x] Scripts de auditoría creados
-- [x] Documentación completa
-- [x] Build exitoso
-- [x] Checkpoint guardado
+```bash
+# Iniciar con debug
+NODE_OPTIONS='--inspect' yarn dev
 
-### Pendiente
+# Ver logs de Redis
+redis-cli
+KEYS company:*
+GET company:COMPANY_ID:dashboard
+TTL company:COMPANY_ID:dashboard
+```
 
-- [ ] Aplicar next.config.optimized.js
-- [ ] Testing en producción
-- [ ] Monitoreo de Web Vitals
-- [ ] Ajuste de TTLs basado en uso
-- [ ] Lighthouse audit post-deploy
+### Producción
+```bash
+# Build optimizado
+yarn build
 
----
+# Ver tamaño de bundles
+du -sh .next/static/chunks/*
 
-## 🎉 Conclusión
-
-### Logros
-
-✅ **8 de 9 objetivos completados**  
-✅ **100% de imágenes optimizadas**  
-✅ **Lazy loading implementado**  
-✅ **Cache de API activo**  
-✅ **Base de datos optimizada**  
-✅ **Nuevas herramientas disponibles**  
-✅ **Documentación completa**  
-✅ **Build exitoso**
-
-### Impacto Esperado
-
-- **Performance**: +45% mejora global
-- **Bundle Size**: -35% (650KB → 420KB)
-- **API Response**: -81% (800ms → 150ms)
-- **Page Load**: -38% (4.5s → 2.8s)
-- **Database Load**: -70%
-
-### Siguientes Pasos
-
-1. Aplicar `next.config.optimized.js`
-2. Testing en producción
-3. Monitoreo continuo
-4. Iteración basada en métricas reales
+# Monitor API response times
+tail -f logs/api-performance.log
+```
 
 ---
 
-*Documento generado el: Diciembre 9, 2025*  
+## 🎯 Resultados Esperados
+
+### Mejoras Estimadas
+
+| Métrica | Antes | Después | Mejora |
+|---------|-------|---------|--------|
+| Lighthouse Score | ~65 | >80 | +23% |
+| FCP | ~2.5s | <1.8s | -28% |
+| TTI | ~5.0s | <3.8s | -24% |
+| Dashboard API | ~1500ms | ~200ms | -87% |
+| Buildings API | ~800ms | ~150ms | -81% |
+| Units API | ~600ms | ~120ms | -80% |
+| Bundle Size | ~800KB | <500KB | -37% |
+
+### Beneficios Adicionales
+
+✅ **Experiencia de Usuario:**
+- Carga de páginas más rápida
+- Transiciones suaves entre vistas
+- Menor latencia en acciones
+
+✅ **Costos de Infraestructura:**
+- 80% menos queries a la base de datos
+- Menor uso de CPU y memoria
+- Mejor escalabilidad
+
+✅ **SEO y Conversiones:**
+- Mejor ranking en Google
+- Cumplimiento de Core Web Vitals
+- Mayor tasa de retención
+
+---
+
+## ❓ FAQ
+
+### ¿Puedo usar la app sin Redis?
+
+Sí, el sistema tiene fallback automático. Si Redis no está disponible, la app funciona normalmente pero sin caché.
+
+### ¿Cómo sé si Redis está funcionando?
+
+Revisa los logs. Verás mensajes como:
+- "🎯 Cache HIT" cuando los datos se sirven desde Redis
+- "🚫 Cache MISS" cuando se cargan desde la DB
+
+### ¿Qué pasa si los datos no se actualizan?
+
+Asegúrate de invalidar el caché en las operaciones POST/PUT/DELETE:
+
+```typescript
+await invalidateResourceCache(companyId, 'resource-name');
+```
+
+### ¿Cómo ajusto los TTLs?
+
+Edita `lib/redis.ts` y modifica los valores en `CACHE_TTL`:
+
+```typescript
+export const CACHE_TTL = {
+  SHORT: 60,    // Datos que cambian frecuentemente
+  MEDIUM: 300,  // Datos moderadamente dinámicos
+  LONG: 1800,   // Datos relativamente estáticos
+  DAY: 86400,   // Datos muy estáticos
+};
+```
+
+---
+
+## 👍 Próximos Pasos Inmediatos
+
+1. **🔴 URGENTE: Configurar Redis**
+   ```bash
+   # Instalar Redis
+   brew install redis
+   brew services start redis
+   
+   # Añadir a .env
+   echo "REDIS_URL=redis://localhost:6379" >> .env
+   
+   # Probar
+   yarn tsx scripts/init-redis.ts
+   ```
+
+2. **🟡 Optimizar Dashboard API**
+   - Es la más crítica
+   - Mayor impacto en UX
+   - Ver ejemplo en `app/api/buildings-optimized-example/route.ts`
+
+3. **🟢 Medir Baseline**
+   ```bash
+   lighthouse http://localhost:3000/dashboard --output=html
+   ```
+
+4. **🔵 Revisar Guía Completa**
+   - Leer `GUIA_OPTIMIZACION_APIS.md`
+   - Seguir patrón de optimización
+
+---
+
+## 📞 Soporte y Referencias
+
+### Documentación Local
+- `OPTIMIZACION_RENDIMIENTO.md` - Guía completa
+- `GUIA_OPTIMIZACION_APIS.md` - Paso a paso APIs
+- `app/api/buildings-optimized-example/route.ts` - Ejemplo práctico
+
+### Enlaces Útiles
+- [Next.js Performance](https://nextjs.org/docs/app/building-your-application/optimizing)
+- [Redis Best Practices](https://redis.io/docs/manual/patterns/)
+- [Prisma Performance](https://www.prisma.io/docs/guides/performance-and-optimization)
+- [Web Vitals](https://web.dev/vitals/)
+
+---
+
+**🎉 ¡Todas las herramientas están listas! Solo falta configurar Redis y empezar a aplicar las optimizaciones.**
+
+---
+
+*Generado: Diciembre 2024*  
 *Versión: 1.0*  
-*Estado: Completado y Verificado ✅*
+*Estado: 🟢 Listo para implementar*
