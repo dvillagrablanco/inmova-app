@@ -1,30 +1,30 @@
-# ============================================
-# INMOVA - Next.js 14 + Prisma
-# Docker Multi-stage Build - Node 20 Alpine
-# ============================================
+# 1. Imagen Base (Node 20 OBLIGATORIO)
+FROM node:20-alpine AS base
 
-# Etapa 1: Dependencias
-FROM node:20-alpine AS deps
+# 2. Etapa de Dependencias
+FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 COPY package.json yarn.lock* ./
-RUN yarn install --frozen-lockfile
 
-# Etapa 2: Builder
-FROM node:20-alpine AS builder
+# Instalamos dependencias ignorando conflictos de versiones
+RUN yarn install --frozen-lockfile --ignore-engines
+
+# 3. Etapa de Construcción (Builder)
+FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Generar cliente de Prisma OBLIGATORIO antes del build
+# Generamos Prisma Client aquí
 RUN npx prisma generate
 
-# Ignorar linter para asegurar build
+# Desactivamos telemetría y linting para asegurar el build
 ENV NEXT_TELEMETRY_DISABLED 1
 RUN yarn build
 
-# Etapa 3: Runner (Imagen final ligera)
-FROM node:20-alpine AS runner
+# 4. Etapa de Ejecución (Runner)
+FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
@@ -32,7 +32,7 @@ ENV NEXT_TELEMETRY_DISABLED 1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copiar archivos del modo standalone
+# Copiamos solo lo necesario (Standalone)
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
