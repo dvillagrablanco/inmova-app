@@ -1,0 +1,3 @@
+Nombre del Edificio,Dirección Completa,Ciudad,Código Postal,Tipo (residencial/comercial/mixto),Año de Construcción,Número de Unidades,Estado de Conservación,Certificado Energético,Tiene Ascensor (SI/NO),Tiene Garaje (SI/NO),Tiene Piscina (SI/NO),Tiene Jardín (SI/NO),Gastos de Comunidad Mensuales (€),IBI Anual (€),Notas
+Residencial Vista Mar,Av. Principal 123,Madrid,28001,residencial,2018,24,Excelente,B,SI,SI,SI,SI,120,850,Edificio premium con vistas al parque
+Edificio Comercial Centro,Calle Mayor 45,Barcelona,08001,comercial,2015,12,Muy Bueno,A,SI,SI,NO,NO,200,1200,Ubicación céntrica ideal para negocios
