@@ -6,9 +6,9 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Copy package files AND prisma schema (needed for postinstall hook)
-COPY package.json yarn.lock* ./
-COPY prisma ./prisma
+# Copy package files AND prisma schema FROM NEXTJS_SPACE SUBDIRECTORY
+COPY nextjs_space/package.json nextjs_space/yarn.lock* ./
+COPY nextjs_space/prisma ./prisma
 
 # Install dependencies (this will run "prisma generate" via postinstall)
 RUN yarn install --frozen-lockfile
@@ -20,8 +20,8 @@ WORKDIR /app
 # Copy node_modules from deps stage
 COPY --from=deps /app/node_modules ./node_modules
 
-# Copy all project files
-COPY . .
+# Copy all project files FROM NEXTJS_SPACE SUBDIRECTORY
+COPY nextjs_space/ .
 
 # CRITICAL: Generate Prisma Client AGAIN after copying all files
 # This ensures the client is in the correct location for Next.js build
