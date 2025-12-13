@@ -17,7 +17,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useBranding } from '@/lib/hooks/useBranding';
 import { cn } from '@/lib/utils';
-import { LanguageSelector } from '@/components/LanguageSelector';
+import LanguageSelector from '@/components/LanguageSelector';
 import { ExternalPortalsNotifications } from '@/components/admin/external-portals-notifications';
 import logger, { logError } from '@/lib/logger';
 
