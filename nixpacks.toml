@@ -2,7 +2,7 @@
 nixPkgs = ['nodejs-20_x', 'yarn']
 
 [phases.build]
-cmds = ['yarn install', 'npx prisma generate', 'yarn build']
+cmds = ['yarn install --ignore-engines', 'npx prisma generate', 'next build']
 
 [start]
 cmd = 'node .next/standalone/server.js'
