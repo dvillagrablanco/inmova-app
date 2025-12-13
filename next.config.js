@@ -1,20 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Usar directorio .next estándar (sin variables ambiguas)
-  distDir: '.next',
-  
-  // IMPORTANTE: NO usar 'output: standalone' para compatibilidad con 'yarn start'
-  // El modo standalone requiere 'node server.js', no 'next start'
-  // Railway funciona mejor con el enfoque estándar
-  
-  eslint: {
-    ignoreDuringBuilds: true,
+  output: 'standalone',
+  eslint: { 
+    ignoreDuringBuilds: true 
   },
-  typescript: {
-    ignoreBuildErrors: true,
+  typescript: { 
+    ignoreBuildErrors: true 
   },
-  images: { 
-    unoptimized: true 
+  images: {
+    unoptimized: true
   },
 };
 
