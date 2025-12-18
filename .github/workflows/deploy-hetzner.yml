@@ -102,7 +102,7 @@ jobs:
             echo "  🌐 https://www.inmova.app está actualizado"
             echo "  📊 Verificar logs: pm2 logs inmova-app"
             echo "═══════════════════════════════════════════════════════"
-ENDSSH
+          ENDSSH
       
       - name: ✅ Deployment Success Notification
         if: success()
