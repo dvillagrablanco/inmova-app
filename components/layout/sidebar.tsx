@@ -340,7 +340,7 @@ const adminNavItems = [
   { name: 'Marketplace', href: '/admin/marketplace', icon: ShoppingCart, roles: ['administrador'] },
   { name: 'Legal', href: '/admin/legal', icon: BookOpen, roles: ['administrador'] },
   { name: 'Firma Digital', href: '/admin/firma-digital', icon: FileSignature, roles: ['administrador'] },
-  { name: 'Equipo Comercial Externo', href: '/admin/sales-team', icon: Users2, roles: ['administrador'] },
+  { name: 'Equipo Comercial Externo', href: '/admin/sales-team', icon: Users2, roles: ['super_admin'] },
 ];
 
 export function Sidebar() {
