@@ -1,0 +1,157 @@
+name: Configure NextAuth on Production
+
+# Este workflow configura NextAuth en el servidor de producción
+# Se ejecuta manualmente desde GitHub Actions
+
+on:
+  workflow_dispatch:
+    inputs:
+      generate_new_secret:
+        description: 'Generar nuevo NEXTAUTH_SECRET (si = yes, no = mantener existente)'
+        required: true
+        default: 'yes'
+        type: choice
+        options:
+          - 'yes'
+          - 'no'
+
+jobs:
+  configure-nextauth:
+    runs-on: ubuntu-latest
+    name: Configurar NextAuth en Hetzner
+    
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🔐 Setup SSH
+        env:
+          SSH_KEY: ${{ secrets.HETZNER_SSH_PRIVATE_KEY }}
+          SERVER_HOST: 46.224.120.160
+          SERVER_USER: root
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/hetzner_key
+          chmod 600 ~/.ssh/hetzner_key
+          ssh-keyscan -H $SERVER_HOST >> ~/.ssh/known_hosts
+
+      - name: ⚙️ Configurar NextAuth en Servidor
+        env:
+          SERVER_HOST: 46.224.120.160
+          SERVER_USER: root
+          APP_DIR: /opt/inmova-app
+          GENERATE_NEW: ${{ github.event.inputs.generate_new_secret }}
+        run: |
+          echo "═══════════════════════════════════════════════════════"
+          echo "  🔐 INMOVA - Configuración de NextAuth"
+          echo "  📍 Servidor: $SERVER_HOST"
+          echo "  📂 Directorio: $APP_DIR"
+          echo "═══════════════════════════════════════════════════════"
+          echo ""
+          
+          ssh -i ~/.ssh/hetzner_key -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST << 'ENDSSH'
+            set -e
+            
+            APP_DIR="/opt/inmova-app"
+            cd $APP_DIR
+            
+            echo "📂 Directorio actual: $(pwd)"
+            echo ""
+            
+            # Crear backup del .env actual si existe
+            if [ -f .env ]; then
+              BACKUP_FILE=".env.backup.$(date +%Y%m%d_%H%M%S)"
+              echo "💾 Creando backup: $BACKUP_FILE"
+              cp .env "$BACKUP_FILE"
+              echo "✅ Backup creado: $BACKUP_FILE"
+            else
+              echo "⚠️  No existe archivo .env, creando uno nuevo..."
+              touch .env
+              echo "✅ Archivo .env creado"
+            fi
+            echo ""
+            
+            # Generar o mantener NEXTAUTH_SECRET
+            if [ "$GENERATE_NEW" = "yes" ]; then
+              echo "🔑 Generando nuevo NEXTAUTH_SECRET..."
+              NEXTAUTH_SECRET=$(openssl rand -base64 32)
+              echo "✅ Nuevo secret generado: ${NEXTAUTH_SECRET:0:20}...****** (oculto)"
+              
+              # Actualizar o añadir NEXTAUTH_SECRET
+              if grep -q "^NEXTAUTH_SECRET=" .env; then
+                sed -i "s|^NEXTAUTH_SECRET=.*|NEXTAUTH_SECRET=${NEXTAUTH_SECRET}|" .env
+                echo "✅ NEXTAUTH_SECRET actualizado en .env"
+              else
+                echo "" >> .env
+                echo "# NextAuth Configuration" >> .env
+                echo "NEXTAUTH_SECRET=${NEXTAUTH_SECRET}" >> .env
+                echo "✅ NEXTAUTH_SECRET añadido a .env"
+              fi
+            else
+              echo "⏭️  Manteniendo NEXTAUTH_SECRET existente (si existe)"
+              if ! grep -q "^NEXTAUTH_SECRET=" .env; then
+                echo "⚠️  No se encontró NEXTAUTH_SECRET existente, generando uno nuevo..."
+                NEXTAUTH_SECRET=$(openssl rand -base64 32)
+                echo "" >> .env
+                echo "# NextAuth Configuration" >> .env
+                echo "NEXTAUTH_SECRET=${NEXTAUTH_SECRET}" >> .env
+                echo "✅ NEXTAUTH_SECRET añadido a .env"
+              fi
+            fi
+            echo ""
+            
+            # Configurar NEXTAUTH_URL
+            if grep -q "^NEXTAUTH_URL=" .env; then
+              sed -i "s|^NEXTAUTH_URL=.*|NEXTAUTH_URL=https://www.inmova.app|" .env
+              echo "✅ NEXTAUTH_URL actualizado: https://www.inmova.app"
+            else
+              echo "NEXTAUTH_URL=https://www.inmova.app" >> .env
+              echo "✅ NEXTAUTH_URL añadido: https://www.inmova.app"
+            fi
+            echo ""
+            
+            echo "═══════════════════════════════════════════════════════"
+            echo "  ✅ Configuración Completada"
+            echo "═══════════════════════════════════════════════════════"
+            echo ""
+            
+            # Mostrar variables configuradas (sin valores sensibles)
+            echo "📋 Variables configuradas en .env:"
+            grep -E '^(NEXTAUTH_URL|DATABASE_URL|POSTGRES_PASSWORD)' .env | sed 's/=.*/=***/' | head -10 || echo "No se encontraron variables"
+            echo ""
+            
+            # Reiniciar aplicación
+            echo "🔄 Reiniciando aplicación..."
+            pm2 restart inmova || echo "⚠️  PM2 no encontrado o app no corriendo"
+            echo ""
+            
+            # Esperar y verificar
+            echo "⏳ Esperando 5 segundos para estabilización..."
+            sleep 5
+            echo ""
+            
+            echo "📊 Estado de la aplicación:"
+            pm2 status inmova || echo "⚠️  No se pudo obtener el estado"
+            echo ""
+            
+            echo "📝 Últimos 20 logs:"
+            pm2 logs inmova --lines 20 --nostream || echo "⚠️  No se pudieron obtener los logs"
+            echo ""
+            
+            echo "═══════════════════════════════════════════════════════"
+            echo "  🎉 ¡Proceso Completado!"
+            echo "═══════════════════════════════════════════════════════"
+            echo ""
+            echo "🧪 PRUEBA EL LOGIN AHORA:"
+            echo "   1. Ve a: https://www.inmova.app"
+            echo "   2. Click en 'Iniciar Sesión'"
+            echo "   3. Usa: admin@inmova.app / Admin2025!"
+            echo "   4. Deberías acceder al dashboard sin errores"
+            echo ""
+          ENDSSH
+          
+          echo ""
+          echo "✅ ¡NextAuth configurado exitosamente en producción!"
+          echo ""
+          echo "🔗 Verifica el login en: https://www.inmova.app"
+          echo ""
