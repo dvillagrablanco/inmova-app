@@ -223,25 +223,25 @@ const CORE_MODULES = [
 
 // Navegación core - Funcionalidades principales
 const coreNavItems = [
-  { name: 'Inicio', href: '/home', icon: Home, roles: ['administrador', 'gestor', 'operador'] },
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['administrador', 'gestor', 'operador'], dataTour: 'dashboard-link' },
-  { name: 'Edificios', href: '/edificios', icon: Building2, roles: ['administrador', 'gestor'], dataTour: 'edificios-menu' },
-  { name: 'Unidades', href: '/unidades', icon: Home, roles: ['administrador', 'gestor'], dataTour: 'unidades-menu' },
-  { name: 'Inquilinos', href: '/inquilinos', icon: Users, roles: ['administrador', 'gestor'], dataTour: 'inquilinos-menu' },
-  { name: 'Contratos', href: '/contratos', icon: FileText, roles: ['administrador', 'gestor'], dataTour: 'contratos-menu' },
-  { name: 'Pagos', href: '/pagos', icon: CreditCard, roles: ['administrador', 'gestor'], dataTour: 'pagos-menu' },
-  { name: 'Mantenimiento', href: '/mantenimiento', icon: Wrench, roles: ['administrador', 'gestor', 'operador'] },
-  { name: 'Calendario', href: '/calendario', icon: Calendar, roles: ['administrador', 'gestor'] },
-  { name: 'Chat', href: '/chat', icon: MessageSquare, roles: ['administrador', 'gestor'] },
+  { name: 'Inicio', href: '/home', icon: Home, roles: ['super_admin', 'administrador', 'gestor', 'operador'] },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['super_admin', 'administrador', 'gestor', 'operador'], dataTour: 'dashboard-link' },
+  { name: 'Edificios', href: '/edificios', icon: Building2, roles: ['super_admin', 'administrador', 'gestor'], dataTour: 'edificios-menu' },
+  { name: 'Unidades', href: '/unidades', icon: Home, roles: ['super_admin', 'administrador', 'gestor'], dataTour: 'unidades-menu' },
+  { name: 'Inquilinos', href: '/inquilinos', icon: Users, roles: ['super_admin', 'administrador', 'gestor'], dataTour: 'inquilinos-menu' },
+  { name: 'Contratos', href: '/contratos', icon: FileText, roles: ['super_admin', 'administrador', 'gestor'], dataTour: 'contratos-menu' },
+  { name: 'Pagos', href: '/pagos', icon: CreditCard, roles: ['super_admin', 'administrador', 'gestor'], dataTour: 'pagos-menu' },
+  { name: 'Mantenimiento', href: '/mantenimiento', icon: Wrench, roles: ['super_admin', 'administrador', 'gestor', 'operador'] },
+  { name: 'Calendario', href: '/calendario', icon: Calendar, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Chat', href: '/chat', icon: MessageSquare, roles: ['super_admin', 'administrador', 'gestor'] },
 ];
 
 // Automatización y Soporte
 const automatizacionNavItems = [
-  { name: 'Automatización', href: '/automatizacion', icon: Zap, roles: ['administrador', 'gestor', 'operador'] },
-  { name: 'Workflows', href: '/workflows', icon: Zap, roles: ['administrador', 'gestor', 'operador'] },
-  { name: 'Redes Sociales', href: '/redes-sociales', icon: Share2, roles: ['administrador', 'gestor'] },
-  { name: 'Soporte', href: '/soporte', icon: HeadphonesIcon, roles: ['administrador', 'gestor', 'operador'] },
-  { name: 'Base de Conocimientos', href: '/knowledge-base', icon: BookOpen, roles: ['administrador', 'gestor', 'operador'] },
+  { name: 'Automatización', href: '/automatizacion', icon: Zap, roles: ['super_admin', 'administrador', 'gestor', 'operador'] },
+  { name: 'Workflows', href: '/workflows', icon: Zap, roles: ['super_admin', 'administrador', 'gestor', 'operador'] },
+  { name: 'Redes Sociales', href: '/redes-sociales', icon: Share2, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Soporte', href: '/soporte', icon: HeadphonesIcon, roles: ['super_admin', 'administrador', 'gestor', 'operador'] },
+  { name: 'Base de Conocimientos', href: '/knowledge-base', icon: BookOpen, roles: ['super_admin', 'administrador', 'gestor', 'operador'] },
 ];
 
 // Módulos específicos de Operador
@@ -254,77 +254,77 @@ const operadorNavItems = [
 
 // Módulos de Gestión Operativa
 const gestionNavItems = [
-  { name: 'Proveedores', href: '/proveedores', icon: Package, roles: ['administrador', 'gestor'] },
-  { name: 'Gastos', href: '/gastos', icon: Euro, roles: ['administrador', 'gestor'] },
-  { name: 'Tareas', href: '/tareas', icon: CheckSquare, roles: ['administrador', 'gestor', 'operador'] },
-  { name: 'Incidencias', href: '/incidencias', icon: AlertCircle, roles: ['administrador', 'gestor', 'operador'] },
-  { name: 'Candidatos', href: '/candidatos', icon: UserPlus, roles: ['administrador', 'gestor'] },
-  { name: 'Notificaciones', href: '/notificaciones', icon: Bell, roles: ['administrador', 'gestor', 'operador'] },
-  { name: 'OCR Documentos', href: '/ocr', icon: Eye, roles: ['administrador', 'gestor', 'operador'] },
-  { name: 'Sugerencias', href: '/sugerencias', icon: MessageCircle, roles: ['administrador', 'gestor', 'operador'] },
+  { name: 'Proveedores', href: '/proveedores', icon: Package, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Gastos', href: '/gastos', icon: Euro, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Tareas', href: '/tareas', icon: CheckSquare, roles: ['super_admin', 'administrador', 'gestor', 'operador'] },
+  { name: 'Incidencias', href: '/incidencias', icon: AlertCircle, roles: ['super_admin', 'administrador', 'gestor', 'operador'] },
+  { name: 'Candidatos', href: '/candidatos', icon: UserPlus, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Notificaciones', href: '/notificaciones', icon: Bell, roles: ['super_admin', 'administrador', 'gestor', 'operador'] },
+  { name: 'OCR Documentos', href: '/ocr', icon: Eye, roles: ['super_admin', 'administrador', 'gestor', 'operador'] },
+  { name: 'Sugerencias', href: '/sugerencias', icon: MessageCircle, roles: ['super_admin', 'administrador', 'gestor', 'operador'] },
 ];
 
 // Módulos avanzados
 const advancedNavItems = [
-  { name: 'Business Intelligence', href: '/bi', icon: FileBarChart, roles: ['administrador', 'gestor'] },
-  { name: 'Analytics', href: '/analytics', icon: BarChart2, roles: ['administrador', 'gestor'] },
-  { name: 'Reportes', href: '/reportes', icon: FileBarChart, roles: ['administrador', 'gestor'] },
-  { name: 'Documentos', href: '/documentos', icon: Folder, roles: ['administrador', 'gestor'] },
-  { name: 'Room Rental', href: '/room-rental', icon: Home, roles: ['administrador', 'gestor'] },
-  { name: 'CRM', href: '/crm', icon: HeadphonesIcon, roles: ['administrador', 'gestor'] },
+  { name: 'Business Intelligence', href: '/bi', icon: FileBarChart, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Analytics', href: '/analytics', icon: BarChart2, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Reportes', href: '/reportes', icon: FileBarChart, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Documentos', href: '/documentos', icon: Folder, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Room Rental', href: '/room-rental', icon: Home, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'CRM', href: '/crm', icon: HeadphonesIcon, roles: ['super_admin', 'administrador', 'gestor'] },
 ];
 
 // Módulos Multi-Vertical
 const multiVerticalItems = [
-  { name: 'STR Dashboard', href: '/str', icon: Hotel, roles: ['administrador', 'gestor'] },
-  { name: 'Anuncios STR', href: '/str/listings', icon: Hotel, roles: ['administrador', 'gestor'] },
-  { name: 'Reservas STR', href: '/str/bookings', icon: Calendar, roles: ['administrador', 'gestor'] },
-  { name: 'Canales STR', href: '/str/channels', icon: BarChart2, roles: ['administrador', 'gestor'] },
-  { name: 'STR Avanzado', href: '/str-advanced', icon: Sparkles, roles: ['administrador', 'gestor'] },
-  { name: 'Limpieza STR', href: '/str-housekeeping', icon: ClipboardList, roles: ['administrador', 'gestor'] },
-  { name: 'House Flipping', href: '/flipping/projects', icon: TrendingUp, roles: ['administrador', 'gestor'] },
-  { name: 'Construcción', href: '/construction/projects', icon: HardHat, roles: ['administrador', 'gestor'] },
-  { name: 'Servicios Profesionales', href: '/professional/projects', icon: Briefcase, roles: ['administrador', 'gestor'] },
+  { name: 'STR Dashboard', href: '/str', icon: Hotel, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Anuncios STR', href: '/str/listings', icon: Hotel, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Reservas STR', href: '/str/bookings', icon: Calendar, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Canales STR', href: '/str/channels', icon: BarChart2, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'STR Avanzado', href: '/str-advanced', icon: Sparkles, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Limpieza STR', href: '/str-housekeeping', icon: ClipboardList, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'House Flipping', href: '/flipping/projects', icon: TrendingUp, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Construcción', href: '/construction/projects', icon: HardHat, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Servicios Profesionales', href: '/professional/projects', icon: Briefcase, roles: ['super_admin', 'administrador', 'gestor'] },
 ];
 
 // Módulos de Comunidad
 const comunidadItems = [
-  { name: 'Panel Comunidad', href: '/dashboard/community', icon: Users2, roles: ['administrador', 'gestor', 'community_manager'] },
-  { name: 'Anuncios', href: '/anuncios', icon: Megaphone, roles: ['administrador', 'gestor', 'community_manager'] },
-  { name: 'Votaciones', href: '/votaciones', icon: Vote, roles: ['administrador', 'gestor'] },
-  { name: 'Reuniones', href: '/reuniones', icon: Users2, roles: ['administrador', 'gestor'] },
-  { name: 'Reservas Espacios', href: '/reservas', icon: CalendarCheck, roles: ['administrador', 'gestor', 'operador', 'community_manager'] },
+  { name: 'Panel Comunidad', href: '/dashboard/community', icon: Users2, roles: ['super_admin', 'administrador', 'gestor', 'community_manager'] },
+  { name: 'Anuncios', href: '/anuncios', icon: Megaphone, roles: ['super_admin', 'administrador', 'gestor', 'community_manager'] },
+  { name: 'Votaciones', href: '/votaciones', icon: Vote, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Reuniones', href: '/reuniones', icon: Users2, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Reservas Espacios', href: '/reservas', icon: CalendarCheck, roles: ['super_admin', 'administrador', 'gestor', 'operador', 'community_manager'] },
 ];
 
 // Administrador de Fincas
 const adminFincasItems = [
-  { name: 'Portal Admin Fincas', href: '/admin-fincas', icon: Building2, roles: ['administrador', 'gestor'] },
-  { name: 'Comunidades', href: '/admin-fincas/comunidades', icon: Building2, roles: ['administrador', 'gestor'] },
-  { name: 'Facturación', href: '/admin-fincas/facturas', icon: FileText, roles: ['administrador', 'gestor'] },
-  { name: 'Libro de Caja', href: '/admin-fincas/libro-caja', icon: Euro, roles: ['administrador', 'gestor'] },
-  { name: 'Informes', href: '/admin-fincas/informes', icon: BarChart2, roles: ['administrador', 'gestor'] },
+  { name: 'Portal Admin Fincas', href: '/admin-fincas', icon: Building2, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Comunidades', href: '/admin-fincas/comunidades', icon: Building2, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Facturación', href: '/admin-fincas/facturas', icon: FileText, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Libro de Caja', href: '/admin-fincas/libro-caja', icon: Euro, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Informes', href: '/admin-fincas/informes', icon: BarChart2, roles: ['super_admin', 'administrador', 'gestor'] },
 ];
 
 // Módulos Propiedades Avanzado
 const propiedadesAvanzadoItems = [
-  { name: 'Valoraciones', href: '/valoraciones', icon: Award, roles: ['administrador', 'gestor'] },
-  { name: 'Publicaciones', href: '/publicaciones', icon: Megaphone, roles: ['administrador', 'gestor'] },
-  { name: 'Screening', href: '/screening', icon: UserCheck, roles: ['administrador', 'gestor'] },
-  { name: 'Galerías', href: '/galerias', icon: Folder, roles: ['administrador', 'gestor'] },
-  { name: 'Certificaciones', href: '/certificaciones', icon: Award, roles: ['administrador', 'gestor'] },
-  { name: 'Seguros', href: '/seguros', icon: Shield, roles: ['administrador', 'gestor'] },
-  { name: 'Inspecciones', href: '/inspecciones', icon: ClipboardList, roles: ['administrador', 'gestor'] },
-  { name: 'Visitas', href: '/visitas', icon: CalendarCheck, roles: ['administrador', 'gestor'] },
+  { name: 'Valoraciones', href: '/valoraciones', icon: Award, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Publicaciones', href: '/publicaciones', icon: Megaphone, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Screening', href: '/screening', icon: UserCheck, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Galerías', href: '/galerias', icon: Folder, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Certificaciones', href: '/certificaciones', icon: Award, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Seguros', href: '/seguros', icon: Shield, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Inspecciones', href: '/inspecciones', icon: ClipboardList, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Visitas', href: '/visitas', icon: CalendarCheck, roles: ['super_admin', 'administrador', 'gestor'] },
 ];
 
 // Módulos Servicios Profesionales
 const serviciosProfesionalesItems = [
-  { name: 'Órdenes Trabajo', href: '/ordenes-trabajo', icon: ClipboardList, roles: ['administrador', 'gestor'] },
-  { name: 'Firma Digital', href: '/firma-digital', icon: FileSignature, roles: ['administrador', 'gestor'] },
-  { name: 'Legal', href: '/legal', icon: Shield, roles: ['administrador', 'gestor'] },
-  { name: 'Open Banking', href: '/open-banking', icon: CreditCard, roles: ['administrador', 'gestor'] },
-  { name: 'Marketplace', href: '/marketplace', icon: ShoppingCart, roles: ['administrador', 'gestor'] },
-  { name: 'SMS', href: '/sms', icon: MessageCircle, roles: ['administrador', 'gestor'] },
+  { name: 'Órdenes Trabajo', href: '/ordenes-trabajo', icon: ClipboardList, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Firma Digital', href: '/firma-digital', icon: FileSignature, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Legal', href: '/legal', icon: Shield, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Open Banking', href: '/open-banking', icon: CreditCard, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'Marketplace', href: '/marketplace', icon: ShoppingCart, roles: ['super_admin', 'administrador', 'gestor'] },
+  { name: 'SMS', href: '/sms', icon: MessageCircle, roles: ['super_admin', 'administrador', 'gestor'] },
 ];
 
 // Admin
