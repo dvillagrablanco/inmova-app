@@ -1,13 +1,32 @@
 import Stripe from 'stripe';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not defined in environment variables');
+// Lazy initialization to prevent build errors when Stripe is not configured
+let stripeInstance: Stripe | null = null;
+
+export function getStripe(): Stripe | null {
+  if (stripeInstance) {
+    return stripeInstance;
+  }
+
+  if (!process.env.STRIPE_SECRET_KEY) {
+    console.warn('STRIPE_SECRET_KEY is not defined. Stripe functionality will be disabled.');
+    return null;
+  }
+
+  try {
+    stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-11-17.clover',
+      typescript: true,
+    });
+    return stripeInstance;
+  } catch (error) {
+    console.error('Failed to initialize Stripe:', error);
+    return null;
+  }
 }
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2025-11-17.clover',
-  typescript: true,
-});
+// Export legacy stripe for backward compatibility (will be null if not configured)
+export const stripe = getStripe();
 
 export const STRIPE_PUBLISHABLE_KEY = process.env.STRIPE_PUBLISHABLE_KEY || '';
 export const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';

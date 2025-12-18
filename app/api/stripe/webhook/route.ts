@@ -8,6 +8,14 @@ import logger, { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
+  // Check if Stripe is configured
+  if (!stripe) {
+    return NextResponse.json(
+      { error: 'Stripe no está configurado en este momento' },
+      { status: 503 }
+    );
+  }
+
   const body = await request.text();
   const headersList = await headers();
   const signature = headersList.get('stripe-signature');
