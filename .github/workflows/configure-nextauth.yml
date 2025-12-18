@@ -122,7 +122,7 @@ jobs:
             
             # Reiniciar aplicación
             echo "🔄 Reiniciando aplicación..."
-            pm2 restart inmova || echo "⚠️  PM2 no encontrado o app no corriendo"
+            pm2 restart inmova-app || echo "⚠️  PM2 no encontrado o app no corriendo"
             echo ""
             
             # Esperar y verificar
@@ -131,11 +131,11 @@ jobs:
             echo ""
             
             echo "📊 Estado de la aplicación:"
-            pm2 status inmova || echo "⚠️  No se pudo obtener el estado"
+            pm2 status inmova-app || echo "⚠️  No se pudo obtener el estado"
             echo ""
             
             echo "📝 Últimos 20 logs:"
-            pm2 logs inmova --lines 20 --nostream || echo "⚠️  No se pudieron obtener los logs"
+            pm2 logs inmova-app --lines 20 --nostream || echo "⚠️  No se pudieron obtener los logs"
             echo ""
             
             echo "═══════════════════════════════════════════════════════"
