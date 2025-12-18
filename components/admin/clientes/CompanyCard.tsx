@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Building2, Users, TrendingUp, Eye, Trash2, MoreVertical, LogIn, CreditCard } from 'lucide-react';
+import { Building2, Users, TrendingUp, Eye, Trash2, MoreVertical, LogIn, CreditCard, Pencil } from 'lucide-react';
 import { CompanyData } from '@/lib/hooks/admin/useCompanies';
 
 interface CompanyCardProps {
@@ -20,6 +20,7 @@ interface CompanyCardProps {
   isSelected: boolean;
   onSelect: (id: string, checked: boolean) => void;
   onView: (company: CompanyData) => void;
+  onEdit: (company: CompanyData) => void;
   onDelete: (company: CompanyData) => void;
   onChangePlan: (company: CompanyData) => void;
   onLoginAs: (companyId: string) => void;
@@ -30,6 +31,7 @@ export function CompanyCard({
   isSelected,
   onSelect,
   onView,
+  onEdit,
   onDelete,
   onChangePlan,
   onLoginAs,
@@ -76,6 +78,10 @@ export function CompanyCard({
               <DropdownMenuItem onClick={() => onView(company)}>
                 <Eye className="h-4 w-4 mr-2" />
                 Ver Detalles
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onEdit(company)}>
+                <Pencil className="h-4 w-4 mr-2" />
+                Editar
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => onLoginAs(company.id)}>
                 <LogIn className="h-4 w-4 mr-2" />
