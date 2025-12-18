@@ -13,15 +13,31 @@ import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-11-17.clover',
-});
+// Initialize Stripe only if API key is available
+const getStripe = () => {
+  const apiKey = process.env.STRIPE_SECRET_KEY;
+  if (!apiKey) {
+    return null;
+  }
+  return new Stripe(apiKey, {
+    apiVersion: '2025-11-17.clover',
+  });
+};
 
 /**
  * POST: Crear Payment Intent para una factura
  */
 export async function POST(request: NextRequest) {
   try {
+    // Check if Stripe is configured
+    const stripe = getStripe();
+    if (!stripe) {
+      return NextResponse.json(
+        { error: 'Stripe no está configurado. Configure STRIPE_SECRET_KEY en las variables de entorno.' },
+        { status: 503 }
+      );
+    }
+
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
