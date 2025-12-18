@@ -110,6 +110,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/admin/configuracion': 'configuracion',
   '/admin/usuarios': 'usuarios',
   '/admin/modulos': 'configuracion',
+    '/admin/sales-team': 'admin_sales_team',
   '/analytics': 'analytics',
   '/str/listings': 'str_listings',
   '/str-housekeeping': 'str_housekeeping',
@@ -206,6 +207,18 @@ const CORE_MODULES = [
   'api_docs',
   'configuracion', // Agregado para que siempre se muestre la configuración de empresa
   'usuarios', // Agregado para que siempre se muestre la gestión de usuarios
+    // Verticales - siempre visibles según rol
+    'flipping_projects',
+    'construction_projects',
+    'professional_projects',
+    'str_listings',
+    'str_bookings',
+    'str_channels',
+    'str_advanced',
+    'str_housekeeping',
+    'admin_fincas',
+    'admin_sales_team',
+    'admin_portales_externos',
 ];
 
 // Navegación core - Funcionalidades principales
