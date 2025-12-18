@@ -9,6 +9,14 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Stripe is configured
+    if (!stripe) {
+      return NextResponse.json(
+        { error: 'Stripe no está configurado en este momento' },
+        { status: 503 }
+      );
+    }
+
     const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role === 'operador') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });

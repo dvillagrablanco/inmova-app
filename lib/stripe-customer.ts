@@ -6,6 +6,11 @@ export async function getOrCreateStripeCustomer(
   email: string,
   name: string
 ): Promise<string> {
+  // Check if Stripe is configured
+  if (!stripe) {
+    throw new Error('Stripe no está configurado');
+  }
+
   // Check if customer already exists in our database
   const existingCustomer = await prisma.stripeCustomer.findUnique({
     where: { tenantId },
@@ -38,6 +43,11 @@ export async function getOrCreateStripeCustomer(
 }
 
 export async function deleteStripeCustomer(tenantId: string): Promise<void> {
+  // Check if Stripe is configured
+  if (!stripe) {
+    throw new Error('Stripe no está configurado');
+  }
+
   const customer = await prisma.stripeCustomer.findUnique({
     where: { tenantId },
   });
