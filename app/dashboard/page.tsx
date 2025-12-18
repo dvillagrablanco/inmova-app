@@ -67,6 +67,12 @@ interface DashboardData {
 
 const COLORS = ['#4F46E5', '#7C3AED', '#EC4899', '#8B5CF6', '#A78BFA']; // Indigo, Violet, Pink gradients
 
+// Helper function to safely format numbers
+const safeFormatNumber = (value: number | null | undefined, locale: string = 'es-ES'): string => {
+  const numValue = value ?? 0;
+  return numValue.toLocaleString(locale);
+};
+
 function DashboardPageContent() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
@@ -189,23 +195,23 @@ function DashboardPageContent() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <KPICard
                 title="Ingresos Mensuales"
-                value={`€${data.kpis.ingresosTotalesMensuales.toLocaleString('es-ES')}`}
+                value={`€${safeFormatNumber(data.kpis.ingresosTotalesMensuales)}`}
                 icon={TrendingUp}
               />
               <KPICard
                 title="Total Propiedades"
-                value={data.kpis.numeroPropiedades}
+                value={data.kpis.numeroPropiedades ?? 0}
                 icon={Building2}
               />
               <KPICard
                 title="Tasa de Ocupación"
-                value={data.kpis.tasaOcupacion}
+                value={data.kpis.tasaOcupacion ?? 0}
                 suffix="%"
                 icon={Percent}
               />
               <KPICard
                 title="Tasa de Morosidad"
-                value={data.kpis.tasaMorosidad}
+                value={data.kpis.tasaMorosidad ?? 0}
                 suffix="%"
                 icon={AlertTriangle}
               />
@@ -215,15 +221,15 @@ function DashboardPageContent() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <KPICard
                 title="Ingresos Netos"
-                value={`€${data.kpis.ingresosNetos.toLocaleString('es-ES')}`}
+                value={`€${safeFormatNumber(data.kpis.ingresosNetos)}`}
                 icon={DollarSign}
               />
               <KPICard
                 title="Gastos Totales"
-                value={`€${data.kpis.gastosTotales.toLocaleString('es-ES')}`}
+                value={`€${safeFormatNumber(data.kpis.gastosTotales)}`}
                 icon={TrendingDown}
               />
-              <KPICard title="Margen Neto" value={data.kpis.margenNeto} suffix="%" icon={Percent} />
+              <KPICard title="Margen Neto" value={data.kpis.margenNeto ?? 0} suffix="%" icon={Percent} />
             </div>
 
             {/* Monthly Income Chart - Optimizado para móvil */}
@@ -365,7 +371,7 @@ function DashboardPageContent() {
                           />
                           <span>{item.name}</span>
                         </div>
-                        <span className="font-semibold">€{item.value.toLocaleString('es-ES')}</span>
+                        <span className="font-semibold">€{safeFormatNumber(item.value)}</span>
                       </div>
                     ))}
                   </div>
