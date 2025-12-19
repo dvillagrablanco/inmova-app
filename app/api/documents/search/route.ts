@@ -28,13 +28,16 @@ export async function GET(request: NextRequest) {
     // Buscar en contratos
     const contracts = await prisma.contract.findMany({
       where: {
-        companyId: user.companyId,
+        unit: {
+          building: {
+            companyId: user.companyId
+          }
+        },
         ...(type === 'contract' && { id: { not: undefined } }),
         ...(query && {
           OR: [
-            { documentoUrl: { contains: query, mode: 'insensitive' } },
-            { tenant: { nombre: { contains: query, mode: 'insensitive' } } },
-            { unit: { nombre: { contains: query, mode: 'insensitive' } } }
+            { tenant: { nombreCompleto: { contains: query, mode: 'insensitive' } } },
+            { unit: { numero: { contains: query, mode: 'insensitive' } } }
           ]
         }),
         ...(dateFrom && { createdAt: { gte: new Date(dateFrom) } }),
@@ -42,14 +45,13 @@ export async function GET(request: NextRequest) {
       },
       select: {
         id: true,
-        documentoUrl: true,
         createdAt: true,
         fechaInicio: true,
         fechaFin: true,
-        tenant: { select: { nombre: true } },
+        tenant: { select: { nombreCompleto: true } },
         unit: {
           select: {
-            nombre: true,
+            numero: true,
             building: { select: { nombre: true } }
           }
         }
@@ -58,20 +60,18 @@ export async function GET(request: NextRequest) {
     });
 
     // Buscar documentos en otras entidades si es necesario
-    const results = contracts
-      .filter(c => c.documentoUrl)
-      .map(c => ({
-        id: c.id,
-        type: 'contract',
-        title: `Contrato - ${c.tenant.nombre}`,
-        description: `${c.unit.building.nombre} - ${c.unit.nombre}`,
-        url: c.documentoUrl,
-        date: c.createdAt,
-        metadata: {
-          fechaInicio: c.fechaInicio,
-          fechaFin: c.fechaFin
-        }
-      }));
+    const results = contracts.map((c: any) => ({
+      id: c.id,
+      type: 'contract',
+      title: `Contrato - ${c.tenant?.nombreCompleto || 'Sin inquilino'}`,
+      description: `${c.unit?.building?.nombre || 'Sin edificio'} - ${c.unit?.numero || 'Sin unidad'}`,
+      url: `/contratos/${c.id}`,
+      date: c.createdAt,
+      metadata: {
+        fechaInicio: c.fechaInicio,
+        fechaFin: c.fechaFin
+      }
+    }));
 
     return NextResponse.json({ results, total: results.length });
   } catch (error) {
