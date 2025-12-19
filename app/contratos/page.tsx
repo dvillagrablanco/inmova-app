@@ -231,7 +231,7 @@ function ContratosPageContent() {
               </div>
 
               {/* Skeleton for contracts list */}
-              <SkeletonList count={3} />
+              <SkeletonList items={3} />
 
               {/* Loading message */}
               <LoadingState message="Cargando contratos..." size="sm" />

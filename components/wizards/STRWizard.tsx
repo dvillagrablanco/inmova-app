@@ -293,7 +293,7 @@ export function STRWizard({ onComplete, onCancel }: STRWizardProps) {
               const channel = AVAILABLE_CHANNELS.find((c) => c.id === channelId);
               if (!channel) return null;
 
-              const status = connectionStatus[channelId] || 'pending';
+              const status = (connectionStatus[channelId] || 'pending') as 'pending' | 'connecting' | 'connected' | 'error';
 
               return (
                 <Card key={channelId}>

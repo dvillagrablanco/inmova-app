@@ -245,7 +245,7 @@ export default function UnidadesPage() {
               </div>
 
               {/* Skeleton for units list */}
-              <SkeletonList count={4} />
+              <SkeletonList items={4} />
 
               {/* Loading message */}
               <LoadingState message="Cargando unidades..." size="sm" />

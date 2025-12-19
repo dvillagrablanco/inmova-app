@@ -19,7 +19,7 @@ export { generateCSSVariables, validateColorContrast, getDefaultBranding, type B
  * Obtiene la configuración de branding para una empresa
  * Si no existe, retorna valores por defecto
  */
-export async function getBrandingConfig(companyId: string): Promise<BrandingConfig | null> {
+export async function getBrandingConfig(companyId: string): Promise<BrandingConfig | BrandingConfigData> {
   try {
     const config = await prisma.brandingConfig.findUnique({
       where: { companyId }
