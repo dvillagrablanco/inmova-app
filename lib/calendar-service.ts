@@ -4,9 +4,12 @@
  */
 
 import { prisma } from './db';
-import { CalendarEventType, CalendarEventPriority } from '@prisma/client';
 import { addDays, addMonths, startOfMonth, endOfMonth } from 'date-fns';
 import logger, { logError } from '@/lib/logger';
+
+// Types for Calendar Events
+type CalendarEventType = 'pago' | 'vencimiento' | 'visita' | 'mantenimiento' | 'inspeccion' | 'reunion' | 'recordatorio' | 'otro';
+type CalendarEventPriority = 'baja' | 'media' | 'alta' | 'critica';
 
 export interface EventoCalendario {
   id: string;
