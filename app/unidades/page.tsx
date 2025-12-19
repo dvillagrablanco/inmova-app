@@ -231,17 +231,17 @@ export default function UnidadesPage() {
 
               {/* Skeleton for search/filters */}
               <div className="grid gap-4 md:grid-cols-3">
-                <SkeletonCard showHeader={false} linesCount={1} />
-                <SkeletonCard showHeader={false} linesCount={1} />
-                <SkeletonCard showHeader={false} linesCount={1} />
+                <SkeletonCard showHeader={false} lines={1} />
+                <SkeletonCard showHeader={false} lines={1} />
+                <SkeletonCard showHeader={false} lines={1} />
               </div>
 
               {/* Skeleton for stats */}
               <div className="grid gap-4 md:grid-cols-4">
-                <SkeletonCard showHeader={true} linesCount={1} />
-                <SkeletonCard showHeader={true} linesCount={1} />
-                <SkeletonCard showHeader={true} linesCount={1} />
-                <SkeletonCard showHeader={true} linesCount={1} />
+                <SkeletonCard showHeader={true} lines={1} />
+                <SkeletonCard showHeader={true} lines={1} />
+                <SkeletonCard showHeader={true} lines={1} />
+                <SkeletonCard showHeader={true} lines={1} />
               </div>
 
               {/* Skeleton for units list */}

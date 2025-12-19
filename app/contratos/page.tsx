@@ -225,9 +225,9 @@ function ContratosPageContent() {
 
               {/* Skeleton for stats */}
               <div className="grid gap-4 md:grid-cols-3">
-                <SkeletonCard showHeader={true} linesCount={1} />
-                <SkeletonCard showHeader={true} linesCount={1} />
-                <SkeletonCard showHeader={true} linesCount={1} />
+                <SkeletonCard showHeader={true} lines={1} />
+                <SkeletonCard showHeader={true} lines={1} />
+                <SkeletonCard showHeader={true} lines={1} />
               </div>
 
               {/* Skeleton for contracts list */}
