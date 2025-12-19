@@ -108,7 +108,7 @@ export async function createB2BInvoice(data: InvoiceData) {
       descuento,
       impuestos,
       total,
-      estado: InvoiceStatus.PENDIENTE,
+      estado: 'PENDIENTE',
       fechaVencimiento,
       conceptos: data.conceptos as any,
       notas: data.notas,
@@ -230,15 +230,15 @@ export async function registerInvoicePayment(
 
   // Actualizar estado de la factura
   const nuevoEstado = paymentData.monto >= invoice.total 
-    ? InvoiceStatus.PAGADA 
-    : InvoiceStatus.PARCIALMENTE_PAGADA;
+    ? 'PAGADA' 
+    : 'PARCIALMENTE_PAGADA';
 
   await prisma.b2BInvoice.update({
     where: { id: invoiceId },
     data: {
       estado: nuevoEstado,
       metodoPago: paymentData.metodoPago,
-      fechaPago: nuevoEstado === InvoiceStatus.PAGADA ? new Date() : undefined,
+      fechaPago: nuevoEstado === 'PAGADA' ? new Date() : undefined,
       stripePaymentIntentId: paymentData.stripePaymentId,
     }
   });
@@ -273,10 +273,10 @@ export async function markOverdueInvoices() {
       fechaVencimiento: {
         lt: today
       },
-      estado: InvoiceStatus.PENDIENTE
+      estado: 'PENDIENTE'
     },
     data: {
-      estado: InvoiceStatus.VENCIDA
+      estado: 'VENCIDA'
     }
   });
 
@@ -295,7 +295,7 @@ export async function sendPaymentReminders() {
   
   const invoices = await prisma.b2BInvoice.findMany({
     where: {
-      estado: InvoiceStatus.PENDIENTE,
+      estado: 'PENDIENTE',
       fechaVencimiento: {
         lte: threeDaysFromNow
       },
@@ -382,8 +382,8 @@ export async function calculateFinancialMetrics(
   const ingresosNetos = invoices.reduce((sum, inv) => sum + inv.total, 0);
 
   const facturasEmitidas = invoices.length;
-  const facturasPagadas = invoices.filter(inv => inv.estado === InvoiceStatus.PAGADA).length;
-  const facturasVencidas = invoices.filter(inv => inv.estado === InvoiceStatus.VENCIDA).length;
+  const facturasPagadas = invoices.filter(inv => inv.estado === 'PAGADA').length;
+  const facturasVencidas = invoices.filter(inv => inv.estado === 'VENCIDA').length;
   const ticketPromedio = facturasEmitidas > 0 ? ingresosNetos / facturasEmitidas : 0;
 
   // Métricas de empresas
@@ -633,9 +633,9 @@ export async function getBillingStats() {
 
   const [totalInvoices, paidInvoices, pendingInvoices, overdueInvoices] = await Promise.all([
     prisma.b2BInvoice.count(),
-    prisma.b2BInvoice.count({ where: { estado: InvoiceStatus.PAGADA } }),
-    prisma.b2BInvoice.count({ where: { estado: InvoiceStatus.PENDIENTE } }),
-    prisma.b2BInvoice.count({ where: { estado: InvoiceStatus.VENCIDA } }),
+    prisma.b2BInvoice.count({ where: { estado: 'PAGADA' } }),
+    prisma.b2BInvoice.count({ where: { estado: 'PENDIENTE' } }),
+    prisma.b2BInvoice.count({ where: { estado: 'VENCIDA' } }),
   ]);
 
   const monthlyRevenue = await prisma.b2BInvoice.aggregate({
@@ -644,7 +644,7 @@ export async function getBillingStats() {
         gte: startOfCurrentMonth,
         lte: endOfCurrentMonth,
       },
-      estado: InvoiceStatus.PAGADA,
+      estado: 'PAGADA',
     },
     _sum: {
       total: true,
@@ -653,7 +653,7 @@ export async function getBillingStats() {
 
   const pendingAmount = await prisma.b2BInvoice.aggregate({
     where: {
-      estado: InvoiceStatus.PENDIENTE,
+      estado: 'PENDIENTE',
     },
     _sum: {
       total: true,
