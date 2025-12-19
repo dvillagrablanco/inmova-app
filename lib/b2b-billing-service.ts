@@ -4,7 +4,6 @@
  */
 
 import { prisma } from './db';
-import { InvoiceStatus } from '@prisma/client';
 import { addMonths, addDays, startOfMonth, endOfMonth, format, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -13,6 +12,9 @@ const IVA_RATE = 0.21; // 21% IVA en España
 // ============================================
 // TIPOS E INTERFACES
 // ============================================
+
+// InvoiceStatus enum (from Prisma schema)
+type InvoiceStatus = 'PENDIENTE' | 'PAGADA' | 'VENCIDA' | 'CANCELADA' | 'PARCIALMENTE_PAGADA';
 
 interface InvoiceItem {
   descripcion: string;
