@@ -49,8 +49,14 @@ export async function GET(request: NextRequest) {
     // Ingresos del mes actual (pagos completados)
     const monthlyIncomeResult = await prisma.payment.aggregate({
       where: {
-        companyId: user.companyId,
-        estado: 'completado',
+        contract: {
+          unit: {
+            building: {
+              companyId: user.companyId
+            }
+          }
+        },
+        estado: 'pagado',
         fechaPago: {
           gte: startOfCurrentMonth,
           lte: endOfCurrentMonth
@@ -65,7 +71,13 @@ export async function GET(request: NextRequest) {
     // Pagos pendientes
     const pendingPaymentsResult = await prisma.payment.aggregate({
       where: {
-        companyId: user.companyId,
+        contract: {
+          unit: {
+            building: {
+              companyId: user.companyId
+            }
+          }
+        },
         estado: 'pendiente'
       },
       _sum: {
