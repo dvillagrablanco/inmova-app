@@ -1,0 +1,191 @@
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { getToken } from 'next-auth/jwt';
+
+/**
+ * Middleware de Next.js para protección de rutas y rate limiting
+ * Se ejecuta en TODAS las requests antes de llegar a las rutas
+ */
+
+// Rutas públicas que NO requieren autenticación
+const PUBLIC_PATHS = [
+  '/api/auth',
+  '/api/auth/signin',
+  '/api/auth/callback',
+  '/api/auth/validate-password',
+  '/api/auth-tenant',
+  '/api/auth-propietario',
+  '/api/auth-proveedor',
+  '/api/webhooks',
+  '/api/stripe/webhook',
+  '/api/b2b-billing/webhook',
+  '/api/digital-signature/webhook',
+  '/api/health',
+  '/api/push/public-key',
+  '/api/cron',
+  '/api/landing/capture-lead',
+  '/api/csrf-token',
+  '/api/docs',
+  '/api/partners/login',
+  '/api/partners/register',
+  '/api/analytics/web-vitals', // Analytics público
+];
+
+// Rate limiting: Almacenamiento en memoria (para producción usar Redis)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+
+// Configuración de rate limiting por tipo de ruta
+const RATE_LIMITS = {
+  auth: { requests: 5, window: 60 * 1000 }, // 5 requests por minuto
+  api: { requests: 100, window: 60 * 1000 }, // 100 requests por minuto
+  payment: { requests: 10, window: 60 * 1000 }, // 10 requests por minuto
+};
+
+function getRateLimitKey(ip: string, path: string): string {
+  return `${ip}:${path}`;
+}
+
+function checkRateLimit(
+  ip: string,
+  path: string,
+  limit: { requests: number; window: number }
+): { allowed: boolean; remaining: number; resetTime: number } {
+  const key = getRateLimitKey(ip, path);
+  const now = Date.now();
+  const record = rateLimitMap.get(key);
+
+  if (!record || now > record.resetTime) {
+    // Nueva ventana de tiempo
+    const resetTime = now + limit.window;
+    rateLimitMap.set(key, { count: 1, resetTime });
+    return { allowed: true, remaining: limit.requests - 1, resetTime };
+  }
+
+  if (record.count >= limit.requests) {
+    // Límite excedido
+    return { allowed: false, remaining: 0, resetTime: record.resetTime };
+  }
+
+  // Incrementar contador
+  record.count++;
+  rateLimitMap.set(key, record);
+  return {
+    allowed: true,
+    remaining: limit.requests - record.count,
+    resetTime: record.resetTime,
+  };
+}
+
+function isPublicPath(pathname: string): boolean {
+  return PUBLIC_PATHS.some(publicPath => pathname.startsWith(publicPath));
+}
+
+function getRateLimitConfig(pathname: string): { requests: number; window: number } {
+  if (pathname.includes('/api/auth') || pathname.includes('/api/partners/login')) {
+    return RATE_LIMITS.auth;
+  }
+  if (pathname.includes('/api/payments') || pathname.includes('/api/stripe')) {
+    return RATE_LIMITS.payment;
+  }
+  return RATE_LIMITS.api;
+}
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Solo procesar rutas API
+  if (!pathname.startsWith('/api/')) {
+    return NextResponse.next();
+  }
+
+  // Obtener IP del cliente (considera headers de proxy)
+  const ip =
+    request.headers.get('x-forwarded-for')?.split(',')[0] ||
+    request.headers.get('x-real-ip') ||
+    'unknown';
+
+  // 1. Rate Limiting (aplicar a TODAS las rutas API)
+  const rateLimitConfig = getRateLimitConfig(pathname);
+  const rateLimitResult = checkRateLimit(ip, pathname, rateLimitConfig);
+
+  if (!rateLimitResult.allowed) {
+    const resetIn = Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000);
+    return NextResponse.json(
+      {
+        error: 'Too many requests',
+        message: `Rate limit exceeded. Try again in ${resetIn} seconds.`,
+      },
+      {
+        status: 429,
+        headers: {
+          'X-RateLimit-Limit': String(rateLimitConfig.requests),
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': String(rateLimitResult.resetTime),
+          'Retry-After': String(resetIn),
+        },
+      }
+    );
+  }
+
+  // 2. Verificar si la ruta es pública
+  if (isPublicPath(pathname)) {
+    const response = NextResponse.next();
+    // Agregar headers de rate limit incluso para rutas públicas
+    response.headers.set('X-RateLimit-Limit', String(rateLimitConfig.requests));
+    response.headers.set('X-RateLimit-Remaining', String(rateLimitResult.remaining));
+    response.headers.set('X-RateLimit-Reset', String(rateLimitResult.resetTime));
+    return response;
+  }
+
+  // 3. Verificar autenticación para rutas protegidas
+  const token = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
+
+  if (!token) {
+    return NextResponse.json(
+      { error: 'Unauthorized', message: 'Authentication required' },
+      { status: 401 }
+    );
+  }
+
+  // 4. Verificar que el usuario esté activo
+  if ('activo' in token && token.activo === false) {
+    return NextResponse.json(
+      { error: 'Forbidden', message: 'Inactive user account' },
+      { status: 403 }
+    );
+  }
+
+  // 5. Verificar permisos de Super Admin para rutas administrativas
+  if (pathname.startsWith('/api/admin/')) {
+    if (token.role !== 'super_admin') {
+      return NextResponse.json(
+        { error: 'Forbidden', message: 'Super admin access required' },
+        { status: 403 }
+      );
+    }
+  }
+
+  // 6. Pasar la request con headers de rate limit
+  const response = NextResponse.next();
+  response.headers.set('X-RateLimit-Limit', String(rateLimitConfig.requests));
+  response.headers.set('X-RateLimit-Remaining', String(rateLimitResult.remaining));
+  response.headers.set('X-RateLimit-Reset', String(rateLimitResult.resetTime));
+
+  return response;
+}
+
+// Configurar qué rutas debe procesar el middleware
+export const config = {
+  matcher: [
+    /*
+     * Match all API routes except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/api/:path*',
+  ],
+};

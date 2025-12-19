@@ -1,7 +1,7 @@
 generator client {
     provider = "prisma-client-js"
     binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
-    output = "/home/ubuntu/homming_vidaro/nextjs_space/nextjs_space/node_modules/.prisma/client"
+    output = "/home/ubuntu/homming_vidaro/nextjs_space/node_modules/.prisma/client"
 }
 
 datasource db {
@@ -387,6 +387,7 @@ model Building {
   @@index([tipo, companyId])
   @@index([companyId, createdAt])
   @@index([companyId, tipo, anoConstructor]) // Nuevo: búsqueda por tipo y año
+  @@index([companyId, activo]) // SEMANA 2: Filtros de edificios activos
   @@map("buildings")
   // Administrador de Fincas
   communityManagement CommunityManagement?
@@ -499,6 +500,7 @@ model Tenant {
   @@index([dni])
   @@index([companyId, scoring])
   @@index([companyId, createdAt]) // Nuevo: tenants por fecha de creación
+  @@index([companyId, activo]) // SEMANA 2: Filtros de inquilinos activos
   @@map("tenants")
 }
 
@@ -697,6 +699,7 @@ model Payment {
   @@index([contractId, fechaVencimiento])
   @@index([estado, fechaVencimiento]) // Nuevo: pagos pendientes ordenados por fecha
   @@index([nivelRiesgo, estado]) // Nuevo: análisis de riesgo de morosidad
+  @@index([contractId, estado, fechaVencimiento]) // SEMANA 2: Query optimization para filtros complejos
   @@map("payments")
 }
 

@@ -1,38 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
-import logger, { logError } from '@/lib/logger';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { prisma } from '@/lib/prisma';
 
-export const dynamic = 'force-dynamic';
-
-export async function PUT(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session || !session.user) {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-  }
-
-  const user = session.user as any;
-  const userId = user.id;
-  const companyId = user.companyId;
-
+export async function PATCH(request: NextRequest) {
   try {
-    // Marcar como leídas solo las notificaciones del usuario en su empresa
-    await prisma.notification.updateMany({
-      where: {
-        companyId: companyId,
-        OR: [
-          { userId: userId },
-          { userId: null },
-        ],
-        leida: false,
-      },
-      data: { leida: true },
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true, companyId: true }
     });
 
-    return NextResponse.json({ message: 'Todas las notificaciones marcadas como leídas' });
+    if (!user?.companyId) {
+      return NextResponse.json({ error: 'Usuario sin empresa' }, { status: 400 });
+    }
+
+    const result = await prisma.notification.updateMany({
+      where: {
+        companyId: user.companyId,
+        OR: [
+          { userId: user.id },
+          { userId: null }
+        ],
+        leida: false
+      },
+      data: {
+        leida: true
+      }
+    });
+
+    return NextResponse.json({ 
+      message: 'Todas las notificaciones marcadas como leídas',
+      count: result.count
+    });
   } catch (error) {
-    logger.error('Error marking all notifications as read:', error);
-    return NextResponse.json({ error: 'Error al marcar notificaciones' }, { status: 500 });
+    console.error('Error al marcar todas como leídas:', error);
+    return NextResponse.json(
+      { error: 'Error al actualizar notificaciones' },
+      { status: 500 }
+    );
   }
 }

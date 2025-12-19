@@ -1,29 +1,53 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
-import logger, { logError } from '@/lib/logger';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { prisma } from '@/lib/prisma';
 
-export const dynamic = 'force-dynamic';
-
-export async function PUT(
-  req: NextRequest,
+export async function PATCH(
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-  }
-
   try {
-    const notification = await prisma.notification.update({
-      where: { id: params.id },
-      data: { leida: true },
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true, companyId: true }
     });
 
-    return NextResponse.json(notification);
+    if (!user?.companyId) {
+      return NextResponse.json({ error: 'Usuario sin empresa' }, { status: 400 });
+    }
+
+    const notification = await prisma.notification.findFirst({
+      where: {
+        id: params.id,
+        companyId: user.companyId,
+        OR: [
+          { userId: user.id },
+          { userId: null }
+        ]
+      }
+    });
+
+    if (!notification) {
+      return NextResponse.json({ error: 'Notificación no encontrada' }, { status: 404 });
+    }
+
+    const updated = await prisma.notification.update({
+      where: { id: params.id },
+      data: { leida: true }
+    });
+
+    return NextResponse.json(updated);
   } catch (error) {
-    logger.error('Error marking notification as read:', error);
-    return NextResponse.json({ error: 'Error al marcar notificación como leída' }, { status: 500 });
+    console.error('Error al marcar notificación como leída:', error);
+    return NextResponse.json(
+      { error: 'Error al actualizar notificación' },
+      { status: 500 }
+    );
   }
 }

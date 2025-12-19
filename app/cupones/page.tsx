@@ -354,18 +354,18 @@ export default function CuponesPage() {
                 >
                   <DialogTrigger asChild>
                     <Button className="gradient-primary shadow-primary">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Nuevo Cupón
+                      <Plus className="h-4 w-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Nuevo Cupón</span>
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogContent className="max-w-2xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>
                         {editingCoupon ? 'Editar Cupón' : 'Crear Nuevo Cupón'}
                       </DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleSubmit} className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="codigo">Código *</Label>
                           <Input
@@ -398,7 +398,7 @@ export default function CuponesPage() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="valor">Valor del Descuento *</Label>
                           <div className="relative">
@@ -452,7 +452,7 @@ export default function CuponesPage() {
                         />
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="usosMaximos">Usos Máximos Totales</Label>
                           <Input
@@ -481,7 +481,7 @@ export default function CuponesPage() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="fechaInicio">Fecha de Inicio *</Label>
                           <Input
@@ -527,7 +527,7 @@ export default function CuponesPage() {
             </div>
 
             {/* KPIs */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium text-gray-600">Total Cupones</CardTitle>
@@ -637,7 +637,7 @@ export default function CuponesPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredCoupons.map((coupon) => (
                   <Card key={coupon.id} className="hover:shadow-lg transition-shadow">
-                    <CardHeader>
+                    <CardHeader className="p-4 sm:p-6">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
