@@ -1,0 +1,122 @@
+name: 🚀 Deploy Sprints 1+2+3 + GitHub Actions auto-deployment
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to inmova.app (Hetzner)
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v3
+      
+      - name: 🔐 Configure SSH
+        env:
+          SSH_KEY: ${{ secrets.HETZNER_SSH_PRIVATE_KEY }}
+          SERVER_HOST: 46.224.120.160
+          SERVER_USER: root
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/hetzner_key
+          chmod 600 ~/.ssh/hetzner_key
+          ssh-keyscan -H $SERVER_HOST >> ~/.ssh/known_hosts
+          
+      - name: 🚀 Deploy to Server
+        env:
+          SERVER_HOST: 46.224.120.160
+          SERVER_USER: root
+          APP_DIR: /opt/inmova-app
+        run: |
+          echo "═══════════════════════════════════════════════════════"
+          echo "  🚀 INMOVA - Deployment to Hetzner Production"
+          echo "  📍 Server: $SERVER_HOST"
+          echo "  📂 Directory: $APP_DIR"
+          echo "  🌐 URL: https://www.inmova.app"
+          echo "═══════════════════════════════════════════════════════"
+          echo ""
+          
+          # Step 1: Create backup
+          ssh -i ~/.ssh/hetzner_key -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST << 'ENDSSH'
+            set -e
+            APP_DIR="/opt/inmova-app"
+            BACKUP_DIR="/opt/backups"
+            TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+            
+            echo "💾 [1/8] Creando backup..."
+            mkdir -p $BACKUP_DIR
+            cd $APP_DIR
+            tar -czf $BACKUP_DIR/backup_${TIMESTAMP}.tar.gz \
+              --exclude='node_modules' \
+              --exclude='.next' \
+              --exclude='uploads' \
+              --exclude='.git' \
+              . 2>/dev/null || true
+            echo "   ✓ Backup creado: backup_${TIMESTAMP}.tar.gz"
+            
+            echo "🛑 [2/8] Deteniendo aplicación..."
+            pm2 stop inmova-app || echo "   ⚠ App no estaba corriendo"
+          ENDSSH
+          
+          # Step 2: Sync files with rsync
+          echo "📡 [3/8] Sincronizando archivos..."
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/hetzner_key -o StrictHostKeyChecking=no" \
+            --exclude='node_modules' \
+            --exclude='.next' \
+            --exclude='uploads' \
+            --exclude='.git' \
+            --exclude='.env' \
+            ./ $SERVER_USER@$SERVER_HOST:$APP_DIR/
+          echo "   ✓ Archivos sincronizados"
+          
+          # Step 3: Install dependencies, build, and restart
+          ssh -i ~/.ssh/hetzner_key -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST << 'ENDSSH'
+            set -e
+            APP_DIR="/opt/inmova-app"
+            cd $APP_DIR
+            
+            echo "📦 [4/8] Instalando dependencias..."
+            yarn install --frozen-lockfile --production=false
+            echo "   ✓ Dependencias instaladas"
+            
+            echo "🗄️  [5/8] Generando Prisma Client..."
+            yarn prisma generate
+            echo "   ✓ Prisma Client generado"
+            
+            echo "🏗️  [6/8] Construyendo aplicación con 8GB de memoria..."
+            NODE_OPTIONS="--max-old-space-size=8192" yarn build
+            echo "   ✓ Build completado"
+            
+            echo "▶️  [7/8] Reiniciando aplicación..."
+            pm2 restart inmova-app
+            pm2 save
+            echo "   ✓ Aplicación reiniciada"
+            
+            echo "🔍 [8/8] Verificando estado..."
+            sleep 5
+            pm2 list | grep inmova-app
+            
+            echo ""
+            echo "═══════════════════════════════════════════════════════"
+            echo "  ✅ DEPLOYMENT COMPLETADO EXITOSAMENTE"
+            echo "  🌐 https://www.inmova.app está actualizado"
+            echo "  📊 Verificar logs: pm2 logs inmova-app"
+            echo "═══════════════════════════════════════════════════════"
+          ENDSSH
+      
+      - name: ✅ Deployment Success Notification
+        if: success()
+        run: |
+          echo "🎉 Deployment to Hetzner completed successfully!"
+          echo "📱 Application is now live at: https://www.inmova.app"
+          
+      - name: ❌ Deployment Failure Notification
+        if: failure()
+        run: |
+          echo "⚠️ Deployment failed! Please check the logs above."
+          echo "🔄 To rollback, SSH to server and restore from backup in /opt/backups/"
