@@ -239,7 +239,7 @@ export default function PlanesPage() {
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <div className="mb-4">
-              <BackButton fallbackUrl="/dashboard" />
+              <BackButton href="/dashboard" />
             </div>
             <div className="mb-6 flex items-center justify-between">
               <div>
