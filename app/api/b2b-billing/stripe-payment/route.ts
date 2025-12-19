@@ -144,6 +144,14 @@ export async function POST(request: NextRequest) {
  * PUT: Confirmar pago exitoso (webhook o manual)
  */
 export async function PUT(request: NextRequest) {
+  const stripe = getStripe();
+  if (!stripe) {
+    return NextResponse.json(
+      { error: 'Stripe no está configurado' },
+      { status: 500 }
+    );
+  }
+
   try {
     const body = await request.json();
     const { paymentIntentId } = body;

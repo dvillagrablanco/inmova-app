@@ -90,6 +90,12 @@ export async function POST(request: NextRequest) {
  * Manejar pago exitoso
  */
 async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
+  const stripe = getStripe();
+  if (!stripe) {
+    logger.error('Stripe no está configurado en handlePaymentSuccess');
+    return;
+  }
+
   const { invoiceId } = paymentIntent.metadata;
 
   if (!invoiceId) {
