@@ -3,14 +3,15 @@
  * Proporciona estructura consistente y accesibilidad WCAG 2.1 AA
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { InfoTooltip } from '@/components/ui/info-tooltip';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface BaseFieldProps {
   id: string;
@@ -71,6 +72,9 @@ export function AccessibleInputField({
 }: InputFieldProps) {
   const hasError = !!error;
   const describedBy = `${id}-error ${id}-help`.trim();
+  const [showPassword, setShowPassword] = useState(false);
+  const isPasswordField = type === 'password';
+  const inputType = isPasswordField && showPassword ? 'text' : type;
 
   return (
     <div className={cn('space-y-2', className)}>
@@ -86,26 +90,46 @@ export function AccessibleInputField({
         {tooltip && <InfoTooltip content={tooltip} />}
       </div>
 
-      <Input
-        id={id}
-        name={name}
-        type={type}
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
-        required={required}
-        aria-invalid={hasError}
-        aria-describedby={hasError || helpText ? describedBy : undefined}
-        aria-required={required}
-        min={min}
-        max={max}
-        step={step}
-        className={cn(
-          hasError && 'border-red-500 focus-visible:ring-red-500',
-          'transition-colors'
+      <div className="relative">
+        <Input
+          id={id}
+          name={name}
+          type={inputType}
+          placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          disabled={disabled}
+          required={required}
+          aria-invalid={hasError}
+          aria-describedby={hasError || helpText ? describedBy : undefined}
+          aria-required={required}
+          min={min}
+          max={max}
+          step={step}
+          className={cn(
+            hasError && 'border-red-500 focus-visible:ring-red-500',
+            isPasswordField && 'pr-12',
+            'transition-colors'
+          )}
+        />
+        {isPasswordField && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+            onClick={() => setShowPassword(!showPassword)}
+            aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+            tabIndex={-1}
+          >
+            {showPassword ? (
+              <EyeOff className="h-4 w-4 text-gray-500" aria-hidden="true" />
+            ) : (
+              <Eye className="h-4 w-4 text-gray-500" aria-hidden="true" />
+            )}
+          </Button>
         )}
-      />
+      </div>
 
       {helpText && !hasError && (
         <p id={`${id}-help`} className="text-sm text-gray-600">

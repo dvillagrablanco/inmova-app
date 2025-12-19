@@ -702,6 +702,75 @@ export const MODULOS_CATALOGO = [
 ];
 
 /**
+ * MAPEO DE MODELOS DE NEGOCIO A MÓDULOS RECOMENDADOS
+ * Cada modelo de negocio tiene módulos específicos que son más relevantes
+ */
+export const BUSINESS_MODEL_MODULES: Record<string, string[]> = {
+  RESIDENCIAL_LARGA: [
+    // Core
+    'dashboard', 'edificios', 'unidades', 'inquilinos', 'contratos', 'pagos',
+    'mantenimiento', 'chat', 'calendario',
+    // Específicos
+    'documentos', 'proveedores', 'gastos', 'reportes', 'notificaciones',
+    'incidencias', 'anuncios', 'reservas', 'portal_inquilino',
+    'crm', 'screening', 'valoraciones', 'publicaciones'
+  ],
+  TURISTICO_STR: [
+    // Core
+    'dashboard', 'edificios', 'unidades', 'calendario', 'chat',
+    // STR Específicos
+    'str_listings', 'str_bookings', 'str_channels',
+    'documentos', 'reportes', 'notificaciones',
+    'pricing_dinamico', 'galerias', 'tours_virtuales',
+    'analytics', 'bi', 'portal_inquilino'
+  ],
+  COLIVING_MEDIA: [
+    // Core
+    'dashboard', 'edificios', 'unidades', 'inquilinos', 'contratos', 'pagos',
+    'mantenimiento', 'chat', 'calendario',
+    // Coliving Específicos
+    'room_rental', 'reservas', 'anuncios', 'galerias',
+    'comunidad_social', 'economia_circular', 'marketplace',
+    'portal_inquilino', 'documentos', 'reportes', 'notificaciones'
+  ],
+  HOTEL_APARTHOT: [
+    // Core
+    'dashboard', 'edificios', 'unidades', 'calendario',
+    // Hotel Específicos
+    'str_bookings', 'str_channels', 'pricing_dinamico',
+    'mantenimiento', 'proveedores', 'gastos', 'reportes',
+    'analytics', 'bi', 'documentos', 'notificaciones'
+  ],
+  HOUSE_FLIPPING: [
+    // Core
+    'dashboard', 'edificios', 'unidades',
+    // Flipping Específicos
+    'flipping_projects', 'proveedores', 'gastos', 'documentos',
+    'mantenimiento', 'reportes', 'analytics', 'bi',
+    'valoraciones', 'galerias', 'tours_virtuales',
+    'crm', 'notificaciones', 'calendario'
+  ],
+  CONSTRUCCION: [
+    // Core
+    'dashboard', 'edificios', 'unidades',
+    // Construcción Específicos
+    'construction_projects', 'proveedores', 'gastos', 'documentos',
+    'mantenimiento', 'reportes', 'calendario',
+    'valoraciones', 'galerias', 'legal',
+    'crm', 'notificaciones', 'analytics'
+  ],
+  SERVICIOS_PROF: [
+    // Core
+    'dashboard', 'calendario', 'chat',
+    // Profesional Específicos
+    'professional_projects', 'crm', 'documentos',
+    'valoraciones', 'galerias', 'tours_virtuales',
+    'reportes', 'notificaciones', 'marketplace',
+    'edificios', 'unidades', 'proveedores'
+  ]
+};
+
+/**
  * DEFINICIÓN DE PACKS DE SUSCRIPCIÓN
  */
 export const SUBSCRIPTION_PACKS = [
@@ -834,14 +903,33 @@ export async function isModuleActiveForCompany(
 
 /**
  * Obtiene todos los módulos activos de una empresa
+ * Considera: 1) Módulos core, 2) Modelos de negocio activos, 3) Módulos activados manualmente
  */
 export async function getActiveModulesForCompany(companyId: string): Promise<string[]> {
-  // Obtener módulos core (siempre activos)
+  // 1. Obtener módulos core (siempre activos)
   const coreModules = MODULOS_CATALOGO
     .filter(m => m.esCore)
     .map(m => m.codigo);
 
-  // Obtener módulos activados manualmente
+  // 2. Obtener modelos de negocio activos de la empresa
+  const businessModels = await prisma.companyBusinessModel.findMany({
+    where: {
+      companyId,
+      activo: true
+    },
+    select: {
+      businessModel: true
+    }
+  });
+
+  // Obtener módulos según los modelos de negocio activos
+  const businessModelModules: string[] = [];
+  for (const bm of businessModels) {
+    const modules = BUSINESS_MODEL_MODULES[bm.businessModel] || [];
+    businessModelModules.push(...modules);
+  }
+
+  // 3. Obtener módulos activados manualmente
   const activeModules = await prisma.companyModule.findMany({
     where: {
       companyId,
@@ -854,8 +942,14 @@ export async function getActiveModulesForCompany(companyId: string): Promise<str
 
   const activatedModules = activeModules.map(m => m.moduloCodigo);
 
-  // Combinar y eliminar duplicados
-  return Array.from(new Set([...coreModules, ...activatedModules]));
+  // 4. Combinar todas las fuentes y eliminar duplicados
+  const allModules = [
+    ...coreModules,
+    ...businessModelModules,
+    ...activatedModules
+  ];
+
+  return Array.from(new Set(allModules));
 }
 
 /**
@@ -931,4 +1025,76 @@ export async function initializeModulesForCompany(
   for (const moduloCodigo of pack.modulosIncluidos) {
     await activateModuleForCompany(companyId, moduloCodigo, activadoPor);
   }
+}
+
+/**
+ * Obtiene los modelos de negocio activos de una empresa
+ */
+export async function getBusinessModelsForCompany(companyId: string): Promise<string[]> {
+  const businessModels = await prisma.companyBusinessModel.findMany({
+    where: {
+      companyId,
+      activo: true
+    },
+    select: {
+      businessModel: true
+    }
+  });
+
+  return businessModels.map(bm => bm.businessModel);
+}
+
+/**
+ * Activa un modelo de negocio para una empresa
+ * Esto automáticamente activará los módulos relevantes
+ */
+export async function activateBusinessModelForCompany(
+  companyId: string,
+  businessModel: string
+): Promise<void> {
+  await prisma.companyBusinessModel.upsert({
+    where: {
+      companyId_businessModel: {
+        companyId,
+        businessModel: businessModel as any
+      }
+    },
+    update: {
+      activo: true,
+      updatedAt: new Date()
+    },
+    create: {
+      companyId,
+      businessModel: businessModel as any,
+      activo: true
+    }
+  });
+}
+
+/**
+ * Desactiva un modelo de negocio para una empresa
+ */
+export async function deactivateBusinessModelForCompany(
+  companyId: string,
+  businessModel: string
+): Promise<void> {
+  await prisma.companyBusinessModel.update({
+    where: {
+      companyId_businessModel: {
+        companyId,
+        businessModel: businessModel as any
+      }
+    },
+    data: {
+      activo: false,
+      updatedAt: new Date()
+    }
+  });
+}
+
+/**
+ * Obtiene los módulos recomendados para un modelo de negocio específico
+ */
+export function getModulesForBusinessModel(businessModel: string): string[] {
+  return BUSINESS_MODEL_MODULES[businessModel] || [];
 }

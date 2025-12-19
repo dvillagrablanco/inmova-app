@@ -111,12 +111,17 @@ export default function GastosPage() {
     try {
       const res = await fetch('/api/expenses');
       if (res.ok) {
-        const data = await res.json();
-        setExpenses(data);
+        const response = await res.json();
+        // El API retorna { data: expenses[], meta: {...} }
+        setExpenses(response.data || response || []);
+      } else {
+        toast.error('Error al cargar gastos');
+        setExpenses([]);
       }
     } catch (error) {
       logger.error('Error fetching expenses:', error);
       toast.error('Error al cargar gastos');
+      setExpenses([]);
     } finally {
       setLoading(false);
     }

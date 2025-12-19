@@ -281,6 +281,9 @@ model User {
 
   // Workflows creados por el usuario
   createdWorkflows Workflow[]
+  
+  // Emails programados (sistema de automatización)
+  scheduledEmails ScheduledEmail[]
 
   @@index([email])
   @@index([companyId])
@@ -11250,4 +11253,32 @@ model WorkflowExecution {
   @@index([status])
   @@index([startedAt])
   @@map("workflow_executions")
+}
+
+// ========================================
+// SISTEMA DE EMAILS AUTOM\u00c1TICOS
+// ========================================
+
+model ScheduledEmail {
+  id          String   @id @default(cuid())
+  userId      String
+  templateId  String   // 'welcome', 'activation_reminder', etc.
+  scheduledFor DateTime
+  sentAt      DateTime?
+  trigger     String   // EmailTrigger enum value
+  status      String   @default("pending") // pending, sent, failed, cancelled
+  metadata    Json?    // Datos adicionales para el template
+  error       String?  // Error si el env\u00edo fall\u00f3
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relaciones
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([status])
+  @@index([scheduledFor])
+  @@index([trigger])
+  @@map("scheduled_emails")
 }

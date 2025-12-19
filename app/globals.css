@@ -197,6 +197,235 @@ textarea:valid:not(:placeholder-shown) {
   @apply border-green-300;
 }
 
+/* ==============================================
+   MEJORAS DE ACCESIBILIDAD Y CONTRASTE DE BOTONES
+   ============================================== */
+
+/* Asegurar contraste mínimo WCAG AA (4.5:1) en todos los botones */
+button, 
+[role="button"],
+.btn,
+input[type="submit"],
+input[type="button"],
+input[type="reset"] {
+  /* Mejorar la tipografía para legibilidad */
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  
+  /* Asegurar que el texto no sea transparente */
+  color: inherit;
+  
+  /* Cursor pointer para indicar interactividad */
+  cursor: pointer;
+  
+  /* Transiciones suaves */
+  transition: all 0.2s ease-in-out;
+}
+
+/* Mejorar visibilidad en estado hover */
+button:hover:not(:disabled), 
+[role="button"]:hover:not(:disabled),
+.btn:hover:not(:disabled) {
+  /* Aumentar contraste en hover */
+  filter: brightness(0.95) contrast(1.1);
+  transform: translateY(-1px);
+}
+
+/* Estado activo/pressed */
+button:active:not(:disabled), 
+[role="button"]:active:not(:disabled),
+.btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Botones deshabilitados con mejor contraste */
+button:disabled,
+[role="button"]:disabled,
+.btn:disabled,
+button[disabled],
+[role="button"][disabled] {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  background-color: #9ca3af !important;
+  color: #4b5563 !important;
+  border-color: #d1d5db !important;
+}
+
+/* Foco visible para accesibilidad de teclado */
+button:focus-visible,
+[role="button"]:focus-visible,
+.btn:focus-visible {
+  outline: 3px solid #4f46e5 !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1) !important;
+}
+
+/* Modo oscuro - asegurar contraste alto */
+.dark button:not([class*="bg-"]),
+.dark [role="button"]:not([class*="bg-"]) {
+  background-color: #4f46e5;
+  color: #ffffff;
+}
+
+.dark button:disabled,
+.dark [role="button"]:disabled {
+  background-color: #374151 !important;
+  color: #9ca3af !important;
+}
+
+/* Botones con iconos - mejorar alineación visual */
+button svg,
+[role="button"] svg,
+.btn svg {
+  flex-shrink: 0;
+}
+
+/* Asegurar que botones pequeños sean accesibles (mínimo 44x44px táctil) */
+@media (pointer: coarse) {
+  button,
+  [role="button"],
+  .btn {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.75rem 1rem;
+  }
+}
+
+/* Botones de acción primaria - máximo contraste */
+button[class*="primary"],
+button[class*="indigo"],
+.btn-primary {
+  background-color: #4338ca !important;
+  color: #ffffff !important;
+  border: 2px solid transparent;
+}
+
+button[class*="primary"]:hover,
+button[class*="indigo"]:hover,
+.btn-primary:hover {
+  background-color: #3730a3 !important;
+  border-color: #312e81;
+}
+
+/* Botones de acción secundaria */
+button[class*="secondary"],
+button[class*="gray"],
+.btn-secondary {
+  background-color: #e5e7eb !important;
+  color: #1f2937 !important;
+  border: 2px solid #d1d5db;
+}
+
+button[class*="secondary"]:hover,
+button[class*="gray"]:hover,
+.btn-secondary:hover {
+  background-color: #d1d5db !important;
+  color: #111827 !important;
+}
+
+/* Botones destructivos */
+button[class*="destructive"],
+button[class*="danger"],
+button[class*="red"],
+.btn-danger,
+.btn-destructive {
+  background-color: #dc2626 !important;
+  color: #ffffff !important;
+}
+
+button[class*="destructive"]:hover,
+button[class*="danger"]:hover,
+button[class*="red"]:hover,
+.btn-danger:hover,
+.btn-destructive:hover {
+  background-color: #b91c1c !important;
+}
+
+/* Botones de éxito */
+button[class*="success"],
+button[class*="green"],
+.btn-success {
+  background-color: #16a34a !important;
+  color: #ffffff !important;
+}
+
+button[class*="success"]:hover,
+button[class*="green"]:hover,
+.btn-success:hover {
+  background-color: #15803d !important;
+}
+
+/* Botones ghost/transparentes - asegurar visibilidad */
+button[class*="ghost"],
+.btn-ghost {
+  background-color: transparent !important;
+  color: #4338ca !important;
+  border: 1px solid transparent;
+}
+
+button[class*="ghost"]:hover,
+.btn-ghost:hover {
+  background-color: #eef2ff !important;
+  color: #3730a3 !important;
+  border-color: #c7d2fe;
+}
+
+.dark button[class*="ghost"],
+.dark .btn-ghost {
+  color: #a5b4fc !important;
+}
+
+.dark button[class*="ghost"]:hover,
+.dark .btn-ghost:hover {
+  background-color: rgba(79, 70, 229, 0.1) !important;
+  color: #c7d2fe !important;
+}
+
+/* Botones outline - mejor contraste */
+button[class*="outline"],
+.btn-outline {
+  background-color: transparent !important;
+  color: #4338ca !important;
+  border: 2px solid #4338ca !important;
+}
+
+button[class*="outline"]:hover,
+.btn-outline:hover {
+  background-color: #eef2ff !important;
+  color: #3730a3 !important;
+  border-color: #3730a3 !important;
+}
+
+/* Asegurar que los botones en formularios sean visibles */
+form button[type="submit"],
+form input[type="submit"] {
+  background-color: #4338ca !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  min-height: 44px;
+  padding: 0.75rem 2rem;
+}
+
+form button[type="submit"]:hover,
+form input[type="submit"]:hover {
+  background-color: #3730a3 !important;
+}
+
+/* Botones en cards y modals - asegurar visibilidad */
+[class*="card"] button,
+[class*="modal"] button,
+[class*="dialog"] button {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* Links que funcionan como botones */
+a[role="button"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none !important;
+}
+
 /* Loading states */
 .loading-skeleton {
   @apply animate-pulse bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%];

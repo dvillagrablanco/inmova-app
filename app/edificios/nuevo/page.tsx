@@ -28,6 +28,7 @@ import {
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
 import { LoadingState } from '@/components/ui/loading-state';
+import { BackButton } from '@/components/ui/back-button';
 import { MobileFormWizard, FormStep } from '@/components/ui/mobile-form-wizard';
 
 export default function NuevoEdificioPage() {
@@ -129,9 +130,12 @@ export default function NuevoEdificioPage() {
             </div>
 
             {/* Header Section */}
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Nuevo Edificio</h1>
-              <p className="text-muted-foreground">Registra un nuevo edificio en tu cartera</p>
+            <div className="space-y-4">
+              <BackButton href="/edificios" label="Volver a Edificios" />
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Nuevo Edificio</h1>
+                <p className="text-muted-foreground">Registra un nuevo edificio en tu cartera</p>
+              </div>
             </div>
 
             {/* Formulario con Wizard para móvil */}

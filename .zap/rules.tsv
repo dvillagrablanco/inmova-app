@@ -1,0 +1,26 @@
+# OWASP ZAP Security Scan Rules
+# Format: <rule-id>\t<threshold>\t<ignore>
+
+# Ignorar falsos positivos comunes
+10096\tOFF\tFalse Positive - Timestamp Disclosure
+10202\tOFF\tDevelopment Mode - Acceptable in Testing
+
+# Reglas críticas - No ignorar
+40012\tHIGH\tCross Site Scripting (Reflected)
+40014\tHIGH\tCross Site Scripting (Persistent)
+40016\tHIGH\tCross Site Scripting (DOM Based)
+40018\tHIGH\tSQL Injection
+90019\tHIGH\tCode Injection
+90020\tHIGH\tRemote OS Command Injection
+
+# Reglas de advertencia
+10038\tMEDIUM\tContent Security Policy (CSP) Header Not Set
+10055\tMEDIUM\tCSP: Wildcard Directive
+10063\tMEDIUM\tFeature Policy Header Not Set
+10094\tMEDIUM\tCookie Without Secure Flag
+10095\tMEDIUM\tCookie Without HttpOnly Flag
+10098\tMEDIUM\tCross-Domain Misconfiguration
+
+# Reglas informativas
+10021\tINFO\tX-Content-Type-Options Header Missing
+10020\tINFO\tX-Frame-Options Header Not Set

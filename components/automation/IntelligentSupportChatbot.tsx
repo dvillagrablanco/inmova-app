@@ -202,27 +202,58 @@ export default function IntelligentSupportChatbot() {
 
   return (
     <>
-      {/* Botón flotante */}
+      {/* Botón flotante mejorado con emoticono */}
       <AnimatePresence>
         {!isOpen && (
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
+            whileHover={{ scale: 1.05 }}
             className="fixed bottom-6 right-6 z-50"
           >
             <Button
               size="lg"
               onClick={() => setIsOpen(true)}
-              className="h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all"
+              className="h-16 w-16 rounded-full shadow-2xl hover:shadow-3xl transition-all bg-gradient-to-br from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white border-2 border-white relative overflow-hidden group"
+              aria-label="Abrir chat de asistencia"
             >
-              <MessageCircle className="h-6 w-6" />
+              {/* Efecto de brillo en hover */}
+              <div className="absolute inset-0 bg-white/20 group-hover:bg-white/30 transition-colors" />
+              
+              {/* Emoticono del asistente */}
+              <span className="text-3xl relative z-10 group-hover:scale-110 transition-transform" role="img" aria-label="Asistente">
+                🤖
+              </span>
             </Button>
+            
+            {/* Indicador de disponibilidad pulsante */}
             <motion.div
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ repeat: Infinity, duration: 2 }}
-              className="absolute -top-1 -right-1 h-4 w-4 bg-green-500 rounded-full border-2 border-white"
-            />
+              animate={{ 
+                scale: [1, 1.3, 1],
+                opacity: [1, 0.7, 1]
+              }}
+              transition={{ 
+                repeat: Infinity, 
+                duration: 2,
+                ease: "easeInOut"
+              }}
+              className="absolute -top-1 -right-1 h-5 w-5 bg-green-500 rounded-full border-3 border-white shadow-lg"
+              aria-label="En línea"
+            >
+              <span className="sr-only">Asistente disponible</span>
+            </motion.div>
+            
+            {/* Tooltip informativo */}
+            <motion.div
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 2 }}
+              className="absolute right-full mr-4 top-1/2 -translate-y-1/2 bg-gray-900 text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap shadow-xl pointer-events-none hidden sm:block"
+            >
+              💬 ¿Necesitas ayuda?
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-full border-8 border-transparent border-l-gray-900" />
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
