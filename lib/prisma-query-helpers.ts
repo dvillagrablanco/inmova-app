@@ -95,7 +95,7 @@ export async function getOptimizedContracts(
     },
   };
 
-  if (filters.estado) where.estado = filters.estado;
+  if (filters.estado) where.estado = filters.estado as any;
   if (filters.tenantId) where.tenantId = filters.tenantId;
   if (filters.unitId) where.unitId = filters.unitId;
 
@@ -225,13 +225,12 @@ export async function getOptimizedPayments(
     },
   };
 
-  if (filters.estado) where.estado = filters.estado;
+  if (filters.estado) where.estado = filters.estado as any;
   if (filters.contractId) where.contractId = filters.contractId;
   if (filters.tenantId) {
-    where.contract = {
-      ...where.contract,
-      tenantId: filters.tenantId,
-    };
+    if (where.contract && typeof where.contract === 'object' && !Array.isArray(where.contract)) {
+      (where.contract as any).tenantId = filters.tenantId;
+    }
   }
   if (filters.dateFrom || filters.dateTo) {
     where.fechaVencimiento = {};
