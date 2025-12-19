@@ -40,7 +40,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { Skeleton } from '@/components/ui/skeleton';
-import { SkeletonList } from '@/components/ui/skeleton-card';
+import { SkeletonCard } from '@/components/ui/skeleton-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { FilterChips } from '@/components/ui/filter-chips';
 import { ButtonWithLoading } from '@/components/ui/button-with-loading';
@@ -211,10 +211,11 @@ function InquilinosPageContent() {
             <div className="max-w-7xl mx-auto">
               <Skeleton className="h-8 w-48 mb-6" />
               <Skeleton className="h-10 w-full max-w-md mb-6" />
-              <SkeletonList
-                items={5}
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-              />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <SkeletonCard key={i} />
+                ))}
+              </div>
             </div>
           </main>
         </div>
