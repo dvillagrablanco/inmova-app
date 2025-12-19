@@ -1,3 +1,0 @@
-Nombre del Edificio,Unidad,Nombre del Inquilino,Email del Inquilino,Fecha de Inicio (DD/MM/AAAA),Fecha de Fin (DD/MM/AAAA),Renta Mensual (€),Fianza (€),Día de Cobro (1-31),Depósito Inicial (€),Tipo de Contrato (indefinido/temporal),Renovación Automática (SI/NO),Notas
-Residencial Vista Mar,1A,Juan Pérez García,juan.perez@email.com,01/01/2020,31/12/2026,1200,2400,5,3600,temporal,SI,Contrato con opción a compra
-Edificio Comercial Centro,B1,María López Fernández,maria.lopez@email.com,15/06/2021,14/06/2024,1800,3600,1,5400,temporal,NO,Renovación pendiente de negociación
