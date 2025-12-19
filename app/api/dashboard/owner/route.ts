@@ -32,13 +32,13 @@ export async function GET(request: NextRequest) {
 
     // Total de unidades
     const totalUnits = await prisma.unit.count({
-      where: { companyId: user.companyId }
+      where: { building: { companyId: user.companyId } }
     });
 
     // Unidades ocupadas
     const occupiedUnits = await prisma.unit.count({
       where: {
-        companyId: user.companyId,
+        building: { companyId: user.companyId },
         estado: 'ocupada'
       }
     });
