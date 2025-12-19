@@ -321,11 +321,12 @@ export function STRWizard({ onComplete, onCancel }: STRWizardProps) {
                     </div>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    {status === 'pending' && (
+                    {(status === 'pending' || status === 'connecting') && (
                       <Button
                         type="button"
                         size="sm"
                         className="w-full"
+                        disabled={status === 'connecting'}
                         onClick={async () => {
                           setConnectionStatus({ ...connectionStatus, [channelId]: 'connecting' });
                           

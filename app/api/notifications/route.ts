@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Solo admins pueden crear notificaciones
-    if (user.role !== 'admin' && user.role !== 'superadmin') {
+    if (user.role !== 'super_admin' && user.role !== 'administrador') {
       return NextResponse.json({ error: 'Sin permisos' }, { status: 403 });
     }
 
