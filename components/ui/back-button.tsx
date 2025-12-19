@@ -6,41 +6,83 @@ import { ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface BackButtonProps {
-  fallbackUrl?: string;
+  /**
+   * Ruta personalizada a la que volver. Si no se proporciona, usa router.back()
+   */
+  href?: string;
+  /**
+   * Texto del botón. Por defecto: "Atrás"
+   */
   label?: string;
-  variant?: 'default' | 'ghost' | 'outline' | 'secondary' | 'destructive' | 'link';
+  /**
+   * Variante del botón
+   */
+  variant?: 'default' | 'outline' | 'ghost' | 'link' | 'secondary';
+  /**
+   * Tamaño del botón
+   */
   size?: 'default' | 'sm' | 'lg' | 'icon';
+  /**
+   * Clases CSS adicionales
+   */
   className?: string;
+  /**
+   * Si true, muestra solo el icono sin texto
+   */
+  iconOnly?: boolean;
 }
 
+/**
+ * Componente de botón de navegación "Atrás"
+ * Proporciona una forma consistente de volver a la página anterior
+ * 
+ * Ejemplos de uso:
+ * ```tsx
+ * // Botón básico que vuelve a la página anterior
+ * <BackButton />
+ * 
+ * // Botón con ruta personalizada
+ * <BackButton href="/edificios" label="Volver a Edificios" />
+ * 
+ * // Botón solo icono
+ * <BackButton iconOnly variant="ghost" />
+ * ```
+ */
 export function BackButton({
-  fallbackUrl = '/dashboard',
-  label = 'Volver',
-  variant = 'ghost',
+  href,
+  label = 'Atrás',
+  variant = 'outline',
   size = 'default',
-  className
+  className,
+  iconOnly = false
 }: BackButtonProps) {
   const router = useRouter();
 
-  const handleBack = () => {
-    // Intentar ir atrás en el historial
-    if (window.history.length > 1) {
-      router.back();
+  const handleClick = () => {
+    if (href) {
+      router.push(href);
     } else {
-      // Si no hay historial, ir a la URL de fallback
-      router.push(fallbackUrl);
+      router.back();
     }
   };
 
   return (
     <Button
       variant={variant}
-      size={size}
-      onClick={handleBack}
-      className={cn('flex items-center gap-2', className)}
+      size={iconOnly ? 'icon' : size}
+      onClick={handleClick}
+      className={cn(
+        'gap-2',
+        iconOnly && 'h-9 w-9',
+        className
+      )}
+      aria-label={iconOnly ? label : undefined}
     >
-      <ArrowLeft className="h-4 w-4" />
-      {label}
+      <ArrowLeft className={cn(
+        'h-4 w-4',
+        !iconOnly && 'flex-shrink-0'
+      )} />
+      {!iconOnly && <span>{label}</span>}
     </Button>
   );
 }

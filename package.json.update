@@ -1,0 +1,27 @@
+// INSTRUCCIONES: Añadir estos scripts al package.json existente en la sección "scripts"
+
+{
+  "scripts": {
+    // Tests existentes (mantener)
+    "test": "jest --watch",
+    "test:ci": "jest --ci --coverage --maxWorkers=2",
+    "test:unit": "vitest",
+    "test:unit:ui": "vitest --ui",
+    
+    // NUEVOS SCRIPTS DE TESTING
+    "test:integration": "jest --ci --testPathPatterns=__tests__/integration --maxWorkers=2",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug",
+    "test:visual": "playwright test --grep @visual",
+    "test:a11y": "node scripts/run-pa11y.js",
+    "test:security": "echo 'Security tests run in CI/CD with OWASP ZAP'",
+    "test:load": "jmeter -n -t jmeter/load-test.jmx -l results.jtl -e -o jmeter-report/",
+    
+    // SCRIPTS DE UTILIDAD
+    "test:all": "yarn test:ci && yarn test:integration && yarn test:e2e",
+    "test:quick": "jest --ci --bail --findRelatedTests",
+    "coverage:view": "open coverage/lcov-report/index.html",
+    "lighthouse:audit": "node scripts/lighthouse-audit.js"
+  }
+}

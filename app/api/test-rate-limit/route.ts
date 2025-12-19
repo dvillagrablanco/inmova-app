@@ -5,7 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { checkRateLimit, getRequestIdentifier } from '@/lib/rate-limit';
+import { checkRateLimit } from '@/lib/rate-limit';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -17,7 +17,8 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    const identifier = getRequestIdentifier(request, session?.user?.id);
+    // Get identifier from session or IP
+    const identifier = session?.user?.id || request.headers.get('x-forwarded-for') || 'anonymous';
 
     // Aplicar rate limit de API autenticado o público
     const limitType = session?.user ? 'AUTHENTICATED_API' : 'PUBLIC_API';

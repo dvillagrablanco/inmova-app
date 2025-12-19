@@ -91,11 +91,16 @@ export default function NotificacionesPage() {
       const response = await fetch('/api/notifications');
       if (response.ok) {
         const data = await response.json();
-        setNotifications(data);
+        // El API retorna { notifications: [], unreadCount: number, total: number }
+        setNotifications(data.notifications || data || []);
+      } else {
+        toast.error('Error al cargar notificaciones');
+        setNotifications([]);
       }
     } catch (error) {
       logger.error('Error fetching notifications:', error);
       toast.error('Error al cargar notificaciones');
+      setNotifications([]);
     } finally {
       setLoading(false);
     }

@@ -35,7 +35,15 @@ export async function GET(req: NextRequest) {
       const where: any = { building: { companyId } };
       if (buildingId) where.buildingId = buildingId;
       if (estado) where.estado = estado;
-      if (tipo) where.tipo = tipo;
+      // Soportar múltiples tipos separados por comas (ej: garaje,trastero)
+      if (tipo) {
+        const tipos = tipo.split(',').map(t => t.trim());
+        if (tipos.length === 1) {
+          where.tipo = tipos[0];
+        } else {
+          where.tipo = { in: tipos };
+        }
+      }
 
       // Paginación si se solicita
       if (usePagination) {

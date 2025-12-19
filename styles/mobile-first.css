@@ -1,0 +1,581 @@
+/**
+ * MOBILE FIRST CSS RULES
+ * Sistema de diseño optimizado para móvil
+ */
+
+/* ========================================
+   1. TOUCH TARGETS (ÁREAS TÁCTILES)
+   ======================================== */
+
+/* Tamaño mínimo de elementos interactivos */
+.btn,
+.link,
+.input,
+button,
+a[href],
+input[type="button"],
+input[type="submit"],
+label[for] {
+  min-height: 48px; /* WCAG AAA: 44px mínimo */
+  min-width: 48px;
+}
+
+/* Padding adecuado para elementos táctiles */
+.btn,
+button {
+  padding: 12px 16px;
+}
+
+/* Espaciado entre elementos interactivos */
+.interactive-element + .interactive-element,
+.btn + .btn,
+button + button {
+  margin-top: 8px; /* Mínimo 8px entre elementos */
+}
+
+/* Prevenir selección de texto en botones */
+.btn,
+button,
+.card-interactive {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ========================================
+   2. TYPOGRAPHY RESPONSIVE
+   ======================================== */
+
+:root {
+  /* Mobile (320px - 768px) */
+  --font-size-xs: clamp(0.75rem, 2vw, 0.875rem);
+  --font-size-sm: clamp(0.875rem, 2.5vw, 1rem);
+  --font-size-base: clamp(1rem, 3vw, 1.125rem);
+  --font-size-lg: clamp(1.125rem, 3.5vw, 1.25rem);
+  --font-size-xl: clamp(1.25rem, 4vw, 1.5rem);
+  --font-size-2xl: clamp(1.5rem, 5vw, 2rem);
+  --font-size-3xl: clamp(1.875rem, 6vw, 2.5rem);
+  --font-size-4xl: clamp(2.25rem, 7vw, 3rem);
+  
+  /* Line height optimizado para lectura en móvil */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+}
+
+/* Textos legibles sin zoom */
+body {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+p {
+  max-width: 65ch; /* Óptimo para lectura */
+}
+
+/* Evitar zoom en inputs (iOS) */
+input,
+textarea,
+select {
+  font-size: 16px !important; /* Mínimo 16px para evitar zoom en iOS */
+}
+
+/* ========================================
+   3. LAYOUT RESPONSIVE
+   ======================================== */
+
+/* Container system */
+.container {
+  width: 100%;
+  padding-left: 16px;
+  padding-right: 16px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 640px) {
+  .container {
+    max-width: 640px;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 768px;
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1024px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1280px;
+  }
+}
+
+/* Stack en móvil, grid en desktop */
+.responsive-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .responsive-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+  }
+}
+
+/* ========================================
+   4. FORMS MOBILE-OPTIMIZED
+   ======================================== */
+
+/* Inputs accesibles */
+.form-input,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+textarea,
+select {
+  width: 100%;
+  min-height: 48px;
+  font-size: 16px; /* Evita zoom en iOS */
+  padding: 12px 16px;
+  border: 2px solid hsl(var(--border));
+  border-radius: 8px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 3px hsla(var(--primary), 0.1);
+}
+
+/* Labels siempre visibles (no floating) en móvil */
+.form-label,
+label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: hsl(var(--foreground));
+}
+
+/* Wizard forms: un campo a la vez en móvil */
+@media (max-width: 767px) {
+  .form-wizard .form-step {
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  .form-wizard .form-group {
+    margin-bottom: 24px;
+  }
+}
+
+/* ========================================
+   5. NAVIGATION MOBILE
+   ======================================== */
+
+/* Bottom navigation bar (solo móvil) */
+.mobile-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: white;
+  border-top: 1px solid hsl(var(--border));
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom); /* iOS notch */
+}
+
+@media (min-width: 768px) {
+  .mobile-nav {
+    display: none; /* Hidden en desktop */
+  }
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px;
+  min-width: 64px;
+  color: hsl(var(--muted-foreground));
+  text-decoration: none;
+  font-size: 12px;
+  transition: color 0.2s;
+}
+
+.mobile-nav-item.active {
+  color: hsl(var(--primary));
+}
+
+.mobile-nav-icon {
+  font-size: 24px;
+}
+
+/* ========================================
+   6. GESTURES SUPPORT
+   ======================================== */
+
+/* Swipe to go back */
+.swipeable-container {
+  touch-action: pan-y; /* Permite swipe horizontal */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Pull to refresh */
+.pull-to-refresh {
+  overscroll-behavior-y: contain;
+}
+
+/* ========================================
+   7. PERFORMANCE MOBILE
+   ======================================== */
+
+/* Lazy loading de imágenes */
+img {
+  loading: lazy;
+  content-visibility: auto;
+}
+
+/* Reduce animations en conexiones lentas */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+  }
+}
+
+/* ========================================
+   8. SAFE AREAS (iOS NOTCH)
+   ======================================== */
+
+/* Respectar notch y home indicator */
+.app-container {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Header fijo */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(64px + env(safe-area-inset-top));
+  padding-top: env(safe-area-inset-top);
+  background: white;
+  z-index: 1000;
+}
+
+/* Content con offset */
+.main-content {
+  margin-top: calc(64px + env(safe-area-inset-top));
+  margin-bottom: calc(64px + env(safe-area-inset-bottom)); /* Bottom nav */
+  padding: 16px;
+}
+
+/* ========================================
+   9. SCROLL BEHAVIOR
+   ======================================== */
+
+/* Smooth scroll nativo */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Ocultar scrollbar en móvil (mantener funcionalidad) */
+@media (max-width: 767px) {
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* ========================================
+   10. MODALS Y OVERLAYS MOBILE
+   ======================================== */
+
+/* Modal fullscreen en móvil */
+@media (max-width: 767px) {
+  .modal,
+  [role="dialog"] {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 0;
+    margin: 0;
+  }
+}
+
+/* Sheet desde abajo en móvil */
+@media (max-width: 767px) {
+  .sheet,
+  [role="sheet"] {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 90vh;
+    border-radius: 16px 16px 0 0;
+  }
+}
+
+/* ========================================
+   11. CARDS RESPONSIVE
+   ======================================== */
+
+/* Cards apiladas en móvil, grid en desktop */
+.cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+@media (min-width: 768px) {
+  .cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+    padding: 24px;
+  }
+}
+
+/* Card interactivo con feedback */
+.card-interactive {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card-interactive:active {
+  transform: scale(0.98);
+}
+
+@media (min-width: 768px) {
+  .card-interactive:hover {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* ========================================
+   12. TABLES RESPONSIVE
+   ======================================== */
+
+/* Tabla scroll horizontal en móvil */
+@media (max-width: 767px) {
+  .table-container {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  table {
+    min-width: 600px;
+  }
+  
+  /* Alternativa: tabla como lista en móvil */
+  .table-as-list {
+    display: block;
+  }
+  
+  .table-as-list thead {
+    display: none;
+  }
+  
+  .table-as-list tbody,
+  .table-as-list tr,
+  .table-as-list td {
+    display: block;
+    width: 100%;
+  }
+  
+  .table-as-list tr {
+    margin-bottom: 16px;
+    padding: 16px;
+    border: 1px solid hsl(var(--border));
+    border-radius: 8px;
+  }
+  
+  .table-as-list td {
+    text-align: left;
+    padding: 8px 0;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  
+  .table-as-list td:last-child {
+    border-bottom: none;
+  }
+  
+  .table-as-list td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 4px;
+    color: hsl(var(--muted-foreground));
+  }
+}
+
+/* ========================================
+   13. SKELETON LOADERS
+   ======================================== */
+
+/* Skeleton screen animation */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 0%,
+    hsl(var(--muted) / 0.5) 50%,
+    hsl(var(--muted)) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+  border-radius: 4px;
+}
+
+/* ========================================
+   14. ACCESSIBILITY
+   ======================================== */
+
+/* Focus visible para teclado */
+:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+/* Ocultar solo visualmente (mantener para lectores de pantalla) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Contraste en modo alto contraste */
+@media (prefers-contrast: high) {
+  * {
+    border-width: 2px !important;
+  }
+}
+
+/* ========================================
+   15. PRINT STYLES
+   ======================================== */
+
+@media print {
+  /* Ocultar elementos innecesarios */
+  .no-print,
+  .mobile-nav,
+  .sidebar,
+  button,
+  .btn {
+    display: none !important;
+  }
+  
+  /* Optimizar para impresión */
+  body {
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+  
+  a[href]::after {
+    content: " (" attr(href) ")";
+  }
+  
+  /* Evitar saltos de página dentro de elementos */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  
+  img {
+    page-break-inside: avoid;
+  }
+}

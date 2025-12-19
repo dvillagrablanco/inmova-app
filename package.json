@@ -25,7 +25,8 @@
     "db:optimize": "tsx scripts/db-optimize.ts",
     "db:migrate": "prisma migrate deploy",
     "db:seed": "prisma db seed",
-    "db:status": "prisma migrate status"
+    "db:status": "prisma migrate status",
+    "audit:deployment": "node scripts/pre-deployment-audit.js"
   },
   "prisma": {
     "seed": "tsx --require dotenv/config scripts/seed.ts"

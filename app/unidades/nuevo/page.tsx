@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
+import { BackButton } from '@/components/ui/back-button';
 import { MobileFormWizard, FormStep } from '@/components/ui/mobile-form-wizard';
 
 interface Building {
@@ -157,9 +158,12 @@ export default function NuevaUnidadPage() {
             </div>
 
             {/* Header Section */}
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Nueva Unidad</h1>
-              <p className="text-muted-foreground">Registra una nueva unidad en un edificio</p>
+            <div className="space-y-4">
+              <BackButton href="/unidades" label="Volver a Unidades" />
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Nueva Unidad</h1>
+                <p className="text-muted-foreground">Registra una nueva unidad en un edificio</p>
+              </div>
             </div>
 
             {/* Formulario con Wizard para móvil */}

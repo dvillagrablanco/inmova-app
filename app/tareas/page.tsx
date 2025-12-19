@@ -141,11 +141,13 @@ export default function TareasPage() {
     try {
       const res = await fetch('/api/tasks');
       if (!res.ok) throw new Error('Error al cargar tareas');
-      const data = await res.json();
-      setTasks(data);
+      const response = await res.json();
+      // El API retorna { data: tasks[], meta: {...} }
+      setTasks(response.data || response || []);
     } catch (error) {
       logger.error('Error:', error);
       toast.error('Error al cargar las tareas');
+      setTasks([]);
     } finally {
       setIsLoading(false);
     }
