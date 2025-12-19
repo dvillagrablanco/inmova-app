@@ -15,7 +15,7 @@ export function getStripe(): Stripe | null {
 
   try {
     stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: '2025-11-17.clover',
+      apiVersion: '2025-12-15.clover',
       typescript: true,
       timeout: 30000, // 30 segundos
       maxNetworkRetries: 2, // Reintentar 2 veces autom\u00e1ticamente
