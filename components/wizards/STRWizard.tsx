@@ -194,7 +194,7 @@ export function STRWizard({ onComplete, onCancel }: STRWizardProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {AVAILABLE_CHANNELS.map((channel) => {
               const isSelected = data.selectedChannels?.includes(channel.id);
-              const status = connectionStatus[channel.id] || 'pending';
+              const status = (connectionStatus[channel.id] || 'pending') as 'pending' | 'connecting' | 'connected' | 'error';
 
               return (
                 <Card

@@ -212,7 +212,7 @@ function InquilinosPageContent() {
               <Skeleton className="h-8 w-48 mb-6" />
               <Skeleton className="h-10 w-full max-w-md mb-6" />
               <SkeletonList
-                count={5}
+                items={5}
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
               />
             </div>

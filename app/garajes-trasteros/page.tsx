@@ -224,10 +224,10 @@ export default function GarajesTrasterosPage() {
 
     // Filtrar por precio
     if (filterValues.precio_min) {
-      filtered = filtered.filter((unit) => unit.precioBase >= Number(filterValues.precio_min));
+      filtered = filtered.filter((unit) => unit.rentaMensual >= Number(filterValues.precio_min));
     }
     if (filterValues.precio_max) {
-      filtered = filtered.filter((unit) => unit.precioBase <= Number(filterValues.precio_max));
+      filtered = filtered.filter((unit) => unit.rentaMensual <= Number(filterValues.precio_max));
     }
 
     setFilteredUnits(filtered);
@@ -418,7 +418,7 @@ export default function GarajesTrasterosPage() {
             {/* Results */}
             {filteredUnits.length === 0 ? (
               <EmptyState
-                icon={Car}
+                icon={<Car className="h-12 w-12" />}
                 title="No se encontraron espacios"
                 description="No hay garajes o trasteros que coincidan con los criterios de búsqueda."
                 actions={[
