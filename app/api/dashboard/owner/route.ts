@@ -101,8 +101,21 @@ export async function GET(request: NextRequest) {
     // Gastos del mes (expenses)
     const monthlyExpensesResult = await prisma.expense.aggregate({
       where: {
-        companyId: user.companyId,
-        fechaGasto: {
+        OR: [
+          {
+            building: {
+              companyId: user.companyId
+            }
+          },
+          {
+            unit: {
+              building: {
+                companyId: user.companyId
+              }
+            }
+          }
+        ],
+        fecha: {
           gte: startOfCurrentMonth,
           lte: endOfCurrentMonth
         }

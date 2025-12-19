@@ -200,7 +200,7 @@ function PagosPage() {
               </div>
 
               {/* Skeleton for payments list */}
-              <SkeletonList count={3} />
+              <SkeletonList items={3} />
 
               {/* Loading message */}
               <LoadingState message="Cargando pagos..." size="sm" />

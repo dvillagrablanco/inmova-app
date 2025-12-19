@@ -50,7 +50,6 @@ export function generateCSV<T extends Record<string, any>>(data: T[]): string {
 
   const csv = Papa.unparse(data, {
     delimiter: CSV_CONFIG.DELIMITER,
-    encoding: CSV_CONFIG.ENCODING,
     header: true,
   });
 
