@@ -221,7 +221,7 @@ export default function AprobacionesPage() {
                   Gestiona y revisa solicitudes de aprobación
                 </p>
               </div>
-              <BackButton fallbackUrl="/dashboard" label="Volver al Dashboard" variant="outline" />
+              <BackButton href="/dashboard" label="Volver al Dashboard" variant="outline" />
             </div>
           </div>
 
