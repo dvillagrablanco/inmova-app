@@ -27,6 +27,10 @@ export const dynamic = 'force-dynamic';
  * GET /api/export?type=buildings|units|tenants|contracts|payments|expenses
  */
 export async function GET(request: Request) {
+  // Extract type outside try-catch for error logging
+  const { searchParams } = new URL(request.url);
+  const type = searchParams.get('type');
+
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -37,9 +41,6 @@ export async function GET(request: Request) {
     if (!companyId) {
       return NextResponse.json({ error: 'Empresa no encontrada' }, { status: 400 });
     }
-
-    const { searchParams } = new URL(request.url);
-    const type = searchParams.get('type');
 
     if (!type) {
       return NextResponse.json({ error: 'Tipo no especificado' }, { status: 400 });
