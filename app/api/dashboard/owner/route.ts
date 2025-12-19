@@ -87,7 +87,13 @@ export async function GET(request: NextRequest) {
     const pendingPayments = pendingPaymentsResult._sum.monto || 0;
     const pendingPaymentsCount = await prisma.payment.count({
       where: {
-        companyId: user.companyId,
+        contract: {
+          unit: {
+            building: {
+              companyId: user.companyId
+            }
+          }
+        },
         estado: 'pendiente'
       }
     });
