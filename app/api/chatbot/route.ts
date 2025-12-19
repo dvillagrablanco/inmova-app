@@ -150,12 +150,10 @@ RESPONDE EN FORMATO JSON:
           data: {
             userId: session.user.id,
             type: 'chatbot',
-            message: message,
+            question: message,
             response: aiResponse.message,
-            metadata: {
-              confidence: aiResponse.confidence,
-              escalated: aiResponse.escalateToHuman
-            }
+            confidence: aiResponse.confidence,
+            resolved: !aiResponse.escalateToHuman
           }
         });
       } catch (error) {

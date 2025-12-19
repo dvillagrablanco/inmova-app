@@ -410,10 +410,10 @@ export async function getOptimizedBuildings(
   ]);
 
   // Calcular métricas por edificio
-  const buildingsWithMetrics = buildings.map(building => {
-    const totalUnidades = building.units.length;
-    const unidadesOcupadas = building.units.filter(u => u.estado === 'ocupada').length;
-    const unidadesDisponibles = building.units.filter(u => u.estado === 'disponible').length;
+  const buildingsWithMetrics = buildings.map((building: any) => {
+    const totalUnidades = building.units?.length || 0;
+    const unidadesOcupadas = building.units?.filter((u: any) => u.estado === 'ocupada').length || 0;
+    const unidadesDisponibles = building.units?.filter((u: any) => u.estado === 'disponible').length || 0;
     const tasaOcupacion = totalUnidades > 0 ? (unidadesOcupadas / totalUnidades) * 100 : 0;
 
     return {
@@ -444,7 +444,7 @@ export async function getOptimizedBuildings(
 export async function getBuildingStats(companyId: string) {
   const [total, totalUnits, unitsByStatus] = await Promise.all([
     prisma.building.count({
-      where: { companyId, activo: true },
+      where: { companyId },
     }),
     prisma.unit.count({
       where: { building: { companyId } },
@@ -491,7 +491,7 @@ export async function getDashboardStats(companyId: string): Promise<DashboardSta
     getContractStats(companyId),
     getPaymentStats(companyId),
     prisma.tenant.count({
-      where: { companyId, activo: true },
+      where: { companyId },
     }),
   ]);
 
