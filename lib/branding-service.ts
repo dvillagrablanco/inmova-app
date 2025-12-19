@@ -1,8 +1,31 @@
 import 'server-only';
 import { prisma } from './db';
-import { BrandingConfig } from '@prisma/client';
 import logger from '@/lib/logger';
 import { BrandingConfigData, getDefaultBranding as getDefaultBrandingUtil } from './branding-utils';
+
+// BrandingConfig type (from Prisma schema)
+type BrandingConfig = {
+  id: string;
+  companyId: string;
+  appName: string;
+  appDescription: string | null;
+  tagline: string | null;
+  logoUrl: string | null;
+  logoSmallUrl: string | null;
+  faviconUrl: string | null;
+  ogImageUrl: string | null;
+  primaryColor: string;
+  secondaryColor: string;
+  accentColor: string | null;
+  backgroundColor: string;
+  textColor: string;
+  successColor: string;
+  warningColor: string;
+  errorColor: string;
+  fontFamily: string;
+  headingFont: string | null;
+  [key: string]: any; // Para otros campos que puedan existir
+};
 
 /**
  * Servicio de gestión de personalización White Label (Server-Side Only)
