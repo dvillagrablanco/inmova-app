@@ -38,7 +38,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { Skeleton } from '@/components/ui/skeleton';
-import { SkeletonList } from '@/components/ui/skeleton-card';
+import { SkeletonCard } from '@/components/ui/skeleton-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { EnhancedEmptyState } from '@/components/ui/enhanced-empty-state';
 import { ViewModeToggle, ViewMode } from '@/components/ui/view-mode-toggle';
@@ -181,10 +181,11 @@ function EdificiosPageContent() {
           <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
             <div className="max-w-7xl mx-auto">
               <Skeleton className="h-8 w-48 mb-6" />
-              <SkeletonList
-                items={6}
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-              />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <SkeletonCard key={i} />
+                ))}
+              </div>
             </div>
           </main>
         </div>
