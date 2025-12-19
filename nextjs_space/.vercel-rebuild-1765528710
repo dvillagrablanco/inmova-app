@@ -1,4 +1,0 @@
-# Force Vercel rebuild - timestamp file
-This file forces Vercel to regenerate the complete bundle.
-Reason: Fix Prisma Client in browser bundle error
-Commit: 3eeb0748
