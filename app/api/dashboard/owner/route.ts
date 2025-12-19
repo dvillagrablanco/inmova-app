@@ -143,7 +143,7 @@ export async function GET(request: NextRequest) {
         const income = await prisma.payment.aggregate({
           where: {
             companyId: user.companyId,
-            estado: 'completado',
+            estado: 'pagado',
             fechaPago: {
               gte: startDate,
               lte: endDate
@@ -205,7 +205,7 @@ export async function GET(request: NextRequest) {
     const paymentsOnTime = await prisma.payment.count({
       where: {
         companyId: user.companyId,
-        estado: 'completado',
+        estado: 'pagado',
         fechaPago: {
           lte: prisma.payment.fields.fechaVencimiento
         }
@@ -218,7 +218,7 @@ export async function GET(request: NextRequest) {
         OR: [
           { estado: 'atrasado' },
           {
-            estado: 'completado',
+            estado: 'pagado',
             fechaPago: {
               gt: prisma.payment.fields.fechaVencimiento
             }

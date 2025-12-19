@@ -182,7 +182,7 @@ function EdificiosPageContent() {
             <div className="max-w-7xl mx-auto">
               <Skeleton className="h-8 w-48 mb-6" />
               <SkeletonList
-                count={6}
+                items={6}
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
               />
             </div>

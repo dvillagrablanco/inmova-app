@@ -92,7 +92,7 @@ export async function GET(request: Request) {
           estado: true,
           fechaVencimiento: true,
           fechaPago: true,
-          concepto: true,
+          periodo: true,
           metodoPago: true,
           contract: {
             select: {
