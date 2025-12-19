@@ -1,129 +1,93 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
-import logger, { logError } from '@/lib/logger';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { prisma } from '@/lib/prisma';
 
-export const dynamic = 'force-dynamic';
-
+// GET - Obtener lista de conversaciones del usuario
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.companyId || !session?.user?.id) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId;
-    const userId = session.user.id;
-
-    // Get all conversations for this company
-    const conversations = await prisma.chatConversation.findMany({
-      where: {
-        companyId,
-        estado: {
-          not: 'archivada',
-        },
-      },
-      include: {
-        messages: {
-          orderBy: {
-            createdAt: 'desc',
-          },
-          take: 1,
-        },
-      },
-      orderBy: {
-        ultimoMensajeFecha: 'desc',
-      },
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true, companyId: true, name: true, role: true }
     });
 
-    // Get tenant names for each conversation
-    const enrichedConversations = await Promise.all(
-      conversations.map(async (conv) => {
-        let tenantName = 'Desconocido';
-        if (conv.tenantId) {
-          const tenant = await prisma.tenant.findUnique({
-            where: { id: conv.tenantId },
-            select: { nombreCompleto: true, email: true },
-          });
-          if (tenant) {
-            tenantName = tenant.nombreCompleto;
-          }
-        }
+    if (!user?.companyId) {
+      return NextResponse.json({ error: 'Usuario sin empresa' }, { status: 400 });
+    }
 
-        // Count unread messages
-        const unreadCount = await prisma.chatMessage.count({
+    // Obtener todos los usuarios de la empresa (posibles conversaciones)
+    const users = await prisma.user.findMany({
+      where: {
+        companyId: user.companyId,
+        id: { not: user.id } // Excluir al usuario actual
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true
+      },
+      orderBy: { name: 'asc' }
+    });
+
+    // Para cada usuario, obtener el último mensaje (si existe)
+    const conversations = await Promise.all(
+      users.map(async (otherUser) => {
+        const lastMessage = await prisma.notification.findFirst({
           where: {
-            conversationId: conv.id,
-            senderType: 'tenant',
-            leido: false,
+            companyId: user.companyId,
+            tipo: 'info', // Usamos 'info' para mensajes de chat
+            OR: [
+              { userId: otherUser.id, entityId: user.id },
+              { userId: user.id, entityId: otherUser.id }
+            ]
           },
+          orderBy: { createdAt: 'desc' },
+          select: {
+            id: true,
+            titulo: true,
+            mensaje: true,
+            leida: true,
+            createdAt: true,
+            userId: true
+          }
+        });
+
+        const unreadCount = await prisma.notification.count({
+          where: {
+            companyId: user.companyId,
+            tipo: 'info',
+            userId: user.id,
+            entityId: otherUser.id,
+            leida: false
+          }
         });
 
         return {
-          ...conv,
-          tenantName,
-          unreadCount,
+          user: otherUser,
+          lastMessage,
+          unreadCount
         };
       })
     );
 
-    return NextResponse.json({ conversations: enrichedConversations });
-  } catch (error: any) {
-    logger.error('Error fetching conversations:', error);
-    return NextResponse.json(
-      { error: error.message || 'Error al cargar conversaciones' },
-      { status: 500 }
-    );
-  }
-}
-
-export async function POST(request: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.companyId || !session?.user?.id) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-    }
-
-    const { tenantId, asunto, mensaje } = await request.json();
-
-    if (!tenantId || !asunto || !mensaje) {
-      return NextResponse.json(
-        { error: 'Datos incompletos' },
-        { status: 400 }
-      );
-    }
-
-    const companyId = session.user.companyId;
-    const userId = session.user.id;
-
-    // Create conversation
-    const conversation = await prisma.chatConversation.create({
-      data: {
-        companyId,
-        tenantId,
-        userId,
-        asunto,
-        ultimoMensaje: mensaje,
-        ultimoMensajeFecha: new Date(),
-      },
+    // Ordenar por fecha del último mensaje (más reciente primero)
+    conversations.sort((a, b) => {
+      if (!a.lastMessage) return 1;
+      if (!b.lastMessage) return -1;
+      return new Date(b.lastMessage.createdAt).getTime() - new Date(a.lastMessage.createdAt).getTime();
     });
 
-    // Create first message
-    await prisma.chatMessage.create({
-      data: {
-        conversationId: conversation.id,
-        senderType: 'user',
-        senderId: userId,
-        mensaje,
-      },
-    });
-
-    return NextResponse.json({ conversation });
-  } catch (error: any) {
-    logger.error('Error creating conversation:', error);
+    return NextResponse.json({ conversations });
+  } catch (error) {
+    console.error('Error al obtener conversaciones:', error);
     return NextResponse.json(
-      { error: error.message || 'Error al crear conversación' },
+      { error: 'Error al obtener conversaciones' },
       { status: 500 }
     );
   }

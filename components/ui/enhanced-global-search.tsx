@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Command,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -12,374 +11,395 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/components/ui/command';
-import { 
-  Building2, 
-  Home, 
-  User, 
-  FileText, 
-  Briefcase,
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  Building2,
+  Home,
+  Users,
+  FileText,
+  DollarSign,
+  Calendar,
+  Settings,
   Search,
   Clock,
   TrendingUp,
-  X
+  Loader2,
+  Hash,
+  AtSign,
+  MapPin,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { useDebounce } from '@/hooks/use-debounce';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import logger, { logError } from '@/lib/logger';
 
 interface SearchResult {
   id: string;
-  type: 'building' | 'unit' | 'tenant' | 'contract' | 'provider';
+  type: 'building' | 'unit' | 'tenant' | 'contract' | 'payment' | 'page';
   title: string;
   subtitle?: string;
-  badge?: string;
-  [key: string]: any;
+  route: string;
+  metadata?: Record<string, any>;
+  score?: number;
 }
 
-interface SearchResults {
-  buildings: SearchResult[];
-  units: SearchResult[];
-  tenants: SearchResult[];
-  contracts: SearchResult[];
-  providers: SearchResult[];
+interface EnhancedGlobalSearchProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-interface RecentSearch {
-  query: string;
-  timestamp: number;
-}
-
-const RECENT_SEARCHES_KEY = 'inmova-recent-searches';
-const MAX_RECENT_SEARCHES = 5;
-
-const popularSearches = [
-  'Inquilinos activos',
-  'Contratos por vencer',
-  'Pagos pendientes',
-  'Edificios',
-  'Unidades disponibles'
+const SEARCH_SHORTCUTS = [
+  { prefix: '@', description: 'Buscar por nombre', example: '@Juan' },
+  { prefix: '#', description: 'Buscar por ID', example: '#12345' },
+  { prefix: '$', description: 'Buscar por importe', example: '$500' },
+  { prefix: '/', description: 'Navegar directo', example: '/edificios' },
+  { prefix: '*', description: 'Buscar en todo', example: '*pendiente' },
 ];
 
-export function EnhancedGlobalSearch() {
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState<SearchResults>({
-    buildings: [],
-    units: [],
-    tenants: [],
-    contracts: [],
-    providers: [],
-  });
-  const [isLoading, setIsLoading] = useState(false);
-  const [recentSearches, setRecentSearches] = useState<RecentSearch[]>([]);
+const TYPE_ICONS: Record<string, any> = {
+  building: Building2,
+  unit: Home,
+  tenant: Users,
+  contract: FileText,
+  payment: DollarSign,
+  page: MapPin,
+};
 
-  // Cargar búsquedas recientes desde localStorage
+const TYPE_LABELS: Record<string, string> = {
+  building: 'Edificio',
+  unit: 'Unidad',
+  tenant: 'Inquilino',
+  contract: 'Contrato',
+  payment: 'Pago',
+  page: 'Página',
+};
+
+const TYPE_COLORS: Record<string, string> = {
+  building: 'bg-blue-500',
+  unit: 'bg-green-500',
+  tenant: 'bg-purple-500',
+  contract: 'bg-orange-500',
+  payment: 'bg-red-500',
+  page: 'bg-gray-500',
+};
+
+export function EnhancedGlobalSearch({ open: externalOpen, onOpenChange }: EnhancedGlobalSearchProps) {
+  const router = useRouter();
+  const [internalOpen, setInternalOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [searchScope, setSearchScope] = useState<'all' | 'buildings' | 'tenants' | 'contracts'>('all');
+
+  const open = externalOpen !== undefined ? externalOpen : internalOpen;
+  const setOpen = onOpenChange || setInternalOpen;
+
+  const debouncedQuery = useDebounce(query, 300);
+
+  // Load recent searches from localStorage
   useEffect(() => {
-    const stored = localStorage.getItem(RECENT_SEARCHES_KEY);
+    const stored = localStorage.getItem('recentSearches');
     if (stored) {
       try {
         setRecentSearches(JSON.parse(stored));
       } catch (e) {
-        logger.error('Error loading recent searches:', e);
+        console.error('Failed to parse recent searches:', e);
       }
     }
   }, []);
 
-  // Atajo de teclado Ctrl+K o Cmd+K
-  useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        setOpen((open) => !open);
-      }
-    };
-
-    document.addEventListener('keydown', down);
-    return () => document.removeEventListener('keydown', down);
+  // Save to recent searches
+  const addToRecentSearches = useCallback((query: string) => {
+    setRecentSearches((prev) => {
+      const updated = [query, ...prev.filter((q) => q !== query)].slice(0, 5);
+      localStorage.setItem('recentSearches', JSON.stringify(updated));
+      return updated;
+    });
   }, []);
 
-  // Búsqueda con debounce
-  useEffect(() => {
-    const searchTimeout = setTimeout(() => {
-      if (query.length >= 2) {
-        performSearch(query);
-      } else {
-        setResults({
-          buildings: [],
-          units: [],
-          tenants: [],
-          contracts: [],
-          providers: [],
-        });
-      }
-    }, 300);
+  // Process query for special prefixes
+  const processQuery = useCallback((q: string) => {
+    const trimmed = q.trim();
+    
+    if (trimmed.startsWith('/')) {
+      // Direct navigation
+      const path = trimmed.slice(1);
+      router.push(`/${path}`);
+      setOpen(false);
+      return null;
+    }
 
-    return () => clearTimeout(searchTimeout);
-  }, [query]);
+    let searchType = 'general';
+    let searchQuery = trimmed;
 
-  const performSearch = async (searchQuery: string) => {
-    setIsLoading(true);
+    if (trimmed.startsWith('@')) {
+      searchType = 'name';
+      searchQuery = trimmed.slice(1);
+    } else if (trimmed.startsWith('#')) {
+      searchType = 'id';
+      searchQuery = trimmed.slice(1);
+    } else if (trimmed.startsWith('$')) {
+      searchType = 'amount';
+      searchQuery = trimmed.slice(1);
+    } else if (trimmed.startsWith('*')) {
+      searchType = 'wildcard';
+      searchQuery = trimmed.slice(1);
+    }
+
+    return { type: searchType, query: searchQuery };
+  }, [router, setOpen]);
+
+  // Perform search
+  const performSearch = useCallback(async (searchQuery: string) => {
+    if (!searchQuery || searchQuery.length < 2) {
+      setResults([]);
+      return;
+    }
+
+    const processed = processQuery(searchQuery);
+    if (!processed) return; // Direct navigation handled
+
+    setIsSearching(true);
+    
     try {
-      const response = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}`);
-      if (!response.ok) throw new Error('Error en búsqueda');
-      
-      const data = await response.json();
-      setResults(data);
-      
-      // Guardar en búsquedas recientes
-      saveRecentSearch(searchQuery);
-    } catch (error) {
-      logger.error('Error searching:', error);
-      toast.error('Error al buscar');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      const response = await fetch('/api/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: processed.query,
+          type: processed.type,
+          scope: searchScope,
+        }),
+      });
 
-  const saveRecentSearch = (searchQuery: string) => {
-    const newSearch: RecentSearch = {
-      query: searchQuery,
-      timestamp: Date.now()
+      if (!response.ok) {
+        throw new Error('Search failed');
+      }
+
+      const data = await response.json();
+      setResults(data.results || []);
+    } catch (error) {
+      console.error('Search error:', error);
+      toast.error('Error al buscar');
+      setResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  }, [processQuery, searchScope]);
+
+  // Trigger search when debounced query changes
+  useEffect(() => {
+    if (debouncedQuery) {
+      performSearch(debouncedQuery);
+    } else {
+      setResults([]);
+    }
+  }, [debouncedQuery, performSearch]);
+
+  // Keyboard shortcut (Cmd+K or Ctrl+K)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setOpen((prev) => !prev);
+      }
+      // ESC to close
+      if (e.key === 'Escape' && open) {
+        setOpen(false);
+      }
     };
 
-    const updated = [
-      newSearch,
-      ...recentSearches.filter(s => s.query.toLowerCase() !== searchQuery.toLowerCase())
-    ].slice(0, MAX_RECENT_SEARCHES);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [open, setOpen]);
 
-    setRecentSearches(updated);
-    localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
-  };
+  // Group results by type
+  const groupedResults = useMemo(() => {
+    const groups: Record<string, SearchResult[]> = {};
+    
+    results.forEach((result) => {
+      if (!groups[result.type]) {
+        groups[result.type] = [];
+      }
+      groups[result.type].push(result);
+    });
 
-  const clearRecentSearches = () => {
-    setRecentSearches([]);
-    localStorage.removeItem(RECENT_SEARCHES_KEY);
-  };
+    return groups;
+  }, [results]);
 
-  const handleSelect = (type: string, id: string) => {
+  const handleSelect = useCallback((result: SearchResult) => {
+    addToRecentSearches(query);
+    router.push(result.route);
     setOpen(false);
     setQuery('');
-    
-    const routes: Record<string, string> = {
-      building: '/edificios',
-      unit: '/unidades',
-      tenant: '/inquilinos',
-      contract: '/contratos',
-      provider: '/proveedores',
-    };
-
-    router.push(`${routes[type]}/${id}`);
-  };
-
-  const handleRecentSearch = (searchQuery: string) => {
-    setQuery(searchQuery);
-  };
-
-  const getIcon = (type: string) => {
-    const icons = {
-      building: Building2,
-      unit: Home,
-      tenant: User,
-      contract: FileText,
-      provider: Briefcase,
-    };
-    const Icon = icons[type as keyof typeof icons] || Search;
-    return <Icon className="mr-2 h-4 w-4 shrink-0" />;
-  };
-
-  const getTypeLabel = (type: string) => {
-    const labels = {
-      building: 'Edificio',
-      unit: 'Unidad',
-      tenant: 'Inquilino',
-      contract: 'Contrato',
-      provider: 'Proveedor',
-    };
-    return labels[type as keyof typeof labels] || '';
-  };
-
-  const getGroupLabel = (type: string) => {
-    const labels = {
-      building: 'Edificios',
-      unit: 'Unidades',
-      tenant: 'Inquilinos',
-      contract: 'Contratos',
-      provider: 'Proveedores',
-    };
-    return labels[type as keyof typeof labels] || '';
-  };
-
-  const totalResults = 
-    results.buildings.length +
-    results.units.length +
-    results.tenants.length +
-    results.contracts.length +
-    results.providers.length;
-
-  const renderSearchResult = (item: SearchResult) => (
-    <CommandItem
-      key={item.id}
-      onSelect={() => handleSelect(item.type, item.id)}
-      className="cursor-pointer flex items-center gap-3 py-3"
-    >
-      {getIcon(item.type)}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="font-medium truncate">{item.title}</span>
-          <Badge variant="outline" className="text-xs shrink-0">
-            {getTypeLabel(item.type)}
-          </Badge>
-        </div>
-        {item.subtitle && (
-          <span className="text-xs text-muted-foreground truncate block">
-            {item.subtitle}
-          </span>
-        )}
-      </div>
-    </CommandItem>
-  );
+  }, [query, router, setOpen, addToRecentSearches]);
 
   return (
     <>
+      {/* Trigger Button */}
       <Button
         variant="outline"
-        className={cn(
-          "relative h-9 w-full justify-start text-sm text-muted-foreground",
-          "sm:pr-12 md:w-40 lg:w-64 xl:w-80"
-        )}
+        className="relative w-full justify-start text-sm text-muted-foreground sm:pr-12 md:w-64 lg:w-96"
         onClick={() => setOpen(true)}
-        aria-label="Abrir búsqueda global (⌘K)"
-        aria-keyshortcuts="Meta+K Control+K"
       >
-        <Search className="mr-2 h-4 w-4 shrink-0" aria-hidden="true" />
-        <span className="hidden lg:inline-flex truncate">Buscar en Inmova...</span>
-        <span className="inline-flex lg:hidden">Buscar...</span>
-        <kbd className="pointer-events-none absolute right-1.5 top-2 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex" aria-hidden="true">
+        <Search className="mr-2 h-4 w-4" />
+        <span>Buscar...</span>
+        <kbd className="pointer-events-none absolute right-1.5 top-2 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
           <span className="text-xs">⌘</span>K
         </kbd>
       </Button>
 
+      {/* Search Dialog */}
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput 
-          placeholder="Buscar edificios, unidades, inquilinos..." 
+        <CommandInput
+          placeholder="Buscar en INMOVA... (Usa @, #, $, / para filtrar)"
           value={query}
           onValueChange={setQuery}
         />
+        
         <CommandList>
-          {/* Estado de carga */}
-          {isLoading && (
-            <div className="py-8 text-center">
-              <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                Buscando...
-              </div>
-            </div>
+          {/* Show shortcuts when no query */}
+          {!query && (
+            <CommandGroup heading="Atajos de Búsqueda">
+              {SEARCH_SHORTCUTS.map((shortcut) => (
+                <CommandItem
+                  key={shortcut.prefix}
+                  onSelect={() => setQuery(shortcut.prefix)}
+                  className="cursor-pointer"
+                >
+                  <kbd className="mr-2 rounded bg-muted px-2 py-1 font-mono text-xs">
+                    {shortcut.prefix}
+                  </kbd>
+                  <div>
+                    <p className="text-sm">{shortcut.description}</p>
+                    <p className="text-xs text-muted-foreground">{shortcut.example}</p>
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
           )}
-          
-          {/* Sin resultados */}
-          {!isLoading && query.length >= 2 && totalResults === 0 && (
+
+          {/* Recent Searches */}
+          {!query && recentSearches.length > 0 && (
+            <>
+              <CommandSeparator />
+              <CommandGroup heading="Búsquedas Recientes">
+                {recentSearches.map((search) => (
+                  <CommandItem
+                    key={search}
+                    onSelect={() => setQuery(search)}
+                    className="cursor-pointer"
+                  >
+                    <Clock className="mr-2 h-4 w-4" />
+                    {search}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </>
+          )}
+
+          {/* Loading State */}
+          {isSearching && query && (
+            <CommandGroup>
+              <CommandItem disabled>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Buscando...
+              </CommandItem>
+            </CommandGroup>
+          )}
+
+          {/* Results */}
+          {!isSearching && query && results.length === 0 && (
             <CommandEmpty>
-              <div className="py-6 text-center">
-                <Search className="mx-auto h-10 w-10 text-muted-foreground/50 mb-2" />
-                <p className="text-sm font-medium">No se encontraron resultados</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Intenta con otros términos de búsqueda
+              <div className="py-6 text-center text-sm">
+                <p className="text-muted-foreground">No se encontraron resultados para "{query}"</p>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Prueba con otros términos o usa los atajos de búsqueda
                 </p>
               </div>
             </CommandEmpty>
           )}
 
-          {/* Mensaje inicial */}
-          {!isLoading && query.length < 2 && (
-            <>
-              {/* Búsquedas recientes */}
-              {recentSearches.length > 0 && (
-                <>
-                  <CommandGroup heading="Búsquedas recientes">
-                    {recentSearches.map((search, index) => (
-                      <CommandItem
-                        key={index}
-                        onSelect={() => handleRecentSearch(search.query)}
-                        className="cursor-pointer"
-                      >
-                        <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
-                        <span>{search.query}</span>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                  <div className="px-2 py-1.5">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={clearRecentSearches}
-                      className="w-full justify-start text-xs text-muted-foreground hover:text-foreground"
+          {!isSearching && Object.keys(groupedResults).map((type) => (
+            <div key={type}>
+              <CommandSeparator />
+              <CommandGroup heading={`${TYPE_LABELS[type]}s (${groupedResults[type].length})`}>
+                {groupedResults[type].map((result) => {
+                  const Icon = TYPE_ICONS[result.type];
+                  return (
+                    <CommandItem
+                      key={result.id}
+                      onSelect={() => handleSelect(result)}
+                      className="cursor-pointer"
                     >
-                      <X className="mr-2 h-3 w-3" />
-                      Limpiar historial
-                    </Button>
-                  </div>
-                  <CommandSeparator />
-                </>
-              )}
-
-              {/* Búsquedas populares */}
-              <CommandGroup heading="Búsquedas populares">
-                {popularSearches.map((search, index) => (
-                  <CommandItem
-                    key={index}
-                    onSelect={() => handleRecentSearch(search)}
-                    className="cursor-pointer"
-                  >
-                    <TrendingUp className="mr-2 h-4 w-4 text-muted-foreground" />
-                    <span>{search}</span>
-                  </CommandItem>
-                ))}
+                      <div className="flex items-center gap-3 flex-1">
+                        <div className={cn(
+                          'w-8 h-8 rounded flex items-center justify-center',
+                          TYPE_COLORS[result.type],
+                          'text-white'
+                        )}>
+                          {Icon && <Icon className="h-4 w-4" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">
+                            {result.title}
+                          </p>
+                          {result.subtitle && (
+                            <p className="text-xs text-muted-foreground truncate">
+                              {result.subtitle}
+                            </p>
+                          )}
+                        </div>
+                        <Badge variant="secondary" className="text-xs">
+                          {TYPE_LABELS[result.type]}
+                        </Badge>
+                      </div>
+                    </CommandItem>
+                  );
+                })}
               </CommandGroup>
+            </div>
+          ))}
 
-              <div className="px-4 py-3 text-center text-xs text-muted-foreground border-t mt-2">
-                Escribe al menos 2 caracteres para buscar
-              </div>
-            </>
-          )}
-
-          {/* Resultados por categoría */}
-          {!isLoading && totalResults > 0 && (
+          {/* Quick Actions */}
+          {!query && (
             <>
-              {results.buildings.length > 0 && (
-                <CommandGroup heading={getGroupLabel('building')}>
-                  {results.buildings.map(renderSearchResult)}
-                </CommandGroup>
-              )}
-
-              {results.units.length > 0 && (
-                <CommandGroup heading={getGroupLabel('unit')}>
-                  {results.units.map(renderSearchResult)}
-                </CommandGroup>
-              )}
-
-              {results.tenants.length > 0 && (
-                <CommandGroup heading={getGroupLabel('tenant')}>
-                  {results.tenants.map(renderSearchResult)}
-                </CommandGroup>
-              )}
-
-              {results.contracts.length > 0 && (
-                <CommandGroup heading={getGroupLabel('contract')}>
-                  {results.contracts.map(renderSearchResult)}
-                </CommandGroup>
-              )}
-
-              {results.providers.length > 0 && (
-                <CommandGroup heading={getGroupLabel('provider')}>
-                  {results.providers.map(renderSearchResult)}
-                </CommandGroup>
-              )}
+              <CommandSeparator />
+              <CommandGroup heading="Acciones Rápidas">
+                <CommandItem onSelect={() => router.push('/edificios/nuevo-wizard')} className="cursor-pointer">
+                  <Building2 className="mr-2 h-4 w-4" />
+                  Crear Nueva Propiedad
+                </CommandItem>
+                <CommandItem onSelect={() => router.push('/inquilinos/nuevo')} className="cursor-pointer">
+                  <Users className="mr-2 h-4 w-4" />
+                  Añadir Inquilino
+                </CommandItem>
+                <CommandItem onSelect={() => router.push('/contratos/nuevo')} className="cursor-pointer">
+                  <FileText className="mr-2 h-4 w-4" />
+                  Nuevo Contrato
+                </CommandItem>
+                <CommandItem onSelect={() => router.push('/settings')} className="cursor-pointer">
+                  <Settings className="mr-2 h-4 w-4" />
+                  Configuración
+                </CommandItem>
+              </CommandGroup>
             </>
           )}
         </CommandList>
+
+        {/* Footer with tips */}
+        <div className="border-t px-4 py-2 text-xs text-muted-foreground">
+          <div className="flex items-center justify-between">
+            <span>Tip: Usa ⌘K para abrir/cerrar</span>
+            <div className="flex gap-2">
+              <kbd className="rounded bg-muted px-1">↑↓</kbd>
+              <span>navegar</span>
+              <kbd className="rounded bg-muted px-1">↵</kbd>
+              <span>seleccionar</span>
+            </div>
+          </div>
+        </div>
       </CommandDialog>
     </>
   );

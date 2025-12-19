@@ -15,6 +15,7 @@
 import 'server-only'
 import { PrismaClient } from '@prisma/client'
 import logger from './logger'
+import { prismaQueryMiddleware } from './prisma-query-optimizer'
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
@@ -41,6 +42,12 @@ function getPrismaClient(): PrismaClient {
   }
 
   const client = new PrismaClient(prismaClientOptions)
+
+  // Agregar middleware de optimización de queries (Semana 2, Tarea 2.4)
+  // Solo en desarrollo para evitar overhead en producción
+  if (process.env.NODE_ENV === 'development') {
+    client.$use(prismaQueryMiddleware)
+  }
 
   // Event listeners para logging
   client.$on('warn' as any, (e: any) => {
