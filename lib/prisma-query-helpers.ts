@@ -249,7 +249,7 @@ export async function getOptimizedPayments(
         fechaVencimiento: true,
         fechaPago: true,
         metodoPago: true,
-        concepto: true,
+        periodo: true,
         nivelRiesgo: true,
         createdAt: true,
         contract: {
@@ -380,8 +380,7 @@ export async function getOptimizedBuildings(
     companyId: filters.companyId,
   };
 
-  if (filters.tipo) where.tipo = filters.tipo;
-  if (filters.activo !== undefined) where.activo = filters.activo;
+  if (filters.tipo) where.tipo = filters.tipo as any;
 
   const [buildings, total] = await Promise.all([
     prisma.building.findMany({
@@ -392,8 +391,7 @@ export async function getOptimizedBuildings(
         direccion: true,
         tipo: true,
         anoConstructor: true,
-        superficieTotal: true,
-        activo: true,
+        numeroUnidades: true,
         createdAt: true,
         units: {
           select: {
