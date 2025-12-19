@@ -288,14 +288,14 @@ export async function GET(request: NextRequest) {
         fechaFin: true,
         unit: {
           select: {
-            nombre: true,
+            numero: true,
             building: {
               select: { nombre: true }
             }
           }
         },
         tenant: {
-          select: { nombre: true }
+          select: { nombreCompleto: true }
         }
       },
       orderBy: { fechaFin: 'asc' },
@@ -312,7 +312,7 @@ export async function GET(request: NextRequest) {
       },
       select: {
         id: true,
-        nombre: true,
+        numero: true,
         building: {
           select: { nombre: true }
         }
@@ -327,8 +327,8 @@ export async function GET(request: NextRequest) {
             companyId: user.companyId
           }
         },
-        prioridad: 'urgente',
-        estado: { notIn: ['completada', 'cancelada'] }
+        prioridad: 'alta',
+        estado: { notIn: ['completado'] }
       }
     });
 
@@ -351,16 +351,16 @@ export async function GET(request: NextRequest) {
         paymentDistribution
       },
       alerts: {
-        upcomingExpirations: upcomingExpirations.map(c => ({
+        upcomingExpirations: upcomingExpirations.map((c: any) => ({
           id: c.id,
-          property: `${c.unit.building.nombre} - ${c.unit.nombre}`,
-          tenant: c.tenant.nombre,
+          property: `${c.unit?.building?.nombre} - ${c.unit?.numero}`,
+          tenant: c.tenant?.nombreCompleto,
           expirationDate: c.fechaFin,
           daysLeft: Math.ceil((c.fechaFin.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
         })),
-        vacantUnits: vacantUnits.map(u => ({
+        vacantUnits: vacantUnits.map((u: any) => ({
           id: u.id,
-          name: `${u.building.nombre} - ${u.nombre}`
+          name: `${u.building?.nombre} - ${u.numero}`
         }))
       }
     });
