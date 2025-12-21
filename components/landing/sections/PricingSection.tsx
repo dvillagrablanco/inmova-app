@@ -8,76 +8,92 @@ import { CheckCircle, DollarSign } from 'lucide-react';
 
 const plans = [
   {
-    name: 'Starter',
-    price: '€99',
+    name: 'Basic',
+    price: '€49',
     period: '/mes',
-    modules: '56 módulos',
-    properties: 'Hasta 25 propiedades',
-    costPerProperty: '€3.96/propiedad',
+    yearlyPrice: '€490/año',
+    yearlySavings: 'Ahorra €98',
+    modules: '88+ módulos',
+    properties: 'Hasta 20 propiedades',
+    costPerProperty: '€2.45/propiedad',
     features: [
-      'Todos los 56 módulos incluidos',
-      'Hasta 25 propiedades',
-      'Todos los verticales de negocio',
-      '3 usuarios',
-      'Soporte email 48h',
-      'Onboarding básico'
+      'Todos los 88+ módulos incluidos',
+      'Hasta 20 propiedades',
+      '1 vertical de negocio (a elegir)',
+      '1 usuario',
+      'Room Rental básico (sin prorrateo)',
+      'Marca Blanca: Logo básico',
+      'Soporte email 48h'
     ],
-    cta: 'Ideal para emprendedores'
+    cta: 'Ideal para inversores particulares y flippers'
   },
   {
-    name: 'Profesional',
-    price: '€199',
+    name: 'Professional',
+    price: '€149',
     period: '/mes',
-    modules: '56 módulos',
-    properties: '26-100 propiedades',
-    costPerProperty: '€1.99/propiedad (max)',
+    yearlyPrice: '€1,490/año',
+    yearlySavings: 'Ahorra €298',
+    modules: '88+ módulos',
+    properties: 'Hasta 100 propiedades',
+    costPerProperty: '€1.49/propiedad (max)',
     popular: true,
+    newFeature: 'Room Rental PRO',
     features: [
-      'Todos los 56 módulos incluidos',
-      '26-100 propiedades',
-      'Todos los verticales de negocio',
-      'Portal inquilino + propietario',
-      'Firma Digital + CRM',
-      '10 usuarios',
-      'Soporte chat 24h + Account Manager'
+      'Todos los 88+ módulos incluidos',
+      'Hasta 100 propiedades',
+      '⭐ Room Rental PRO: Prorrateo automático de suministros',
+      'Hasta 2 verticales (ej. Alquiler + STR)',
+      'AI Assistant GPT-4 Standard',
+      'Construcción: Reformas',
+      '5 usuarios',
+      'Sistema de Cupones (add-on +€29/mes)',
+      'Marca Blanca: Colores + Dominio',
+      'Soporte chat prioritario'
     ],
-    cta: 'Gestoras en crecimiento'
+    cta: 'Perfecto para agencias y gestoras de coliving'
   },
   {
-    name: 'Enterprise',
-    price: '€499',
+    name: 'Business',
+    price: '€349',
     period: '/mes',
-    modules: '56 módulos',
-    properties: '101-300 propiedades',
-    costPerProperty: '€1.66/propiedad (max)',
+    yearlyPrice: '€3,490/año',
+    yearlySavings: 'Ahorra €698',
+    modules: '88+ módulos',
+    properties: 'Propiedades ilimitadas',
+    costPerProperty: 'Sin límite',
+    newFeature: 'Sistema de Cupones Incluido',
     features: [
-      'Todos los 56 módulos incluidos',
-      '101-300 propiedades',
-      'Todos los verticales de negocio',
-      'White Label personalizado',
-      'Integraciones ERP (SAP, Zucchetti)',
-      '30 usuarios',
-      'SLA 99.9% + Infraestructura dedicada'
+      'Todos los 88+ módulos incluidos',
+      'Propiedades ilimitadas',
+      'Todos los 7 verticales de negocio',
+      '⭐ Room Rental PRO completo',
+      '✨ Sistema de Cupones INCLUIDO (valor €29/mes)',
+      'AI Assistant GPT-4 Advanced (entrenable)',
+      'Construcción: Obra Nueva completa',
+      'Marca Blanca: App Nativa Personalizada',
+      '15 usuarios',
+      'Gestor de Cuenta Dedicado'
     ],
-    cta: 'Empresas consolidadas'
+    cta: 'Para promotoras y gestoras consolidadas'
   },
   {
-    name: 'Corporate',
+    name: 'Enterprise+',
     price: 'A medida',
     period: '',
-    modules: '56+ módulos',
-    properties: '+300 propiedades',
+    modules: '88+ módulos custom',
+    properties: 'Ilimitadas',
     costPerProperty: 'Personalizado',
     features: [
       'Todos los módulos + desarrollos custom',
-      'Propiedades ilimitadas',
-      'Usuarios ilimitados',
+      'Propiedades y usuarios ilimitados',
+      'Migración de datos garantizada',
+      'SLA 99.9%',
+      'Consultoría de Tokenización',
       'Multi-región + Multi-moneda',
-      'SLA 99.95% + Soporte 24/7',
-      'Account Manager dedicado',
-      'Consultoría estratégica incluida'
+      'Soporte 24/7 + Account Manager',
+      'Auditoría y cumplimiento normativo'
     ],
-    cta: 'Grandes corporaciones'
+    cta: 'SOCIMIs y grandes corporaciones'
   }
 ];
 
@@ -88,13 +104,16 @@ export function PricingSection() {
         <div className="text-center mb-16">
           <Badge className="mb-4 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-green-200 px-4 py-2">
             <DollarSign className="h-4 w-4 mr-1 inline" />
-            Mejor Precio/Valor del Mercado
+            Mejor Precio/Valor del Mercado - Ahorra hasta 70%
           </Badge>
           <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-            Una Plataforma. Todo Incluido.
+            El Fin de la Fragmentación
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            <strong className="text-indigo-600">Todos los 56 módulos incluidos en todos los planes.</strong> Paga solo por tus propiedades, no por funcionalidades. Ahorra hasta un 70% consolidando 5-8 herramientas en una sola.
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-4">
+            <strong className="text-indigo-600">Todos los 88+ módulos incluidos en todos los planes.</strong> Sistema Operativo Integral del Real Estate.
+          </p>
+          <p className="text-lg text-gray-500 max-w-2xl mx-auto">
+            Reemplaza <strong>Rentger + Guesty + Presto</strong> en una sola plataforma. Ahorra <strong className="text-green-600">€240/mes</strong> consolidando 5-8 herramientas.
           </p>
         </div>
 
@@ -110,6 +129,11 @@ export function PricingSection() {
                   ⭐ Más Popular
                 </div>
               )}
+              {plan.newFeature && !plan.popular && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-2 rounded-full text-xs font-bold shadow-lg">
+                  ✨ NUEVO Q4 2024
+                </div>
+              )}
               <CardHeader className="pb-4">
                 <CardTitle className="text-xl mb-2">{plan.name}</CardTitle>
                 <div className="space-y-1">
@@ -117,9 +141,21 @@ export function PricingSection() {
                     <span className="text-4xl font-black bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">{plan.price}</span>
                     <span className="text-gray-500 text-sm">{plan.period}</span>
                   </div>
+                  {plan.yearlyPrice && (
+                    <div className="text-xs text-green-600 font-semibold">
+                      {plan.yearlyPrice} • {plan.yearlySavings}
+                    </div>
+                  )}
                   <div className="text-xs text-gray-500 font-semibold">{plan.costPerProperty}</div>
                 </div>
-                <Badge variant="secondary" className="mt-3 w-fit text-xs">{plan.modules}</Badge>
+                <div className="flex flex-wrap gap-1 mt-3">
+                  <Badge variant="secondary" className="text-xs">{plan.modules}</Badge>
+                  {plan.newFeature && (
+                    <Badge className="text-xs bg-gradient-to-r from-green-500 to-emerald-600 text-white">
+                      {plan.newFeature}
+                    </Badge>
+                  )}
+                </div>
                 <div className="text-sm text-indigo-600 font-semibold mt-2">{plan.properties}</div>
               </CardHeader>
               <CardContent>

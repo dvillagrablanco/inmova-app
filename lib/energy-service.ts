@@ -1,6 +1,6 @@
 import { prisma } from './db';
-import { EnergyType, AlertType } from '@prisma/client';
 import { format, subMonths } from 'date-fns';
+import type { EnergyType, AlertType } from '@prisma/client';
 
 /**
  * PAQUETE 13: GESTIÓN DE ENERGÍA - SERVICE LAYER

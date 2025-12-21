@@ -392,3 +392,4 @@ function ComunidadesWidgets() {
     </Card>
   );
 }
+export default VerticalSpecificWidgets;

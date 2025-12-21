@@ -109,7 +109,7 @@ export default function NuevoGarajeTrasteroPage() {
           aireAcondicionado: false,
           calefaccion: false,
           terraza: false,
-          balcon: false,
+          tieneBalcon: false,
           amueblado: false,
         }),
       });

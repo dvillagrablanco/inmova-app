@@ -93,8 +93,8 @@ export async function GET(
         }
 
         // Calcular ingresos proporcionales
-        if (room.precioPorMes && daysOccupied > 0) {
-          revenue = (room.precioPorMes / 30) * daysOccupied; // Aproximación simple
+        if (room.rentaMensual && daysOccupied > 0) {
+          revenue = (room.rentaMensual / 30) * daysOccupied; // Aproximación simple
         }
       }
 
@@ -104,7 +104,7 @@ export async function GET(
         roomId: room.id,
         numero: room.numero,
         superficie: room.superficie || 0,
-        precio: room.precioPorMes || 0,
+        precio: room.rentaMensual || 0,
         occupancyRate,
         daysOccupied,
         revenue,
@@ -137,8 +137,8 @@ export async function GET(
 
               if (isWithinInterval(day, { start: contractStart, end: contractEnd })) {
                 occupiedRooms++;
-                if (room.precioPorMes) {
-                  dailyRevenue += room.precioPorMes / 30;
+                if (room.rentaMensual) {
+                  dailyRevenue += room.rentaMensual / 30;
                 }
                 break; // Only count once per room
               }

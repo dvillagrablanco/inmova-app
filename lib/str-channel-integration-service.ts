@@ -9,9 +9,12 @@
  */
 
 import { prisma } from './db';
-import { ChannelType, BookingStatus } from '@prisma/client';
 import { addDays, startOfDay, endOfDay } from 'date-fns';
 import logger, { logError } from '@/lib/logger';
+
+// Definiciones de tipos inline (reemplaza imports de @prisma/client)
+type ChannelType = 'AIRBNB' | 'BOOKING' | 'VRBO' | 'HOMEAWAY' | 'WEB_PROPIA' | 'OTROS';
+type BookingStatus = 'PENDIENTE' | 'CONFIRMADA' | 'CHECK_IN' | 'CHECK_OUT' | 'CANCELADA' | 'NO_SHOW';
 
 // ============================================
 // TIPOS E INTERFACES
@@ -693,7 +696,7 @@ async function createBookingFromExternal(
       tarifaLimpieza,
       comisionCanal,
       ingresoNeto,
-      estado: BookingStatus.CONFIRMADA,
+      estado: 'CONFIRMADA',
       pagado: true,
       estadoPago: 'pagado',
     },

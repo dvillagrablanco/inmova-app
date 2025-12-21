@@ -18,6 +18,7 @@ import { useBranding } from '@/lib/hooks/useBranding';
 import { LanguageSelector } from '@/components/LanguageSelector';
 import { ExternalPortalsNotifications } from '@/components/admin/external-portals-notifications';
 import { NotificationDropdown } from '@/components/notifications/NotificationDropdown';
+import NotificationCenter from '@/components/NotificationCenter';
 
 export function Header() {
   const { data: session } = useSession() || {};
@@ -42,9 +43,9 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-20 border-b bg-background shadow-sm">
-      <div className="flex h-14 items-center justify-between gap-4 px-4 md:px-6 lg:ml-64">
-        {/* Empresa Info */}
-        <div className="flex items-center gap-3">
+      <div className="flex h-14 items-center justify-between gap-2 px-3 md:gap-4 md:px-6 lg:ml-64">
+        {/* Empresa Info - Oculta en móvil para ahorrar espacio */}
+        <div className="hidden items-center gap-3 md:flex">
           <div className="flex items-center gap-2 rounded-lg bg-muted px-3 py-2">
             <Building2 className="h-5 w-5 text-primary" />
             <div className="flex flex-col">
@@ -54,15 +55,20 @@ export function Header() {
           </div>
         </div>
 
-        {/* Global Search */}
+        {/* Logo/Nombre en móvil */}
+        <div className="flex items-center md:hidden">
+          <span className="text-sm font-semibold text-primary">{appName}</span>
+        </div>
+
+        {/* Global Search - Responsive */}
         <div className="hidden flex-1 md:flex md:max-w-md">
           <EnhancedGlobalSearch />
         </div>
 
         {/* Right Side Actions */}
-        <div className="flex items-center gap-2 md:gap-3">
-          {/* Notifications Dropdown - New enhanced component */}
-          <NotificationDropdown />
+        <div className="flex items-center gap-1 md:gap-3">
+          {/* Notifications Center - Enhanced with real-time notifications */}
+          <NotificationCenter />
 
           {/* External Portals Notifications (Super Admin only) */}
           <ExternalPortalsNotifications />

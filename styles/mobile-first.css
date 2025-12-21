@@ -1,581 +1,507 @@
-/**
- * MOBILE FIRST CSS RULES
- * Sistema de diseño optimizado para móvil
- */
+/* ============================
+   MOBILE-FIRST CSS SYSTEM
+   INMOVA - Fase 3
+   ============================ */
 
-/* ========================================
-   1. TOUCH TARGETS (ÁREAS TÁCTILES)
-   ======================================== */
-
-/* Tamaño mínimo de elementos interactivos */
-.btn,
-.link,
-.input,
-button,
-a[href],
-input[type="button"],
-input[type="submit"],
-label[for] {
-  min-height: 48px; /* WCAG AAA: 44px mínimo */
-  min-width: 48px;
-}
-
-/* Padding adecuado para elementos táctiles */
-.btn,
-button {
-  padding: 12px 16px;
-}
-
-/* Espaciado entre elementos interactivos */
-.interactive-element + .interactive-element,
-.btn + .btn,
-button + button {
-  margin-top: 8px; /* Mínimo 8px entre elementos */
-}
-
-/* Prevenir selección de texto en botones */
-.btn,
-button,
-.card-interactive {
-  -webkit-user-select: none;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* ========================================
-   2. TYPOGRAPHY RESPONSIVE
-   ======================================== */
+/* ============================
+   1. VARIABLES CSS PERSONALIZADAS
+   ============================ */
 
 :root {
-  /* Mobile (320px - 768px) */
-  --font-size-xs: clamp(0.75rem, 2vw, 0.875rem);
-  --font-size-sm: clamp(0.875rem, 2.5vw, 1rem);
-  --font-size-base: clamp(1rem, 3vw, 1.125rem);
-  --font-size-lg: clamp(1.125rem, 3.5vw, 1.25rem);
-  --font-size-xl: clamp(1.25rem, 4vw, 1.5rem);
-  --font-size-2xl: clamp(1.5rem, 5vw, 2rem);
-  --font-size-3xl: clamp(1.875rem, 6vw, 2.5rem);
-  --font-size-4xl: clamp(2.25rem, 7vw, 3rem);
+  /* Thumb Zone Safe Area (parte inferior de la pantalla accesible con pulgar) */
+  --safe-area-bottom: max(env(safe-area-inset-bottom), 24px);
+  --safe-area-top: max(env(safe-area-inset-top), 24px);
   
-  /* Line height optimizado para lectura en móvil */
-  --line-height-tight: 1.25;
-  --line-height-normal: 1.5;
-  --line-height-relaxed: 1.75;
+  /* Tamaños de toque mínimos (Apple & Google guidelines) */
+  --touch-target-min: 44px;
+  --touch-target-comfortable: 56px;
+  
+  /* Espaciado adaptativo */
+  --spacing-mobile: 16px;
+  --spacing-tablet: 24px;
+  --spacing-desktop: 32px;
+  
+  /* Tipografía fluida */
+  --font-size-base: clamp(14px, 2vw, 16px);
+  --font-size-heading: clamp(20px, 4vw, 32px);
+  --line-height-mobile: 1.6;
+  --line-height-desktop: 1.5;
+  
+  /* Bottom nav height */
+  --bottom-nav-height: calc(56px + var(--safe-area-bottom));
 }
 
-/* Textos legibles sin zoom */
+/* ============================
+   2. RESET Y BASE STYLES
+   ============================ */
+
+* {
+  /* Smooth scrolling en toda la app */
+  scroll-behavior: smooth;
+  
+  /* Prevenir zoom en inputs en iOS */
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent; /* Quitar highlight azul en iOS */
+}
+
 body {
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-normal);
+  /* Prevenir scroll bounce en iOS */
+  overscroll-behavior-y: none;
+  
+  /* Optimizar rendering */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  
+  /* Touch actions */
+  touch-action: pan-y pinch-zoom;
 }
 
-p {
-  max-width: 65ch; /* Óptimo para lectura */
-}
+/* ============================
+   3. LAYOUT MOBILE-FIRST
+   ============================ */
 
-/* Evitar zoom en inputs (iOS) */
-input,
-textarea,
-select {
-  font-size: 16px !important; /* Mínimo 16px para evitar zoom en iOS */
-}
-
-/* ========================================
-   3. LAYOUT RESPONSIVE
-   ======================================== */
-
-/* Container system */
-.container {
+/* Container fluido con máximos adaptativos */
+.container-mobile-first {
   width: 100%;
-  padding-left: 16px;
-  padding-right: 16px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-@media (min-width: 640px) {
-  .container {
-    max-width: 640px;
-    padding-left: 24px;
-    padding-right: 24px;
-  }
+  padding-left: var(--spacing-mobile);
+  padding-right: var(--spacing-mobile);
+  margin: 0 auto;
 }
 
 @media (min-width: 768px) {
-  .container {
-    max-width: 768px;
-    padding-left: 32px;
-    padding-right: 32px;
+  .container-mobile-first {
+    padding-left: var(--spacing-tablet);
+    padding-right: var(--spacing-tablet);
+    max-width: 1200px;
   }
 }
 
 @media (min-width: 1024px) {
-  .container {
-    max-width: 1024px;
+  .container-mobile-first {
+    padding-left: var(--spacing-desktop);
+    padding-right: var(--spacing-desktop);
+    max-width: 1440px;
   }
 }
 
-@media (min-width: 1280px) {
-  .container {
-    max-width: 1280px;
-  }
-}
-
-/* Stack en móvil, grid en desktop */
+/* Stack layout por defecto en móvil */
 .responsive-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  display: grid;
+  grid-template-columns: 1fr; /* Una columna en móvil */
+  gap: var(--spacing-mobile);
 }
 
 @media (min-width: 768px) {
   .responsive-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(2, 1fr); /* Dos columnas en tablet */
+    gap: var(--spacing-tablet);
   }
 }
 
-/* ========================================
-   4. FORMS MOBILE-OPTIMIZED
-   ======================================== */
+@media (min-width: 1024px) {
+  .responsive-grid {
+    grid-template-columns: repeat(3, 1fr); /* Tres columnas en desktop */
+    gap: var(--spacing-desktop);
+  }
+}
 
-/* Inputs accesibles */
-.form-input,
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="number"],
-input[type="tel"],
-input[type="url"],
+/* ============================
+   4. COMPONENTES TOUCH-FRIENDLY
+   ============================ */
+
+/* Botones con tamaño de toque adecuado */
+.btn-mobile {
+  min-height: var(--touch-target-comfortable);
+  min-width: var(--touch-target-comfortable);
+  padding: 12px 24px;
+  font-size: 16px; /* Prevenir zoom en iOS */
+  border-radius: 12px;
+  
+  /* Feedback táctil visual */
+  transition: transform 0.1s ease, box-shadow 0.2s ease;
+  
+  /* Optimizar para touch */
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.btn-mobile:active {
+  transform: scale(0.96); /* Feedback al tocar */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Inputs con tamaño adecuado y sin zoom automático */
+input,
 textarea,
 select {
-  width: 100%;
-  min-height: 48px;
-  font-size: 16px; /* Evita zoom en iOS */
-  padding: 12px 16px;
-  border: 2px solid hsl(var(--border));
+  font-size: 16px !important; /* Mínimo 16px para prevenir zoom en iOS */
+  min-height: var(--touch-target-comfortable);
   border-radius: 8px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.form-input:focus,
-input:focus,
-textarea:focus,
-select:focus {
-  outline: none;
-  border-color: hsl(var(--primary));
-  box-shadow: 0 0 0 3px hsla(var(--primary), 0.1);
-}
-
-/* Labels siempre visibles (no floating) en móvil */
-.form-label,
-label {
-  display: block;
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: hsl(var(--foreground));
-}
-
-/* Wizard forms: un campo a la vez en móvil */
-@media (max-width: 767px) {
-  .form-wizard .form-step {
-    min-height: 60vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
   
-  .form-wizard .form-group {
-    margin-bottom: 24px;
-  }
+  /* Mejorar legibilidad en móvil */
+  line-height: var(--line-height-mobile);
 }
 
-/* ========================================
-   5. NAVIGATION MOBILE
-   ======================================== */
+/* Checkbox y radio buttons más grandes */
+input[type="checkbox"],
+input[type="radio"] {
+  width: 24px;
+  height: 24px;
+  margin-right: 12px;
+  cursor: pointer;
+}
 
-/* Bottom navigation bar (solo móvil) */
-.mobile-nav {
+/* ============================
+   5. NAVEGACIÓN MOBILE - BOTTOM NAV
+   ============================ */
+
+.bottom-nav {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 64px;
+  height: var(--bottom-nav-height);
   background: white;
-  border-top: 1px solid hsl(var(--border));
+  border-top: 1px solid #e5e7eb;
+  padding-bottom: var(--safe-area-bottom);
+  
   display: flex;
   justify-content: space-around;
   align-items: center;
-  z-index: 100;
-  padding-bottom: env(safe-area-inset-bottom); /* iOS notch */
+  
+  z-index: 50;
+  
+  /* Shadow sutil */
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
 }
 
-@media (min-width: 768px) {
-  .mobile-nav {
-    display: none; /* Hidden en desktop */
+/* Ocultar en desktop */
+@media (min-width: 1024px) {
+  .bottom-nav {
+    display: none;
   }
 }
 
-.mobile-nav-item {
+.bottom-nav-item {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 4px;
-  padding: 8px;
-  min-width: 64px;
-  color: hsl(var(--muted-foreground));
-  text-decoration: none;
-  font-size: 12px;
-  transition: color 0.2s;
-}
-
-.mobile-nav-item.active {
-  color: hsl(var(--primary));
-}
-
-.mobile-nav-icon {
-  font-size: 24px;
-}
-
-/* ========================================
-   6. GESTURES SUPPORT
-   ======================================== */
-
-/* Swipe to go back */
-.swipeable-container {
-  touch-action: pan-y; /* Permite swipe horizontal */
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Pull to refresh */
-.pull-to-refresh {
-  overscroll-behavior-y: contain;
-}
-
-/* ========================================
-   7. PERFORMANCE MOBILE
-   ======================================== */
-
-/* Lazy loading de imágenes */
-img {
-  loading: lazy;
-  content-visibility: auto;
-}
-
-/* Reduce animations en conexiones lentas */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
-  }
-}
-
-/* ========================================
-   8. SAFE AREAS (iOS NOTCH)
-   ======================================== */
-
-/* Respectar notch y home indicator */
-.app-container {
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
-}
-
-/* Header fijo */
-.header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: calc(64px + env(safe-area-inset-top));
-  padding-top: env(safe-area-inset-top);
-  background: white;
-  z-index: 1000;
-}
-
-/* Content con offset */
-.main-content {
-  margin-top: calc(64px + env(safe-area-inset-top));
-  margin-bottom: calc(64px + env(safe-area-inset-bottom)); /* Bottom nav */
-  padding: 16px;
-}
-
-/* ========================================
-   9. SCROLL BEHAVIOR
-   ======================================== */
-
-/* Smooth scroll nativo */
-html {
-  scroll-behavior: smooth;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-}
-
-/* Ocultar scrollbar en móvil (mantener funcionalidad) */
-@media (max-width: 767px) {
-  .hide-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
   
-  .hide-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
+  min-width: var(--touch-target-comfortable);
+  min-height: var(--touch-target-comfortable);
+  
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 500;
+  
+  transition: color 0.2s ease, transform 0.1s ease;
+  cursor: pointer;
+  user-select: none;
 }
 
-/* ========================================
-   10. MODALS Y OVERLAYS MOBILE
-   ======================================== */
-
-/* Modal fullscreen en móvil */
-@media (max-width: 767px) {
-  .modal,
-  [role="dialog"] {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
-    max-width: 100%;
-    max-height: 100%;
-    border-radius: 0;
-    margin: 0;
-  }
+.bottom-nav-item.active {
+  color: #6366f1; /* primary color */
 }
 
-/* Sheet desde abajo en móvil */
-@media (max-width: 767px) {
-  .sheet,
-  [role="sheet"] {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    max-height: 90vh;
-    border-radius: 16px 16px 0 0;
-  }
+.bottom-nav-item:active {
+  transform: scale(0.92);
 }
 
-/* ========================================
-   11. CARDS RESPONSIVE
-   ======================================== */
+/* ============================
+   6. MOBILE TABLE CARDS
+   ============================ */
 
-/* Cards apiladas en móvil, grid en desktop */
-.cards-container {
+.mobile-table-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: box-shadow 0.2s ease;
+}
+
+.mobile-table-card:active {
+  box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+}
+
+.mobile-table-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.mobile-table-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.mobile-table-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mobile-table-card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.mobile-table-card-label {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.mobile-table-card-value {
+  color: #111827;
+  text-align: right;
+}
+
+/* ============================
+   7. SWIPEABLE COMPONENTS
+   ============================ */
+
+.swipeable {
+  position: relative;
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.swipeable-content {
+  transition: transform 0.3s ease;
+}
+
+.swipeable-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 16px;
+}
+
+/* ============================
+   8. PULL TO REFRESH
+   ============================ */
+
+.pull-to-refresh-indicator {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: top 0.3s ease;
+}
+
+.pull-to-refresh-indicator.active {
+  top: 20px;
+}
+
+/* ============================
+   9. MOBILE FORMS
+   ============================ */
+
+.mobile-form {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 16px;
+  padding-bottom: var(--bottom-nav-height);
 }
 
-@media (min-width: 768px) {
-  .cards-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 24px;
-    padding: 24px;
-  }
+.mobile-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-/* Card interactivo con feedback */
-.card-interactive {
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+.mobile-form-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
 }
 
-.card-interactive:active {
-  transform: scale(0.98);
+.mobile-form-input {
+  min-height: var(--touch-target-comfortable);
+  padding: 12px 16px;
+  font-size: 16px !important;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  transition: border-color 0.2s ease;
 }
 
-@media (min-width: 768px) {
-  .card-interactive:hover {
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-  }
+.mobile-form-input:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
-/* ========================================
-   12. TABLES RESPONSIVE
-   ======================================== */
+.mobile-form-error {
+  font-size: 13px;
+  color: #ef4444;
+  margin-top: 4px;
+}
 
-/* Tabla scroll horizontal en móvil */
-@media (max-width: 767px) {
-  .table-container {
-    width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  table {
-    min-width: 600px;
-  }
-  
-  /* Alternativa: tabla como lista en móvil */
-  .table-as-list {
-    display: block;
-  }
-  
-  .table-as-list thead {
+/* Floating action button */
+.mobile-fab {
+  position: fixed;
+  bottom: calc(var(--bottom-nav-height) + 16px);
+  right: 16px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  z-index: 40;
+  transition: transform 0.2s ease;
+}
+
+.mobile-fab:active {
+  transform: scale(0.9);
+}
+
+/* Ocultar FAB en desktop */
+@media (min-width: 1024px) {
+  .mobile-fab {
     display: none;
   }
-  
-  .table-as-list tbody,
-  .table-as-list tr,
-  .table-as-list td {
+}
+
+/* ============================
+   10. UTILITY CLASSES
+   ============================ */
+
+/* Espaciado seguro para contenido con bottom nav */
+.pb-safe-bottom {
+  padding-bottom: var(--bottom-nav-height);
+}
+
+/* Ocultar en móvil */
+.hidden-mobile {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .hidden-mobile {
     display: block;
-    width: 100%;
-  }
-  
-  .table-as-list tr {
-    margin-bottom: 16px;
-    padding: 16px;
-    border: 1px solid hsl(var(--border));
-    border-radius: 8px;
-  }
-  
-  .table-as-list td {
-    text-align: left;
-    padding: 8px 0;
-    border-bottom: 1px solid hsl(var(--border));
-  }
-  
-  .table-as-list td:last-child {
-    border-bottom: none;
-  }
-  
-  .table-as-list td::before {
-    content: attr(data-label);
-    font-weight: 600;
-    display: block;
-    margin-bottom: 4px;
-    color: hsl(var(--muted-foreground));
   }
 }
 
-/* ========================================
-   13. SKELETON LOADERS
-   ======================================== */
+/* Mostrar solo en móvil */
+.show-mobile {
+  display: block;
+}
 
-/* Skeleton screen animation */
-@keyframes shimmer {
-  0% {
-    background-position: -1000px 0;
-  }
-  100% {
-    background-position: 1000px 0;
+@media (min-width: 1024px) {
+  .show-mobile {
+    display: none;
   }
 }
 
-.skeleton {
-  background: linear-gradient(
-    90deg,
-    hsl(var(--muted)) 0%,
-    hsl(var(--muted) / 0.5) 50%,
-    hsl(var(--muted)) 100%
-  );
-  background-size: 1000px 100%;
-  animation: shimmer 2s infinite linear;
-  border-radius: 4px;
+/* Stack horizontal en desktop */
+.mobile-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-/* ========================================
-   14. ACCESSIBILITY
-   ======================================== */
-
-/* Focus visible para teclado */
-:focus-visible {
-  outline: 2px solid hsl(var(--primary));
-  outline-offset: 2px;
-}
-
-/* Ocultar solo visualmente (mantener para lectores de pantalla) */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-
-/* Contraste en modo alto contraste */
-@media (prefers-contrast: high) {
-  * {
-    border-width: 2px !important;
+@media (min-width: 1024px) {
+  .mobile-stack {
+    flex-direction: row;
   }
 }
 
-/* ========================================
-   15. PRINT STYLES
-   ======================================== */
+/* ============================
+   11. ANIMATIONS
+   ============================ */
 
-@media print {
-  /* Ocultar elementos innecesarios */
-  .no-print,
-  .mobile-nav,
-  .sidebar,
-  button,
-  .btn {
-    display: none !important;
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
   }
-  
-  /* Optimizar para impresión */
-  body {
-    font-size: 12pt;
-    line-height: 1.5;
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
-  
-  a[href]::after {
-    content: " (" attr(href) ")";
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
   }
-  
-  /* Evitar saltos de página dentro de elementos */
-  h1, h2, h3, h4, h5, h6 {
-    page-break-after: avoid;
+  to {
+    opacity: 1;
   }
-  
-  img {
-    page-break-inside: avoid;
-  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease forwards;
+}
+
+/* ============================
+   12. MOBILE MODAL/SHEET
+   ============================ */
+
+.mobile-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  padding: 24px;
+  padding-bottom: calc(24px + var(--safe-area-bottom));
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
+  z-index: 60;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+
+.mobile-sheet.open {
+  transform: translateY(0);
+}
+
+.mobile-sheet-handle {
+  width: 40px;
+  height: 4px;
+  background: #d1d5db;
+  border-radius: 2px;
+  margin: 0 auto 16px;
+}
+
+/* Overlay para sheets */
+.mobile-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 59;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.mobile-sheet-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
 }

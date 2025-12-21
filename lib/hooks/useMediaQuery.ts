@@ -1,5 +1,7 @@
-'use client';
-
+/**
+ * Hook para detectar media queries y tipos de dispositivo
+ * Optimizado para mobile-first approach
+ */
 import { useState, useEffect } from 'react';
 
 export function useMediaQuery(query: string): boolean {
@@ -7,34 +9,48 @@ export function useMediaQuery(query: string): boolean {
 
   useEffect(() => {
     const media = window.matchMedia(query);
-    
-    // Set initial value
-    setMatches(media.matches);
+    if (media.matches !== matches) {
+      setMatches(media.matches);
+    }
 
-    // Define event listener
-    const listener = (e: MediaQueryListEvent) => {
-      setMatches(e.matches);
-    };
-
-    // Add event listener
+    const listener = () => setMatches(media.matches);
     media.addEventListener('change', listener);
-
-    // Cleanup
+    
     return () => media.removeEventListener('change', listener);
-  }, [query]);
+  }, [matches, query]);
 
   return matches;
 }
 
-// Hooks convenientes para breakpoints comunes
+/**
+ * Hook especializado para detectar dispositivos móviles
+ */
 export function useIsMobile() {
   return useMediaQuery('(max-width: 768px)');
 }
 
+/**
+ * Hook para detectar tablets
+ */
 export function useIsTablet() {
   return useMediaQuery('(min-width: 769px) and (max-width: 1024px)');
 }
 
+/**
+ * Hook para detectar desktop
+ */
 export function useIsDesktop() {
   return useMediaQuery('(min-width: 1025px)');
+}
+
+/**
+ * Hook para obtener el tipo de dispositivo actual
+ */
+export function useDeviceType(): 'mobile' | 'tablet' | 'desktop' {
+  const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
+  
+  if (isMobile) return 'mobile';
+  if (isTablet) return 'tablet';
+  return 'desktop';
 }

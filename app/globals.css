@@ -688,3 +688,231 @@ select[aria-invalid="true"]:focus {
 .skip-link:focus {
   @apply not-sr-only fixed top-4 left-4 z-50 bg-primary text-primary-foreground px-4 py-2 rounded-md;
 }
+
+
+/* ========================================
+   MOBILE-FIRST OPTIMIZATIONS
+   Fase 3: Mobile-First UI Implementation
+   ======================================== */
+
+/* Touch targets m\u00ednimos (44x44px) para mejor accesibilidad en m\u00f3vil */
+@layer utilities {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Optimizaciones para pantallas t\u00e1ctiles */
+@media (hover: none) and (pointer: coarse) {
+  /* Aumentar \u00e1reas de click en m\u00f3vil */
+  button, a, [role="button"] {
+    padding: 0.75rem;
+  }
+
+  /* Desactivar hover effects en touch devices */
+  .hover\:bg-accent:hover {
+    background-color: inherit;
+  }
+}
+
+/* Mejoras de rendimiento para animaciones en m\u00f3vil */
+@media (max-width: 768px) {
+  /* Reducir complejidad de animaciones */
+  * {
+    animation-duration: 200ms !important;
+  }
+
+  /* Optimizar transiciones */
+  .transition-all {
+    transition-property: opacity, transform;
+  }
+
+  /* Scroll suave nativo */
+  html {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevenir zoom en inputs en iOS */
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="password"],
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  /* Mejorar experiencia de scroll */
+  .overflow-auto,
+  .overflow-y-auto {
+    overscroll-behavior: contain;
+  }
+
+  /* Cards m\u00e1s compactas en m\u00f3vil */
+  .card {
+    padding: 1rem;
+  }
+
+  /* Tipograf\u00eda optimizada para m\u00f3vil */
+  h1 {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+
+  h3 {
+    font-size: 1.125rem;
+    line-height: 1.5rem;
+  }
+}
+
+/* Utilidades para gestos */
+.gesture-enabled {
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.swipeable {
+  touch-action: pan-y;
+  cursor: grab;
+}
+
+.swipeable:active {
+  cursor: grabbing;
+}
+
+/* Safe area insets para dispositivos con notch */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-left {
+    padding-left: env(safe-area-inset-left);
+  }
+
+  .safe-right {
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* Mejoras de accesibilidad en m\u00f3vil */
+@media (max-width: 768px) {
+  /* Asegurar contraste suficiente */
+  button:focus-visible,
+  a:focus-visible,
+  [role="button"]:focus-visible {
+    outline: 3px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* Espaciado generoso entre elementos interactivos */
+  button + button,
+  a + a,
+  [role="button"] + [role="button"] {
+    margin-left: 0.5rem;
+  }
+}
+
+/* Loading states optimizados para m\u00f3vil */
+.mobile-skeleton {
+  @apply animate-pulse rounded-md bg-muted;
+}
+
+/* Feedback visual para interacciones t\u00e1ctiles */
+.touch-feedback {
+  @apply active:scale-95 active:opacity-80 transition-all duration-100;
+}
+
+/* Optimizar rendimiento de scroll */
+.scroll-optimized {
+  will-change: scroll-position;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Pull to refresh indicator */
+.ptr-indicator {
+  @apply transition-transform duration-200 ease-out;
+}
+
+/* Bottom navigation safe area */
+.bottom-nav {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Estilos para tablas responsivas convertidas a cards */
+@media (max-width: 768px) {
+  .responsive-table {
+    @apply block;
+  }
+
+  .responsive-table thead {
+    @apply hidden;
+  }
+
+  .responsive-table tbody {
+    @apply block;
+  }
+
+  .responsive-table tr {
+    @apply mb-4 block rounded-lg border bg-card p-4 shadow-sm;
+  }
+
+  .responsive-table td {
+    @apply flex justify-between py-2 text-sm;
+  }
+
+  .responsive-table td::before {
+    content: attr(data-label);
+    @apply font-semibold text-muted-foreground;
+  }
+}
+
+/* Optimizaciones de fuentes para m\u00f3vil */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Grid responsive optimizado */
+.mobile-grid {
+  @apply grid gap-4;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+}
+
+/* Utilidades para ocultar/mostrar seg\u00fan dispositivo */
+.mobile-only {
+  @apply block md:hidden;
+}
+
+.desktop-only {
+  @apply hidden md:block;
+}
+
+/* Mejoras de performance */
+@media (max-width: 768px) {
+  /* Reducir blur y shadows en m\u00f3vil para mejor performance */
+  .backdrop-blur-xl {
+    backdrop-filter: blur(8px);
+  }
+
+  .shadow-2xl {
+    box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1);
+  }
+}

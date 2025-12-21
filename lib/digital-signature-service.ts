@@ -1,6 +1,9 @@
 import { prisma } from './db';
-import { SignatureStatus, SignerStatus } from '@prisma/client';
 import logger, { logError } from '@/lib/logger';
+
+// Definiciones de tipos inline (reemplaza imports de @prisma/client)
+type SignatureStatus = 'pendiente' | 'firmado' | 'rechazado' | 'expirado';
+type SignerStatus = 'pendiente' | 'visto' | 'firmado' | 'rechazado';
 
 // ============================================================================
 // CONFIGURACIÓN - Variables de Entorno
@@ -179,7 +182,7 @@ export async function crearSolicitudFirma(params: CrearDocumentoFirmaParams) {
       tipoDocumento,
       urlDocumento: documentUrl,
       signaturitId: externalId,
-      estado: SignatureStatus.pendiente,
+      estado: 'pendiente',
       diasExpiracion,
       fechaExpiracion,
       creadoPor,
@@ -189,7 +192,7 @@ export async function crearSolicitudFirma(params: CrearDocumentoFirmaParams) {
           nombre: firmante.nombre,
           rol: firmante.rol,
           orden: index + 1,
-          estado: SignerStatus.pendiente
+          estado: 'pendiente'
         }))
       }
     },
@@ -231,7 +234,7 @@ export async function firmarDocumento(
   if (documento.fechaExpiracion && new Date() > documento.fechaExpiracion) {
     await prisma.documentoFirma.update({
       where: { id: documentoId },
-      data: { estado: SignatureStatus.expirado }
+      data: { estado: 'expirado' }
     });
     throw new Error('El documento ha expirado');
   }
@@ -241,7 +244,7 @@ export async function firmarDocumento(
     throw new Error('Firmante no encontrado');
   }
 
-  if (firmante.estado === SignerStatus.firmado) {
+  if (firmante.estado === 'firmado') {
     throw new Error('Este documento ya ha sido firmado por este usuario');
   }
 
@@ -249,7 +252,7 @@ export async function firmarDocumento(
   await prisma.firmante.update({
     where: { id: firmanteId },
     data: {
-      estado: SignerStatus.firmado,
+      estado: 'firmado',
       firmadoEn: new Date(),
       ipFirma: '192.168.1.1',
       dispositivo: 'Demo Browser',
@@ -258,18 +261,18 @@ export async function firmarDocumento(
   });
 
   const firmantesPendientes = documento.firmantes.filter(
-    f => f.id !== firmanteId && f.estado !== SignerStatus.firmado
+    f => f.id !== firmanteId && f.estado !== 'firmado'
   ).length;
 
   const nuevoEstado = firmantesPendientes === 0 
-    ? SignatureStatus.firmado 
-    : SignatureStatus.pendiente;
+    ? 'firmado' 
+    : 'pendiente';
 
   const documentoActualizado = await prisma.documentoFirma.update({
     where: { id: documentoId },
     data: {
       estado: nuevoEstado,
-      ...(nuevoEstado === SignatureStatus.firmado && {
+      ...(nuevoEstado === 'firmado' && {
         fechaCompletada: new Date()
       })
     },
@@ -281,7 +284,7 @@ export async function firmarDocumento(
   return {
     success: true,
     documento: documentoActualizado,
-    message: nuevoEstado === SignatureStatus.firmado
+    message: nuevoEstado === 'firmado'
       ? 'Documento firmado completamente'
       : 'Firma registrada, esperando a otros firmantes'
   };
@@ -295,7 +298,7 @@ export async function rechazarDocumento(
   await prisma.firmante.update({
     where: { id: firmanteId },
     data: {
-      estado: SignerStatus.rechazado,
+      estado: 'rechazado',
       rechazadoEn: new Date(),
       motivoRechazo: motivo
     }
@@ -304,7 +307,7 @@ export async function rechazarDocumento(
   await prisma.documentoFirma.update({
     where: { id: documentoId },
     data: {
-      estado: SignatureStatus.rechazado
+      estado: 'rechazado'
     }
   });
 
@@ -337,9 +340,9 @@ export async function obtenerEstadoDocumento(documentoId: string) {
   }
 
   const totalFirmantes = documento.firmantes.length;
-  const firmados = documento.firmantes.filter(f => f.estado === SignerStatus.firmado).length;
-  const pendientes = documento.firmantes.filter(f => f.estado === SignerStatus.pendiente).length;
-  const rechazados = documento.firmantes.filter(f => f.estado === SignerStatus.rechazado).length;
+  const firmados = documento.firmantes.filter(f => f.estado === 'firmado').length;
+  const pendientes = documento.firmantes.filter(f => f.estado === 'pendiente').length;
+  const rechazados = documento.firmantes.filter(f => f.estado === 'rechazado').length;
 
   return {
     documento,
@@ -377,7 +380,7 @@ export async function cancelarSolicitudFirma(documentoId: string, motivo: string
   await prisma.documentoFirma.update({
     where: { id: documentoId },
     data: {
-      estado: SignatureStatus.cancelado,
+      estado: 'cancelado',
       canceladoEn: new Date()
     }
   });

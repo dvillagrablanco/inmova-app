@@ -1,63 +1,103 @@
 /**
- * API Endpoint: Deshabilitar MFA
- * POST /api/auth/mfa/disable
+ * DELETE /api/auth/mfa/disable
+ * Desactiva MFA para el usuario actual
  * 
- * Desactiva MFA para el usuario (requiere código de verificación)
+ * Body: { password: string } - Requiere password para confirmar
  */
-
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { disableMFA } from '@/lib/mfa-service';
+import { prisma } from '@/lib/db';
+import bcrypt from 'bcryptjs';
 import logger from '@/lib/logger';
-import { z } from 'zod';
-
-const disableSchema = z.object({
-  code: z.string().length(6).regex(/^\d{6}$/, 'Código debe ser 6 dígitos'),
-});
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(req: NextRequest) {
+export async function DELETE(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-
-    if (!session || !session.user?.id) {
+    
+    if (!session?.user?.id) {
       return NextResponse.json(
-        { error: 'No autorizado' },
+        { error: 'No autenticado' },
         { status: 401 }
       );
     }
-
+    
     const body = await req.json();
-
-    // Validar entrada
-    const validated = disableSchema.safeParse(body);
-    if (!validated.success) {
+    const { password } = body;
+    
+    if (!password) {
       return NextResponse.json(
-        { error: 'Datos inválidos', details: validated.error.flatten() },
+        { error: 'Password requerido para desactivar MFA' },
         { status: 400 }
       );
     }
-
-    const { code } = validated.data;
-    const userId = session.user.id;
-
-    // Deshabilitar MFA
-    await disableMFA(userId, code);
-
-    logger.info('MFA disabled', { userId });
-
+    
+    // Verificar password
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        password: true,
+        mfaEnabled: true,
+        email: true,
+      },
+    });
+    
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Usuario no encontrado' },
+        { status: 404 }
+      );
+    }
+    
+    if (!user.mfaEnabled) {
+      return NextResponse.json(
+        { error: 'MFA no está habilitado' },
+        { status: 400 }
+      );
+    }
+    
+    // Verificar password
+    const passwordValid = await bcrypt.compare(password, user.password);
+    
+    if (!passwordValid) {
+      logger.warn('[MFA] Invalid password for MFA disable', {
+        userId: session.user.id,
+        email: user.email,
+      });
+      return NextResponse.json(
+        { error: 'Password incorrecto' },
+        { status: 401 }
+      );
+    }
+    
+    // Desactivar MFA
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: {
+        mfaEnabled: false,
+        mfaSecret: null,
+        mfaBackupCodes: [],
+        mfaVerifiedAt: null,
+        mfaRecoveryCodes: 10, // Reset counter
+      },
+    });
+    
+    logger.info('[MFA] MFA disabled', {
+      userId: session.user.id,
+      email: user.email,
+    });
+    
     return NextResponse.json({
       success: true,
-      message: 'MFA deshabilitado correctamente',
+      message: 'MFA desactivado correctamente',
     });
   } catch (error: any) {
-    logger.error('Error disabling MFA', { error: error.message });
-
+    logger.error('[MFA] Error disabling MFA:', error);
     return NextResponse.json(
-      { error: error.message || 'Error al deshabilitar MFA' },
-      { status: 400 }
+      { error: 'Error al desactivar MFA' },
+      { status: 500 }
     );
   }
 }

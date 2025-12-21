@@ -4,6 +4,13 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { checkRoomAvailability, generateColivingRulesTemplate } from '@/lib/room-rental-service';
 import logger, { logError } from '@/lib/logger';
+import { 
+  selectUnitMinimal, 
+  selectBuildingMinimal, 
+  selectRoomContractMinimal, 
+  selectTenantMinimal,
+  selectRoomPaymentMinimal
+} from '@/lib/query-optimizer';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,20 +38,37 @@ export async function GET(request: NextRequest) {
     if (tenantId) whereClause.tenantId = tenantId;
     if (estado) whereClause.estado = estado;
 
+    // OPTIMIZADO - Bug Fix Week: Query Optimization
+    // Usa select minimal para reducir payload en ~70%
     const contracts = await prisma.roomContract.findMany({
       where: whereClause,
-      include: {
+      select: {
+        ...selectRoomContractMinimal,
         room: {
-          include: {
+          select: {
+            id: true,
+            numero: true,
+            nombre: true,
+            superficie: true,
+            rentaMensual: true,
+            estado: true,
+            unitId: true,
             unit: {
-              include: {
-                building: true,
+              select: {
+                ...selectUnitMinimal,
+                building: {
+                  select: selectBuildingMinimal,
+                },
               },
             },
           },
         },
-        tenant: true,
-        payments: true,
+        tenant: {
+          select: selectTenantMinimal,
+        },
+        payments: {
+          select: selectRoomPaymentMinimal,
+        },
       },
       orderBy: {
         fechaInicio: 'desc',
@@ -96,42 +120,62 @@ export async function POST(request: NextRequest) {
     // Generar normas de convivencia si no se proporcionan
     const normasConvivencia = data.normasConvivencia || generateColivingRulesTemplate(data.customRules);
 
-    const contract = await prisma.roomContract.create({
-      data: {
-        companyId: session.user.companyId,
-        roomId: data.roomId,
-        tenantId: data.tenantId,
-        fechaInicio: new Date(data.fechaInicio),
-        fechaFin: new Date(data.fechaFin),
-        rentaMensual: parseFloat(data.rentaMensual),
-        diaPago: data.diaPago || 1,
-        deposito: data.deposito ? parseFloat(data.deposito) : 0,
-        gastosIncluidos: data.gastosIncluidos || [],
-        normasConvivencia,
-        horariosVisitas: data.horariosVisitas,
-        permiteMascotas: data.permiteMascotas || false,
-        permiteFumar: data.permiteFumar || false,
-        frecuenciaLimpieza: data.frecuenciaLimpieza || 'semanal',
-        estado: 'activo',
-      },
-      include: {
-        room: {
-          include: {
-            unit: {
-              include: {
-                building: true,
+    // BUG FIX: Usar transacción para garantizar consistencia
+    // Si falla la actualización del estado, se revierte la creación del contrato
+    const contract = await prisma.$transaction(async (tx) => {
+      // Crear contrato
+      const newContract = await tx.roomContract.create({
+        data: {
+          companyId: session.user.companyId,
+          roomId: data.roomId,
+          tenantId: data.tenantId,
+          fechaInicio: new Date(data.fechaInicio),
+          fechaFin: new Date(data.fechaFin),
+          rentaMensual: parseFloat(data.rentaMensual),
+          diaPago: data.diaPago || 1,
+          deposito: data.deposito ? parseFloat(data.deposito) : 0,
+          gastosIncluidos: data.gastosIncluidos || [],
+          normasConvivencia,
+          horariosVisitas: data.horariosVisitas,
+          permiteMascotas: data.permiteMascotas || false,
+          permiteFumar: data.permiteFumar || false,
+          frecuenciaLimpieza: data.frecuenciaLimpieza || 'semanal',
+          estado: 'activo',
+        },
+        select: {
+          ...selectRoomContractMinimal,
+          room: {
+            select: {
+              id: true,
+              numero: true,
+              nombre: true,
+              superficie: true,
+              rentaMensual: true,
+              estado: true,
+              unitId: true,
+              unit: {
+                select: {
+                  ...selectUnitMinimal,
+                  building: {
+                    select: selectBuildingMinimal,
+                  },
+                },
               },
             },
           },
+          tenant: {
+            select: selectTenantMinimal,
+          },
         },
-        tenant: true,
-      },
-    });
+      });
 
-    // Actualizar estado de la habitación a ocupada
-    await prisma.room.update({
-      where: { id: data.roomId },
-      data: { estado: 'ocupada' },
+      // Actualizar estado de la habitación a ocupada
+      await tx.room.update({
+        where: { id: data.roomId },
+        data: { estado: 'ocupada' },
+      });
+
+      return newContract;
     });
 
     return NextResponse.json(contract, { status: 201 });

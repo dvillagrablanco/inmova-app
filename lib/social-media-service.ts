@@ -1,6 +1,9 @@
 import { prisma } from './db';
-import { SocialMediaPlatform, SocialPostStatus } from '@prisma/client';
 import logger, { logError } from '@/lib/logger';
+
+// Definiciones de tipos inline (reemplaza imports de @prisma/client)
+type SocialMediaPlatform = 'FACEBOOK' | 'INSTAGRAM' | 'TWITTER' | 'LINKEDIN' | 'WHATSAPP_BUSINESS' | 'TIKTOK';
+type SocialPostStatus = 'borrador' | 'programado' | 'publicado' | 'error';
 
 /**
  * SERVICIO DE REDES SOCIALES

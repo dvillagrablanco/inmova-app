@@ -488,3 +488,4 @@ export function LandingChatbot() {
     </>
   );
 }
+export default LandingChatbot;

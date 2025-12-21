@@ -1,4 +1,4 @@
-import { type BusinessVertical } from '@/lib/onboarding-tours';
+import { BusinessVertical } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 import * as bcrypt from 'bcryptjs';
@@ -53,6 +53,18 @@ const DEMO_DATA_CONFIGS: Record<BusinessVertical, DemoDataConfig> = {
     units: 6,
     tenants: 4,
     contracts: 3,
+  },
+  room_rental: {
+    buildings: 1,
+    units: 10,
+    tenants: 8,
+    contracts: 8,
+  },
+  comunidades: {
+    buildings: 1,
+    units: 15,
+    tenants: 12,
+    contracts: 10,
   },
 };
 

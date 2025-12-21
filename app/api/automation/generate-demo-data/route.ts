@@ -82,7 +82,7 @@ const DEMO_DATA = {
       rentaMensual: 1200,
       estado: 'disponible' as const,
       amueblado: true,
-      balcon: true,
+      tieneBalcon: true,
       descripcion: 'Apartamento luminoso con vistas al parque'
     },
     {
@@ -95,7 +95,7 @@ const DEMO_DATA = {
       rentaMensual: 1400,
       estado: 'ocupada' as const,
       amueblado: false,
-      balcon: true,
+      tieneBalcon: true,
       descripcion: 'Amplio apartamento de 3 dormitorios'
     },
     {
@@ -108,7 +108,7 @@ const DEMO_DATA = {
       rentaMensual: 1100,
       estado: 'disponible' as const,
       amueblado: true,
-      balcon: false,
+      tieneBalcon: false,
       descripcion: 'Apartamento acogedor, ideal para parejas'
     },
     // Comercial Centro
@@ -122,7 +122,7 @@ const DEMO_DATA = {
       rentaMensual: 2000,
       estado: 'disponible' as const,
       amueblado: false,
-      balcon: false,
+      tieneBalcon: false,
       descripcion: 'Local comercial en zona prime'
     },
     {
@@ -135,7 +135,7 @@ const DEMO_DATA = {
       rentaMensual: 1600,
       estado: 'ocupada' as const,
       amueblado: true,
-      balcon: false,
+      tieneBalcon: false,
       descripcion: 'Oficina equipada lista para usar'
     },
     // Coliving
@@ -149,7 +149,7 @@ const DEMO_DATA = {
       rentaMensual: 450,
       estado: 'disponible' as const,
       amueblado: true,
-      balcon: false,
+      tieneBalcon: false,
       descripcion: 'Habitación individual en coliving'
     },
     {
@@ -162,7 +162,7 @@ const DEMO_DATA = {
       rentaMensual: 550,
       estado: 'ocupada' as const,
       amueblado: true,
-      balcon: false,
+      tieneBalcon: false,
       descripcion: 'Habitación con baño privado'
     }
   ],

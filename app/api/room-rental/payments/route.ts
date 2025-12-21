@@ -3,6 +3,13 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
+import { 
+  selectUnitMinimal, 
+  selectBuildingMinimal, 
+  selectRoomContractMinimal, 
+  selectTenantMinimal,
+  selectRoomPaymentMinimal
+} from '@/lib/query-optimizer';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,21 +35,33 @@ export async function GET(request: NextRequest) {
     if (contractId) whereClause.contractId = contractId;
     if (estado) whereClause.estado = estado;
 
+    // OPTIMIZADO - Bug Fix Week: Query Optimization
     const payments = await prisma.roomPayment.findMany({
       where: whereClause,
-      include: {
+      select: {
+        ...selectRoomPaymentMinimal,
         contract: {
-          include: {
+          select: {
+            ...selectRoomContractMinimal,
             room: {
-              include: {
+              select: {
+                id: true,
+                numero: true,
+                nombre: true,
+                unitId: true,
                 unit: {
-                  include: {
-                    building: true,
+                  select: {
+                    ...selectUnitMinimal,
+                    building: {
+                      select: selectBuildingMinimal,
+                    },
                   },
                 },
               },
             },
-            tenant: true,
+            tenant: {
+              select: selectTenantMinimal,
+            },
           },
         },
       },
@@ -79,13 +98,44 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // BUG FIX: Validar montos positivos
+    const monto = parseFloat(data.monto);
+    if (isNaN(monto) || monto <= 0) {
+      return NextResponse.json(
+        { error: 'El monto debe ser un número positivo' },
+        { status: 400 }
+      );
+    }
+
+    // Validar montos de prorrateo si existen
+    const prorationFields = [
+      'montoProrrateoLuz',
+      'montoProrrateoAgua',
+      'montoProrrateoGas',
+      'montoProrrateoInternet',
+      'montoProrrateoLimpieza',
+    ];
+
+    for (const field of prorationFields) {
+      if (data[field] !== undefined && data[field] !== null) {
+        const value = parseFloat(data[field]);
+        if (isNaN(value) || value < 0) {
+          return NextResponse.json(
+            { error: `${field} debe ser un número no negativo` },
+            { status: 400 }
+          );
+        }
+      }
+    }
+
+    // OPTIMIZADO - Bug Fix Week: Query Optimization + select minimal
     const payment = await prisma.roomPayment.create({
       data: {
         companyId: session.user.companyId,
         contractId: data.contractId,
         concepto: data.concepto || 'Renta mensual',
         mes: new Date(data.mes),
-        monto: parseFloat(data.monto),
+        monto,
         montoProrrateoLuz: data.montoProrrateoLuz ? parseFloat(data.montoProrrateoLuz) : null,
         montoProrrateoAgua: data.montoProrrateoAgua ? parseFloat(data.montoProrrateoAgua) : null,
         montoProrrateoGas: data.montoProrrateoGas ? parseFloat(data.montoProrrateoGas) : null,
@@ -97,19 +147,30 @@ export async function POST(request: NextRequest) {
         metodoPago: data.metodoPago,
         notas: data.notas,
       },
-      include: {
+      select: {
+        ...selectRoomPaymentMinimal,
         contract: {
-          include: {
+          select: {
+            ...selectRoomContractMinimal,
             room: {
-              include: {
+              select: {
+                id: true,
+                numero: true,
+                nombre: true,
+                unitId: true,
                 unit: {
-                  include: {
-                    building: true,
+                  select: {
+                    ...selectUnitMinimal,
+                    building: {
+                      select: selectBuildingMinimal,
+                    },
                   },
                 },
               },
             },
-            tenant: true,
+            tenant: {
+              select: selectTenantMinimal,
+            },
           },
         },
       },

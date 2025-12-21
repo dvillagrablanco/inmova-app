@@ -4,8 +4,12 @@
  */
 
 import { prisma } from './db';
-import { WorkflowStatus, WorkflowTriggerType, WorkflowActionType } from '@prisma/client';
 import logger from './logger';
+
+// Definiciones de tipos inline (reemplaza imports de @prisma/client)
+type WorkflowStatus = 'activo' | 'inactivo' | 'borrador';
+type WorkflowTriggerType = 'manual' | 'evento' | 'programado' | 'webhook';
+type WorkflowActionType = 'enviar_notificacion' | 'crear_tarea' | 'enviar_email' | 'ejecutar_script' | 'actualizar_registro' | 'crear_incidencia' | 'generar_documento' | 'webhook';
 
 /**
  * Crea un nuevo workflow

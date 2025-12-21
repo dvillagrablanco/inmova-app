@@ -1,65 +1,93 @@
 /**
- * API Endpoint: Verificar y activar MFA (paso 2)
  * POST /api/auth/mfa/verify
+ * Verifica el código TOTP y activa MFA
  * 
- * Verifica el código TOTP y activa MFA para el usuario
+ * Body: { token: string }
  */
-
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { verifyAndEnableMFA } from '@/lib/mfa-service';
+import { prisma } from '@/lib/db';
+import { verifyTOTPToken } from '@/lib/mfa-helpers';
 import logger from '@/lib/logger';
-import { z } from 'zod';
-
-const verifySchema = z.object({
-  code: z.string().length(6).regex(/^\d{6}$/, 'Código debe ser 6 dígitos'),
-  secret: z.string().min(16),
-  backupCodes: z.array(z.string()).min(10).max(10),
-});
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-
-    if (!session || !session.user?.id) {
+    
+    if (!session?.user?.id) {
       return NextResponse.json(
-        { error: 'No autorizado' },
+        { error: 'No autenticado' },
         { status: 401 }
       );
     }
-
+    
     const body = await req.json();
-
-    // Validar entrada
-    const validated = verifySchema.safeParse(body);
-    if (!validated.success) {
+    const { token } = body;
+    
+    if (!token || typeof token !== 'string' || token.length !== 6) {
       return NextResponse.json(
-        { error: 'Datos inválidos', details: validated.error.flatten() },
+        { error: 'Código inválido' },
         { status: 400 }
       );
     }
-
-    const { code, secret, backupCodes } = validated.data;
-    const userId = session.user.id;
-
-    // Verificar y activar MFA
-    const result = await verifyAndEnableMFA(userId, code, secret, backupCodes);
-
-    logger.info('MFA enabled successfully', { userId });
-
+    
+    // Obtener secret del usuario
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        mfaSecret: true,
+        mfaEnabled: true,
+        email: true,
+      },
+    });
+    
+    if (!user || !user.mfaSecret) {
+      return NextResponse.json(
+        { error: 'MFA no configurado. Inicie el proceso con /api/auth/mfa/enable' },
+        { status: 400 }
+      );
+    }
+    
+    // Verificar código TOTP
+    const isValid = verifyTOTPToken(token, user.mfaSecret, true);
+    
+    if (!isValid) {
+      logger.warn('[MFA] Invalid TOTP token', {
+        userId: session.user.id,
+        email: user.email,
+      });
+      return NextResponse.json(
+        { error: 'Código incorrecto' },
+        { status: 400 }
+      );
+    }
+    
+    // Activar MFA
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: {
+        mfaEnabled: true,
+        mfaVerifiedAt: new Date(),
+      },
+    });
+    
+    logger.info('[MFA] MFA activated successfully', {
+      userId: session.user.id,
+      email: user.email,
+    });
+    
     return NextResponse.json({
       success: true,
-      message: result.message,
+      message: 'MFA activado correctamente',
     });
   } catch (error: any) {
-    logger.error('Error verifying MFA', { error: error.message });
-
+    logger.error('[MFA] Error verifying MFA:', error);
     return NextResponse.json(
-      { error: error.message || 'Error al verificar MFA' },
-      { status: 400 }
+      { error: 'Error al verificar código MFA' },
+      { status: 500 }
     );
   }
 }
