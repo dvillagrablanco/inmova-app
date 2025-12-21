@@ -52,9 +52,8 @@ if (SENTRY_DSN) {
       // Remove sensitive context
       if (event.contexts) {
         if (event.contexts.request?.headers) {
-          const headers = event.contexts.request.headers as Record<string, any>;
-          delete headers.authorization;
-          delete headers.cookie;
+          delete event.contexts.request.headers.authorization;
+          delete event.contexts.request.headers.cookie;
         }
       }
 

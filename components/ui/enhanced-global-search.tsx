@@ -93,14 +93,7 @@ export function EnhancedGlobalSearch({ open: externalOpen, onOpenChange }: Enhan
   const [searchScope, setSearchScope] = useState<'all' | 'buildings' | 'tenants' | 'contracts'>('all');
 
   const open = externalOpen !== undefined ? externalOpen : internalOpen;
-  const setOpen = (value: boolean | ((prev: boolean) => boolean)) => {
-    const newValue = typeof value === 'function' ? value(open) : value;
-    if (onOpenChange) {
-      onOpenChange(newValue);
-    } else {
-      setInternalOpen(newValue);
-    }
-  };
+  const setOpen = onOpenChange || setInternalOpen;
 
   const debouncedQuery = useDebounce(query, 300);
 
@@ -411,4 +404,3 @@ export function EnhancedGlobalSearch({ open: externalOpen, onOpenChange }: Enhan
     </>
   );
 }
-export default EnhancedGlobalSearch;

@@ -430,4 +430,3 @@ export function IntelligentChatbot({
     </>
   );
 }
-export default IntelligentChatbot;

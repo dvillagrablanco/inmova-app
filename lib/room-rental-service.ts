@@ -577,7 +577,7 @@ export async function getRoomRentalAnalytics(
   // 5. Precio promedio por habitación
   const averageRoomPrice =
     rooms.length > 0
-      ? rooms.reduce((sum, room) => sum + room.rentaMensual, 0) / rooms.length
+      ? rooms.reduce((sum, room) => sum + room.precioPorMes, 0) / rooms.length
       : 0;
 
   // 6. Habitaciones con mejor rendimiento

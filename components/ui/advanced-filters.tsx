@@ -390,4 +390,3 @@ export function AdvancedFilters({
     </div>
   );
 }
-export default AdvancedFilters;

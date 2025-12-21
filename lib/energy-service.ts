@@ -1,6 +1,9 @@
 import { prisma } from './db';
 import { format, subMonths } from 'date-fns';
-import type { EnergyType, AlertType } from '@prisma/client';
+
+// Definiciones de tipos inline (reemplaza imports de @prisma/client)
+type EnergyType = 'electricidad' | 'agua' | 'gas' | 'calefaccion' | 'otro';
+type AlertType = 'consumo_alto' | 'consumo_bajo' | 'incremento_repentino' | 'fuga_posible' | 'anomalia_patron';
 
 /**
  * PAQUETE 13: GESTIÓN DE ENERGÍA - SERVICE LAYER

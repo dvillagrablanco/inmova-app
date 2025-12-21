@@ -10,67 +10,20 @@
  */
 
 // ============================================================================
-// TYPES
-// ============================================================================
-
-export type AnalyticsEventName = 
-  | 'onboarding_start'
-  | 'onboarding_task_complete'
-  | 'onboarding_task_skip'
-  | 'onboarding_complete'
-  | 'property_created'
-  | 'contract_created'
-  | 'payment_processed'
-  | 'user_signup'
-  | 'user_login'
-  | 'page_view'
-  | string; // Allow custom event names
-
-// ============================================================================
 // CLIENT-SIDE ANALYTICS (Google Analytics 4)
 // ============================================================================
-
-/**
- * Inicializa Google Analytics 4 con un Measurement ID
- */
-export function initializeGoogleAnalytics(measurementId: string) {
-  if (typeof window !== 'undefined') {
-    // Load gtag.js script
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
-    document.head.appendChild(script);
-
-    // Initialize gtag
-    (window as any).dataLayer = (window as any).dataLayer || [];
-    function gtag(...args: any[]) {
-      (window as any).dataLayer.push(args);
-    }
-    (window as any).gtag = gtag;
-    
-    gtag('js', new Date());
-    gtag('config', measurementId);
-    
-    console.log('[Analytics] Google Analytics initialized with ID:', measurementId);
-  }
-}
 
 /**
  * Envía un evento a Google Analytics 4 (client-side)
  * Usa el objeto window.gtag si está disponible
  */
 export function trackEvent(
-  eventName: AnalyticsEventName,
-  eventParams?: Record<string, any>,
-  userId?: string
+  eventName: string,
+  eventParams?: Record<string, any>
 ) {
   if (typeof window !== 'undefined' && (window as any).gtag) {
-    const params = { ...eventParams };
-    if (userId) {
-      params.user_id = userId;
-    }
-    (window as any).gtag('event', eventName, params);
-    console.log('[Analytics] Event tracked:', eventName, params);
+    (window as any).gtag('event', eventName, eventParams);
+    console.log('[Analytics] Event tracked:', eventName, eventParams);
   } else {
     console.warn('[Analytics] gtag not available');
   }
@@ -394,7 +347,7 @@ export async function analyzeTenantBehavior(tenantId: string) {
   return { tenantId, behavior: {} };
 }
 
-export async function getAnalyticsTrends(companyId: string, months: number = 12) {
+export async function getAnalyticsTrends(companyId: string) {
   // TODO: Implement analytics trends
-  return { companyId, trends: [], months };
+  return { companyId, trends: [] };
 }

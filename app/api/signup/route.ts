@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
 
     // Programar emails automáticos diferidos (2h, 24h, 7d, 30d)
     try {
-      await scheduleOnboardingEmails(user.id, user.email, company.id);
+      await scheduleOnboardingEmails(user.id, user.email);
       logger.info(`Emails automáticos diferidos programados para usuario ${user.id}`);
     } catch (emailTriggersError) {
       // No fallar el signup si hay error en triggers, solo registrar

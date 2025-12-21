@@ -92,17 +92,16 @@ export const selectRoomPaymentMinimal = {
   concepto: true,
 } satisfies Prisma.RoomPaymentSelect;
 
-// TODO: Implement UtilityProration model in schema.prisma
-// export const selectUtilityProrationMinimal = {
-//   id: true,
-//   mesReferencia: true,
-//   metodoProrrateado: true,
-//   totalElectricidad: true,
-//   totalAgua: true,
-//   totalGas: true,
-//   totalInternet: true,
-//   createdAt: true,
-// };
+export const selectUtilityProrationMinimal = {
+  id: true,
+  mesReferencia: true,
+  metodoProrrateado: true,
+  totalElectricidad: true,
+  totalAgua: true,
+  totalGas: true,
+  totalInternet: true,
+  createdAt: true,
+} satisfies Prisma.UtilityProrationSelect;
 
 /**
  * Build optimized include object
