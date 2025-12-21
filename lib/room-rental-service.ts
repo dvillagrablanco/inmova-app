@@ -90,6 +90,12 @@ export async function calculateUtilityProration(
     case 'by_surface':
       // Por superficie
       const totalSurface = input.rooms.reduce((sum, room) => sum + room.surface, 0);
+      
+      // BUG FIX: Prevenir división por cero
+      if (totalSurface === 0) {
+        throw new Error('No se puede prorratear por superficie: todas las habitaciones tienen superficie = 0');
+      }
+      
       input.rooms.forEach((room) => {
         const percentage = (room.surface / totalSurface) * 100;
         const amount = (input.totalAmount * room.surface) / totalSurface;
@@ -105,6 +111,12 @@ export async function calculateUtilityProration(
     case 'by_occupants':
       // Por número de ocupantes
       const totalOccupants = input.rooms.reduce((sum, room) => sum + room.occupants, 0);
+      
+      // BUG FIX: Prevenir división por cero
+      if (totalOccupants === 0) {
+        throw new Error('No se puede prorratear por ocupantes: todas las habitaciones tienen 0 ocupantes');
+      }
+      
       input.rooms.forEach((room) => {
         const percentage = (room.occupants / totalOccupants) * 100;
         const amount = (input.totalAmount * room.occupants) / totalOccupants;
@@ -122,19 +134,52 @@ export async function calculateUtilityProration(
       const totalSurfaceComb = input.rooms.reduce((sum, room) => sum + room.surface, 0);
       const totalOccupantsComb = input.rooms.reduce((sum, room) => sum + room.occupants, 0);
       
-      input.rooms.forEach((room) => {
-        const surfacePercentage = room.surface / totalSurfaceComb;
-        const occupantsPercentage = room.occupants / totalOccupantsComb;
-        const combinedPercentage = (surfacePercentage + occupantsPercentage) / 2;
-        const amount = input.totalAmount * combinedPercentage;
-        
-        results.push({
-          roomId: room.roomId,
-          amount: parseFloat(amount.toFixed(2)),
-          percentage: parseFloat((combinedPercentage * 100).toFixed(2)),
-          method: 'Método combinado (superficie + ocupantes)',
+      // BUG FIX: Prevenir división por cero
+      if (totalSurfaceComb === 0 && totalOccupantsComb === 0) {
+        throw new Error('No se puede prorratear: todas las habitaciones tienen superficie = 0 y ocupantes = 0');
+      }
+      
+      // Si uno es cero, usar solo el otro
+      if (totalSurfaceComb === 0) {
+        // Solo por ocupantes
+        input.rooms.forEach((room) => {
+          const percentage = (room.occupants / totalOccupantsComb) * 100;
+          const amount = (input.totalAmount * room.occupants) / totalOccupantsComb;
+          results.push({
+            roomId: room.roomId,
+            amount: parseFloat(amount.toFixed(2)),
+            percentage: parseFloat(percentage.toFixed(2)),
+            method: 'Método combinado (solo ocupantes, superficie = 0)',
+          });
         });
-      });
+      } else if (totalOccupantsComb === 0) {
+        // Solo por superficie
+        input.rooms.forEach((room) => {
+          const percentage = (room.surface / totalSurfaceComb) * 100;
+          const amount = (input.totalAmount * room.surface) / totalSurfaceComb;
+          results.push({
+            roomId: room.roomId,
+            amount: parseFloat(amount.toFixed(2)),
+            percentage: parseFloat(percentage.toFixed(2)),
+            method: 'Método combinado (solo superficie, ocupantes = 0)',
+          });
+        });
+      } else {
+        // Ambos tienen valores válidos
+        input.rooms.forEach((room) => {
+          const surfacePercentage = room.surface / totalSurfaceComb;
+          const occupantsPercentage = room.occupants / totalOccupantsComb;
+          const combinedPercentage = (surfacePercentage + occupantsPercentage) / 2;
+          const amount = input.totalAmount * combinedPercentage;
+          
+          results.push({
+            roomId: room.roomId,
+            amount: parseFloat(amount.toFixed(2)),
+            percentage: parseFloat((combinedPercentage * 100).toFixed(2)),
+            method: 'Método combinado (superficie + ocupantes)',
+          });
+        });
+      }
       break;
   }
 
@@ -532,7 +577,7 @@ export async function getRoomRentalAnalytics(
   // 5. Precio promedio por habitación
   const averageRoomPrice =
     rooms.length > 0
-      ? rooms.reduce((sum, room) => sum + room.precioPorMes, 0) / rooms.length
+      ? rooms.reduce((sum, room) => sum + room.rentaMensual, 0) / rooms.length
       : 0;
 
   // 6. Habitaciones con mejor rendimiento

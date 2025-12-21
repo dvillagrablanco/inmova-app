@@ -101,10 +101,10 @@ export default function RoomDetailPage() {
           nombre: roomData.nombre || '',
           superficie: roomData.superficie,
           tipoHabitacion: roomData.tipoHabitacion,
-          precioPorMes: roomData.precioPorMes,
+          rentaMensual: roomData.rentaMensual,
           precioPorSemana: roomData.precioPorSemana || '',
-          bajoPrivado: roomData.bajoPrivado,
-          balcon: roomData.balcon,
+          banoPrivado: roomData.banoPrivado,
+          tieneBalcon: roomData.tieneBalcon,
           escritorio: roomData.escritorio,
           armarioEmpotrado: roomData.armarioEmpotrado,
           aireAcondicionado: roomData.aireAcondicionado,
@@ -119,7 +119,7 @@ export default function RoomDetailPage() {
         });
         setContractData({
           ...contractData,
-          rentaMensual: roomData.precioPorMes,
+          rentaMensual: roomData.rentaMensual,
         });
       }
 
@@ -171,7 +171,7 @@ export default function RoomDetailPage() {
           tenantId: '',
           fechaInicio: '',
           fechaFin: '',
-          rentaMensual: room?.precioPorMes || '',
+          rentaMensual: room?.rentaMensual || '',
           diaPago: '1',
           deposito: '',
           gastosIncluidos: [],
@@ -306,14 +306,14 @@ export default function RoomDetailPage() {
                           />
                         </div>
                         <div>
-                          <Label htmlFor="precioPorMes">Precio/Mes (€)</Label>
+                          <Label htmlFor="rentaMensual">Precio/Mes (€)</Label>
                           <Input
-                            id="precioPorMes"
+                            id="rentaMensual"
                             type="number"
                             step="0.01"
-                            value={formData.precioPorMes}
+                            value={formData.rentaMensual}
                             onChange={(e) =>
-                              setFormData({ ...formData, precioPorMes: e.target.value })
+                              setFormData({ ...formData, rentaMensual: e.target.value })
                             }
                           />
                         </div>
@@ -346,8 +346,8 @@ export default function RoomDetailPage() {
                           <h3 className="font-semibold mb-3">Características</h3>
                           <div className="grid grid-cols-3 gap-3">
                             {[
-                              { key: 'bajoPrivado', label: 'Baño Privado' },
-                              { key: 'balcon', label: 'Balcón' },
+                              { key: 'banoPrivado', label: 'Baño Privado' },
+                              { key: 'tieneBalcon', label: 'Balcón' },
                               { key: 'escritorio', label: 'Escritorio' },
                               { key: 'armarioEmpotrado', label: 'Armario Empotrado' },
                               { key: 'aireAcondicionado', label: 'Aire Acondicionado' },
@@ -416,7 +416,7 @@ export default function RoomDetailPage() {
                       </div>
                       <div>
                         <p className="text-sm text-gray-600">Precio Mensual</p>
-                        <p className="font-medium text-green-600">€{room.precioPorMes}/mes</p>
+                        <p className="font-medium text-green-600">€{room.rentaMensual}/mes</p>
                       </div>
                       {room.precioPorSemana && (
                         <div>
@@ -454,8 +454,8 @@ export default function RoomDetailPage() {
                   <CardContent>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                       {[
-                        { icon: Bath, label: 'Baño Privado', value: room.bajoPrivado },
-                        { icon: Sun, label: 'Balcón', value: room.balcon },
+                        { icon: Bath, label: 'Baño Privado', value: room.banoPrivado },
+                        { icon: Sun, label: 'Balcón', value: room.tieneBalcon },
                         { icon: Table, label: 'Escritorio', value: room.escritorio },
                         {
                           icon: DoorOpen,

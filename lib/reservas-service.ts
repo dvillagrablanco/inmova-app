@@ -4,9 +4,12 @@
  */
 
 import { prisma } from './db';
-import { CommonSpaceType, ReservationStatus } from '@prisma/client';
 import { addHours, format, isAfter, isBefore, parseISO } from 'date-fns';
 import logger, { logError } from '@/lib/logger';
+
+// Definiciones de tipos inline (reemplaza imports de @prisma/client)
+type CommonSpaceType = 'salon_fiestas' | 'gimnasio' | 'piscina' | 'sala_reuniones' | 'zona_bbq' | 'lavanderia' | 'terraza' | 'coworking' | 'otros';
+type ReservationStatus = 'pendiente' | 'confirmada' | 'cancelada' | 'completada';
 
 /**
  * Valida si un horario está disponible para reserva

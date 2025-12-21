@@ -22,10 +22,51 @@ enum BusinessVertical {
   alquiler_tradicional
   str_vacacional
   coliving
+  room_rental
   construccion
   flipping
   servicios_profesionales
+  comunidades
   mixto
+}
+
+enum UIMode {
+  simple
+  standard
+  advanced
+}
+
+enum ExperienceLevel {
+  principiante
+  intermedio
+  avanzado
+}
+
+enum TechSavviness {
+  bajo
+  medio
+  alto
+}
+
+enum PortfolioSize {
+  size_1_5
+  size_6_20
+  size_21_100
+  size_100_plus
+}
+
+enum OnboardingTaskType {
+  wizard
+  video
+  action
+  form
+}
+
+enum OnboardingTaskStatus {
+  pending
+  in_progress
+  completed
+  skipped
 }
 
 enum CompanyCategory {
@@ -222,6 +263,16 @@ model User {
   mfaVerifiedAt    DateTime?
   mfaRecoveryCodes Int               @default(10) // Count of remaining codes
   
+  // Zero-Touch Onboarding - User Profile
+  experienceLevel     ExperienceLevel? @default(intermedio)
+  techSavviness       TechSavviness?   @default(medio)
+  portfolioSize       PortfolioSize?   @default(size_1_5)
+  uiMode              UIMode           @default(standard)
+  onboardingCompleted Boolean          @default(false)
+  preferredModules    String[]         @default([]) // IDs de módulos favoritos
+  hiddenModules       String[]         @default([]) // IDs de módulos ocultados
+  lastAction          String?          // Última acción realizada
+  
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
 
@@ -284,6 +335,14 @@ model User {
   
   // Emails programados (sistema de automatización)
   scheduledEmails ScheduledEmail[]
+  
+  // Zero-Touch Onboarding System
+  onboardingTasks       OnboardingTask[]
+  moduleUsageStats      ModuleUsageStats[]
+  inAppNotifications    InAppNotification[]
+  emailLogs             EmailLog[]
+  chatbotInteractions   ChatbotInteraction[]
+  userCelebrations      UserCelebration[]
 
   @@index([email])
   @@index([companyId])
@@ -1283,6 +1342,16 @@ model Company {
 
   // Workflows y Automatización Inteligente
   workflows Workflow[]
+  
+  // Zero-Touch Onboarding System
+  onboardingTasks       OnboardingTask[]
+  moduleUsageStats      ModuleUsageStats[]
+  inAppNotifications    InAppNotification[]
+  emailLogs             EmailLog[]
+  webhookEvents         WebhookEvent[]
+  chatbotInteractions   ChatbotInteraction[]
+  userCelebrations      UserCelebration[]
+  
   @@map("company")
 }
 
@@ -7411,8 +7480,8 @@ model Room {
   // Características
   superficie        Float
   tipoHabitacion    String // individual, doble, suite, estudio
-  bajoPrivado       Boolean @default(false)
-  balcon            Boolean @default(false)
+  banoPrivado       Boolean @default(false)
+  tieneBalcon       Boolean @default(false)
   escritorio        Boolean @default(false)
   armarioEmpotrado  Boolean @default(false)
   aireAcondicionado Boolean @default(false)
@@ -7427,7 +7496,7 @@ model Room {
   silla      Boolean @default(false)
 
   // Precios y disponibilidad
-  precioPorMes    Float
+  rentaMensual    Float
   precioPorSemana Float?
   estado          RoomStatus @default(disponible)
 
@@ -11281,4 +11350,183 @@ model ScheduledEmail {
   @@index([scheduledFor])
   @@index([trigger])
   @@map("scheduled_emails")
+}
+
+// ========================================
+// ZERO-TOUCH ONBOARDING SYSTEM
+// ========================================
+
+model OnboardingTask {
+  id              String                @id @default(cuid())
+  userId          String
+  companyId       String
+  vertical        String                // alquiler_tradicional, str, etc.
+  taskId          String                // ID único de la tarea (ej: 'create_first_building')
+  title           String
+  description     String                @db.Text
+  type            OnboardingTaskType
+  status          OnboardingTaskStatus  @default(pending)
+  order           Int                   @default(0)
+  isMandatory     Boolean               @default(false)
+  estimatedTime   Int                   @default(60) // Segundos
+  route           String?               // Ruta para completar la acción
+  videoUrl        String?
+  helpArticle     String?
+  unlocks         String[]              @default([]) // Qué features desbloquea
+  completedAt     DateTime?
+  skippedAt       DateTime?
+  
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  
+  user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company         Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, companyId, taskId])
+  @@index([userId])
+  @@index([companyId])
+  @@index([status])
+  @@map("onboarding_tasks")
+}
+
+model ModuleUsageStats {
+  id                      String   @id @default(cuid())
+  userId                  String
+  companyId               String
+  moduleId                String   // ID del módulo (ej: 'edificios', 'str_channel_manager')
+  timesUsed               Int      @default(0)
+  lastUsed                DateTime?
+  totalSessionDuration    Int      @default(0) // Segundos totales
+  averageSessionDuration  Float    @default(0) // Segundos promedio
+  favorited               Boolean  @default(false)
+  
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  
+  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company                 Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, companyId, moduleId])
+  @@index([userId])
+  @@index([companyId])
+  @@index([moduleId])
+  @@index([lastUsed])
+  @@map("module_usage_stats")
+}
+
+model InAppNotification {
+  id          String    @id @default(cuid())
+  userId      String
+  companyId   String
+  type        String    // 'success', 'info', 'warning', 'action'
+  title       String
+  message     String    @db.Text
+  icon        String?
+  actionLabel String?
+  actionRoute String?
+  read        Boolean   @default(false)
+  readAt      DateTime?
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company     Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([companyId])
+  @@index([read])
+  @@index([createdAt])
+  @@map("in_app_notifications")
+}
+
+model EmailLog {
+  id          String    @id @default(cuid())
+  userId      String
+  companyId   String
+  template    String    // 'welcome', 'building_created_success', etc.
+  subject     String
+  to          String
+  status      String    @default("pending") // pending, sent, failed
+  sentAt      DateTime?
+  error       String?   @db.Text
+  metadata    Json?     // Datos adicionales usados en el template
+  
+  createdAt   DateTime  @default(now())
+  
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company     Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([companyId])
+  @@index([template])
+  @@index([status])
+  @@index([sentAt])
+  @@map("email_logs")
+}
+
+model WebhookEvent {
+  id          String    @id @default(cuid())
+  companyId   String
+  event       String    // 'user.signed_up', 'building.created', etc.
+  payload     Json
+  sentAt      DateTime?
+  status      String    @default("pending") // pending, sent, failed
+  attempts    Int       @default(0)
+  error       String?   @db.Text
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  company     Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  @@index([companyId])
+  @@index([event])
+  @@index([status])
+  @@index([createdAt])
+  @@map("webhook_events")
+}
+
+model ChatbotInteraction {
+  id              String   @id @default(cuid())
+  userId          String
+  companyId       String
+  message         String   @db.Text
+  response        String   @db.Text
+  context         Json?    // Contexto del usuario (página actual, progreso onboarding, etc.)
+  suggestedActions Json?   // Acciones sugeridas por el chatbot
+  escalated       Boolean  @default(false)
+  
+  createdAt       DateTime @default(now())
+  
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([companyId])
+  @@index([escalated])
+  @@index([createdAt])
+  @@map("chatbot_interactions")
+}
+
+model UserCelebration {
+  id          String   @id @default(cuid())
+  userId      String
+  companyId   String
+  type        String   // 'first_building', 'onboarding_completed', '100_buildings', etc.
+  title       String
+  message     String   @db.Text
+  shown       Boolean  @default(false)
+  shownAt     DateTime?
+  
+  createdAt   DateTime @default(now())
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([companyId])
+  @@index([shown])
+  @@index([createdAt])
+  @@map("user_celebrations")
 }

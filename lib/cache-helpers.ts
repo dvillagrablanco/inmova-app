@@ -2,8 +2,39 @@
  * Cache Helper Functions
  * Provides easy-to-use caching functions for common data patterns
  */
-import { getCached, invalidateCache, companyKey, CACHE_TTL } from './redis';
+import { getCached as getCachedRaw, invalidateCache, companyKey, CACHE_TTL } from './redis';
 import logger from './logger';
+import getRedisClient from './redis';
+
+/**
+ * Get cached value or compute and cache it
+ */
+async function getCachedWithTTL<T>(
+  key: string,
+  fetchFn: () => Promise<T>,
+  ttl: number
+): Promise<T> {
+  // Try to get from cache first
+  const cached = await getCachedRaw<T>(key);
+  if (cached !== null) {
+    return cached;
+  }
+
+  // Fetch fresh data
+  const data = await fetchFn();
+
+  // Store in cache
+  const redis = getRedisClient();
+  if (redis) {
+    try {
+      await redis.setex(key, ttl, JSON.stringify(data));
+    } catch (error) {
+      logger.error('[Cache] Error storing in cache:', error);
+    }
+  }
+
+  return data;
+}
 
 /**
  * Cache wrapper for dashboard statistics
@@ -13,7 +44,7 @@ export async function cachedDashboardStats<T>(
   fetchFn: () => Promise<T>
 ): Promise<T> {
   const key = companyKey(companyId, 'dashboard');
-  return getCached(key, fetchFn, CACHE_TTL.SHORT);
+  return getCachedWithTTL(key, fetchFn, CACHE_TTL.SHORT);
 }
 
 /**
@@ -24,7 +55,7 @@ export async function cachedBuildings<T>(
   fetchFn: () => Promise<T>
 ): Promise<T> {
   const key = companyKey(companyId, 'buildings');
-  return getCached(key, fetchFn, CACHE_TTL.MEDIUM);
+  return getCachedWithTTL(key, fetchFn, CACHE_TTL.MEDIUM);
 }
 
 /**
@@ -38,7 +69,7 @@ export async function cachedUnits<T>(
   const key = buildingId
     ? companyKey(companyId, `units:building:${buildingId}`)
     : companyKey(companyId, 'units');
-  return getCached(key, fetchFn, CACHE_TTL.MEDIUM);
+  return getCachedWithTTL(key, fetchFn, CACHE_TTL.MEDIUM);
 }
 
 /**
@@ -49,7 +80,7 @@ export async function cachedTenants<T>(
   fetchFn: () => Promise<T>
 ): Promise<T> {
   const key = companyKey(companyId, 'tenants');
-  return getCached(key, fetchFn, CACHE_TTL.MEDIUM);
+  return getCachedWithTTL(key, fetchFn, CACHE_TTL.MEDIUM);
 }
 
 /**
@@ -60,7 +91,7 @@ export async function cachedContracts<T>(
   fetchFn: () => Promise<T>
 ): Promise<T> {
   const key = companyKey(companyId, 'contracts');
-  return getCached(key, fetchFn, CACHE_TTL.SHORT);
+  return getCachedWithTTL(key, fetchFn, CACHE_TTL.SHORT);
 }
 
 /**
@@ -71,7 +102,7 @@ export async function cachedPayments<T>(
   fetchFn: () => Promise<T>
 ): Promise<T> {
   const key = companyKey(companyId, 'payments');
-  return getCached(key, fetchFn, CACHE_TTL.SHORT);
+  return getCachedWithTTL(key, fetchFn, CACHE_TTL.SHORT);
 }
 
 /**
@@ -83,7 +114,7 @@ export async function cachedAnalytics<T>(
   fetchFn: () => Promise<T>
 ): Promise<T> {
   const key = companyKey(companyId, `analytics:${period}`);
-  return getCached(key, fetchFn, CACHE_TTL.LONG);
+  return getCachedWithTTL(key, fetchFn, CACHE_TTL.LONG);
 }
 
 /**

@@ -55,8 +55,8 @@ export default function UnitRoomsPage() {
     nombre: '',
     superficie: '',
     tipoHabitacion: 'individual',
-    precioPorMes: '',
-    bajoPrivado: false,
+    rentaMensual: '',
+    banoPrivado: false,
     amueblada: true,
   });
 
@@ -108,8 +108,8 @@ export default function UnitRoomsPage() {
           nombre: '',
           superficie: '',
           tipoHabitacion: 'individual',
-          precioPorMes: '',
-          bajoPrivado: false,
+          rentaMensual: '',
+          banoPrivado: false,
           amueblada: true,
         });
         loadData();
@@ -213,14 +213,14 @@ export default function UnitRoomsPage() {
                           />
                         </div>
                         <div>
-                          <Label htmlFor="precioPorMes">Precio/Mes (€) *</Label>
+                          <Label htmlFor="rentaMensual">Precio/Mes (€) *</Label>
                           <Input
-                            id="precioPorMes"
+                            id="rentaMensual"
                             type="number"
                             step="0.01"
-                            value={formData.precioPorMes}
+                            value={formData.rentaMensual}
                             onChange={(e) =>
-                              setFormData({ ...formData, precioPorMes: e.target.value })
+                              setFormData({ ...formData, rentaMensual: e.target.value })
                             }
                             required
                           />
@@ -248,14 +248,14 @@ export default function UnitRoomsPage() {
                           <div className="flex items-center space-x-2">
                             <input
                               type="checkbox"
-                              id="bajoPrivado"
-                              checked={formData.bajoPrivado}
+                              id="banoPrivado"
+                              checked={formData.banoPrivado}
                               onChange={(e) =>
-                                setFormData({ ...formData, bajoPrivado: e.target.checked })
+                                setFormData({ ...formData, banoPrivado: e.target.checked })
                               }
                               className="h-4 w-4"
                             />
-                            <Label htmlFor="bajoPrivado">Baño Privado</Label>
+                            <Label htmlFor="banoPrivado">Baño Privado</Label>
                           </div>
                           <div className="flex items-center space-x-2">
                             <input
@@ -319,7 +319,7 @@ export default function UnitRoomsPage() {
                         </div>
                         <div>
                           <span className="text-gray-600">Precio:</span>
-                          <p className="font-medium text-green-600">€{room.precioPorMes}/mes</p>
+                          <p className="font-medium text-green-600">€{room.rentaMensual}/mes</p>
                         </div>
                       </div>
 

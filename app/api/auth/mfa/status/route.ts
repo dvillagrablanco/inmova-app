@@ -1,38 +1,52 @@
 /**
- * API Endpoint: Estado de MFA
  * GET /api/auth/mfa/status
- * 
- * Obtiene el estado actual de MFA para el usuario autenticado
+ * Obtiene el estado MFA del usuario actual
  */
-
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { getMFAStatus } from '@/lib/mfa-service';
+import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-
-    if (!session || !session.user?.id) {
+    
+    if (!session?.user?.id) {
       return NextResponse.json(
-        { error: 'No autorizado' },
+        { error: 'No autenticado' },
         { status: 401 }
       );
     }
-
-    const userId = session.user.id;
-    const status = await getMFAStatus(userId);
-
+    
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        mfaEnabled: true,
+        mfaVerifiedAt: true,
+        mfaRecoveryCodes: true,
+        role: true,
+      },
+    });
+    
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Usuario no encontrado' },
+        { status: 404 }
+      );
+    }
+    
     return NextResponse.json({
-      success: true,
-      data: status,
+      mfaEnabled: user.mfaEnabled,
+      mfaVerifiedAt: user.mfaVerifiedAt,
+      backupCodesRemaining: user.mfaRecoveryCodes,
+      canEnableMFA: user.role === 'super_admin',
     });
   } catch (error: any) {
+    console.error('[MFA] Error getting status:', error);
     return NextResponse.json(
-      { error: error.message || 'Error al obtener estado MFA' },
+      { error: 'Error al obtener estado MFA' },
       { status: 500 }
     );
   }

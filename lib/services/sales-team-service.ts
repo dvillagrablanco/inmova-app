@@ -4,9 +4,15 @@
  * Gestiona comerciales autónomos, leads, comisiones y objetivos de ventas
  */
 
-import { SalesRepStatus, LeadStatus, SalesCommissionType, SalesCommissionStatus, SalesCommission } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../db';
+
+// Definiciones de tipos inline (reemplaza imports de @prisma/client)
+type SalesRepStatus = 'ACTIVO' | 'INACTIVO' | 'SUSPENDIDO' | 'CANCELADO';
+type LeadStatus = 'NUEVO' | 'CONTACTADO' | 'CALIFICADO' | 'DEMO' | 'PROPUESTA' | 'CERRADO' | 'PERDIDO';
+type SalesCommissionType = 'CAPTACION' | 'RECURRENTE' | 'REACTIVACION' | 'BONIFICACION' | 'NIVEL2';
+type SalesCommissionStatus = 'PENDIENTE' | 'APROBADA' | 'PAGADA' | 'CANCELADA' | 'RETENIDA';
+type SalesCommission = any; // Tipo del modelo Prisma, se mantiene como any para compatibilidad
 
 // ====================================
 // GESTIÓN DE COMERCIALES

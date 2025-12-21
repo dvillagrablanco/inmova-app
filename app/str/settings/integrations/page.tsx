@@ -63,9 +63,14 @@ export default function IntegrationsSettingsPage() {
   const [autoSync, setAutoSync] = useState(true);
   const [syncInterval, setSyncInterval] = useState('24');
   const [loading, setLoading] = useState(true);
+  
+  // Demo: Estado de configuración de canales (evita hydration errors con Math.random)
+  const [configuredChannels, setConfiguredChannels] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadSettings();
+    // Inicializar canales configurados demo (solo en cliente)
+    setConfiguredChannels(new Set(['AIRBNB', 'BOOKING', 'VRBO']));
   }, []);
 
   const loadSettings = async () => {
@@ -369,7 +374,7 @@ export default function IntegrationsSettingsPage() {
                           <div>
                             <p className="font-semibold">{channel}</p>
                               <p className="text-sm text-muted-foreground">
-                              {Math.random() > 0.5 ? (
+                              {configuredChannels.has(channel) ? (
                                 <span className="flex items-center text-green-600">
                                   <CheckCircle2 className="mr-1 h-3 w-3" />
                                   Configurado

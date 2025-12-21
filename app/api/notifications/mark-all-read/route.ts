@@ -1,46 +1,47 @@
+/**
+ * API: /api/notifications/mark-all-read
+ * Marcar todas las notificaciones del usuario como leídas
+ * 
+ * PATCH: Marcar todas como leídas
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/prisma';
+import { markAllAsRead } from '@/lib/notification-service';
 
+/**
+ * PATCH /api/notifications/mark-all-read
+ * Marca todas las notificaciones del usuario como leídas
+ */
 export async function PATCH(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'No autenticado' },
+        { status: 401 }
+      );
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: { id: true, companyId: true }
-    });
+    const result = await markAllAsRead(session.user.id);
 
-    if (!user?.companyId) {
-      return NextResponse.json({ error: 'Usuario sin empresa' }, { status: 400 });
+    if (!result.success) {
+      return NextResponse.json(
+        { error: result.error || 'Error al marcar todas como leídas' },
+        { status: 500 }
+      );
     }
 
-    const result = await prisma.notification.updateMany({
-      where: {
-        companyId: user.companyId,
-        OR: [
-          { userId: user.id },
-          { userId: null }
-        ],
-        leida: false
-      },
-      data: {
-        leida: true
-      }
-    });
-
-    return NextResponse.json({ 
-      message: 'Todas las notificaciones marcadas como leídas',
-      count: result.count
+    return NextResponse.json({
+      count: result.count,
+      message: `${result.count} notificaciones marcadas como leídas`,
     });
   } catch (error) {
-    console.error('Error al marcar todas como leídas:', error);
+    console.error('[API] Error in PATCH /api/notifications/mark-all-read:', error);
     return NextResponse.json(
-      { error: 'Error al actualizar notificaciones' },
+      { error: 'Error interno del servidor' },
       { status: 500 }
     );
   }

@@ -359,7 +359,11 @@ const adminNavItems = [
   { name: 'Equipo Comercial Externo', href: '/admin/sales-team', icon: Users2, roles: ['super_admin'] },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  onNavigate?: () => void; // Callback cuando se navega a una ruta (útil para cerrar modals en mobile)
+}
+
+export function Sidebar({ onNavigate }: SidebarProps = {}) {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session } = useSession() || {};
@@ -541,7 +545,10 @@ export function Sidebar() {
         <Link
           href={item.href}
           prefetch={true}
-          onClick={() => setIsMobileMenuOpen(false)}
+          onClick={() => {
+            setIsMobileMenuOpen(false);
+            onNavigate?.();
+          }}
           data-tour={item.dataTour || undefined}
           className={cn(
             'flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 text-sm',

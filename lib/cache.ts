@@ -1,155 +1,258 @@
 /**
- * Sistema de Caché para mejorar performance
- * Implementación con Redis (cuando esté disponible) o In-Memory
+ * Cache Helper Functions
+ * Wrapper para operaciones de caché con Redis
  */
+import { getRedisClient } from './redis';
+import logger from './logger';
 
-// Cache implementation for INMOVA
+/**
+ * Cache key prefix para evitar colisiones
+ */
+const CACHE_PREFIX = 'inmova:';
 
-interface CacheConfig {
-  ttl: number; // Time to live in seconds
-  prefix?: string;
+/**
+ * TTL por defecto (5 minutos)
+ */
+const DEFAULT_TTL = 300; // seconds
+
+/**
+ * Generate cache key with prefix
+ */
+function getCacheKey(key: string): string {
+  return `${CACHE_PREFIX}${key}`;
 }
 
-// In-Memory Cache (fallback cuando Redis no está disponible)
-class InMemoryCache {
-  private cache: Map<string, { value: any; expires: number }> = new Map();
+/**
+ * Get value from cache
+ * @param key Cache key
+ * @returns Parsed value or null
+ */
+export async function cacheGet<T>(key: string): Promise<T | null> {
+  const redis = getRedisClient();
+  if (!redis) return null;
 
-  async get<T>(key: string): Promise<T | null> {
-    const entry = this.cache.get(key);
-    if (!entry) return null;
+  try {
+    const cacheKey = getCacheKey(key);
+    const value = await redis.get(cacheKey);
 
-    if (Date.now() > entry.expires) {
-      this.cache.delete(key);
+    if (!value) {
       return null;
     }
 
-    return entry.value as T;
-  }
-
-  async set(key: string, value: any, ttl: number): Promise<void> {
-    this.cache.set(key, {
-      value,
-      expires: Date.now() + ttl * 1000,
-    });
-  }
-
-  async del(key: string): Promise<void> {
-    this.cache.delete(key);
-  }
-
-  async flush(): Promise<void> {
-    this.cache.clear();
-  }
-
-  // Cleanup expired entries
-  startCleanup(): void {
-    setInterval(() => {
-      const now = Date.now();
-      for (const [key, entry] of this.cache.entries()) {
-        if (now > entry.expires) {
-          this.cache.delete(key);
-        }
-      }
-    }, 60000); // Every minute
+    return JSON.parse(value) as T;
+  } catch (error) {
+    logger.error('[Cache] Error getting key:', { key, error });
+    return null;
   }
 }
 
-class CacheService {
-  private client: InMemoryCache;
-  private defaultTTL: number = 300; // 5 minutes
+/**
+ * Set value in cache
+ * @param key Cache key
+ * @param value Value to cache
+ * @param ttl Time to live in seconds (default: 5 minutes)
+ */
+export async function cacheSet<T>(
+  key: string,
+  value: T,
+  ttl: number = DEFAULT_TTL
+): Promise<boolean> {
+  const redis = getRedisClient();
+  if (!redis) return false;
 
-  constructor() {
-    this.client = new InMemoryCache();
-    this.client.startCleanup();
-    console.log('Cache initialized (In-Memory fallback)');
-  }
+  try {
+    const cacheKey = getCacheKey(key);
+    const serialized = JSON.stringify(value);
 
-  /**
-   * Get cached value
-   */
-  async get<T>(key: string): Promise<T | null> {
-    try {
-      return await this.client.get<T>(key);
-    } catch (error) {
-      console.error('Cache get error:', error);
-      return null;
-    }
-  }
-
-  /**
-   * Set cached value
-   */
-  async set(key: string, value: any, ttl?: number): Promise<boolean> {
-    try {
-      await this.client.set(key, value, ttl || this.defaultTTL);
-      return true;
-    } catch (error) {
-      console.error('Cache set error:', error);
-      return false;
-    }
-  }
-
-  /**
-   * Delete cached value
-   */
-  async del(key: string): Promise<boolean> {
-    try {
-      await this.client.del(key);
-      return true;
-    } catch (error) {
-      console.error('Cache del error:', error);
-      return false;
-    }
-  }
-
-  /**
-   * Flush all cache
-   */
-  async flush(): Promise<boolean> {
-    try {
-      await this.client.flush();
-      return true;
-    } catch (error) {
-      console.error('Cache flush error:', error);
-      return false;
-    }
-  }
-
-  /**
-   * Cache wrapper for functions
-   */
-  async wrap<T>(
-    key: string,
-    fn: () => Promise<T>,
-    config?: CacheConfig
-  ): Promise<T> {
-    // Try to get from cache
-    const cached = await this.get<T>(key);
-    if (cached !== null) {
-      return cached;
+    if (ttl > 0) {
+      await redis.setex(cacheKey, ttl, serialized);
+    } else {
+      await redis.set(cacheKey, serialized);
     }
 
-    // Execute function and cache result
-    const result = await fn();
-    await this.set(key, result, config?.ttl);
-    return result;
-  }
-
-  /**
-   * Generate cache key
-   */
-  key(parts: (string | number)[]): string {
-    return parts.join(':');
+    return true;
+  } catch (error) {
+    logger.error('[Cache] Error setting key:', { key, error });
+    return false;
   }
 }
 
-export const cache = new CacheService();
+/**
+ * Delete value from cache
+ * @param key Cache key or pattern
+ */
+export async function cacheDel(key: string): Promise<boolean> {
+  const redis = getRedisClient();
+  if (!redis) return false;
 
-// Cache TTL presets
-export const CACHE_TTL = {
-  SHORT: 60, // 1 minute
-  MEDIUM: 300, // 5 minutes
-  LONG: 900, // 15 minutes
-  HOUR: 3600, // 1 hour
-  DAY: 86400, // 24 hours
-};
+  try {
+    const cacheKey = getCacheKey(key);
+    await redis.del(cacheKey);
+    return true;
+  } catch (error) {
+    logger.error('[Cache] Error deleting key:', { key, error });
+    return false;
+  }
+}
+
+/**
+ * Delete multiple keys matching pattern
+ * @param pattern Pattern to match (e.g., 'buildings:*')
+ */
+export async function cacheDelPattern(pattern: string): Promise<number> {
+  const redis = getRedisClient();
+  if (!redis) return 0;
+
+  try {
+    const cachePattern = getCacheKey(pattern);
+    const keys = await redis.keys(cachePattern);
+
+    if (keys.length === 0) {
+      return 0;
+    }
+
+    await redis.del(...keys);
+    return keys.length;
+  } catch (error) {
+    logger.error('[Cache] Error deleting pattern:', { pattern, error });
+    return 0;
+  }
+}
+
+/**
+ * Get or set value (cache-aside pattern)
+ * Si el valor existe en caché, lo retorna
+ * Si no existe, ejecuta la función, guarda en caché y retorna
+ * 
+ * @param key Cache key
+ * @param fn Function to execute if cache miss
+ * @param ttl Time to live in seconds
+ * @returns Cached or fetched value
+ */
+export async function cacheGetOrSet<T>(
+  key: string,
+  fn: () => Promise<T>,
+  ttl: number = DEFAULT_TTL
+): Promise<T> {
+  // Try to get from cache
+  const cached = await cacheGet<T>(key);
+  if (cached !== null) {
+    logger.debug('[Cache] HIT:', key);
+    return cached;
+  }
+
+  logger.debug('[Cache] MISS:', key);
+
+  // Cache miss, execute function
+  const value = await fn();
+
+  // Store in cache (fire and forget)
+  cacheSet(key, value, ttl).catch((error) => {
+    logger.error('[Cache] Error storing value:', { key, error });
+  });
+
+  return value;
+}
+
+/**
+ * Invalidate cache for a specific company
+ * Elimina todas las keys relacionadas con una compañía
+ */
+export async function invalidateCompanyCache(companyId: string): Promise<number> {
+  const deletedKeys = await cacheDelPattern(`company:${companyId}:*`);
+  logger.info('[Cache] Invalidated company cache:', { companyId, deletedKeys });
+  return deletedKeys;
+}
+
+/**
+ * Invalidate cache for a specific user
+ * Elimina todas las keys relacionadas con un usuario
+ */
+export async function invalidateUserCache(userId: string): Promise<number> {
+  const deletedKeys = await cacheDelPattern(`user:${userId}:*`);
+  logger.info('[Cache] Invalidated user cache:', { userId, deletedKeys });
+  return deletedKeys;
+}
+
+/**
+ * Clear all cache
+ * USAR CON CUIDADO - elimina TODO el caché
+ */
+export async function cacheClear(): Promise<boolean> {
+  const redis = getRedisClient();
+  if (!redis) return false;
+
+  try {
+    await redis.flushdb();
+    logger.warn('[Cache] ALL cache cleared');
+    return true;
+  } catch (error) {
+    logger.error('[Cache] Error clearing cache:', error);
+    return false;
+  }
+}
+
+/**
+ * Get cache statistics
+ */
+export async function getCacheStats() {
+  const redis = getRedisClient();
+  if (!redis) {
+    return {
+      connected: false,
+      keys: 0,
+      memory: 0,
+      hitRate: 0,
+    };
+  }
+
+  try {
+    const info = await redis.info('stats');
+    const memory = await redis.info('memory');
+    const dbSize = await redis.dbsize();
+
+    // Parse info strings
+    const hits = parseInt(info.match(/keyspace_hits:(\d+)/)?.[1] || '0');
+    const misses = parseInt(info.match(/keyspace_misses:(\d+)/)?.[1] || '0');
+    const hitRate = hits + misses > 0 ? (hits / (hits + misses)) * 100 : 0;
+
+    const usedMemory = parseInt(
+      memory.match(/used_memory:(\d+)/)?.[1] || '0'
+    );
+
+    return {
+      connected: true,
+      keys: dbSize,
+      memory: usedMemory,
+      hitRate: Math.round(hitRate * 100) / 100,
+      hits,
+      misses,
+    };
+  } catch (error) {
+    logger.error('[Cache] Error getting stats:', error);
+    return {
+      connected: false,
+      keys: 0,
+      memory: 0,
+      hitRate: 0,
+    };
+  }
+}
+
+/**
+ * Cache TTL presets
+ */
+export const CacheTTL = {
+  /** 1 minuto - para datos muy volátiles */
+  VERY_SHORT: 60,
+  /** 5 minutos - default */
+  SHORT: 300,
+  /** 15 minutos - para datos semi-estáticos */
+  MEDIUM: 900,
+  /** 1 hora - para datos estáticos */
+  LONG: 3600,
+  /** 24 horas - para datos muy estáticos */
+  VERY_LONG: 86400,
+  /** 7 días - para configuraciones */
+  WEEK: 604800,
+} as const;

@@ -63,6 +63,48 @@ export const selectPaymentMinimal = {
 } satisfies Prisma.PaymentSelect;
 
 /**
+ * Room Rental Optimized Selects
+ * Added: Semana 2, Query Optimization
+ */
+export const selectRoomMinimal = {
+  id: true,
+  numero: true,
+  superficie: true,
+  rentaMensual: true,
+  estado: true,
+  capacidadMaxima: true,
+} satisfies Prisma.RoomSelect;
+
+export const selectRoomContractMinimal = {
+  id: true,
+  fechaInicio: true,
+  fechaFin: true,
+  rentaMensual: true,
+  estado: true,
+  depositoSeguridad: true,
+} satisfies Prisma.RoomContractSelect;
+
+export const selectRoomPaymentMinimal = {
+  id: true,
+  monto: true,
+  fechaVencimiento: true,
+  estado: true,
+  concepto: true,
+} satisfies Prisma.RoomPaymentSelect;
+
+// TODO: Implement UtilityProration model in schema.prisma
+// export const selectUtilityProrationMinimal = {
+//   id: true,
+//   mesReferencia: true,
+//   metodoProrrateado: true,
+//   totalElectricidad: true,
+//   totalAgua: true,
+//   totalGas: true,
+//   totalInternet: true,
+//   createdAt: true,
+// };
+
+/**
  * Build optimized include object
  */
 export function buildOptimizedInclude<T extends Record<string, any>>(

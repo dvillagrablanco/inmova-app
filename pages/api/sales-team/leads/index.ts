@@ -2,7 +2,9 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth-options';
 import salesTeamService from '@/lib/services/sales-team-service';
-import { LeadStatus } from '@prisma/client';
+
+// Definiciones de tipos inline (reemplaza imports de @prisma/client)
+type LeadStatus = 'NUEVO' | 'CONTACTADO' | 'CALIFICADO' | 'DEMO' | 'PROPUESTA' | 'CERRADO' | 'PERDIDO';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await getServerSession(authOptions);

@@ -4,6 +4,13 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { checkRoomAvailability } from '@/lib/room-rental-service';
 import logger, { logError } from '@/lib/logger';
+import { 
+  selectUnitMinimal, 
+  selectBuildingMinimal, 
+  selectRoomContractMinimal, 
+  selectTenantMinimal,
+  selectRoomPaymentMinimal
+} from '@/lib/query-optimizer';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,21 +28,56 @@ export async function GET(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    // OPTIMIZADO - Bug Fix Week: Query Optimization  
     const room = await prisma.room.findUnique({
       where: {
         id: params.id,
         companyId: session.user.companyId,
       },
-      include: {
+      select: {
+        id: true,
+        numero: true,
+        nombre: true,
+        superficie: true,
+        tipoHabitacion: true,
+        banoPrivado: true,
+        tieneBalcon: true,
+        escritorio: true,
+        armarioEmpotrado: true,
+        aireAcondicionado: true,
+        calefaccion: true,
+        amueblada: true,
+        cama: true,
+        mesaNoche: true,
+        cajonera: true,
+        estanteria: true,
+        silla: true,
+        rentaMensual: true,
+        precioPorSemana: true,
+        estado: true,
+        imagenes: true,
+        descripcion: true,
+        unitId: true,
+        companyId: true,
+        createdAt: true,
+        updatedAt: true,
         unit: {
-          include: {
-            building: true,
+          select: {
+            ...selectUnitMinimal,
+            building: {
+              select: selectBuildingMinimal,
+            },
           },
         },
         contracts: {
-          include: {
-            tenant: true,
-            payments: true,
+          select: {
+            ...selectRoomContractMinimal,
+            tenant: {
+              select: selectTenantMinimal,
+            },
+            payments: {
+              select: selectRoomPaymentMinimal,
+            },
           },
           orderBy: {
             fechaInicio: 'desc',
@@ -71,6 +113,38 @@ export async function PATCH(
 
     const data = await request.json();
 
+    // BUG FIX: Validar valores positivos
+    if (data.superficie !== undefined) {
+      const superficie = parseFloat(data.superficie);
+      if (isNaN(superficie) || superficie <= 0) {
+        return NextResponse.json(
+          { error: 'La superficie debe ser un número positivo' },
+          { status: 400 }
+        );
+      }
+    }
+
+    if (data.rentaMensual !== undefined) {
+      const rentaMensual = parseFloat(data.rentaMensual);
+      if (isNaN(rentaMensual) || rentaMensual <= 0) {
+        return NextResponse.json(
+          { error: 'La renta mensual debe ser un número positivo' },
+          { status: 400 }
+        );
+      }
+    }
+
+    if (data.precioPorSemana !== undefined && data.precioPorSemana !== null) {
+      const precioPorSemana = parseFloat(data.precioPorSemana);
+      if (isNaN(precioPorSemana) || precioPorSemana <= 0) {
+        return NextResponse.json(
+          { error: 'El precio por semana debe ser un número positivo' },
+          { status: 400 }
+        );
+      }
+    }
+
+    // OPTIMIZADO - Bug Fix Week: Query Optimization + select minimal en response
     const room = await prisma.room.update({
       where: {
         id: params.id,
@@ -80,8 +154,8 @@ export async function PATCH(
         nombre: data.nombre,
         superficie: data.superficie ? parseFloat(data.superficie) : undefined,
         tipoHabitacion: data.tipoHabitacion,
-        bajoPrivado: data.bajoPrivado,
-        balcon: data.balcon,
+        banoPrivado: data.banoPrivado,
+        tieneBalcon: data.tieneBalcon,
         escritorio: data.escritorio,
         armarioEmpotrado: data.armarioEmpotrado,
         aireAcondicionado: data.aireAcondicionado,
@@ -92,16 +166,28 @@ export async function PATCH(
         cajonera: data.cajonera,
         estanteria: data.estanteria,
         silla: data.silla,
-        precioPorMes: data.precioPorMes ? parseFloat(data.precioPorMes) : undefined,
+        rentaMensual: data.rentaMensual ? parseFloat(data.rentaMensual) : undefined,
         precioPorSemana: data.precioPorSemana ? parseFloat(data.precioPorSemana) : undefined,
         estado: data.estado,
         imagenes: data.imagenes,
         descripcion: data.descripcion,
       },
-      include: {
+      select: {
+        id: true,
+        numero: true,
+        nombre: true,
+        superficie: true,
+        tipoHabitacion: true,
+        banoPrivado: true,
+        tieneBalcon: true,
+        rentaMensual: true,
+        estado: true,
         unit: {
-          include: {
-            building: true,
+          select: {
+            ...selectUnitMinimal,
+            building: {
+              select: selectBuildingMinimal,
+            },
           },
         },
       },

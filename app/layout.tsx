@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
+import '@/styles/mobile-first.css';
 // import 'react-big-calendar/lib/css/react-big-calendar.css'; // Desactivado temporalmente - requiere paquete react-big-calendar
 import { Providers } from '@/components/providers';
 import { SkipLink } from '@/components/ui/skip-link';
+import { BottomNavigation } from '@/components/mobile/BottomNavigation';
 // import { WebVitalsInit } from '@/components/WebVitalsInit'; // Desactivado temporalmente - requiere paquete web-vitals
 import { defaultMetadata } from '@/lib/seo-config';
 
@@ -30,6 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SkipLink />
         <Providers>
           {children}
+          <BottomNavigation />
           {/* <WebVitalsInit /> */}
         </Providers>
       </body>

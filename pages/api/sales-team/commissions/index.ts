@@ -2,7 +2,10 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth-options';
 import salesTeamService from '@/lib/services/sales-team-service';
-import { SalesCommissionStatus, SalesCommissionType } from '@prisma/client';
+
+// Definiciones de tipos inline (reemplaza imports de @prisma/client)
+type SalesCommissionStatus = 'PENDIENTE' | 'APROBADA' | 'PAGADA' | 'CANCELADA' | 'RETENIDA';
+type SalesCommissionType = 'CAPTACION' | 'RECURRENTE' | 'REACTIVACION' | 'BONIFICACION' | 'NIVEL2';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await getServerSession(authOptions);

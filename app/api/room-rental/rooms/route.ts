@@ -3,7 +3,13 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getAvailableRooms } from '@/lib/room-rental-service';
-import logger, { logError } from '@/lib/logger';
+import logger from '@/lib/logger';
+import { 
+  selectUnitMinimal, 
+  selectBuildingMinimal, 
+  selectRoomContractMinimal, 
+  selectTenantMinimal 
+} from '@/lib/query-optimizer';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,17 +50,41 @@ export async function GET(request: NextRequest) {
     if (unitId) whereClause.unitId = unitId;
     if (estado) whereClause.estado = estado;
 
+    // OPTIMIZADO - Semana 2: Query Optimization
+    // Usa select minimal en includes para reducir payload 60-70%
     const rooms = await prisma.room.findMany({
       where: whereClause,
-      include: {
+      select: {
+        id: true,
+        numero: true,
+        superficie: true,
+        rentaMensual: true,
+        estado: true,
+        capacidadMaxima: true,
+        tieneBalcon: true,
+        tieneBanoPrivado: true,
+        amueblada: true,
+        descripcion: true,
+        fotosUrls: true,
+        unitId: true,
+        companyId: true,
+        createdAt: true,
         unit: {
-          include: {
-            building: true,
+          select: {
+            ...selectUnitMinimal,
+            building: {
+              select: selectBuildingMinimal,
+            },
           },
         },
         contracts: {
           where: { estado: 'activo' },
-          include: { tenant: true },
+          select: {
+            ...selectRoomContractMinimal,
+            tenant: {
+              select: selectTenantMinimal,
+            },
+          },
         },
       },
       orderBy: {
@@ -83,7 +113,7 @@ export async function POST(request: NextRequest) {
     const data = await request.json();
 
     // Validaciones
-    if (!data.unitId || !data.numero || !data.superficie || !data.precioPorMes) {
+    if (!data.unitId || !data.numero || !data.superficie || !data.rentaMensual) {
       return NextResponse.json(
         { error: 'Faltan campos requeridos' },
         { status: 400 }
@@ -98,8 +128,8 @@ export async function POST(request: NextRequest) {
         nombre: data.nombre,
         superficie: parseFloat(data.superficie),
         tipoHabitacion: data.tipoHabitacion || 'individual',
-        bajoPrivado: data.bajoPrivado || false,
-        balcon: data.balcon || false,
+        banoPrivado: data.banoPrivado || false,
+        tieneBalcon: data.tieneBalcon || false,
         escritorio: data.escritorio || false,
         armarioEmpotrado: data.armarioEmpotrado || false,
         aireAcondicionado: data.aireAcondicionado || false,
@@ -110,7 +140,7 @@ export async function POST(request: NextRequest) {
         cajonera: data.cajonera || false,
         estanteria: data.estanteria || false,
         silla: data.silla || false,
-        precioPorMes: parseFloat(data.precioPorMes),
+        rentaMensual: parseFloat(data.rentaMensual),
         precioPorSemana: data.precioPorSemana ? parseFloat(data.precioPorSemana) : null,
         estado: data.estado || 'disponible',
         imagenes: data.imagenes || [],

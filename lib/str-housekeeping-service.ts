@@ -4,8 +4,11 @@
  */
 
 import { prisma } from './db';
-import { HousekeepingStatus, TurnoverType } from '@prisma/client';
 import { addDays, addHours, differenceInHours, startOfDay, endOfDay } from 'date-fns';
+
+// Definiciones de tipos inline (reemplaza imports de @prisma/client)
+type HousekeepingStatus = 'pendiente' | 'asignado' | 'en_progreso' | 'completado' | 'verificado' | 'rechazado';
+type TurnoverType = 'check_out' | 'check_in' | 'limpieza_profunda' | 'mantenimiento' | 'inspeccion';
 
 // ==================== INTERFACES ====================
 
@@ -136,7 +139,7 @@ export async function createHousekeepingTask(input: CreateTaskInput) {
       listingId,
       bookingId: rest.bookingId,
       tipo: tipoTurnover,
-      status: HousekeepingStatus.pendiente,
+      status: 'pendiente',
       fechaProgramada: startOfDay(fechaProgramada),
       fechaInicio: rest.horaInicio,
       fechaFin: rest.horaFin,
@@ -170,7 +173,7 @@ export async function updateHousekeepingTask(taskId: string, companyId: string, 
     updateData.status = input.status;
 
     // Si se completa, calcular tiempo real y actualizar stats del staff
-    if (input.status === HousekeepingStatus.completado && input.horaInicioReal && input.horaFinReal) {
+    if (input.status === 'completado' && input.horaInicioReal && input.horaFinReal) {
       const tiempoReal = differenceInHours(input.horaFinReal, input.horaInicioReal) * 60;
       updateData.tiempoRealMin = tiempoReal;
 
@@ -275,10 +278,10 @@ export async function getHousekeepingStats(companyId: string, fechaInicio?: Date
   const tasks = await prisma.sTRHousekeepingTask.findMany({ where });
 
   const totalTareas = tasks.length;
-  const pendientes = tasks.filter(t => t.status === HousekeepingStatus.pendiente).length;
-  const enProgreso = tasks.filter(t => t.status === HousekeepingStatus.en_progreso).length;
-  const completadas = tasks.filter(t => t.status === HousekeepingStatus.completado).length;
-  const conIncidencias = tasks.filter(t => t.status === HousekeepingStatus.incidencia).length;
+  const pendientes = tasks.filter(t => t.status === 'pendiente').length;
+  const enProgreso = tasks.filter(t => t.status === 'en_progreso').length;
+  const completadas = tasks.filter(t => t.status === 'completado').length;
+  const conIncidencias = tasks.filter(t => t.status === 'incidencia').length;
 
   // Calcular tiempo promedio de completado
   const tareasConTiempo = tasks.filter(t => t.tiempoRealMin !== null && t.tiempoRealMin > 0);
@@ -288,7 +291,7 @@ export async function getHousekeepingStats(companyId: string, fechaInicio?: Date
 
   // Calcular tasa de completado a tiempo
   const tareasATiempo = tasks.filter(t =>
-    t.status === HousekeepingStatus.completado &&
+    t.status === 'completado' &&
     t.tiempoRealMin !== null &&
     t.tiempoRealMin <= (t.tiempoEstimadoMin || 0)
   ).length;
@@ -397,14 +400,14 @@ export async function getStaffPerformance(companyId: string): Promise<StaffPerfo
       const tareasCompletadas = await prisma.sTRHousekeepingTask.count({
         where: {
           asignadoA: s.id,
-          status: HousekeepingStatus.completado
+          status: 'completado'
         }
       });
 
       const tareas = await prisma.sTRHousekeepingTask.findMany({
         where: {
           asignadoA: s.id,
-          status: HousekeepingStatus.completado,
+          status: 'completado',
           tiempoRealMin: { not: null }
         },
         select: {
@@ -426,7 +429,7 @@ export async function getStaffPerformance(companyId: string): Promise<StaffPerfo
       const incidenciasReportadas = await prisma.sTRHousekeepingTask.count({
         where: {
           asignadoA: s.id,
-          status: HousekeepingStatus.incidencia
+          status: 'incidencia'
         }
       });
 
@@ -599,7 +602,7 @@ export async function generateAutomaticTasks(companyId: string, diasAnticipacion
     const checkInTask = await createHousekeepingTask({
       companyId,
       listingId: booking.listingId,
-      tipoTurnover: TurnoverType.check_in,
+      tipoTurnover: 'check_in',
       fechaProgramada: booking.checkInDate,
       horaInicio: addHours(booking.checkInDate, -2),
       horaFin: booking.checkInDate,
@@ -613,7 +616,7 @@ export async function generateAutomaticTasks(companyId: string, diasAnticipacion
     const checkOutTask = await createHousekeepingTask({
       companyId,
       listingId: booking.listingId,
-      tipoTurnover: TurnoverType.check_out,
+      tipoTurnover: 'check_out',
       fechaProgramada: booking.checkOutDate,
       horaInicio: booking.checkOutDate,
       horaFin: addHours(booking.checkOutDate, 3),

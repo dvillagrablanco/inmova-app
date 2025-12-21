@@ -1,6 +1,9 @@
 import { prisma } from './db';
-import { CouponType, CouponStatus } from '@prisma/client';
 import { addDays } from 'date-fns';
+
+// Definiciones de tipos inline (reemplaza imports de @prisma/client)
+type CouponType = 'PERCENTAGE' | 'FIXED';
+type CouponStatus = 'activo' | 'inactivo' | 'agotado' | 'expirado';
 
 /**
  * Servicio de Cupones de Descuento

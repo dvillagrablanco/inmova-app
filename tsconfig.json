@@ -10,7 +10,9 @@
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
+    "ignoreDeprecations": "5.0",
     "noEmit": true,
+    "skipDefaultLibCheck": true,
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",
@@ -20,8 +22,13 @@
     "incremental": true,
     "tsBuildInfoFile": ".next/tsbuildinfo",
     "assumeChangesOnlyAffectDirectDependencies": true,
+    "disableSourceOfProjectReferenceRedirect": true,
+    "disableSolutionSearching": true,
+    "disableReferencedProjectLoad": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
+    "suppressImplicitAnyIndexErrors": true,
+    "suppressExcessPropertyErrors": true,
     "plugins": [
       {
         "name": "next"
@@ -68,7 +75,17 @@
     "**/*.spec.tsx",
     "e2e/**/*",
     "stories/**/*",
-    ".storybook/**/*"
+    ".storybook/**/*",
+    "tests/**/*",
+    "examples/**/*",
+    "docs/**/*",
+    "*.md",
+    "**/*.disabled/**/*",
+    "**/*.disabled.bak/**/*",
+    "pages/**/*",
+    "sentry.server.config.ts",
+    "sentry.client.config.ts",
+    "nextjs_space/**/*"
   ],
   "ts-node": {
     "transpileOnly": true

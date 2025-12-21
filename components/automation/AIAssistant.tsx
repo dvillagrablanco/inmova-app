@@ -376,3 +376,4 @@ export function AIAssistant() {
     </AnimatePresence>
   );
 }
+export default AIAssistant;

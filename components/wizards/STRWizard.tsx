@@ -1,700 +1,456 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Wizard, WizardStep } from '@/components/ui/wizard';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import React, { useState, useEffect } from 'react';
+import { useWizard } from '@/lib/hooks/useWizard';
+import { WizardContainer } from './WizardContainer';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { 
+  Link as LinkIcon, 
+  Check, 
+  AlertCircle, 
   Home,
-  CheckCircle,
-  AlertCircle,
-  Wifi,
-  Link2,
-  Upload,
-  DollarSign,
-  Calendar,
-  Settings,
-  Sparkles
+  TrendingUp,
+  Loader2
 } from 'lucide-react';
-import { validateRequiredFields } from '@/lib/wizard-utils';
-import { toast } from 'sonner';
+import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 
 interface STRWizardProps {
-  onComplete?: (config: any) => void;
-  onCancel?: () => void;
+  onComplete?: (data: any) => void;
 }
 
-interface STRFormData {
-  // Channel Selection
-  hasExistingListings: boolean;
-  selectedChannels: string[];
-  
-  // Import Options
-  importMethod: 'oauth' | 'manual' | 'api';
-  listingsToImport: string[];
-  
-  // Property Selection
-  propertyId?: string;
-  createNewProperty: boolean;
-  
-  // Pricing Strategy
-  enableDynamicPricing: boolean;
-  basePrice: number;
-  minPrice: number;
-  maxPrice: number;
-  
-  // Calendar Sync
-  enableCalendarSync: boolean;
-  syncFrequency: 'realtime' | 'hourly' | 'daily';
-  
-  // Automation
-  autoAcceptBookings: boolean;
-  autoMessageGuests: boolean;
-  enableInstantBook: boolean;
-}
-
-const AVAILABLE_CHANNELS = [
-  {
-    id: 'airbnb',
-    name: 'Airbnb',
-    logo: '/channels/airbnb-logo.svg',
-    description: 'La plataforma líder mundial',
-    features: ['Alcance global', 'Instant Book', 'Mensajería integrada'],
-    supported: true,
-  },
-  {
-    id: 'booking',
-    name: 'Booking.com',
-    logo: '/channels/booking-logo.svg',
-    description: 'Red global de viajes',
-    features: ['Gran tráfico', 'Diversos tipos de alojamiento', 'Soporte 24/7'],
-    supported: true,
-  },
-  {
-    id: 'vrbo',
-    name: 'Vrbo',
-    logo: '/channels/vrbo-logo.svg',
-    description: 'Vacation Rentals by Owner',
-    features: ['Estancias largas', 'Familias', 'Casas completas'],
-    supported: true,
-  },
-  {
-    id: 'expedia',
-    name: 'Expedia',
-    logo: '/channels/expedia-logo.svg',
-    description: 'Portal de viajes completo',
-    features: ['Paquetes de viaje', 'Puntos de fidelidad', 'Integración con vuelos'],
-    supported: false,
-  },
-  {
-    id: 'tripadvisor',
-    name: 'TripAdvisor',
-    logo: '/channels/tripadvisor-logo.svg',
-    description: 'Reseñas y reservas',
-    features: ['Reseñas de confianza', 'Comparación de precios', 'Visibilidad'],
-    supported: false,
-  },
-];
-
-export function STRWizard({ onComplete, onCancel }: STRWizardProps) {
+/**
+ * STR WIZARD - Wizard de configuración STR en 4 pasos
+ * 
+ * Pasos:
+ * 1. Selección de Canales (Airbnb, Booking, etc.)
+ * 2. Conexión OAuth (simulado)
+ * 3. Importación de Anuncios
+ * 4. Configuración de Sincronización
+ */
+export function STRWizard({ onComplete }: STRWizardProps) {
   const router = useRouter();
-  const [connectionStatus, setConnectionStatus] = useState<Record<string, 'pending' | 'connecting' | 'connected' | 'error'>>({});
 
-  const steps: WizardStep[] = [
-    {
-      id: 'intro',
-      title: '¡Bienvenido al Channel Manager!',
-      description: 'Conecta tus canales de alquiler vacacional',
-      icon: <Wifi className="h-5 w-5" />,
-      fields: ({ data, updateData }) => (
-        <div className="space-y-6">
-          <div className="text-center space-y-4">
-            <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-              <Wifi className="h-8 w-8 text-primary" />
+  const wizard = useWizard({
+    steps: [
+      {
+        id: 'channels',
+        title: 'Seleccionar Canales',
+        description: '¿Dónde están tus anuncios?',
+      },
+      {
+        id: 'connect',
+        title: 'Conectar Cuentas',
+        description: 'Autoriza el acceso a tus plataformas',
+      },
+      {
+        id: 'import',
+        title: 'Importar Anuncios',
+        description: 'Selecciona qué anuncios quieres sincronizar',
+      },
+      {
+        id: 'sync',
+        title: 'Configurar Sincronización',
+        description: 'Define cómo mantener todo actualizado',
+      },
+    ],
+    persistKey: 'str-setup',
+    onComplete: async (data) => {
+      try {
+        const res = await fetch('/api/str/setup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+
+        if (res.ok) {
+          toast.success('¡Configuración STR completada!');
+          if (onComplete) {
+            onComplete(data);
+          } else {
+            router.push('/str');
+          }
+        } else {
+          throw new Error('Error al configurar STR');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        toast.error('Error al configurar STR');
+        throw error;
+      }
+    },
+  });
+
+  const [selectedChannels, setSelectedChannels] = useState<string[]>([]);
+  const [connectedChannels, setConnectedChannels] = useState<string[]>([]);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [listings, setListings] = useState<any[]>([]);
+  const [selectedListings, setSelectedListings] = useState<string[]>([]);
+  const [syncConfig, setSyncConfig] = useState({
+    realTime: true,
+    priceSync: true,
+    availabilitySync: true,
+    reviewSync: false,
+  });
+
+  const channels = [
+    { id: 'airbnb', name: 'Airbnb', color: 'bg-pink-100 text-pink-700', icon: '🏠' },
+    { id: 'booking', name: 'Booking.com', color: 'bg-blue-100 text-blue-700', icon: '🌐' },
+    { id: 'vrbo', name: 'VRBO', color: 'bg-purple-100 text-purple-700', icon: '🏡' },
+    { id: 'homeaway', name: 'HomeAway', color: 'bg-orange-100 text-orange-700', icon: '🏘️' },
+    { id: 'tripadvisor', name: 'TripAdvisor', color: 'bg-green-100 text-green-700', icon: '🦉' },
+  ];
+
+  // Simulación de conexión OAuth
+  const handleConnect = async (channelId: string) => {
+    setIsConnecting(true);
+    // Simular delay de OAuth
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    setConnectedChannels([...connectedChannels, channelId]);
+    toast.success(`Conectado a ${channels.find((c) => c.id === channelId)?.name}`);
+    setIsConnecting(false);
+
+    // Simular carga de anuncios
+    if (channelId === 'airbnb') {
+      setListings([
+        { id: '1', title: 'Apartamento Centro Madrid', channel: 'airbnb', price: 75 },
+        { id: '2', title: 'Estudio Malasaña', channel: 'airbnb', price: 60 },
+      ]);
+    } else if (channelId === 'booking') {
+      setListings((prev) => [
+        ...prev,
+        { id: '3', title: 'Piso Retiro', channel: 'booking', price: 80 },
+      ]);
+    }
+  };
+
+  // Actualizar datos del wizard
+  useEffect(() => {
+    wizard.actions.updateData('channels', selectedChannels);
+  }, [selectedChannels]);
+
+  useEffect(() => {
+    wizard.actions.updateData('connected', connectedChannels);
+  }, [connectedChannels]);
+
+  useEffect(() => {
+    wizard.actions.updateData('listings', selectedListings);
+  }, [selectedListings]);
+
+  useEffect(() => {
+    wizard.actions.updateData('sync', syncConfig);
+  }, [syncConfig]);
+
+  // Validación
+  const isCurrentStepValid = () => {
+    const { currentStepIndex } = wizard.state;
+
+    switch (currentStepIndex) {
+      case 0:
+        return selectedChannels.length > 0;
+      case 1:
+        return connectedChannels.length === selectedChannels.length;
+      case 2:
+        return selectedListings.length > 0;
+      case 3:
+        return true;
+      default:
+        return false;
+    }
+  };
+
+  const renderStepContent = () => {
+    switch (wizard.state.currentStepIndex) {
+      case 0:
+        return (
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground mb-4">
+              Selecciona las plataformas donde tienes anuncios activos:
+            </p>
+
+            <div className="grid gap-3">
+              {channels.map((channel) => (
+                <Card
+                  key={channel.id}
+                  className={
+                    selectedChannels.includes(channel.id)
+                      ? 'border-primary cursor-pointer'
+                      : 'cursor-pointer hover:border-primary/50'
+                  }
+                  onClick={() => {
+                    if (selectedChannels.includes(channel.id)) {
+                      setSelectedChannels(selectedChannels.filter((id) => id !== channel.id));
+                    } else {
+                      setSelectedChannels([...selectedChannels, channel.id]);
+                    }
+                  }}
+                >
+                  <CardContent className="p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="text-3xl">{channel.icon}</div>
+                      <div>
+                        <p className="font-medium">{channel.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          Sincroniza precios, disponibilidad y reservas
+                        </p>
+                      </div>
+                    </div>
+                    <Checkbox
+                      checked={selectedChannels.includes(channel.id)}
+                      onCheckedChange={() => {}} // Manejado por el onClick del Card
+                    />
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-2">
-                Gestiona todos tus canales desde un solo lugar
-              </h3>
-              <p className="text-muted-foreground">
-                Sincroniza calendarios, precios y reservas automáticamente
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
+              <p className="text-sm text-blue-900">
+                <strong>Tip:</strong> Puedes conectar múltiples canales para centralizar toda tu gestión STR.
               </p>
             </div>
           </div>
-
-          <Card className="border-2">
-            <CardHeader>
-              <CardTitle className="text-lg">Beneficios del Channel Manager</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <span className="text-sm">Evita sobrevalorados con sincronización en tiempo real</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <span className="text-sm">Actualiza precios en todos los canales instantáneamente</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <span className="text-sm">Centraliza mensajes y reservas en un panel único</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <span className="text-sm">Aumenta tu visibilidad y reservas hasta un 40%</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="space-y-3">
-            <Label className="text-base">¿Ya tienes anuncios activos en alguna plataforma?</Label>
-            <div className="flex gap-4">
-              <Button
-                type="button"
-                variant={data.hasExistingListings === true ? 'default' : 'outline'}
-                className="flex-1"
-                onClick={() => updateData({ hasExistingListings: true })}
-              >
-                Sí, tengo anuncios
-              </Button>
-              <Button
-                type="button"
-                variant={data.hasExistingListings === false ? 'default' : 'outline'}
-                className="flex-1"
-                onClick={() => updateData({ hasExistingListings: false })}
-              >
-                No, empezar de cero
-              </Button>
-            </div>
-          </div>
-        </div>
-      ),
-      validate: async (data) => {
-        if (data.hasExistingListings === undefined) {
-          return 'Por favor, indica si tienes anuncios existentes';
-        }
-        return true;
-      },
-    },
-    {
-      id: 'channels',
-      title: 'Selecciona tus Canales',
-      description: '¿Dónde están tus anuncios?',
-      icon: <Link2 className="h-5 w-5" />,
-      helpText: 'Puedes conectar múltiples canales simultáneamente. Solo selecciona los que uses.',
-      fields: ({ data, updateData }) => (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {AVAILABLE_CHANNELS.map((channel) => {
-              const isSelected = data.selectedChannels?.includes(channel.id);
-              const status = (connectionStatus[channel.id] || 'pending') as 'pending' | 'connecting' | 'connected' | 'error';
-
-              return (
-                <Card
-                  key={channel.id}
-                  className={`cursor-pointer transition-all hover:shadow-md ${
-                    isSelected ? 'border-primary border-2' : ''
-                  } ${
-                    !channel.supported ? 'opacity-60' : ''
-                  }`}
-                  onClick={() => {
-                    if (!channel.supported) {
-                      toast.info(`${channel.name} estará disponible próximamente`);
-                      return;
-                    }
-                    const current = data.selectedChannels || [];
-                    const updated = isSelected
-                      ? current.filter((id: string) => id !== channel.id)
-                      : [...current, channel.id];
-                    updateData({ selectedChannels: updated });
-                  }}
-                >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-muted rounded flex items-center justify-center">
-                          <Home className="h-6 w-6" />
-                        </div>
-                        <div>
-                          <CardTitle className="text-base flex items-center gap-2">
-                            {channel.name}
-                            {!channel.supported && (
-                              <Badge variant="secondary" className="text-xs">
-                                Próximamente
-                              </Badge>
-                            )}
-                          </CardTitle>
-                          <CardDescription className="text-xs">
-                            {channel.description}
-                          </CardDescription>
-                        </div>
-                      </div>
-                      {isSelected && channel.supported && (
-                        <CheckCircle className="h-5 w-5 text-primary" />
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="space-y-1">
-                      {channel.features.map((feature, idx) => (
-                        <div key={idx} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                          <div className="w-1 h-1 rounded-full bg-primary" />
-                          {feature}
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-
-          {data.hasExistingListings && data.selectedChannels?.length > 0 && (
-            <Alert>
-              <Upload className="h-4 w-4" />
-              <AlertDescription>
-                En el siguiente paso podrás importar tus anuncios existentes desde {data.selectedChannels.length} canal(es).
-              </AlertDescription>
-            </Alert>
-          )}
-        </div>
-      ),
-      validate: async (data) => {
-        if (!data.selectedChannels || data.selectedChannels.length === 0) {
-          return 'Selecciona al menos un canal para continuar';
-        }
-        return true;
-      },
-    },
-    {
-      id: 'connection',
-      title: 'Conectar Canales',
-      description: 'Autoriza el acceso a tus cuentas',
-      icon: <Settings className="h-5 w-5" />,
-      shouldSkip: (data) => !data.hasExistingListings,
-      fields: ({ data, updateData }) => (
-        <div className="space-y-4">
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Necesitamos permiso para acceder a tus cuentas. Esto es seguro y puedes revocar el acceso en cualquier momento.
-            </AlertDescription>
-          </Alert>
-
-          <div className="space-y-3">
-            {data.selectedChannels?.map((channelId: string) => {
-              const channel = AVAILABLE_CHANNELS.find((c) => c.id === channelId);
-              if (!channel) return null;
-
-              const status = (connectionStatus[channelId] || 'pending') as 'pending' | 'connecting' | 'connected' | 'error';
-
-              return (
-                <Card key={channelId}>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-muted rounded flex items-center justify-center">
-                          <Home className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <CardTitle className="text-sm">{channel.name}</CardTitle>
-                          <CardDescription className="text-xs">
-                            {status === 'pending' && 'Esperando conexión'}
-                            {status === 'connecting' && 'Conectando...'}
-                            {status === 'connected' && 'Conectado correctamente'}
-                            {status === 'error' && 'Error al conectar'}
-                          </CardDescription>
-                        </div>
-                      </div>
-                      {status === 'connected' ? (
-                        <CheckCircle className="h-5 w-5 text-green-600" />
-                      ) : status === 'error' ? (
-                        <AlertCircle className="h-5 w-5 text-red-600" />
-                      ) : null}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    {(status === 'pending' || status === 'connecting') && (
-                      <Button
-                        type="button"
-                        size="sm"
-                        className="w-full"
-                        disabled={status === 'connecting'}
-                        onClick={async () => {
-                          setConnectionStatus({ ...connectionStatus, [channelId]: 'connecting' });
-                          
-                          try {
-                            // Simulate OAuth connection
-                            await new Promise((resolve) => setTimeout(resolve, 2000));
-                            
-                            const response = await fetch(`/api/str/channels/connect`, {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ channel: channelId }),
-                            });
-
-                            if (response.ok) {
-                              setConnectionStatus({ ...connectionStatus, [channelId]: 'connected' });
-                              toast.success(`${channel.name} conectado correctamente`);
-                            } else {
-                              throw new Error('Connection failed');
-                            }
-                          } catch (error) {
-                            setConnectionStatus({ ...connectionStatus, [channelId]: 'error' });
-                            toast.error(`Error al conectar ${channel.name}`);
-                          }
-                        }}
-                      >
-                        {status === 'connecting' ? 'Conectando...' : `Conectar ${channel.name}`}
-                      </Button>
-                    )}
-                    {status === 'error' && (
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => setConnectionStatus({ ...connectionStatus, [channelId]: 'pending' })}
-                      >
-                        Reintentar
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-      ),
-      validate: async (data) => {
-        // Check if all selected channels are connected
-        const allConnected = data.selectedChannels?.every(
-          (channelId: string) => connectionStatus[channelId] === 'connected'
         );
 
-        if (!allConnected) {
-          return 'Por favor, conecta todos los canales seleccionados antes de continuar';
-        }
+      case 1:
+        return (
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground mb-4">
+              Conecta tus cuentas de cada plataforma para importar tus anuncios:
+            </p>
 
-        return true;
-      },
-    },
-    {
-      id: 'pricing',
-      title: 'Estrategia de Precios',
-      description: 'Configura tus precios',
-      icon: <DollarSign className="h-5 w-5" />,
-      helpText: 'El precio dinámico ajusta automáticamente según demanda, temporada y competencia.',
-      fields: ({ data, updateData }) => (
-        <div className="space-y-6">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label className="text-base">Precio Dinámico (Recomendado)</Label>
-                <p className="text-sm text-muted-foreground">
-                  Optimiza tus ingresos automáticamente
+            <div className="space-y-3">
+              {selectedChannels.map((channelId) => {
+                const channel = channels.find((c) => c.id === channelId);
+                const isConnected = connectedChannels.includes(channelId);
+
+                return (
+                  <Card key={channelId}>
+                    <CardContent className="p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="text-2xl">{channel?.icon}</div>
+                        <div>
+                          <p className="font-medium">{channel?.name}</p>
+                          {isConnected ? (
+                            <Badge variant="secondary" className="bg-green-100 text-green-700">
+                              <Check className="h-3 w-3 mr-1" />
+                              Conectado
+                            </Badge>
+                          ) : (
+                            <p className="text-xs text-muted-foreground">No conectado</p>
+                          )}
+                        </div>
+                      </div>
+                      {!isConnected && (
+                        <Button
+                          onClick={() => handleConnect(channelId)}
+                          disabled={isConnecting}
+                          size="sm"
+                        >
+                          {isConnecting ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Conectando...
+                            </>
+                          ) : (
+                            <>
+                              <LinkIcon className="mr-2 h-4 w-4" />
+                              Conectar
+                            </>
+                          )}
+                        </Button>
+                      )}
+                      {isConnected && (
+                        <Check className="h-5 w-5 text-green-600" />
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-6">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
+                <p className="text-sm text-yellow-900">
+                  <strong>Nota:</strong> Esta es una demostración. En producción, se abrirá una ventana de OAuth
+                  real para autorizar el acceso.
                 </p>
               </div>
-              <Checkbox
-                checked={data.enableDynamicPricing}
-                onCheckedChange={(checked) => updateData({ enableDynamicPricing: checked })}
-              />
             </div>
           </div>
+        );
 
-          {data.enableDynamicPricing ? (
-            <Card className="border-primary/50">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <Sparkles className="h-4 w-4" />
-                  Configuración de Precios Dinámicos
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="minPrice" className="text-xs">Precio Mínimo *</Label>
-                    <Input
-                      id="minPrice"
-                      type="number"
-                      value={data.minPrice || ''}
-                      onChange={(e) => updateData({ minPrice: parseFloat(e.target.value) })}
-                      placeholder="50"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="basePrice" className="text-xs">Precio Base *</Label>
-                    <Input
-                      id="basePrice"
-                      type="number"
-                      value={data.basePrice || ''}
-                      onChange={(e) => updateData({ basePrice: parseFloat(e.target.value) })}
-                      placeholder="100"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="maxPrice" className="text-xs">Precio Máximo *</Label>
-                    <Input
-                      id="maxPrice"
-                      type="number"
-                      value={data.maxPrice || ''}
-                      onChange={(e) => updateData({ maxPrice: parseFloat(e.target.value) })}
-                      placeholder="200"
-                      required
-                    />
-                  </div>
-                </div>
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription className="text-xs">
-                    El sistema ajustará tus precios entre €{data.minPrice || 50} y €{data.maxPrice || 200} según la demanda.
-                  </AlertDescription>
-                </Alert>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-2">
-              <Label htmlFor="basePrice">Precio por Noche *</Label>
-              <Input
-                id="basePrice"
-                type="number"
-                value={data.basePrice || ''}
-                onChange={(e) => updateData({ basePrice: parseFloat(e.target.value) })}
-                placeholder="100"
-                required
-              />
-            </div>
-          )}
-        </div>
-      ),
-      validate: async (data) => {
-        if (!data.basePrice || data.basePrice <= 0) {
-          return 'El precio base es requerido y debe ser mayor a 0';
-        }
-
-        if (data.enableDynamicPricing) {
-          if (!data.minPrice || !data.maxPrice) {
-            return 'Configura los precios mínimo y máximo para precio dinámico';
-          }
-          if (data.minPrice >= data.maxPrice) {
-            return 'El precio mínimo debe ser menor que el máximo';
-          }
-          if (data.basePrice < data.minPrice || data.basePrice > data.maxPrice) {
-            return 'El precio base debe estar entre el mínimo y el máximo';
-          }
-        }
-
-        return true;
-      },
-    },
-    {
-      id: 'automation',
-      title: 'Automatización',
-      description: 'Configura las funciones automáticas',
-      icon: <Calendar className="h-5 w-5" />,
-      optional: true,
-      fields: ({ data, updateData }) => (
-        <div className="space-y-4">
+      case 2:
+        return (
           <div className="space-y-4">
-            <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-sm">Sincronización de Calendario</CardTitle>
-                    <CardDescription className="text-xs">
-                      Evita sobrevalorados automáticamente
-                    </CardDescription>
-                  </div>
-                  <Checkbox
-                    checked={data.enableCalendarSync !== false}
-                    onCheckedChange={(checked) => updateData({ enableCalendarSync: checked })}
-                  />
-                </div>
-              </CardHeader>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-sm">Aceptación Automática de Reservas</CardTitle>
-                    <CardDescription className="text-xs">
-                      Acepta reservas instantáneamente sin tu intervención
-                    </CardDescription>
-                  </div>
-                  <Checkbox
-                    checked={data.autoAcceptBookings}
-                    onCheckedChange={(checked) => updateData({ autoAcceptBookings: checked })}
-                  />
-                </div>
-              </CardHeader>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-sm">Mensajes Automáticos a Huéspedes</CardTitle>
-                    <CardDescription className="text-xs">
-                      Envía instrucciones de check-in y bienvenida
-                    </CardDescription>
-                  </div>
-                  <Checkbox
-                    checked={data.autoMessageGuests}
-                    onCheckedChange={(checked) => updateData({ autoMessageGuests: checked })}
-                  />
-                </div>
-              </CardHeader>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-sm">Instant Book en Airbnb</CardTitle>
-                    <CardDescription className="text-xs">
-                      Aumenta reservas hasta 50% (requiere buen historial)
-                    </CardDescription>
-                  </div>
-                  <Checkbox
-                    checked={data.enableInstantBook}
-                    onCheckedChange={(checked) => updateData({ enableInstantBook: checked })}
-                    disabled={!data.selectedChannels?.includes('airbnb')}
-                  />
-                </div>
-              </CardHeader>
-            </Card>
-          </div>
-
-          <Alert className="bg-blue-50 border-blue-200">
-            <AlertCircle className="h-4 w-4 text-blue-600" />
-            <AlertDescription className="text-sm text-blue-700">
-              Puedes modificar estas configuraciones en cualquier momento desde el panel de control.
-            </AlertDescription>
-          </Alert>
-        </div>
-      ),
-    },
-    {
-      id: 'complete',
-      title: '¡Todo Listo!',
-      description: 'Tu Channel Manager está configurado',
-      icon: <CheckCircle className="h-5 w-5" />,
-      fields: ({ data }) => (
-        <div className="space-y-6 text-center">
-          <div className="mx-auto w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
-            <CheckCircle className="h-10 w-10 text-green-600" />
-          </div>
-          
-          <div>
-            <h3 className="text-xl font-semibold mb-2">
-              ¡Channel Manager Configurado!
-            </h3>
-            <p className="text-muted-foreground">
-              Has conectado {data.selectedChannels?.length || 0} canal(es) y configurado tus preferencias
+            <p className="text-sm text-muted-foreground mb-4">
+              Encontramos {listings.length} anuncios. Selecciona cuáles quieres sincronizar:
             </p>
+
+            {listings.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+                <p>Importando anuncios...</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {listings.map((listing) => (
+                  <Card
+                    key={listing.id}
+                    className={
+                      selectedListings.includes(listing.id)
+                        ? 'border-primary cursor-pointer'
+                        : 'cursor-pointer hover:border-primary/50'
+                    }
+                    onClick={() => {
+                      if (selectedListings.includes(listing.id)) {
+                        setSelectedListings(selectedListings.filter((id) => id !== listing.id));
+                      } else {
+                        setSelectedListings([...selectedListings, listing.id]);
+                      }
+                    }}
+                  >
+                    <CardContent className="p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Home className="h-5 w-5 text-muted-foreground" />
+                        <div>
+                          <p className="font-medium">{listing.title}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge variant="secondary" className="text-xs">
+                              {channels.find((c) => c.id === listing.channel)?.name}
+                            </Badge>
+                            <span className="text-sm text-muted-foreground">
+                              €{listing.price}/noche
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <Checkbox
+                        checked={selectedListings.includes(listing.id)}
+                        onCheckedChange={() => {}}
+                      />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
+        );
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Próximos Pasos</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-left">
-              <div className="flex items-start gap-2">
-                <div className="mt-0.5 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs font-semibold text-primary">1</span>
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Importa tus anuncios existentes</p>
-                  <p className="text-xs text-muted-foreground">o crea nuevos desde cero</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-2">
-                <div className="mt-0.5 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs font-semibold text-primary">2</span>
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Configura tus calendarios</p>
-                  <p className="text-xs text-muted-foreground">para sincronizar disponibilidad</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-2">
-                <div className="mt-0.5 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs font-semibold text-primary">3</span>
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Monitorea tu rendimiento</p>
-                  <p className="text-xs text-muted-foreground">en el dashboard de STR</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      ),
-    },
-  ];
+      case 3:
+        return (
+          <div className="space-y-6">
+            <p className="text-sm text-muted-foreground mb-4">
+              Configura cómo quieres que INMOVA sincronice tus anuncios:
+            </p>
 
-  const handleComplete = async (data: STRFormData) => {
-    try {
-      const response = await fetch('/api/str/channel-manager', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          channels: data.selectedChannels,
-          dynamicPricing: data.enableDynamicPricing,
-          basePrice: data.basePrice,
-          minPrice: data.minPrice,
-          maxPrice: data.maxPrice,
-          calendarSync: data.enableCalendarSync,
-          autoAccept: data.autoAcceptBookings,
-          autoMessage: data.autoMessageGuests,
-          instantBook: data.enableInstantBook,
-        }),
-      });
+            <div className="space-y-4">
+              <Card>
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <TrendingUp className="h-4 w-4 text-primary" />
+                      <p className="font-medium">Sincronización en Tiempo Real</p>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Los cambios se sincronizan instantáneamente en todos los canales
+                    </p>
+                  </div>
+                  <Checkbox
+                    checked={syncConfig.realTime}
+                    onCheckedChange={(checked) =>
+                      setSyncConfig({ ...syncConfig, realTime: checked as boolean })
+                    }
+                  />
+                </CardContent>
+              </Card>
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Error al configurar STR');
-      }
+              <Card>
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className="font-medium mb-1">Sincronizar Precios</p>
+                    <p className="text-sm text-muted-foreground">
+                      Actualiza precios automáticamente en todas las plataformas
+                    </p>
+                  </div>
+                  <Checkbox
+                    checked={syncConfig.priceSync}
+                    onCheckedChange={(checked) =>
+                      setSyncConfig({ ...syncConfig, priceSync: checked as boolean })
+                    }
+                  />
+                </CardContent>
+              </Card>
 
-      toast.success('¡Channel Manager configurado con éxito!');
-      
-      if (onComplete) {
-        onComplete(data);
-      } else {
-        router.push('/str/dashboard');
-      }
-    } catch (error: any) {
-      toast.error(error.message || 'Error al configurar STR');
-      throw error;
+              <Card>
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className="font-medium mb-1">Sincronizar Disponibilidad</p>
+                    <p className="text-sm text-muted-foreground">
+                      Evita dobles reservas sincronizando calendarios
+                    </p>
+                  </div>
+                  <Checkbox
+                    checked={syncConfig.availabilitySync}
+                    onCheckedChange={(checked) =>
+                      setSyncConfig({ ...syncConfig, availabilitySync: checked as boolean })
+                    }
+                  />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className="font-medium mb-1">Sincronizar Reseñas</p>
+                    <p className="text-sm text-muted-foreground">
+                      Importa reseñas de todas las plataformas a INMOVA
+                    </p>
+                  </div>
+                  <Checkbox
+                    checked={syncConfig.reviewSync}
+                    onCheckedChange={(checked) =>
+                      setSyncConfig({ ...syncConfig, reviewSync: checked as boolean })
+                    }
+                  />
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <p className="text-sm text-green-900">
+                <strong>✓ Listo para sincronizar</strong>
+                <br />
+                Haz clic en "Finalizar" para activar tu Channel Manager STR.
+              </p>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
     }
   };
 
   return (
-    <Wizard
-      steps={steps}
-      initialData={{
-        hasExistingListings: undefined,
-        selectedChannels: [],
-        enableDynamicPricing: true,
-        enableCalendarSync: true,
-        autoAcceptBookings: false,
-        autoMessageGuests: true,
-        enableInstantBook: false,
-      }}
-      onComplete={handleComplete}
-      onCancel={onCancel}
-      showPreview={false}
-      className="max-w-3xl"
-    />
+    <WizardContainer
+      state={wizard.state}
+      title="Configurar Channel Manager STR"
+      description="Conecta tus canales de alquiler vacacional en minutos"
+      isStepValid={isCurrentStepValid()}
+      isSubmitting={wizard.isSubmitting}
+      onNext={wizard.actions.goToNext}
+      onPrevious={wizard.actions.goToPrevious}
+      onComplete={wizard.actions.complete}
+    >
+      {renderStepContent()}
+    </WizardContainer>
   );
 }
+
+export default STRWizard;

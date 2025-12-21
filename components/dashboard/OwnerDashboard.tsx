@@ -391,3 +391,4 @@ export function OwnerDashboard() {
     </div>
   );
 }
+export default OwnerDashboard;

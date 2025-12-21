@@ -6,54 +6,72 @@ import * as Sentry from '@sentry/nextjs';
 
 const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN;
 
-if (SENTRY_DSN && !SENTRY_DSN.includes('placeholder')) {
+if (SENTRY_DSN) {
   Sentry.init({
     dsn: SENTRY_DSN,
 
+    // Environment
+    environment: process.env.NODE_ENV || 'development',
+
     // Adjust this value in production, or use tracesSampler for greater control
-    tracesSampleRate: 0.1,
+    tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
 
     // Setting this option to true will print useful information to the console while you're setting up Sentry.
     debug: false,
 
-    replaysOnErrorSampleRate: 1.0,
+    // Replay configuration
+    replaysOnErrorSampleRate: 1.0, // Capture 100% of errors for replay
+    replaysSessionSampleRate: 0.1, // Capture 10% of all sessions for replay
 
-    // This sets the sample rate to be 10%. You may want this to be 100% while
-    // in development and sample at a lower rate in production
-    replaysSessionSampleRate: 0.1,
-
-    // You can remove this option if you're not planning to use the Sentry Session Replay feature:
     integrations: [
       Sentry.replayIntegration({
-        // Additional Replay configuration goes in here, for example:
+        // Additional SDK configuration goes in here, for example:
         maskAllText: true,
         blockAllMedia: true,
       }),
+      Sentry.browserTracingIntegration(),
     ],
 
-    // Capture 100% of transactions for performance monitoring in production
-    // Use tracesSampler to adjust sampling in production
-    environment: process.env.NODE_ENV || 'development',
+    // Ignore common noise
+    ignoreErrors: [
+      // Hydration errors (these are often false positives in dev)
+      'Hydration failed',
+      'There was an error while hydrating',
+      'Text content does not match',
+      // Browser extensions
+      'Non-Error promise rejection captured',
+      // Network errors
+      'NetworkError',
+      'Failed to fetch',
+      // ResizeObserver errors (not critical)
+      'ResizeObserver loop',
+    ],
 
-    beforeSend(event, hint) {
-      // Filter out specific errors if needed
-      const error = hint.originalException;
-      
-      if (error instanceof Error) {
-        // Don't send errors from browser extensions
-        if (error.message && error.message.includes('chrome-extension://')) {
-          return null;
-        }
-        
-        // Don't send errors from ad blockers
-        if (error.message && error.message.includes('adsbygoogle')) {
-          return null;
+    // Filter out sensitive data
+    beforeSend(event) {
+      // Remove sensitive query parameters
+      if (event.request?.url) {
+        try {
+          const url = new URL(event.request.url);
+          // Remove sensitive params
+          ['password', 'token', 'api_key', 'secret'].forEach(param => {
+            url.searchParams.delete(param);
+          });
+          event.request.url = url.toString();
+        } catch (e) {
+          // Invalid URL, ignore
         }
       }
-      
+
+      // Remove sensitive headers
+      if (event.request?.headers) {
+        delete event.request.headers['authorization'];
+        delete event.request.headers['cookie'];
+      }
+
       return event;
     },
   });
 } else {
-  console.warn('[Sentry] DSN not configured. Error tracking disabled.');
+  console.log('[Sentry] Not initialized - NEXT_PUBLIC_SENTRY_DSN not configured');
 }

@@ -694,3 +694,5 @@ export function RoomRentalWizard({ propertyId, onComplete, onCancel }: RoomRenta
     />
   );
 }
+
+export default RoomRentalWizard;

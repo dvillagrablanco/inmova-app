@@ -12,7 +12,10 @@
  */
 
 import { prisma } from './db';
-import { ScreeningEstado, RiskLevel } from '@prisma/client';
+
+// Definiciones de tipos inline (reemplaza imports de @prisma/client)
+type ScreeningEstado = 'pendiente' | 'en_revision' | 'verificado' | 'aprobado' | 'rechazado';
+type RiskLevel = 'bajo' | 'medio' | 'alto' | 'critico';
 
 interface ResultadoScreening {
   scoringTotal: number;

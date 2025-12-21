@@ -427,3 +427,4 @@ export function MFASetup() {
     </>
   );
 }
+export default MFASetup;

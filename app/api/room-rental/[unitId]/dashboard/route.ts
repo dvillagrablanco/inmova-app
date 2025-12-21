@@ -70,7 +70,7 @@ export async function GET(
     const availableRooms = totalRooms - occupiedRooms;
     const totalTenants = rooms.filter((r: any) => r.contracts && r.contracts.length > 0).length;
     const occupancyRate = totalRooms > 0 ? (occupiedRooms / totalRooms) * 100 : 0;
-    const monthlyRevenue = rooms.reduce((sum: number, r: any) => sum + (r.precioPorMes || 0), 0);
+    const monthlyRevenue = rooms.reduce((sum: number, r: any) => sum + (r.rentaMensual || 0), 0);
     const averageRoomPrice = totalRooms > 0 ? monthlyRevenue / totalRooms : 0;
 
     // Calcular próximas salidas (contratos que terminan en los próximos 30 días)
@@ -98,7 +98,7 @@ export async function GET(
         roomId: room.id,
         numero: room.numero,
         superficie: room.superficie || 0,
-        precio: room.precioPorMes || 0,
+        precio: room.rentaMensual || 0,
         estado: room.estado,
         tenantName: contract?.tenant?.nombreCompleto || null,
         tenantEmail: contract?.tenant?.email || null,

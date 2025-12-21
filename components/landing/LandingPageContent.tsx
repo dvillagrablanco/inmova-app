@@ -12,12 +12,15 @@ const LandingChatbot = dynamic(() => import('@/components/LandingChatbot').then(
 // Componentes modulares de la landing page
 import { Navigation } from '@/components/landing/sections/Navigation';
 import { HeroSection } from '@/components/landing/sections/HeroSection';
+import { PromoBanner } from '@/components/landing/sections/PromoBanner';
 import { PromoSection } from '@/components/landing/sections/PromoSection';
 import { StatsSection } from '@/components/landing/sections/StatsSection';
 import { FeaturesSection } from '@/components/landing/sections/FeaturesSection';
+import { NewFeaturesSection } from '@/components/landing/sections/NewFeaturesSection';
 import { AccessPortalsSection } from '@/components/landing/sections/AccessPortalsSection';
 import { CompetitorComparisonSection } from '@/components/landing/sections/CompetitorComparisonSection';
 import { PricingSection } from '@/components/landing/sections/PricingSection';
+import { TestimonialsSection } from '@/components/landing/sections/TestimonialsSection';
 import { IntegrationsSection } from '@/components/landing/sections/IntegrationsSection';
 import { Footer } from '@/components/landing/sections/Footer';
 
@@ -33,6 +36,9 @@ export function LandingPageContent() {
         {/* Hero Section */}
         <HeroSection />
 
+        {/* Banner Promocional Rotativo */}
+        <PromoBanner />
+
         {/* Promo Section */}
         <PromoSection />
 
@@ -42,6 +48,9 @@ export function LandingPageContent() {
         {/* Features & Verticals */}
         <FeaturesSection />
 
+        {/* Novedades Q4 2024: Room Rental PRO + Sistema de Cupones */}
+        <NewFeaturesSection />
+
         {/* Access Portals Section */}
         <AccessPortalsSection />
 
@@ -50,6 +59,9 @@ export function LandingPageContent() {
 
         {/* Pricing Section */}
         <PricingSection />
+
+        {/* Testimonios */}
+        <TestimonialsSection />
 
         {/* Integrations Section */}
         <IntegrationsSection />
