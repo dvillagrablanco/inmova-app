@@ -364,4 +364,3 @@ export function ResponsiveDataTable<T extends { id?: string | number }>({
     </div>
   );
 }
-export default ResponsiveDataTable;

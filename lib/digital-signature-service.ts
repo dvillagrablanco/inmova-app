@@ -182,7 +182,7 @@ export async function crearSolicitudFirma(params: CrearDocumentoFirmaParams) {
       tipoDocumento,
       urlDocumento: documentUrl,
       signaturitId: externalId,
-      estado: 'pendiente',
+      estado: SignatureStatus.pendiente,
       diasExpiracion,
       fechaExpiracion,
       creadoPor,
@@ -192,7 +192,7 @@ export async function crearSolicitudFirma(params: CrearDocumentoFirmaParams) {
           nombre: firmante.nombre,
           rol: firmante.rol,
           orden: index + 1,
-          estado: 'pendiente'
+          estado: SignerStatus.pendiente
         }))
       }
     },
@@ -234,7 +234,7 @@ export async function firmarDocumento(
   if (documento.fechaExpiracion && new Date() > documento.fechaExpiracion) {
     await prisma.documentoFirma.update({
       where: { id: documentoId },
-      data: { estado: 'expirado' }
+      data: { estado: SignatureStatus.expirado }
     });
     throw new Error('El documento ha expirado');
   }
@@ -244,7 +244,7 @@ export async function firmarDocumento(
     throw new Error('Firmante no encontrado');
   }
 
-  if (firmante.estado === 'firmado') {
+  if (firmante.estado === SignerStatus.firmado) {
     throw new Error('Este documento ya ha sido firmado por este usuario');
   }
 
@@ -252,7 +252,7 @@ export async function firmarDocumento(
   await prisma.firmante.update({
     where: { id: firmanteId },
     data: {
-      estado: 'firmado',
+      estado: SignerStatus.firmado,
       firmadoEn: new Date(),
       ipFirma: '192.168.1.1',
       dispositivo: 'Demo Browser',
@@ -261,18 +261,18 @@ export async function firmarDocumento(
   });
 
   const firmantesPendientes = documento.firmantes.filter(
-    f => f.id !== firmanteId && f.estado !== 'firmado'
+    f => f.id !== firmanteId && f.estado !== SignerStatus.firmado
   ).length;
 
   const nuevoEstado = firmantesPendientes === 0 
-    ? 'firmado' 
-    : 'pendiente';
+    ? SignatureStatus.firmado 
+    : SignatureStatus.pendiente;
 
   const documentoActualizado = await prisma.documentoFirma.update({
     where: { id: documentoId },
     data: {
       estado: nuevoEstado,
-      ...(nuevoEstado === 'firmado' && {
+      ...(nuevoEstado === SignatureStatus.firmado && {
         fechaCompletada: new Date()
       })
     },
@@ -284,7 +284,7 @@ export async function firmarDocumento(
   return {
     success: true,
     documento: documentoActualizado,
-    message: nuevoEstado === 'firmado'
+    message: nuevoEstado === SignatureStatus.firmado
       ? 'Documento firmado completamente'
       : 'Firma registrada, esperando a otros firmantes'
   };
@@ -298,7 +298,7 @@ export async function rechazarDocumento(
   await prisma.firmante.update({
     where: { id: firmanteId },
     data: {
-      estado: 'rechazado',
+      estado: SignerStatus.rechazado,
       rechazadoEn: new Date(),
       motivoRechazo: motivo
     }
@@ -307,7 +307,7 @@ export async function rechazarDocumento(
   await prisma.documentoFirma.update({
     where: { id: documentoId },
     data: {
-      estado: 'rechazado'
+      estado: SignatureStatus.rechazado
     }
   });
 
@@ -340,9 +340,9 @@ export async function obtenerEstadoDocumento(documentoId: string) {
   }
 
   const totalFirmantes = documento.firmantes.length;
-  const firmados = documento.firmantes.filter(f => f.estado === 'firmado').length;
-  const pendientes = documento.firmantes.filter(f => f.estado === 'pendiente').length;
-  const rechazados = documento.firmantes.filter(f => f.estado === 'rechazado').length;
+  const firmados = documento.firmantes.filter(f => f.estado === SignerStatus.firmado).length;
+  const pendientes = documento.firmantes.filter(f => f.estado === SignerStatus.pendiente).length;
+  const rechazados = documento.firmantes.filter(f => f.estado === SignerStatus.rechazado).length;
 
   return {
     documento,
@@ -380,7 +380,7 @@ export async function cancelarSolicitudFirma(documentoId: string, motivo: string
   await prisma.documentoFirma.update({
     where: { id: documentoId },
     data: {
-      estado: 'cancelado',
+      estado: SignatureStatus.cancelado,
       canceladoEn: new Date()
     }
   });

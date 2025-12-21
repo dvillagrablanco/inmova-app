@@ -9,7 +9,7 @@ import logger from './logger';
 // Definiciones de tipos inline (reemplaza imports de @prisma/client)
 type WorkflowStatus = 'activo' | 'inactivo' | 'borrador';
 type WorkflowTriggerType = 'manual' | 'evento' | 'programado' | 'webhook';
-type WorkflowActionType = 'enviar_notificacion' | 'crear_tarea' | 'enviar_email' | 'ejecutar_script' | 'actualizar_registro' | 'crear_incidencia' | 'generar_documento' | 'webhook';
+type WorkflowActionType = 'enviar_notificacion' | 'crear_tarea' | 'enviar_email' | 'ejecutar_script' | 'actualizar_registro';
 
 /**
  * Crea un nuevo workflow

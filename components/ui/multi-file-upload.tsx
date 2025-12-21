@@ -391,4 +391,3 @@ export function MultiFileUpload({
     </div>
   );
 }
-export default MultiFileUpload;

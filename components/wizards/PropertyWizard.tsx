@@ -487,5 +487,3 @@ export function PropertyWizard({ onComplete }: PropertyWizardProps) {
     </WizardContainer>
   );
 }
-
-export default PropertyWizard;

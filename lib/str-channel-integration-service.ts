@@ -696,7 +696,7 @@ async function createBookingFromExternal(
       tarifaLimpieza,
       comisionCanal,
       ingresoNeto,
-      estado: 'CONFIRMADA',
+      estado: BookingStatus.CONFIRMADA,
       pagado: true,
       estadoPago: 'pagado',
     },

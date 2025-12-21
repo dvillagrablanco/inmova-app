@@ -452,5 +452,3 @@ export function STRWizard({ onComplete }: STRWizardProps) {
     </WizardContainer>
   );
 }
-
-export default STRWizard;

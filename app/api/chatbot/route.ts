@@ -39,32 +39,36 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Obtener contexto del usuario
-    const onboardingData = await getOnboardingProgress(user.id, user.companyId);
+    const onboardingData = await getOnboardingProgress(user.id);
     const conversationHistory = includeHistory
-      ? await getChatbotHistory(user.id, user.companyId) // Últimos 5 mensajes
+      ? await getChatbotHistory(user.id, 5) // Últimos 5 mensajes
       : [];
 
     const context = {
       userId: user.id,
       userName: user.name || 'Usuario',
-      vertical: user.businessVertical,
+      vertical: user.vertical,
       experienceLevel: user.experienceLevel,
-      onboardingProgress: onboardingData?.percentage || 0,
-      pendingTasks: onboardingData?.tasks?.filter((t: any) => t.status === 'pending') || [],
-      completedTasks: onboardingData?.tasks?.filter((t: any) => t.status === 'completed') || [],
+      onboardingProgress: onboardingData?.progress || 0,
+      pendingTasks: onboardingData?.tasks?.filter((t: any) => t.status === 'PENDING') || [],
+      completedTasks: onboardingData?.tasks?.filter((t: any) => t.status === 'COMPLETED') || [],
     };
 
     // 4. Generar respuesta del chatbot
-    const botResponse = await generateChatbotResponse(message, context);
+    const botResponse = await generateChatbotResponse(
+      context,
+      message,
+      conversationHistory
+    );
 
     // 5. Guardar la interacción en BD
-    await saveChatbotInteraction(user.id, message, botResponse.response, {
-      vertical: user.businessVertical,
+    await saveChatbotInteraction(user.id, message, botResponse, {
+      vertical: user.vertical,
       onboardingProgress: context.onboardingProgress,
     });
 
     // 6. Generar sugerencias proactivas
-    const suggestions = await generateProactiveSuggestions(user.id, user.companyId);
+    const suggestions = generateProactiveSuggestions(context);
 
     return NextResponse.json({
       response: botResponse,
