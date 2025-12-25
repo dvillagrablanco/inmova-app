@@ -50,7 +50,12 @@ export function BottomNavigation() {
   const pathname = usePathname();
 
   // No mostrar en páginas de autenticación
-  if (pathname?.startsWith('/login') || pathname?.startsWith('/signup') || pathname?.startsWith('/api/')) {
+  if (
+    pathname?.startsWith('/login') ||
+    pathname?.startsWith('/signup') ||
+    pathname?.startsWith('/auth') ||
+    pathname?.startsWith('/api/')
+  ) {
     return null;
   }
 
