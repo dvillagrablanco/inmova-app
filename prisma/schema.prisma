@@ -1356,6 +1356,10 @@ model Company {
   ewoorkerPerfil        EwoorkerPerfilEmpresa?
   ewoorkerObras         EwoorkerObra[]
   
+  // 🚀 ZERO-TOUCH ONBOARDING
+  onboardingProgress    OnboardingProgress[]
+  onboardingTasks       OnboardingTask[]
+  
   @@map("company")
 }
 
@@ -11511,6 +11515,87 @@ model ChatbotInteraction {
   @@index([escalated])
   @@index([createdAt])
   @@map("chatbot_interactions")
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════════
+// 🚀 ZERO-TOUCH ONBOARDING - Sistema de activación automática
+// ══════════════════════════════════════════════════════════════════════════════
+
+model OnboardingProgress {
+  id               String   @id @default(cuid())
+  userId           String
+  companyId        String
+  vertical         String   @default("alquiler_tradicional") // BusinessVertical
+  currentStep      Int      @default(0)
+  totalSteps       Int      @default(8)
+  completedSteps   String[] @default([]) // Array de IDs de steps completados
+  skippedSteps     String[] @default([]) // Steps que el usuario saltó
+  
+  // Timing
+  startedAt        DateTime @default(now())
+  lastActivityAt   DateTime @default(now())
+  completedAt      DateTime?
+  
+  // Engagement
+  emailsSent       Int      @default(0)
+  emailsOpened     Int      @default(0)
+  emailsClicked    Int      @default(0)
+  chatbotMessages  Int      @default(0)
+  
+  // Abandono
+  abandonedAt      DateTime?
+  remindersSent    Int      @default(0)
+  
+  // Datos de ejemplo usados
+  usedExampleData  Boolean  @default(false)
+  exampleDataIds   String[] @default([]) // IDs de datos de ejemplo creados
+  
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company          Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, companyId])
+  @@index([userId])
+  @@index([companyId])
+  @@index([completedAt])
+  @@index([lastActivityAt])
+  @@index([abandonedAt])
+  @@map("onboarding_progress")
+}
+
+model OnboardingTask {
+  id               String   @id @default(cuid())
+  userId           String
+  companyId        String
+  taskId           String   // ID del step (ej: 'first_building')
+  taskTitle        String
+  
+  // Estado
+  status           String   @default("pending") // pending, in_progress, completed, skipped
+  startedAt        DateTime?
+  completedAt      DateTime?
+  skippedAt        DateTime?
+  
+  // Método de completado
+  completedBy      String?  // 'user' | 'auto' | 'example_data'
+  skipReason       String?  @db.Text
+  
+  // Tracking
+  timeSpentSeconds Int      @default(0)
+  attemptsCount    Int      @default(0)
+  helpRequested    Boolean  @default(false)
+  
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company          Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  @@unique([userId, companyId, taskId])
+  @@index([userId])
+  @@index([companyId])
+  @@index([status])
+  @@map("onboarding_tasks")
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
