@@ -1,0 +1,283 @@
+╔═══════════════════════════════════════════════════════════════╗
+║                                                               ║
+║   ✅ MIGRACIÓN AL SERVIDOR INMOVA-DEPLOYMENT PREPARADA       ║
+║                                                               ║
+╚═══════════════════════════════════════════════════════════════╝
+
+📦 ARCHIVOS CREADOS (12 archivos)
+═══════════════════════════════════════════════════════════════
+
+📚 DOCUMENTACIÓN (7 archivos):
+  ✅ EMPIEZA_AQUI.md                          👈 EMPIEZA AQUÍ
+  ✅ README_MIGRACION.md                      📚 Índice completo
+  ✅ INICIO_RAPIDO_MIGRACION.md              ⚡ Guía rápida (3 pasos)
+  ✅ COMANDOS_MIGRACION_RAPIDA.md            📋 Referencia de comandos
+  ✅ GUIA_MIGRACION_SERVIDOR_INMOVA.md       📖 Guía detallada
+  ✅ SERVIDOR_MIGRACION_SSH.md               🔐 Info SSH y seguridad
+  ✅ RESUMEN_MIGRACION_COMPLETA.md           📝 Resumen ejecutivo
+
+🔧 SCRIPTS (4 archivos):
+  ✅ scripts/check-pre-migracion.sh          ✅ Verificar preparación
+  ✅ scripts/backup-pre-migracion.sh         💾 Crear backup
+  ✅ scripts/migracion-servidor.sh           🚀 Ejecutar migración
+  ✅ scripts/verificacion-post-migracion.sh  🔍 Verificar instalación
+
+🔐 CONFIGURACIÓN (1 archivo):
+  ✅ .env.servidor.inmova-deployment         🔐 Plantilla variables
+
+═══════════════════════════════════════════════════════════════
+
+🔐 INFORMACIÓN DEL SERVIDOR
+═══════════════════════════════════════════════════════════════
+
+  Nombre:      inmova-deployment
+  Fingerprint: 55:0e:12:f9:8f:a3:b0:4b:04:7e:fe:de:00:3f:53:78
+  Clave:       hhk8JqPEpJ3C
+  Fecha:       26 de Diciembre, 2025
+
+═══════════════════════════════════════════════════════════════
+
+⚡ PRIMEROS PASOS
+═══════════════════════════════════════════════════════════════
+
+  1️⃣  Lee el punto de inicio:
+     cat EMPIEZA_AQUI.md
+
+  2️⃣  O lee la guía rápida:
+     cat INICIO_RAPIDO_MIGRACION.md
+
+  3️⃣  O ve el índice completo:
+     cat README_MIGRACION.md
+
+═══════════════════════════════════════════════════════════════
+
+🎯 MIGRACIÓN EN 4 COMANDOS
+═══════════════════════════════════════════════════════════════
+
+  # 1. Verificar que todo está listo
+  ./scripts/check-pre-migracion.sh
+
+  # 2. Crear backup
+  ./scripts/backup-pre-migracion.sh
+
+  # 3. Migrar (necesitas la IP del servidor)
+  export SERVER_IP="xxx.xxx.xxx.xxx"
+  ./scripts/migracion-servidor.sh
+
+  # 4. Verificar
+  ./scripts/verificacion-post-migracion.sh
+
+═══════════════════════════════════════════════════════════════
+
+⏱️  TIEMPO ESTIMADO
+═══════════════════════════════════════════════════════════════
+
+  Preparación:   10-15 minutos
+  Migración:     15-30 minutos
+  Verificación:   5-10 minutos
+  ─────────────────────────────
+  TOTAL:         30-55 minutos
+
+═══════════════════════════════════════════════════════════════
+
+📋 LO QUE HACE CADA SCRIPT
+═══════════════════════════════════════════════════════════════
+
+check-pre-migracion.sh:
+  • Verifica herramientas instaladas (SSH, rsync, curl, etc.)
+  • Verifica variables de entorno
+  • Verifica clave SSH y permisos
+  • Verifica archivos del proyecto
+  • Verifica .env.production sin placeholders
+  • Verifica conectividad al servidor
+  • Verifica espacio en disco
+
+backup-pre-migracion.sh:
+  • Backup de base de datos (PostgreSQL)
+  • Backup de variables de entorno
+  • Backup de configuración
+  • Backup de scripts
+  • Genera checksums para verificación
+  • Comprime todo en .tar.gz
+
+migracion-servidor.sh (12 PASOS):
+  1.  Verificar conectividad SSH
+  2.  Instalar sistema (Node.js, PostgreSQL, Nginx, Redis, PM2)
+  3.  Crear estructura de directorios
+  4.  Transferir archivos (rsync)
+  5.  Configurar variables de entorno
+  6.  Instalar dependencias (yarn install)
+  7.  Configurar PostgreSQL
+  8.  Ejecutar migraciones Prisma
+  9.  Compilar aplicación (yarn build)
+  10. Configurar PM2
+  11. Configurar Nginx
+  12. Configurar firewall (UFW)
+
+verificacion-post-migracion.sh:
+  • Verifica conectividad SSH
+  • Verifica servicios del sistema
+  • Verifica aplicación PM2
+  • Verifica base de datos y tablas
+  • Verifica archivos de la aplicación
+  • Verifica conectividad HTTP/HTTPS
+  • Verifica logs sin errores
+  • Verifica firewall configurado
+  • Verifica recursos del sistema (CPU, RAM, Disco)
+  • Muestra últimas líneas de log
+
+═══════════════════════════════════════════════════════════════
+
+🔑 VARIABLES DE ENTORNO OBLIGATORIAS
+═══════════════════════════════════════════════════════════════
+
+Antes de migrar, debes generar estas claves:
+
+  # NEXTAUTH_SECRET
+  openssl rand -base64 32
+
+  # ENCRYPTION_KEY
+  openssl rand -base64 32
+
+  # MFA_ENCRYPTION_KEY
+  openssl rand -base64 32
+
+  # CRON_SECRET
+  node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+
+  # VAPID Keys (Push Notifications)
+  npx web-push generate-vapid-keys
+
+Y configurar en .env.production:
+  • DATABASE_URL
+  • NEXTAUTH_URL (con tu IP o dominio)
+  • NEXT_PUBLIC_BASE_URL (con tu IP o dominio)
+  • AWS_BUCKET_NAME
+  • AWS_ACCESS_KEY_ID
+  • AWS_SECRET_ACCESS_KEY
+  • STRIPE_SECRET_KEY (producción)
+  • STRIPE_PUBLISHABLE_KEY (producción)
+  • NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY (producción)
+
+═══════════════════════════════════════════════════════════════
+
+📊 SERVICIOS QUE SE INSTALARÁN
+═══════════════════════════════════════════════════════════════
+
+  Servicio       Versión    Puerto    Propósito
+  ────────────────────────────────────────────────────────────
+  Node.js        20.x       -         Runtime de la aplicación
+  Yarn           Latest     -         Gestor de paquetes
+  PM2            Latest     -         Gestor de procesos
+  PostgreSQL     15         5432      Base de datos
+  Nginx          Latest     80, 443   Reverse proxy
+  Redis          Latest     6379      Cache (opcional)
+  UFW            -          -         Firewall
+
+═══════════════════════════════════════════════════════════════
+
+🗺️  ESTRUCTURA EN EL SERVIDOR
+═══════════════════════════════════════════════════════════════
+
+  /var/www/inmova/                  # Aplicación
+  /var/www/inmova/.env              # Variables de entorno
+  /var/www/inmova/backups/          # Backups
+  /var/log/inmova/                  # Logs de PM2
+  /var/log/nginx/                   # Logs de Nginx
+  /etc/nginx/sites-available/inmova # Config de Nginx
+
+═══════════════════════════════════════════════════════════════
+
+📱 DESPUÉS DE LA MIGRACIÓN
+═══════════════════════════════════════════════════════════════
+
+Comandos útiles:
+
+  # Conectar al servidor
+  ssh inmova-deployment
+
+  # Ver estado de PM2
+  pm2 status
+
+  # Ver logs
+  pm2 logs inmova-production
+
+  # Reiniciar aplicación
+  pm2 restart inmova-production
+
+  # Ver estado de servicios
+  systemctl status nginx
+  systemctl status postgresql
+
+  # Ver recursos
+  htop
+  df -h
+  free -m
+
+═══════════════════════════════════════════════════════════════
+
+🔄 PRÓXIMOS PASOS POST-MIGRACIÓN
+═══════════════════════════════════════════════════════════════
+
+1. Configurar dominio DNS (opcional)
+   • Apuntar A record a la IP del servidor
+
+2. Instalar certificado SSL (después de configurar dominio)
+   • sudo certbot --nginx -d tudominio.com
+
+3. Configurar backups automáticos
+   • Agregar cron job para backups diarios
+
+4. Configurar monitoreo
+   • PM2 Plus, Netdata, Grafana, o Sentry
+
+═══════════════════════════════════════════════════════════════
+
+✅ CHECKLIST ANTES DE EMPEZAR
+═══════════════════════════════════════════════════════════════
+
+  [ ] Tengo la IP del servidor
+  [ ] Tengo la clave SSH en ~/.ssh/inmova_deployment_key
+  [ ] He leído EMPIEZA_AQUI.md o INICIO_RAPIDO_MIGRACION.md
+  [ ] He creado .env.production desde la plantilla
+  [ ] He generado todas las claves de seguridad
+  [ ] He configurado todas las variables en .env.production
+  [ ] Tengo credenciales de AWS S3
+  [ ] Tengo credenciales de Stripe (producción)
+  [ ] Tengo 30-60 minutos disponibles
+
+═══════════════════════════════════════════════════════════════
+
+✅ ESTADO: TODO LISTO PARA MIGRAR
+═══════════════════════════════════════════════════════════════
+
+  📚 Documentación completa ✅
+  🔧 Scripts funcionales    ✅
+  🔐 Configuración lista    ✅
+  📝 Guías detalladas       ✅
+
+═══════════════════════════════════════════════════════════════
+
+🚀 ¡COMIENZA AHORA!
+═══════════════════════════════════════════════════════════════
+
+  cat EMPIEZA_AQUI.md
+
+  O directamente:
+
+  ./scripts/check-pre-migracion.sh
+
+═══════════════════════════════════════════════════════════════
+
+📞 SOPORTE Y DOCUMENTACIÓN
+═══════════════════════════════════════════════════════════════
+
+  • Todos los .md en este directorio
+  • Scripts comentados en scripts/
+  • Plantilla de configuración en .env.servidor.inmova-deployment
+
+═══════════════════════════════════════════════════════════════
+
+Preparado: 26 de Diciembre, 2025
+Estado:    ✅ LISTO PARA MIGRAR
+Servidor:  inmova-deployment
