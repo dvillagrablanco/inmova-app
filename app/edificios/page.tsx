@@ -183,7 +183,8 @@ function EdificiosPageContent() {
                 ))}
               </div>
             </div>
-          </AuthenticatedLayout>
+          </div>
+      </AuthenticatedLayout>
     );
   }
 
@@ -201,7 +202,7 @@ function EdificiosPageContent() {
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
             {/* Botón Volver y Breadcrumbs */}
             <div className="flex items-center gap-4">
               <Button
@@ -602,9 +603,8 @@ function EdificiosPageContent() {
                 }}
               />
             )}
-          </div>
-        </main>
       </div>
+      </AuthenticatedLayout>
 
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmationDialog

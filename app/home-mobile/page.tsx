@@ -262,7 +262,7 @@ export default function HomeMobilePage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="container-mobile-first py-6">
+      <div className="container-mobile-first py-6">
             {isMobile ? (
               <PullToRefresh onRefresh={handleRefresh}>
                 {mainContent}
@@ -270,11 +270,10 @@ export default function HomeMobilePage() {
             ) : (
               mainContent
             )}
-          </div>
-        </main>
+      </div>
 
-        {/* Mobile FAB for Quick Actions */}
-        {isMobile && (
+      {/* Mobile FAB for Quick Actions */}
+      {isMobile && (
           <>
             <MobileFAB onClick={() => setIsQuickActionsOpen(true)} label="Acciones rápidas" />
             <MobileSheet
@@ -303,7 +302,7 @@ export default function HomeMobilePage() {
             </MobileSheet>
           </>
         )}
-      </div>
     </div>
+      </AuthenticatedLayout>
   );
 }

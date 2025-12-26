@@ -11,7 +11,7 @@
  * {
  *   "crons": [{
  *     "path": "/api/cron/onboarding-automation",
- *     "schedule": "0 */6 * * *"  // Cada 6 horas
+ *     "schedule": "0 *\/6 * * *"
  *   }]
  * }
  */
