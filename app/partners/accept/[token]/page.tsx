@@ -1,8 +1,5 @@
 'use client';
 
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
-
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter, useParams } from 'next/navigation';
@@ -13,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import Link from 'next/link';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 export default function AcceptInvitationPage() {
   const router = useRouter();
@@ -122,11 +120,7 @@ export default function AcceptInvitationPage() {
 
   if (error && !invitation) {
     return (
-      <div className="flex h-screen overflow-hidden bg-gradient-bg">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
-          <Header />
-          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+      <AuthenticatedLayout>
             <div className="max-w-7xl mx-auto">
               <Card className="max-w-md w-full">
                 <CardContent className="pt-6">
@@ -143,9 +137,7 @@ export default function AcceptInvitationPage() {
                 </CardContent>
               </Card>
             </div>
-          </main>
-        </div>
-      </div>
+          </AuthenticatedLayout>
     );
   }
 

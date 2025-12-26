@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import logger from '@/lib/logger';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -261,26 +261,16 @@ export default function AutomatizacionPage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen bg-gradient-bg">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
-          <Header />
-          <main className="flex-1 overflow-y-auto p-6">
+      <AuthenticatedLayout>
             <div className="flex items-center justify-center h-full">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
             </div>
-          </main>
-        </div>
-      </div>
+          </AuthenticatedLayout>
     );
   }
 
   return (
-    <div className="flex h-screen bg-gradient-bg">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-6">
+    <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">

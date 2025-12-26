@@ -1,18 +1,16 @@
 'use client';
 import { useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { ArrowLeft } from 'lucide-react';
 
 export default function FondosPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -24,13 +22,8 @@ export default function FondosPage() {
     return <div className="flex items-center justify-center min-h-screen">Cargando...</div>;
   }
 
-
   return (
-    <div className="flex h-screen overflow-hidden bg-gradient-bg">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+    <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto space-y-6">
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="icon" onClick={() => router.push('/comunidades')}>
@@ -66,8 +59,6 @@ export default function FondosPage() {
               </CardContent>
             </Card>
           </div>
-        </main>
-      </div>
-    </div>
+        </AuthenticatedLayout>
   );
 }

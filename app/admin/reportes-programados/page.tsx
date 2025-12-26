@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { toast } from 'sonner';
 import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -23,8 +24,7 @@ import {
   FileSpreadsheet,
   Database,
 } from 'lucide-react';
-import { Header } from '@/components/layout/header';
-import { Sidebar } from '@/components/layout/sidebar';
+
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -416,11 +416,7 @@ export default function ReportesProgramadosPage() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gradient-bg">
-      <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+    <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">

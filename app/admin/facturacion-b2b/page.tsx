@@ -8,8 +8,8 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -220,11 +220,7 @@ export default function B2BBillingDashboard() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-6 bg-gradient-bg">
+    <AuthenticatedLayout>
           <div className="container mx-auto space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
@@ -434,8 +430,6 @@ export default function B2BBillingDashboard() {
               </CardContent>
             </Card>
           </div>
-        </main>
-      </div>
-    </div>
+        </AuthenticatedLayout>
   );
 }

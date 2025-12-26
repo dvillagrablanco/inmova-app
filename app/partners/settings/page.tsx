@@ -1,10 +1,8 @@
 'use client';
 
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
-
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Building2, Save, User, Mail, Phone, FileText } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,11 +31,7 @@ export default function PartnerSettingsPage() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gradient-bg">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+    <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto">
             {/* Header */}
       <div>
@@ -237,8 +231,6 @@ export default function PartnerSettingsPage() {
         </CardContent>
       </Card>
     </div>
-          </main>
-        </div>
-      </div>
+          </AuthenticatedLayout>
   );
 }

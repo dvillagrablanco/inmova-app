@@ -3,8 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -55,6 +54,7 @@ import {
   Home as HomeIcon,
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { LoadingState } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
 import { FilterChips } from '@/components/ui/filter-chips';
@@ -429,26 +429,16 @@ function MantenimientoPage() {
   // ========== RENDER PRINCIPAL ==========
   if (status === 'loading' || isLoading) {
     return (
-      <div className="flex h-screen overflow-hidden bg-muted/30">
-        <Sidebar />
-        <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
-          <Header />
-          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+      <AuthenticatedLayout>
             <LoadingState message="Cargando mantenimiento..." />
-          </main>
-        </div>
-      </div>
+          </AuthenticatedLayout>
     );
   }
 
   if (!session) return null;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-muted/30">
-      <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+    <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Botón Volver y Breadcrumbs */}
             <div className="flex items-center gap-4">

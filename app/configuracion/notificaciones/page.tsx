@@ -1,8 +1,5 @@
 'use client';
 
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
-
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -22,6 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { Bell, Mail, MessageSquare, AlertCircle, CheckCircle, Save } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import logger, { logError } from '@/lib/logger';
 
 interface NotificationPreferences {
@@ -192,11 +190,7 @@ export default function ConfiguracionNotificacionesPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="flex h-screen overflow-hidden bg-gradient-bg">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
-          <Header />
-          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+      <AuthenticatedLayout>
             <div className="max-w-7xl mx-auto">
               <Skeleton className="h-10 w-96" />
               <div className="space-y-4">
@@ -205,18 +199,12 @@ export default function ConfiguracionNotificacionesPage() {
                 ))}
               </div>
             </div>
-          </main>
-        </div>
-      </div>
+          </AuthenticatedLayout>
     );
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gradient-bg">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+    <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto space-y-6">
             <div>
               <h1 className="text-3xl font-bold">Configuración de Notificaciones</h1>
@@ -562,8 +550,6 @@ export default function ConfiguracionNotificacionesPage() {
               </Button>
             </div>
           </div>
-        </main>
-      </div>
-    </div>
+        </AuthenticatedLayout>
   );
 }

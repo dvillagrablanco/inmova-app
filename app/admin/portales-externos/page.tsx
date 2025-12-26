@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import logger from '@/lib/logger';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -132,26 +132,16 @@ export default function PortalesExternosPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="flex h-screen">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
-          <Header />
-          <main className="flex-1 overflow-y-auto bg-gradient-bg p-6">
+      <AuthenticatedLayout>
             <LoadingState message="Cargando estadísticas de portales externos..." />
-          </main>
-        </div>
-      </div>
+          </AuthenticatedLayout>
     );
   }
 
   if (!stats) return null;
 
   return (
-    <div className="flex h-screen">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto bg-gradient-bg p-6">
+    <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Header */}
             <div className="flex justify-between items-center">
@@ -629,8 +619,6 @@ export default function PortalesExternosPage() {
               </CardContent>
             </Card>
           </div>
-        </main>
-      </div>
-    </div>
+        </AuthenticatedLayout>
   );
 }

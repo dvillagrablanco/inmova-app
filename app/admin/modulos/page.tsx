@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -196,26 +196,16 @@ export default function ModulosAdminPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="flex h-screen">
-        <Sidebar />
-        <div className="flex-1">
-          <Header />
-          <main className="p-6">
+      <AuthenticatedLayout>
             <div className="flex items-center justify-center h-96">
               <RefreshCw className="h-8 w-8 animate-spin text-primary" />
             </div>
-          </main>
-        </div>
-      </div>
+          </AuthenticatedLayout>
     );
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-6 bg-gradient-bg">
+    <AuthenticatedLayout>
           {/* Header */}
           <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
@@ -549,8 +539,6 @@ export default function ModulosAdminPage() {
               </Card>
             </TabsContent>
           </Tabs>
-        </main>
-      </div>
-    </div>
+        </AuthenticatedLayout>
   );
 }

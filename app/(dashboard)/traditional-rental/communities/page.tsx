@@ -1,9 +1,7 @@
 'use client';
 
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
-
 import { useState } from 'react';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,11 +11,7 @@ export default function CommunitiesPage() {
   const [activeTab, setActiveTab] = useState('minutes');
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gradient-bg">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+    <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto">
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestión de Comunidades</h1>
@@ -261,8 +255,6 @@ export default function CommunitiesPage() {
               </TabsContent>
             </Tabs>
           </div>
-        </main>
-      </div>
-    </div>
+        </AuthenticatedLayout>
   );
 }

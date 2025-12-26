@@ -8,10 +8,10 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { usePageTracking } from '@/lib/hooks/usePageTracking';
 import { trackOnboardingStart } from '@/lib/analytics-service';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
+
 import { OnboardingProgressTracker } from '@/components/onboarding/OnboardingProgressTracker';
 import OnboardingChatbot from '@/components/onboarding/OnboardingChatbot';
 import { ContextualHelp } from '@/components/ui/contextual-help';
@@ -72,13 +72,7 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
-      <Sidebar />
-
-      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-
-        <main className="flex-1 overflow-y-auto">
+    <AuthenticatedLayout>
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
             {/* Hero Section */}
             <motion.div

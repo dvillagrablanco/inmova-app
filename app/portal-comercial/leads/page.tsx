@@ -1,8 +1,5 @@
 'use client';
 
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
-
 import { useEffect, useState } from 'react';
 import logger from '@/lib/logger';
 import { useSession } from 'next-auth/react';
@@ -34,6 +31,7 @@ import {
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import Link from 'next/link';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 interface Lead {
   id: string;
@@ -182,17 +180,11 @@ export default function LeadsPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="flex h-screen overflow-hidden bg-gradient-bg">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
-          <Header />
-          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+      <AuthenticatedLayout>
             <div className="max-w-7xl mx-auto">
               <LoadingState message="Cargando leads..." />
             </div>
-          </main>
-        </div>
-      </div>
+          </AuthenticatedLayout>
     );
   }
 

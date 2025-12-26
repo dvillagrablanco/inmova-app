@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -37,8 +38,7 @@ import {
   Trash2,
   Home,
 } from 'lucide-react';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
+
 import logger, { logError } from '@/lib/logger';
 
 export default function UnitRoomsPage() {
@@ -125,11 +125,7 @@ export default function UnitRoomsPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen">
-        <Sidebar />
-        <div className="flex-1 ml-0 lg:ml-64">
-          <Header />
-          <main className="p-6">
+      <AuthenticatedLayout>
             <div className="text-center py-12">Cargando...</div>
           </main>
         </div>
@@ -138,11 +134,7 @@ export default function UnitRoomsPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <Sidebar />
-      <div className="flex-1 ml-0 lg:ml-64">
-        <Header />
-        <main className="p-4 sm:p-6 lg:p-8">
+    <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <div className="mb-6 flex items-center justify-between">

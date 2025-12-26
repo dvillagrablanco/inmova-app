@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -215,9 +214,9 @@ export default function OperadorDashboard() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-gradient-bg">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
+      
+      
+        
         <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6">
           <div className="max-w-7xl mx-auto">
             {/* Header - Optimizado para móvil */}

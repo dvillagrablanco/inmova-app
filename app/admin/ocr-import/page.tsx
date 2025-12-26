@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -33,6 +32,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import Image from 'next/image';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import logger, { logError } from '@/lib/logger';
 
 interface OCRResult {
@@ -225,13 +225,7 @@ export default function OCRImportPage() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gradient-bg">
-      <Sidebar />
-
-      <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-
-        <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
+    <AuthenticatedLayout>
           <div className="max-w-5xl mx-auto">
             <div className="mb-8">
               <h1 className="text-3xl font-bold gradient-text mb-2 flex items-center gap-3">
@@ -390,8 +384,6 @@ export default function OCRImportPage() {
             {/* Resultados */}
             {renderExtractedData()}
           </div>
-        </main>
-      </div>
-    </div>
+        </AuthenticatedLayout>
   );
 }

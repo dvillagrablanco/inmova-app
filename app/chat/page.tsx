@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+
 import { toast } from 'sonner';
 import { LoadingState } from '@/components/ui/loading-state';
 import { Home } from 'lucide-react';
@@ -142,26 +142,16 @@ function AdminChatPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="flex h-screen overflow-hidden">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
-          <Header />
-          <main className="flex-1 overflow-y-auto bg-gradient-bg p-6">
+      <AuthenticatedLayout>
             <LoadingState message="Cargando chat..." size="lg" />
-          </main>
-        </div>
-      </div>
+          </AuthenticatedLayout>
     );
   }
 
   if (!session?.user) return null;
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto bg-gradient-bg p-6">
+    <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Breadcrumb */}
             <Breadcrumb>
@@ -202,9 +192,7 @@ function AdminChatPage() {
               onCloseConversation={closeConversation}
             />
           </div>
-        </main>
-      </div>
-    </div>
+        </AuthenticatedLayout>
   );
 }
 

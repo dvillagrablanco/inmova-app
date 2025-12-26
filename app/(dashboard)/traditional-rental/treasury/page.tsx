@@ -1,19 +1,12 @@
 'use client';
 
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
-
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { TrendingUp, TrendingDown, AlertCircle, CheckCircle } from 'lucide-react';
 
 export default function TreasuryPage() {
   return (
-    <div className="flex h-screen overflow-hidden bg-gradient-bg">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+    <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto">
             <h1 className="text-3xl font-bold mb-2">Tesorería Avanzada</h1>
             <p className="text-gray-600 mb-8">
@@ -116,8 +109,6 @@ export default function TreasuryPage() {
               </div>
             </Card>
           </div>
-        </main>
-      </div>
-    </div>
+        </AuthenticatedLayout>
   );
 }

@@ -153,6 +153,13 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/marketplace': 'marketplace',
   '/sms': 'sms',
   '/dashboard/community': 'community_management',
+  '/esg': 'esg',
+  '/iot': 'iot',
+  '/blockchain': 'blockchain',
+  '/tours-virtuales': 'tours_virtuales',
+  '/economia-circular': 'economia_circular',
+  '/auditoria': 'auditoria',
+  '/seguridad-compliance': 'seguridad_compliance',
 };
 
 // Módulos core que siempre deben mostrarse (esCore: true)
@@ -198,6 +205,13 @@ const CORE_MODULES = [
   'sms',
   'room_rental',
   'community_management',
+  'esg',
+  'iot',
+  'blockchain',
+  'tours_virtuales',
+  'economia_circular',
+  'auditoria',
+  'seguridad_compliance',
   'gestion_clientes',
   'admin_dashboard',
   'admin_planes',
@@ -513,6 +527,52 @@ const multiVerticalItems = [
   },
 ];
 
+// Módulos Transversales (Innovación)
+const modulosTransversalesItems = [
+  {
+    name: 'ESG & Sostenibilidad',
+    href: '/esg',
+    icon: Sparkles,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'IoT & Smart Homes',
+    href: '/iot',
+    icon: Zap,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Blockchain & Tokenización',
+    href: '/blockchain',
+    icon: Shield,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Tours Virtuales',
+    href: '/tours-virtuales',
+    icon: Eye,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Economía Circular',
+    href: '/economia-circular',
+    icon: Activity,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Auditoría',
+    href: '/auditoria',
+    icon: ClipboardList,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
+    name: 'Seguridad & Compliance',
+    href: '/seguridad-compliance',
+    icon: Shield,
+    roles: ['super_admin', 'administrador'],
+  },
+];
+
 // Módulos de Comunidad
 const comunidadItems = [
   {
@@ -769,6 +829,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     gestion: true,
     advanced: false,
     multivertical: false,
+    modulosTransversales: false,
     comunidad: false,
     adminFincas: false,
     propiedadesAvanzado: false,
@@ -929,6 +990,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   const filteredGestionItems = filterItems(gestionNavItems);
   const filteredAdvancedItems = filterItems(advancedNavItems);
   const filteredMultiVerticalItems = filterItems(multiVerticalItems);
+  const filteredModulosTransversalesItems = filterItems(modulosTransversalesItems);
   const filteredComunidadItems = filterItems(comunidadItems);
   const filteredAdminFincasItems = filterItems(adminFincasItems);
   const filteredPropiedadesAvanzadoItems = filterItems(propiedadesAvanzadoItems);
@@ -943,6 +1005,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     ...gestionNavItems,
     ...advancedNavItems,
     ...multiVerticalItems,
+    ...modulosTransversalesItems,
     ...comunidadItems,
     ...adminFincasItems,
     ...propiedadesAvanzadoItems,
@@ -1268,6 +1331,30 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 {expandedSections.multivertical && (
                   <div className="space-y-1 mt-1">
                     {filteredMultiVerticalItems.map((item) => (
+                      <NavItem key={item.href} item={item} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Módulos Transversales Section */}
+            {filteredModulosTransversalesItems.length > 0 && (
+              <div className="mb-4">
+                <button
+                  onClick={() => toggleSection('modulosTransversales')}
+                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
+                >
+                  <span>Módulos Transversales</span>
+                  {expandedSections.modulosTransversales ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
+                </button>
+                {expandedSections.modulosTransversales && (
+                  <div className="space-y-1 mt-1">
+                    {filteredModulosTransversalesItems.map((item) => (
                       <NavItem key={item.href} item={item} />
                     ))}
                   </div>

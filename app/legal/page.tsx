@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -125,11 +125,7 @@ export default function LegalPage() {
   const scheduledInspections = inspections.filter((i) => i.estado === 'programada').length;
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto bg-muted/30 p-4 md:p-6">
+    <AuthenticatedLayout>
           <div className="mb-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -361,8 +357,6 @@ export default function LegalPage() {
               </Card>
             </TabsContent>
           </Tabs>
-        </main>
-      </div>
-    </div>
+        </AuthenticatedLayout>
   );
 }
