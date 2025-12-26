@@ -29,11 +29,7 @@ interface FeatureHighlightProps {
  * Componente para destacar nuevas funcionalidades
  * Ayuda a descubrir características de la plataforma
  */
-export function FeatureHighlightBanner({
-  feature,
-  onDismiss,
-  onComplete,
-}: FeatureHighlightProps) {
+export function FeatureHighlightBanner({ feature, onDismiss, onComplete }: FeatureHighlightProps) {
   const [isVisible, setIsVisible] = useState(true);
 
   const handleDismiss = () => {
@@ -81,9 +77,7 @@ export function FeatureHighlightBanner({
                           Nuevo
                         </span>
                       </h3>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {feature.description}
-                      </p>
+                      <p className="text-sm text-gray-600 mt-1">{feature.description}</p>
                     </div>
                     <button
                       onClick={handleDismiss}

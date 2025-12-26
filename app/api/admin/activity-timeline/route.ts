@@ -11,17 +11,11 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     if (session.user.role !== 'super_admin') {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -74,13 +68,10 @@ export async function GET(request: NextRequest) {
     });
 
     // Estadísticas de acciones
-    const actionStats = activities.reduce(
-      (acc: Record<string, number>, activity) => {
-        acc[activity.action] = (acc[activity.action] || 0) + 1;
-        return acc;
-      },
-      {}
-    );
+    const actionStats = activities.reduce((acc: Record<string, number>, activity) => {
+      acc[activity.action] = (acc[activity.action] || 0) + 1;
+      return acc;
+    }, {});
 
     return NextResponse.json({
       activities,
@@ -90,9 +81,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error fetching activity timeline:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener timeline' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener timeline' }, { status: 500 });
   }
 }

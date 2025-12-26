@@ -12,10 +12,7 @@ export function sanitizeInput(input: string, maxLength = 10000): string {
 
 // Sanitizar email
 export function sanitizeEmail(email: string): string {
-  return email
-    .toLowerCase()
-    .trim()
-    .substring(0, 254);
+  return email.toLowerCase().trim().substring(0, 254);
 }
 
 // Validar y sanitizar URLs
@@ -43,24 +40,22 @@ export function sanitizePhone(phone: string): string {
 
 // Sanitizar alfanumérico (solo letras, números y espacios)
 export function sanitizeAlphanumeric(input: string): string {
-  return input
-    .replace(/[^a-zA-Z0-9 ]/g, '')
-    .substring(0, 1000);
+  return input.replace(/[^a-zA-Z0-9 ]/g, '').substring(0, 1000);
 }
 
 // Sanitizar nombre de archivo
 export function sanitizeFileName(filename: string): string {
   // Primero reemplazar .. con _ para prevenir path traversal
   let sanitized = filename.replace(/\.\./g, '_');
-  
+
   // Luego reemplazar otros caracteres especiales
   sanitized = sanitized.replace(/[^a-zA-Z0-9._-]/g, '_');
-  
+
   // No debe empezar con punto
   if (sanitized.startsWith('.')) {
     sanitized = '_' + sanitized.substring(1);
   }
-  
+
   return sanitized.substring(0, 255);
 }
 
@@ -72,16 +67,16 @@ export function sanitizeHtml(html: string): string {
   // Esta es una implementación básica. En producción, usar DOMPurify o similar
   // Por ahora, simplemente remueve scripts y atributos peligrosos
   let sanitized = html;
-  
+
   // Remover script tags
   sanitized = sanitized.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-  
+
   // Remover event handlers
   sanitized = sanitized.replace(/on\w+\s*=\s*["'][^"']*["']/gi, '');
-  
+
   // Remover javascript: en hrefs
   sanitized = sanitized.replace(/javascript:/gi, '');
-  
+
   return sanitized;
 }
 
@@ -98,7 +93,7 @@ export function sanitizeSql(input: string): string {
 
 // Validar tipo MIME de archivo
 export function isValidMimeType(mimeType: string, allowedTypes: string[]): boolean {
-  return allowedTypes.some(type => {
+  return allowedTypes.some((type) => {
     if (type.endsWith('/*')) {
       return mimeType.startsWith(type.slice(0, -1));
     }
@@ -110,7 +105,7 @@ export function isValidMimeType(mimeType: string, allowedTypes: string[]): boole
 export function generateCsrfToken(): string {
   const array = new Uint8Array(32);
   crypto.getRandomValues(array);
-  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+  return Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
 // Verificar fortaleza de contraseña
@@ -171,5 +166,5 @@ export function hasCommonPatterns(password: string): boolean {
     /(.)\1{2,}/, // Caracteres repetidos
   ];
 
-  return commonPatterns.some(pattern => pattern.test(password));
+  return commonPatterns.some((pattern) => pattern.test(password));
 }

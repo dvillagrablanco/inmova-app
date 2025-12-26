@@ -19,9 +19,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ backups });
   } catch (error: any) {
     logger.error('Error listing backups:', error);
-    return NextResponse.json(
-      { error: 'Error al listar backups' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al listar backups' }, { status: 500 });
   }
 }

@@ -54,7 +54,7 @@ function getClientIdentifier(request: NextRequest): string {
   const forwardedFor = request.headers.get('x-forwarded-for');
   const realIp = request.headers.get('x-real-ip');
   const ip = forwardedFor?.split(',')[0] || realIp || 'unknown';
-  
+
   return `ip:${ip}`;
 }
 
@@ -65,7 +65,11 @@ function getRateLimitType(pathname: string): keyof typeof RATE_LIMITS {
   if (pathname.includes('/auth') || pathname.includes('/login') || pathname.includes('/register')) {
     return 'auth';
   }
-  if (pathname.includes('/payment') || pathname.includes('/stripe') || pathname.includes('/pagos')) {
+  if (
+    pathname.includes('/payment') ||
+    pathname.includes('/stripe') ||
+    pathname.includes('/pagos')
+  ) {
     return 'payment';
   }
   if (pathname.startsWith('/api/') && (request.method === 'GET' || request.method === 'HEAD')) {
@@ -83,28 +87,26 @@ export function checkRateLimit(
 ): { success: boolean; remaining: number; reset: number } {
   const now = Date.now();
   const timestamps = tokenCache.get(identifier) || [];
-  
+
   // Filtrar timestamps que están dentro de la ventana de tiempo
-  const validTimestamps = timestamps.filter(
-    (timestamp) => now - timestamp < config.interval
-  );
-  
+  const validTimestamps = timestamps.filter((timestamp) => now - timestamp < config.interval);
+
   // Verificar si excede el límite
   if (validTimestamps.length >= config.uniqueTokenPerInterval) {
     const oldestTimestamp = Math.min(...validTimestamps);
     const reset = oldestTimestamp + config.interval;
-    
+
     return {
       success: false,
       remaining: 0,
       reset: Math.ceil((reset - now) / 1000), // Segundos hasta reset
     };
   }
-  
+
   // Agregar el nuevo timestamp
   validTimestamps.push(now);
   tokenCache.set(identifier, validTimestamps);
-  
+
   return {
     success: true,
     remaining: config.uniqueTokenPerInterval - validTimestamps.length,
@@ -115,9 +117,7 @@ export function checkRateLimit(
 /**
  * Middleware de rate limiting
  */
-export async function rateLimitMiddleware(
-  request: NextRequest
-): Promise<NextResponse | null> {
+export async function rateLimitMiddleware(request: NextRequest): Promise<NextResponse | null> {
   // Excluir rutas estáticas y de salud
   const { pathname } = request.nextUrl;
   if (
@@ -132,15 +132,15 @@ export async function rateLimitMiddleware(
   const identifier = getClientIdentifier(request);
   const limitType = getRateLimitType(pathname);
   const config = RATE_LIMITS[limitType];
-  
+
   const result = checkRateLimit(identifier, config);
-  
+
   // Agregar headers de rate limit en todas las respuestas
   const headers = new Headers();
   headers.set('X-RateLimit-Limit', config.uniqueTokenPerInterval.toString());
   headers.set('X-RateLimit-Remaining', result.remaining.toString());
   headers.set('X-RateLimit-Reset', result.reset.toString());
-  
+
   if (!result.success) {
     // Rate limit excedido
     return NextResponse.json(
@@ -155,7 +155,7 @@ export async function rateLimitMiddleware(
       }
     );
   }
-  
+
   // Rate limit OK - continuar con la petición
   // Los headers se agregarán en el response final
   return null;
@@ -171,9 +171,9 @@ export async function withRateLimit(
 ): Promise<NextResponse> {
   const identifier = getClientIdentifier(request);
   const config = customConfig || RATE_LIMITS.api;
-  
+
   const result = checkRateLimit(identifier, config);
-  
+
   if (!result.success) {
     return NextResponse.json(
       {
@@ -191,15 +191,15 @@ export async function withRateLimit(
       }
     );
   }
-  
+
   // Ejecutar el handler
   const response = await handler();
-  
+
   // Agregar headers de rate limit
   response.headers.set('X-RateLimit-Limit', config.uniqueTokenPerInterval.toString());
   response.headers.set('X-RateLimit-Remaining', result.remaining.toString());
   response.headers.set('X-RateLimit-Reset', result.reset.toString());
-  
+
   return response;
 }
 

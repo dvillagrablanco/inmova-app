@@ -1,7 +1,7 @@
 /**
  * CUSTOM HOOK: useCelebrations
  * Hook para gestionar celebraciones desde componentes cliente
- * 
+ *
  * Funcionalidades:
  * - Obtener celebraciones pendientes
  * - Mostrar celebraciones automáticamente
@@ -63,18 +63,13 @@ export function useCelebrations(options: UseCelebrationsOptions = {}) {
   const markAsShown = useCallback(
     async (celebrationId: string) => {
       try {
-        const response = await fetch(
-          `/api/celebrations/${celebrationId}/shown`,
-          {
-            method: 'PATCH',
-          }
-        );
+        const response = await fetch(`/api/celebrations/${celebrationId}/shown`, {
+          method: 'PATCH',
+        });
 
         if (response.ok) {
           // Remover de la lista de pendientes
-          setCelebrations((prev) =>
-            prev.filter((c) => c.id !== celebrationId)
-          );
+          setCelebrations((prev) => prev.filter((c) => c.id !== celebrationId));
 
           // Si hay más celebraciones pendientes, mostrar la siguiente
           const remaining = celebrations.filter((c) => c.id !== celebrationId);

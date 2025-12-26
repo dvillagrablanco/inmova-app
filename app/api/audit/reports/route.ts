@@ -34,10 +34,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(reports);
   } catch (error) {
     logger.error('Error al obtener reportes de auditoría:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener reportes' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener reportes' }, { status: 500 });
   }
 }
 
@@ -52,10 +49,7 @@ export async function POST(req: NextRequest) {
     const { titulo, descripcion, tipoReporte, fechaInicio, fechaFin, filtros } = body;
 
     if (!titulo || !tipoReporte || !fechaInicio || !fechaFin) {
-      return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
 
     const startDate = startOfDay(new Date(fechaInicio));
@@ -87,9 +81,7 @@ export async function POST(req: NextRequest) {
     const eventosError = securityEvents.filter((e) => e.severidad === 'error').length;
     const eventosCriticos = securityEvents.filter((e) => e.severidad === 'critical').length;
     const usuariosAfectados = new Set(
-      [...auditLogs.map((a) => a.userId), ...securityEvents.map((s) => s.userId)].filter(
-        Boolean
-      )
+      [...auditLogs.map((a) => a.userId), ...securityEvents.map((s) => s.userId)].filter(Boolean)
     ).size;
 
     const report = await prisma.auditReport.create({
@@ -105,7 +97,7 @@ export async function POST(req: NextRequest) {
         eventosError,
         eventosCriticos,
         usuariosAfectados,
-        generadoPor: session?.user?.email
+        generadoPor: session?.user?.email,
       },
     });
 

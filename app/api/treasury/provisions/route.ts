@@ -9,7 +9,6 @@ import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-
 /**
  * @swagger
  * /api/treasury/provisions:
@@ -32,10 +31,7 @@ export async function GET(req: NextRequest) {
     const companyId = searchParams.get('companyId');
 
     if (!companyId) {
-      return NextResponse.json(
-        { error: 'companyId es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'companyId es requerido' }, { status: 400 });
     }
 
     const provisions = await prisma.badDebtProvision.findMany({
@@ -56,22 +52,15 @@ export async function GET(req: NextRequest) {
     });
 
     // Calcular totales
-    const totalProvision = provisions.reduce(
-      (sum, p) => sum + p.montoProvision,
-      0
-    );
-    const totalOriginal = provisions.reduce(
-      (sum, p) => sum + p.montoOriginal,
-      0
-    );
+    const totalProvision = provisions.reduce((sum, p) => sum + p.montoProvision, 0);
+    const totalOriginal = provisions.reduce((sum, p) => sum + p.montoOriginal, 0);
 
     return NextResponse.json({
       provisions,
       summary: {
         totalProvision,
         totalOriginal,
-        porcentajeTotal:
-          totalOriginal > 0 ? (totalProvision / totalOriginal) * 100 : 0,
+        porcentajeTotal: totalOriginal > 0 ? (totalProvision / totalOriginal) * 100 : 0,
         totalImpagos: provisions.length,
       },
     });

@@ -1,6 +1,6 @@
 /**
  * RoutePreloaderManager - Gestor centralizado de precarga de rutas
- * 
+ *
  * Proporciona una API para:
  * - Precargar rutas críticas al cargar la aplicación
  * - Precargar datos de endpoints API comunes
@@ -51,7 +51,7 @@ class RoutePreloaderManager {
    */
   async preloadForUserRole(role: 'admin' | 'owner' | 'tenant' | 'guest') {
     if (this.isPreloading) return;
-    
+
     this.isPreloading = true;
     const strategy = preloadStrategies[role];
 
@@ -84,10 +84,10 @@ class RoutePreloaderManager {
    * Precarga un conjunto de rutas
    */
   private async preloadRoutes(routes: string[]) {
-    const promises = routes.map(route => {
+    const promises = routes.map((route) => {
       if (this.preloadedRoutes.has(route)) return Promise.resolve();
-      
-      return new Promise<void>(resolve => {
+
+      return new Promise<void>((resolve) => {
         this.preloadedRoutes.add(route);
         // En Next.js 13+, el prefetch se maneja automáticamente con Link
         // Aquí solo marcamos como "intención de precargar"
@@ -102,7 +102,7 @@ class RoutePreloaderManager {
    * Precarga datos de endpoints API
    */
   private async preloadEndpoints(endpoints: string[]) {
-    const promises = endpoints.map(async endpoint => {
+    const promises = endpoints.map(async (endpoint) => {
       if (this.preloadedData.has(endpoint)) return;
 
       try {

@@ -63,14 +63,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `${results.filter(r => r.success).length}/${results.length} gastos registrados en Holded`,
+      message: `${results.filter((r) => r.success).length}/${results.length} gastos registrados en Holded`,
       results,
     });
   } catch (error) {
     logger.error('Error registering expenses in Holded:', error);
-    return NextResponse.json(
-      { error: 'Error al registrar gastos en Holded' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al registrar gastos en Holded' }, { status: 500 });
   }
 }

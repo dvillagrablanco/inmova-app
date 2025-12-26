@@ -1,9 +1,9 @@
 /**
  * Skeleton Loader Component
- * 
+ *
  * Skeletons para diferentes tipos de contenido durante la carga.
  * Proporciona feedback visual de la estructura de la página.
- * 
+ *
  * @module skeleton-loader
  * @since Semana 2, Tarea 2.5
  */
@@ -26,15 +26,7 @@ export interface SkeletonLoaderProps {
  * Componente base de skeleton (pulso animado)
  */
 function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      className={cn(
-        'animate-pulse rounded-md bg-muted',
-        className
-      )}
-      {...props}
-    />
-  );
+  return <div className={cn('animate-pulse rounded-md bg-muted', className)} {...props} />;
 }
 
 /**
@@ -50,7 +42,7 @@ function TableSkeleton({ rows = 5 }: { rows?: number }) {
         <Skeleton className="h-10 flex-1" />
         <Skeleton className="h-10 w-20" />
       </div>
-      
+
       {/* Rows */}
       {Array.from({ length: rows }).map((_, i) => (
         <div key={i} className="flex gap-4">
@@ -148,13 +140,7 @@ function TextSkeleton({ lines = 3 }: { lines?: number }) {
   return (
     <div className="space-y-2">
       {Array.from({ length: lines }).map((_, i) => (
-        <Skeleton
-          key={i}
-          className={cn(
-            'h-4',
-            i === lines - 1 ? 'w-3/4' : 'w-full'
-          )}
-        />
+        <Skeleton key={i} className={cn('h-4', i === lines - 1 ? 'w-3/4' : 'w-full')} />
       ))}
     </div>
   );
@@ -162,28 +148,23 @@ function TextSkeleton({ lines = 3 }: { lines?: number }) {
 
 /**
  * Componente principal SkeletonLoader
- * 
+ *
  * @example
  * ```tsx
  * // Tabla
  * <SkeletonLoader type="table" rows={10} />
- * 
+ *
  * // Cards
  * <SkeletonLoader type="card" count={6} />
- * 
+ *
  * // Lista
  * <SkeletonLoader type="list" rows={5} />
- * 
+ *
  * // Formulario
  * <SkeletonLoader type="form" />
  * ```
  */
-export function SkeletonLoader({
-  type = 'table',
-  rows,
-  count,
-  className,
-}: SkeletonLoaderProps) {
+export function SkeletonLoader({ type = 'table', rows, count, className }: SkeletonLoaderProps) {
   const content = (() => {
     switch (type) {
       case 'table':
@@ -201,11 +182,7 @@ export function SkeletonLoader({
     }
   })();
 
-  return (
-    <div className={cn('w-full', className)}>
-      {content}
-    </div>
-  );
+  return <div className={cn('w-full', className)}>{content}</div>;
 }
 
 export { Skeleton };

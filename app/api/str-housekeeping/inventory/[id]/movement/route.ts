@@ -6,10 +6,7 @@ import { prisma } from '@/lib/db';
 export const dynamic = 'force-dynamic';
 
 // POST - Registrar movimiento de inventario
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -20,10 +17,7 @@ export async function POST(
     const { tipo, cantidad, motivo, realizadoPor, taskId } = body;
 
     if (!tipo || !cantidad) {
-      return NextResponse.json(
-        { error: 'Tipo y cantidad son requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Tipo y cantidad son requeridos' }, { status: 400 });
     }
 
     // Verificar que el item pertenece a la compañía
@@ -45,10 +39,7 @@ export async function POST(
     } else if (tipo === 'salida' || tipo === 'uso') {
       nuevoStock -= cantidad;
       if (nuevoStock < 0) {
-        return NextResponse.json(
-          { error: 'Stock insuficiente' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Stock insuficiente' }, { status: 400 });
       }
     }
 
@@ -66,7 +57,7 @@ export async function POST(
       }),
       prisma.sTRHousekeepingInventory.update({
         where: { id: params.id },
-        data: { 
+        data: {
           stockActual: nuevoStock,
           fechaUltimoConteo: new Date(),
         },
@@ -82,9 +73,6 @@ export async function POST(
     );
   } catch (error) {
     console.error('Error al registrar movimiento:', error);
-    return NextResponse.json(
-      { error: 'Error al registrar movimiento' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al registrar movimiento' }, { status: 500 });
   }
 }

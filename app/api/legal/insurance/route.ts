@@ -41,10 +41,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(policies);
   } catch (error) {
     logger.error('Error fetching insurance policies:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener pólizas de seguro' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener pólizas de seguro' }, { status: 500 });
   }
 }
 
@@ -89,9 +86,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(policy, { status: 201 });
   } catch (error) {
     logger.error('Error creating insurance policy:', error);
-    return NextResponse.json(
-      { error: 'Error al crear póliza de seguro' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear póliza de seguro' }, { status: 500 });
   }
 }

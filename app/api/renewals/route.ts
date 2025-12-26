@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
  *   get:
  *     summary: Obtener renovaciones de contratos
  *     tags: [Renovaciones]
- * 
+ *
  * NOTE: ContractRenewal model not yet implemented in Prisma schema
  * This endpoint is temporarily disabled
  */
@@ -25,10 +25,14 @@ export async function GET(req: NextRequest) {
     }
 
     // TODO: Implement ContractRenewal model in Prisma schema first
-    return NextResponse.json({ 
-      error: 'ContractRenewal feature not yet implemented',
-      message: 'This endpoint requires the ContractRenewal model to be added to the Prisma schema'
-    }, { status: 501 });
+    return NextResponse.json(
+      {
+        error: 'ContractRenewal feature not yet implemented',
+        message:
+          'This endpoint requires the ContractRenewal model to be added to the Prisma schema',
+      },
+      { status: 501 }
+    );
 
     /* Original code - to be uncommented after ContractRenewal model is added
     const searchParams = req.nextUrl.searchParams;

@@ -24,10 +24,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.companyId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Verificar que la integración pertenece a la empresa
@@ -39,19 +36,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     });
 
     if (!integration) {
-      return NextResponse.json(
-        { error: 'Integration not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Integration not found' }, { status: 404 });
     }
 
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '50');
 
-    const logs = await IntegrationManager.getIntegrationLogs(
-      params.integrationId,
-      limit
-    );
+    const logs = await IntegrationManager.getIntegrationLogs(params.integrationId, limit);
 
     return NextResponse.json({
       success: true,
@@ -59,9 +50,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     });
   } catch (error) {
     logger.error('Error getting integration logs:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

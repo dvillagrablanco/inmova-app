@@ -6,10 +6,7 @@ import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { unitId: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { unitId: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -27,10 +24,10 @@ export async function GET(
         building: {
           select: {
             nombre: true,
-            direccion: true
-          }
-        }
-      }
+            direccion: true,
+          },
+        },
+      },
     });
 
     if (!unit) {
@@ -46,22 +43,22 @@ export async function GET(
             tenant: {
               select: {
                 nombreCompleto: true,
-                email: true
-              }
-            }
+                email: true,
+              },
+            },
           },
           where: {
             fechaFin: {
-              gte: new Date()
-            }
+              gte: new Date(),
+            },
           },
           orderBy: {
-            fechaInicio: 'desc'
+            fechaInicio: 'desc',
           },
-          take: 1
-        }
+          take: 1,
+        },
       },
-      orderBy: { numero: 'asc' }
+      orderBy: { numero: 'asc' },
     });
 
     // Calcular estadísticas
@@ -104,20 +101,20 @@ export async function GET(
         tenantEmail: contract?.tenant?.email || null,
         contratoFin: contract?.fechaFin || null,
         numOcupantes: contract ? 1 : 0, // Assuming 1 tenant per room contract
-        diasRestantes
+        diasRestantes,
       };
     });
 
     // Obtener pagos recientes (últimos 5 de habitaciones)
     // Note: Payment model needs adjustment or we'll skip this for now
     const recentPayments: any[] = [];
-    
+
     const recentPaymentsFormatted = recentPayments.map((p: any) => ({
       id: p.id,
       monto: p.monto,
       fecha: p.fechaPago?.toISOString() || new Date().toISOString(),
       tenantName: p.tenant?.nombre || 'Desconocido',
-      roomNumero: p.room?.numero || '-'
+      roomNumero: p.room?.numero || '-',
     }));
 
     // Obtener resumen de gastos compartidos del mes actual
@@ -128,21 +125,25 @@ export async function GET(
       where: {
         building: {
           units: {
-            some: { id: unitId }
-          }
+            some: { id: unitId },
+          },
         },
         fecha: {
           gte: firstDayOfMonth,
-          lte: lastDayOfMonth
+          lte: lastDayOfMonth,
         },
-        categoria: 'servicios'
-      }
+        categoria: 'servicios',
+      },
     });
 
     // Calcular totales por tipo de gasto
     const expensesSummary = {
       electricidad: expenses
-        .filter((e: any) => e.descripcion?.toLowerCase().includes('electricidad') || e.descripcion?.toLowerCase().includes('luz'))
+        .filter(
+          (e: any) =>
+            e.descripcion?.toLowerCase().includes('electricidad') ||
+            e.descripcion?.toLowerCase().includes('luz')
+        )
         .reduce((sum: number, e: any) => sum + e.monto, 0),
       agua: expenses
         .filter((e: any) => e.descripcion?.toLowerCase().includes('agua'))
@@ -151,15 +152,19 @@ export async function GET(
         .filter((e: any) => e.descripcion?.toLowerCase().includes('gas'))
         .reduce((sum: number, e: any) => sum + e.monto, 0),
       internet: expenses
-        .filter((e: any) => e.descripcion?.toLowerCase().includes('internet') || e.descripcion?.toLowerCase().includes('wifi'))
+        .filter(
+          (e: any) =>
+            e.descripcion?.toLowerCase().includes('internet') ||
+            e.descripcion?.toLowerCase().includes('wifi')
+        )
         .reduce((sum: number, e: any) => sum + e.monto, 0),
       limpieza: expenses
         .filter((e: any) => e.categoria === 'limpieza')
         .reduce((sum: number, e: any) => sum + e.monto, 0),
-      total: 0
+      total: 0,
     };
 
-    expensesSummary.total = 
+    expensesSummary.total =
       expensesSummary.electricidad +
       expensesSummary.agua +
       expensesSummary.gas +
@@ -170,7 +175,7 @@ export async function GET(
       unit: {
         id: unit.id,
         nombre: `${unit.building?.nombre || 'Unidad'} - ${unit.numero}`,
-        direccion: unit.building?.direccion || ''
+        direccion: unit.building?.direccion || '',
       },
       stats: {
         totalRooms,
@@ -180,17 +185,14 @@ export async function GET(
         occupancyRate,
         monthlyRevenue,
         averageRoomPrice,
-        upcomingCheckouts
+        upcomingCheckouts,
       },
       roomsOverview,
       recentPayments: recentPaymentsFormatted,
-      expensesSummary
+      expensesSummary,
     });
   } catch (error) {
     logger.error('Error fetching co-living dashboard:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener dashboard' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener dashboard' }, { status: 500 });
   }
 }

@@ -48,16 +48,12 @@ export function useSWRWithOptimistic<T>(
     return res.json();
   };
 
-  const { data, error, isLoading, mutate } = useSWR<T>(
-    key,
-    fetcher || defaultFetcher,
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: true,
-      dedupingInterval: 2000,
-      ...options,
-    }
-  );
+  const { data, error, isLoading, mutate } = useSWR<T>(key, fetcher || defaultFetcher, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: true,
+    dedupingInterval: 2000,
+    ...options,
+  });
 
   /**
    * Optimistically updates the cache and performs the mutation

@@ -51,14 +51,7 @@ export const invoiceTemplate: PDFTemplate = {
   id: 'invoice',
   name: 'Factura',
   category: 'invoice',
-  variables: [
-    'invoiceNumber',
-    'date',
-    'companyName',
-    'clientName',
-    'items',
-    'total',
-  ],
+  variables: ['invoiceNumber', 'date', 'companyName', 'clientName', 'items', 'total'],
   html: `
     <!DOCTYPE html>
     <html>

@@ -1,7 +1,7 @@
 /**
  * API: /api/onboarding/chatbot
  * Endpoint para el chatbot de onboarding con IA
- * 
+ *
  * POST: Envía un mensaje y recibe una respuesta del asistente
  */
 
@@ -25,10 +25,7 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -36,10 +33,7 @@ export async function POST(request: NextRequest) {
 
     // Validaciones
     if (!message || typeof message !== 'string') {
-      return NextResponse.json(
-        { error: 'Mensaje requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Mensaje requerido' }, { status: 400 });
     }
 
     // Obtener datos del usuario para contexto
@@ -74,9 +68,7 @@ export async function POST(request: NextRequest) {
 
     const onboardingProgress =
       onboardingTasks.length > 0
-        ? Math.round(
-            (completedTasks.length / onboardingTasks.length) * 100
-          )
+        ? Math.round((completedTasks.length / onboardingTasks.length) * 100)
         : 0;
 
     // Contexto del usuario
@@ -88,11 +80,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Enviar mensaje al chatbot
-    const response = await sendChatMessage(
-      message,
-      conversationHistory || [],
-      userContext
-    );
+    const response = await sendChatMessage(message, conversationHistory || [], userContext);
 
     if (!response.success) {
       return NextResponse.json(
@@ -123,10 +111,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('[API] Error in POST /api/onboarding/chatbot:', error);
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }
 
@@ -139,10 +124,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Obtener datos del usuario
@@ -163,9 +145,7 @@ export async function GET(request: NextRequest) {
       vertical: user?.company?.vertical || undefined,
     });
 
-    const quickQuestions = getQuickQuestions(
-      user?.company?.vertical || undefined
-    );
+    const quickQuestions = getQuickQuestions(user?.company?.vertical || undefined);
 
     return NextResponse.json({
       welcomeMessage,
@@ -173,9 +153,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('[API] Error in GET /api/onboarding/chatbot:', error);
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }

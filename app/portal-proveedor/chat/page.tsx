@@ -7,7 +7,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { MessageCircle, Plus, Send, Archive } from 'lucide-react';
@@ -161,197 +169,194 @@ export default function ChatPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto">
-            <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Mensajería</h1>
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Mensajería</h1>
             <p className="text-gray-600">Comunicate directamente con los gestores</p>
-        </div>
-        <Dialog open={showNewConversationDialog} onOpenChange={setShowNewConversationDialog}>
-          <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              Nueva Conversación
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Nueva Conversación</DialogTitle>
-                <DialogDescription>
-                Inicia una nueva conversación con el equipo de gestión
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div>
-                <Label htmlFor="asunto">Asunto</Label>
-                  <Input
-                  id="asunto"
-                  value={newConversation.asunto}
-                  onChange={(e) =>
-                    setNewConversation({ ...newConversation, asunto: e.target.value })
-                  }
-                  placeholder="Asunto de la conversación..."
-                />
-              </div>
-              <div>
-                <Label htmlFor="mensajeInicial">Mensaje Inicial</Label>
-                  <Textarea
-                  id="mensajeInicial"
-                  value={newConversation.mensajeInicial}
-                  onChange={(e) =>
-                    setNewConversation({
-                      ...newConversation,
-                      mensajeInicial: e.target.value,
-                    })
-                  }
-                  placeholder="Escribe tu mensaje..."
-                  rows={4}
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setShowNewConversationDialog(false)}
-              >
-                Cancelar
+          </div>
+          <Dialog open={showNewConversationDialog} onOpenChange={setShowNewConversationDialog}>
+            <DialogTrigger asChild>
+              <Button className="gap-2">
+                <Plus className="h-4 w-4" />
+                Nueva Conversación
               </Button>
-              <Button onClick={handleCreateConversation}>Crear</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      <Card>
-        <CardContent className="p-0">
-          <div className="grid md:grid-cols-3 h-[600px]">
-            {/* Lista de conversaciones */}
-            <div className="border-r">
-              <div className="p-4 border-b bg-gray-50">
-                <h3 className="font-semibold">Conversaciones</h3>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Nueva Conversación</DialogTitle>
+                <DialogDescription>
+                  Inicia una nueva conversación con el equipo de gestión
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div>
+                  <Label htmlFor="asunto">Asunto</Label>
+                  <Input
+                    id="asunto"
+                    value={newConversation.asunto}
+                    onChange={(e) =>
+                      setNewConversation({ ...newConversation, asunto: e.target.value })
+                    }
+                    placeholder="Asunto de la conversación..."
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="mensajeInicial">Mensaje Inicial</Label>
+                  <Textarea
+                    id="mensajeInicial"
+                    value={newConversation.mensajeInicial}
+                    onChange={(e) =>
+                      setNewConversation({
+                        ...newConversation,
+                        mensajeInicial: e.target.value,
+                      })
+                    }
+                    placeholder="Escribe tu mensaje..."
+                    rows={4}
+                  />
+                </div>
               </div>
-              <ScrollArea className="h-[540px]">
-                {loading ? (
-                  <div className="p-4 text-center text-gray-500">
-                    Cargando...
-                  </div>
-                ) : conversations.length === 0 ? (
-                  <div className="p-4 text-center">
-                    <MessageCircle className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-500">No hay conversaciones</p>
-                  </div>
-                ) : (
-                  conversations.map((conv) => (
-                    <div
-                      key={conv.id}
-                      className={`p-4 border-b cursor-pointer hover:bg-gray-50 transition-colors ${
-                        selectedConversation === conv.id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
-                      }`}
-                      onClick={() => setSelectedConversation(conv.id)}
-                    >
-                      <div className="flex justify-between items-start mb-1">
-                        <h4 className="font-medium text-sm">{conv.asunto}</h4>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowNewConversationDialog(false)}>
+                  Cancelar
+                </Button>
+                <Button onClick={handleCreateConversation}>Crear</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        <Card>
+          <CardContent className="p-0">
+            <div className="grid md:grid-cols-3 h-[600px]">
+              {/* Lista de conversaciones */}
+              <div className="border-r">
+                <div className="p-4 border-b bg-gray-50">
+                  <h3 className="font-semibold">Conversaciones</h3>
+                </div>
+                <ScrollArea className="h-[540px]">
+                  {loading ? (
+                    <div className="p-4 text-center text-gray-500">Cargando...</div>
+                  ) : conversations.length === 0 ? (
+                    <div className="p-4 text-center">
+                      <MessageCircle className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                      <p className="text-sm text-gray-500">No hay conversaciones</p>
+                    </div>
+                  ) : (
+                    conversations.map((conv) => (
+                      <div
+                        key={conv.id}
+                        className={`p-4 border-b cursor-pointer hover:bg-gray-50 transition-colors ${
+                          selectedConversation === conv.id
+                            ? 'bg-blue-50 border-l-4 border-l-blue-500'
+                            : ''
+                        }`}
+                        onClick={() => setSelectedConversation(conv.id)}
+                      >
+                        <div className="flex justify-between items-start mb-1">
+                          <h4 className="font-medium text-sm">{conv.asunto}</h4>
                           {conv.mensajesNoLeidosProveedor > 0 && (
-                          <Badge className="bg-blue-500 text-xs">
-                            {conv.mensajesNoLeidosProveedor}
-                          </Badge>
-                        )}
+                            <Badge className="bg-blue-500 text-xs">
+                              {conv.mensajesNoLeidosProveedor}
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-600 line-clamp-2 mb-1">
+                          {conv.ultimoMensaje}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {format(new Date(conv.ultimoMensajeFecha), 'dd MMM, HH:mm', {
+                            locale: es,
+                          })}
+                        </p>
                       </div>
-                      <p className="text-xs text-gray-600 line-clamp-2 mb-1">
-                        {conv.ultimoMensaje}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {format(new Date(conv.ultimoMensajeFecha), 'dd MMM, HH:mm', {
-                          locale: es,
-                        })}
+                    ))
+                  )}
+                </ScrollArea>
+              </div>
+
+              {/* Área de mensajes */}
+              <div className="md:col-span-2 flex flex-col">
+                {selectedConv ? (
+                  <>
+                    {/* Encabezado */}
+                    <div className="p-4 border-b bg-gray-50">
+                      <h3 className="font-semibold">{selectedConv.asunto}</h3>
+                      <p className="text-xs text-gray-500">
+                        {selectedConv.estado === 'activa' ? 'Activa' : 'Archivada'}
                       </p>
                     </div>
-                  ))
-                )}
-              </ScrollArea>
-            </div>
 
-            {/* Área de mensajes */}
-            <div className="md:col-span-2 flex flex-col">
-              {selectedConv ? (
-                <>
-                  {/* Encabezado */}
-                  <div className="p-4 border-b bg-gray-50">
-                    <h3 className="font-semibold">{selectedConv.asunto}</h3>
-                      <p className="text-xs text-gray-500">
-                      {selectedConv.estado === 'activa' ? 'Activa' : 'Archivada'}
-                    </p>
-                  </div>
-
-                  {/* Mensajes */}
-                  <ScrollArea className="flex-1 p-4">
-                    <div className="space-y-4">
-                      {messages.map((message) => (
-                        <div
-                          key={message.id}
-                          className={`flex ${
-                            message.remitenteTipo === 'proveedor'
-                              ? 'justify-end'
-                              : 'justify-start'
-                          }`}
-                        >
+                    {/* Mensajes */}
+                    <ScrollArea className="flex-1 p-4">
+                      <div className="space-y-4">
+                        {messages.map((message) => (
                           <div
-                            className={`max-w-[70%] rounded-lg p-3 ${
+                            key={message.id}
+                            className={`flex ${
                               message.remitenteTipo === 'proveedor'
-                                ? 'bg-blue-500 text-white'
-                                : 'bg-gray-100 text-gray-900'
+                                ? 'justify-end'
+                                : 'justify-start'
                             }`}
                           >
-                            <p className="text-xs font-semibold mb-1">
-                              {message.remitenteNombre}
-                            </p>
-                            <p className="text-sm">{message.contenido}</p>
-                              <p
-                              className={`text-xs mt-1 ${
+                            <div
+                              className={`max-w-[70%] rounded-lg p-3 ${
                                 message.remitenteTipo === 'proveedor'
-                                  ? 'text-blue-100'
-                                  : 'text-gray-500'
+                                  ? 'bg-blue-500 text-white'
+                                  : 'bg-gray-100 text-gray-900'
                               }`}
                             >
-                              {format(new Date(message.createdAt), 'HH:mm', {
-                                locale: es,
-                              })}
-                            </p>
+                              <p className="text-xs font-semibold mb-1">
+                                {message.remitenteNombre}
+                              </p>
+                              <p className="text-sm">{message.contenido}</p>
+                              <p
+                                className={`text-xs mt-1 ${
+                                  message.remitenteTipo === 'proveedor'
+                                    ? 'text-blue-100'
+                                    : 'text-gray-500'
+                                }`}
+                              >
+                                {format(new Date(message.createdAt), 'HH:mm', {
+                                  locale: es,
+                                })}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      ))}
-                      <div ref={messagesEndRef} />
-                    </div>
-                  </ScrollArea>
+                        ))}
+                        <div ref={messagesEndRef} />
+                      </div>
+                    </ScrollArea>
 
-                  {/* Input de mensaje */}
-                  <form onSubmit={handleSendMessage} className="p-4 border-t">
-                    <div className="flex gap-2">
-                      <Input
-                        value={messageContent}
-                        onChange={(e) => setMessageContent(e.target.value)}
-                        placeholder="Escribe tu mensaje..."
-                        disabled={sending}
-                      />
-                      <Button type="submit" disabled={sending || !messageContent.trim()}>
-                        <Send className="h-4 w-4" />
-                      </Button>
+                    {/* Input de mensaje */}
+                    <form onSubmit={handleSendMessage} className="p-4 border-t">
+                      <div className="flex gap-2">
+                        <Input
+                          value={messageContent}
+                          onChange={(e) => setMessageContent(e.target.value)}
+                          placeholder="Escribe tu mensaje..."
+                          disabled={sending}
+                        />
+                        <Button type="submit" disabled={sending || !messageContent.trim()}>
+                          <Send className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </form>
+                  </>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center">
+                    <div className="text-center">
+                      <MessageCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-500">Selecciona una conversación</p>
                     </div>
-                  </form>
-                </>
-              ) : (
-                <div className="flex-1 flex items-center justify-center">
-                  <div className="text-center">
-                    <MessageCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500">Selecciona una conversación</p>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-          </AuthenticatedLayout>
+          </CardContent>
+        </Card>
+      </div>
+    </AuthenticatedLayout>
   );
 }

@@ -7,10 +7,7 @@ import logger, { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 // PATCH /api/incidencias/[id] - Actualizar incidencia
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -25,9 +22,7 @@ export async function PATCH(
       data: {
         ...(estado && {
           estado,
-          ...(estado === 'resuelta' || estado === 'cerrada'
-            ? { fechaResolucion: new Date() }
-            : {}),
+          ...(estado === 'resuelta' || estado === 'cerrada' ? { fechaResolucion: new Date() } : {}),
         }),
         ...(asignadoA !== undefined && { asignadoA }),
         ...(solucion && { solucion }),
@@ -42,18 +37,12 @@ export async function PATCH(
     return NextResponse.json(incidencia);
   } catch (error) {
     logger.error('Error updating incidencia:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar incidencia' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar incidencia' }, { status: 500 });
   }
 }
 
 // DELETE /api/incidencias/[id] - Eliminar incidencia
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.role || session.user.role !== 'administrador') {
@@ -67,9 +56,6 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     logger.error('Error deleting incidencia:', error);
-    return NextResponse.json(
-      { error: 'Error al eliminar incidencia' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar incidencia' }, { status: 500 });
   }
 }

@@ -38,10 +38,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(ordenes);
   } catch (error) {
     logger.error('Error fetching ordenes:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener órdenes de trabajo' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener órdenes de trabajo' }, { status: 500 });
   }
 }
 
@@ -109,9 +106,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(orden, { status: 201 });
   } catch (error) {
     logger.error('Error creating orden:', error);
-    return NextResponse.json(
-      { error: 'Error al crear orden de trabajo' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear orden de trabajo' }, { status: 500 });
   }
 }

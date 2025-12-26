@@ -17,10 +17,7 @@ export async function GET(request: NextRequest) {
     const conversationId = searchParams.get('conversationId');
 
     if (!conversationId) {
-      return NextResponse.json(
-        { error: 'ID de conversación requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'ID de conversación requerido' }, { status: 400 });
     }
 
     const messages = await prisma.chatMessage.findMany({
@@ -61,14 +58,11 @@ export async function POST(request: NextRequest) {
     const { conversationId, mensaje } = await request.json();
 
     if (!conversationId || !mensaje) {
-      return NextResponse.json(
-        { error: 'Datos incompletos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Datos incompletos' }, { status: 400 });
     }
 
     const userId = session.user?.id;
-    
+
     if (!userId) {
       return NextResponse.json({ error: 'Usuario no válido' }, { status: 401 });
     }

@@ -118,176 +118,172 @@ export default function NuevaMantenimientoPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="container mx-auto p-6 space-y-6">
-            {/* Botón Volver y Breadcrumbs */}
-            <div className="flex items-center gap-4 pt-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push('/mantenimiento')}
-                className="gap-2 shadow-sm"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Volver a Mantenimiento
-              </Button>
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/dashboard">
-                      <Home className="h-4 w-4" />
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/mantenimiento">Mantenimiento</BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>Nueva Solicitud</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
-            </div>
+      <div className="container mx-auto p-6 space-y-6">
+        {/* Botón Volver y Breadcrumbs */}
+        <div className="flex items-center gap-4 pt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push('/mantenimiento')}
+            className="gap-2 shadow-sm"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Volver a Mantenimiento
+          </Button>
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/dashboard">
+                  <Home className="h-4 w-4" />
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/mantenimiento">Mantenimiento</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Nueva Solicitud</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
 
-            {/* Header Section */}
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">
-                Nueva Solicitud de Mantenimiento
-              </h1>
-              <p className="text-muted-foreground">Registra una nueva solicitud de mantenimiento</p>
-            </div>
+        {/* Header Section */}
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Nueva Solicitud de Mantenimiento</h1>
+          <p className="text-muted-foreground">Registra una nueva solicitud de mantenimiento</p>
+        </div>
 
-            {/* Formulario */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Wrench className="h-5 w-5" />
-                  Información de la Solicitud
-                </CardTitle>
-                <CardDescription>
-                  Completa los datos de la solicitud de mantenimiento
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid gap-6 md:grid-cols-2">
-                    {/* Unidad */}
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="unitId">Unidad Afectada *</Label>
-                      <Select
-                        value={formData.unitId}
-                        onValueChange={(value) => setFormData({ ...formData, unitId: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona una unidad" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {units.map((unit) => (
-                            <SelectItem key={unit.id} value={unit.id}>
-                              {unit.building.nombre} - {unit.numero}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+        {/* Formulario */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Wrench className="h-5 w-5" />
+              Información de la Solicitud
+            </CardTitle>
+            <CardDescription>Completa los datos de la solicitud de mantenimiento</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid gap-6 md:grid-cols-2">
+                {/* Unidad */}
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="unitId">Unidad Afectada *</Label>
+                  <Select
+                    value={formData.unitId}
+                    onValueChange={(value) => setFormData({ ...formData, unitId: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona una unidad" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {units.map((unit) => (
+                        <SelectItem key={unit.id} value={unit.id}>
+                          {unit.building.nombre} - {unit.numero}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                    {/* Título */}
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="titulo">Título de la Solicitud *</Label>
-                      <Input
-                        id="titulo"
-                        name="titulo"
-                        value={formData.titulo}
-                        onChange={handleChange}
-                        required
-                        placeholder="Ej: Fuga de agua en baño"
-                      />
-                    </div>
+                {/* Título */}
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="titulo">Título de la Solicitud *</Label>
+                  <Input
+                    id="titulo"
+                    name="titulo"
+                    value={formData.titulo}
+                    onChange={handleChange}
+                    required
+                    placeholder="Ej: Fuga de agua en baño"
+                  />
+                </div>
 
-                    {/* Tipo */}
-                    <div className="space-y-2">
-                      <Label htmlFor="tipo">Tipo de Mantenimiento *</Label>
-                      <Select
-                        value={formData.tipo}
-                        onValueChange={(value) => setFormData({ ...formData, tipo: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="general">General</SelectItem>
-                          <SelectItem value="plomeria">Plomería</SelectItem>
-                          <SelectItem value="electricidad">Electricidad</SelectItem>
-                          <SelectItem value="pintura">Pintura</SelectItem>
-                          <SelectItem value="carpinteria">Carpintería</SelectItem>
-                          <SelectItem value="electrodomesticos">Electrodomésticos</SelectItem>
-                          <SelectItem value="limpieza">Limpieza</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                {/* Tipo */}
+                <div className="space-y-2">
+                  <Label htmlFor="tipo">Tipo de Mantenimiento *</Label>
+                  <Select
+                    value={formData.tipo}
+                    onValueChange={(value) => setFormData({ ...formData, tipo: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="general">General</SelectItem>
+                      <SelectItem value="plomeria">Plomería</SelectItem>
+                      <SelectItem value="electricidad">Electricidad</SelectItem>
+                      <SelectItem value="pintura">Pintura</SelectItem>
+                      <SelectItem value="carpinteria">Carpintería</SelectItem>
+                      <SelectItem value="electrodomesticos">Electrodomésticos</SelectItem>
+                      <SelectItem value="limpieza">Limpieza</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                    {/* Prioridad */}
-                    <div className="space-y-2">
-                      <Label htmlFor="prioridad">Prioridad *</Label>
-                      <Select
-                        value={formData.prioridad}
-                        onValueChange={(value) => setFormData({ ...formData, prioridad: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="baja">Baja</SelectItem>
-                          <SelectItem value="media">Media</SelectItem>
-                          <SelectItem value="alta">Alta</SelectItem>
-                          <SelectItem value="urgente">Urgente</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                {/* Prioridad */}
+                <div className="space-y-2">
+                  <Label htmlFor="prioridad">Prioridad *</Label>
+                  <Select
+                    value={formData.prioridad}
+                    onValueChange={(value) => setFormData({ ...formData, prioridad: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="baja">Baja</SelectItem>
+                      <SelectItem value="media">Media</SelectItem>
+                      <SelectItem value="alta">Alta</SelectItem>
+                      <SelectItem value="urgente">Urgente</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                    {/* Descripción */}
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="descripcion">Descripción Detallada *</Label>
-                      <Textarea
-                        id="descripcion"
-                        name="descripcion"
-                        value={formData.descripcion}
-                        onChange={handleChange}
-                        required
-                        placeholder="Describe el problema de forma detallada..."
-                        rows={5}
-                      />
-                    </div>
-                  </div>
+                {/* Descripción */}
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="descripcion">Descripción Detallada *</Label>
+                  <Textarea
+                    id="descripcion"
+                    name="descripcion"
+                    value={formData.descripcion}
+                    onChange={handleChange}
+                    required
+                    placeholder="Describe el problema de forma detallada..."
+                    rows={5}
+                  />
+                </div>
+              </div>
 
-                  {/* Botones */}
-                  <div className="flex gap-3 pt-4">
-                    <Button type="submit" disabled={isLoading || !formData.unitId}>
-                      {isLoading ? (
-                        <>
-                          <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
-                          Guardando...
-                        </>
-                      ) : (
-                        <>
-                          <Save className="mr-2 h-4 w-4" />
-                          Crear Solicitud
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => router.push('/mantenimiento')}
-                      disabled={isLoading}
-                    >
-                      Cancelar
-                    </Button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
-        </AuthenticatedLayout>
+              {/* Botones */}
+              <div className="flex gap-3 pt-4">
+                <Button type="submit" disabled={isLoading || !formData.unitId}>
+                  {isLoading ? (
+                    <>
+                      <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
+                      Guardando...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Crear Solicitud
+                    </>
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => router.push('/mantenimiento')}
+                  disabled={isLoading}
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </AuthenticatedLayout>
   );
 }

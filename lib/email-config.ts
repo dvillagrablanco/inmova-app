@@ -1,6 +1,6 @@
 /**
  * Configuración de Email Transaccional
- * 
+ *
  * Soporta múltiples proveedores:
  * - SendGrid (recomendado para producción)
  * - SMTP genérico
@@ -85,13 +85,15 @@ function createTransporter(): Transporter {
 /**
  * Enviar email
  */
-export async function sendEmail(
-  options: EmailOptions
-): Promise<SendEmailResult> {
+export async function sendEmail(options: EmailOptions): Promise<SendEmailResult> {
   try {
     const transporter = createTransporter();
 
-    const from = options.from || process.env.SENDGRID_FROM_EMAIL || process.env.SMTP_FROM || 'noreply@inmova.app';
+    const from =
+      options.from ||
+      process.env.SENDGRID_FROM_EMAIL ||
+      process.env.SMTP_FROM ||
+      'noreply@inmova.app';
     const fromName = process.env.SENDGRID_FROM_NAME || 'INMOVA';
 
     const mailOptions = {
@@ -107,7 +109,11 @@ export async function sendEmail(
     };
 
     // En desarrollo, solo loguear
-    if (process.env.NODE_ENV === 'development' && !process.env.SENDGRID_API_KEY && !process.env.SMTP_HOST) {
+    if (
+      process.env.NODE_ENV === 'development' &&
+      !process.env.SENDGRID_API_KEY &&
+      !process.env.SMTP_HOST
+    ) {
       console.log('📧 [DEV] Email que se enviaría:', {
         to: mailOptions.to,
         subject: mailOptions.subject,
@@ -244,7 +250,12 @@ export const emailTemplates = {
   /**
    * Email de notificación de pago
    */
-  paymentConfirmation: (userName: string, amount: string, concept: string, invoiceUrl?: string) => ({
+  paymentConfirmation: (
+    userName: string,
+    amount: string,
+    concept: string,
+    invoiceUrl?: string
+  ) => ({
     subject: 'Confirmación de pago - INMOVA',
     html: `
       <!DOCTYPE html>
@@ -275,11 +286,15 @@ export const emailTemplates = {
                 <p><strong>Concepto:</strong> ${concept}</p>
                 <p><strong>Fecha:</strong> ${new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
               </div>
-              ${invoiceUrl ? `
+              ${
+                invoiceUrl
+                  ? `
               <div style="text-align: center;">
                 <a href="${invoiceUrl}" class="button">Descargar Factura</a>
               </div>
-              ` : ''}
+              `
+                  : ''
+              }
               <p>Gracias por tu pago. Si tienes alguna pregunta, no dudes en contactarnos.</p>
             </div>
             <div class="footer">
@@ -321,11 +336,15 @@ export const emailTemplates = {
               <div class="reminder">
                 <p>${reminderText}</p>
               </div>
-              ${actionUrl && actionText ? `
+              ${
+                actionUrl && actionText
+                  ? `
               <div style="text-align: center;">
                 <a href="${actionUrl}" class="button">${actionText}</a>
               </div>
-              ` : ''}
+              `
+                  : ''
+              }
               <p>Este es un recordatorio automático de INMOVA.</p>
             </div>
             <div class="footer">

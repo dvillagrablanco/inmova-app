@@ -13,12 +13,9 @@ import { getPomelliService, type SocialPlatform } from '@/lib/pomelli-integratio
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -27,20 +24,14 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Usuario no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
     const body = await request.json();
     const { platform } = body as { platform: SocialPlatform };
 
     if (!platform || !['linkedin', 'instagram', 'x', 'facebook'].includes(platform)) {
-      return NextResponse.json(
-        { error: 'Plataforma inválida' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Plataforma inválida' }, { status: 400 });
     }
 
     // Verificar que existe configuración de Pomelli
@@ -49,15 +40,12 @@ export async function POST(request: NextRequest) {
     });
 
     if (!config || !config.enabled) {
-      return NextResponse.json(
-        { error: 'Pomelli no está configurado' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Pomelli no está configurado' }, { status: 400 });
     }
 
     // Obtener servicio de Pomelli
     const pomelliService = getPomelliService();
-    
+
     if (!pomelliService) {
       return NextResponse.json(
         { error: 'Error al inicializar servicio de Pomelli' },
@@ -86,9 +74,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error connecting social profile:', error);
-    return NextResponse.json(
-      { error: 'Error al conectar perfil social' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al conectar perfil social' }, { status: 500 });
   }
 }

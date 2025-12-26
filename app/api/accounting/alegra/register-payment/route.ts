@@ -68,14 +68,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `${results.filter(r => r.success).length}/${results.length} pagos registrados en Alegra`,
+      message: `${results.filter((r) => r.success).length}/${results.length} pagos registrados en Alegra`,
       results,
     });
   } catch (error) {
     logger.error('Error registering payments in Alegra:', error);
-    return NextResponse.json(
-      { error: 'Error al registrar pagos en Alegra' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al registrar pagos en Alegra' }, { status: 500 });
   }
 }

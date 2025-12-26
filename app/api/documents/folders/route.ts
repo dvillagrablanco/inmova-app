@@ -56,10 +56,7 @@ export async function POST(request: NextRequest) {
     const { nombre, descripcion, parentFolderId, color, icono } = await request.json();
 
     if (!nombre) {
-      return NextResponse.json(
-        { error: 'El nombre es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'El nombre es requerido' }, { status: 400 });
     }
 
     const companyId = session?.user?.companyId;
@@ -78,9 +75,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ folder }, { status: 201 });
   } catch (error: any) {
     logger.error('Error creating folder:', error);
-    return NextResponse.json(
-      { error: error.message || 'Error al crear carpeta' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Error al crear carpeta' }, { status: 500 });
   }
 }

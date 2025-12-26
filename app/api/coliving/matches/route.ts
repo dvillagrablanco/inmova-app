@@ -14,10 +14,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const profileId = searchParams.get('profileId');
     if (!profileId) {
-      return NextResponse.json(
-        { error: 'profileId requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'profileId requerido' }, { status: 400 });
     }
     const result = await socialService.findMatches(profileId);
     if (!result.success) {
@@ -26,10 +23,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(result.matches);
   } catch (error) {
     logger.error('Error en GET /api/coliving/matches:', error);
-    return NextResponse.json(
-      { error: 'Error al buscar matches' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al buscar matches' }, { status: 500 });
   }
 }
 export async function POST(request: NextRequest) {
@@ -40,25 +34,15 @@ export async function POST(request: NextRequest) {
     }
     const { profile1Id, profile2Id, companyId } = await request.json();
     if (!profile1Id || !profile2Id || !companyId) {
-      return NextResponse.json(
-        { error: 'Datos incompletos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Datos incompletos' }, { status: 400 });
     }
-    const result = await socialService.createMatch(
-      profile1Id,
-      profile2Id,
-      companyId
-    );
+    const result = await socialService.createMatch(profile1Id, profile2Id, companyId);
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
     return NextResponse.json(result.match, { status: 201 });
   } catch (error) {
     logger.error('Error en POST /api/coliving/matches:', error);
-    return NextResponse.json(
-      { error: 'Error al crear match' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear match' }, { status: 500 });
   }
 }

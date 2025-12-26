@@ -121,7 +121,7 @@ export function DocumentSearch() {
                           <p className="text-xs text-gray-500 mt-2">
                             {formatDistanceToNow(new Date(doc.date), {
                               addSuffix: true,
-                              locale: es
+                              locale: es,
                             })}
                           </p>
                         </div>

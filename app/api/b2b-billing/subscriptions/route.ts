@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
+      where: { id: session.user.id },
     });
 
     // Solo super-admins pueden modificar suscripciones
@@ -33,18 +33,12 @@ export async function POST(request: NextRequest) {
     const { companyId, action, planId, razon } = body;
 
     if (!companyId || !action) {
-      return NextResponse.json(
-        { error: 'Datos incompletos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Datos incompletos' }, { status: 400 });
     }
 
     if (action === 'upgrade' || action === 'downgrade') {
       if (!planId) {
-        return NextResponse.json(
-          { error: 'Plan ID requerido' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Plan ID requerido' }, { status: 400 });
       }
 
       const result = await upgradeCompanyPlan(companyId, planId, session.user.id);
@@ -53,7 +47,7 @@ export async function POST(request: NextRequest) {
 
     if (action === 'cancelacion') {
       const company = await prisma.company.findUnique({
-        where: { id: companyId }
+        where: { id: companyId },
       });
 
       await prisma.company.update({
@@ -61,7 +55,7 @@ export async function POST(request: NextRequest) {
         data: {
           estadoCliente: 'suspendido',
           subscriptionPlanId: null,
-        }
+        },
       });
 
       await recordSubscriptionChange(companyId, 'cancelacion', {
@@ -75,10 +69,7 @@ export async function POST(request: NextRequest) {
 
     if (action === 'reactivacion') {
       if (!planId) {
-        return NextResponse.json(
-          { error: 'Plan ID requerido' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Plan ID requerido' }, { status: 400 });
       }
 
       await prisma.company.update({
@@ -86,7 +77,7 @@ export async function POST(request: NextRequest) {
         data: {
           estadoCliente: 'activo',
           subscriptionPlanId: planId,
-        }
+        },
       });
 
       await recordSubscriptionChange(companyId, 'reactivacion', {
@@ -98,10 +89,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Suscripción reactivada' });
     }
 
-    return NextResponse.json(
-      { error: 'Acción no válida' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Acción no válida' }, { status: 400 });
   } catch (error: any) {
     logger.error('Error al gestionar suscripción:', error);
     return NextResponse.json(
@@ -122,11 +110,11 @@ export async function GET(request: NextRequest) {
     const companyId = searchParams.get('companyId');
 
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
+      where: { id: session.user.id },
     });
 
     const isSuperAdmin = user?.role === 'super_admin';
-    
+
     if (!isSuperAdmin && companyId !== user?.companyId) {
       return NextResponse.json({ error: 'Permiso denegado' }, { status: 403 });
     }
@@ -143,7 +131,7 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             nombre: true,
-          }
+          },
         },
       },
       orderBy: {

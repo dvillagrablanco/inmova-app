@@ -10,10 +10,7 @@ export async function GET(req: NextRequest) {
     const owner = await getAuthenticatedOwner();
 
     if (!owner) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     return NextResponse.json({
@@ -22,9 +19,6 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     logger.error('Error al obtener propietario autenticado:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener datos del propietario' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener datos del propietario' }, { status: 500 });
   }
 }

@@ -10,13 +10,10 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   const isReady = await readinessCheck();
-  
+
   if (isReady) {
     return NextResponse.json({ status: 'ready' });
   }
-  
-  return NextResponse.json(
-    { status: 'not ready' },
-    { status: 503 }
-  );
+
+  return NextResponse.json({ status: 'not ready' }, { status: 503 });
 }

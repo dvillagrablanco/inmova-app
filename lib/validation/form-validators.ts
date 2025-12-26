@@ -55,10 +55,7 @@ export const commonValidations = {
     },
   }),
 
-  password: (
-    minLength: number = 8,
-    requireSpecial: boolean = true
-  ): ValidationRule => {
+  password: (minLength: number = 8, requireSpecial: boolean = true): ValidationRule => {
     const rules: ValidationRule = {
       minLength: {
         value: minLength,
@@ -69,15 +66,13 @@ export const commonValidations = {
           /[A-Z]/.test(value) || 'Debe contener al menos una mayúscula',
         hasLowerCase: (value: string) =>
           /[a-z]/.test(value) || 'Debe contener al menos una minúscula',
-        hasNumber: (value: string) =>
-          /[0-9]/.test(value) || 'Debe contener al menos un número',
+        hasNumber: (value: string) => /[0-9]/.test(value) || 'Debe contener al menos un número',
       },
     };
 
     if (requireSpecial && rules.validate) {
       rules.validate.hasSpecial = (value: string) =>
-        /[!@#$%^&*(),.?":{}|<>]/.test(value) ||
-        'Debe contener al menos un carácter especial';
+        /[!@#$%^&*(),.?":{}|<>]/.test(value) || 'Debe contener al menos un carácter especial';
     }
 
     return rules;
@@ -85,7 +80,8 @@ export const commonValidations = {
 
   url: (message: string = 'Ingrese una URL válida'): ValidationRule => ({
     pattern: {
-      value: /^(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/,
+      value:
+        /^(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/,
       message,
     },
   }),
@@ -140,7 +136,10 @@ export const commonValidations = {
     },
   }),
 
-  custom: (validator: (value: any) => boolean | string, name: string = 'custom'): ValidationRule => ({
+  custom: (
+    validator: (value: any) => boolean | string,
+    name: string = 'custom'
+  ): ValidationRule => ({
     validate: {
       [name]: validator,
     },

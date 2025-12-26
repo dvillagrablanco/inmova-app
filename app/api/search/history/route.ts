@@ -18,19 +18,16 @@ export async function GET(req: NextRequest) {
     const history = await prisma.searchHistory.findMany({
       where: {
         userId: session.user.id,
-        companyId
+        companyId,
       },
       orderBy: { createdAt: 'desc' },
-      take: 20
+      take: 20,
     });
 
     return NextResponse.json({ history });
   } catch (error: any) {
     logger.error('Error al obtener historial:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener historial' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener historial' }, { status: 500 });
   }
 }
 
@@ -46,16 +43,13 @@ export async function DELETE(req: NextRequest) {
     await prisma.searchHistory.deleteMany({
       where: {
         userId: session.user.id,
-        companyId
-      }
+        companyId,
+      },
     });
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
     logger.error('Error al limpiar historial:', error);
-    return NextResponse.json(
-      { error: 'Error al limpiar historial' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al limpiar historial' }, { status: 500 });
   }
 }

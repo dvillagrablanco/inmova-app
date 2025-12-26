@@ -1,17 +1,17 @@
 // @ts-nocheck
 /**
  * Holded Integration Service
- * 
+ *
  * Servicio de integración con Holded
  * Sistema de gestión empresarial todo-en-uno (ERP, CRM, Contabilidad, Proyectos)
  * Popular en España y Latinoamérica
- * 
+ *
  * Características:
  * - Gestión de contactos
  * - Emisión de facturas
  * - Registro de pagos
  * - Gestión de gastos
- * 
+ *
  * Documentación API: https://developers.holded.com/reference
  */
 
@@ -60,7 +60,7 @@ interface HoldedPayment {
   id?: string;
   date: string;
   contactId: string;
-  documentsId: string[];  // IDs de facturas
+  documentsId: string[]; // IDs de facturas
   amount: number;
   paymentMethod?: string;
   account?: string;
@@ -86,16 +86,16 @@ class HoldedIntegrationService {
   constructor() {
     this.config = {
       apiKey: process.env.HOLDED_API_KEY || '',
-      apiUrl: 'https://api.holded.com/api'
+      apiUrl: 'https://api.holded.com/api',
     };
 
     this.client = axios.create({
       baseURL: this.config.apiUrl,
       headers: {
-        'key': this.config.apiKey,
+        key: this.config.apiKey,
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
+        Accept: 'application/json',
+      },
     });
   }
 
@@ -126,7 +126,7 @@ class HoldedIntegrationService {
       billProvince: contact.province,
       billCountry: contact.country || 'ES',
       vatnumber: contact.vatNumber,
-      type: contact.type || 'client'
+      type: contact.type || 'client',
     });
 
     return response.data;
@@ -153,7 +153,7 @@ class HoldedIntegrationService {
     }
 
     const response = await this.client.get('/contacts', {
-      params: { email }
+      params: { email },
     });
 
     return response.data?.[0] || null;
@@ -182,11 +182,11 @@ class HoldedIntegrationService {
     const response = await this.client.post('/invoicing/v1/documents/invoice', {
       contactId: invoice.contactId,
       contactName: invoice.contactName,
-      date: new Date(invoice.date).getTime() / 1000,  // Unix timestamp
+      date: new Date(invoice.date).getTime() / 1000, // Unix timestamp
       dueDate: new Date(invoice.dueDate).getTime() / 1000,
       currency: invoice.currency || 'EUR',
       items: invoice.items,
-      notes: invoice.notes
+      notes: invoice.notes,
     });
 
     return response.data;
@@ -219,7 +219,7 @@ class HoldedIntegrationService {
       amount: payment.amount,
       paymethod: payment.paymentMethod || 'bank',
       account: payment.account,
-      notes: payment.notes
+      notes: payment.notes,
     });
 
     return response.data;
@@ -241,7 +241,7 @@ class HoldedIntegrationService {
       subtotal: expense.subtotal,
       tax: expense.tax || 0,
       paymethod: expense.paymentMethod || 'bank',
-      account: expense.account
+      account: expense.account,
     });
 
     return response.data;
@@ -253,7 +253,7 @@ class HoldedIntegrationService {
   async syncTenantToContact(tenantId: string, companyId: string): Promise<any> {
     const tenant = await prisma.tenant.findUnique({
       where: { id: tenantId },
-      include: { units: { include: { building: true } } }
+      include: { units: { include: { building: true } } },
     });
 
     if (!tenant || tenant.companyId !== companyId) {
@@ -280,7 +280,7 @@ class HoldedIntegrationService {
       postalCode: firstUnit?.building?.codigoPostal,
       country: firstUnit?.building?.pais || 'ES',
       vatNumber: tenant.dni,
-      type: 'client'
+      type: 'client',
     };
 
     return await this.createContact(contact);
@@ -294,8 +294,8 @@ class HoldedIntegrationService {
       where: { id: contractId },
       include: {
         tenant: true,
-        unit: { include: { building: true } }
-      }
+        unit: { include: { building: true } },
+      },
     });
 
     if (!contract || contract.tenant.companyId !== companyId) {
@@ -318,10 +318,10 @@ class HoldedIntegrationService {
           desc: `Alquiler de ${contract.unit?.numero} en ${contract.unit?.building?.nombre}`,
           units: 1,
           subtotal: contract.rentaMensual,
-          tax: 21  // IVA estándar en España
-        }
+          tax: 21, // IVA estándar en España
+        },
       ],
-      notes: `Contrato ID: ${contractId}`
+      notes: `Contrato ID: ${contractId}`,
     };
 
     if (contract.deposito) {
@@ -330,7 +330,7 @@ class HoldedIntegrationService {
         desc: 'Depósito reembolsable al finalizar el contrato',
         units: 1,
         subtotal: contract.deposito,
-        tax: 0  // El depósito no lleva IVA
+        tax: 0, // El depósito no lleva IVA
       });
     }
 
@@ -347,10 +347,10 @@ class HoldedIntegrationService {
         contract: {
           include: {
             tenant: true,
-            unit: { include: { building: true } }
-          }
-        }
-      }
+            unit: { include: { building: true } },
+          },
+        },
+      },
     });
 
     if (!payment || payment.contract.tenant.companyId !== companyId) {
@@ -363,10 +363,10 @@ class HoldedIntegrationService {
     const holdedPayment: HoldedPayment = {
       date: payment.fechaPago?.toISOString() || new Date().toISOString(),
       contactId: contact.id,
-      documentsId: payment.holdedInvoiceId ? [payment.holdedInvoiceId] : [],  // Necesitas almacenar esto
+      documentsId: payment.holdedInvoiceId ? [payment.holdedInvoiceId] : [], // Necesitas almacenar esto
       amount: payment.monto,
       paymentMethod: payment.metodoPago || 'bank',
-      notes: `Pago INMOVA - Ref: ${payment.concepto}`
+      notes: `Pago INMOVA - Ref: ${payment.concepto}`,
     };
 
     return await this.registerPayment(holdedPayment);
@@ -380,8 +380,8 @@ class HoldedIntegrationService {
       where: { id: expenseId },
       include: {
         building: true,
-        provider: true
-      }
+        provider: true,
+      },
     });
 
     if (!expense || expense.companyId !== companyId) {
@@ -397,7 +397,7 @@ class HoldedIntegrationService {
           name: expense.provider.nombre,
           email: expense.provider.email,
           phone: expense.provider.telefono,
-          type: 'supplier'
+          type: 'supplier',
         });
         contactId = newContact.id;
       } else {
@@ -411,8 +411,8 @@ class HoldedIntegrationService {
       category: expense.categoria,
       desc: expense.descripcion,
       subtotal: expense.monto,
-      tax: 21,  // IVA estándar
-      paymentMethod: 'bank'
+      tax: 21, // IVA estándar
+      paymentMethod: 'bank',
     };
 
     return await this.createExpense(holdedExpense);
@@ -426,7 +426,8 @@ class HoldedIntegrationService {
       if (!this.config.apiKey) {
         return {
           success: false,
-          message: 'API Key no configurada. Por favor, añade HOLDED_API_KEY a las variables de entorno.'
+          message:
+            'API Key no configurada. Por favor, añade HOLDED_API_KEY a las variables de entorno.',
         };
       }
 
@@ -435,12 +436,12 @@ class HoldedIntegrationService {
 
       return {
         success: true,
-        message: `Conectado exitosamente a Holded (${response.data.name || 'Cuenta activa'})`
+        message: `Conectado exitosamente a Holded (${response.data.name || 'Cuenta activa'})`,
       };
     } catch (error: any) {
       return {
         success: false,
-        message: `Error de conexión: ${error.response?.data?.message || error.message}`
+        message: `Error de conexión: ${error.response?.data?.message || error.message}`,
       };
     }
   }

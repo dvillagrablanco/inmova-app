@@ -13,10 +13,7 @@ export async function GET(request: NextRequest) {
     const providerId = request.headers.get('x-provider-id');
 
     if (!providerId) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Verificar que el proveedor existe
@@ -26,10 +23,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!provider) {
-      return NextResponse.json(
-        { error: 'Proveedor no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Proveedor no encontrado' }, { status: 404 });
     }
 
     // Obtener conversaciones
@@ -59,10 +53,7 @@ export async function GET(request: NextRequest) {
     logError(error instanceof Error ? error : new Error(String(error)), {
       context: 'GET /api/portal-proveedor/chat/conversations',
     });
-    return NextResponse.json(
-      { error: 'Error al obtener conversaciones' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener conversaciones' }, { status: 500 });
   }
 }
 
@@ -75,10 +66,7 @@ export async function POST(request: NextRequest) {
     const providerId = request.headers.get('x-provider-id');
 
     if (!providerId) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Verificar que el proveedor existe
@@ -88,10 +76,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!provider) {
-      return NextResponse.json(
-        { error: 'Proveedor no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Proveedor no encontrado' }, { status: 404 });
     }
 
     const body = await request.json();
@@ -99,10 +84,7 @@ export async function POST(request: NextRequest) {
 
     // Validar campos requeridos
     if (!asunto || !mensajeInicial) {
-      return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
 
     // Crear conversación y primer mensaje en una transacción
@@ -140,9 +122,6 @@ export async function POST(request: NextRequest) {
     logError(error instanceof Error ? error : new Error(String(error)), {
       context: 'POST /api/portal-proveedor/chat/conversations',
     });
-    return NextResponse.json(
-      { error: 'Error al crear conversación' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear conversación' }, { status: 500 });
   }
 }

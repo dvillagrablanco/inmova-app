@@ -19,10 +19,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!tenant) {
-      return NextResponse.json(
-        { error: 'Inquilino no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Inquilino no encontrado' }, { status: 404 });
     }
 
     const shares = await prisma.documentShare.findMany({

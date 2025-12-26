@@ -12,19 +12,19 @@ import { logger } from '@/lib/logger';
 
 export type SocialPlatform = 'linkedin' | 'instagram' | 'x' | 'facebook';
 
-export type PostStatus = 
-  | 'draft'        // Borrador
-  | 'scheduled'    // Programado
-  | 'published'    // Publicado
-  | 'failed'       // Falló
-  | 'archived';    // Archivado
+export type PostStatus =
+  | 'draft' // Borrador
+  | 'scheduled' // Programado
+  | 'published' // Publicado
+  | 'failed' // Falló
+  | 'archived'; // Archivado
 
-export type ContentType = 
-  | 'text'         // Solo texto
-  | 'image'        // Imagen + texto
-  | 'video'        // Video + texto
-  | 'carousel'     // Múltiples imágenes
-  | 'story';       // Historia (Instagram/Facebook)
+export type ContentType =
+  | 'text' // Solo texto
+  | 'image' // Imagen + texto
+  | 'video' // Video + texto
+  | 'carousel' // Múltiples imágenes
+  | 'story'; // Historia (Instagram/Facebook)
 
 export interface PomelliConfig {
   apiKey: string;
@@ -36,12 +36,12 @@ export interface PomelliConfig {
 export interface SocialProfile {
   id: string;
   platform: SocialPlatform;
-  profileId: string;           // ID del perfil en Pomelli
-  profileName: string;          // Nombre del perfil
-  profileUsername: string;      // @username
+  profileId: string; // ID del perfil en Pomelli
+  profileName: string; // Nombre del perfil
+  profileUsername: string; // @username
   profileUrl?: string;
-  accessToken?: string;         // Token de acceso (encriptado)
-  refreshToken?: string;        // Token de refresh (encriptado)
+  accessToken?: string; // Token de acceso (encriptado)
+  refreshToken?: string; // Token de refresh (encriptado)
   tokenExpiresAt?: Date;
   isActive: boolean;
   isConnected: boolean;
@@ -52,16 +52,16 @@ export interface SocialProfile {
 export interface SocialPost {
   id: string;
   companyId: string;
-  platforms: SocialPlatform[];  // Múltiples plataformas
-  content: string;              // Texto del post
-  mediaUrls?: string[];         // URLs de imágenes/videos
+  platforms: SocialPlatform[]; // Múltiples plataformas
+  content: string; // Texto del post
+  mediaUrls?: string[]; // URLs de imágenes/videos
   contentType: ContentType;
   status: PostStatus;
   scheduledAt?: Date;
   publishedAt?: Date;
-  pomelliPostId?: string;       // ID en Pomelli
+  pomelliPostId?: string; // ID en Pomelli
   analytics?: PostAnalytics;
-  createdBy: string;            // User ID
+  createdBy: string; // User ID
   createdAt: Date;
   updatedAt: Date;
 }
@@ -95,7 +95,7 @@ export class PomelliClient {
   private apiKey: string;
   private apiSecret: string;
   private baseUrl: string = 'https://api.pomelli.com/v1';
-  
+
   constructor(config: PomelliConfig) {
     this.apiKey = config.apiKey;
     this.apiSecret = config.apiSecret;
@@ -132,17 +132,14 @@ export class PomelliClient {
   /**
    * Conectar perfil de red social
    */
-  async connectSocialProfile(
-    platform: SocialPlatform,
-    authCode: string
-  ): Promise<SocialProfile> {
+  async connectSocialProfile(platform: SocialPlatform, authCode: string): Promise<SocialProfile> {
     try {
       const token = await this.authenticate();
-      
+
       const response = await fetch(`${this.baseUrl}/profiles/connect`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -156,7 +153,7 @@ export class PomelliClient {
       }
 
       const data = await response.json();
-      
+
       return {
         id: data.id,
         platform,
@@ -184,11 +181,11 @@ export class PomelliClient {
   async disconnectSocialProfile(profileId: string): Promise<void> {
     try {
       const token = await this.authenticate();
-      
+
       const response = await fetch(`${this.baseUrl}/profiles/${profileId}/disconnect`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -206,10 +203,12 @@ export class PomelliClient {
   /**
    * Crear publicación en redes sociales
    */
-  async createPost(post: Omit<SocialPost, 'id' | 'status' | 'createdAt' | 'updatedAt'>): Promise<string> {
+  async createPost(
+    post: Omit<SocialPost, 'id' | 'status' | 'createdAt' | 'updatedAt'>
+  ): Promise<string> {
     try {
       const token = await this.authenticate();
-      
+
       const payload = {
         platforms: post.platforms,
         content: post.content,
@@ -223,7 +222,7 @@ export class PomelliClient {
       const response = await fetch(`${this.baseUrl}/posts`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
@@ -235,7 +234,7 @@ export class PomelliClient {
 
       const data = await response.json();
       logger.info(`Post created in Pomelli: ${data.post_id}`);
-      
+
       return data.post_id;
     } catch (error) {
       logger.error('Error creating post in Pomelli:', error);
@@ -252,11 +251,11 @@ export class PomelliClient {
   ): Promise<void> {
     try {
       const token = await this.authenticate();
-      
+
       const response = await fetch(`${this.baseUrl}/posts/${postId}`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -283,11 +282,11 @@ export class PomelliClient {
   async deletePost(postId: string): Promise<void> {
     try {
       const token = await this.authenticate();
-      
+
       const response = await fetch(`${this.baseUrl}/posts/${postId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -308,11 +307,11 @@ export class PomelliClient {
   async getPostAnalytics(postId: string): Promise<PostAnalytics> {
     try {
       const token = await this.authenticate();
-      
+
       const response = await fetch(`${this.baseUrl}/posts/${postId}/analytics`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -321,7 +320,7 @@ export class PomelliClient {
       }
 
       const data = await response.json();
-      
+
       return {
         impressions: data.impressions || 0,
         reach: data.reach || 0,
@@ -344,11 +343,11 @@ export class PomelliClient {
   async getConnectedProfiles(): Promise<SocialProfile[]> {
     try {
       const token = await this.authenticate();
-      
+
       const response = await fetch(`${this.baseUrl}/profiles`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -357,7 +356,7 @@ export class PomelliClient {
       }
 
       const data = await response.json();
-      
+
       return data.profiles.map((profile: any) => ({
         id: profile.id,
         platform: profile.platform,
@@ -382,11 +381,11 @@ export class PomelliClient {
   async publishNow(postId: string): Promise<void> {
     try {
       const token = await this.authenticate();
-      
+
       const response = await fetch(`${this.baseUrl}/posts/${postId}/publish`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -407,14 +406,14 @@ export class PomelliClient {
   async uploadMedia(file: File): Promise<string> {
     try {
       const token = await this.authenticate();
-      
+
       const formData = new FormData();
       formData.append('file', file);
 
       const response = await fetch(`${this.baseUrl}/media/upload`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: formData,
       });
@@ -437,11 +436,11 @@ export class PomelliClient {
   async getAuthorizationUrl(platform: SocialPlatform, redirectUri: string): Promise<string> {
     try {
       const token = await this.authenticate();
-      
+
       const response = await fetch(`${this.baseUrl}/auth/authorize`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -485,17 +484,17 @@ export class PomelliService {
     try {
       // URLs de autorización para cada plataforma
       const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://inmova.app';
-      
+
       const linkedinUrl = await this.client.getAuthorizationUrl(
         'linkedin',
         `${baseUrl}/api/pomelli/callback/linkedin?company=${companyId}`
       );
-      
+
       const instagramUrl = await this.client.getAuthorizationUrl(
         'instagram',
         `${baseUrl}/api/pomelli/callback/instagram?company=${companyId}`
       );
-      
+
       const xUrl = await this.client.getAuthorizationUrl(
         'x',
         `${baseUrl}/api/pomelli/callback/x?company=${companyId}`
@@ -522,10 +521,10 @@ export class PomelliService {
   ): Promise<SocialProfile> {
     try {
       const profile = await this.client.connectSocialProfile(platform, authCode);
-      
+
       // TODO: Guardar en base de datos (Prisma)
       // await prisma.socialProfile.create({ ... })
-      
+
       logger.info(`${platform} profile connected for company ${companyId}`);
       return profile;
     } catch (error) {
@@ -543,7 +542,7 @@ export class PomelliService {
     try {
       // Crear post en Pomelli
       const pomelliPostId = await this.client.createPost(post);
-      
+
       // TODO: Guardar en base de datos
       const savedPost: SocialPost = {
         id: crypto.randomUUID(),
@@ -640,7 +639,7 @@ export async function validatePomelliCredentials(
       apiSecret,
       enabled: true,
     });
-    
+
     // Intentar autenticar
     await client.getConnectedProfiles();
     return true;
@@ -676,7 +675,7 @@ export function getPomelliConfig(): PomelliConfig | null {
  */
 export function getPomelliService(): PomelliService | null {
   const config = getPomelliConfig();
-  
+
   if (!config) {
     return null;
   }
@@ -687,10 +686,7 @@ export function getPomelliService(): PomelliService | null {
 /**
  * Formatear texto para redes sociales (límites de caracteres)
  */
-export function formatPostContent(
-  content: string,
-  platform: SocialPlatform
-): string {
+export function formatPostContent(content: string, platform: SocialPlatform): string {
   const limits: Record<SocialPlatform, number> = {
     linkedin: 3000,
     instagram: 2200,
@@ -699,7 +695,7 @@ export function formatPostContent(
   };
 
   const maxLength = limits[platform];
-  
+
   if (content.length <= maxLength) {
     return content;
   }

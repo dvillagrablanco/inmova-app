@@ -15,10 +15,7 @@ export async function GET(request: NextRequest) {
     // Verificar autenticación
     const session = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Obtener lista de agentes
@@ -29,15 +26,14 @@ export async function GET(request: NextRequest) {
       system: SYSTEM_INFO,
       agents,
       totalAgents: agents.length,
-      enabledAgents: agents.filter(a => a.enabled).length
+      enabledAgents: agents.filter((a) => a.enabled).length,
     });
-
   } catch (error: any) {
     return NextResponse.json(
       {
         success: false,
         error: 'Error obteniendo lista de agentes',
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined,
       },
       { status: 500 }
     );

@@ -226,164 +226,161 @@ export default function OCRImportPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-5xl mx-auto">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold gradient-text mb-2 flex items-center gap-3">
-                <Scan className="h-8 w-8" />
-                Importación con OCR (Escaneo de Documentos)
-              </h1>
-              <p className="text-muted-foreground">
-                Escanea y extrae datos automáticamente de DNI, facturas, contratos y otros
-                documentos
-              </p>
+      <div className="max-w-5xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold gradient-text mb-2 flex items-center gap-3">
+            <Scan className="h-8 w-8" />
+            Importación con OCR (Escaneo de Documentos)
+          </h1>
+          <p className="text-muted-foreground">
+            Escanea y extrae datos automáticamente de DNI, facturas, contratos y otros documentos
+          </p>
+        </div>
+
+        {/* Tipo de Documento */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileCheck className="h-5 w-5" />
+              Tipo de Documento
+            </CardTitle>
+            <CardDescription>
+              Selecciona el tipo de documento para optimizar la extracción de datos
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <Card
+                className={`cursor-pointer transition-all hover:shadow-md ${
+                  documentType === 'dni' ? 'ring-2 ring-indigo-600' : ''
+                }`}
+                onClick={() => setDocumentType('dni')}
+              >
+                <CardContent className="p-4 text-center">
+                  <CreditCard className="h-8 w-8 mx-auto mb-2 text-indigo-600" />
+                  <p className="font-semibold text-sm">DNI/NIE</p>
+                  <p className="text-xs text-muted-foreground mt-1">Documentos de identidad</p>
+                </CardContent>
+              </Card>
+
+              <Card
+                className={`cursor-pointer transition-all hover:shadow-md ${
+                  documentType === 'invoice' ? 'ring-2 ring-indigo-600' : ''
+                }`}
+                onClick={() => setDocumentType('invoice')}
+              >
+                <CardContent className="p-4 text-center">
+                  <FileText className="h-8 w-8 mx-auto mb-2 text-green-600" />
+                  <p className="font-semibold text-sm">Factura</p>
+                  <p className="text-xs text-muted-foreground mt-1">Facturas y recibos</p>
+                </CardContent>
+              </Card>
+
+              <Card
+                className={`cursor-pointer transition-all hover:shadow-md ${
+                  documentType === 'contract' ? 'ring-2 ring-indigo-600' : ''
+                }`}
+                onClick={() => setDocumentType('contract')}
+              >
+                <CardContent className="p-4 text-center">
+                  <FileCheck className="h-8 w-8 mx-auto mb-2 text-blue-600" />
+                  <p className="font-semibold text-sm">Contrato</p>
+                  <p className="text-xs text-muted-foreground mt-1">Contratos de arrendamiento</p>
+                </CardContent>
+              </Card>
+
+              <Card
+                className={`cursor-pointer transition-all hover:shadow-md ${
+                  documentType === 'generic' ? 'ring-2 ring-indigo-600' : ''
+                }`}
+                onClick={() => setDocumentType('generic')}
+              >
+                <CardContent className="p-4 text-center">
+                  <FileText className="h-8 w-8 mx-auto mb-2 text-gray-600" />
+                  <p className="font-semibold text-sm">Genérico</p>
+                  <p className="text-xs text-muted-foreground mt-1">Cualquier documento</p>
+                </CardContent>
+              </Card>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Carga de Imagen */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Upload className="h-5 w-5" />
+              Cargar Documento
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-indigo-500 transition">
+              {imagePreview ? (
+                <div className="space-y-4">
+                  <div className="relative w-full max-w-md mx-auto">
+                    <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                      <Image src={imagePreview} alt="Preview" fill className="object-contain" />
+                    </div>
+                  </div>
+                  <div className="flex gap-3 justify-center">
+                    <Button onClick={handleProcess} disabled={processing} className="gap-2">
+                      {processing ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Procesando...
+                        </>
+                      ) : (
+                        <>
+                          <Scan className="h-4 w-4" />
+                          Escanear y Extraer Datos
+                        </>
+                      )}
+                    </Button>
+                    <Button onClick={handleReset} variant="outline">
+                      Cambiar Imagen
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Archivo: {file?.name} ({(file?.size || 0 / 1024).toFixed(0)} KB)
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                  <h3 className="text-lg font-medium mb-2">Sube una imagen del documento</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Formatos soportados: JPG, PNG, WEBP (máximo 10MB)
+                  </p>
+                  <input
+                    type="file"
+                    id="file-upload"
+                    className="hidden"
+                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                    onChange={handleFileChange}
+                  />
+                  <Button asChild>
+                    <label htmlFor="file-upload" className="cursor-pointer">
+                      Seleccionar Imagen
+                    </label>
+                  </Button>
+                </>
+              )}
             </div>
 
-            {/* Tipo de Documento */}
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileCheck className="h-5 w-5" />
-                  Tipo de Documento
-                </CardTitle>
-                <CardDescription>
-                  Selecciona el tipo de documento para optimizar la extracción de datos
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Card
-                    className={`cursor-pointer transition-all hover:shadow-md ${
-                      documentType === 'dni' ? 'ring-2 ring-indigo-600' : ''
-                    }`}
-                    onClick={() => setDocumentType('dni')}
-                  >
-                    <CardContent className="p-4 text-center">
-                      <CreditCard className="h-8 w-8 mx-auto mb-2 text-indigo-600" />
-                      <p className="font-semibold text-sm">DNI/NIE</p>
-                      <p className="text-xs text-muted-foreground mt-1">Documentos de identidad</p>
-                    </CardContent>
-                  </Card>
+            <Alert>
+              <Sparkles className="h-4 w-4" />
+              <AlertTitle>Tecnología de IA Avanzada</AlertTitle>
+              <AlertDescription>
+                Utilizamos modelos de visión artificial de última generación para extraer y
+                estructurar automáticamente la información de tus documentos con alta precisión.
+              </AlertDescription>
+            </Alert>
+          </CardContent>
+        </Card>
 
-                  <Card
-                    className={`cursor-pointer transition-all hover:shadow-md ${
-                      documentType === 'invoice' ? 'ring-2 ring-indigo-600' : ''
-                    }`}
-                    onClick={() => setDocumentType('invoice')}
-                  >
-                    <CardContent className="p-4 text-center">
-                      <FileText className="h-8 w-8 mx-auto mb-2 text-green-600" />
-                      <p className="font-semibold text-sm">Factura</p>
-                      <p className="text-xs text-muted-foreground mt-1">Facturas y recibos</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card
-                    className={`cursor-pointer transition-all hover:shadow-md ${
-                      documentType === 'contract' ? 'ring-2 ring-indigo-600' : ''
-                    }`}
-                    onClick={() => setDocumentType('contract')}
-                  >
-                    <CardContent className="p-4 text-center">
-                      <FileCheck className="h-8 w-8 mx-auto mb-2 text-blue-600" />
-                      <p className="font-semibold text-sm">Contrato</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Contratos de arrendamiento
-                      </p>
-                    </CardContent>
-                  </Card>
-
-                  <Card
-                    className={`cursor-pointer transition-all hover:shadow-md ${
-                      documentType === 'generic' ? 'ring-2 ring-indigo-600' : ''
-                    }`}
-                    onClick={() => setDocumentType('generic')}
-                  >
-                    <CardContent className="p-4 text-center">
-                      <FileText className="h-8 w-8 mx-auto mb-2 text-gray-600" />
-                      <p className="font-semibold text-sm">Genérico</p>
-                      <p className="text-xs text-muted-foreground mt-1">Cualquier documento</p>
-                    </CardContent>
-                  </Card>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Carga de Imagen */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Upload className="h-5 w-5" />
-                  Cargar Documento
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-indigo-500 transition">
-                  {imagePreview ? (
-                    <div className="space-y-4">
-                      <div className="relative w-full max-w-md mx-auto">
-                        <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                          <Image src={imagePreview} alt="Preview" fill className="object-contain" />
-                        </div>
-                      </div>
-                      <div className="flex gap-3 justify-center">
-                        <Button onClick={handleProcess} disabled={processing} className="gap-2">
-                          {processing ? (
-                            <>
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                              Procesando...
-                            </>
-                          ) : (
-                            <>
-                              <Scan className="h-4 w-4" />
-                              Escanear y Extraer Datos
-                            </>
-                          )}
-                        </Button>
-                        <Button onClick={handleReset} variant="outline">
-                          Cambiar Imagen
-                        </Button>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Archivo: {file?.name} ({(file?.size || 0 / 1024).toFixed(0)} KB)
-                      </p>
-                    </div>
-                  ) : (
-                    <>
-                      <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                      <h3 className="text-lg font-medium mb-2">Sube una imagen del documento</h3>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Formatos soportados: JPG, PNG, WEBP (máximo 10MB)
-                      </p>
-                      <input
-                        type="file"
-                        id="file-upload"
-                        className="hidden"
-                        accept="image/jpeg,image/jpg,image/png,image/webp"
-                        onChange={handleFileChange}
-                      />
-                      <Button asChild>
-                        <label htmlFor="file-upload" className="cursor-pointer">
-                          Seleccionar Imagen
-                        </label>
-                      </Button>
-                    </>
-                  )}
-                </div>
-
-                <Alert>
-                  <Sparkles className="h-4 w-4" />
-                  <AlertTitle>Tecnología de IA Avanzada</AlertTitle>
-                  <AlertDescription>
-                    Utilizamos modelos de visión artificial de última generación para extraer y
-                    estructurar automáticamente la información de tus documentos con alta precisión.
-                  </AlertDescription>
-                </Alert>
-              </CardContent>
-            </Card>
-
-            {/* Resultados */}
-            {renderExtractedData()}
-          </div>
-        </AuthenticatedLayout>
+        {/* Resultados */}
+        {renderExtractedData()}
+      </div>
+    </AuthenticatedLayout>
   );
 }

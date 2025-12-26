@@ -8,12 +8,9 @@ import { prisma } from './db';
 /**
  * Registra una vista de un tour virtual
  */
-export async function registrarVistaTour(
-  tourId: string,
-  duracionSegundos: number
-) {
+export async function registrarVistaTour(tourId: string, duracionSegundos: number) {
   const tour = await prisma.virtualTour.findUnique({
-    where: { id: tourId }
+    where: { id: tourId },
   });
 
   if (!tour) {
@@ -30,36 +27,32 @@ export async function registrarVistaTour(
     where: { id: tourId },
     data: {
       vistas: nuevasVistas,
-      tiempoPromedio: nuevoTiempoPromedio
-    }
+      tiempoPromedio: nuevoTiempoPromedio,
+    },
   });
 
   return {
     vistas: nuevasVistas,
-    tiempoPromedio: nuevoTiempoPromedio
+    tiempoPromedio: nuevoTiempoPromedio,
   };
 }
 
 /**
  * Genera un tour virtual básico a partir de fotos
  */
-export async function generarTourDesdeGaleria(
-  companyId: string,
-  unitId: string,
-  titulo: string
-) {
+export async function generarTourDesdeGaleria(companyId: string, unitId: string, titulo: string) {
   // Buscar galería existente
   const galeria = await prisma.propertyGallery.findFirst({
     where: { unitId },
     include: {
       items: {
         where: { tipo: 'foto' },
-        orderBy: { orden: 'asc' }
+        orderBy: { orden: 'asc' },
       },
       unit: {
-        include: { building: true }
-      }
-    }
+        include: { building: true },
+      },
+    },
   });
 
   if (!galeria || galeria.items.length === 0) {
@@ -68,8 +61,8 @@ export async function generarTourDesdeGaleria(
 
   // Agrupar fotos por habitación
   const escenasPorHabitacion: Record<string, any[]> = {};
-  
-  galeria.items.forEach(item => {
+
+  galeria.items.forEach((item) => {
     const habitacion = item.habitacion || 'General';
     if (!escenasPorHabitacion[habitacion]) {
       escenasPorHabitacion[habitacion] = [];
@@ -78,7 +71,7 @@ export async function generarTourDesdeGaleria(
       id: item.id,
       url: item.url,
       titulo: item.titulo,
-      descripcion: item.descripcion
+      descripcion: item.descripcion,
     });
   });
 
@@ -87,9 +80,9 @@ export async function generarTourDesdeGaleria(
     id: `escena_${index}`,
     nombre: habitacion,
     imagenPrincipal: fotos[0].url,
-    imagenes: fotos.map(f => f.url),
+    imagenes: fotos.map((f) => f.url),
     descripcion: `Recorrido por ${habitacion}`,
-    orden: index
+    orden: index,
   }));
 
   // Crear hotspots (puntos de interés)
@@ -101,7 +94,7 @@ export async function generarTourDesdeGaleria(
       destino: siguiente.id,
       posicion: { x: 0.5, y: 0.5 },
       icono: 'arrow-right',
-      tooltip: `Ir a ${siguiente.nombre}`
+      tooltip: `Ir a ${siguiente.nombre}`,
     };
   });
 
@@ -119,8 +112,8 @@ export async function generarTourDesdeGaleria(
       escenas,
       hotspots,
       estado: 'activo',
-      publico: false
-    }
+      publico: false,
+    },
   });
 
   return tour;
@@ -129,9 +122,11 @@ export async function generarTourDesdeGaleria(
 /**
  * Calcula el costo estimado de una visualización AR de reforma
  */
-export function calcularCostoReforma(
-  elementos: any[]
-): { costoTotal: number; tiempoEstimado: number; desglose: any[] } {
+export function calcularCostoReforma(elementos: any[]): {
+  costoTotal: number;
+  tiempoEstimado: number;
+  desglose: any[];
+} {
   const costoPorTipo: Record<string, number> = {
     pintura: 15, // €/m2
     suelo: 50,
@@ -139,7 +134,7 @@ export function calcularCostoReforma(
     baño: 6000,
     ventanas: 400,
     puertas: 300,
-    mobiliario: 500
+    mobiliario: 500,
   };
 
   const tiempoPorTipo: Record<string, number> = {
@@ -149,14 +144,14 @@ export function calcularCostoReforma(
     baño: 10,
     ventanas: 2,
     puertas: 1,
-    mobiliario: 1
+    mobiliario: 1,
   };
 
   let costoTotal = 0;
   let tiempoTotal = 0;
   const desglose: any[] = [];
 
-  elementos.forEach(elemento => {
+  elementos.forEach((elemento) => {
     const tipo = elemento.tipo;
     const cantidad = elemento.cantidad || 1;
     const costoPorUnidad = costoPorTipo[tipo] || 100;
@@ -174,14 +169,14 @@ export function calcularCostoReforma(
       cantidad,
       costoPorUnidad,
       costoTotal: costoElemento,
-      tiempoEstimado: tiempoElemento
+      tiempoEstimado: tiempoElemento,
     });
   });
 
   return {
     costoTotal: Math.round(costoTotal),
     tiempoEstimado: Math.round(tiempoTotal),
-    desglose
+    desglose,
   };
 }
 
@@ -195,7 +190,7 @@ export async function obtenerMetricasTours(
 ) {
   const where: any = {
     companyId,
-    estado: 'activo'
+    estado: 'activo',
   };
 
   if (fechaDesde || fechaHasta) {
@@ -208,9 +203,9 @@ export async function obtenerMetricasTours(
     where,
     include: {
       unit: {
-        include: { building: true }
-      }
-    }
+        include: { building: true },
+      },
+    },
   });
 
   const totalVistas = tours.reduce((sum, t) => sum + t.vistas, 0);
@@ -237,12 +232,12 @@ export async function obtenerMetricasTours(
     toursMasVistos: tours
       .sort((a, b) => b.vistas - a.vistas)
       .slice(0, 5)
-      .map(t => ({
+      .map((t) => ({
         id: t.id,
         titulo: t.titulo,
         vistas: t.vistas,
         unidad: t.unit?.numero,
-        edificio: t.unit?.building.nombre
-      }))
+        edificio: t.unit?.building.nombre,
+      })),
   };
 }

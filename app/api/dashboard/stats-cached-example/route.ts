@@ -1,6 +1,6 @@
 /**
  * EJEMPLO: Dashboard con Caché Redis y Rate Limiting
- * 
+ *
  * Este archivo es un EJEMPLO DESHABILITADO (para prevenir errores de build)
  * En producción, debería implementarse con:
  * 1. Rate limiting funcional
@@ -14,8 +14,5 @@ import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  return NextResponse.json(
-    { error: 'Endpoint de ejemplo deshabilitado' },
-    { status: 501 }
-  );
+  return NextResponse.json({ error: 'Endpoint de ejemplo deshabilitado' }, { status: 501 });
 }

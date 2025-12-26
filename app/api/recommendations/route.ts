@@ -21,10 +21,7 @@ export async function GET(request: NextRequest) {
         companyId,
         aplicada: false,
       },
-      orderBy: [
-        { prioridad: 'desc' },
-        { createdAt: 'desc' },
-      ],
+      orderBy: [{ prioridad: 'desc' }, { createdAt: 'desc' }],
       take: 20,
     });
 

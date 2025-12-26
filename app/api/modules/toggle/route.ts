@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { 
-  activateModuleForCompany, 
-  deactivateModuleForCompany 
-} from '@/lib/modules-service';
+import { activateModuleForCompany, deactivateModuleForCompany } from '@/lib/modules-service';
 import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
 
@@ -30,10 +27,7 @@ export async function POST(req: NextRequest) {
     const userId = session.user.id;
 
     if (!moduloCodigo) {
-      return NextResponse.json(
-        { error: 'Código de módulo requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Código de módulo requerido' }, { status: 400 });
     }
 
     // Verificar que el módulo esté incluido en el plan de suscripción si se quiere activar
@@ -71,7 +65,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: activo ? 'Módulo activado' : 'Módulo desactivado'
+      message: activo ? 'Módulo activado' : 'Módulo desactivado',
     });
   } catch (error: any) {
     logger.error('Error al modificar módulo:', error);

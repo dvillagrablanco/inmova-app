@@ -105,7 +105,7 @@ export const couponSchema = z.object({
     .min(3, 'Mínimo 3 caracteres')
     .max(50, 'Máximo 50 caracteres')
     .regex(/^[A-Z0-9_-]+$/, 'Solo mayúsculas, números, guiones y guiones bajos')
-    .transform(val => val.toUpperCase()),
+    .transform((val) => val.toUpperCase()),
   descripcion: longTextSchema,
   tipo: z.enum(['porcentaje', 'fijo']),
   valor: z.number().positive('El valor debe ser positivo'),
@@ -273,11 +273,11 @@ export const schemas = {
   roomContract: roomContractSchema,
   proration: prorationSchema,
   cleaningSchedule: cleaningScheduleSchema,
-  
+
   // Cupones
   coupon: couponSchema,
   applyCoupon: applyCouponSchema,
-  
+
   // Core
   building: buildingSchema,
   unit: unitSchema,

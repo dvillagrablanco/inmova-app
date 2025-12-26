@@ -1,12 +1,12 @@
 /**
  * API Endpoint: Iniciar Autorización OAuth con Redsys PSD2
- * 
+ *
  * Este endpoint inicia el flujo de autorización OAuth 2.0 con un banco específico
  * a través de la plataforma Redsys PSD2.
- * 
+ *
  * Método: POST
  * Body: { aspsp: string, scope: string }
- * 
+ *
  * @author INMOVA Development Team
  */
 
@@ -14,7 +14,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import logger from '@/lib/logger';
 
 import {
-
   buildAuthorizationUrl,
   generateCodeVerifier,
   generateCodeChallenge,
@@ -30,7 +29,6 @@ import { authOptions } from '@/lib/auth-options';
 // Force dynamic rendering for this route
 export const dynamic = 'force-dynamic';
 
-
 // Almacenamiento temporal para code_verifier y state
 // En producción, esto debería estar en Redis o base de datos
 const pkceStorage = new Map<string, { verifier: string; state: string; userId: string }>();
@@ -40,10 +38,7 @@ export async function POST(request: NextRequest) {
     // Verificar autenticación
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -60,9 +55,9 @@ export async function POST(request: NextRequest) {
     const supportedBanks = Object.values(SPANISH_BANKS);
     if (!supportedBanks.includes(aspsp)) {
       return NextResponse.json(
-        { 
+        {
           error: 'Banco no soportado',
-          supportedBanks: Object.entries(BANK_NAMES).map(([id, name]) => ({ id, name }))
+          supportedBanks: Object.entries(BANK_NAMES).map(([id, name]) => ({ id, name })),
         },
         { status: 400 }
       );

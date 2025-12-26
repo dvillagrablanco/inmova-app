@@ -7,7 +7,13 @@ import { prisma } from './db';
 import { addDays, addHours, differenceInHours, startOfDay, endOfDay } from 'date-fns';
 
 // Definiciones de tipos inline (reemplaza imports de @prisma/client)
-type HousekeepingStatus = 'pendiente' | 'asignado' | 'en_progreso' | 'completado' | 'verificado' | 'rechazado';
+type HousekeepingStatus =
+  | 'pendiente'
+  | 'asignado'
+  | 'en_progreso'
+  | 'completado'
+  | 'verificado'
+  | 'rechazado';
 type TurnoverType = 'check_out' | 'check_in' | 'limpieza_profunda' | 'mantenimiento' | 'inspeccion';
 
 // ==================== INTERFACES ====================
@@ -107,7 +113,7 @@ export async function createHousekeepingTask(input: CreateTaskInput) {
   // Validar que el listing pertenece a la compañía
   const listing = await prisma.sTRListing.findFirst({
     where: { id: listingId, companyId },
-    include: { unit: true }
+    include: { unit: true },
   });
 
   if (!listing) {
@@ -118,7 +124,7 @@ export async function createHousekeepingTask(input: CreateTaskInput) {
   let checklistData: any = null;
   if (rest.checklistId) {
     const checklist = await prisma.sTRHousekeepingChecklist.findUnique({
-      where: { id: rest.checklistId }
+      where: { id: rest.checklistId },
     });
     if (checklist) {
       checklistData = checklist.items;
@@ -129,7 +135,7 @@ export async function createHousekeepingTask(input: CreateTaskInput) {
   const tiempoEstimado = calculateEstimatedTime(tipoTurnover, listing.unit?.habitaciones || 2);
 
   // Mapear prioridad de string a número
-  const prioridadMap = { 'baja': 0, 'media': 0, 'alta': 1, 'urgente': 2 };
+  const prioridadMap = { baja: 0, media: 0, alta: 1, urgente: 2 };
   const prioridadNum = prioridadMap[rest.prioridad || 'media'];
 
   // Crear la tarea
@@ -147,8 +153,8 @@ export async function createHousekeepingTask(input: CreateTaskInput) {
       instruccionesEspeciales: rest.instruccionesEspeciales,
       prioridad: prioridadNum,
       tiempoEstimadoMin: tiempoEstimado,
-      checklistCompletado: checklistData ? JSON.parse(JSON.stringify(checklistData)) : null
-    }
+      checklistCompletado: checklistData ? JSON.parse(JSON.stringify(checklistData)) : null,
+    },
   });
 
   return task;
@@ -157,10 +163,14 @@ export async function createHousekeepingTask(input: CreateTaskInput) {
 /**
  * Actualiza una tarea de housekeeping
  */
-export async function updateHousekeepingTask(taskId: string, companyId: string, input: UpdateTaskInput) {
+export async function updateHousekeepingTask(
+  taskId: string,
+  companyId: string,
+  input: UpdateTaskInput
+) {
   // Verificar que la tarea pertenece a la compañía
   const existingTask = await prisma.sTRHousekeepingTask.findFirst({
-    where: { id: taskId, companyId }
+    where: { id: taskId, companyId },
   });
 
   if (!existingTask) {
@@ -173,7 +183,11 @@ export async function updateHousekeepingTask(taskId: string, companyId: string, 
     updateData.status = input.status;
 
     // Si se completa, calcular tiempo real y actualizar stats del staff
-    if (input.status === HousekeepingStatus.completado && input.horaInicioReal && input.horaFinReal) {
+    if (
+      input.status === HousekeepingStatus.completado &&
+      input.horaInicioReal &&
+      input.horaFinReal
+    ) {
       const tiempoReal = differenceInHours(input.horaFinReal, input.horaInicioReal) * 60;
       updateData.tiempoRealMin = tiempoReal;
 
@@ -181,7 +195,7 @@ export async function updateHousekeepingTask(taskId: string, companyId: string, 
       if (existingTask.asignadoA && input.calificacionCalidad) {
         await updateStaffPerformance(existingTask.asignadoA, {
           tareasCompletadas: 1,
-          calificacionPromedio: input.calificacionCalidad
+          calificacionPromedio: input.calificacionCalidad,
         });
       }
     }
@@ -207,8 +221,8 @@ export async function updateHousekeepingTask(taskId: string, companyId: string, 
     data: updateData,
     include: {
       listing: { include: { unit: true } },
-      staff: true
-    }
+      staff: true,
+    },
   });
 
   return updatedTask;
@@ -238,7 +252,7 @@ export async function getHousekeepingTasks(
   if (filters?.fechaInicio && filters?.fechaFin) {
     where.fechaProgramada = {
       gte: startOfDay(filters.fechaInicio),
-      lte: endOfDay(filters.fechaFin)
+      lte: endOfDay(filters.fechaFin),
     };
   }
 
@@ -247,16 +261,13 @@ export async function getHousekeepingTasks(
     include: {
       listing: {
         include: {
-          unit: { include: { building: true } }
-        }
+          unit: { include: { building: true } },
+        },
       },
       staff: true,
-      booking: true
+      booking: true,
     },
-    orderBy: [
-      { fechaProgramada: 'asc' },
-      { prioridad: 'desc' }
-    ]
+    orderBy: [{ fechaProgramada: 'asc' }, { prioridad: 'desc' }],
   });
 
   return tasks;
@@ -265,46 +276,54 @@ export async function getHousekeepingTasks(
 /**
  * Obtiene estadísticas de housekeeping
  */
-export async function getHousekeepingStats(companyId: string, fechaInicio?: Date, fechaFin?: Date): Promise<TaskStats> {
+export async function getHousekeepingStats(
+  companyId: string,
+  fechaInicio?: Date,
+  fechaFin?: Date
+): Promise<TaskStats> {
   const where: any = { companyId };
 
   if (fechaInicio && fechaFin) {
     where.fechaProgramada = {
       gte: startOfDay(fechaInicio),
-      lte: endOfDay(fechaFin)
+      lte: endOfDay(fechaFin),
     };
   }
 
   const tasks = await prisma.sTRHousekeepingTask.findMany({ where });
 
   const totalTareas = tasks.length;
-  const pendientes = tasks.filter(t => t.status === HousekeepingStatus.pendiente).length;
-  const enProgreso = tasks.filter(t => t.status === HousekeepingStatus.en_progreso).length;
-  const completadas = tasks.filter(t => t.status === HousekeepingStatus.completado).length;
-  const conIncidencias = tasks.filter(t => t.status === HousekeepingStatus.incidencia).length;
+  const pendientes = tasks.filter((t) => t.status === HousekeepingStatus.pendiente).length;
+  const enProgreso = tasks.filter((t) => t.status === HousekeepingStatus.en_progreso).length;
+  const completadas = tasks.filter((t) => t.status === HousekeepingStatus.completado).length;
+  const conIncidencias = tasks.filter((t) => t.status === HousekeepingStatus.incidencia).length;
 
   // Calcular tiempo promedio de completado
-  const tareasConTiempo = tasks.filter(t => t.tiempoRealMin !== null && t.tiempoRealMin > 0);
-  const tiempoPromedioCompletado = tareasConTiempo.length > 0
-    ? tareasConTiempo.reduce((sum, t) => sum + (t.tiempoRealMin || 0), 0) / tareasConTiempo.length
-    : 0;
+  const tareasConTiempo = tasks.filter((t) => t.tiempoRealMin !== null && t.tiempoRealMin > 0);
+  const tiempoPromedioCompletado =
+    tareasConTiempo.length > 0
+      ? tareasConTiempo.reduce((sum, t) => sum + (t.tiempoRealMin || 0), 0) / tareasConTiempo.length
+      : 0;
 
   // Calcular tasa de completado a tiempo
-  const tareasATiempo = tasks.filter(t =>
-    t.status === HousekeepingStatus.completado &&
-    t.tiempoRealMin !== null &&
-    t.tiempoRealMin <= (t.tiempoEstimadoMin || 0)
+  const tareasATiempo = tasks.filter(
+    (t) =>
+      t.status === HousekeepingStatus.completado &&
+      t.tiempoRealMin !== null &&
+      t.tiempoRealMin <= (t.tiempoEstimadoMin || 0)
   ).length;
   const tasaCompletadoATiempo = completadas > 0 ? (tareasATiempo / completadas) * 100 : 0;
 
   // Calcular costo promedio por tarea
-  const tareasConCosto = tasks.filter(t => {
+  const tareasConCosto = tasks.filter((t) => {
     const costoTotal = t.costoMateriales + t.costoManoObra;
     return costoTotal > 0;
   });
-  const costoPromedioPorTarea = tareasConCosto.length > 0
-    ? tareasConCosto.reduce((sum, t) => sum + (t.costoMateriales + t.costoManoObra), 0) / tareasConCosto.length
-    : 0;
+  const costoPromedioPorTarea =
+    tareasConCosto.length > 0
+      ? tareasConCosto.reduce((sum, t) => sum + (t.costoMateriales + t.costoManoObra), 0) /
+        tareasConCosto.length
+      : 0;
 
   return {
     totalTareas,
@@ -314,7 +333,7 @@ export async function getHousekeepingStats(companyId: string, fechaInicio?: Date
     conIncidencias,
     tiempoPromedioCompletado: Math.round(tiempoPromedioCompletado),
     tasaCompletadoATiempo: Math.round(tasaCompletadoATiempo * 10) / 10,
-    costoPromedioPorTarea: Math.round(costoPromedioPorTarea * 100) / 100
+    costoPromedioPorTarea: Math.round(costoPromedioPorTarea * 100) / 100,
   };
 }
 
@@ -335,8 +354,8 @@ export async function createHousekeepingStaff(companyId: string, input: StaffInp
       tarifaPorTurnover: input.tarifaPorTurnover || null,
       zonasTrabajo: input.zonasTrabajo || [],
       capacidadDiaria: input.capacidadDiaria || 4,
-      activo: true
-    }
+      activo: true,
+    },
   });
 
   return staff;
@@ -353,7 +372,7 @@ export async function updateStaffPerformance(
   }
 ) {
   const staff = await prisma.sTRHousekeepingStaff.findUnique({
-    where: { id: staffId }
+    where: { id: staffId },
   });
 
   if (!staff) return;
@@ -367,17 +386,16 @@ export async function updateStaffPerformance(
   if (performance.calificacionPromedio) {
     const totalCalificaciones = staff.tareasCompletadas || 1;
     const calificacionActual = staff.calificacionPromedio || 0;
-    const nuevaCalificacion = (
+    const nuevaCalificacion =
       (calificacionActual * totalCalificaciones + performance.calificacionPromedio) /
-      (totalCalificaciones + 1)
-    );
+      (totalCalificaciones + 1);
     updates.calificacionPromedio = nuevaCalificacion;
   }
 
   if (Object.keys(updates).length > 0) {
     await prisma.sTRHousekeepingStaff.update({
       where: { id: staffId },
-      data: updates
+      data: updates,
     });
   }
 }
@@ -390,9 +408,9 @@ export async function getStaffPerformance(companyId: string): Promise<StaffPerfo
     where: { companyId, activo: true },
     include: {
       _count: {
-        select: { tasks: true }
-      }
-    }
+        select: { tasks: true },
+      },
+    },
   });
 
   const performance: StaffPerformance[] = await Promise.all(
@@ -400,37 +418,37 @@ export async function getStaffPerformance(companyId: string): Promise<StaffPerfo
       const tareasCompletadas = await prisma.sTRHousekeepingTask.count({
         where: {
           asignadoA: s.id,
-          status: HousekeepingStatus.completado
-        }
+          status: HousekeepingStatus.completado,
+        },
       });
 
       const tareas = await prisma.sTRHousekeepingTask.findMany({
         where: {
           asignadoA: s.id,
           status: HousekeepingStatus.completado,
-          tiempoRealMin: { not: null }
+          tiempoRealMin: { not: null },
         },
         select: {
           tiempoRealMin: true,
-          tiempoEstimadoMin: true
-        }
+          tiempoEstimadoMin: true,
+        },
       });
 
-      const tiempoPromedio = tareas.length > 0
-        ? tareas.reduce((sum, t) => sum + (t.tiempoRealMin || 0), 0) / tareas.length
-        : 0;
+      const tiempoPromedio =
+        tareas.length > 0
+          ? tareas.reduce((sum, t) => sum + (t.tiempoRealMin || 0), 0) / tareas.length
+          : 0;
 
-      const tareasATiempo = tareas.filter(t =>
-        t.tiempoRealMin && t.tiempoEstimadoMin &&
-        t.tiempoRealMin <= t.tiempoEstimadoMin
+      const tareasATiempo = tareas.filter(
+        (t) => t.tiempoRealMin && t.tiempoEstimadoMin && t.tiempoRealMin <= t.tiempoEstimadoMin
       ).length;
       const tasaPuntualidad = tareas.length > 0 ? (tareasATiempo / tareas.length) * 100 : 0;
 
       const incidenciasReportadas = await prisma.sTRHousekeepingTask.count({
         where: {
           asignadoA: s.id,
-          status: HousekeepingStatus.incidencia
-        }
+          status: HousekeepingStatus.incidencia,
+        },
       });
 
       return {
@@ -440,7 +458,7 @@ export async function getStaffPerformance(companyId: string): Promise<StaffPerfo
         tiempoPromedio: Math.round(tiempoPromedio),
         calificacionPromedio: s.calificacionPromedio || 0,
         tasaPuntualidad: Math.round(tasaPuntualidad * 10) / 10,
-        incidenciasReportadas
+        incidenciasReportadas,
       };
     })
   );
@@ -463,8 +481,8 @@ export async function createInventoryItem(companyId: string, input: InventoryInp
       stockMinimo: input.stockMinimo,
       costoUnitario: input.costoUnitario || null,
       ubicacion: input.ubicacion || null,
-      alertaStockBajo: input.stockActual <= input.stockMinimo
-    }
+      alertaStockBajo: input.stockActual <= input.stockMinimo,
+    },
   });
 
   return item;
@@ -479,7 +497,7 @@ export async function processInventoryUsage(
 ) {
   for (const [itemId, cantidad] of Object.entries(articulosUsados)) {
     const item = await prisma.sTRHousekeepingInventory.findFirst({
-      where: { id: itemId, companyId }
+      where: { id: itemId, companyId },
     });
 
     if (!item) continue;
@@ -490,8 +508,8 @@ export async function processInventoryUsage(
       where: { id: itemId },
       data: {
         stockActual: Math.max(0, nuevaCantidad),
-        alertaStockBajo: nuevaCantidad <= (item.stockMinimo || 0)
-      }
+        alertaStockBajo: nuevaCantidad <= (item.stockMinimo || 0),
+      },
     });
 
     // Registrar movimiento
@@ -500,8 +518,8 @@ export async function processInventoryUsage(
         inventoryId: itemId,
         tipo: 'uso',
         cantidad: -cantidad,
-        motivo: 'Uso en tarea de housekeeping'
-      }
+        motivo: 'Uso en tarea de housekeeping',
+      },
     });
   }
 }
@@ -513,11 +531,11 @@ export async function getLowStockItems(companyId: string) {
   const items = await prisma.sTRHousekeepingInventory.findMany({
     where: {
       companyId,
-      alertaStockBajo: true
+      alertaStockBajo: true,
     },
     orderBy: {
-      stockActual: 'asc'
-    }
+      stockActual: 'asc',
+    },
   });
 
   return items;
@@ -537,8 +555,8 @@ export async function createChecklistTemplate(companyId: string, input: Checklis
       tipo: input.tipo,
       items: input.items,
       tiempoEstimadoMin: input.tiempoEstimadoMin || null,
-      activo: true
-    }
+      activo: true,
+    },
   });
 
   return template;
@@ -555,7 +573,7 @@ function calculateEstimatedTime(tipo: TurnoverType, capacidad: number): number {
     check_in: 30,
     limpieza_profunda: 120,
     mantenimiento: 60,
-    inspeccion: 20
+    inspeccion: 20,
   };
 
   const base = baseTime[tipo] || 60;
@@ -577,12 +595,12 @@ export async function generateAutomaticTasks(companyId: string, diasAnticipacion
       estado: { in: ['CONFIRMADA', 'PENDIENTE'] },
       checkInDate: {
         gte: new Date(),
-        lte: fechaFin
-      }
+        lte: fechaFin,
+      },
     },
     include: {
-      listing: true
-    }
+      listing: true,
+    },
   });
 
   const tareasCreadas: any[] = [];
@@ -591,8 +609,8 @@ export async function generateAutomaticTasks(companyId: string, diasAnticipacion
     // Verificar si ya existe tarea para este booking
     const existingTasks = await prisma.sTRHousekeepingTask.findMany({
       where: {
-        bookingId: booking.id
-      }
+        bookingId: booking.id,
+      },
     });
 
     // Si ya hay tareas creadas para este booking, saltar
@@ -607,7 +625,7 @@ export async function generateAutomaticTasks(companyId: string, diasAnticipacion
       horaInicio: addHours(booking.checkInDate, -2),
       horaFin: booking.checkInDate,
       prioridad: 'alta',
-      bookingId: booking.id
+      bookingId: booking.id,
     });
 
     tareasCreadas.push(checkInTask);
@@ -621,7 +639,7 @@ export async function generateAutomaticTasks(companyId: string, diasAnticipacion
       horaInicio: booking.checkOutDate,
       horaFin: addHours(booking.checkOutDate, 3),
       prioridad: 'alta',
-      bookingId: booking.id
+      bookingId: booking.id,
     });
 
     tareasCreadas.push(checkOutTask);

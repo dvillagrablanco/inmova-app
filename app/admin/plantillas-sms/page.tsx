@@ -277,203 +277,76 @@ export default function PlantillasSMSPage() {
   if (status === 'loading' || loading) {
     return (
       <AuthenticatedLayout>
-            <div className="max-w-7xl mx-auto">
-              <Skeleton className="h-10 w-96" />
-              <div className="grid md:grid-cols-2 gap-6">
-                {[...Array(4)].map((_, i) => (
-                  <Skeleton key={i} className="h-64" />
-                ))}
-              </div>
-            </div>
-          </AuthenticatedLayout>
+        <div className="max-w-7xl mx-auto">
+          <Skeleton className="h-10 w-96" />
+          <div className="grid md:grid-cols-2 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <Skeleton key={i} className="h-64" />
+            ))}
+          </div>
+        </div>
+      </AuthenticatedLayout>
     );
   }
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold">Plantillas SMS</h1>
-                <p className="text-muted-foreground mt-2">
-                  Gestiona las plantillas de mensajes SMS para comunicarte con tus inquilinos.
-                </p>
-              </div>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button onClick={resetForm}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Nueva Plantilla
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>{editando ? 'Editar' : 'Nueva'} Plantilla SMS</DialogTitle>
-                    <DialogDescription>
-                      Crea plantillas reutilizables con variables dinámicas
-                    </DialogDescription>
-                  </DialogHeader>
-                  <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="nombre">Nombre de la Plantilla *</Label>
-                      <Input
-                        id="nombre"
-                        value={formData.nombre}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, nombre: e.target.value }))
-                        }
-                        placeholder="Ej: Recordatorio de Pago Mensual"
-                        required
-                      />
-                    </div>
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Plantillas SMS</h1>
+            <p className="text-muted-foreground mt-2">
+              Gestiona las plantillas de mensajes SMS para comunicarte con tus inquilinos.
+            </p>
+          </div>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button onClick={resetForm}>
+                <Plus className="w-4 h-4 mr-2" />
+                Nueva Plantilla
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>{editando ? 'Editar' : 'Nueva'} Plantilla SMS</DialogTitle>
+                <DialogDescription>
+                  Crea plantillas reutilizables con variables dinámicas
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="nombre">Nombre de la Plantilla *</Label>
+                  <Input
+                    id="nombre"
+                    value={formData.nombre}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, nombre: e.target.value }))}
+                    placeholder="Ej: Recordatorio de Pago Mensual"
+                    required
+                  />
+                </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="descripcion">Descripción</Label>
-                      <Input
-                        id="descripcion"
-                        value={formData.descripcion}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, descripcion: e.target.value }))
-                        }
-                        placeholder="Breve descripción de cuándo usar esta plantilla"
-                      />
-                    </div>
+                <div className="space-y-2">
+                  <Label htmlFor="descripcion">Descripción</Label>
+                  <Input
+                    id="descripcion"
+                    value={formData.descripcion}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, descripcion: e.target.value }))
+                    }
+                    placeholder="Breve descripción de cuándo usar esta plantilla"
+                  />
+                </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="tipo">Tipo de SMS *</Label>
-                      <Select
-                        value={formData.tipo}
-                        onValueChange={(value) => setFormData((prev) => ({ ...prev, tipo: value }))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona un tipo" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {tiposSMS.map((tipo) => (
-                            <SelectItem key={tipo.value} value={tipo.value}>
-                              {tipo.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="mensaje">Mensaje *</Label>
-                      <Textarea
-                        id="mensaje"
-                        value={formData.mensaje}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, mensaje: e.target.value }))
-                        }
-                        placeholder="Escribe tu mensaje aquí..."
-                        rows={5}
-                        required
-                      />
-                      <p className="text-sm text-muted-foreground">
-                        Longitud: {formData.mensaje.length} caracteres | SMS:{' '}
-                        {Math.ceil(formData.mensaje.length / 160)}
-                      </p>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Variables Disponibles</Label>
-                      <div className="grid grid-cols-2 gap-2">
-                        {variablesDisponibles.map((v) => (
-                          <Button
-                            key={v.nombre}
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => insertarVariable(v.nombre)}
-                            className="justify-start"
-                          >
-                            <Plus className="w-3 h-3 mr-1" />
-                            {v.nombre}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        id="activa"
-                        checked={formData.activa}
-                        onCheckedChange={(checked) =>
-                          setFormData((prev) => ({ ...prev, activa: checked }))
-                        }
-                      />
-                      <Label htmlFor="activa">Plantilla activa</Label>
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        id="envioAutomatico"
-                        checked={formData.envioAutomatico}
-                        onCheckedChange={(checked) =>
-                          setFormData((prev) => ({ ...prev, envioAutomatico: checked }))
-                        }
-                      />
-                      <Label htmlFor="envioAutomatico">Envío automático</Label>
-                    </div>
-
-                    {formData.envioAutomatico && (
-                      <Alert>
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertDescription>
-                          El envío automático requiere configurar eventos y horarios específicos.
-                        </AlertDescription>
-                      </Alert>
-                    )}
-
-                    <div className="flex gap-2">
-                      <ButtonWithLoading
-                        type="submit"
-                        className="flex-1"
-                        isLoading={isSaving}
-                        loadingText={editando ? 'Actualizando...' : 'Creando...'}
-                        icon={Save}
-                      >
-                        {editando ? 'Actualizar' : 'Crear'} Plantilla
-                      </ButtonWithLoading>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => {
-                          setEditando(null);
-                          resetForm();
-                        }}
-                      >
-                        Cancelar
-                      </Button>
-                    </div>
-                  </form>
-                </DialogContent>
-              </Dialog>
-            </div>
-
-            {/* Filtros de búsqueda */}
-            <Card>
-              <CardContent className="pt-6">
-                <div className="grid gap-4 md:grid-cols-3">
-                  {/* Búsqueda por nombre/descripción */}
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      placeholder="Buscar plantillas..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-
-                  {/* Filtro por tipo */}
-                  <Select value={filterTipo} onValueChange={setFilterTipo}>
+                <div className="space-y-2">
+                  <Label htmlFor="tipo">Tipo de SMS *</Label>
+                  <Select
+                    value={formData.tipo}
+                    onValueChange={(value) => setFormData((prev) => ({ ...prev, tipo: value }))}
+                  >
                     <SelectTrigger>
-                      <SelectValue placeholder="Filtrar por tipo" />
+                      <SelectValue placeholder="Selecciona un tipo" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="todos">Todos los tipos</SelectItem>
                       {tiposSMS.map((tipo) => (
                         <SelectItem key={tipo.value} value={tipo.value}>
                           {tipo.label}
@@ -481,193 +354,311 @@ export default function PlantillasSMSPage() {
                       ))}
                     </SelectContent>
                   </Select>
-
-                  {/* Filtro por estado */}
-                  <Select value={filterActiva} onValueChange={setFilterActiva}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Filtrar por estado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="todos">Todos los estados</SelectItem>
-                      <SelectItem value="activas">Activas</SelectItem>
-                      <SelectItem value="inactivas">Inactivas</SelectItem>
-                    </SelectContent>
-                  </Select>
                 </div>
 
-                {/* Contador de resultados */}
-                <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
-                  <span>
-                    Mostrando {plantillasFiltradas.length} de {plantillas.length} plantillas
-                  </span>
-                  {(searchTerm || filterTipo !== 'todos' || filterActiva !== 'todos') && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setSearchTerm('');
-                        setFilterTipo('todos');
-                        setFilterActiva('todos');
-                      }}
-                    >
-                      Limpiar filtros
-                    </Button>
+                <div className="space-y-2">
+                  <Label htmlFor="mensaje">Mensaje *</Label>
+                  <Textarea
+                    id="mensaje"
+                    value={formData.mensaje}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, mensaje: e.target.value }))}
+                    placeholder="Escribe tu mensaje aquí..."
+                    rows={5}
+                    required
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Longitud: {formData.mensaje.length} caracteres | SMS:{' '}
+                    {Math.ceil(formData.mensaje.length / 160)}
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Variables Disponibles</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {variablesDisponibles.map((v) => (
+                      <Button
+                        key={v.nombre}
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => insertarVariable(v.nombre)}
+                        className="justify-start"
+                      >
+                        <Plus className="w-3 h-3 mr-1" />
+                        {v.nombre}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="activa"
+                    checked={formData.activa}
+                    onCheckedChange={(checked) =>
+                      setFormData((prev) => ({ ...prev, activa: checked }))
+                    }
+                  />
+                  <Label htmlFor="activa">Plantilla activa</Label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="envioAutomatico"
+                    checked={formData.envioAutomatico}
+                    onCheckedChange={(checked) =>
+                      setFormData((prev) => ({ ...prev, envioAutomatico: checked }))
+                    }
+                  />
+                  <Label htmlFor="envioAutomatico">Envío automático</Label>
+                </div>
+
+                {formData.envioAutomatico && (
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      El envío automático requiere configurar eventos y horarios específicos.
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                <div className="flex gap-2">
+                  <ButtonWithLoading
+                    type="submit"
+                    className="flex-1"
+                    isLoading={isSaving}
+                    loadingText={editando ? 'Actualizando...' : 'Creando...'}
+                    icon={Save}
+                  >
+                    {editando ? 'Actualizar' : 'Crear'} Plantilla
+                  </ButtonWithLoading>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setEditando(null);
+                      resetForm();
+                    }}
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        {/* Filtros de búsqueda */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="grid gap-4 md:grid-cols-3">
+              {/* Búsqueda por nombre/descripción */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar plantillas..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+
+              {/* Filtro por tipo */}
+              <Select value={filterTipo} onValueChange={setFilterTipo}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filtrar por tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos los tipos</SelectItem>
+                  {tiposSMS.map((tipo) => (
+                    <SelectItem key={tipo.value} value={tipo.value}>
+                      {tipo.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {/* Filtro por estado */}
+              <Select value={filterActiva} onValueChange={setFilterActiva}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filtrar por estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos los estados</SelectItem>
+                  <SelectItem value="activas">Activas</SelectItem>
+                  <SelectItem value="inactivas">Inactivas</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Contador de resultados */}
+            <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+              <span>
+                Mostrando {plantillasFiltradas.length} de {plantillas.length} plantillas
+              </span>
+              {(searchTerm || filterTipo !== 'todos' || filterActiva !== 'todos') && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setFilterTipo('todos');
+                    setFilterActiva('todos');
+                  }}
+                >
+                  Limpiar filtros
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {plantillasFiltradas.map((plantilla) => (
+            <Card key={plantilla.id} className="relative">
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <CardTitle className="text-lg">{plantilla.nombre}</CardTitle>
+                    <CardDescription className="text-sm">
+                      {plantilla.descripcion || 'Sin descripción'}
+                    </CardDescription>
+                  </div>
+                  <Badge variant={plantilla.activa ? 'default' : 'secondary'}>
+                    {plantilla.activa ? 'Activa' : 'Inactiva'}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-3 bg-muted rounded-lg text-sm">
+                  {plantilla.mensaje.substring(0, 100)}
+                  {plantilla.mensaje.length > 100 && '...'}
+                </div>
+
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <span>Usado {plantilla.vecesUsada} veces</span>
+                  {plantilla.envioAutomatico && (
+                    <Badge variant="outline" className="text-xs">
+                      <CheckCircle2 className="w-3 h-3 mr-1" />
+                      Automático
+                    </Badge>
                   )}
+                </div>
+
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => handleEdit(plantilla)}
+                  >
+                    <Edit className="w-3 h-3 mr-1" />
+                    Editar
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => handleDuplicate(plantilla)}>
+                    <Copy className="w-3 h-3" />
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => setVistaPrevia(plantilla)}>
+                    <Eye className="w-3 h-3" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => confirmDelete(plantilla.id, plantilla.nombre)}
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
                 </div>
               </CardContent>
             </Card>
+          ))}
+        </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {plantillasFiltradas.map((plantilla) => (
-                <Card key={plantilla.id} className="relative">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-1">
-                        <CardTitle className="text-lg">{plantilla.nombre}</CardTitle>
-                        <CardDescription className="text-sm">
-                          {plantilla.descripcion || 'Sin descripción'}
-                        </CardDescription>
-                      </div>
-                      <Badge variant={plantilla.activa ? 'default' : 'secondary'}>
-                        {plantilla.activa ? 'Activa' : 'Inactiva'}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="p-3 bg-muted rounded-lg text-sm">
-                      {plantilla.mensaje.substring(0, 100)}
-                      {plantilla.mensaje.length > 100 && '...'}
-                    </div>
+        {plantillasFiltradas.length === 0 && plantillas.length === 0 && (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <MessageSquare className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-lg font-semibold mb-2">No hay plantillas</h3>
+              <p className="text-muted-foreground mb-4">
+                Crea tu primera plantilla SMS para comenzar a comunicarte con tus inquilinos.
+              </p>
+              <Button onClick={resetForm}>
+                <Plus className="w-4 h-4 mr-2" />
+                Crear Primera Plantilla
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <span>Usado {plantilla.vecesUsada} veces</span>
-                      {plantilla.envioAutomatico && (
-                        <Badge variant="outline" className="text-xs">
-                          <CheckCircle2 className="w-3 h-3 mr-1" />
-                          Automático
+        {plantillasFiltradas.length === 0 && plantillas.length > 0 && (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <Search className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-lg font-semibold mb-2">No se encontraron plantillas</h3>
+              <p className="text-muted-foreground mb-4">
+                No hay plantillas que coincidan con los filtros aplicados.
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchTerm('');
+                  setFilterTipo('todos');
+                  setFilterActiva('todos');
+                }}
+              >
+                Limpiar filtros
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Dialog de Vista Previa */}
+        {vistaPrevia && (
+          <Dialog open={!!vistaPrevia} onOpenChange={() => setVistaPrevia(null)}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{vistaPrevia.nombre}</DialogTitle>
+                <DialogDescription>{vistaPrevia.descripcion}</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 mt-4">
+                <div>
+                  <Label>Tipo:</Label>
+                  <p className="mt-1">
+                    {tiposSMS.find((t) => t.value === vistaPrevia.tipo)?.label || vistaPrevia.tipo}
+                  </p>
+                </div>
+                <div>
+                  <Label>Mensaje:</Label>
+                  <div className="p-4 bg-muted rounded-lg mt-1">{vistaPrevia.mensaje}</div>
+                </div>
+                {vistaPrevia.variables && vistaPrevia.variables.length > 0 && (
+                  <div>
+                    <Label>Variables utilizadas:</Label>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {vistaPrevia.variables.map((v: any, i: number) => (
+                        <Badge key={i} variant="outline">
+                          {v.nombre}
                         </Badge>
-                      )}
+                      ))}
                     </div>
-
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="flex-1"
-                        onClick={() => handleEdit(plantilla)}
-                      >
-                        <Edit className="w-3 h-3 mr-1" />
-                        Editar
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleDuplicate(plantilla)}
-                      >
-                        <Copy className="w-3 h-3" />
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => setVistaPrevia(plantilla)}>
-                        <Eye className="w-3 h-3" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => confirmDelete(plantilla.id, plantilla.nombre)}
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {plantillasFiltradas.length === 0 && plantillas.length === 0 && (
-              <Card>
-                <CardContent className="py-12 text-center">
-                  <MessageSquare className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-lg font-semibold mb-2">No hay plantillas</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Crea tu primera plantilla SMS para comenzar a comunicarte con tus inquilinos.
-                  </p>
-                  <Button onClick={resetForm}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Crear Primera Plantilla
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-
-            {plantillasFiltradas.length === 0 && plantillas.length > 0 && (
-              <Card>
-                <CardContent className="py-12 text-center">
-                  <Search className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-lg font-semibold mb-2">No se encontraron plantillas</h3>
-                  <p className="text-muted-foreground mb-4">
-                    No hay plantillas que coincidan con los filtros aplicados.
-                  </p>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setSearchTerm('');
-                      setFilterTipo('todos');
-                      setFilterActiva('todos');
-                    }}
-                  >
-                    Limpiar filtros
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Dialog de Vista Previa */}
-            {vistaPrevia && (
-              <Dialog open={!!vistaPrevia} onOpenChange={() => setVistaPrevia(null)}>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>{vistaPrevia.nombre}</DialogTitle>
-                    <DialogDescription>{vistaPrevia.descripcion}</DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4 mt-4">
-                    <div>
-                      <Label>Tipo:</Label>
-                      <p className="mt-1">
-                        {tiposSMS.find((t) => t.value === vistaPrevia.tipo)?.label ||
-                          vistaPrevia.tipo}
-                      </p>
-                    </div>
-                    <div>
-                      <Label>Mensaje:</Label>
-                      <div className="p-4 bg-muted rounded-lg mt-1">{vistaPrevia.mensaje}</div>
-                    </div>
-                    {vistaPrevia.variables && vistaPrevia.variables.length > 0 && (
-                      <div>
-                        <Label>Variables utilizadas:</Label>
-                        <div className="flex flex-wrap gap-2 mt-1">
-                          {vistaPrevia.variables.map((v: any, i: number) => (
-                            <Badge key={i} variant="outline">
-                              {v.nombre}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
                   </div>
-                </DialogContent>
-              </Dialog>
-            )}
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
 
-            {/* ConfirmDialog para eliminar plantilla */}
-            <ConfirmDialog
-              open={showDeleteDialog}
-              onOpenChange={setShowDeleteDialog}
-              title="¿Eliminar plantilla SMS?"
-              description={`¿Estás seguro de que deseas eliminar la plantilla "${deletingTemplate?.nombre}"? Esta acción no se puede deshacer.`}
-              onConfirm={handleDelete}
-              confirmText="Eliminar"
-              loading={isDeleting}
-            />
-          </div>
-        </AuthenticatedLayout>
+        {/* ConfirmDialog para eliminar plantilla */}
+        <ConfirmDialog
+          open={showDeleteDialog}
+          onOpenChange={setShowDeleteDialog}
+          title="¿Eliminar plantilla SMS?"
+          description={`¿Estás seguro de que deseas eliminar la plantilla "${deletingTemplate?.nombre}"? Esta acción no se puede deshacer.`}
+          onConfirm={handleDelete}
+          confirmText="Eliminar"
+          loading={isDeleting}
+        />
+      </div>
+    </AuthenticatedLayout>
   );
 }

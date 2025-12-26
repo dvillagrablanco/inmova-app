@@ -1,9 +1,9 @@
 /**
  * Servicio de Integración con Canales STR (Short-Term Rental)
- * 
+ *
  * Este servicio proporciona una interfaz unificada para conectar
  * y sincronizar con plataformas externas como Airbnb, Booking.com, etc.
- * 
+ *
  * MODO DEMO: Actualmente simula las integraciones. Para activar
  * integraciones reales, se requieren credenciales API de cada plataforma.
  */
@@ -14,7 +14,13 @@ import logger, { logError } from '@/lib/logger';
 
 // Definiciones de tipos inline (reemplaza imports de @prisma/client)
 type ChannelType = 'AIRBNB' | 'BOOKING' | 'VRBO' | 'HOMEAWAY' | 'WEB_PROPIA' | 'OTROS';
-type BookingStatus = 'PENDIENTE' | 'CONFIRMADA' | 'CHECK_IN' | 'CHECK_OUT' | 'CANCELADA' | 'NO_SHOW';
+type BookingStatus =
+  | 'PENDIENTE'
+  | 'CONFIRMADA'
+  | 'CHECK_IN'
+  | 'CHECK_OUT'
+  | 'CANCELADA'
+  | 'NO_SHOW';
 
 // ============================================
 // TIPOS E INTERFACES
@@ -189,7 +195,7 @@ export async function connectChannel(
   companyId: string,
   listingId: string,
   channel: ChannelType,
-  credentials: ChannelCredentials,
+  credentials: ChannelCredentials
 ): Promise<SyncResult> {
   try {
     logger.info(`[STR] Conectando ${channel} para listing ${listingId}`);
@@ -271,10 +277,7 @@ export async function connectChannel(
 /**
  * Desconecta un canal
  */
-export async function disconnectChannel(
-  listingId: string,
-  channel: ChannelType,
-): Promise<boolean> {
+export async function disconnectChannel(listingId: string, channel: ChannelType): Promise<boolean> {
   try {
     await prisma.sTRChannelSync.update({
       where: { listingId_canal: { listingId, canal: channel } },
@@ -297,7 +300,7 @@ export async function syncCalendar(
   listingId: string,
   channel: ChannelType,
   startDate: Date,
-  endDate: Date,
+  endDate: Date
 ): Promise<SyncResult> {
   try {
     const channelSync = await prisma.sTRChannelSync.findUnique({
@@ -387,7 +390,7 @@ export async function syncCalendar(
 export async function importBookings(
   companyId: string,
   listingId: string,
-  channel: ChannelType,
+  channel: ChannelType
 ): Promise<SyncResult> {
   try {
     const channelSync = await prisma.sTRChannelSync.findUnique({
@@ -436,7 +439,7 @@ export async function importBookings(
 export async function updateChannelPrices(
   listingId: string,
   channel: ChannelType,
-  priceUpdates: PriceUpdate[],
+  priceUpdates: PriceUpdate[]
 ): Promise<SyncResult> {
   try {
     const channelSync = await prisma.sTRChannelSync.findUnique({
@@ -497,10 +500,7 @@ export async function updateChannelPrices(
 /**
  * Obtiene el estado de sincronización de un canal
  */
-export async function getChannelStatus(
-  listingId: string,
-  channel: ChannelType,
-) {
+export async function getChannelStatus(listingId: string, channel: ChannelType) {
   try {
     const channelSync = await prisma.sTRChannelSync.findUnique({
       where: { listingId_canal: { listingId, canal: channel } },
@@ -564,10 +564,7 @@ export function getSupportedChannels(): ChannelType[] {
 /**
  * Simula sincronización inicial al conectar un canal
  */
-async function simulateInitialSync(
-  listingId: string,
-  channel: ChannelType,
-): Promise<void> {
+async function simulateInitialSync(listingId: string, channel: ChannelType): Promise<void> {
   // Crear 30 días de calendario
   const startDate = startOfDay(new Date());
   const listing = await prisma.sTRListing.findUnique({
@@ -605,10 +602,7 @@ async function simulateInitialSync(
 /**
  * Genera reservas demo para simular importación
  */
-function generateDemoBookings(
-  listingId: string,
-  channel: ChannelType,
-): ExternalBooking[] {
+function generateDemoBookings(listingId: string, channel: ChannelType): ExternalBooking[] {
   const bookings: ExternalBooking[] = [];
   const today = new Date();
 
@@ -643,7 +637,7 @@ function generateDemoBookings(
 async function createBookingFromExternal(
   companyId: string,
   listingId: string,
-  externalBooking: ExternalBooking,
+  externalBooking: ExternalBooking
 ): Promise<void> {
   const { checkIn, checkOut, totalPrice, channel } = externalBooking;
 

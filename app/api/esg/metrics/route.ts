@@ -24,19 +24,12 @@ export async function GET(request: NextRequest) {
       recyclingRate: 68, // %
       renewableEnergyRate: 42, // %
       esgScore: 72, // 0-100
-      certifications: [
-        'ISO 14001',
-        'BREEAM Good',
-        'Energy Star',
-      ],
+      certifications: ['ISO 14001', 'BREEAM Good', 'Energy Star'],
     };
 
     return NextResponse.json(metrics);
   } catch (error) {
     logger.error('Error fetching ESG metrics:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener métricas ESG' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener métricas ESG' }, { status: 500 });
   }
 }

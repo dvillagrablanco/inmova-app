@@ -181,10 +181,10 @@ export default function LeadsPage() {
   if (status === 'loading' || loading) {
     return (
       <AuthenticatedLayout>
-            <div className="max-w-7xl mx-auto">
-              <LoadingState message="Cargando leads..." />
-            </div>
-          </AuthenticatedLayout>
+        <div className="max-w-7xl mx-auto">
+          <LoadingState message="Cargando leads..." />
+        </div>
+      </AuthenticatedLayout>
     );
   }
 
@@ -202,7 +202,7 @@ export default function LeadsPage() {
               </Link>
               <div>
                 <h1 className="text-2xl font-bold gradient-text">Mis Leads</h1>
-                  <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   Gestiona tus oportunidades comerciales
                 </p>
               </div>
@@ -285,10 +285,12 @@ export default function LeadsPage() {
             {/* Resultados */}
             <div className="mt-4 flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
-                {filteredLeads.length} {filteredLeads.length === 1 ? 'lead' : 'leads'}{' '}
-                encontrados
+                {filteredLeads.length} {filteredLeads.length === 1 ? 'lead' : 'leads'} encontrados
               </p>
-              {(searchTerm || estadoFilter !== 'all' || prioridadFilter !== 'all' || fuenteFilter !== 'all') && (
+              {(searchTerm ||
+                estadoFilter !== 'all' ||
+                prioridadFilter !== 'all' ||
+                fuenteFilter !== 'all') && (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -313,8 +315,11 @@ export default function LeadsPage() {
               <div className="text-center text-muted-foreground">
                 <Users className="h-16 w-16 mx-auto mb-4 opacity-50" />
                 <p className="text-lg font-medium mb-2">No se encontraron leads</p>
-                  <p className="text-sm">
-                  {searchTerm || estadoFilter !== 'all' || prioridadFilter !== 'all' || fuenteFilter !== 'all'
+                <p className="text-sm">
+                  {searchTerm ||
+                  estadoFilter !== 'all' ||
+                  prioridadFilter !== 'all' ||
+                  fuenteFilter !== 'all'
                     ? 'Intenta ajustar los filtros'
                     : 'Aún no tienes leads registrados'}
                 </p>
@@ -331,9 +336,7 @@ export default function LeadsPage() {
                       <div className="flex-1 space-y-3">
                         {/* Cabecera */}
                         <div className="flex items-center gap-3">
-                          <h3 className="text-lg font-semibold">
-                            {lead.nombreCompleto}
-                          </h3>
+                          <h3 className="text-lg font-semibold">{lead.nombreCompleto}</h3>
                           <Badge className={getBadgeColor(lead.estado)}>
                             {lead.estado.replace('_', ' ')}
                           </Badge>
@@ -372,15 +375,13 @@ export default function LeadsPage() {
                             Prioridad: {lead.prioridad}
                           </Badge>
                           <Badge variant="outline">Fuente: {lead.fuente}</Badge>
-                            {lead.presupuestoMensual && (
+                          {lead.presupuestoMensual && (
                             <Badge variant="outline">
                               Presupuesto: {lead.presupuestoMensual}€/mes
                             </Badge>
                           )}
                           {lead.propiedadesEstimadas && (
-                            <Badge variant="outline">
-                              {lead.propiedadesEstimadas} propiedades
-                            </Badge>
+                            <Badge variant="outline">{lead.propiedadesEstimadas} propiedades</Badge>
                           )}
                         </div>
                       </div>

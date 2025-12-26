@@ -4,10 +4,13 @@ import dynamic from 'next/dynamic';
 import { StructuredData } from '@/components/StructuredData';
 
 // Lazy load de componentes pesados
-const LandingChatbot = dynamic(() => import('@/components/LandingChatbot').then(mod => ({ default: mod.LandingChatbot })), {
-  ssr: false,
-  loading: () => null
-});
+const LandingChatbot = dynamic(
+  () => import('@/components/LandingChatbot').then((mod) => ({ default: mod.LandingChatbot })),
+  {
+    ssr: false,
+    loading: () => null,
+  }
+);
 
 // Componentes modulares de la landing page
 import { Navigation } from '@/components/landing/sections/Navigation';
@@ -26,7 +29,6 @@ import { IntegrationsSection } from '@/components/landing/sections/IntegrationsS
 import { Footer } from '@/components/landing/sections/Footer';
 
 export function LandingPageContent() {
-
   return (
     <>
       <StructuredData />

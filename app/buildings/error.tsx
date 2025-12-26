@@ -1,6 +1,6 @@
 /**
  * Error Boundary para Edificios
- * 
+ *
  * @since Semana 2, Tarea 2.5
  */
 

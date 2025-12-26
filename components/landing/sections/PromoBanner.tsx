@@ -24,34 +24,37 @@ const campaigns: PromoCampaign[] = [
     code: 'FLIPPING25',
     title: 'Adiós al Excel',
     subtitle: 'Plan Basic a solo €29/mes',
-    description: 'Deja de perder dinero en tus reformas. Controla tu ROI en tiempo real durante 6 meses.',
+    description:
+      'Deja de perder dinero en tus reformas. Controla tu ROI en tiempo real durante 6 meses.',
     cta: 'Obtener descuento',
     icon: <Sparkles className="h-6 w-6" />,
     gradient: 'from-amber-500 via-orange-500 to-red-500',
-    textGradient: 'from-amber-600 to-red-600'
+    textGradient: 'from-amber-600 to-red-600',
   },
   {
     id: 'roompro',
     code: 'ROOMPRO',
     title: 'Revolución Coliving',
     subtitle: '50% dto. primer mes + Migración gratis',
-    description: '¿Harto de calcular facturas de luz a mano? INMOVA lo hace solo. Plan Professional con Room Rental PRO.',
+    description:
+      '¿Harto de calcular facturas de luz a mano? INMOVA lo hace solo. Plan Professional con Room Rental PRO.',
     cta: 'Activar oferta',
     icon: <TrendingUp className="h-6 w-6" />,
     gradient: 'from-green-500 via-emerald-500 to-teal-500',
-    textGradient: 'from-green-600 to-teal-600'
+    textGradient: 'from-green-600 to-teal-600',
   },
   {
     id: 'switch2025',
     code: 'SWITCH2025',
     title: 'El Desafío Homming/Rentger',
     subtitle: 'Igualamos tu precio 1 año + Upgrade gratis',
-    description: 'Trae tu última factura de la competencia. Te damos INMOVA al mismo precio con el plan superior.',
+    description:
+      'Trae tu última factura de la competencia. Te damos INMOVA al mismo precio con el plan superior.',
     cta: 'Cambia ahora',
     icon: <ArrowRightLeft className="h-6 w-6" />,
     gradient: 'from-indigo-500 via-purple-500 to-pink-500',
-    textGradient: 'from-indigo-600 to-pink-600'
-  }
+    textGradient: 'from-indigo-600 to-pink-600',
+  },
 ];
 
 export function PromoBanner() {
@@ -94,7 +97,7 @@ export function PromoBanner() {
       <div className="container mx-auto">
         <div className="relative">
           {/* Banner Principal */}
-          <div 
+          <div
             className={`relative rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-r ${current.gradient} transition-all duration-500 ${isAnimating ? 'scale-[0.98] opacity-90' : 'scale-100 opacity-100'}`}
           >
             {/* Patrón de fondo animado */}
@@ -106,30 +109,24 @@ export function PromoBanner() {
               {/* Contenido */}
               <div className="flex-1 text-white space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
-                    {current.icon}
-                  </div>
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">{current.icon}</div>
                   <div>
                     <Badge className="mb-2 bg-white/30 text-white border-white/50 backdrop-blur-sm px-3 py-1 text-xs font-bold">
                       Código: {current.code}
                     </Badge>
-                    <h3 className="text-3xl md:text-4xl font-black">
-                      {current.title}
-                    </h3>
+                    <h3 className="text-3xl md:text-4xl font-black">{current.title}</h3>
                   </div>
                 </div>
-                
-                <p className="text-2xl md:text-3xl font-bold opacity-95">
-                  {current.subtitle}
-                </p>
-                
+
+                <p className="text-2xl md:text-3xl font-bold opacity-95">{current.subtitle}</p>
+
                 <p className="text-base md:text-lg opacity-90 max-w-2xl leading-relaxed">
                   {current.description}
                 </p>
 
                 <div className="flex flex-wrap items-center gap-4 pt-2">
                   <Link href="/register">
-                    <Button 
+                    <Button
                       size="lg"
                       className="bg-white hover:bg-gray-100 text-gray-900 font-bold shadow-xl hover:shadow-2xl transition-all hover:scale-105"
                     >
@@ -137,7 +134,7 @@ export function PromoBanner() {
                       <Sparkles className="ml-2 h-5 w-5" />
                     </Button>
                   </Link>
-                  
+
                   <span className="text-sm font-semibold bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
                     ⏰ Oferta por tiempo limitado
                   </span>
@@ -211,16 +208,16 @@ export function PromoBanner() {
                 } disabled:cursor-not-allowed`}
               >
                 <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg bg-gradient-to-r ${campaign.gradient} text-white`}>
+                  <div
+                    className={`p-2 rounded-lg bg-gradient-to-r ${campaign.gradient} text-white`}
+                  >
                     {campaign.icon}
                   </div>
                   <div className="text-left flex-1">
                     <div className="text-sm font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">
                       {campaign.title}
                     </div>
-                    <div className="text-xs text-gray-500 font-semibold">
-                      {campaign.code}
-                    </div>
+                    <div className="text-xs text-gray-500 font-semibold">{campaign.code}</div>
                   </div>
                 </div>
               </button>

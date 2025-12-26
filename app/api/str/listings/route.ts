@@ -15,45 +15,42 @@ export async function GET(request: NextRequest) {
 
     const listings = await prisma.sTRListing.findMany({
       where: {
-        companyId: session.user.companyId
+        companyId: session.user.companyId,
       },
       include: {
         unit: {
           include: {
-            building: true
-          }
+            building: true,
+          },
         },
         bookings: {
           where: {
             estado: {
-              in: ['CONFIRMADA', 'CHECK_IN']
-            }
+              in: ['CONFIRMADA', 'CHECK_IN'],
+            },
           },
           orderBy: {
-            checkInDate: 'desc'
+            checkInDate: 'desc',
           },
-          take: 5
+          take: 5,
         },
         channels: true,
         reviews: {
           orderBy: {
-            fecha: 'desc'
+            fecha: 'desc',
           },
-          take: 3
-        }
+          take: 3,
+        },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: 'desc',
+      },
     });
 
     return NextResponse.json(listings);
   } catch (error) {
     logger.error('Error fetching STR listings:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch listings' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch listings' }, { status: 500 });
   }
 }
 
@@ -65,27 +62,24 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await request.json();
-    
+
     const listing = await prisma.sTRListing.create({
       data: {
         ...data,
-        companyId: session.user.companyId
+        companyId: session.user.companyId,
       },
       include: {
         unit: {
           include: {
-            building: true
-          }
-        }
-      }
+            building: true,
+          },
+        },
+      },
     });
 
     return NextResponse.json(listing, { status: 201 });
   } catch (error) {
     logger.error('Error creating STR listing:', error);
-    return NextResponse.json(
-      { error: 'Failed to create listing' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create listing' }, { status: 500 });
   }
 }

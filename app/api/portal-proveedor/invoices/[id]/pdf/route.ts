@@ -7,10 +7,7 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 // GET /api/portal-proveedor/invoices/[id]/pdf - Generar PDF de factura
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const auth = await requireProviderAuth(req);
     if (!auth.authenticated || !auth.provider) {
@@ -43,10 +40,7 @@ export async function GET(
     });
 
     if (!invoice) {
-      return NextResponse.json(
-        { error: 'Factura no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Factura no encontrada' }, { status: 404 });
     }
 
     if (invoice.providerId !== auth.provider.id) {
@@ -73,9 +67,7 @@ export async function GET(
 
     const pdfBuffer = Buffer.from(pdf.output('arraybuffer'));
 
-    logger.info(
-      `PDF generado para factura ${invoice.numeroFactura}`
-    );
+    logger.info(`PDF generado para factura ${invoice.numeroFactura}`);
 
     return new NextResponse(pdfBuffer, {
       headers: {
@@ -85,9 +77,6 @@ export async function GET(
     });
   } catch (error) {
     logger.error('Error al generar PDF de factura:', error);
-    return NextResponse.json(
-      { error: 'Error al generar PDF' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al generar PDF' }, { status: 500 });
   }
 }

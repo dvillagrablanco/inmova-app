@@ -4,9 +4,18 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger, { logError } from '@/lib/logger';
 import { unitCreateSchema } from '@/lib/validations';
-import { cachedUnits, invalidateUnitsCache, invalidateBuildingsCache, invalidateDashboardCache } from '@/lib/api-cache-helpers';
+import {
+  cachedUnits,
+  invalidateUnitsCache,
+  invalidateBuildingsCache,
+  invalidateDashboardCache,
+} from '@/lib/api-cache-helpers';
 import { getPaginationParams, buildPaginationResponse } from '@/lib/pagination-helper';
-import { selectBuildingMinimal, selectTenantMinimal, selectContractMinimal } from '@/lib/query-optimizer';
+import {
+  selectBuildingMinimal,
+  selectTenantMinimal,
+  selectContractMinimal,
+} from '@/lib/query-optimizer';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,7 +46,7 @@ export async function GET(req: NextRequest) {
       if (estado) where.estado = estado;
       // Soportar múltiples tipos separados por comas (ej: garaje,trastero)
       if (tipo) {
-        const tipos = tipo.split(',').map(t => t.trim());
+        const tipos = tipo.split(',').map((t) => t.trim());
         if (tipos.length === 1) {
           where.tipo = tipos[0];
         } else {
@@ -48,7 +57,7 @@ export async function GET(req: NextRequest) {
       // Paginación si se solicita
       if (usePagination) {
         const { skip, take, page, limit } = getPaginationParams(searchParams);
-        
+
         const [units, total] = await Promise.all([
           prisma.unit.findMany({
             where,
@@ -134,20 +143,17 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    
+
     // Validación con Zod
     const validationResult = unitCreateSchema.safeParse(body);
-    
+
     if (!validationResult.success) {
-      const errors = validationResult.error.errors.map(err => ({
+      const errors = validationResult.error.errors.map((err) => ({
         field: err.path.join('.'),
-        message: err.message
+        message: err.message,
       }));
       logger.warn('Validation error creating unit:', { errors });
-      return NextResponse.json(
-        { error: 'Datos inv\u00e1lidos', details: errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Datos inv\u00e1lidos', details: errors }, { status: 400 });
     }
 
     const validatedData = validationResult.data;
@@ -160,8 +166,18 @@ export async function POST(req: NextRequest) {
         numero: validatedData.numero,
         tipo: validatedData.tipo || 'vivienda',
         estado: validatedData.estado || 'disponible',
-        planta: typeof validatedData.piso === 'number' ? validatedData.piso : (typeof validatedData.piso === 'string' ? parseInt(validatedData.piso, 10) || null : null),
-        superficie: typeof validatedData.superficie === 'number' ? validatedData.superficie : (typeof validatedData.superficie === 'string' ? parseFloat(validatedData.superficie) || 0 : 0),
+        planta:
+          typeof validatedData.piso === 'number'
+            ? validatedData.piso
+            : typeof validatedData.piso === 'string'
+              ? parseInt(validatedData.piso, 10) || null
+              : null,
+        superficie:
+          typeof validatedData.superficie === 'number'
+            ? validatedData.superficie
+            : typeof validatedData.superficie === 'string'
+              ? parseFloat(validatedData.superficie) || 0
+              : 0,
         habitaciones: validatedData.habitaciones || null,
         banos: validatedData.banos || null,
         rentaMensual: validatedData.rentaMensual || 0,
@@ -175,19 +191,22 @@ export async function POST(req: NextRequest) {
       await invalidateDashboardCache(companyId);
     }
 
-    logger.info('Unit created successfully', { unitId: unit.id, buildingId: validatedData.buildingId });
+    logger.info('Unit created successfully', {
+      unitId: unit.id,
+      buildingId: validatedData.buildingId,
+    });
 
-    // 🚀 AUTO-PUBLICACIÓN EN REDES SOCIALES (async, no bloqueante) 
+    // 🚀 AUTO-PUBLICACIÓN EN REDES SOCIALES (async, no bloqueante)
     const userId = session?.user?.id;
     if (companyId && userId) {
       (async () => {
         try {
           const { autoPublishProperty } = await import('@/lib/social-media-service');
-          
+
           // Obtener datos del edificio para el address
           const building = await prisma.building.findUnique({
             where: { id: validatedData.buildingId },
-            select: { nombre: true, direccion: true }
+            select: { nombre: true, direccion: true },
           });
 
           await autoPublishProperty(
@@ -203,7 +222,7 @@ export async function POST(req: NextRequest) {
               habitaciones: unit.habitaciones || undefined,
             },
             {
-              scheduleMinutesDelay: 10 // Publicar en 10 minutos para permitir agregar fotos
+              scheduleMinutesDelay: 10, // Publicar en 10 minutos para permitir agregar fotos
             }
           );
         } catch (socialError) {

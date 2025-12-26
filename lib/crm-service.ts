@@ -1,6 +1,6 @@
 /**
  * 📊 CRM Service - Gestión Completa de Leads y Deals
- * 
+ *
  * Funcionalidades:
  * - CRUD de leads con validación
  * - Lead scoring automático
@@ -11,12 +11,12 @@
  */
 
 import { PrismaClient } from '@prisma/client';
-import type { 
-  CRMLeadStatus, 
-  CRMLeadSource, 
+import type {
+  CRMLeadStatus,
+  CRMLeadSource,
   CRMLeadPriority,
   DealStage,
-  CompanySize 
+  CompanySize,
 } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -105,37 +105,37 @@ export interface LeadFilters {
 
 export interface LeadScoringFactors {
   // Datos de la empresa (40 puntos)
-  hasCompanyWebsite: boolean;       // +5
-  hasCompanyLinkedIn: boolean;      // +5
-  hasIndustry: boolean;             // +5
-  companySize?: CompanySize;        // +10-25
-  
+  hasCompanyWebsite: boolean; // +5
+  hasCompanyLinkedIn: boolean; // +5
+  hasIndustry: boolean; // +5
+  companySize?: CompanySize; // +10-25
+
   // Datos del contacto (30 puntos)
-  hasPhone: boolean;                // +5
-  hasJobTitle: boolean;             // +5
-  isDecisionMaker: boolean;         // +20
-  
+  hasPhone: boolean; // +5
+  hasJobTitle: boolean; // +5
+  isDecisionMaker: boolean; // +20
+
   // Engagement (20 puntos)
-  emailsOpened: number;             // +1 por email
-  emailsClicked: number;            // +2 por click
-  callsMade: number;                // +5 por llamada
-  meetingsHeld: number;             // +10 por reunión (max 20)
-  
+  emailsOpened: number; // +1 por email
+  emailsClicked: number; // +2 por click
+  callsMade: number; // +5 por llamada
+  meetingsHeld: number; // +10 por reunión (max 20)
+
   // Calificación BANT (10 puntos)
-  hasBudget: boolean;               // +3
-  hasAuthority: boolean;            // +3
-  hasNeed: boolean;                 // +2
-  hasTimeline: boolean;             // +2
+  hasBudget: boolean; // +3
+  hasAuthority: boolean; // +3
+  hasNeed: boolean; // +2
+  hasTimeline: boolean; // +2
 }
 
 export function calculateLeadScore(factors: LeadScoringFactors): number {
   let score = 0;
-  
+
   // Datos de la empresa (40 puntos)
   if (factors.hasCompanyWebsite) score += 5;
   if (factors.hasCompanyLinkedIn) score += 5;
   if (factors.hasIndustry) score += 5;
-  
+
   // Tamaño de empresa
   switch (factors.companySize) {
     case 'solopreneur':
@@ -155,24 +155,24 @@ export function calculateLeadScore(factors: LeadScoringFactors): number {
       score += 25;
       break;
   }
-  
+
   // Datos del contacto (30 puntos)
   if (factors.hasPhone) score += 5;
   if (factors.hasJobTitle) score += 5;
   if (factors.isDecisionMaker) score += 20;
-  
+
   // Engagement (20 puntos)
   score += Math.min(factors.emailsOpened, 5); // Max 5
   score += Math.min(factors.emailsClicked * 2, 10); // Max 10
   score += Math.min(factors.callsMade * 5, 5); // Max 5 (1 llamada)
   score += Math.min(factors.meetingsHeld * 10, 20); // Max 20 (2 reuniones)
-  
+
   // Calificación BANT (10 puntos)
   if (factors.hasBudget) score += 3;
   if (factors.hasAuthority) score += 3;
   if (factors.hasNeed) score += 2;
   if (factors.hasTimeline) score += 2;
-  
+
   return Math.min(score, 100); // Cap at 100
 }
 
@@ -295,12 +295,7 @@ export class CRMService {
   /**
    * Listar leads con filtros
    */
-  static async listLeads(
-    companyId: string,
-    filters: LeadFilters = {},
-    page = 1,
-    limit = 50
-  ) {
+  static async listLeads(companyId: string, filters: LeadFilters = {}, page = 1, limit = 50) {
     const where: any = {
       companyId,
     };
@@ -363,11 +358,7 @@ export class CRMService {
             },
           },
         },
-        orderBy: [
-          { priority: 'desc' },
-          { score: 'desc' },
-          { createdAt: 'desc' },
-        ],
+        orderBy: [{ priority: 'desc' }, { score: 'desc' }, { createdAt: 'desc' }],
         skip: (page - 1) * limit,
         take: limit,
       }),
@@ -386,11 +377,7 @@ export class CRMService {
   /**
    * Actualizar lead
    */
-  static async updateLead(
-    leadId: string,
-    companyId: string,
-    input: UpdateLeadInput
-  ) {
+  static async updateLead(leadId: string, companyId: string, input: UpdateLeadInput) {
     // Verificar que existe
     const existing = await prisma.cRMLead.findFirst({
       where: {
@@ -461,11 +448,7 @@ export class CRMService {
   /**
    * Cambiar estado del lead
    */
-  static async updateLeadStatus(
-    leadId: string,
-    companyId: string,
-    status: CRMLeadStatus
-  ) {
+  static async updateLeadStatus(leadId: string, companyId: string, status: CRMLeadStatus) {
     const lead = await prisma.cRMLead.findFirst({
       where: {
         id: leadId,
@@ -563,11 +546,7 @@ export class CRMService {
   /**
    * Actualizar stage del deal
    */
-  static async updateDealStage(
-    dealId: string,
-    companyId: string,
-    stage: DealStage
-  ) {
+  static async updateDealStage(dealId: string, companyId: string, stage: DealStage) {
     const deal = await prisma.deal.findFirst({
       where: {
         id: dealId,
@@ -618,12 +597,7 @@ export class CRMService {
   /**
    * Listar deals
    */
-  static async listDeals(
-    companyId: string,
-    stage?: DealStage,
-    page = 1,
-    limit = 50
-  ) {
+  static async listDeals(companyId: string, stage?: DealStage, page = 1, limit = 50) {
     const where: any = { companyId };
     if (stage) {
       where.stage = stage;
@@ -641,10 +615,7 @@ export class CRMService {
             },
           },
         },
-        orderBy: [
-          { expectedCloseDate: 'asc' },
-          { createdAt: 'desc' },
-        ],
+        orderBy: [{ expectedCloseDate: 'asc' }, { createdAt: 'desc' }],
         skip: (page - 1) * limit,
         take: limit,
       }),
@@ -821,11 +792,7 @@ export class CRMService {
   /**
    * Listar tareas pendientes
    */
-  static async listTasks(
-    companyId: string,
-    assignedTo?: string,
-    completed = false
-  ) {
+  static async listTasks(companyId: string, assignedTo?: string, completed = false) {
     const where: any = {
       companyId,
       completed,
@@ -846,10 +813,7 @@ export class CRMService {
           },
         },
       },
-      orderBy: [
-        { priority: 'desc' },
-        { dueDate: 'asc' },
-      ],
+      orderBy: [{ priority: 'desc' }, { dueDate: 'asc' }],
     });
   }
 
@@ -916,10 +880,7 @@ export class CRMService {
       }),
     ]);
 
-    const winRate =
-      wonLeads + (totalLeads - wonLeads) > 0
-        ? (wonLeads / totalLeads) * 100
-        : 0;
+    const winRate = wonLeads + (totalLeads - wonLeads) > 0 ? (wonLeads / totalLeads) * 100 : 0;
 
     return {
       leads: {

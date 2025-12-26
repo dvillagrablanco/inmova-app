@@ -8,7 +8,9 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 // Helper function to map user role to assistant context user type
-function mapUserRole(role: string | undefined): 'tenant' | 'landlord' | 'admin' | 'provider' | 'operador' | 'gestor' {
+function mapUserRole(
+  role: string | undefined
+): 'tenant' | 'landlord' | 'admin' | 'provider' | 'operador' | 'gestor' {
   switch (role) {
     case 'super_admin':
     case 'administrador':
@@ -35,20 +37,14 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const body = await request.json();
     const { message, conversationHistory = [] } = body;
 
     if (!message) {
-      return NextResponse.json(
-        { error: 'Mensaje requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Mensaje requerido' }, { status: 400 });
     }
 
     // Construir contexto del usuario
@@ -58,7 +54,7 @@ export async function POST(request: NextRequest) {
       userName: session?.user?.name || 'Usuario',
       userEmail: session?.user?.email || '',
       companyId: session?.user?.companyId || '',
-      conversationHistory
+      conversationHistory,
     };
 
     logger.info(`🤖 Claude Assistant - New message from ${context.userName} (${context.userType})`);
@@ -73,7 +69,7 @@ export async function POST(request: NextRequest) {
       {
         type: 'text',
         content: 'Lo siento, hubo un error. Por favor, inténtalo de nuevo.',
-        error: 'Error procesando mensaje'
+        error: 'Error procesando mensaje',
       },
       { status: 500 }
     );

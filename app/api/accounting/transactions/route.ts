@@ -51,10 +51,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(transactions);
   } catch (error) {
     logger.error('Error fetching transactions:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener transacciones' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener transacciones' }, { status: 500 });
   }
 }
 
@@ -93,9 +90,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(transaction, { status: 201 });
   } catch (error) {
     logger.error('Error creating transaction:', error);
-    return NextResponse.json(
-      { error: 'Error al crear transacción' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear transacción' }, { status: 500 });
   }
 }

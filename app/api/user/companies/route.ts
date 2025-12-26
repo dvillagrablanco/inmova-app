@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
 
     // También incluir la empresa principal del usuario
     const user = await prisma.user.findUnique({
-      where: { id: session?.user?.id},
+      where: { id: session?.user?.id },
       include: {
         company: {
           select: {
@@ -59,9 +59,9 @@ export async function GET(request: NextRequest) {
     });
 
     // Crear un set de IDs de empresas para evitar duplicados
-    const companyIds = new Set(userAccess.map(access => access.companyId));
-    
-    const companies = userAccess.map(access => ({
+    const companyIds = new Set(userAccess.map((access) => access.companyId));
+
+    const companies = userAccess.map((access) => ({
       ...access.company,
       roleInCompany: access.roleInCompany,
       isCurrent: access.companyId === session?.user?.companyId,
@@ -87,9 +87,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error fetching user companies:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener las empresas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener las empresas' }, { status: 500 });
   }
 }

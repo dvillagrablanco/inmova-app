@@ -6,7 +6,6 @@ import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -24,10 +23,7 @@ export async function POST(request: NextRequest) {
     const { companyId, newPlanId } = body;
 
     if (!companyId || !newPlanId) {
-      return NextResponse.json(
-        { error: 'companyId y newPlanId son requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'companyId y newPlanId son requeridos' }, { status: 400 });
     }
 
     // Get company current plan
@@ -130,8 +126,8 @@ export async function POST(request: NextRequest) {
       message: isUpgrade
         ? 'Plan actualizado exitosamente (upgrade)'
         : isDowngrade
-        ? 'Plan actualizado exitosamente (downgrade)'
-        : 'Plan cambiado exitosamente',
+          ? 'Plan actualizado exitosamente (downgrade)'
+          : 'Plan cambiado exitosamente',
       company: updatedCompany,
       changes: {
         isUpgrade,
@@ -142,9 +138,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error changing subscription plan:', error);
-    return NextResponse.json(
-      { error: 'Error al cambiar el plan de suscripción' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al cambiar el plan de suscripción' }, { status: 500 });
   }
 }

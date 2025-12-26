@@ -9,23 +9,20 @@ export const dynamic = 'force-dynamic';
 
 /**
  * GET /api/open-banking/bankinter/status?consentId=xxx
- * 
+ *
  * Obtiene el estado de un consentimiento de Bankinter
  */
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     if (!isBankinterConfigured()) {
       return NextResponse.json(
         {
-          error: 'Integración con Bankinter no configurada'
+          error: 'Integración con Bankinter no configurada',
         },
         { status: 503 }
       );
@@ -35,18 +32,15 @@ export async function GET(request: NextRequest) {
     const consentId = searchParams.get('consentId');
 
     if (!consentId) {
-      return NextResponse.json(
-        { error: 'consentId requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'consentId requerido' }, { status: 400 });
     }
 
     // Verificar que el consentimiento pertenece a la compañía del usuario
     const connection = await prisma.bankConnection.findFirst({
       where: {
         consentId,
-        companyId: session.user.companyId
-      }
+        companyId: session.user.companyId,
+      },
     });
 
     if (!connection) {
@@ -65,8 +59,8 @@ export async function GET(request: NextRequest) {
         where: { id: connection.id },
         data: {
           estado: 'desconectado',
-          errorDetalle: `Consentimiento en estado: ${consentStatus}`
-        }
+          errorDetalle: `Consentimiento en estado: ${consentStatus}`,
+        },
       });
     }
 
@@ -79,15 +73,15 @@ export async function GET(request: NextRequest) {
         id: connection.id,
         nombreBanco: connection.nombreBanco,
         estado: connection.estado,
-        ultimaSync: connection.ultimaSync
-      }
+        ultimaSync: connection.ultimaSync,
+      },
     });
   } catch (error: any) {
     logger.error('Error obteniendo estado del consentimiento:', error);
     return NextResponse.json(
       {
         error: 'Error al obtener estado del consentimiento',
-        details: error.message
+        details: error.message,
       },
       { status: 500 }
     );

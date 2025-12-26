@@ -7,10 +7,7 @@ import logger, { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 // GET /api/legal/templates/[id] - Obtener plantilla específica
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -33,27 +30,18 @@ export async function GET(
     });
 
     if (!template) {
-      return NextResponse.json(
-        { error: 'Plantilla no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Plantilla no encontrada' }, { status: 404 });
     }
 
     return NextResponse.json(template);
   } catch (error) {
     logger.error('Error fetching legal template:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener plantilla legal' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener plantilla legal' }, { status: 500 });
   }
 }
 
 // PATCH /api/legal/templates/[id] - Actualizar plantilla
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -79,10 +67,7 @@ export async function PATCH(
     });
 
     if (!existingTemplate) {
-      return NextResponse.json(
-        { error: 'Plantilla no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Plantilla no encontrada' }, { status: 404 });
     }
 
     const updateData: any = {};
@@ -96,7 +81,8 @@ export async function PATCH(
     if (body.jurisdiccion !== undefined) updateData.jurisdiccion = body.jurisdiccion;
     if (body.aplicableA !== undefined) updateData.aplicableA = body.aplicableA;
     if (body.activo !== undefined) updateData.activo = body.activo;
-    if (body.ultimaRevision !== undefined) updateData.ultimaRevision = body.ultimaRevision ? new Date(body.ultimaRevision) : null;
+    if (body.ultimaRevision !== undefined)
+      updateData.ultimaRevision = body.ultimaRevision ? new Date(body.ultimaRevision) : null;
 
     const template = await prisma.legalTemplate.update({
       where: { id: params.id },
@@ -106,18 +92,12 @@ export async function PATCH(
     return NextResponse.json(template);
   } catch (error) {
     logger.error('Error updating legal template:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar plantilla legal' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar plantilla legal' }, { status: 500 });
   }
 }
 
 // DELETE /api/legal/templates/[id] - Eliminar plantilla
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -141,10 +121,7 @@ export async function DELETE(
     });
 
     if (!existingTemplate) {
-      return NextResponse.json(
-        { error: 'Plantilla no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Plantilla no encontrada' }, { status: 404 });
     }
 
     await prisma.legalTemplate.delete({
@@ -154,9 +131,6 @@ export async function DELETE(
     return NextResponse.json({ success: true, message: 'Plantilla eliminada correctamente' });
   } catch (error) {
     logger.error('Error deleting legal template:', error);
-    return NextResponse.json(
-      { error: 'Error al eliminar plantilla legal' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar plantilla legal' }, { status: 500 });
   }
 }

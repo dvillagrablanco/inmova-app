@@ -83,16 +83,7 @@ export function useKeyboardNavigation(options: UseKeyboardNavigationOptions = {}
           break;
       }
     },
-    [
-      enabled,
-      onEscape,
-      onEnter,
-      onArrowUp,
-      onArrowDown,
-      onArrowLeft,
-      onArrowRight,
-      onTab,
-    ]
+    [enabled, onEscape, onEnter, onArrowUp, onArrowDown, onArrowLeft, onArrowRight, onTab]
   );
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
@@ -13,7 +13,7 @@ import { toast } from 'react-hot-toast';
 
 /**
  * PÁGINA DE CONFIGURACIÓN DE MODO UI
- * 
+ *
  * Permite al usuario cambiar entre Simple / Standard / Advanced
  */
 export default function UIModePage() {
@@ -112,7 +112,8 @@ export default function UIModePage() {
                         <Badge variant="secondary">Principiante</Badge>
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        <strong>Ideal para:</strong> Nuevos usuarios, propietarios con 1-5 propiedades
+                        <strong>Ideal para:</strong> Nuevos usuarios, propietarios con 1-5
+                        propiedades
                       </p>
                       <ul className="text-sm space-y-1 text-muted-foreground">
                         <li>• Solo módulos esenciales</li>
@@ -206,13 +207,11 @@ export default function UIModePage() {
         {/* Info Adicional */}
         <Card className="border-blue-200 bg-blue-50">
           <CardContent className="p-6">
-            <h3 className="font-semibold text-blue-900 mb-2">
-              💡 ¿No sabes qué modo elegir?
-            </h3>
+            <h3 className="font-semibold text-blue-900 mb-2">💡 ¿No sabes qué modo elegir?</h3>
             <p className="text-sm text-blue-800">
               Empieza con el <strong>Modo Estándar</strong>. Es el balance perfecto entre
-              funcionalidad y simplicidad. Puedes cambiarlo en cualquier momento según
-              tu experiencia evolucione.
+              funcionalidad y simplicidad. Puedes cambiarlo en cualquier momento según tu
+              experiencia evolucione.
             </p>
           </CardContent>
         </Card>

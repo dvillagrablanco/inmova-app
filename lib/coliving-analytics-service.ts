@@ -101,9 +101,7 @@ export class ColivingAnalyticsService {
       };
     }
 
-    const ltvValues = tenantPayments
-      .map((tp) => tp._sum.monto || 0)
-      .filter((v: number) => v > 0);
+    const ltvValues = tenantPayments.map((tp) => tp._sum.monto || 0).filter((v: number) => v > 0);
 
     if (ltvValues.length === 0) {
       return {
@@ -206,19 +204,29 @@ export class ColivingAnalyticsService {
     }
 
     // Calcular estadísticas
-    const edades = tenantsWithProfile.map((t: any) => t.profile.edad).filter((e: any): e is number => e !== null);
-    const ingresos = tenantsWithProfile.map((t: any) => t.profile.ingresos).filter((i: any): i is number => i !== null);
-    const ocupaciones = tenantsWithProfile.map((t: any) => t.profile.ocupacion).filter((o: any): o is string => o !== null);
+    const edades = tenantsWithProfile
+      .map((t: any) => t.profile.edad)
+      .filter((e: any): e is number => e !== null);
+    const ingresos = tenantsWithProfile
+      .map((t: any) => t.profile.ingresos)
+      .filter((i: any): i is number => i !== null);
+    const ocupaciones = tenantsWithProfile
+      .map((t: any) => t.profile.ocupacion)
+      .filter((o: any): o is string => o !== null);
 
     // Ocupación más común
     const ocupacionCounts: Record<string, number> = {};
     ocupaciones.forEach((o: string) => {
       ocupacionCounts[o] = (ocupacionCounts[o] || 0) + 1;
     });
-    const perfilIdealOcupacion = Object.keys(ocupacionCounts).sort((a, b) => ocupacionCounts[b] - ocupacionCounts[a])[0] || null;
+    const perfilIdealOcupacion =
+      Object.keys(ocupacionCounts).sort((a, b) => ocupacionCounts[b] - ocupacionCounts[a])[0] ||
+      null;
 
     // Promedio de estancia
-    const promedioEstancia = tenantsWithProfile.reduce((sum: number, t: any) => sum + t.monthsStayed, 0) / tenantsWithProfile.length;
+    const promedioEstancia =
+      tenantsWithProfile.reduce((sum: number, t: any) => sum + t.monthsStayed, 0) /
+      tenantsWithProfile.length;
 
     return {
       perfilIdealEdadMin: edades.length > 0 ? Math.min(...edades) : null,
@@ -323,7 +331,8 @@ export class ColivingAnalyticsService {
         perfilIdealIngresoMin: profileData.perfilIdealIngresoMin,
         perfilIdealEstanciaMeses: profileData.perfilIdealEstanciaMeses,
         prediccionOcupacionProximoMes: occupancyData.prediccionOcupacionProximoMes,
-        prediccionDisponibilidadRoomsProximoMes: occupancyData.prediccionDisponibilidadRoomsProximoMes,
+        prediccionDisponibilidadRoomsProximoMes:
+          occupancyData.prediccionDisponibilidadRoomsProximoMes,
         nivelConfianzaPrediccion: occupancyData.nivelConfianzaPrediccion,
       },
       update: {
@@ -345,7 +354,8 @@ export class ColivingAnalyticsService {
         perfilIdealIngresoMin: profileData.perfilIdealIngresoMin,
         perfilIdealEstanciaMeses: profileData.perfilIdealEstanciaMeses,
         prediccionOcupacionProximoMes: occupancyData.prediccionOcupacionProximoMes,
-        prediccionDisponibilidadRoomsProximoMes: occupancyData.prediccionDisponibilidadRoomsProximoMes,
+        prediccionDisponibilidadRoomsProximoMes:
+          occupancyData.prediccionDisponibilidadRoomsProximoMes,
         nivelConfianzaPrediccion: occupancyData.nivelConfianzaPrediccion,
       },
     });
@@ -374,11 +384,7 @@ export class ColivingAnalyticsService {
   /**
    * Actualiza una encuesta NPS con la respuesta del tenant
    */
-  static async updateNPSSurvey(
-    surveyId: string,
-    score: number,
-    comentario?: string
-  ) {
+  static async updateNPSSurvey(surveyId: string, score: number, comentario?: string) {
     // Determinar categoría según el score
     let categoria: 'promotor' | 'pasivo' | 'detractor';
     if (score >= 9) {

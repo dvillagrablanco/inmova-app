@@ -45,10 +45,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(items);
   } catch (error) {
     console.error('Error al obtener inventario:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener inventario' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener inventario' }, { status: 500 });
   }
 }
 
@@ -73,10 +70,7 @@ export async function POST(req: NextRequest) {
     } = body;
 
     if (!nombre || !categoria) {
-      return NextResponse.json(
-        { error: 'Nombre y categoría son requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Nombre y categoría son requeridos' }, { status: 400 });
     }
 
     const item = await prisma.sTRHousekeepingInventory.create({
@@ -94,9 +88,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(item, { status: 201 });
   } catch (error) {
     console.error('Error al crear item:', error);
-    return NextResponse.json(
-      { error: 'Error al crear item' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear item' }, { status: 500 });
   }
 }

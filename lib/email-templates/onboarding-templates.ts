@@ -182,7 +182,10 @@ function getBaseTemplate(content: string): string {
 /**
  * Email de Bienvenida
  */
-export function getWelcomeEmailTemplate(data: EmailTemplateData): { subject: string; html: string } {
+export function getWelcomeEmailTemplate(data: EmailTemplateData): {
+  subject: string;
+  html: string;
+} {
   const content = `
     <div class="content">
       <h2 class="greeting">🚀 ¡Bienvenido a INMOVA, ${data.userName}!</h2>
@@ -236,33 +239,46 @@ export function getWelcomeEmailTemplate(data: EmailTemplateData): { subject: str
 /**
  * Email de Recordatorio de Onboarding
  */
-export function getOnboardingReminderTemplate(data: EmailTemplateData): { subject: string; html: string } {
+export function getOnboardingReminderTemplate(data: EmailTemplateData): {
+  subject: string;
+  html: string;
+} {
   const isSecond = data.isSecondReminder;
-  
+
   const content = `
     <div class="content">
       <h2 class="greeting">🔔 ${isSecond ? 'Último recordatorio' : 'No olvides completar tu configuración'}, ${data.userName}</h2>
       
       <p class="text">
-        ${isSecond 
-          ? 'Notamos que aún no has completado la configuración inicial de tu cuenta INMOVA. ¡No te pierdas todo lo que puedes hacer!' 
-          : 'Te escribimos para recordarte que tu configuración inicial está pendiente.'}
+        ${
+          isSecond
+            ? 'Notamos que aún no has completado la configuración inicial de tu cuenta INMOVA. ¡No te pierdas todo lo que puedes hacer!'
+            : 'Te escribimos para recordarte que tu configuración inicial está pendiente.'
+        }
       </p>
 
-      ${data.progress !== undefined ? `
+      ${
+        data.progress !== undefined
+          ? `
         <div class="stats-container">
           <div class="stat-item">
             <span class="stat-label">Progreso actual</span>
             <span class="stat-value">${data.progress}%</span>
           </div>
-          ${data.tasksCompleted !== undefined && data.tasksTotal !== undefined ? `
+          ${
+            data.tasksCompleted !== undefined && data.tasksTotal !== undefined
+              ? `
             <div class="stat-item">
               <span class="stat-label">Tareas completadas</span>
               <span class="stat-value">${data.tasksCompleted} de ${data.tasksTotal}</span>
             </div>
-          ` : ''}
+          `
+              : ''
+          }
         </div>
-      ` : ''}
+      `
+          : ''
+      }
 
       <p class="text">
         <strong>⏱️ Solo te tomará ${isSecond ? '10-15' : '15'} minutos</strong> y tendrás acceso completo a:
@@ -289,17 +305,21 @@ export function getOnboardingReminderTemplate(data: EmailTemplateData): { subjec
         </a>
       </center>
 
-      ${isSecond ? `
+      ${
+        isSecond
+          ? `
         <div class="divider"></div>
         <p class="text" style="text-align: center; color: #dc2626;">
           <strong>⚠️ Última oportunidad</strong> para activar todas las funcionalidades desde el inicio.
         </p>
-      ` : ''}
+      `
+          : ''
+      }
     </div>
   `;
 
   return {
-    subject: isSecond 
+    subject: isSecond
       ? '⚠️ Último recordatorio: Completa tu configuración de INMOVA'
       : '🔔 Tu configuración de INMOVA está pendiente',
     html: getBaseTemplate(content),
@@ -309,7 +329,10 @@ export function getOnboardingReminderTemplate(data: EmailTemplateData): { subjec
 /**
  * Email de Tarea Completada
  */
-export function getTaskCompletedTemplate(data: EmailTemplateData): { subject: string; html: string } {
+export function getTaskCompletedTemplate(data: EmailTemplateData): {
+  subject: string;
+  html: string;
+} {
   const content = `
     <div class="content">
       <h2 class="greeting">🎉 ¡Excelente trabajo, ${data.userName}!</h2>
@@ -318,19 +341,27 @@ export function getTaskCompletedTemplate(data: EmailTemplateData): { subject: st
         Has completado una tarea importante de tu configuración. Estás cada vez más cerca de aprovechar al máximo INMOVA.
       </p>
 
-      ${data.nextTask ? `
+      ${
+        data.nextTask
+          ? `
         <div class="stats-container">
           <p style="font-weight: 600; color: #111827; margin-bottom: 10px;">🎯 Siguiente paso:</p>
           <p style="color: #4b5563; margin: 0;">${data.nextTask}</p>
         </div>
-      ` : ''}
+      `
+          : ''
+      }
 
-      ${data.progress !== undefined ? `
+      ${
+        data.progress !== undefined
+          ? `
         <p class="text">
           <strong>Tu progreso:</strong> ${data.progress}% completado
           <span class="badge">${data.tasksCompleted} de ${data.tasksTotal} tareas</span>
         </p>
-      ` : ''}
+      `
+          : ''
+      }
 
       <center>
         <a href="${data.actionUrl}" class="button">
@@ -355,7 +386,10 @@ export function getTaskCompletedTemplate(data: EmailTemplateData): { subject: st
 /**
  * Email de Onboarding Completado
  */
-export function getOnboardingCompletedTemplate(data: EmailTemplateData): { subject: string; html: string } {
+export function getOnboardingCompletedTemplate(data: EmailTemplateData): {
+  subject: string;
+  html: string;
+} {
   const content = `
     <div class="content">
       <h2 class="greeting" style="text-align: center;">🎉🎊 ¡Felicidades, ${data.userName}! 🎊🎉</h2>
@@ -428,7 +462,10 @@ export function getOnboardingCompletedTemplate(data: EmailTemplateData): { subje
 /**
  * Email de Primera Propiedad Creada
  */
-export function getBuildingCreatedTemplate(data: EmailTemplateData): { subject: string; html: string } {
+export function getBuildingCreatedTemplate(data: EmailTemplateData): {
+  subject: string;
+  html: string;
+} {
   const content = `
     <div class="content">
       <h2 class="greeting">🏗️ ¡Has añadido tu primera propiedad, ${data.userName}!</h2>
@@ -476,7 +513,10 @@ export function getBuildingCreatedTemplate(data: EmailTemplateData): { subject: 
 /**
  * Email de Primer Contrato Creado
  */
-export function getFirstContractTemplate(data: EmailTemplateData): { subject: string; html: string } {
+export function getFirstContractTemplate(data: EmailTemplateData): {
+  subject: string;
+  html: string;
+} {
   const content = `
     <div class="content">
       <h2 class="greeting">📄 ¡Primer contrato creado, ${data.userName}!</h2>

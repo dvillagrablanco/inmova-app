@@ -123,7 +123,7 @@ export async function cacheDelPattern(pattern: string): Promise<number> {
  * Get or set value (cache-aside pattern)
  * Si el valor existe en caché, lo retorna
  * Si no existe, ejecuta la función, guarda en caché y retorna
- * 
+ *
  * @param key Cache key
  * @param fn Function to execute if cache miss
  * @param ttl Time to live in seconds
@@ -216,9 +216,7 @@ export async function getCacheStats() {
     const misses = parseInt(info.match(/keyspace_misses:(\d+)/)?.[1] || '0');
     const hitRate = hits + misses > 0 ? (hits / (hits + misses)) * 100 : 0;
 
-    const usedMemory = parseInt(
-      memory.match(/used_memory:(\d+)/)?.[1] || '0'
-    );
+    const usedMemory = parseInt(memory.match(/used_memory:(\d+)/)?.[1] || '0');
 
     return {
       connected: true,

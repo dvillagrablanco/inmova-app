@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { motion } from 'framer-motion';
 import { Input } from '@/components/ui/input';
@@ -32,7 +32,7 @@ export const AnimatedInput = forwardRef<HTMLInputElement, AnimatedInputProps>(
             {label}
           </motion.label>
         )}
-        
+
         <motion.div
           animate={{
             scale: isFocused ? 1.01 : 1,

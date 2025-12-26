@@ -4,12 +4,12 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { checkRoomAvailability, generateColivingRulesTemplate } from '@/lib/room-rental-service';
 import logger, { logError } from '@/lib/logger';
-import { 
-  selectUnitMinimal, 
-  selectBuildingMinimal, 
-  selectRoomContractMinimal, 
+import {
+  selectUnitMinimal,
+  selectBuildingMinimal,
+  selectRoomContractMinimal,
   selectTenantMinimal,
-  selectRoomPaymentMinimal
+  selectRoomPaymentMinimal,
 } from '@/lib/query-optimizer';
 
 export const dynamic = 'force-dynamic';
@@ -96,11 +96,14 @@ export async function POST(request: NextRequest) {
     const data = await request.json();
 
     // Validaciones
-    if (!data.roomId || !data.tenantId || !data.fechaInicio || !data.fechaFin || !data.rentaMensual) {
-      return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
-        { status: 400 }
-      );
+    if (
+      !data.roomId ||
+      !data.tenantId ||
+      !data.fechaInicio ||
+      !data.fechaFin ||
+      !data.rentaMensual
+    ) {
+      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
 
     // Verificar disponibilidad de la habitación
@@ -118,7 +121,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Generar normas de convivencia si no se proporcionan
-    const normasConvivencia = data.normasConvivencia || generateColivingRulesTemplate(data.customRules);
+    const normasConvivencia =
+      data.normasConvivencia || generateColivingRulesTemplate(data.customRules);
 
     // BUG FIX: Usar transacción para garantizar consistencia
     // Si falla la actualización del estado, se revierte la creación del contrato

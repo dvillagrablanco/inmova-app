@@ -14,7 +14,7 @@ export async function parsePDF(pdfBuffer: Buffer): Promise<PDFParseResult> {
     logger.info('Parsing PDF', { size: pdfBuffer.length });
 
     // TODO: Implement PDF parsing using pdf-parse or similar
-    
+
     await new Promise((resolve) => setTimeout(resolve, 200));
 
     return {
@@ -39,7 +39,7 @@ export async function extractTablesFromPDF(pdfBuffer: Buffer): Promise<any[]> {
     logger.info('Extracting tables from PDF');
 
     // TODO: Implement table extraction using tabula-js or similar
-    
+
     return [];
   } catch (error: any) {
     logger.error('Error extracting tables from PDF:', error);
@@ -55,7 +55,7 @@ export async function extractImagesFromPDF(pdfBuffer: Buffer): Promise<Buffer[]>
     logger.info('Extracting images from PDF');
 
     // TODO: Implement image extraction using pdf-lib or similar
-    
+
     return [];
   } catch (error: any) {
     logger.error('Error extracting images from PDF:', error);

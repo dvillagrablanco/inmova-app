@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import {
-  createWorkflow,
-  getCompanyWorkflows,
-} from '@/lib/workflow-service';
+import { createWorkflow, getCompanyWorkflows } from '@/lib/workflow-service';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -24,21 +21,15 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
     const isActive = searchParams.get('isActive');
 
-    const workflows = await getCompanyWorkflows(
-      session.user.companyId,
-      {
-        ...(status && { status: status as any }),
-        ...(isActive !== null && { isActive: isActive === 'true' }),
-      }
-    );
+    const workflows = await getCompanyWorkflows(session.user.companyId, {
+      ...(status && { status: status as any }),
+      ...(isActive !== null && { isActive: isActive === 'true' }),
+    });
 
     return NextResponse.json(workflows);
   } catch (error) {
     logger.error('Error obteniendo workflows');
-    return NextResponse.json(
-      { error: 'Error al obtener workflows' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener workflows' }, { status: 500 });
   }
 }
 
@@ -57,10 +48,7 @@ export async function POST(request: NextRequest) {
 
     // Validar campos requeridos
     if (!body.nombre || !body.triggerType || !body.actions) {
-      return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
 
     const workflow = await createWorkflow({
@@ -81,9 +69,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(workflow, { status: 201 });
   } catch (error) {
     logger.error('Error creando workflow');
-    return NextResponse.json(
-      { error: 'Error al crear workflow' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear workflow' }, { status: 500 });
   }
 }

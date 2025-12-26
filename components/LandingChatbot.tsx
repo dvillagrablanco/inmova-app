@@ -23,50 +23,60 @@ const WHATSAPP_NUMBER = '+34600000000'; // Reemplazar con el número real de INM
 const WHATSAPP_MESSAGE = 'Hola, me gustaría obtener más información sobre INMOVA';
 
 // Respuestas automáticas con información correcta
-const FAQ_RESPONSES: Record<string, { answer: string; followUp?: Array<{ label: string; value: string }> }> = {
+const FAQ_RESPONSES: Record<
+  string,
+  { answer: string; followUp?: Array<{ label: string; value: string }> }
+> = {
   precio: {
-    answer: 'INMOVA ofrece varios planes:\n\n• Starter (€89/mes): 30 módulos, hasta 25 propiedades\n• Profesional (€199/mes): 60 módulos, hasta 200 propiedades\n• Empresarial (€499/mes): 88 módulos, hasta 1000 propiedades\n• Enterprise+ (€1,999+/mes): Personalizado\n\n30 días de prueba gratis en todos los planes.',
+    answer:
+      'INMOVA ofrece varios planes:\n\n• Starter (€89/mes): 30 módulos, hasta 25 propiedades\n• Profesional (€199/mes): 60 módulos, hasta 200 propiedades\n• Empresarial (€499/mes): 88 módulos, hasta 1000 propiedades\n• Enterprise+ (€1,999+/mes): Personalizado\n\n30 días de prueba gratis en todos los planes.',
     followUp: [
       { label: 'Probar gratis 30 días', value: 'trial' },
       { label: 'Ver comparativa de planes', value: 'planes' },
-      { label: 'Hablar con ventas', value: 'contact' }
-    ]
+      { label: 'Hablar con ventas', value: 'contact' },
+    ],
   },
   funcionalidades: {
-    answer: 'INMOVA incluye:\n\n• Gestión de propiedades completa\n• Alquiler tradicional y por habitaciones\n• Short-Term Rental con Channel Manager\n• Mantenimiento con IA predictiva\n• Contabilidad y pagos Stripe\n• Portales web para inquilinos y propietarios\n• Blockchain, ESG, IoT y más\n\n¿Qué te interesa más?',
+    answer:
+      'INMOVA incluye:\n\n• Gestión de propiedades completa\n• Alquiler tradicional y por habitaciones\n• Short-Term Rental con Channel Manager\n• Mantenimiento con IA predictiva\n• Contabilidad y pagos Stripe\n• Portales web para inquilinos y propietarios\n• Blockchain, ESG, IoT y más\n\n¿Qué te interesa más?',
     followUp: [
       { label: 'Alquiler por habitaciones', value: 'rooms' },
       { label: 'STR/Channel Manager', value: 'str' },
-      { label: 'Ver demo', value: 'demo' }
-    ]
+      { label: 'Ver demo', value: 'demo' },
+    ],
   },
   demo: {
-    answer: 'Puedes ver INMOVA en acción:\n\n🎥 Video demo disponible en la página principal\n💻 Regístrate para acceder a la plataforma completa\n👤 Contacta con nosotros para una demo personalizada\n\n¿Qué prefieres?',
+    answer:
+      'Puedes ver INMOVA en acción:\n\n🎥 Video demo disponible en la página principal\n💻 Regístrate para acceder a la plataforma completa\n👤 Contacta con nosotros para una demo personalizada\n\n¿Qué prefieres?',
     followUp: [
       { label: 'Registrarme ahora', value: 'trial' },
-      { label: 'Contactar con ventas', value: 'contact' }
-    ]
+      { label: 'Contactar con ventas', value: 'contact' },
+    ],
   },
   comparativa: {
-    answer: 'INMOVA vs Competencia:\n\n✅ Más módulos (88 vs 10-25)\n✅ Multi-vertical (7 modelos de negocio)\n✅ Mejor precio/valor del mercado\n✅ Tecnología más avanzada (IA, Blockchain, IoT)\n\nConsulta la tabla comparativa completa en nuestra página.'
+    answer:
+      'INMOVA vs Competencia:\n\n✅ Más módulos (88 vs 10-25)\n✅ Multi-vertical (7 modelos de negocio)\n✅ Mejor precio/valor del mercado\n✅ Tecnología más avanzada (IA, Blockchain, IoT)\n\nConsulta la tabla comparativa completa en nuestra página.',
   },
   habitaciones: {
-    answer: 'El módulo de Alquiler por Habitaciones incluye:\n\n🏠 Gestión de múltiples inquilinos por propiedad\n💰 Prorrateo automático de servicios (luz, agua, gas)\n📅 Calendario de limpieza y tareas\n📊 Reportes individuales\n\nIdeal para coliving y residencias compartidas.',
+    answer:
+      'El módulo de Alquiler por Habitaciones incluye:\n\n🏠 Gestión de múltiples inquilinos por propiedad\n💰 Prorrateo automático de servicios (luz, agua, gas)\n📅 Calendario de limpieza y tareas\n📊 Reportes individuales\n\nIdeal para coliving y residencias compartidas.',
     followUp: [
       { label: 'Probar gratis', value: 'trial' },
-      { label: 'Más información', value: 'contact' }
-    ]
+      { label: 'Más información', value: 'contact' },
+    ],
   },
   trial: {
-    answer: '¡Perfecto! Regístrate para probar INMOVA gratis por 30 días:\n\n✅ Sin tarjeta de crédito\n✅ Acceso completo\n✅ Soporte incluido\n✅ Cancela cuando quieras\n\nHaz clic en "Comenzar Gratis" en el menú superior.'
+    answer:
+      '¡Perfecto! Regístrate para probar INMOVA gratis por 30 días:\n\n✅ Sin tarjeta de crédito\n✅ Acceso completo\n✅ Soporte incluido\n✅ Cancela cuando quieras\n\nHaz clic en "Comenzar Gratis" en el menú superior.',
   },
   contacto: {
-    answer: 'Puedes contactarnos:\n\n📧 A través del formulario de contacto en nuestra web\n💬 Por WhatsApp (botón verde flotante)\n📞 O déjanos tus datos y te llamamos\n\n¿Prefieres que te contactemos?',
+    answer:
+      'Puedes contactarnos:\n\n📧 A través del formulario de contacto en nuestra web\n💬 Por WhatsApp (botón verde flotante)\n📞 O déjanos tus datos y te llamamos\n\n¿Prefieres que te contactemos?',
     followUp: [
       { label: 'Sí, contactadme', value: 'contact-form' },
-      { label: 'WhatsApp', value: 'whatsapp' }
-    ]
-  }
+      { label: 'WhatsApp', value: 'whatsapp' },
+    ],
+  },
 };
 
 export function LandingChatbot() {
@@ -79,7 +89,7 @@ export function LandingChatbot() {
     name: '',
     email: '',
     phone: '',
-    message: ''
+    message: '',
   });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -102,7 +112,7 @@ export function LandingChatbot() {
             { label: '💰 Precios', value: 'precio' },
             { label: '✨ Funcionalidades', value: 'funcionalidades' },
             { label: '🏠 Alquiler habitaciones', value: 'habitaciones' },
-            { label: '📞 Contacto', value: 'contacto' }
+            { label: '📞 Contacto', value: 'contacto' },
           ]
         );
       }, 500);
@@ -114,9 +124,9 @@ export function LandingChatbot() {
       id: Date.now().toString(),
       text,
       sender: 'user',
-      timestamp: new Date()
+      timestamp: new Date(),
     };
-    setMessages(prev => [...prev, newMessage]);
+    setMessages((prev) => [...prev, newMessage]);
   };
 
   const addBotMessage = (
@@ -130,9 +140,9 @@ export function LandingChatbot() {
       sender: 'bot',
       timestamp: new Date(),
       type,
-      options
+      options,
     };
-    setMessages(prev => [...prev, newMessage]);
+    setMessages((prev) => [...prev, newMessage]);
   };
 
   const handleSend = async () => {
@@ -144,7 +154,7 @@ export function LandingChatbot() {
     setIsTyping(true);
 
     // Simular tiempo de respuesta
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Buscar respuesta relevante
     const lowerMessage = userMessage.toLowerCase();
@@ -153,16 +163,25 @@ export function LandingChatbot() {
     // Detectar intenciones clave
     const intentions = {
       precio: ['precio', 'coste', 'cost', 'cuánto', 'cuanto', 'tarifa', 'plan'],
-      funcionalidades: ['módulo', 'modulo', 'función', 'funcion', 'característica', 'caracteristica', 'qué hace', 'que hace'],
+      funcionalidades: [
+        'módulo',
+        'modulo',
+        'función',
+        'funcion',
+        'característica',
+        'caracteristica',
+        'qué hace',
+        'que hace',
+      ],
       demo: ['demo', 'demostración', 'demostracion', 'prueba', 'ver', 'mostrar'],
       comparativa: ['comparar', 'competencia', 'competidor', 'alternativa', 'vs', 'diferencia'],
       habitaciones: ['habitación', 'habitacion', 'roommate', 'coliving', 'compartir'],
       trial: ['gratis', 'free', 'trial', 'prueba gratuita'],
-      contacto: ['contacto', 'llamar', 'email', 'teléfono', 'telefono', 'hablar']
+      contacto: ['contacto', 'llamar', 'email', 'teléfono', 'telefono', 'hablar'],
     };
 
     for (const [key, keywords] of Object.entries(intentions)) {
-      if (keywords.some(keyword => lowerMessage.includes(keyword))) {
+      if (keywords.some((keyword) => lowerMessage.includes(keyword))) {
         const response = FAQ_RESPONSES[key];
         if (response) {
           addBotMessage(response.answer, response.followUp ? 'options' : 'text', response.followUp);
@@ -179,7 +198,7 @@ export function LandingChatbot() {
         [
           { label: 'Sí, quiero que me contacten', value: 'contact' },
           { label: 'Ver opciones principales', value: 'menu' },
-          { label: 'Hablar por WhatsApp', value: 'whatsapp' }
+          { label: 'Hablar por WhatsApp', value: 'whatsapp' },
         ]
       );
     }
@@ -191,7 +210,7 @@ export function LandingChatbot() {
     addUserMessage(`Seleccioné: ${value}`);
     setIsTyping(true);
 
-    await new Promise(resolve => setTimeout(resolve, 800));
+    await new Promise((resolve) => setTimeout(resolve, 800));
 
     switch (value) {
       case 'trial':
@@ -200,17 +219,14 @@ export function LandingChatbot() {
           'options',
           [
             { label: 'Sí, ayúdame', value: 'contact-form' },
-            { label: 'No, ya puedo', value: 'menu' }
+            { label: 'No, ya puedo', value: 'menu' },
           ]
         );
         break;
       case 'contact':
       case 'contact-form':
         setShowContactForm(true);
-        addBotMessage(
-          'Déjanos tus datos y te contactaremos pronto:',
-          'contact-form'
-        );
+        addBotMessage('Déjanos tus datos y te contactaremos pronto:', 'contact-form');
         break;
       case 'whatsapp':
         addBotMessage(
@@ -218,16 +234,12 @@ export function LandingChatbot() {
         );
         break;
       case 'menu':
-        addBotMessage(
-          '¿En qué puedo ayudarte?',
-          'options',
-          [
-            { label: '💰 Precios', value: 'precio' },
-            { label: '✨ Funcionalidades', value: 'funcionalidades' },
-            { label: '🏠 Alquiler habitaciones', value: 'habitaciones' },
-            { label: '📞 Contacto', value: 'contacto' }
-          ]
-        );
+        addBotMessage('¿En qué puedo ayudarte?', 'options', [
+          { label: '💰 Precios', value: 'precio' },
+          { label: '✨ Funcionalidades', value: 'funcionalidades' },
+          { label: '🏠 Alquiler habitaciones', value: 'habitaciones' },
+          { label: '📞 Contacto', value: 'contacto' },
+        ]);
         break;
       case 'planes':
         addBotMessage(
@@ -247,7 +259,7 @@ export function LandingChatbot() {
 
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validación
     if (!contactForm.name || !contactForm.email) {
       toast.error('Por favor completa al menos tu nombre y email');
@@ -257,9 +269,7 @@ export function LandingChatbot() {
     // Capturar lead en el CRM
     try {
       const conversacionId = `chat-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      const preguntasHechas = messages
-        .filter(m => m.sender === 'user')
-        .map(m => m.text);
+      const preguntasHechas = messages.filter((m) => m.sender === 'user').map((m) => m.text);
 
       await fetch('/api/landing/capture-lead', {
         method: 'POST',
@@ -290,16 +300,16 @@ export function LandingChatbot() {
       [
         { label: 'Ver precios', value: 'precio' },
         { label: 'WhatsApp ahora', value: 'whatsapp' },
-        { label: 'No, gracias', value: 'menu' }
+        { label: 'No, gracias', value: 'menu' },
       ]
     );
-    
+
     // Reset form
     setContactForm({
       name: '',
       email: '',
       phone: '',
-      message: ''
+      message: '',
     });
   };
 
@@ -362,7 +372,7 @@ export function LandingChatbot() {
 
           {/* Messages */}
           <CardContent className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-br from-slate-50 to-indigo-50">
-            {messages.map(message => (
+            {messages.map((message) => (
               <div
                 key={message.id}
                 className={`flex gap-2 ${
@@ -394,7 +404,7 @@ export function LandingChatbot() {
                   </div>
                   {message.type === 'options' && message.options && (
                     <div className="flex flex-col gap-2 w-full">
-                      {message.options.map(option => (
+                      {message.options.map((option) => (
                         <button
                           key={option.value}
                           onClick={() => handleOptionClick(option.value)}
@@ -406,11 +416,14 @@ export function LandingChatbot() {
                     </div>
                   )}
                   {message.type === 'contact-form' && showContactForm && (
-                    <form onSubmit={handleContactSubmit} className="w-full space-y-3 bg-white p-4 rounded-lg border-2 border-indigo-200">
+                    <form
+                      onSubmit={handleContactSubmit}
+                      className="w-full space-y-3 bg-white p-4 rounded-lg border-2 border-indigo-200"
+                    >
                       <Input
                         placeholder="Tu nombre*"
                         value={contactForm.name}
-                        onChange={e => setContactForm({ ...contactForm, name: e.target.value })}
+                        onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
                         required
                         className="border-indigo-200"
                       />
@@ -418,7 +431,7 @@ export function LandingChatbot() {
                         type="email"
                         placeholder="Tu email*"
                         value={contactForm.email}
-                        onChange={e => setContactForm({ ...contactForm, email: e.target.value })}
+                        onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
                         required
                         className="border-indigo-200"
                       />
@@ -426,13 +439,15 @@ export function LandingChatbot() {
                         type="tel"
                         placeholder="Tu teléfono (opcional)"
                         value={contactForm.phone}
-                        onChange={e => setContactForm({ ...contactForm, phone: e.target.value })}
+                        onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
                         className="border-indigo-200"
                       />
                       <Textarea
                         placeholder="Tu mensaje (opcional)"
                         value={contactForm.message}
-                        onChange={e => setContactForm({ ...contactForm, message: e.target.value })}
+                        onChange={(e) =>
+                          setContactForm({ ...contactForm, message: e.target.value })
+                        }
                         rows={3}
                         className="border-indigo-200"
                       />
@@ -451,9 +466,18 @@ export function LandingChatbot() {
                 </div>
                 <div className="bg-white border border-indigo-200 rounded-2xl p-3">
                   <div className="flex gap-1">
-                    <span className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    <span
+                      className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce"
+                      style={{ animationDelay: '0ms' }}
+                    />
+                    <span
+                      className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce"
+                      style={{ animationDelay: '150ms' }}
+                    />
+                    <span
+                      className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce"
+                      style={{ animationDelay: '300ms' }}
+                    />
                   </div>
                 </div>
               </div>
@@ -466,8 +490,8 @@ export function LandingChatbot() {
             <div className="flex gap-2">
               <Input
                 value={inputValue}
-                onChange={e => setInputValue(e.target.value)}
-                onKeyPress={e => e.key === 'Enter' && handleSend()}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                 placeholder="Escribe tu pregunta..."
                 className="flex-1 border-indigo-200"
               />

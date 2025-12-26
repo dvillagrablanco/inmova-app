@@ -1,6 +1,6 @@
 /**
  * Sistema de Agentes IA - Tipos y Definiciones
- * 
+ *
  * Define los tipos base para el sistema de agentes especializados
  */
 
@@ -10,14 +10,14 @@ import type Anthropic from '@anthropic-ai/sdk';
 // TIPOS BASE DE AGENTES
 // ============================================================================
 
-export type AgentType = 
-  | 'technical_support'      // Servicio Técnico y Mantenimiento
-  | 'customer_service'       // Atención al Cliente
-  | 'commercial_management'  // Gestión Comercial
-  | 'financial_analysis'     // Análisis Financiero
-  | 'legal_compliance'       // Legal y Cumplimiento
+export type AgentType =
+  | 'technical_support' // Servicio Técnico y Mantenimiento
+  | 'customer_service' // Atención al Cliente
+  | 'commercial_management' // Gestión Comercial
+  | 'financial_analysis' // Análisis Financiero
+  | 'legal_compliance' // Legal y Cumplimiento
   | 'maintenance_preventive' // Mantenimiento Preventivo
-  | 'general';               // Asistente General
+  | 'general'; // Asistente General
 
 export type AgentStatus = 'idle' | 'thinking' | 'executing' | 'waiting' | 'completed' | 'error';
 

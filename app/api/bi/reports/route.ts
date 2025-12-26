@@ -28,10 +28,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(reports);
   } catch (error) {
     logger.error('Error fetching reports:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener reportes' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener reportes' }, { status: 500 });
   }
 }
 
@@ -44,15 +41,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const {
-      nombre,
-      descripcion,
-      tipo,
-      frecuencia,
-      filtros,
-      columnas,
-      emailDestinatarios,
-    } = body;
+    const { nombre, descripcion, tipo, frecuencia, filtros, columnas, emailDestinatarios } = body;
 
     const report = await prisma.biReport.create({
       data: {
@@ -64,16 +53,13 @@ export async function POST(req: NextRequest) {
         filtros,
         columnas,
         emailDestinatarios: emailDestinatarios || [],
-        creadoPor: session?.user?.email|| '',
+        creadoPor: session?.user?.email || '',
       },
     });
 
     return NextResponse.json(report, { status: 201 });
   } catch (error) {
     logger.error('Error creating report:', error);
-    return NextResponse.json(
-      { error: 'Error al crear reporte' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear reporte' }, { status: 500 });
   }
 }

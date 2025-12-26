@@ -10,11 +10,14 @@ import logger from './logger';
 /**
  * Tipos para transacciones
  */
-type TransactionClient = Omit<typeof prisma, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use'>;
+type TransactionClient = Omit<
+  typeof prisma,
+  '$connect' | '$disconnect' | '$on' | '$transaction' | '$use'
+>;
 
 /**
  * TRANSACCIÓN: Crear contrato con pagos programados
- * 
+ *
  * Operaciones atómicas:
  * 1. Crear contrato
  * 2. Generar pagos mensuales
@@ -138,7 +141,7 @@ export async function createContractWithPayments(data: {
 
 /**
  * TRANSACCIÓN: Finalizar contrato
- * 
+ *
  * Operaciones atómicas:
  * 1. Verificar pagos pendientes
  * 2. Actualizar estado del contrato
@@ -170,7 +173,7 @@ export async function finalizeContract(contractId: string) {
 
     // 2. Verificar pagos pendientes
     const hasPendingPayments = contract.payments.length > 0;
-    
+
     if (hasPendingPayments) {
       logger.warn(`Contract ${contractId} has ${contract.payments.length} pending payments`);
       // Podrías decidir no permitir finalización o cancelar los pagos
@@ -198,7 +201,7 @@ export async function finalizeContract(contractId: string) {
 
 /**
  * TRANSACCIÓN: Procesar pago
- * 
+ *
  * Operaciones atómicas:
  * 1. Actualizar pago
  * 2. Registrar transacción bancaria (si aplica)
@@ -273,7 +276,7 @@ export async function processPayment(data: {
 
 /**
  * TRANSACCIÓN: Crear edificio con unidades
- * 
+ *
  * Operaciones atómicas:
  * 1. Crear edificio
  * 2. Crear múltiples unidades
@@ -339,7 +342,7 @@ export async function createBuildingWithUnits(data: {
 
 /**
  * TRANSACCIÓN: Transferir inquilino entre unidades
- * 
+ *
  * Operaciones atómicas:
  * 1. Finalizar contrato actual
  * 2. Liberar unidad actual
@@ -448,10 +451,9 @@ export async function executeTransactionWithRetry<T>(
         throw error;
       }
 
-      logger.warn(
-        `Transaction failed (attempt ${attempt}/${maxRetries}), retrying...`,
-        { error: error.message }
-      );
+      logger.warn(`Transaction failed (attempt ${attempt}/${maxRetries}), retrying...`, {
+        error: error.message,
+      });
 
       // Esperar antes de reintentar (backoff exponencial)
       await new Promise((resolve) => setTimeout(resolve, delayMs * attempt));

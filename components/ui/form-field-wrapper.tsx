@@ -48,12 +48,10 @@ export function FormFieldWrapper({
             </Label>
             {tooltip && <InfoTooltip content={tooltip} />}
           </div>
-          {optional && (
-            <span className="text-xs text-muted-foreground">(Opcional)</span>
-          )}
+          {optional && <span className="text-xs text-muted-foreground">(Opcional)</span>}
         </div>
       )}
-      
+
       <div
         {...(errorId && { 'aria-describedby': errorId })}
         {...(hintId && !error && { 'aria-describedby': hintId })}
@@ -68,11 +66,7 @@ export function FormFieldWrapper({
       )}
 
       {error && (
-        <p
-          id={errorId}
-          className="text-xs text-destructive flex items-center gap-1"
-          role="alert"
-        >
+        <p id={errorId} className="text-xs text-destructive flex items-center gap-1" role="alert">
           <AlertCircle className="h-3 w-3" />
           {error}
         </p>

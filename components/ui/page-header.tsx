@@ -27,27 +27,21 @@ export function PageHeader({
   return (
     <div className={cn('space-y-4 mb-6', className)}>
       {showBreadcrumbs && <BreadcrumbAuto />}
-      
+
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-2 flex-1">
           {showBackButton && <BackButton />}
-          
+
           <div className="flex items-center gap-3">
             {icon && <div className="flex-shrink-0">{icon}</div>}
             <div>
               <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
-              {description && (
-                <p className="text-muted-foreground mt-2">{description}</p>
-              )}
+              {description && <p className="text-muted-foreground mt-2">{description}</p>}
             </div>
           </div>
         </div>
 
-        {actions && (
-          <div className="flex items-center gap-2 flex-shrink-0">
-            {actions}
-          </div>
-        )}
+        {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}
       </div>
     </div>
   );

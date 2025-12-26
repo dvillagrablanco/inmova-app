@@ -53,9 +53,6 @@ export async function GET(req: NextRequest) {
     if (error.message === 'No autorizado') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
-    return NextResponse.json(
-      { error: 'Error al obtener historial' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener historial' }, { status: 500 });
   }
 }

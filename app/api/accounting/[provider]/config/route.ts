@@ -7,19 +7,12 @@ import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { provider: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { provider: string } }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const { provider } = params;
@@ -29,7 +22,7 @@ export async function POST(
     const fs = require('fs');
     const path = require('path');
     const envPath = path.join(process.cwd(), '.env');
-    
+
     let envContent = '';
     if (fs.existsSync(envPath)) {
       envContent = fs.readFileSync(envPath, 'utf8');
@@ -40,9 +33,9 @@ export async function POST(
     const newLines = [...lines];
 
     for (const [key, value] of Object.entries(config)) {
-      if (!value) continue;  // Saltar valores vacíos
+      if (!value) continue; // Saltar valores vacíos
 
-      const existingIndex = newLines.findIndex(line => line.startsWith(`${key}=`));
+      const existingIndex = newLines.findIndex((line) => line.startsWith(`${key}=`));
       const newLine = `${key}="${value}"`;
 
       if (existingIndex >= 0) {
@@ -65,7 +58,7 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      message: 'Configuración guardada exitosamente'
+      message: 'Configuración guardada exitosamente',
     });
   } catch (error: any) {
     logger.error('Error saving config:', error);

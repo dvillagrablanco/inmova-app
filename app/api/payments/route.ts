@@ -4,7 +4,11 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger, { logError } from '@/lib/logger';
 import { paymentCreateSchema } from '@/lib/validations';
-import { cachedPayments, invalidatePaymentsCache, invalidateDashboardCache } from '@/lib/api-cache-helpers';
+import {
+  cachedPayments,
+  invalidatePaymentsCache,
+  invalidateDashboardCache,
+} from '@/lib/api-cache-helpers';
 
 export const dynamic = 'force-dynamic';
 
@@ -114,26 +118,23 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    
+
     // Asegurar que "concepto" esté presente (usar "periodo" si no está definido)
     const dataToValidate = {
       ...body,
-      concepto: body.concepto || body.periodo || 'Pago de renta'
+      concepto: body.concepto || body.periodo || 'Pago de renta',
     };
-    
+
     // Validación con Zod
     const validationResult = paymentCreateSchema.safeParse(dataToValidate);
-    
+
     if (!validationResult.success) {
-      const errors = validationResult.error.errors.map(err => ({
+      const errors = validationResult.error.errors.map((err) => ({
         field: err.path.join('.'),
-        message: err.message
+        message: err.message,
       }));
       logger.warn('Validation error creating payment:', { errors });
-      return NextResponse.json(
-        { error: 'Datos inv\u00e1lidos', details: errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Datos inv\u00e1lidos', details: errors }, { status: 400 });
     }
 
     const validatedData = validationResult.data;

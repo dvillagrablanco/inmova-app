@@ -17,13 +17,13 @@ interface KPICardProps {
 }
 
 // Optimizado con React.memo para evitar re-renders innecesarios
-export const KPICard = memo(function KPICard({ 
-  title, 
-  value, 
-  icon: Icon, 
-  trend, 
-  suffix = '', 
-  className = '' 
+export const KPICard = memo(function KPICard({
+  title,
+  value,
+  icon: Icon,
+  trend,
+  suffix = '',
+  className = '',
 }: KPICardProps) {
   return (
     <motion.div
@@ -42,12 +42,9 @@ export const KPICard = memo(function KPICard({
             {suffix && <span className="text-lg text-gray-600">{suffix}</span>}
           </div>
           {trend && (
-            <p
-              className={`text-sm mt-2 ${
-                trend.isPositive ? 'text-green-600' : 'text-red-600'
-              }`}
-            >
-              {trend.isPositive ? '+' : '-'}{Math.abs(trend.value)}%
+            <p className={`text-sm mt-2 ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
+              {trend.isPositive ? '+' : '-'}
+              {Math.abs(trend.value)}%
             </p>
           )}
         </div>

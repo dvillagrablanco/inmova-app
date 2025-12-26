@@ -6,10 +6,7 @@ import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -21,10 +18,7 @@ export async function GET(
     });
 
     if (!inspection || inspection.companyId !== session?.user?.companyId) {
-      return NextResponse.json(
-        { error: 'Inspección no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Inspección no encontrada' }, { status: 404 });
     }
 
     // Enriquecer con datos relacionales
@@ -58,17 +52,11 @@ export async function GET(
     });
   } catch (error) {
     logger.error('Error al obtener inspección:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener inspección' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener inspección' }, { status: 500 });
   }
 }
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -83,10 +71,7 @@ export async function PATCH(
     });
 
     if (!inspection || inspection.companyId !== session?.user?.companyId) {
-      return NextResponse.json(
-        { error: 'Inspección no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Inspección no encontrada' }, { status: 404 });
     }
 
     const updated = await prisma.legalInspection.update({
@@ -103,17 +88,11 @@ export async function PATCH(
     return NextResponse.json(updated);
   } catch (error) {
     logger.error('Error al actualizar inspección:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar inspección' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar inspección' }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -125,10 +104,7 @@ export async function DELETE(
     });
 
     if (!inspection || inspection.companyId !== session?.user?.companyId) {
-      return NextResponse.json(
-        { error: 'Inspección no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Inspección no encontrada' }, { status: 404 });
     }
 
     await prisma.legalInspection.delete({
@@ -138,9 +114,6 @@ export async function DELETE(
     return NextResponse.json({ message: 'Inspección eliminada' });
   } catch (error) {
     logger.error('Error al eliminar inspección:', error);
-    return NextResponse.json(
-      { error: 'Error al eliminar inspección' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar inspección' }, { status: 500 });
   }
 }

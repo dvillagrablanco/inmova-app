@@ -31,7 +31,7 @@ interface EnhancedReportConfig {
  */
 export async function generateContractRenewalsReport(companyId: string): Promise<any> {
   const reportData = await generateRenewalReport(companyId);
-  
+
   const pdfData = {
     tipo: 'Renovaciones de Contratos',
     periodo: format(new Date(), 'MMMM yyyy', { locale: es }),
@@ -39,7 +39,7 @@ export async function generateContractRenewalsReport(companyId: string): Promise
     datos: reportData,
     companyInfo: await getCompanyInfo(companyId),
   };
-  
+
   return { data: reportData, pdf: await generateReportPDF(pdfData) };
 }
 
@@ -48,7 +48,7 @@ export async function generateContractRenewalsReport(companyId: string): Promise
  */
 export async function generateOverduePaymentsReportPDF(companyId: string): Promise<any> {
   const reportData = await generateOverduePaymentsReport(companyId);
-  
+
   const pdfData = {
     tipo: 'Pagos Atrasados',
     periodo: format(new Date(), 'MMMM yyyy', { locale: es }),
@@ -56,7 +56,7 @@ export async function generateOverduePaymentsReportPDF(companyId: string): Promi
     datos: reportData,
     companyInfo: await getCompanyInfo(companyId),
   };
-  
+
   return { data: reportData, pdf: await generateReportPDF(pdfData) };
 }
 
@@ -75,25 +75,27 @@ export async function generateOccupancyReport(companyId: string): Promise<any> {
     totalBuildings: buildings.length,
     totalUnits: buildings.reduce((sum, b) => sum + b.units.length, 0),
     occupiedUnits: buildings.reduce(
-      (sum, b) => sum + b.units.filter(u => u.estado === 'ocupada').length,
+      (sum, b) => sum + b.units.filter((u) => u.estado === 'ocupada').length,
       0
     ),
     vacantUnits: buildings.reduce(
-      (sum, b) => sum + b.units.filter(u => u.estado === 'disponible').length,
+      (sum, b) => sum + b.units.filter((u) => u.estado === 'disponible').length,
       0
     ),
     maintenanceUnits: buildings.reduce(
-      (sum, b) => sum + b.units.filter(u => u.estado === 'en_mantenimiento').length,
+      (sum, b) => sum + b.units.filter((u) => u.estado === 'en_mantenimiento').length,
       0
     ),
-    buildings: buildings.map(b => ({
+    buildings: buildings.map((b) => ({
       nombre: b.nombre,
       totalUnits: b.units.length,
-      occupiedUnits: b.units.filter(u => u.estado === 'ocupada').length,
-      vacantUnits: b.units.filter(u => u.estado === 'disponible').length,
+      occupiedUnits: b.units.filter((u) => u.estado === 'ocupada').length,
+      vacantUnits: b.units.filter((u) => u.estado === 'disponible').length,
       occupancyRate:
         b.units.length > 0
-          ? ((b.units.filter(u => u.estado === 'ocupada').length / b.units.length) * 100).toFixed(1)
+          ? ((b.units.filter((u) => u.estado === 'ocupada').length / b.units.length) * 100).toFixed(
+              1
+            )
           : '0',
     })),
   };
@@ -152,13 +154,10 @@ export async function generateIncomeReport(
     },
   });
 
-  const totalIncome = payments.reduce(
-    (sum, p) => sum + parseFloat(p.monto.toString()),
-    0
-  );
+  const totalIncome = payments.reduce((sum, p) => sum + parseFloat(p.monto.toString()), 0);
 
   const byBuilding: { [key: string]: number } = {};
-  payments.forEach(p => {
+  payments.forEach((p) => {
     const buildingName = p.contract?.unit?.building?.nombre || 'Sin edificio';
     byBuilding[buildingName] = (byBuilding[buildingName] || 0) + parseFloat(p.monto.toString());
   });
@@ -169,7 +168,7 @@ export async function generateIncomeReport(
     totalIncome,
     averagePayment: payments.length > 0 ? totalIncome / payments.length : 0,
     byBuilding: Object.entries(byBuilding).map(([name, amount]) => ({ name, amount })),
-    payments: payments.map(p => ({
+    payments: payments.map((p) => ({
       tenant: p.contract?.tenant?.nombreCompleto,
       unit: `${p.contract?.unit?.building?.nombre} ${p.contract?.unit?.numero}`,
       amount: parseFloat(p.monto.toString()),
@@ -228,27 +227,26 @@ export async function generateMaintenanceReport(
   );
 
   const byStatus = {
-    pendiente: maintenanceRequests.filter(m => m.estado === 'pendiente').length,
-    en_progreso: maintenanceRequests.filter(m => m.estado === 'en_progreso').length,
-    programado: maintenanceRequests.filter(m => m.estado === 'programado').length,
-    completado: maintenanceRequests.filter(m => m.estado === 'completado').length,
+    pendiente: maintenanceRequests.filter((m) => m.estado === 'pendiente').length,
+    en_progreso: maintenanceRequests.filter((m) => m.estado === 'en_progreso').length,
+    programado: maintenanceRequests.filter((m) => m.estado === 'programado').length,
+    completado: maintenanceRequests.filter((m) => m.estado === 'completado').length,
   };
 
   const byPriority = {
-    baja: maintenanceRequests.filter(m => m.prioridad === 'baja').length,
-    media: maintenanceRequests.filter(m => m.prioridad === 'media').length,
-    alta: maintenanceRequests.filter(m => m.prioridad === 'alta').length,
+    baja: maintenanceRequests.filter((m) => m.prioridad === 'baja').length,
+    media: maintenanceRequests.filter((m) => m.prioridad === 'media').length,
+    alta: maintenanceRequests.filter((m) => m.prioridad === 'alta').length,
   };
 
   const reportData = {
     periodo: `${format(start, 'dd/MM/yyyy', { locale: es })} - ${format(end, 'dd/MM/yyyy', { locale: es })}`,
     totalRequests: maintenanceRequests.length,
     totalCost,
-    averageCost:
-      maintenanceRequests.length > 0 ? totalCost / maintenanceRequests.length : 0,
+    averageCost: maintenanceRequests.length > 0 ? totalCost / maintenanceRequests.length : 0,
     byStatus,
     byPriority,
-    requests: maintenanceRequests.map(m => ({
+    requests: maintenanceRequests.map((m) => ({
       unit: `${m.unit?.building?.nombre} ${m.unit?.numero}`,
       description: m.descripcion,
       status: m.estado,
@@ -290,16 +288,20 @@ export async function generateExecutiveReport(companyId: string): Promise<any> {
     maintenance: maintenance.data,
     summary: {
       criticalItems: [
-        ...renewals.contracts.filter((c: any) => c.stage === 'critical').map((c: any) => ({
-          type: 'contrato',
-          description: `Contrato vence en ${c.daysUntilExpiry} días - ${c.unit}`,
-          priority: 'alto',
-        })),
-        ...overduePayments.payments.filter((p: any) => p.stage === 'legal').map((p: any) => ({
-          type: 'pago',
-          description: `Pago atrasado ${p.daysOverdue} días - ${p.tenant}`,
-          priority: 'alto',
-        })),
+        ...renewals.contracts
+          .filter((c: any) => c.stage === 'critical')
+          .map((c: any) => ({
+            type: 'contrato',
+            description: `Contrato vence en ${c.daysUntilExpiry} días - ${c.unit}`,
+            priority: 'alto',
+          })),
+        ...overduePayments.payments
+          .filter((p: any) => p.stage === 'legal')
+          .map((p: any) => ({
+            type: 'pago',
+            description: `Pago atrasado ${p.daysOverdue} días - ${p.tenant}`,
+            priority: 'alto',
+          })),
       ],
     },
   };
@@ -342,10 +344,10 @@ export async function sendReportByEmail(
   reportData: any
 ): Promise<void> {
   const fileName = `reporte-${reportType.toLowerCase()}-${format(new Date(), 'yyyy-MM-dd')}.pdf`;
-  
+
   // Subir PDF a S3
   const pdfKey = await uploadFile(pdfBuffer, `reports/${fileName}`);
-  
+
   const htmlContent = `
     <!DOCTYPE html>
     <html>
@@ -369,7 +371,7 @@ export async function sendReportByEmail(
           <div class="summary">
             <h2>Resumen del Reporte</h2>
             <p>Se adjunta el reporte completo de ${reportType} generado automáticamente.</p>
-            <p><strong>Fecha de generación:</strong> ${format(new Date(), "dd/MM/yyyy HH:mm", { locale: es })}</p>
+            <p><strong>Fecha de generación:</strong> ${format(new Date(), 'dd/MM/yyyy HH:mm', { locale: es })}</p>
           </div>
           
           <div style="text-align: center; margin: 20px 0;">

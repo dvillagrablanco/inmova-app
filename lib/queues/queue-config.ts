@@ -54,11 +54,11 @@ export enum QueueName {
  */
 export function isBullMQAvailable(): boolean {
   const available = redis !== null;
-  
+
   if (!available) {
     logger.warn('⚠️  BullMQ not available - Redis is required for job queues');
   }
-  
+
   return available;
 }
 

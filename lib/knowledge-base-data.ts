@@ -682,40 +682,40 @@ Puedes exportar a:
  */
 export function searchArticles(query: string): KnowledgeArticle[] {
   const lowerQuery = query.toLowerCase();
-  const words = lowerQuery.split(' ').filter(w => w.length > 2);
+  const words = lowerQuery.split(' ').filter((w) => w.length > 2);
 
   return knowledgeBase
-    .map(article => {
+    .map((article) => {
       let score = 0;
 
       // Coincidencia en título (peso alto)
       if (article.title.toLowerCase().includes(lowerQuery)) score += 10;
-      words.forEach(word => {
+      words.forEach((word) => {
         if (article.title.toLowerCase().includes(word)) score += 3;
       });
 
       // Coincidencia en keywords (peso medio-alto)
-      article.keywords.forEach(keyword => {
+      article.keywords.forEach((keyword) => {
         if (keyword.includes(lowerQuery)) score += 5;
-        words.forEach(word => {
+        words.forEach((word) => {
           if (keyword.includes(word)) score += 2;
         });
       });
 
       // Coincidencia en excerpt (peso medio)
       if (article.excerpt.toLowerCase().includes(lowerQuery)) score += 3;
-      words.forEach(word => {
+      words.forEach((word) => {
         if (article.excerpt.toLowerCase().includes(word)) score += 1;
       });
 
       // Coincidencia en tags (peso bajo)
-      article.tags.forEach(tag => {
+      article.tags.forEach((tag) => {
         if (tag.includes(lowerQuery)) score += 2;
       });
 
       return { ...article, score };
     })
-    .filter(article => article.score > 0)
+    .filter((article) => article.score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, 5); // Top 5 resultados
 }
@@ -724,11 +724,11 @@ export function searchArticles(query: string): KnowledgeArticle[] {
  * Obtiene artículos relacionados
  */
 export function getRelatedArticles(articleId: string): KnowledgeArticle[] {
-  const article = knowledgeBase.find(a => a.id === articleId);
+  const article = knowledgeBase.find((a) => a.id === articleId);
   if (!article || !article.relatedArticles) return [];
 
   return article.relatedArticles
-    .map(id => knowledgeBase.find(a => a.id === id))
+    .map((id) => knowledgeBase.find((a) => a.id === id))
     .filter(Boolean) as KnowledgeArticle[];
 }
 
@@ -736,5 +736,5 @@ export function getRelatedArticles(articleId: string): KnowledgeArticle[] {
  * Obtiene artículos por categoría
  */
 export function getArticlesByCategory(category: string): KnowledgeArticle[] {
-  return knowledgeBase.filter(article => article.category === category);
+  return knowledgeBase.filter((article) => article.category === category);
 }

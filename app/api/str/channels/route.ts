@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     const listingId = searchParams.get('listingId');
 
     const where: any = {
-      companyId: session.user.companyId
+      companyId: session.user.companyId,
     };
 
     if (listingId) {
@@ -31,24 +31,21 @@ export async function GET(request: NextRequest) {
           include: {
             unit: {
               include: {
-                building: true
-              }
-            }
-          }
-        }
+                building: true,
+              },
+            },
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: 'desc',
+      },
     });
 
     return NextResponse.json(channels);
   } catch (error) {
     logger.error('Error fetching STR channels:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch channels' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch channels' }, { status: 500 });
   }
 }
 
@@ -60,31 +57,28 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await request.json();
-    
+
     const channel = await prisma.sTRChannelSync.create({
       data: {
         ...data,
-        companyId: session.user.companyId
+        companyId: session.user.companyId,
       },
       include: {
         listing: {
           include: {
             unit: {
               include: {
-                building: true
-              }
-            }
-          }
-        }
-      }
+                building: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     return NextResponse.json(channel, { status: 201 });
   } catch (error) {
     logger.error('Error creating STR channel:', error);
-    return NextResponse.json(
-      { error: 'Failed to create channel' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create channel' }, { status: 500 });
   }
 }

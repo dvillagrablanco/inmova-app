@@ -1,5 +1,3 @@
-
-
 /**
  * Structured Logging Service
  * Provides different log levels and formats for development and production
@@ -63,7 +61,10 @@ function sanitizeString(str: string): string {
   // Reemplazar emails
   sanitized = sanitized.replace(PII_PATTERNS.email, (match) => {
     const [username, domain] = match.split('@');
-    const maskedUsername = username.charAt(0) + '*'.repeat(Math.max(username.length - 2, 0)) + username.charAt(username.length - 1);
+    const maskedUsername =
+      username.charAt(0) +
+      '*'.repeat(Math.max(username.length - 2, 0)) +
+      username.charAt(username.length - 1);
     return `${maskedUsername}@${domain}`;
   });
 
@@ -217,7 +218,11 @@ export const logSecurityEvent = (event: string, userId: string, details?: Record
   });
 };
 
-export const logPerformance = (operation: string, duration: number, metadata?: Record<string, any>) => {
+export const logPerformance = (
+  operation: string,
+  duration: number,
+  metadata?: Record<string, any>
+) => {
   const level = duration > 1000 ? 'warn' : 'info';
   logger.log(level, 'Performance', {
     operation,

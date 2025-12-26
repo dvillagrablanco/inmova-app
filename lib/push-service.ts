@@ -12,11 +12,7 @@ const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
 const vapidEmail = process.env.VAPID_EMAIL || 'mailto:admin@inmova.app';
 
 if (vapidPublicKey && vapidPrivateKey) {
-  webpush.setVapidDetails(
-    vapidEmail,
-    vapidPublicKey,
-    vapidPrivateKey
-  );
+  webpush.setVapidDetails(vapidEmail, vapidPublicKey, vapidPrivateKey);
 } else {
   logger.warn('VAPID keys no configuradas. Las notificaciones push no funcionarán.');
 }
@@ -56,8 +52,8 @@ export async function sendPushNotification(
     // Obtener todas las suscripciones del usuario
     const subscriptions = await prisma.pushSubscription.findMany({
       where: {
-        userId
-      }
+        userId,
+      },
     });
 
     if (subscriptions.length === 0) {
@@ -77,14 +73,11 @@ export async function sendPushNotification(
             endpoint: sub.endpoint,
             keys: {
               p256dh: sub.p256dh,
-              auth: sub.auth
-            }
+              auth: sub.auth,
+            },
           };
 
-          await webpush.sendNotification(
-            subscriptionObject as any,
-            payload
-          );
+          await webpush.sendNotification(subscriptionObject as any, payload);
           logger.info(`Push sent to subscription ${sub.id}`);
           return true;
         } catch (error: any) {
@@ -93,7 +86,7 @@ export async function sendPushNotification(
           // Si la suscripción es inválida (410 Gone), eliminarla
           if (error.statusCode === 410 || error.statusCode === 404) {
             await prisma.pushSubscription.delete({
-              where: { id: sub.id }
+              where: { id: sub.id },
             });
             logger.info(`Subscription ${sub.id} deleted (invalid)`);
           }
@@ -103,7 +96,7 @@ export async function sendPushNotification(
       })
     );
 
-    const successful = results.filter(r => r.status === 'fulfilled').length;
+    const successful = results.filter((r) => r.status === 'fulfilled').length;
     return successful > 0;
   } catch (error) {
     logger.error(`Error in sendPushNotification for user ${userId}:`, error);
@@ -119,11 +112,13 @@ export async function sendPushNotificationToMany(
   notification: PushNotificationPayload
 ): Promise<{ sent: number; failed: number }> {
   const results = await Promise.allSettled(
-    userIds.map(userId => sendPushNotification(userId, notification))
+    userIds.map((userId) => sendPushNotification(userId, notification))
   );
 
-  const sent = results.filter(r => r.status === 'fulfilled' && r.value).length;
-  const failed = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value)).length;
+  const sent = results.filter((r) => r.status === 'fulfilled' && r.value).length;
+  const failed = results.filter(
+    (r) => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value)
+  ).length;
 
   logger.info(`Bulk push notifications: ${sent} sent, ${failed} failed`);
 
@@ -141,10 +136,10 @@ export async function sendPushNotificationToCompany(
     // Obtener todos los usuarios de la compañía
     const users = await prisma.user.findMany({
       where: { companyId },
-      select: { id: true }
+      select: { id: true },
     });
 
-    const userIds = users.map(u => u.id);
+    const userIds = users.map((u) => u.id);
     return await sendPushNotificationToMany(userIds, notification);
   } catch (error) {
     logger.error(`Error in sendPushNotificationToCompany:`, error);
@@ -163,9 +158,9 @@ export async function cleanupOldSubscriptions(daysOld: number = 90): Promise<num
     const result = await prisma.pushSubscription.deleteMany({
       where: {
         updatedAt: {
-          lt: cutoffDate
-        }
-      }
+          lt: cutoffDate,
+        },
+      },
     });
 
     logger.info(`Cleaned up ${result.count} old push subscriptions`);

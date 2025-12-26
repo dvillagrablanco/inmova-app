@@ -8,7 +8,7 @@ import { prisma } from './db';
 import logger, { logError } from '@/lib/logger';
 
 // Tipos de negocio soportados
-export type BusinessVertical = 
+export type BusinessVertical =
   | 'residencial'
   | 'comercial'
   | 'vacacional'
@@ -58,7 +58,7 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       required: true,
       order: 1,
       videoUrl: '/videos/onboarding/welcome.mp4',
-      estimatedTime: 2
+      estimatedTime: 2,
     },
     {
       id: 'company_setup',
@@ -68,7 +68,7 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       completed: false,
       required: true,
       order: 2,
-      estimatedTime: 5
+      estimatedTime: 5,
     },
     {
       id: 'first_building',
@@ -79,7 +79,7 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       required: true,
       order: 3,
       videoUrl: '/videos/onboarding/create-building.mp4',
-      estimatedTime: 5
+      estimatedTime: 5,
     },
     {
       id: 'add_units',
@@ -89,7 +89,7 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       completed: false,
       required: true,
       order: 4,
-      estimatedTime: 10
+      estimatedTime: 10,
     },
     {
       id: 'first_tenant',
@@ -99,7 +99,7 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       completed: false,
       required: false,
       order: 5,
-      estimatedTime: 5
+      estimatedTime: 5,
     },
     {
       id: 'create_contract',
@@ -109,7 +109,7 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       completed: false,
       required: false,
       order: 6,
-      estimatedTime: 7
+      estimatedTime: 7,
     },
     {
       id: 'explore_modules',
@@ -119,7 +119,7 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       completed: false,
       required: false,
       order: 7,
-      estimatedTime: 10
+      estimatedTime: 10,
     },
     {
       id: 'setup_complete',
@@ -129,8 +129,8 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       completed: false,
       required: false,
       order: 8,
-      estimatedTime: 1
-    }
+      estimatedTime: 1,
+    },
   ],
   vacacional: [
     {
@@ -141,7 +141,7 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       completed: false,
       required: true,
       order: 1,
-      estimatedTime: 2
+      estimatedTime: 2,
     },
     {
       id: 'company_setup',
@@ -151,7 +151,7 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       completed: false,
       required: true,
       order: 2,
-      estimatedTime: 5
+      estimatedTime: 5,
     },
     {
       id: 'str_property',
@@ -161,7 +161,7 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       completed: false,
       required: true,
       order: 3,
-      estimatedTime: 5
+      estimatedTime: 5,
     },
     {
       id: 'str_listing',
@@ -172,7 +172,7 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       required: true,
       order: 4,
       videoUrl: '/videos/onboarding/str-listing.mp4',
-      estimatedTime: 15
+      estimatedTime: 15,
     },
     {
       id: 'channel_sync',
@@ -182,7 +182,7 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       completed: false,
       required: false,
       order: 5,
-      estimatedTime: 10
+      estimatedTime: 10,
     },
     {
       id: 'pricing_setup',
@@ -192,7 +192,7 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       completed: false,
       required: false,
       order: 6,
-      estimatedTime: 10
+      estimatedTime: 10,
     },
     {
       id: 'setup_complete',
@@ -202,8 +202,8 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       completed: false,
       required: false,
       order: 7,
-      estimatedTime: 1
-    }
+      estimatedTime: 1,
+    },
   ],
   coliving: [
     {
@@ -214,7 +214,7 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       completed: false,
       required: true,
       order: 1,
-      estimatedTime: 2
+      estimatedTime: 2,
     },
     {
       id: 'company_setup',
@@ -224,7 +224,7 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       completed: false,
       required: true,
       order: 2,
-      estimatedTime: 5
+      estimatedTime: 5,
     },
     {
       id: 'coliving_building',
@@ -234,7 +234,7 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       completed: false,
       required: true,
       order: 3,
-      estimatedTime: 5
+      estimatedTime: 5,
     },
     {
       id: 'setup_rooms',
@@ -245,7 +245,7 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       required: true,
       order: 4,
       videoUrl: '/videos/onboarding/coliving-rooms.mp4',
-      estimatedTime: 15
+      estimatedTime: 15,
     },
     {
       id: 'utility_proration',
@@ -255,7 +255,7 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       completed: false,
       required: true,
       order: 5,
-      estimatedTime: 10
+      estimatedTime: 10,
     },
     {
       id: 'common_spaces',
@@ -265,7 +265,7 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       completed: false,
       required: false,
       order: 6,
-      estimatedTime: 10
+      estimatedTime: 10,
     },
     {
       id: 'coliving_rules',
@@ -275,7 +275,7 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       completed: false,
       required: false,
       order: 7,
-      estimatedTime: 15
+      estimatedTime: 15,
     },
     {
       id: 'setup_complete',
@@ -285,8 +285,8 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       completed: false,
       required: false,
       order: 8,
-      estimatedTime: 1
-    }
+      estimatedTime: 1,
+    },
   ],
   comercial: [
     // Flujo simplificado para otros verticales
@@ -298,7 +298,7 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       completed: false,
       required: true,
       order: 1,
-      estimatedTime: 2
+      estimatedTime: 2,
     },
     {
       id: 'setup_complete',
@@ -308,8 +308,8 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       completed: false,
       required: true,
       order: 2,
-      estimatedTime: 10
-    }
+      estimatedTime: 10,
+    },
   ],
   студенческое: [
     {
@@ -320,7 +320,7 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       completed: false,
       required: true,
       order: 1,
-      estimatedTime: 2
+      estimatedTime: 2,
     },
     {
       id: 'setup_complete',
@@ -330,8 +330,8 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       completed: false,
       required: true,
       order: 2,
-      estimatedTime: 10
-    }
+      estimatedTime: 10,
+    },
   ],
   senior: [
     {
@@ -342,7 +342,7 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       completed: false,
       required: true,
       order: 1,
-      estimatedTime: 2
+      estimatedTime: 2,
     },
     {
       id: 'setup_complete',
@@ -352,8 +352,8 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       completed: false,
       required: true,
       order: 2,
-      estimatedTime: 10
-    }
+      estimatedTime: 10,
+    },
   ],
   mixto: [
     {
@@ -364,7 +364,7 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       completed: false,
       required: true,
       order: 1,
-      estimatedTime: 2
+      estimatedTime: 2,
     },
     {
       id: 'setup_complete',
@@ -374,9 +374,9 @@ const ONBOARDING_FLOWS: Record<BusinessVertical, OnboardingStep[]> = {
       completed: false,
       required: true,
       order: 2,
-      estimatedTime: 10
-    }
-  ]
+      estimatedTime: 10,
+    },
+  ],
 };
 
 /**
@@ -390,7 +390,7 @@ export async function getOrCreateOnboardingProgress(
   try {
     // TEMPORALMENTE DESHABILITADO: Tabla no existe en el esquema
     // TODO: Agregar modelo OnboardingProgress al schema.prisma
-    
+
     // Retornar progreso por defecto
     const steps = ONBOARDING_FLOWS[vertical] || ONBOARDING_FLOWS.residencial;
     const defaultProgress: OnboardingProgress = {
@@ -406,7 +406,7 @@ export async function getOrCreateOnboardingProgress(
       lastActivityAt: new Date(),
     };
     return defaultProgress;
-    
+
     /* CODIGO ORIGINAL COMENTADO:
     // Buscar progreso existente
     const existing = await prisma.onboardingProgress.findUnique({
@@ -451,7 +451,7 @@ export async function getOrCreateOnboardingProgress(
     // Lanzar error para usar el catch block
     throw new Error('OnboardingProgress table not available');
     */ // FIN CODIGO ORIGINAL COMENTADO
-    
+
     /*const newProgress = await prisma.onboardingProgress.create({
       data: {
         userId,
@@ -482,7 +482,7 @@ export async function getOrCreateOnboardingProgress(
     logger.error('Error accessing OnboardingProgress table:', error);
     const steps = ONBOARDING_FLOWS[vertical] || ONBOARDING_FLOWS.residencial;
     const now = new Date();
-    
+
     return {
       userId,
       companyId,
@@ -493,7 +493,7 @@ export async function getOrCreateOnboardingProgress(
       percentageComplete: 0,
       steps: steps,
       startedAt: now,
-      lastActivityAt: now
+      lastActivityAt: now,
     };
   }
 }
@@ -508,7 +508,7 @@ export async function completeOnboardingStep(
 ): Promise<OnboardingProgress> {
   // TEMPORALMENTE DESHABILITADO: Tabla no existe
   return getOrCreateOnboardingProgress(userId, companyId);
-  
+
   /* CÓDIGO DESHABILITADO - La tabla OnboardingProgress no existe aún
   try {
     const progress = await prisma.onboardingProgress.findUnique({
@@ -569,19 +569,16 @@ export async function completeOnboardingStep(
 /**
  * Omite el onboarding completamente
  */
-export async function skipOnboarding(
-  userId: string,
-  companyId: string
-): Promise<void> {
+export async function skipOnboarding(userId: string, companyId: string): Promise<void> {
   // TEMPORALMENTE DESHABILITADO: Tabla no existe
   return;
-  
+
   await prisma.onboardingProgress.upsert({
     where: {
       userId_companyId: {
         userId,
-        companyId
-      }
+        companyId,
+      },
     },
     create: {
       userId,
@@ -592,12 +589,12 @@ export async function skipOnboarding(
       completedSteps: [],
       startedAt: new Date(),
       lastActivityAt: new Date(),
-      completedAt: new Date()
+      completedAt: new Date(),
     },
     update: {
       completedAt: new Date(),
-      lastActivityAt: new Date()
-    }
+      lastActivityAt: new Date(),
+    },
   });
 }
 
@@ -611,13 +608,13 @@ export async function restartOnboarding(
 ): Promise<OnboardingProgress> {
   // TEMPORALMENTE DESHABILITADO: Tabla no existe
   return getOrCreateOnboardingProgress(userId, companyId, vertical);
-  
+
   // Eliminar progreso existente
   await prisma.onboardingProgress.deleteMany({
     where: {
       userId,
-      companyId
-    }
+      companyId,
+    },
   });
 
   // Crear nuevo progreso
@@ -627,18 +624,16 @@ export async function restartOnboarding(
 /**
  * Detecta automáticamente el vertical basándose en la actividad del usuario
  */
-export async function detectBusinessVertical(
-  companyId: string
-): Promise<BusinessVertical> {
+export async function detectBusinessVertical(companyId: string): Promise<BusinessVertical> {
   // Verificar si tiene módulos STR activos
   const strModules = await prisma.companyModule.count({
     where: {
       companyId,
       moduloCodigo: {
-        in: ['str_listings', 'str_bookings', 'str_channels']
+        in: ['str_listings', 'str_bookings', 'str_channels'],
       },
-      activo: true
-    }
+      activo: true,
+    },
   });
 
   if (strModules > 0) {
@@ -650,10 +645,10 @@ export async function detectBusinessVertical(
     where: {
       unit: {
         building: {
-          companyId
-        }
-      }
-    }
+          companyId,
+        },
+      },
+    },
   });
 
   if (rooms > 3) {

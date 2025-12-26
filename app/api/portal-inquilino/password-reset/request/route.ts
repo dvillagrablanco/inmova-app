@@ -4,18 +4,17 @@ import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-
 // Simulación de envío de email (en producción usar un servicio real)
 async function sendPasswordResetEmail(email: string, token: string, tenantName: string) {
   // TODO: Integrar con servicio de email (SendGrid, AWS SES, etc.)
   const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/portal-inquilino/password-reset/${token}`;
-  
+
   logger.info('Email de recuperación generado', {
     email,
     resetUrl,
-    tenantName
+    tenantName,
   });
-  
+
   // Por ahora solo log, en producción enviar email real
   console.log(`
 ==============================================
@@ -47,10 +46,7 @@ export async function POST(request: NextRequest) {
     const { email } = body;
 
     if (!email) {
-      return NextResponse.json(
-        { error: 'Email requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email requerido' }, { status: 400 });
     }
 
     // Crear el token de recuperación
@@ -58,25 +54,18 @@ export async function POST(request: NextRequest) {
 
     // Por seguridad, siempre responder con éxito aunque el email no exista
     if (result) {
-      await sendPasswordResetEmail(
-        email,
-        result.token,
-        result.tenant.nombreCompleto
-      );
+      await sendPasswordResetEmail(email, result.token, result.tenant.nombreCompleto);
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Si el email existe, recibirás instrucciones para restablecer tu contraseña'
+      message: 'Si el email existe, recibirás instrucciones para restablecer tu contraseña',
     });
   } catch (error: any) {
     logger.error('Error al solicitar recuperación de contraseña', {
-      error: error.message
+      error: error.message,
     });
-    
-    return NextResponse.json(
-      { error: 'Error al procesar la solicitud' },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ error: 'Error al procesar la solicitud' }, { status: 500 });
   }
 }

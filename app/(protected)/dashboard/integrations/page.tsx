@@ -129,20 +129,22 @@ export default function IntegrationsPage() {
   // FILTERING
   // ============================================================================
 
-  const filteredProviders = catalog?.providers?.filter((p: Provider) => {
-    const matchesCategory = categoryFilter === 'all' || p.category === categoryFilter;
-    const matchesSearch = searchQuery === '' || 
-      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.description.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    return matchesCategory && matchesSearch;
-  }) || [];
+  const filteredProviders =
+    catalog?.providers?.filter((p: Provider) => {
+      const matchesCategory = categoryFilter === 'all' || p.category === categoryFilter;
+      const matchesSearch =
+        searchQuery === '' ||
+        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.description.toLowerCase().includes(searchQuery.toLowerCase());
+
+      return matchesCategory && matchesSearch;
+    }) || [];
 
   const filteredIntegrations = integrations.filter((i) => {
     const matchesCategory = categoryFilter === 'all' || i.category === categoryFilter;
-    const matchesSearch = searchQuery === '' || 
-      i.name.toLowerCase().includes(searchQuery.toLowerCase());
-    
+    const matchesSearch =
+      searchQuery === '' || i.name.toLowerCase().includes(searchQuery.toLowerCase());
+
     return matchesCategory && matchesSearch;
   });
 
@@ -152,9 +154,9 @@ export default function IntegrationsPage() {
 
   const stats = {
     total: integrations.length,
-    active: integrations.filter(i => i.enabled).length,
-    configured: integrations.filter(i => i.isConfigured).length,
-    lastSync: integrations.filter(i => i.lastSyncAt).length,
+    active: integrations.filter((i) => i.enabled).length,
+    configured: integrations.filter((i) => i.isConfigured).length,
+    lastSync: integrations.filter((i) => i.lastSyncAt).length,
   };
 
   // ============================================================================
@@ -219,9 +221,9 @@ export default function IntegrationsPage() {
       });
 
       const result = await response.json();
-      
+
       alert(result.success ? '✅ Conexión exitosa' : '❌ ' + result.message);
-      
+
       if (result.success) {
         await loadData();
       }
@@ -269,7 +271,9 @@ export default function IntegrationsPage() {
           </div>
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Centro de Integraciones</h1>
-            <p className="text-gray-600">Gestiona todas tus conexiones externas desde un solo lugar</p>
+            <p className="text-gray-600">
+              Gestiona todas tus conexiones externas desde un solo lugar
+            </p>
           </div>
         </div>
       </div>
@@ -374,9 +378,13 @@ export default function IntegrationsPage() {
               </button>
               {Object.entries(catalog.categories).map(([key, label]: any) => {
                 const count = catalog.groupedByCategory?.[key]?.length || 0;
-                const config = CATEGORY_CONFIG[key] || { icon: Settings, color: 'text-gray-600', bgColor: 'bg-gray-100' };
+                const config = CATEGORY_CONFIG[key] || {
+                  icon: Settings,
+                  color: 'text-gray-600',
+                  bgColor: 'bg-gray-100',
+                };
                 const Icon = config.icon;
-                
+
                 return (
                   <button
                     key={key}
@@ -409,7 +417,7 @@ export default function IntegrationsPage() {
       ) : (
         <AvailableIntegrationsView
           providers={filteredProviders}
-          configuredProviders={integrations.map(i => i.provider)}
+          configuredProviders={integrations.map((i) => i.provider)}
           onConfigure={handleConfigureIntegration}
           catalog={catalog}
           categoryFilter={categoryFilter}
@@ -453,7 +461,9 @@ function ActiveIntegrationsView({
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
         <AlertCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">No tienes integraciones configuradas</h3>
+        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+          No tienes integraciones configuradas
+        </h3>
         <p className="text-gray-600 mb-6">Comienza agregando tu primera integración</p>
       </div>
     );
@@ -476,7 +486,7 @@ function ActiveIntegrationsView({
                 <p className="text-sm text-gray-600 capitalize">{integration.category}</p>
               </div>
             </div>
-            
+
             {/* Status Badge */}
             {integration.enabled ? (
               <span className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
@@ -496,9 +506,11 @@ function ActiveIntegrationsView({
             <div className="mb-4 p-3 bg-gray-50 rounded-lg">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-600">Último test:</span>
-                <span className={`font-medium ${
-                  integration.testStatus === 'success' ? 'text-green-600' : 'text-red-600'
-                }`}>
+                <span
+                  className={`font-medium ${
+                    integration.testStatus === 'success' ? 'text-green-600' : 'text-red-600'
+                  }`}
+                >
                   {integration.testStatus === 'success' ? '✓ Exitoso' : '✗ Fallido'}
                 </span>
               </div>
@@ -517,7 +529,7 @@ function ActiveIntegrationsView({
             >
               {integration.enabled ? 'Desactivar' : 'Activar'}
             </button>
-            
+
             <button
               onClick={() => onTest(integration.id)}
               className="p-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
@@ -525,7 +537,7 @@ function ActiveIntegrationsView({
             >
               <RefreshCw className="h-5 w-5" />
             </button>
-            
+
             <button
               onClick={() => onDelete(integration.id)}
               className="p-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
@@ -578,14 +590,21 @@ function AvailableIntegrationsView({
     <div className="space-y-8">
       {Object.entries(catalog.categories).map(([categoryKey, categoryLabel]: any) => {
         const categoryProviders = catalog.groupedByCategory?.[categoryKey] || [];
-        
+
         if (categoryProviders.length === 0) return null;
 
-        const config = CATEGORY_CONFIG[categoryKey] || { icon: Settings, color: 'text-gray-600', bgColor: 'bg-gray-100' };
+        const config = CATEGORY_CONFIG[categoryKey] || {
+          icon: Settings,
+          color: 'text-gray-600',
+          bgColor: 'bg-gray-100',
+        };
         const Icon = config.icon;
 
         return (
-          <div key={categoryKey} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div
+            key={categoryKey}
+            className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+          >
             {/* Category Header */}
             <div className={`${config.bgColor} px-6 py-4 border-b border-gray-200`}>
               <div className="flex items-center gap-3">
@@ -594,7 +613,9 @@ function AvailableIntegrationsView({
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-gray-900">{categoryLabel}</h2>
-                  <p className="text-sm text-gray-600">{categoryProviders.length} integraciones disponibles</p>
+                  <p className="text-sm text-gray-600">
+                    {categoryProviders.length} integraciones disponibles
+                  </p>
                 </div>
               </div>
             </div>
@@ -635,7 +656,11 @@ function IntegrationCard({
   onConfigure: (provider: Provider) => void;
   compact?: boolean;
 }) {
-  const config = CATEGORY_CONFIG[provider.category] || { icon: Settings, color: 'text-gray-600', bgColor: 'bg-gray-100' };
+  const config = CATEGORY_CONFIG[provider.category] || {
+    icon: Settings,
+    color: 'text-gray-600',
+    bgColor: 'bg-gray-100',
+  };
   const Icon = config.icon;
 
   return (
@@ -659,9 +684,7 @@ function IntegrationCard({
           </div>
         </div>
 
-        {isConfigured && (
-          <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
-        )}
+        {isConfigured && <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />}
       </div>
 
       <p className="text-xs text-gray-600 mb-3 line-clamp-2">{provider.description}</p>
@@ -677,7 +700,7 @@ function IntegrationCard({
         >
           {isConfigured ? 'Reconfigurar' : 'Configurar'}
         </button>
-        
+
         {provider.website && (
           <a
             href={provider.website}
@@ -736,17 +759,21 @@ function ConfigurationModal({
                       {field.label}
                       {field.required && <span className="text-red-600 ml-1">*</span>}
                     </label>
-                    
+
                     {field.type === 'select' ? (
                       <select
                         required={field.required}
                         value={credentials[field.key] || ''}
-                        onChange={(e) => setCredentials({ ...credentials, [field.key]: e.target.value })}
+                        onChange={(e) =>
+                          setCredentials({ ...credentials, [field.key]: e.target.value })
+                        }
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="">Seleccionar...</option>
                         {field.options?.map((opt: any) => (
-                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
                         ))}
                       </select>
                     ) : (
@@ -755,11 +782,13 @@ function ConfigurationModal({
                         required={field.required}
                         placeholder={field.placeholder}
                         value={credentials[field.key] || ''}
-                        onChange={(e) => setCredentials({ ...credentials, [field.key]: e.target.value })}
+                        onChange={(e) =>
+                          setCredentials({ ...credentials, [field.key]: e.target.value })
+                        }
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     )}
-                    
+
                     {field.helpText && (
                       <p className="text-xs text-gray-500 mt-1">{field.helpText}</p>
                     )}
@@ -780,8 +809,14 @@ function ConfigurationModal({
                           <>
                             <input
                               type="checkbox"
-                              checked={settings[field.key] !== undefined ? settings[field.key] : field.defaultValue}
-                              onChange={(e) => setSettings({ ...settings, [field.key]: e.target.checked })}
+                              checked={
+                                settings[field.key] !== undefined
+                                  ? settings[field.key]
+                                  : field.defaultValue
+                              }
+                              onChange={(e) =>
+                                setSettings({ ...settings, [field.key]: e.target.checked })
+                              }
                               className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                             />
                             <span className="text-sm font-medium text-gray-700">{field.label}</span>
@@ -790,7 +825,9 @@ function ConfigurationModal({
                           <input
                             type={field.type}
                             value={settings[field.key] || field.defaultValue || ''}
-                            onChange={(e) => setSettings({ ...settings, [field.key]: e.target.value })}
+                            onChange={(e) =>
+                              setSettings({ ...settings, [field.key]: e.target.value })
+                            }
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           />
                         )}

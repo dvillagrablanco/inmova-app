@@ -50,10 +50,7 @@ export async function POST(request: NextRequest) {
     const { nombre, descripcion, tipo, contenido, variables } = await request.json();
 
     if (!nombre || !tipo || !contenido) {
-      return NextResponse.json(
-        { error: 'Datos incompletos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Datos incompletos' }, { status: 400 });
     }
 
     const companyId = session?.user?.companyId;

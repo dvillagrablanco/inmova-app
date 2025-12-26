@@ -15,7 +15,7 @@ interface Params {
 export async function GET(request: NextRequest, { params }: Params) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.companyId) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
@@ -30,18 +30,12 @@ export async function GET(request: NextRequest, { params }: Params) {
       },
     });
     if (!invoice) {
-      return NextResponse.json(
-        { error: 'Factura no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Factura no encontrada' }, { status: 404 });
     }
     return NextResponse.json(invoice);
   } catch (error) {
     logger.error('Error fetching invoice:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener factura' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener factura' }, { status: 500 });
   }
 }
 
@@ -64,26 +58,20 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         companyId: session.user.companyId,
       },
     });
-    
+
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Factura no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Factura no encontrada' }, { status: 404 });
     }
-    
+
     const invoice = await prisma.communityInvoice.update({
       where: { id },
       data: body,
     });
-    
+
     return NextResponse.json(invoice);
   } catch (error) {
     logger.error('Error updating invoice:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar factura' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar factura' }, { status: 500 });
   }
 }
 
@@ -97,23 +85,20 @@ export async function DELETE(request: NextRequest, { params }: Params) {
     if (!session?.user?.companyId) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
-    
+
     const { id } = await params;
-    
+
     const existing = await prisma.communityInvoice.findFirst({
       where: {
         id,
         companyId: session.user.companyId,
       },
     });
-    
+
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Factura no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Factura no encontrada' }, { status: 404 });
     }
-    
+
     // Solo permitir eliminar facturas en borrador
     if (existing.estado !== 'borrador') {
       return NextResponse.json(
@@ -121,17 +106,14 @@ export async function DELETE(request: NextRequest, { params }: Params) {
         { status: 400 }
       );
     }
-    
+
     await prisma.communityInvoice.delete({
       where: { id },
     });
-    
+
     return NextResponse.json({ success: true });
   } catch (error) {
     logger.error('Error deleting invoice:', error);
-    return NextResponse.json(
-      { error: 'Error al eliminar factura' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar factura' }, { status: 500 });
   }
 }

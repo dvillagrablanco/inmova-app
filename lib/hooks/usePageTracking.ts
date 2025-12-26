@@ -1,7 +1,7 @@
 /**
  * CUSTOM HOOK: usePageTracking
  * Hook para tracking automático de page views y time on page
- * 
+ *
  * Usage:
  * ```tsx
  * usePageTracking('/onboarding', 'Onboarding Page');

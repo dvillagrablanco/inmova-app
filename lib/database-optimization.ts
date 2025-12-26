@@ -263,11 +263,7 @@ export async function getContractsWithDetails(companyId: string, options?: Pagin
 /**
  * Agregación optimizada de pagos
  */
-export async function getPaymentStats(
-  companyId: string,
-  startDate: Date,
-  endDate: Date
-) {
+export async function getPaymentStats(companyId: string, startDate: Date, endDate: Date) {
   const [totalAmount, statsByStatus, monthlyTrend] = await Promise.all([
     // Total amount
     prisma.payment.aggregate({
@@ -328,7 +324,7 @@ export async function getPaymentStats(
       amount: totalAmount._sum.monto || 0,
       count: totalAmount._count,
     },
-    byStatus: statsByStatus.map(stat => ({
+    byStatus: statsByStatus.map((stat) => ({
       estado: stat.estado,
       amount: stat._sum.monto || 0,
       count: stat._count,
@@ -344,9 +340,7 @@ export async function batchUpdate<T>(
   model: any,
   updates: Array<{ where: any; data: any }>
 ): Promise<T[]> {
-  return prisma.$transaction(
-    updates.map(({ where, data }) => model.update({ where, data }))
-  );
+  return prisma.$transaction(updates.map(({ where, data }) => model.update({ where, data })));
 }
 
 /**
@@ -364,10 +358,7 @@ export async function batchUpsert<T>(
 /**
  * Soft delete optimizado
  */
-export async function softDelete(
-  model: any,
-  where: any
-): Promise<number> {
+export async function softDelete(model: any, where: any): Promise<number> {
   const result = await model.updateMany({
     where,
     data: {
@@ -388,9 +379,7 @@ export async function fullTextSearch(
   where?: any,
   limit: number = 25
 ) {
-  const searchQuery = searchFields
-    .map(field => `${field}::text ILIKE $1`)
-    .join(' OR ');
+  const searchQuery = searchFields.map((field) => `${field}::text ILIKE $1`).join(' OR ');
 
   const query = `
     SELECT * FROM "${table}"

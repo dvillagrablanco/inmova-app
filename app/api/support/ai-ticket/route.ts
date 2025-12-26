@@ -12,21 +12,15 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const { subject, description, category, priority } = await req.json();
 
     if (!subject || !description) {
-      return NextResponse.json(
-        { error: 'Asunto y descripción son requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Asunto y descripción son requeridos' }, { status: 400 });
     }
 
     // Crear el ticket
@@ -105,10 +99,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     logger.error('Error al crear ticket de soporte:', error);
-    return NextResponse.json(
-      { error: 'Error al crear el ticket de soporte' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear el ticket de soporte' }, { status: 500 });
   }
 }
 
@@ -206,7 +197,7 @@ async function generateAIResponse(params: {
 
   // Analizar el contenido para determinar la mejor respuesta
   const text = `${subject} ${description}`.toLowerCase();
-  
+
   let bestMatch = {
     message:
       'Gracias por contactarnos. He registrado tu consulta.\n\n' +
@@ -247,12 +238,9 @@ async function generateAIResponse(params: {
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const { searchParams } = new URL(req.url);
@@ -294,9 +282,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ tickets });
   } catch (error) {
     logger.error('Error al obtener tickets:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener los tickets' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener los tickets' }, { status: 500 });
   }
 }

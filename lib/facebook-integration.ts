@@ -91,10 +91,9 @@ export class FacebookClient {
         fb_exchange_token: shortToken,
       });
 
-      const response = await fetch(
-        `${this.baseUrl}/oauth/access_token?${params}`,
-        { method: 'GET' }
-      );
+      const response = await fetch(`${this.baseUrl}/oauth/access_token?${params}`, {
+        method: 'GET',
+      });
 
       if (!response.ok) {
         throw new Error(`Failed to get long-lived token: ${response.statusText}`);
@@ -121,10 +120,9 @@ export class FacebookClient {
         throw new Error('No access token available');
       }
 
-      const response = await fetch(
-        `${this.baseUrl}/me/accounts?access_token=${this.accessToken}`,
-        { method: 'GET' }
-      );
+      const response = await fetch(`${this.baseUrl}/me/accounts?access_token=${this.accessToken}`, {
+        method: 'GET',
+      });
 
       if (!response.ok) {
         throw new Error(`Failed to get pages: ${response.statusText}`);
@@ -151,7 +149,7 @@ export class FacebookClient {
       }
 
       const fields = 'id,name,category,fan_count,likes,about,website,phone,emails,cover,picture';
-      
+
       const response = await fetch(
         `${this.baseUrl}/${pageId}?fields=${fields}&access_token=${this.accessToken}`,
         { method: 'GET' }
@@ -207,7 +205,10 @@ export class FacebookClient {
 
       if (post.scheduledTime) {
         formData.append('published', 'false');
-        formData.append('scheduled_publish_time', Math.floor(post.scheduledTime.getTime() / 1000).toString());
+        formData.append(
+          'scheduled_publish_time',
+          Math.floor(post.scheduledTime.getTime() / 1000).toString()
+        );
       }
 
       // Si hay imagen, usar endpoint de fotos
@@ -251,10 +252,9 @@ export class FacebookClient {
         throw new Error('No access token available');
       }
 
-      const response = await fetch(
-        `${this.baseUrl}/${postId}?access_token=${this.accessToken}`,
-        { method: 'DELETE' }
-      );
+      const response = await fetch(`${this.baseUrl}/${postId}?access_token=${this.accessToken}`, {
+        method: 'DELETE',
+      });
 
       if (!response.ok) {
         throw new Error(`Failed to delete post: ${response.statusText}`);
@@ -271,10 +271,7 @@ export class FacebookClient {
   /**
    * Obtener insights de la página
    */
-  async getPageInsights(params: {
-    startDate: Date;
-    endDate: Date;
-  }): Promise<FacebookInsights[]> {
+  async getPageInsights(params: { startDate: Date; endDate: Date }): Promise<FacebookInsights[]> {
     try {
       if (!this.accessToken || !this.pageId) {
         throw new Error('No access token or page ID available');
@@ -319,11 +316,11 @@ export class FacebookClient {
   private processInsights(metrics: any[]): FacebookInsights[] {
     const insightsByDate: Record<string, Partial<FacebookInsights>> = {};
 
-    metrics.forEach(metric => {
+    metrics.forEach((metric) => {
       const values = metric.values || [];
       values.forEach((value: any) => {
         const date = value.end_time.split('T')[0];
-        
+
         if (!insightsByDate[date]) {
           insightsByDate[date] = {
             pageId: this.pageId!,
@@ -371,7 +368,8 @@ export class FacebookClient {
         throw new Error('No access token or page ID available');
       }
 
-      const fields = 'id,message,created_time,permalink_url,full_picture,likes.summary(true),comments.summary(true),shares';
+      const fields =
+        'id,message,created_time,permalink_url,full_picture,likes.summary(true),comments.summary(true),shares';
 
       const response = await fetch(
         `${this.baseUrl}/${this.pageId}/posts?fields=${fields}&limit=${limit}&access_token=${this.accessToken}`,
@@ -400,11 +398,7 @@ export class FacebookClient {
 
 export function isFacebookConfigured(config?: FacebookConfig | null): boolean {
   if (!config) return false;
-  return !!(
-    config.appId &&
-    config.appSecret &&
-    config.enabled
-  );
+  return !!(config.appId && config.appSecret && config.enabled);
 }
 
 export function getFacebookClient(config?: FacebookConfig): FacebookClient | null {

@@ -10,7 +10,6 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-
 /**
  * @swagger
  * /api/communities/fees:
@@ -34,10 +33,7 @@ export async function GET(req: NextRequest) {
     const periodo = searchParams.get('periodo') || undefined;
 
     if (!buildingId) {
-      return NextResponse.json(
-        { error: 'buildingId es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'buildingId es requerido' }, { status: 400 });
     }
 
     const fees = await getCommunityFeesByBuilding(buildingId, periodo);
@@ -76,18 +72,11 @@ export async function POST(req: NextRequest) {
 
     if (body.action === 'mark_paid') {
       // Marcar cuota como pagada
-      const fee = await markFeeAsPaid(
-        body.feeId,
-        new Date(body.fechaPago),
-        body.metodoPago
-      );
+      const fee = await markFeeAsPaid(body.feeId, new Date(body.fechaPago), body.metodoPago);
       return NextResponse.json(fee);
     }
 
-    return NextResponse.json(
-      { error: 'Acción no válida' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Acción no válida' }, { status: 400 });
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message || 'Error al procesar cuotas' },

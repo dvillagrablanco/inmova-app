@@ -50,10 +50,7 @@ export async function GET(req: NextRequest) {
     }
   } catch (error) {
     logger.error('Error fetching cash flow:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener flujo de caja' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener flujo de caja' }, { status: 500 });
   }
 }
 
@@ -90,9 +87,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     logger.error('Error generating cash flow:', error);
-    return NextResponse.json(
-      { error: 'Error al generar flujo de caja' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al generar flujo de caja' }, { status: 500 });
   }
 }

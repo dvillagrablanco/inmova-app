@@ -9,12 +9,9 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.companyId) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Verificar permisos de administrador
@@ -28,21 +25,16 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const entityType = formData.get('entityType') as ImportableEntity;
-    const sourceSystem = (formData.get('sourceSystem') as keyof typeof SYSTEM_MAPPINGS) || 'generic_csv';
+    const sourceSystem =
+      (formData.get('sourceSystem') as keyof typeof SYSTEM_MAPPINGS) || 'generic_csv';
     const buildingId = formData.get('buildingId') as string | undefined;
 
     if (!file) {
-      return NextResponse.json(
-        { error: 'No se proporcionó ningún archivo' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No se proporcionó ningún archivo' }, { status: 400 });
     }
 
     if (!entityType) {
-      return NextResponse.json(
-        { error: 'Tipo de entidad no especificado' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Tipo de entidad no especificado' }, { status: 400 });
     }
 
     // Leer el contenido del archivo
@@ -59,13 +51,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Ejecutar la importación
-    const importResult = await importData(
-      data,
-      entityType,
-      session.user.companyId,
-      sourceSystem,
-      { buildingId }
-    );
+    const importResult = await importData(data, entityType, session.user.companyId, sourceSystem, {
+      buildingId,
+    });
 
     return NextResponse.json(importResult);
   } catch (error: any) {

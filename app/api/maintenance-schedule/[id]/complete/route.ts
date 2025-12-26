@@ -29,10 +29,7 @@ function calculateNextDate(currentDate: Date, frecuencia: string): Date {
   return nextDate;
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {

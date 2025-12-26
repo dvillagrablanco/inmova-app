@@ -16,10 +16,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const companyId = (session.user as any).companyId;
@@ -51,7 +48,9 @@ export async function GET(request: NextRequest) {
     // Obtener historial de mantenimiento
     const maintenanceHistory = await getMaintenanceHistory(companyId, filters);
 
-    logger.info(`Operador obtuvo historial de mantenimiento con ${maintenanceHistory.length} solicitudes`);
+    logger.info(
+      `Operador obtuvo historial de mantenimiento con ${maintenanceHistory.length} solicitudes`
+    );
 
     return NextResponse.json(maintenanceHistory);
   } catch (error) {

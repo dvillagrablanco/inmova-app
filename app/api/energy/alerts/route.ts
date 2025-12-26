@@ -37,10 +37,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(alerts);
   } catch (error) {
     logger.error('Error fetching energy alerts:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener alertas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener alertas' }, { status: 500 });
   }
 }
 
@@ -71,9 +68,6 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json(alert);
   } catch (error) {
     logger.error('Error resolving energy alert:', error);
-    return NextResponse.json(
-      { error: 'Error al resolver alerta' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al resolver alerta' }, { status: 500 });
   }
 }

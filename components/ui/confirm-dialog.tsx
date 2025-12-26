@@ -46,9 +46,7 @@ export function ConfirmDialog({
             )}
             <DialogTitle>{title}</DialogTitle>
           </div>
-          <DialogDescription className="pt-2">
-            {description}
-          </DialogDescription>
+          <DialogDescription className="pt-2">{description}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button
@@ -59,12 +57,7 @@ export function ConfirmDialog({
           >
             {cancelText}
           </Button>
-          <Button
-            type="button"
-            variant={variant}
-            onClick={onConfirm}
-            disabled={loading}
-          >
+          <Button type="button" variant={variant} onClick={onConfirm} disabled={loading}>
             {loading ? (
               <>
                 <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />

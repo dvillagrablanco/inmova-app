@@ -1,10 +1,10 @@
 /**
  * API Endpoint: Iniciar Pagos via Redsys PSD2
- * 
+ *
  * Este endpoint permite iniciar pagos SEPA a través de la API de Redsys PSD2.
- * 
+ *
  * Métodos: POST (iniciar pago), GET (consultar estado)
- * 
+ *
  * @author INMOVA Development Team
  */
 
@@ -12,7 +12,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import logger from '@/lib/logger';
 
 import {
-
   initiatePayment,
   getPaymentStatus,
   getPaymentDetails,
@@ -26,7 +25,6 @@ import { prisma } from '@/lib/db';
 
 // Force dynamic rendering for this route
 export const dynamic = 'force-dynamic';
-
 
 export async function POST(request: NextRequest) {
   try {
@@ -46,15 +44,23 @@ export async function POST(request: NextRequest) {
     }
 
     // Validar datos del pago
-    const { instructedAmount, debtorAccount, creditorAccount, creditorName, remittanceInformationUnstructured } = payment;
-    
-    if (!instructedAmount?.amount || !instructedAmount?.currency ||
-        !debtorAccount?.iban || !creditorAccount?.iban ||
-        !creditorName || !remittanceInformationUnstructured) {
-      return NextResponse.json(
-        { error: 'Datos del pago incompletos' },
-        { status: 400 }
-      );
+    const {
+      instructedAmount,
+      debtorAccount,
+      creditorAccount,
+      creditorName,
+      remittanceInformationUnstructured,
+    } = payment;
+
+    if (
+      !instructedAmount?.amount ||
+      !instructedAmount?.currency ||
+      !debtorAccount?.iban ||
+      !creditorAccount?.iban ||
+      !creditorName ||
+      !remittanceInformationUnstructured
+    ) {
+      return NextResponse.json({ error: 'Datos del pago incompletos' }, { status: 400 });
     }
 
     // Obtener la conexión bancaria
@@ -110,10 +116,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     logger.error('Error iniciando pago:', error);
-    return NextResponse.json(
-      { error: error.message || 'Error al iniciar pago' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Error al iniciar pago' }, { status: 500 });
   }
 }
 

@@ -3,7 +3,7 @@ import { getVersionInfo, getVersionHeaders } from '@/lib/version';
 
 /**
  * GET /api/version
- * 
+ *
  * Endpoint público que retorna información de la versión actual del deployment.
  * Útil para verificar que se está ejecutando la última versión.
  */
@@ -22,8 +22,8 @@ export async function GET() {
       headers: {
         ...versionHeaders,
         'Cache-Control': 'no-store, no-cache, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
+        Pragma: 'no-cache',
+        Expires: '0',
       },
     }
   );
@@ -33,7 +33,7 @@ export async function GET() {
 
 /**
  * HEAD /api/version
- * 
+ *
  * Permite verificar rápidamente la versión sin descargar el body completo
  */
 export async function HEAD() {

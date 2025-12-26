@@ -14,7 +14,7 @@ export function HydrationErrorSuppressor() {
       const originalError = console.error;
       console.error = (...args: any[]) => {
         const errorMessage = args[0]?.toString() || '';
-        
+
         // Filtrar mensajes específicos de hydration
         const hydrationPatterns = [
           'Hydration',
@@ -24,7 +24,7 @@ export function HydrationErrorSuppressor() {
           'Warning: Text content',
         ];
 
-        const isHydrationError = hydrationPatterns.some(pattern =>
+        const isHydrationError = hydrationPatterns.some((pattern) =>
           errorMessage.includes(pattern)
         );
 
@@ -37,14 +37,10 @@ export function HydrationErrorSuppressor() {
       const originalWarn = console.warn;
       console.warn = (...args: any[]) => {
         const warnMessage = args[0]?.toString() || '';
-        
-        const hydrationPatterns = [
-          'Hydration',
-          'hydration',
-          'did not match',
-        ];
 
-        const isHydrationWarning = hydrationPatterns.some(pattern =>
+        const hydrationPatterns = ['Hydration', 'hydration', 'did not match'];
+
+        const isHydrationWarning = hydrationPatterns.some((pattern) =>
           warnMessage.includes(pattern)
         );
 

@@ -1,12 +1,7 @@
 'use client';
 
 import { ReactNode, useState } from 'react';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Info, Lightbulb, AlertCircle, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 

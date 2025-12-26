@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, AlertCircle, Info, XCircle, X } from 'lucide-react';
@@ -14,7 +14,13 @@ interface AnimatedToastProps {
   message: ReactNode;
   onClose?: () => void;
   duration?: number;
-  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
+  position?:
+    | 'top-right'
+    | 'top-left'
+    | 'bottom-right'
+    | 'bottom-left'
+    | 'top-center'
+    | 'bottom-center';
 }
 
 const positionClasses = {

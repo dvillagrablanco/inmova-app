@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { motion, HTMLMotionProps } from 'framer-motion';
 import { Card } from '@/components/ui/card';
@@ -16,7 +16,21 @@ interface AnimatedCardProps extends HTMLAttributes<HTMLDivElement> {
  * Card con animaciones de entrada, hover y clic
  */
 export const AnimatedCard = forwardRef<HTMLDivElement, AnimatedCardProps>(
-  ({ children, className, hoverScale = 1.02, hoverShadow = true, clickable = false, delay = 0, onClick, onMouseEnter, onMouseLeave, ...props }, ref) => {
+  (
+    {
+      children,
+      className,
+      hoverScale = 1.02,
+      hoverShadow = true,
+      clickable = false,
+      delay = 0,
+      onClick,
+      onMouseEnter,
+      onMouseLeave,
+      ...props
+    },
+    ref
+  ) => {
     return (
       <motion.div
         ref={ref}
@@ -62,7 +76,19 @@ interface AnimatedListItemProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 export const AnimatedListItem = forwardRef<HTMLDivElement, AnimatedListItemProps>(
-  ({ children, className, index, clickable = false, onClick, onMouseEnter, onMouseLeave, ...props }, ref) => {
+  (
+    {
+      children,
+      className,
+      index,
+      clickable = false,
+      onClick,
+      onMouseEnter,
+      onMouseLeave,
+      ...props
+    },
+    ref
+  ) => {
     return (
       <motion.div
         ref={ref}

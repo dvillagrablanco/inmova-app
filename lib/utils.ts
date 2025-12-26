@@ -1,36 +1,44 @@
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
- 
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 export function formatDuration(seconds: number): string {
-  const hours = Math.floor(seconds / 3600)
-  const minutes = Math.floor((seconds % 3600) / 60)
-  const remainingSeconds = seconds % 60
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
 
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
-export function formatCurrency(amount: number, currency: string = 'EUR', locale: string = 'es-ES'): string {
+export function formatCurrency(
+  amount: number,
+  currency: string = 'EUR',
+  locale: string = 'es-ES'
+): string {
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: currency,
   }).format(amount);
 }
 
-export function formatDate(date: Date | string, format: 'short' | 'long' | 'full' = 'short', locale: string = 'es-ES'): string {
+export function formatDate(
+  date: Date | string,
+  format: 'short' | 'long' | 'full' = 'short',
+  locale: string = 'es-ES'
+): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
-  
+
   const optionsMap: Record<string, Intl.DateTimeFormatOptions> = {
     short: { year: 'numeric', month: '2-digit', day: '2-digit' },
     long: { year: 'numeric', month: 'long', day: 'numeric' },
-    full: { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
+    full: { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' },
   };
-  
+
   const options = optionsMap[format];
-  
+
   return new Intl.DateTimeFormat(locale, options).format(dateObj);
 }
 
@@ -55,7 +63,7 @@ export function debounce<T extends (...args: any[]) => any>(
   wait: number
 ): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout | null = null;
-  
+
   return (...args: Parameters<T>) => {
     if (timeout) clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
@@ -67,7 +75,7 @@ export function throttle<T extends (...args: any[]) => any>(
   limit: number
 ): (...args: Parameters<T>) => void {
   let inThrottle: boolean = false;
-  
+
   return (...args: Parameters<T>) => {
     if (!inThrottle) {
       func(...args);
@@ -82,7 +90,7 @@ export function generateId(): string {
 }
 
 export function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export function isValidEmail(email: string): boolean {
@@ -110,7 +118,8 @@ export function pluralize(count: number, singular: string, plural?: string): str
 
 export function copyToClipboard(text: string): Promise<boolean> {
   if (navigator.clipboard && window.isSecureContext) {
-    return navigator.clipboard.writeText(text)
+    return navigator.clipboard
+      .writeText(text)
       .then(() => true)
       .catch(() => false);
   } else {
@@ -133,7 +142,11 @@ export function copyToClipboard(text: string): Promise<boolean> {
   }
 }
 
-export function downloadFile(data: Blob | string, filename: string, mimeType: string = 'text/plain'): void {
+export function downloadFile(
+  data: Blob | string,
+  filename: string,
+  mimeType: string = 'text/plain'
+): void {
   const blob = typeof data === 'string' ? new Blob([data], { type: mimeType }) : data;
   const url = window.URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -162,9 +175,9 @@ export function getRelativeTime(date: Date | string, locale: string = 'es-ES'): 
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - dateObj.getTime()) / 1000);
-  
+
   const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
-  
+
   if (diffInSeconds < 60) {
     return rtf.format(-diffInSeconds, 'second');
   } else if (diffInSeconds < 3600) {

@@ -5,12 +5,7 @@
 
 import { Job } from 'bullmq';
 import { createWorker, QueueName } from './queue-config';
-import {
-  EmailJobData,
-  ReportJobData,
-  SyncJobData,
-  NotificationJobData,
-} from './queue-types';
+import { EmailJobData, ReportJobData, SyncJobData, NotificationJobData } from './queue-types';
 import logger from '../logger';
 
 /**
@@ -23,19 +18,19 @@ async function processEmailJob(job: Job<EmailJobData>): Promise<void> {
   try {
     // Aquí iría la lógica real de envío de email
     // Por ejemplo, usando Nodemailer, SendGrid, AWS SES, etc.
-    
+
     // Simulación:
     logger.info(`✉️  Sending email to: ${to}`);
     logger.info(`   Subject: ${subject}`);
-    
+
     // Simular delay de envío
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     // TODO: Implementar envío real de email
     // Ejemplo con Nodemailer:
     // const transporter = nodemailer.createTransport({ ... });
     // await transporter.sendMail({ to, subject, html, from, cc, bcc, attachments });
-    
+
     logger.info(`✅ Email sent successfully to: ${to}`);
   } catch (error) {
     logger.error(`❌ Failed to send email to ${to}:`, error);
@@ -54,31 +49,31 @@ async function processReportJob(job: Job<ReportJobData>): Promise<string> {
     // Actualizar progreso
     await job.updateProgress(10);
     logger.info(`📄 Generating ${type} report for company ${companyId}`);
-    
+
     // Aquí iría la lógica real de generación de reportes
     // Por ejemplo, usando PDFKit, ExcelJS, etc.
-    
+
     await job.updateProgress(30);
     // Simulación: obtener datos
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
     await job.updateProgress(60);
     // Simulación: generar documento
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
     await job.updateProgress(90);
     // Simulación: guardar archivo
     const reportUrl = `/reports/${type}-${companyId}-${Date.now()}.pdf`;
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     await job.updateProgress(100);
-    
+
     // Si se especificó email de notificación, enviarlo
     if (notifyEmail) {
       logger.info(`Sending report notification to: ${notifyEmail}`);
       // TODO: Añadir trabajo de email para notificar
     }
-    
+
     logger.info(`✅ Report generated successfully: ${reportUrl}`);
     return reportUrl;
   } catch (error) {
@@ -96,17 +91,17 @@ async function processSyncJob(job: Job<SyncJobData>): Promise<void> {
 
   try {
     logger.info(`🔄 Syncing ${type} for company ${companyId}`);
-    
+
     // Aquí iría la lógica real de sincronización
     // Por ejemplo:
     // - Actualizar estados de pagos
     // - Verificar contratos vencidos
     // - Sincronizar con APIs externas
     // - Realizar backups
-    
+
     // Simulación:
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
     logger.info(`✅ Sync completed successfully for ${type}`);
   } catch (error) {
     logger.error(`❌ Failed to sync ${type}:`, error);
@@ -123,17 +118,17 @@ async function processNotificationJob(job: Job<NotificationJobData>): Promise<vo
 
   try {
     logger.info(`🔔 Sending ${type} notification to user ${userId}`);
-    
+
     // Aquí iría la lógica real de notificaciones
     // Por ejemplo:
     // - Enviar push notification
     // - Enviar SMS
     // - Guardar notificación in-app en la BD
     // - Enviar email (usando la cola de emails)
-    
+
     // Simulación:
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
     logger.info(`✅ Notification sent successfully to user ${userId}`);
   } catch (error) {
     logger.error(`❌ Failed to send notification to user ${userId}:`, error);
@@ -171,13 +166,11 @@ export function initializeWorkers(): void {
   // Manejar señales para graceful shutdown
   const gracefulShutdown = async (signal: string) => {
     logger.info(`🛑 Received ${signal}, shutting down workers gracefully...`);
-    
+
     const workers = [emailWorker, reportWorker, syncWorker, notificationWorker].filter(Boolean);
-    
-    await Promise.all(
-      workers.map(worker => worker?.close())
-    );
-    
+
+    await Promise.all(workers.map((worker) => worker?.close()));
+
     logger.info('✅ All workers shut down successfully');
     process.exit(0);
   };

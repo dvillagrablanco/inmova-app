@@ -1,6 +1,6 @@
 /**
  * Endpoints API para Gastos
- * 
+ *
  * Implementa operaciones CRUD con validación Zod, manejo de errores
  * y códigos de estado HTTP correctos.
  */
@@ -33,20 +33,20 @@ export async function GET(req: NextRequest) {
     const offset = searchParams.get('offset');
 
     const where: any = {};
-    
+
     // Filtrar por compañía mediante edificios
     const userBuildings = await prisma.building.findMany({
       where: { companyId: user.companyId },
       select: { id: true },
     });
-    const buildingIds = userBuildings.map(b => b.id);
+    const buildingIds = userBuildings.map((b) => b.id);
     where.buildingId = { in: buildingIds };
 
     if (buildingId) where.buildingId = buildingId;
     if (unitId) where.unitId = unitId;
     if (providerId) where.providerId = providerId;
     if (categoria) where.categoria = categoria;
-    
+
     if (fechaDesde || fechaHasta) {
       where.fecha = {};
       if (fechaDesde) where.fecha.gte = new Date(fechaDesde);
@@ -73,26 +73,28 @@ export async function GET(req: NextRequest) {
     ]);
 
     logger.info(`Gastos obtenidos: ${expenses.length} de ${total}`, { userId: user.id });
-    
-    return NextResponse.json({
-      data: expenses,
-      meta: {
-        total,
-        limit: take,
-        offset: skip,
+
+    return NextResponse.json(
+      {
+        data: expenses,
+        meta: {
+          total,
+          limit: take,
+          offset: skip,
+        },
       },
-    }, { status: 200 });
-    
+      { status: 200 }
+    );
   } catch (error: any) {
     logger.error('Error fetching expenses:', error);
-    
+
     if (error.message === 'No autenticado') {
       return NextResponse.json(
         { error: 'No autenticado', message: 'Debe iniciar sesión' },
         { status: 401 }
       );
     }
-    
+
     return NextResponse.json(
       { error: 'Error interno del servidor', message: 'Error al obtener gastos' },
       { status: 500 }
@@ -200,7 +202,6 @@ export async function POST(req: NextRequest) {
 
     logger.info(`Gasto creado: ${expense.id}`, { userId: user.id, expenseId: expense.id });
     return NextResponse.json(expense, { status: 201 });
-    
   } catch (error: any) {
     logger.error('Error creating expense:', error);
 
@@ -216,12 +217,9 @@ export async function POST(req: NextRequest) {
     }
 
     if (error.message?.includes('permiso')) {
-      return NextResponse.json(
-        { error: 'Prohibido', message: error.message },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Prohibido', message: error.message }, { status: 403 });
     }
-    
+
     if (error.message === 'No autenticado') {
       return NextResponse.json(
         { error: 'No autenticado', message: 'Debe iniciar sesión' },

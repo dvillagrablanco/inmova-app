@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { requireAuth, requirePermission, forbiddenResponse, badRequestResponse } from '@/lib/permissions';
+import {
+  requireAuth,
+  requirePermission,
+  forbiddenResponse,
+  badRequestResponse,
+} from '@/lib/permissions';
 import bcrypt from 'bcryptjs';
 import logger, { logError } from '@/lib/logger';
 

@@ -16,9 +16,12 @@ interface AccessibleCardProps {
 }
 
 export const AccessibleCard = forwardRef<HTMLDivElement, AccessibleCardProps>(
-  ({ title, description, children, className, onClick, href, 'aria-label': ariaLabel, role }, ref) => {
+  (
+    { title, description, children, className, onClick, href, 'aria-label': ariaLabel, role },
+    ref
+  ) => {
     const isInteractive = onClick || href;
-    
+
     return (
       <Card
         ref={ref}

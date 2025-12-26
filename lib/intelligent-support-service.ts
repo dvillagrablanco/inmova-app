@@ -6,7 +6,7 @@
 import { prisma } from './db';
 
 // Categorías de tickets
-export type TicketCategory = 
+export type TicketCategory =
   | 'technical'
   | 'billing'
   | 'feature_request'
@@ -114,7 +114,7 @@ const KNOWLEDGE_BASE: KnowledgeArticle[] = [
     views: 1250,
     helpful: 145,
     notHelpful: 12,
-    videoUrl: '/videos/tutorials/create-building.mp4'
+    videoUrl: '/videos/tutorials/create-building.mp4',
   },
   {
     id: 'kb-002',
@@ -145,7 +145,7 @@ const KNOWLEDGE_BASE: KnowledgeArticle[] = [
     tags: ['unidades', 'viviendas', 'tutorial'],
     views: 980,
     helpful: 120,
-    notHelpful: 8
+    notHelpful: 8,
   },
   {
     id: 'kb-003',
@@ -181,7 +181,7 @@ const KNOWLEDGE_BASE: KnowledgeArticle[] = [
     views: 1450,
     helpful: 189,
     notHelpful: 15,
-    relatedArticles: ['kb-004', 'kb-010']
+    relatedArticles: ['kb-004', 'kb-010'],
   },
   {
     id: 'kb-004',
@@ -218,7 +218,7 @@ const KNOWLEDGE_BASE: KnowledgeArticle[] = [
     tags: ['pagos', 'stripe', 'automatización'],
     views: 890,
     helpful: 105,
-    notHelpful: 7
+    notHelpful: 7,
   },
   {
     id: 'kb-005',
@@ -264,7 +264,7 @@ const KNOWLEDGE_BASE: KnowledgeArticle[] = [
     views: 650,
     helpful: 78,
     notHelpful: 5,
-    videoUrl: '/videos/tutorials/coliving-setup.mp4'
+    videoUrl: '/videos/tutorials/coliving-setup.mp4',
   },
   {
     id: 'kb-006',
@@ -308,7 +308,7 @@ const KNOWLEDGE_BASE: KnowledgeArticle[] = [
     tags: ['importar', 'migración', 'CSV'],
     views: 420,
     helpful: 62,
-    notHelpful: 8
+    notHelpful: 8,
   },
   {
     id: 'kb-007',
@@ -351,7 +351,7 @@ const KNOWLEDGE_BASE: KnowledgeArticle[] = [
     tags: ['errores', 'problemas', 'soluciones'],
     views: 1100,
     helpful: 145,
-    notHelpful: 20
+    notHelpful: 20,
   },
   {
     id: 'kb-008',
@@ -395,7 +395,7 @@ const KNOWLEDGE_BASE: KnowledgeArticle[] = [
     tags: ['contabilidad', 'integración', 'ERP'],
     views: 560,
     helpful: 72,
-    notHelpful: 9
+    notHelpful: 9,
   },
   {
     id: 'kb-009',
@@ -440,7 +440,7 @@ Tecnología que extrae texto de imágenes, permitiéndote:
     views: 380,
     helpful: 48,
     notHelpful: 5,
-    videoUrl: '/videos/tutorials/ocr-usage.mp4'
+    videoUrl: '/videos/tutorials/ocr-usage.mp4',
   },
   {
     id: 'kb-010',
@@ -483,8 +483,8 @@ Tecnología que extrae texto de imágenes, permitiéndote:
     tags: ['mantenimiento', 'preventivo', 'automatización'],
     views: 720,
     helpful: 92,
-    notHelpful: 6
-  }
+    notHelpful: 6,
+  },
 ];
 
 // Patrones de preguntas frecuentes para el chatbot
@@ -493,62 +493,72 @@ const FAQ_PATTERNS = [
     patterns: ['cómo crear edificio', 'añadir edificio', 'nuevo edificio', 'registrar propiedad'],
     articleId: 'kb-001',
     confidence: 0.95,
-    quickAnswer: 'Para crear un edificio, ve a Menú > Edificios > Nuevo Edificio (+). Completa nombre, dirección, tipo y datos adicionales. ¿Te guío paso a paso?'
+    quickAnswer:
+      'Para crear un edificio, ve a Menú > Edificios > Nuevo Edificio (+). Completa nombre, dirección, tipo y datos adicionales. ¿Te guío paso a paso?',
   },
   {
     patterns: ['añadir unidad', 'crear vivienda', 'nueva unidad', 'registrar piso'],
     articleId: 'kb-002',
-    confidence: 0.90,
-    quickAnswer: 'Puedes añadir unidades desde el edificio (pestaña Unidades) o directamente desde Menú > Unidades > Nueva Unidad. Necesitarás número, tipo, superficie y renta.'
+    confidence: 0.9,
+    quickAnswer:
+      'Puedes añadir unidades desde el edificio (pestaña Unidades) o directamente desde Menú > Unidades > Nueva Unidad. Necesitarás número, tipo, superficie y renta.',
   },
   {
     patterns: ['crear contrato', 'nuevo contrato', 'alquilar', 'arrendar'],
     articleId: 'kb-003',
     confidence: 0.92,
-    quickAnswer: 'Ve a Contratos > Nuevo Contrato. Selecciona inquilino y unidad, define fechas, renta y depósito. Puedes activar pagos recurrentes con Stripe para automatizar cobros.'
+    quickAnswer:
+      'Ve a Contratos > Nuevo Contrato. Selecciona inquilino y unidad, define fechas, renta y depósito. Puedes activar pagos recurrentes con Stripe para automatizar cobros.',
   },
   {
     patterns: ['pago automático', 'cobro recurrente', 'stripe', 'domiciliación'],
     articleId: 'kb-004',
     confidence: 0.88,
-    quickAnswer: 'Los pagos recurrentes se configuran desde el contrato > Pagos > Activar Pagos Recurrentes. Se cargará automáticamente a la tarjeta del inquilino cada mes.'
+    quickAnswer:
+      'Los pagos recurrentes se configuran desde el contrato > Pagos > Activar Pagos Recurrentes. Se cargará automáticamente a la tarjeta del inquilino cada mes.',
   },
   {
     patterns: ['coliving', 'habitaciones', 'prorrateo', 'gastos compartidos'],
     articleId: 'kb-005',
     confidence: 0.93,
-    quickAnswer: 'El módulo de Alquiler por Habitaciones permite crear habitaciones individuales en una unidad y prorratear gastos comunes. ¿Necesitas ayuda configurándolo?'
+    quickAnswer:
+      'El módulo de Alquiler por Habitaciones permite crear habitaciones individuales en una unidad y prorratear gastos comunes. ¿Necesitas ayuda configurándolo?',
   },
   {
     patterns: ['importar datos', 'migrar', 'CSV', 'homming', 'rentger'],
     articleId: 'kb-006',
     confidence: 0.89,
-    quickAnswer: 'Puedes importar datos desde Admin > Importar. Selecciona tu sistema anterior, descarga la plantilla, prepara el CSV y súbelo. Te guiaremos en la validación.'
+    quickAnswer:
+      'Puedes importar datos desde Admin > Importar. Selecciona tu sistema anterior, descarga la plantilla, prepara el CSV y súbelo. Te guiaremos en la validación.',
   },
   {
     patterns: ['error', 'problema', 'no funciona', 'fallo'],
     articleId: 'kb-007',
     confidence: 0.75,
-    quickAnswer: 'Veo que tienes un problema. ¿Puedes describirlo con más detalle? Mientras, revisa nuestra guía de solución de problemas comunes.'
+    quickAnswer:
+      'Veo que tienes un problema. ¿Puedes describirlo con más detalle? Mientras, revisa nuestra guía de solución de problemas comunes.',
   },
   {
     patterns: ['integración contable', 'sage', 'holded', 'a3', 'contasimple', 'alegra'],
     articleId: 'kb-008',
     confidence: 0.91,
-    quickAnswer: 'INMOVA se integra con Sage, Holded, A3, ContaSimple, Alegra y Zucchetti. Ve a Contabilidad > Integraciones y configura tus credenciales API.'
+    quickAnswer:
+      'INMOVA se integra con Sage, Holded, A3, ContaSimple, Alegra y Zucchetti. Ve a Contabilidad > Integraciones y configura tus credenciales API.',
   },
   {
     patterns: ['OCR', 'escanear', 'DNI', 'reconocimiento'],
     articleId: 'kb-009',
     confidence: 0.87,
-    quickAnswer: 'El módulo OCR extrae datos automáticamente de DNI y contratos. Sube la imagen, espera el procesamiento y podrás crear inquilinos/contratos directamente.'
+    quickAnswer:
+      'El módulo OCR extrae datos automáticamente de DNI y contratos. Sube la imagen, espera el procesamiento y podrás crear inquilinos/contratos directamente.',
   },
   {
     patterns: ['mantenimiento preventivo', 'revisión', 'programar mantenimiento'],
     articleId: 'kb-010',
     confidence: 0.85,
-    quickAnswer: 'El mantenimiento preventivo se gestiona desde Mantenimiento > Preventivo. Crea programaciones recurrentes (mensual, trimestral, anual) y se generarán órdenes automáticamente.'
-  }
+    quickAnswer:
+      'El mantenimiento preventivo se gestiona desde Mantenimiento > Preventivo. Crea programaciones recurrentes (mensual, trimestral, anual) y se generarán órdenes automáticamente.',
+  },
 ];
 
 /**
@@ -561,7 +571,7 @@ export async function processUserQuestion(
   sentimentAnalysis?: any
 ): Promise<ChatbotResponse> {
   const lowerQuestion = question.toLowerCase();
-  
+
   // Adaptar el tono de respuesta según el sentimiento
   let responsePrefix = '';
   if (sentimentAnalysis) {
@@ -573,19 +583,19 @@ export async function processUserQuestion(
       responsePrefix = 'Veo que es urgente. ';
     }
   }
-  
+
   // Buscar coincidencias en patrones FAQ
   for (const faq of FAQ_PATTERNS) {
     for (const pattern of faq.patterns) {
       if (lowerQuestion.includes(pattern)) {
-        const article = KNOWLEDGE_BASE.find(a => a.id === faq.articleId);
-        
+        const article = KNOWLEDGE_BASE.find((a) => a.id === faq.articleId);
+
         return {
           message: responsePrefix + faq.quickAnswer,
           confidence: faq.confidence,
           suggestedActions: generateSuggestedActions(faq.articleId, sentimentAnalysis),
           relatedArticles: article ? [article] : [],
-          requiresHumanSupport: sentimentAnalysis?.urgency === 'critical'
+          requiresHumanSupport: sentimentAnalysis?.urgency === 'critical',
         };
       }
     }
@@ -593,41 +603,44 @@ export async function processUserQuestion(
 
   // Si no hay coincidencia, búsqueda general en la base de conocimientos
   const searchResults = searchKnowledgeBase(question);
-  
+
   if (searchResults.length > 0) {
     return {
-      message: responsePrefix + `He encontrado ${searchResults.length} artículos relacionados con tu consulta. ¿Te ayudan estos recursos?`,
-      confidence: 0.70,
+      message:
+        responsePrefix +
+        `He encontrado ${searchResults.length} artículos relacionados con tu consulta. ¿Te ayudan estos recursos?`,
+      confidence: 0.7,
       relatedArticles: searchResults.slice(0, 3),
-      requiresHumanSupport: false
+      requiresHumanSupport: false,
     };
   }
 
   // Si no se encuentra nada, sugerir contacto humano
   return {
-    message: 'No he encontrado una respuesta directa a tu pregunta. Te recomiendo explorar nuestra base de conocimientos o crear un ticket de soporte para ayuda personalizada.',
-    confidence: 0.30,
+    message:
+      'No he encontrado una respuesta directa a tu pregunta. Te recomiendo explorar nuestra base de conocimientos o crear un ticket de soporte para ayuda personalizada.',
+    confidence: 0.3,
     suggestedActions: [
       {
         id: 'create_ticket',
         label: 'Crear ticket de soporte',
         action: 'create_ticket',
-        icon: 'Ticket'
+        icon: 'Ticket',
       },
       {
         id: 'browse_kb',
         label: 'Explorar base de conocimientos',
         action: 'navigate:/knowledge-base',
-        icon: 'BookOpen'
+        icon: 'BookOpen',
       },
       {
         id: 'contact_sales',
         label: 'Contactar con ventas',
         action: 'navigate:/landing/contacto',
-        icon: 'Phone'
-      }
+        icon: 'Phone',
+      },
     ],
-    requiresHumanSupport: true
+    requiresHumanSupport: true,
   };
 }
 
@@ -636,41 +649,40 @@ export async function processUserQuestion(
  */
 export function searchKnowledgeBase(query: string): KnowledgeArticle[] {
   const lowerQuery = query.toLowerCase();
-  const words = lowerQuery.split(' ').filter(w => w.length > 3);
+  const words = lowerQuery.split(' ').filter((w) => w.length > 3);
 
-  return KNOWLEDGE_BASE
-    .map(article => {
-      let score = 0;
-      const lowerTitle = article.title.toLowerCase();
-      const lowerContent = article.content.toLowerCase();
-      const lowerTags = article.tags.join(' ').toLowerCase();
+  return KNOWLEDGE_BASE.map((article) => {
+    let score = 0;
+    const lowerTitle = article.title.toLowerCase();
+    const lowerContent = article.content.toLowerCase();
+    const lowerTags = article.tags.join(' ').toLowerCase();
 
-      // Puntuación por coincidencia en título
-      words.forEach(word => {
-        if (lowerTitle.includes(word)) score += 10;
-        if (lowerTags.includes(word)) score += 5;
-        if (lowerContent.includes(word)) score += 2;
-      });
+    // Puntuación por coincidencia en título
+    words.forEach((word) => {
+      if (lowerTitle.includes(word)) score += 10;
+      if (lowerTags.includes(word)) score += 5;
+      if (lowerContent.includes(word)) score += 2;
+    });
 
-      return { article, score };
-    })
-    .filter(item => item.score > 0)
+    return { article, score };
+  })
+    .filter((item) => item.score > 0)
     .sort((a, b) => b.score - a.score)
-    .map(item => item.article);
+    .map((item) => item.article);
 }
 
 /**
  * Obtiene un artículo por ID
  */
 export function getArticleById(articleId: string): KnowledgeArticle | undefined {
-  return KNOWLEDGE_BASE.find(a => a.id === articleId);
+  return KNOWLEDGE_BASE.find((a) => a.id === articleId);
 }
 
 /**
  * Obtiene todos los artículos por categoría
  */
 export function getArticlesByCategory(category: string): KnowledgeArticle[] {
-  return KNOWLEDGE_BASE.filter(a => a.category === category);
+  return KNOWLEDGE_BASE.filter((a) => a.category === category);
 }
 
 /**
@@ -683,47 +695,47 @@ function generateSuggestedActions(articleId: string, sentimentAnalysis?: any): S
         id: 'create_building',
         label: 'Crear edificio ahora',
         action: 'navigate:/edificios/nuevo',
-        icon: 'Building2'
+        icon: 'Building2',
       },
       {
         id: 'watch_video',
         label: 'Ver tutorial en video',
         action: 'play_video:/videos/tutorials/create-building.mp4',
-        icon: 'Play'
-      }
+        icon: 'Play',
+      },
     ],
     'kb-002': [
       {
         id: 'create_unit',
         label: 'Añadir unidad',
         action: 'navigate:/unidades/nuevo',
-        icon: 'Home'
-      }
+        icon: 'Home',
+      },
     ],
     'kb-003': [
       {
         id: 'create_contract',
         label: 'Crear contrato',
         action: 'navigate:/contratos/nuevo',
-        icon: 'FileText'
-      }
+        icon: 'FileText',
+      },
     ],
     'kb-005': [
       {
         id: 'setup_coliving',
         label: 'Configurar coliving',
         action: 'navigate:/room-rental',
-        icon: 'Users'
-      }
+        icon: 'Users',
+      },
     ],
     'kb-006': [
       {
         id: 'import_data',
         label: 'Importar datos',
         action: 'navigate:/admin/importar',
-        icon: 'Upload'
-      }
-    ]
+        icon: 'Upload',
+      },
+    ],
   };
 
   return actions[articleId] || [];
@@ -741,7 +753,7 @@ export async function createSupportTicket(
 ): Promise<SupportTicket> {
   // Analizar prioridad automáticamente
   const priority = analyzePriority(subject, description);
-  
+
   // Extraer tags del contenido
   const tags = extractTags(subject + ' ' + description);
 
@@ -756,21 +768,25 @@ export async function createSupportTicket(
       priority,
       status: 'open',
       tags,
-      autoResolved: false
-    }
+      autoResolved: false,
+    },
   });
 
   // Intentar respuesta automática
   const autoResponse = await attemptAutoResolution(ticket.id, description);
 
-  const autoMsg = autoResponse ? [{
-    id: autoResponse.id,
-    ticketId: autoResponse.ticketId,
-    sender: autoResponse.sender as 'user' | 'system' | 'ai',
-    message: autoResponse.message,
-    isAutomatic: autoResponse.isAutomatic,
-    createdAt: autoResponse.createdAt
-  }] : [];
+  const autoMsg = autoResponse
+    ? [
+        {
+          id: autoResponse.id,
+          ticketId: autoResponse.ticketId,
+          sender: autoResponse.sender as 'user' | 'system' | 'ai',
+          message: autoResponse.message,
+          isAutomatic: autoResponse.isAutomatic,
+          createdAt: autoResponse.createdAt,
+        },
+      ]
+    : [];
 
   return {
     id: ticket.id,
@@ -785,7 +801,7 @@ export async function createSupportTicket(
     messages: autoMsg,
     createdAt: ticket.createdAt,
     updatedAt: ticket.updatedAt,
-    autoResolved: ticket.autoResolved
+    autoResolved: ticket.autoResolved,
   };
 }
 
@@ -794,15 +810,15 @@ export async function createSupportTicket(
  */
 function analyzePriority(subject: string, description: string): TicketPriority {
   const content = (subject + ' ' + description).toLowerCase();
-  
+
   const criticalKeywords = ['crítico', 'urgente', 'no funciona', 'down', 'caído', 'pérdida datos'];
   const highKeywords = ['error', 'problema', 'fallo', 'bug'];
   const mediumKeywords = ['duda', 'pregunta', 'cómo', 'consulta'];
 
-  if (criticalKeywords.some(k => content.includes(k))) return 'critical';
-  if (highKeywords.some(k => content.includes(k))) return 'high';
-  if (mediumKeywords.some(k => content.includes(k))) return 'medium';
-  
+  if (criticalKeywords.some((k) => content.includes(k))) return 'critical';
+  if (highKeywords.some((k) => content.includes(k))) return 'high';
+  if (mediumKeywords.some((k) => content.includes(k))) return 'medium';
+
   return 'low';
 }
 
@@ -814,17 +830,17 @@ function extractTags(content: string): string[] {
   const lower = content.toLowerCase();
 
   const tagMap: Record<string, string> = {
-    'edificio': 'buildings',
-    'unidad': 'units',
-    'inquilino': 'tenants',
-    'contrato': 'contracts',
-    'pago': 'payments',
-    'mantenimiento': 'maintenance',
-    'stripe': 'billing',
-    'importar': 'import',
-    'ocr': 'ocr',
-    'coliving': 'coliving',
-    'habitación': 'rooms'
+    edificio: 'buildings',
+    unidad: 'units',
+    inquilino: 'tenants',
+    contrato: 'contracts',
+    pago: 'payments',
+    mantenimiento: 'maintenance',
+    stripe: 'billing',
+    importar: 'import',
+    ocr: 'ocr',
+    coliving: 'coliving',
+    habitación: 'rooms',
   };
 
   Object.entries(tagMap).forEach(([keyword, tag]) => {
@@ -844,16 +860,16 @@ async function attemptAutoResolution(
   description: string
 ): Promise<TicketMessage | null> {
   const response = await processUserQuestion(description, '', '');
-  
-  if (response.confidence > 0.80 && !response.requiresHumanSupport) {
+
+  if (response.confidence > 0.8 && !response.requiresHumanSupport) {
     // Crear mensaje automático
     const message = await prisma.ticketMessage.create({
       data: {
         ticketId,
         sender: 'ai',
         message: response.message,
-        isAutomatic: true
-      }
+        isAutomatic: true,
+      },
     });
 
     return {
@@ -862,7 +878,7 @@ async function attemptAutoResolution(
       sender: message.sender as 'user' | 'system' | 'ai',
       message: message.message,
       isAutomatic: message.isAutomatic,
-      createdAt: message.createdAt
+      createdAt: message.createdAt,
     };
   }
 

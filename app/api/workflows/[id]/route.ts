@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import {
-  toggleWorkflow,
-  deleteWorkflow,
-  executeWorkflow,
-} from '@/lib/workflow-service';
+import { toggleWorkflow, deleteWorkflow, executeWorkflow } from '@/lib/workflow-service';
 import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
 
@@ -14,10 +10,7 @@ export const dynamic = 'force-dynamic';
 /**
  * GET /api/workflows/[id] - Obtiene un workflow específico
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -42,29 +35,20 @@ export async function GET(
     });
 
     if (!workflow) {
-      return NextResponse.json(
-        { error: 'Workflow no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Workflow no encontrado' }, { status: 404 });
     }
 
     return NextResponse.json(workflow);
   } catch (error) {
     logger.error('Error obteniendo workflow');
-    return NextResponse.json(
-      { error: 'Error al obtener workflow' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener workflow' }, { status: 500 });
   }
 }
 
 /**
  * PATCH /api/workflows/[id] - Actualiza un workflow
  */
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -83,10 +67,7 @@ export async function PATCH(
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Workflow no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Workflow no encontrado' }, { status: 404 });
     }
 
     // Manejar acción especial de activar/desactivar
@@ -122,20 +103,14 @@ export async function PATCH(
     return NextResponse.json(workflow);
   } catch (error) {
     logger.error('Error actualizando workflow');
-    return NextResponse.json(
-      { error: 'Error al actualizar workflow' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar workflow' }, { status: 500 });
   }
 }
 
 /**
  * DELETE /api/workflows/[id] - Elimina un workflow
  */
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -152,10 +127,7 @@ export async function DELETE(
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Workflow no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Workflow no encontrado' }, { status: 404 });
     }
 
     await deleteWorkflow(params.id);
@@ -163,9 +135,6 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     logger.error('Error eliminando workflow');
-    return NextResponse.json(
-      { error: 'Error al eliminar workflow' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar workflow' }, { status: 500 });
   }
 }

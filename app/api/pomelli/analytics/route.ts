@@ -12,12 +12,9 @@ import { logger } from '@/lib/logger';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -26,10 +23,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Usuario no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
     const searchParams = request.nextUrl.searchParams;
@@ -98,13 +92,14 @@ export async function GET(request: NextRequest) {
     );
 
     // Calcular engagement rate promedio
-    const avgEngagementRate = posts.length > 0
-      ? posts.reduce((sum, post) => sum + post.engagementRate, 0) / posts.length
-      : 0;
+    const avgEngagementRate =
+      posts.length > 0
+        ? posts.reduce((sum, post) => sum + post.engagementRate, 0) / posts.length
+        : 0;
 
     // Agrupar por plataforma
     const byPlatform: Record<string, any> = {};
-    
+
     posts.forEach((post) => {
       post.platforms.forEach((platform) => {
         if (!byPlatform[platform]) {
@@ -118,7 +113,7 @@ export async function GET(request: NextRequest) {
             postsCount: 0,
           };
         }
-        
+
         // Distribuir métricas proporcionalmente
         const platformCount = post.platforms.length;
         byPlatform[platform].impressions += Math.floor(post.impressions / platformCount);
@@ -164,9 +159,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error getting analytics:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener analytics' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener analytics' }, { status: 500 });
   }
 }

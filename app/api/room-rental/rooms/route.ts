@@ -4,11 +4,11 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { getAvailableRooms } from '@/lib/room-rental-service';
 import logger from '@/lib/logger';
-import { 
-  selectUnitMinimal, 
-  selectBuildingMinimal, 
-  selectRoomContractMinimal, 
-  selectTenantMinimal 
+import {
+  selectUnitMinimal,
+  selectBuildingMinimal,
+  selectRoomContractMinimal,
+  selectTenantMinimal,
 } from '@/lib/query-optimizer';
 
 export const dynamic = 'force-dynamic';
@@ -114,10 +114,7 @@ export async function POST(request: NextRequest) {
 
     // Validaciones
     if (!data.unitId || !data.numero || !data.superficie || !data.rentaMensual) {
-      return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
 
     const room = await prisma.room.create({

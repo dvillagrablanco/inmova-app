@@ -46,7 +46,7 @@ export const businessVerticals = [
   'mixto',
 ] as const;
 
-export type BusinessVertical = typeof businessVerticals[number];
+export type BusinessVertical = (typeof businessVerticals)[number];
 
 export const registerSchema = z
   .object({

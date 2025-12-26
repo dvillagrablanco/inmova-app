@@ -297,8 +297,10 @@ export async function cachedContracts(companyId: string) {
       const contractsWithExpiration = contracts.map((contract) => {
         const today = new Date();
         const fechaFin = new Date(contract.fechaFin);
-        const diasHastaVencimiento = Math.ceil((fechaFin.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-        
+        const diasHastaVencimiento = Math.ceil(
+          (fechaFin.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+        );
+
         return {
           ...contract,
           diasHastaVencimiento,

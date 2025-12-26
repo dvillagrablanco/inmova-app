@@ -9,28 +9,19 @@ export const dynamic = 'force-dynamic';
  * GET /api/notification-templates/[id]
  * Obtiene una plantilla de notificación específica
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await requireAuth();
 
     const template = await prisma.notificationTemplate.findFirst({
       where: {
         id: params.id,
-        OR: [
-          { companyId: user.companyId },
-          { esPlantillaGlobal: true },
-        ],
+        OR: [{ companyId: user.companyId }, { esPlantillaGlobal: true }],
       },
     });
 
     if (!template) {
-      return NextResponse.json(
-        { error: 'Plantilla no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Plantilla no encontrada' }, { status: 404 });
     }
 
     return NextResponse.json(template);
@@ -50,10 +41,7 @@ export async function GET(
  * PUT /api/notification-templates/[id]
  * Actualiza una plantilla de notificación (solo personalizadas)
  */
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await requireAuth();
     const body = await request.json();
@@ -68,10 +56,7 @@ export async function PUT(
     });
 
     if (!existingTemplate) {
-      return NextResponse.json(
-        { error: 'Plantilla no encontrada o no editable' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Plantilla no encontrada o no editable' }, { status: 404 });
     }
 
     const template = await prisma.notificationTemplate.update({
@@ -109,10 +94,7 @@ export async function PUT(
  * DELETE /api/notification-templates/[id]
  * Elimina una plantilla de notificación (solo personalizadas)
  */
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await requireAuth();
 

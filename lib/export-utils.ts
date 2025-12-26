@@ -36,7 +36,10 @@ export function exportToCSV(options: ExportOptions): void {
           value = col.format(value);
         }
         // Escapar valores que contienen comas, comillas o saltos de línea
-        if (typeof value === 'string' && (value.includes(',') || value.includes('"') || value.includes('\n'))) {
+        if (
+          typeof value === 'string' &&
+          (value.includes(',') || value.includes('"') || value.includes('\n'))
+        ) {
           value = `"${value.replace(/"/g, '""')}"`;
         }
         return value ?? '';

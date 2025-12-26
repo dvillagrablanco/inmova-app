@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 /**
  * POST /api/admin/companies/bulk
  * Operaciones en lote sobre empresas (solo super_admin)
- * 
+ *
  * Body: {
  *   action: 'activate' | 'deactivate' | 'changePlan' | 'changeStatus',
  *   companyIds: string[],
@@ -19,7 +19,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session || !session.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
@@ -35,10 +35,7 @@ export async function POST(request: NextRequest) {
     const { action, companyIds, ...params } = await request.json();
 
     if (!action || !companyIds || !Array.isArray(companyIds) || companyIds.length === 0) {
-      return NextResponse.json(
-        { error: 'Parámetros inválidos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Parámetros inválidos' }, { status: 400 });
     }
 
     let result;
@@ -85,16 +82,13 @@ export async function POST(request: NextRequest) {
         break;
 
       default:
-        return NextResponse.json(
-          { error: 'Acción no válida' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Acción no válida' }, { status: 400 });
     }
 
     // Registrar en audit log
     await prisma.auditLog.create({
       data: {
-        userId: session?.user?.id|| '',
+        userId: session?.user?.id || '',
         action: 'UPDATE',
         entityType: 'Company',
         entityId: 'bulk',
@@ -117,9 +111,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error en operación en lote:', error);
-    return NextResponse.json(
-      { error: 'Error al ejecutar operación en lote' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al ejecutar operación en lote' }, { status: 500 });
   }
 }

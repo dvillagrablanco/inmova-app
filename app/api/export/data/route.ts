@@ -17,10 +17,7 @@ export async function POST(req: NextRequest) {
     const companyId = (session.user as any).companyId;
 
     if (!model) {
-      return NextResponse.json(
-        { error: 'Modelo requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Modelo requerido' }, { status: 400 });
     }
 
     const result = await exportData({
@@ -29,15 +26,15 @@ export async function POST(req: NextRequest) {
       format,
       filters,
       startDate: startDate ? new Date(startDate) : undefined,
-      endDate: endDate ? new Date(endDate) : undefined
+      endDate: endDate ? new Date(endDate) : undefined,
     });
 
     if (format === 'csv' && typeof result === 'string') {
       return new NextResponse(result, {
         headers: {
           'Content-Type': 'text/csv',
-          'Content-Disposition': `attachment; filename="${model}_export.csv"`
-        }
+          'Content-Disposition': `attachment; filename="${model}_export.csv"`,
+        },
       });
     }
 

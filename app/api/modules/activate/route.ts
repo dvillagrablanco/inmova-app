@@ -6,27 +6,20 @@ import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
+      where: { id: session.user.id },
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Usuario no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
     // Solo admins o superadmins pueden activar módulos
@@ -41,25 +34,22 @@ export async function POST(request: NextRequest) {
     const { moduloCodigo } = body;
 
     if (!moduloCodigo) {
-      return NextResponse.json(
-        { error: 'Código de módulo requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Código de módulo requerido' }, { status: 400 });
     }
 
     // Verificar si el módulo ya existe para esta empresa
     const existingModule = await prisma.companyModule.findFirst({
       where: {
         companyId: user.companyId,
-        moduloCodigo
-      }
+        moduloCodigo,
+      },
     });
 
     if (existingModule) {
       // Si ya existe, solo actualizar el estado
       await prisma.companyModule.update({
         where: { id: existingModule.id },
-        data: { activo: true }
+        data: { activo: true },
       });
     } else {
       // Crear nuevo registro de módulo
@@ -67,8 +57,8 @@ export async function POST(request: NextRequest) {
         data: {
           companyId: user.companyId,
           moduloCodigo,
-          activo: true
-        }
+          activo: true,
+        },
       });
     }
 
@@ -82,21 +72,19 @@ export async function POST(request: NextRequest) {
         entityId: moduloCodigo,
         entityName: moduloCodigo,
         changes: `Usuario ${user.name} activó el módulo ${moduloCodigo}`,
-        ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
-      }
+        ipAddress:
+          request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
+      },
     });
 
     logger.info(`Módulo ${moduloCodigo} activado para empresa ${user.companyId}`);
 
     return NextResponse.json({
       success: true,
-      message: 'Módulo activado correctamente'
+      message: 'Módulo activado correctamente',
     });
   } catch (error) {
     logger.error('Error activating module:', error);
-    return NextResponse.json(
-      { error: 'Error al activar módulo' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al activar módulo' }, { status: 500 });
   }
 }

@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
 
     // Buscar el inquilino por email
     const tenant = await prisma.tenant.findUnique({
-      where: { email: session.user.email! }
+      where: { email: session.user.email! },
     });
 
     if (!tenant) {
@@ -26,24 +26,21 @@ export async function GET(request: NextRequest) {
     // Obtener conversaciones del inquilino
     const conversations = await prisma.chatbotConversation.findMany({
       where: {
-        tenantId: tenant.id
+        tenantId: tenant.id,
       },
       include: {
         messages: {
           orderBy: { createdAt: 'asc' },
-          take: 1 // Solo el último mensaje para preview
-        }
+          take: 1, // Solo el último mensaje para preview
+        },
       },
-      orderBy: { updatedAt: 'desc' }
+      orderBy: { updatedAt: 'desc' },
     });
 
     return NextResponse.json(conversations);
   } catch (error: any) {
     logger.error('Error al obtener conversaciones:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener conversaciones' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener conversaciones' }, { status: 500 });
   }
 }
 
@@ -60,7 +57,7 @@ export async function POST(request: NextRequest) {
 
     // Buscar el inquilino por email
     const tenant = await prisma.tenant.findUnique({
-      where: { email: session.user.email! }
+      where: { email: session.user.email! },
     });
 
     if (!tenant) {
@@ -82,20 +79,17 @@ export async function POST(request: NextRequest) {
         contexto: {
           tenantName: tenant.nombreCompleto,
           tenantEmail: tenant.email,
-          startedAt: new Date().toISOString()
-        }
+          startedAt: new Date().toISOString(),
+        },
       },
       include: {
-        messages: true
-      }
+        messages: true,
+      },
     });
 
     return NextResponse.json(conversation, { status: 201 });
   } catch (error: any) {
     logger.error('Error al crear conversación:', error);
-    return NextResponse.json(
-      { error: 'Error al crear conversación' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear conversación' }, { status: 500 });
   }
 }

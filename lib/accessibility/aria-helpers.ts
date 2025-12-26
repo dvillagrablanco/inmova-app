@@ -17,7 +17,7 @@ export function getFieldAriaProps({
   label,
   error,
   description,
-  required = false
+  required = false,
 }: {
   id: string;
   label: string;
@@ -34,7 +34,7 @@ export function getFieldAriaProps({
     'aria-required': required,
     'aria-invalid': !!error,
     'aria-describedby': [descriptionId, errorId].filter(Boolean).join(' ') || undefined,
-    'aria-errormessage': errorId
+    'aria-errormessage': errorId,
   };
 }
 
@@ -44,7 +44,7 @@ export function getFieldAriaProps({
 export function getExpandableAriaProps({
   id,
   expanded,
-  controlsId
+  controlsId,
 }: {
   id: string;
   expanded: boolean;
@@ -55,7 +55,7 @@ export function getExpandableAriaProps({
     'aria-expanded': expanded,
     'aria-controls': controlsId,
     role: 'button',
-    tabIndex: 0
+    tabIndex: 0,
   };
 }
 
@@ -65,7 +65,7 @@ export function getExpandableAriaProps({
 export function getModalAriaProps({
   titleId,
   descriptionId,
-  open
+  open,
 }: {
   titleId: string;
   descriptionId?: string;
@@ -76,7 +76,7 @@ export function getModalAriaProps({
     'aria-modal': true,
     'aria-labelledby': titleId,
     'aria-describedby': descriptionId,
-    'aria-hidden': !open
+    'aria-hidden': !open,
   };
 }
 
@@ -85,7 +85,7 @@ export function getModalAriaProps({
  */
 export function getSortableHeaderAriaProps({
   columnName,
-  sortDirection
+  sortDirection,
 }: {
   columnName: string;
   sortDirection?: 'asc' | 'desc' | 'none';
@@ -94,7 +94,7 @@ export function getSortableHeaderAriaProps({
     role: 'columnheader',
     'aria-sort': sortDirection || 'none',
     'aria-label': `${columnName}, ${sortDirection === 'asc' ? 'ordenado ascendente' : sortDirection === 'desc' ? 'ordenado descendente' : 'sin ordenar'}`,
-    tabIndex: 0
+    tabIndex: 0,
   };
 }
 
@@ -104,7 +104,7 @@ export function getSortableHeaderAriaProps({
 export function getProgressAriaProps({
   value,
   max = 100,
-  label
+  label,
 }: {
   value: number;
   max?: number;
@@ -117,7 +117,7 @@ export function getProgressAriaProps({
     'aria-valuemin': 0,
     'aria-valuemax': max,
     'aria-valuetext': `${percentage}%`,
-    'aria-label': label
+    'aria-label': label,
   };
 }
 
@@ -127,7 +127,7 @@ export function getProgressAriaProps({
 export function getTabAriaProps({
   id,
   panelId,
-  selected
+  selected,
 }: {
   id: string;
   panelId: string;
@@ -138,14 +138,14 @@ export function getTabAriaProps({
     role: 'tab',
     'aria-selected': selected,
     'aria-controls': panelId,
-    tabIndex: selected ? 0 : -1
+    tabIndex: selected ? 0 : -1,
   };
 }
 
 export function getTabPanelAriaProps({
   id,
   tabId,
-  hidden
+  hidden,
 }: {
   id: string;
   tabId: string;
@@ -156,6 +156,6 @@ export function getTabPanelAriaProps({
     role: 'tabpanel',
     'aria-labelledby': tabId,
     hidden,
-    tabIndex: 0
+    tabIndex: 0,
   };
 }

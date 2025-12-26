@@ -11,33 +11,39 @@ export const loginSchema = z.object({
   password: z.string().min(1, 'Contraseña requerida'),
 });
 
-export const registerSchema = z.object({
-  nombre: z.string().min(1).max(100),
-  apellidos: z.string().max(100).optional(),
-  email: z.string().email('Email inválido'),
-  password: z.string()
-    .min(8, 'La contraseña debe tener al menos 8 caracteres')
-    .regex(/[A-Z]/, 'Debe contener al menos una mayúscula')
-    .regex(/[a-z]/, 'Debe contener al menos una minúscula')
-    .regex(/[0-9]/, 'Debe contener al menos un número'),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'Las contraseñas no coinciden',
-  path: ['confirmPassword'],
-});
+export const registerSchema = z
+  .object({
+    nombre: z.string().min(1).max(100),
+    apellidos: z.string().max(100).optional(),
+    email: z.string().email('Email inválido'),
+    password: z
+      .string()
+      .min(8, 'La contraseña debe tener al menos 8 caracteres')
+      .regex(/[A-Z]/, 'Debe contener al menos una mayúscula')
+      .regex(/[a-z]/, 'Debe contener al menos una minúscula')
+      .regex(/[0-9]/, 'Debe contener al menos un número'),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Las contraseñas no coinciden',
+    path: ['confirmPassword'],
+  });
 
-export const changePasswordSchema = z.object({
-  currentPassword: z.string().min(1, 'Contraseña actual requerida'),
-  newPassword: z.string()
-    .min(8, 'La contraseña debe tener al menos 8 caracteres')
-    .regex(/[A-Z]/, 'Debe contener al menos una mayúscula')
-    .regex(/[a-z]/, 'Debe contener al menos una minúscula')
-    .regex(/[0-9]/, 'Debe contener al menos un número'),
-  confirmPassword: z.string(),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: 'Las contraseñas no coinciden',
-  path: ['confirmPassword'],
-});
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'Contraseña actual requerida'),
+    newPassword: z
+      .string()
+      .min(8, 'La contraseña debe tener al menos 8 caracteres')
+      .regex(/[A-Z]/, 'Debe contener al menos una mayúscula')
+      .regex(/[a-z]/, 'Debe contener al menos una minúscula')
+      .regex(/[0-9]/, 'Debe contener al menos un número'),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: 'Las contraseñas no coinciden',
+    path: ['confirmPassword'],
+  });
 
 // Building schemas
 export const buildingCreateSchema = z.object({
@@ -47,7 +53,12 @@ export const buildingCreateSchema = z.object({
   codigoPostal: z.string().min(0).max(10).optional(),
   pais: z.string().min(0).max(100).optional(),
   numeroUnidades: z.number().int().positive().max(10000),
-  anosConstruccion: z.number().int().min(1800).max(new Date().getFullYear() + 1).optional(),
+  anosConstruccion: z
+    .number()
+    .int()
+    .min(1800)
+    .max(new Date().getFullYear() + 1)
+    .optional(),
   descripcion: z.string().min(0).max(2000).optional(),
   notas: z.string().min(0).max(5000).optional(),
 });
@@ -88,40 +99,48 @@ export const tenantCreateSchema = z.object({
 export const tenantUpdateSchema = tenantCreateSchema.partial();
 
 // Contract schemas
-export const contractCreateSchema = z.object({
-  unitId: z.string().cuid(),
-  tenantId: z.string().cuid(),
-  fechaInicio: z.coerce.date(),
-  fechaFin: z.coerce.date(),
-  renta: z.number().positive(),
-  diaCobranza: z.number().int().min(1).max(31),
-  deposito: z.number().nonnegative(),
-  duracionMeses: z.number().int().positive(),
-  renovacionAutomatica: z.boolean().optional(),
-  condiciones: z.string().optional(),
-  notas: z.string().min(0).max(5000).optional(),
-}).refine((data) => {
-  const fechaFin = typeof data.fechaFin === 'string' ? new Date(data.fechaFin) : data.fechaFin;
-  const fechaInicio = typeof data.fechaInicio === 'string' ? new Date(data.fechaInicio) : data.fechaInicio;
-  return fechaFin > fechaInicio;
-}, {
-  message: 'La fecha de fin debe ser posterior a la fecha de inicio',
-  path: ['fechaFin'],
-});
+export const contractCreateSchema = z
+  .object({
+    unitId: z.string().cuid(),
+    tenantId: z.string().cuid(),
+    fechaInicio: z.coerce.date(),
+    fechaFin: z.coerce.date(),
+    renta: z.number().positive(),
+    diaCobranza: z.number().int().min(1).max(31),
+    deposito: z.number().nonnegative(),
+    duracionMeses: z.number().int().positive(),
+    renovacionAutomatica: z.boolean().optional(),
+    condiciones: z.string().optional(),
+    notas: z.string().min(0).max(5000).optional(),
+  })
+  .refine(
+    (data) => {
+      const fechaFin = typeof data.fechaFin === 'string' ? new Date(data.fechaFin) : data.fechaFin;
+      const fechaInicio =
+        typeof data.fechaInicio === 'string' ? new Date(data.fechaInicio) : data.fechaInicio;
+      return fechaFin > fechaInicio;
+    },
+    {
+      message: 'La fecha de fin debe ser posterior a la fecha de inicio',
+      path: ['fechaFin'],
+    }
+  );
 
-export const contractUpdateSchema = z.object({
-  unitId: z.string().cuid().optional(),
-  tenantId: z.string().cuid().optional(),
-  fechaInicio: z.coerce.date().optional(),
-  fechaFin: z.coerce.date().optional(),
-  renta: z.number().positive().optional(),
-  diaCobranza: z.number().int().min(1).max(31).optional(),
-  deposito: z.number().nonnegative().optional(),
-  duracionMeses: z.number().int().positive().optional(),
-  renovacionAutomatica: z.boolean().optional(),
-  condiciones: z.string().optional(),
-  notas: z.string().min(0).max(5000).optional(),
-}).omit({ unitId: true, tenantId: true });
+export const contractUpdateSchema = z
+  .object({
+    unitId: z.string().cuid().optional(),
+    tenantId: z.string().cuid().optional(),
+    fechaInicio: z.coerce.date().optional(),
+    fechaFin: z.coerce.date().optional(),
+    renta: z.number().positive().optional(),
+    diaCobranza: z.number().int().min(1).max(31).optional(),
+    deposito: z.number().nonnegative().optional(),
+    duracionMeses: z.number().int().positive().optional(),
+    renovacionAutomatica: z.boolean().optional(),
+    condiciones: z.string().optional(),
+    notas: z.string().min(0).max(5000).optional(),
+  })
+  .omit({ unitId: true, tenantId: true });
 
 // Payment schemas
 export const paymentCreateSchema = z.object({
@@ -135,8 +154,7 @@ export const paymentCreateSchema = z.object({
   notas: z.string().min(0).max(1000).optional(),
 });
 
-export const paymentUpdateSchema = paymentCreateSchema.partial()
-  .omit({ contractId: true });
+export const paymentUpdateSchema = paymentCreateSchema.partial().omit({ contractId: true });
 
 // Maintenance schemas
 export const maintenanceCreateSchema = z.object({
@@ -161,8 +179,7 @@ export const maintenanceCreateSchema = z.object({
   fechaLimite: z.coerce.date().optional(),
 });
 
-export const maintenanceUpdateSchema = maintenanceCreateSchema.partial()
-  .omit({ unitId: true });
+export const maintenanceUpdateSchema = maintenanceCreateSchema.partial().omit({ unitId: true });
 
 // Document schemas
 export const documentUploadSchema = z.object({
@@ -206,26 +223,28 @@ export const companyCreateSchema = z.object({
 export const companyUpdateSchema = companyCreateSchema.partial();
 
 // Bulk operations
-export const bulkOperationSchema = z.object({
-  action: z.enum(['activate', 'deactivate', 'changePlan', 'changeStatus', 'delete']),
-  ids: z.array(z.string().cuid()).min(1, 'Al menos un ID es requerido'),
-  subscriptionPlanId: z.string().cuid().optional(),
-  estadoCliente: z.enum(['activo', 'prueba', 'suspendido', 'cancelado']).optional(),
-}).refine(
-  (data) => {
-    if (data.action === 'changePlan') {
-      return !!data.subscriptionPlanId;
+export const bulkOperationSchema = z
+  .object({
+    action: z.enum(['activate', 'deactivate', 'changePlan', 'changeStatus', 'delete']),
+    ids: z.array(z.string().cuid()).min(1, 'Al menos un ID es requerido'),
+    subscriptionPlanId: z.string().cuid().optional(),
+    estadoCliente: z.enum(['activo', 'prueba', 'suspendido', 'cancelado']).optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.action === 'changePlan') {
+        return !!data.subscriptionPlanId;
+      }
+      if (data.action === 'changeStatus') {
+        return !!data.estadoCliente;
+      }
+      return true;
+    },
+    {
+      message: 'Parámetros requeridos para la acción seleccionada',
+      path: ['action'],
     }
-    if (data.action === 'changeStatus') {
-      return !!data.estadoCliente;
-    }
-    return true;
-  },
-  {
-    message: 'Parámetros requeridos para la acción seleccionada',
-    path: ['action'],
-  }
-);
+  );
 
 // Search and filter schemas
 export const searchSchema = z.object({

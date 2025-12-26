@@ -87,12 +87,12 @@ export function useCompanies() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(companyData),
       });
-      
+
       if (!res.ok) {
         const error = await res.json();
         throw new Error(error.error || 'Error al crear empresa');
       }
-      
+
       const data = await res.json();
       toast.success(`Empresa "${data.company.nombre}" creada exitosamente`);
       await fetchCompanies();
@@ -110,12 +110,12 @@ export function useCompanies() {
       const res = await fetch(`/api/admin/companies/${companyId}`, {
         method: 'DELETE',
       });
-      
+
       if (!res.ok) {
         const error = await res.json();
         throw new Error(error.error || 'Error al eliminar empresa');
       }
-      
+
       toast.success('Empresa eliminada exitosamente');
       await fetchCompanies();
       return true;
@@ -134,9 +134,9 @@ export function useCompanies() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ category: newCategory }),
       });
-      
+
       if (!res.ok) throw new Error('Error al actualizar categoría');
-      
+
       toast.success('Categoría actualizada');
       await fetchCompanies();
       return true;
@@ -155,9 +155,9 @@ export function useCompanies() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ companyIds, activate }),
       });
-      
+
       if (!res.ok) throw new Error('Error en operación masiva');
-      
+
       const data = await res.json();
       toast.success(data.message);
       await fetchCompanies();

@@ -126,7 +126,7 @@ export function hasPermission(
  */
 export async function getCurrentUser() {
   const session = await getServerSession(authOptions);
-  
+
   if (!session?.user?.email) {
     return null;
   }
@@ -146,7 +146,7 @@ export async function getCurrentUser() {
  */
 export async function requireAuth() {
   const user = await getCurrentUser();
-  
+
   if (!user) {
     throw new Error('No autenticado');
   }
@@ -161,11 +161,9 @@ export async function requireAuth() {
 /**
  * Middleware para verificar permiso específico
  */
-export async function requirePermission(
-  permission: keyof typeof PERMISSIONS.administrador
-) {
+export async function requirePermission(permission: keyof typeof PERMISSIONS.administrador) {
   const user = await requireAuth();
-  
+
   if (!hasPermission(user.role, permission)) {
     throw new Error(`No tienes permiso para: ${permission}`);
   }
@@ -186,12 +184,12 @@ export async function getUserCompany() {
  */
 export async function canAccessCompanyResource(companyId: string) {
   const user = await requireAuth();
-  
+
   // Super_admin y soporte pueden acceder a cualquier empresa
   if (user.role === 'super_admin' || user.role === 'soporte') {
     return true;
   }
-  
+
   if (user.companyId !== companyId) {
     throw new Error('No tienes acceso a recursos de esta empresa');
   }
@@ -203,29 +201,17 @@ export async function canAccessCompanyResource(companyId: string) {
  * Tipos de respuesta de error estándar
  */
 export function unauthorizedResponse(message = 'No autorizado') {
-  return Response.json(
-    { error: message },
-    { status: 401 }
-  );
+  return Response.json({ error: message }, { status: 401 });
 }
 
 export function forbiddenResponse(message = 'Permiso denegado') {
-  return Response.json(
-    { error: message },
-    { status: 403 }
-  );
+  return Response.json({ error: message }, { status: 403 });
 }
 
 export function notFoundResponse(message = 'Recurso no encontrado') {
-  return Response.json(
-    { error: message },
-    { status: 404 }
-  );
+  return Response.json({ error: message }, { status: 404 });
 }
 
 export function badRequestResponse(message = 'Solicitud inválida') {
-  return Response.json(
-    { error: message },
-    { status: 400 }
-  );
+  return Response.json({ error: message }, { status: 400 });
 }

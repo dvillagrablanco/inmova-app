@@ -53,10 +53,7 @@ export async function GET(request: NextRequest) {
     );
 
     const stripeRevenue = successfulStripePayments.reduce((sum, p) => sum + p.monto, 0);
-    const stripeFees = successfulStripePayments.reduce(
-      (sum, p) => sum + (p.stripeFee || 0),
-      0
-    );
+    const stripeFees = successfulStripePayments.reduce((sum, p) => sum + (p.stripeFee || 0), 0);
     const netRevenue = successfulStripePayments.reduce(
       (sum, p) => sum + (p.stripeNetAmount || p.monto),
       0
@@ -66,10 +63,7 @@ export async function GET(request: NextRequest) {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const paymentsThisMonth = allPayments.filter(
-      (p) =>
-        p.estado === 'pagado' &&
-        p.fechaPago &&
-        new Date(p.fechaPago) >= startOfMonth
+      (p) => p.estado === 'pagado' && p.fechaPago && new Date(p.fechaPago) >= startOfMonth
     ).length;
 
     // Success rate

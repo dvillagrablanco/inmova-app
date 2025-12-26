@@ -5,13 +5,7 @@ import { Home, Building2, Users, CreditCard, Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/lib/hooks/useMediaQuery';
 import { useState } from 'react';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Sidebar } from './sidebar';
 
 /**
@@ -64,8 +58,7 @@ export function BottomNavigation() {
         <div className="flex h-16 items-center justify-around px-2">
           {mainNavItems.map((item) => {
             const Icon = item.icon;
-            const isActive =
-              pathname === item.href || pathname.startsWith(`${item.href}/`);
+            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
             return (
               <button
@@ -74,9 +67,7 @@ export function BottomNavigation() {
                 className={cn(
                   'flex flex-1 flex-col items-center justify-center gap-1 rounded-lg px-3 py-2 transition-colors',
                   'active:scale-95 active:bg-muted',
-                  isActive
-                    ? 'text-primary'
-                    : 'text-muted-foreground hover:text-foreground'
+                  isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
                 )}
                 aria-label={item.label}
                 aria-current={isActive ? 'page' : undefined}

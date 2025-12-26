@@ -23,12 +23,12 @@ interface PropertyReport {
 export async function GET(request: Request) {
   try {
     const user = await requireAuth();
-    
+
     // Verificar permiso de visualización de reportes
     if (user.role === 'operador') {
       return forbiddenResponse('No tienes permiso para ver reportes financieros');
     }
-    
+
     const companyId = user.companyId;
 
     const { searchParams } = new URL(request.url);
@@ -99,12 +99,10 @@ export async function GET(request: Request) {
 
       // Calcular métricas adicionales
       const reportesConMetricas = reportes.map((r: any) => {
-        const rentabilidadBruta = r.ingresosBrutos > 0 
-          ? (r.ingresosBrutos / (r.ingresosBrutos + r.gastos)) * 100 
-          : 0;
-        const rentabilidadNeta = r.ingresosBrutos > 0 
-          ? (r.ingresosNetos / r.ingresosBrutos) * 100 
-          : 0;
+        const rentabilidadBruta =
+          r.ingresosBrutos > 0 ? (r.ingresosBrutos / (r.ingresosBrutos + r.gastos)) * 100 : 0;
+        const rentabilidadNeta =
+          r.ingresosBrutos > 0 ? (r.ingresosNetos / r.ingresosBrutos) * 100 : 0;
         const roi = r.gastos > 0 ? (r.ingresosNetos / r.gastos) * 100 : 0;
 
         return {
@@ -172,7 +170,10 @@ export async function GET(request: Request) {
       `;
 
       const flujoCaja = flujoCajaData.map((item: any) => ({
-        mes: new Date(item.month_start).toLocaleDateString('es-ES', { month: 'short', year: 'numeric' }),
+        mes: new Date(item.month_start).toLocaleDateString('es-ES', {
+          month: 'short',
+          year: 'numeric',
+        }),
         ingresos: Math.round(item.ingresos * 100) / 100,
         gastos: Math.round(item.gastos * 100) / 100,
         neto: Math.round((item.ingresos - item.gastos) * 100) / 100,
@@ -218,16 +219,14 @@ export async function GET(request: Request) {
 
     const stats = globalStats[0];
     const ingresosNetos = stats.ingresosBrutos - stats.gastos;
-    const rentabilidadBruta = stats.ingresosBrutos > 0 
-      ? (stats.ingresosBrutos / (stats.ingresosBrutos + stats.gastos)) * 100 
-      : 0;
-    const rentabilidadNeta = stats.ingresosBrutos > 0 
-      ? (ingresosNetos / stats.ingresosBrutos) * 100 
-      : 0;
+    const rentabilidadBruta =
+      stats.ingresosBrutos > 0
+        ? (stats.ingresosBrutos / (stats.ingresosBrutos + stats.gastos)) * 100
+        : 0;
+    const rentabilidadNeta =
+      stats.ingresosBrutos > 0 ? (ingresosNetos / stats.ingresosBrutos) * 100 : 0;
     const roi = stats.gastos > 0 ? (ingresosNetos / stats.gastos) * 100 : 0;
-    const tasaOcupacion = stats.unidades > 0 
-      ? (stats.unidadesOcupadas / stats.unidades) * 100 
-      : 0;
+    const tasaOcupacion = stats.unidades > 0 ? (stats.unidadesOcupadas / stats.unidades) * 100 : 0;
 
     return NextResponse.json({
       global: {

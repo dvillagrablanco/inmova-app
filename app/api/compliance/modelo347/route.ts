@@ -1,14 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import {
-  generateModelo347,
-  GenerateModelo347Params,
-} from '@/lib/services/compliance-service';
+import { generateModelo347, GenerateModelo347Params } from '@/lib/services/compliance-service';
 import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
-
 
 /**
  * @swagger

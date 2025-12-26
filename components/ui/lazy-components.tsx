@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { ComponentType, Suspense } from 'react';
 import { Skeleton } from './skeleton';

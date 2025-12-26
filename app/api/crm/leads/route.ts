@@ -1,6 +1,6 @@
 /**
  * API: /api/crm/leads
- * 
+ *
  * GET:  Listar leads con filtros
  * POST: Crear nuevo lead
  */
@@ -22,7 +22,7 @@ export async function GET(request: Request) {
 
     // Filtros
     const filters: any = {};
-    
+
     // Status (múltiple)
     const statusParam = searchParams.get('status');
     if (statusParam) {
@@ -86,12 +86,7 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '50');
 
-    const result = await CRMService.listLeads(
-      session.user.companyId,
-      filters,
-      page,
-      limit
-    );
+    const result = await CRMService.listLeads(session.user.companyId, filters, page, limit);
 
     return NextResponse.json(result);
   } catch (error: any) {

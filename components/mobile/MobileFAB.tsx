@@ -16,15 +16,12 @@ export function MobileFAB({
   onClick,
   icon = <Plus className="h-6 w-6" />,
   label,
-  className
+  className,
 }: MobileFABProps) {
   return (
     <Button
       onClick={onClick}
-      className={cn(
-        'mobile-fab bg-primary hover:bg-primary/90 text-white shadow-lg',
-        className
-      )}
+      className={cn('mobile-fab bg-primary hover:bg-primary/90 text-white shadow-lg', className)}
       size="lg"
       aria-label={label || 'Añadir'}
     >

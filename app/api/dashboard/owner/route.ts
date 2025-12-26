@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true, companyId: true }
+      select: { id: true, companyId: true },
     });
 
     if (!user?.companyId) {
@@ -27,20 +27,20 @@ export async function GET(request: NextRequest) {
     // 1. KPIs principales
     // Total de propiedades
     const totalProperties = await prisma.building.count({
-      where: { companyId: user.companyId }
+      where: { companyId: user.companyId },
     });
 
     // Total de unidades
     const totalUnits = await prisma.unit.count({
-      where: { building: { companyId: user.companyId } }
+      where: { building: { companyId: user.companyId } },
     });
 
     // Unidades ocupadas
     const occupiedUnits = await prisma.unit.count({
       where: {
         building: { companyId: user.companyId },
-        estado: 'ocupada'
-      }
+        estado: 'ocupada',
+      },
     });
 
     // Tasa de ocupación
@@ -52,19 +52,19 @@ export async function GET(request: NextRequest) {
         contract: {
           unit: {
             building: {
-              companyId: user.companyId
-            }
-          }
+              companyId: user.companyId,
+            },
+          },
         },
         estado: 'pagado',
         fechaPago: {
           gte: startOfCurrentMonth,
-          lte: endOfCurrentMonth
-        }
+          lte: endOfCurrentMonth,
+        },
       },
       _sum: {
-        monto: true
-      }
+        monto: true,
+      },
     });
     const monthlyIncome = monthlyIncomeResult._sum.monto || 0;
 
@@ -74,15 +74,15 @@ export async function GET(request: NextRequest) {
         contract: {
           unit: {
             building: {
-              companyId: user.companyId
-            }
-          }
+              companyId: user.companyId,
+            },
+          },
         },
-        estado: 'pendiente'
+        estado: 'pendiente',
       },
       _sum: {
-        monto: true
-      }
+        monto: true,
+      },
     });
     const pendingPayments = pendingPaymentsResult._sum.monto || 0;
     const pendingPaymentsCount = await prisma.payment.count({
@@ -90,12 +90,12 @@ export async function GET(request: NextRequest) {
         contract: {
           unit: {
             building: {
-              companyId: user.companyId
-            }
-          }
+              companyId: user.companyId,
+            },
+          },
         },
-        estado: 'pendiente'
-      }
+        estado: 'pendiente',
+      },
     });
 
     // Gastos del mes (expenses)
@@ -104,25 +104,25 @@ export async function GET(request: NextRequest) {
         OR: [
           {
             building: {
-              companyId: user.companyId
-            }
+              companyId: user.companyId,
+            },
           },
           {
             unit: {
               building: {
-                companyId: user.companyId
-              }
-            }
-          }
+                companyId: user.companyId,
+              },
+            },
+          },
         ],
         fecha: {
           gte: startOfCurrentMonth,
-          lte: endOfCurrentMonth
-        }
+          lte: endOfCurrentMonth,
+        },
       },
       _sum: {
-        monto: true
-      }
+        monto: true,
+      },
     });
     const monthlyExpenses = monthlyExpensesResult._sum.monto || 0;
 
@@ -133,7 +133,7 @@ export async function GET(request: NextRequest) {
         date,
         month: format(date, 'MMM yyyy'),
         startDate: startOfMonth(date),
-        endDate: endOfMonth(date)
+        endDate: endOfMonth(date),
       };
     });
 
@@ -145,17 +145,17 @@ export async function GET(request: NextRequest) {
             contract: {
               unit: {
                 building: {
-                  companyId: user.companyId
-                }
-              }
+                  companyId: user.companyId,
+                },
+              },
             },
             estado: 'pagado',
             fechaPago: {
               gte: startDate,
-              lte: endDate
-            }
+              lte: endDate,
+            },
           },
-          _sum: { monto: true }
+          _sum: { monto: true },
         });
 
         const expenses = await prisma.expense.aggregate({
@@ -163,30 +163,30 @@ export async function GET(request: NextRequest) {
             OR: [
               {
                 building: {
-                  companyId: user.companyId
-                }
+                  companyId: user.companyId,
+                },
               },
               {
                 unit: {
                   building: {
-                    companyId: user.companyId
-                  }
-                }
-              }
+                    companyId: user.companyId,
+                  },
+                },
+              },
             ],
             fecha: {
               gte: startDate,
-              lte: endDate
-            }
+              lte: endDate,
+            },
           },
-          _sum: { monto: true }
+          _sum: { monto: true },
         });
 
         return {
           month,
           income: income._sum.monto || 0,
           expenses: expenses._sum.monto || 0,
-          profit: (income._sum.monto || 0) - (expenses._sum.monto || 0)
+          profit: (income._sum.monto || 0) - (expenses._sum.monto || 0),
         };
       })
     );
@@ -199,25 +199,26 @@ export async function GET(request: NextRequest) {
         nombre: true,
         _count: {
           select: {
-            units: true
-          }
+            units: true,
+          },
         },
         units: {
           where: { estado: 'ocupada' },
-          select: { id: true }
-        }
+          select: { id: true },
+        },
       },
       take: 10,
-      orderBy: { nombre: 'asc' }
+      orderBy: { nombre: 'asc' },
     });
 
-    const occupancyByProperty = buildings.map(building => ({
+    const occupancyByProperty = buildings.map((building) => ({
       name: building.nombre,
       totalUnits: building._count.units,
       occupiedUnits: building.units.length,
-      occupancyRate: building._count.units > 0 
-        ? ((building.units.length / building._count.units) * 100).toFixed(1)
-        : 0
+      occupancyRate:
+        building._count.units > 0
+          ? ((building.units.length / building._count.units) * 100).toFixed(1)
+          : 0,
     }));
 
     // 4. Distribución de pagos
@@ -226,15 +227,15 @@ export async function GET(request: NextRequest) {
         contract: {
           unit: {
             building: {
-              companyId: user.companyId
-            }
-          }
+              companyId: user.companyId,
+            },
+          },
         },
         estado: 'pagado',
         fechaPago: {
-          not: null
-        }
-      }
+          not: null,
+        },
+      },
     });
 
     const paymentsLate = await prisma.payment.count({
@@ -242,12 +243,12 @@ export async function GET(request: NextRequest) {
         contract: {
           unit: {
             building: {
-              companyId: user.companyId
-            }
-          }
+              companyId: user.companyId,
+            },
+          },
         },
-        estado: 'atrasado'
-      }
+        estado: 'atrasado',
+      },
     });
 
     const paymentsPending = await prisma.payment.count({
@@ -255,18 +256,18 @@ export async function GET(request: NextRequest) {
         contract: {
           unit: {
             building: {
-              companyId: user.companyId
-            }
-          }
+              companyId: user.companyId,
+            },
+          },
         },
-        estado: 'pendiente'
-      }
+        estado: 'pendiente',
+      },
     });
 
     const paymentDistribution = [
       { name: 'A tiempo', value: paymentsOnTime, color: '#10b981' },
       { name: 'Atrasados', value: paymentsLate, color: '#ef4444' },
-      { name: 'Pendientes', value: paymentsPending, color: '#f59e0b' }
+      { name: 'Pendientes', value: paymentsPending, color: '#f59e0b' },
     ];
 
     // 5. Próximos vencimientos de contratos (30 días)
@@ -274,14 +275,14 @@ export async function GET(request: NextRequest) {
       where: {
         unit: {
           building: {
-            companyId: user.companyId
-          }
+            companyId: user.companyId,
+          },
         },
         estado: 'activo',
         fechaFin: {
           gte: now,
-          lte: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000) // 30 días
-        }
+          lte: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000), // 30 días
+        },
       },
       select: {
         id: true,
@@ -290,46 +291,46 @@ export async function GET(request: NextRequest) {
           select: {
             numero: true,
             building: {
-              select: { nombre: true }
-            }
-          }
+              select: { nombre: true },
+            },
+          },
         },
         tenant: {
-          select: { nombreCompleto: true }
-        }
+          select: { nombreCompleto: true },
+        },
       },
       orderBy: { fechaFin: 'asc' },
-      take: 5
+      take: 5,
     });
 
     // 6. Propiedades con problemas (vacantes, mantenimiento urgente)
     const vacantUnits = await prisma.unit.findMany({
       where: {
         building: {
-          companyId: user.companyId
+          companyId: user.companyId,
         },
-        estado: 'disponible'
+        estado: 'disponible',
       },
       select: {
         id: true,
         numero: true,
         building: {
-          select: { nombre: true }
-        }
+          select: { nombre: true },
+        },
       },
-      take: 5
+      take: 5,
     });
 
     const urgentMaintenance = await prisma.maintenanceRequest.count({
       where: {
         unit: {
           building: {
-            companyId: user.companyId
-          }
+            companyId: user.companyId,
+          },
         },
         prioridad: 'alta',
-        estado: { notIn: ['completado'] }
-      }
+        estado: { notIn: ['completado'] },
+      },
     });
 
     return NextResponse.json({
@@ -343,12 +344,12 @@ export async function GET(request: NextRequest) {
         netProfit: monthlyIncome - monthlyExpenses,
         pendingPayments,
         pendingPaymentsCount,
-        urgentMaintenance
+        urgentMaintenance,
       },
       charts: {
         monthlyData,
         occupancyByProperty,
-        paymentDistribution
+        paymentDistribution,
       },
       alerts: {
         upcomingExpirations: upcomingExpirations.map((c: any) => ({
@@ -356,18 +357,15 @@ export async function GET(request: NextRequest) {
           property: `${c.unit?.building?.nombre} - ${c.unit?.numero}`,
           tenant: c.tenant?.nombreCompleto,
           expirationDate: c.fechaFin,
-          daysLeft: Math.ceil((c.fechaFin.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+          daysLeft: Math.ceil((c.fechaFin.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)),
         })),
         vacantUnits: vacantUnits.map((u: any) => ({
           id: u.id,
-          name: `${u.building?.nombre} - ${u.numero}`
-        }))
-      }
+          name: `${u.building?.nombre} - ${u.numero}`,
+        })),
+      },
     });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Error al obtener datos del dashboard' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener datos del dashboard' }, { status: 500 });
   }
 }

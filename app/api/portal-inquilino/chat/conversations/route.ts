@@ -19,10 +19,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!tenant) {
-      return NextResponse.json(
-        { error: 'Inquilino no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Inquilino no encontrado' }, { status: 404 });
     }
 
     // Get conversations
@@ -87,19 +84,13 @@ export async function POST(request: NextRequest) {
     });
 
     if (!tenant) {
-      return NextResponse.json(
-        { error: 'Inquilino no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Inquilino no encontrado' }, { status: 404 });
     }
 
     const { asunto, mensaje } = await request.json();
 
     if (!asunto || !mensaje) {
-      return NextResponse.json(
-        { error: 'Datos incompletos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Datos incompletos' }, { status: 400 });
     }
 
     // Create conversation

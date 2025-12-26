@@ -37,7 +37,7 @@ interface ContractData {
 export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('es-ES', {
     style: 'currency',
-    currency: 'EUR'
+    currency: 'EUR',
   }).format(amount);
 }
 
@@ -45,7 +45,7 @@ export function formatDate(date: Date): string {
   return new Intl.DateTimeFormat('es-ES', {
     day: 'numeric',
     month: 'long',
-    year: 'numeric'
+    year: 'numeric',
   }).format(date);
 }
 
@@ -122,10 +122,14 @@ El ARRENDATARIO se compromete a:
 DÉCIMA.- PROTECCIÓN DE DATOS
 Las partes se comprometen a tratar los datos personales del presente contrato conforme al Reglamento (UE) 2016/679 (RGPD) y la Ley Orgánica 3/2018 de Protección de Datos.
 
-${data.additionalClauses && data.additionalClauses.length > 0 ? `
+${
+  data.additionalClauses && data.additionalClauses.length > 0
+    ? `
 CLÁUSULAS ADICIONALES
 ${data.additionalClauses.map((clause, idx) => `${idx + 11}.- ${clause}`).join('\n\n')}
-` : ''}
+`
+    : ''
+}
 
 Y en prueba de conformidad, ambas partes firman el presente contrato por duplicado en el lugar y fecha indicados en el encabezamiento.
 
@@ -232,10 +236,14 @@ Serán causas de resolución del contrato:
 UNDÉCIMA.- SEGURO
 El ARRENDATARIO se obliga a mantener un seguro de responsabilidad civil que cubra los posibles daños que pudieran derivarse del ejercicio de su actividad.
 
-${data.additionalClauses && data.additionalClauses.length > 0 ? `
+${
+  data.additionalClauses && data.additionalClauses.length > 0
+    ? `
 CLÁUSULAS ADICIONALES
 ${data.additionalClauses.map((clause, idx) => `${idx + 12}.- ${clause}`).join('\n\n')}
-` : ''}
+`
+    : ''
+}
 
 Y en prueba de conformidad, ambas partes firman el presente contrato por duplicado en el lugar y fecha indicados en el encabezamiento.
 
@@ -359,10 +367,14 @@ El ARRENDATARIO tendrá acceso a la plataforma digital del coliving para:
 - Pago de renta online
 - Acceso a eventos y actividades
 
-${data.additionalClauses && data.additionalClauses.length > 0 ? `
+${
+  data.additionalClauses && data.additionalClauses.length > 0
+    ? `
 CLÁUSULAS ADICIONALES
 ${data.additionalClauses.map((clause, idx) => `${idx + 12}.- ${clause}`).join('\n\n')}
-` : ''}
+`
+    : ''
+}
 
 Y en prueba de conformidad, ambas partes firman el presente contrato por duplicado en el lugar y fecha indicados en el encabezamiento.
 
@@ -381,7 +393,10 @@ Fecha de generación: ${formatDate(new Date())}
   `.trim();
 }
 
-export function generateContractByType(type: 'residential' | 'commercial' | 'coliving', data: ContractData): string {
+export function generateContractByType(
+  type: 'residential' | 'commercial' | 'coliving',
+  data: ContractData
+): string {
   switch (type) {
     case 'residential':
       return generateResidentialContract(data);

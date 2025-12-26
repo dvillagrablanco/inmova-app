@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session || !session.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
@@ -68,10 +68,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(companies);
   } catch (error) {
     logger.error('Error fetching companies:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener empresas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener empresas' }, { status: 500 });
   }
 }
 
@@ -79,7 +76,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session || !session.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
@@ -96,10 +93,7 @@ export async function POST(request: NextRequest) {
 
     // Validaciones
     if (!data.nombre) {
-      return NextResponse.json(
-        { error: 'El nombre de la empresa es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'El nombre de la empresa es requerido' }, { status: 400 });
     }
 
     // Verificar dominio único si se proporciona
@@ -107,7 +101,7 @@ export async function POST(request: NextRequest) {
       const existingDomain = await prisma.company.findUnique({
         where: { dominioPersonalizado: data.dominioPersonalizado },
       });
-      
+
       if (existingDomain) {
         return NextResponse.json(
           { error: 'El dominio personalizado ya está en uso' },
@@ -121,7 +115,7 @@ export async function POST(request: NextRequest) {
       const parentCompany = await prisma.company.findUnique({
         where: { id: data.parentCompanyId },
       });
-      
+
       if (!parentCompany) {
         return NextResponse.json(
           { error: 'La empresa matriz especificada no existe' },
@@ -182,10 +176,10 @@ export async function POST(request: NextRequest) {
 
       if (plan && plan.modulosIncluidos) {
         const modulosCodigos = plan.modulosIncluidos as string[];
-        
+
         // Crear registros CompanyModule para cada módulo incluido
         await prisma.companyModule.createMany({
-          data: modulosCodigos.map(codigo => ({
+          data: modulosCodigos.map((codigo) => ({
             companyId: company.id,
             moduloCodigo: codigo,
             activo: true,
@@ -198,9 +192,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(company, { status: 201 });
   } catch (error) {
     logger.error('Error creating company:', error);
-    return NextResponse.json(
-      { error: 'Error al crear empresa' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear empresa' }, { status: 500 });
   }
 }

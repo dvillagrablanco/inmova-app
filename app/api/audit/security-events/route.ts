@@ -49,10 +49,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(events);
   } catch (error) {
     logger.error('Error al obtener eventos de seguridad:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener eventos' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener eventos' }, { status: 500 });
   }
 }
 
@@ -82,10 +79,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(event, { status: 201 });
   } catch (error) {
     logger.error('Error al crear evento de seguridad:', error);
-    return NextResponse.json(
-      { error: 'Error al crear evento' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear evento' }, { status: 500 });
   }
 }
 
@@ -104,10 +98,7 @@ export async function PATCH(req: NextRequest) {
     });
 
     if (!event || event.companyId !== session?.user?.companyId) {
-      return NextResponse.json(
-        { error: 'Evento no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Evento no encontrado' }, { status: 404 });
     }
 
     const updated = await prisma.securityEvent.update({

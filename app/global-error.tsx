@@ -21,35 +21,41 @@ export default function GlobalError({
   return (
     <html lang="es">
       <body>
-        <div style={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: 'linear-gradient(to bottom right, #f9fafb, #f3f4f6)',
-          padding: '1rem',
-          fontFamily: 'system-ui, -apple-system, sans-serif',
-        }}>
-          <div style={{
-            maxWidth: '32rem',
-            width: '100%',
-            background: 'white',
-            borderRadius: '1rem',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-            padding: '2rem',
-          }}>
+        <div
+          style={{
+            minHeight: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'linear-gradient(to bottom right, #f9fafb, #f3f4f6)',
+            padding: '1rem',
+            fontFamily: 'system-ui, -apple-system, sans-serif',
+          }}
+        >
+          <div
+            style={{
+              maxWidth: '32rem',
+              width: '100%',
+              background: 'white',
+              borderRadius: '1rem',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+              padding: '2rem',
+            }}
+          >
             {/* Icon */}
             <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-              <div style={{
-                width: '5rem',
-                height: '5rem',
-                borderRadius: '50%',
-                background: 'linear-gradient(to bottom right, #ef4444, #dc2626)',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto',
-              }}>
+              <div
+                style={{
+                  width: '5rem',
+                  height: '5rem',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(to bottom right, #ef4444, #dc2626)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto',
+                }}
+              >
                 <svg
                   style={{ width: '2.5rem', height: '2.5rem', color: 'white' }}
                   fill="none"
@@ -65,49 +71,57 @@ export default function GlobalError({
                 </svg>
               </div>
             </div>
-            
+
             {/* Title */}
-            <h1 style={{
-              fontSize: '2rem',
-              fontWeight: 'bold',
-              color: '#111827',
-              textAlign: 'center',
-              marginBottom: '0.5rem',
-            }}>
+            <h1
+              style={{
+                fontSize: '2rem',
+                fontWeight: 'bold',
+                color: '#111827',
+                textAlign: 'center',
+                marginBottom: '0.5rem',
+              }}
+            >
               Error Crítico
             </h1>
-            
-            <p style={{
-              fontSize: '1.125rem',
-              color: '#6b7280',
-              textAlign: 'center',
-              marginBottom: '1.5rem',
-            }}>
+
+            <p
+              style={{
+                fontSize: '1.125rem',
+                color: '#6b7280',
+                textAlign: 'center',
+                marginBottom: '1.5rem',
+              }}
+            >
               Ha ocurrido un error crítico en la aplicación. Por favor, recarga la página.
             </p>
-            
+
             {/* Error ID */}
             {error.digest && (
-              <div style={{
-                background: '#f3f4f6',
-                borderRadius: '0.5rem',
-                padding: '1rem',
-                marginBottom: '1.5rem',
-              }}>
+              <div
+                style={{
+                  background: '#f3f4f6',
+                  borderRadius: '0.5rem',
+                  padding: '1rem',
+                  marginBottom: '1.5rem',
+                }}
+              >
                 <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>
                   <strong>ID del error:</strong>{' '}
-                  <code style={{
-                    background: '#e5e7eb',
-                    padding: '0.25rem 0.5rem',
-                    borderRadius: '0.25rem',
-                    fontSize: '0.75rem',
-                  }}>
+                  <code
+                    style={{
+                      background: '#e5e7eb',
+                      padding: '0.25rem 0.5rem',
+                      borderRadius: '0.25rem',
+                      fontSize: '0.75rem',
+                    }}
+                  >
                     {error.digest}
                   </code>
                 </p>
               </div>
             )}
-            
+
             {/* Actions */}
             <div style={{ display: 'flex', gap: '0.75rem' }}>
               <button
@@ -143,16 +157,18 @@ export default function GlobalError({
                 Ir al inicio
               </button>
             </div>
-            
+
             {/* Help text */}
-            <p style={{
-              fontSize: '0.875rem',
-              color: '#9ca3af',
-              textAlign: 'center',
-              marginTop: '1.5rem',
-              paddingTop: '1.5rem',
-              borderTop: '1px solid #e5e7eb',
-            }}>
+            <p
+              style={{
+                fontSize: '0.875rem',
+                color: '#9ca3af',
+                textAlign: 'center',
+                marginTop: '1.5rem',
+                paddingTop: '1.5rem',
+                borderTop: '1px solid #e5e7eb',
+              }}
+            >
               Si el problema persiste, contacta con soporte técnico
             </p>
           </div>

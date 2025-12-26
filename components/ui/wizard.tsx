@@ -1,7 +1,14 @@
 'use client';
 
 import { useState, useEffect, ReactNode, useCallback } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
@@ -116,7 +123,7 @@ export function Wizard({
 
     try {
       const result = await currentStep.validate(formData);
-      
+
       if (result === true) {
         return true;
       } else if (typeof result === 'string') {
@@ -184,7 +191,7 @@ export function Wizard({
 
   const handleSave = async () => {
     if (!onSave) return;
-    
+
     try {
       await onSave(formData);
       setLastSaved(new Date());
@@ -250,7 +257,10 @@ export function Wizard({
                 'relative h-10 w-10 rounded-full border-2 transition-all',
                 isActive && 'border-primary bg-primary text-white scale-110',
                 isCompleted && 'border-primary bg-primary text-white',
-                !isActive && !isCompleted && isVisited && 'border-primary/30 hover:border-primary/50',
+                !isActive &&
+                  !isCompleted &&
+                  isVisited &&
+                  'border-primary/30 hover:border-primary/50',
                 !isVisited && 'border-gray-300 opacity-50 cursor-not-allowed'
               )}
               title={step.title}
@@ -261,10 +271,7 @@ export function Wizard({
                 <span className="text-sm font-semibold">{index + 1}</span>
               )}
               {step.optional && (
-                <Badge
-                  variant="secondary"
-                  className="absolute -top-2 -right-2 h-5 w-5 p-0 text-xs"
-                >
+                <Badge variant="secondary" className="absolute -top-2 -right-2 h-5 w-5 p-0 text-xs">
                   ?
                 </Badge>
               )}
@@ -315,9 +322,7 @@ export function Wizard({
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      {currentStep.icon && (
-                        <div className="text-primary">{currentStep.icon}</div>
-                      )}
+                      {currentStep.icon && <div className="text-primary">{currentStep.icon}</div>}
                       <CardTitle className="text-xl">{currentStep.title}</CardTitle>
                       {currentStep.optional && (
                         <Badge variant="secondary" className="ml-2">

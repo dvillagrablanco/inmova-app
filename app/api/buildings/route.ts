@@ -1,9 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { requireAuth, getUserCompany, requirePermission, forbiddenResponse, badRequestResponse } from '@/lib/permissions';
+import {
+  requireAuth,
+  getUserCompany,
+  requirePermission,
+  forbiddenResponse,
+  badRequestResponse,
+} from '@/lib/permissions';
 import logger, { logError } from '@/lib/logger';
 import { buildingCreateSchema } from '@/lib/validations';
-import { cachedBuildings, invalidateBuildingsCache, invalidateDashboardCache } from '@/lib/api-cache-helpers';
+import {
+  cachedBuildings,
+  invalidateBuildingsCache,
+  invalidateDashboardCache,
+} from '@/lib/api-cache-helpers';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,7 +30,7 @@ export async function GET(req: NextRequest) {
 
     // Si no hay paginación solicitada (página 1 con limit 10 o sin params), usar cache
     const usePagination = searchParams.has('page') || searchParams.has('limit');
-    
+
     if (!usePagination) {
       // Usar datos cacheados para vista completa (por compatibilidad)
       const buildingsWithMetrics = await cachedBuildings(companyId);
@@ -49,7 +59,7 @@ export async function GET(req: NextRequest) {
     ]);
 
     // Calcular métricas para cada edificio
-    const buildingsWithMetrics = buildings.map(building => ({
+    const buildingsWithMetrics = buildings.map((building) => ({
       ...building,
       totalUnidades: building.units.length,
       unidadesOcupadas: building.units.filter((u: any) => u.estado === 'ocupada').length,
@@ -81,20 +91,17 @@ export async function POST(req: NextRequest) {
     const companyId = user.companyId;
 
     const body = await req.json();
-    
+
     // Validación con Zod
     const validationResult = buildingCreateSchema.safeParse(body);
-    
+
     if (!validationResult.success) {
-      const errors = validationResult.error.errors.map(err => ({
+      const errors = validationResult.error.errors.map((err) => ({
         field: err.path.join('.'),
-        message: err.message
+        message: err.message,
       }));
       logger.warn('Validation error creating building:', { errors });
-      return NextResponse.json(
-        { error: 'Datos inv\u00e1lidos', details: errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Datos inv\u00e1lidos', details: errors }, { status: 400 });
     }
 
     const validatedData = validationResult.data;
@@ -104,7 +111,10 @@ export async function POST(req: NextRequest) {
         companyId,
         nombre: validatedData.nombre,
         direccion: validatedData.direccion,
-        tipo: (validatedData.tipo && ['residencial', 'mixto', 'comercial'].includes(validatedData.tipo)) ? validatedData.tipo as 'residencial' | 'mixto' | 'comercial' : 'residencial',
+        tipo:
+          validatedData.tipo && ['residencial', 'mixto', 'comercial'].includes(validatedData.tipo)
+            ? (validatedData.tipo as 'residencial' | 'mixto' | 'comercial')
+            : 'residencial',
         anoConstructor: validatedData.anoConstructor || new Date().getFullYear(),
         numeroUnidades: validatedData.numeroUnidades || 0,
       },
@@ -131,7 +141,7 @@ export async function POST(req: NextRequest) {
             address: building.direccion || undefined,
           },
           {
-            scheduleMinutesDelay: 5 // Publicar en 5 minutos para permitir agregar foto
+            scheduleMinutesDelay: 5, // Publicar en 5 minutos para permitir agregar foto
           }
         );
       } catch (socialError) {

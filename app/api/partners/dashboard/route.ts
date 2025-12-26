@@ -24,10 +24,7 @@ export async function GET(request: NextRequest) {
     // Verificar autenticación
     const decoded = verifyToken(request);
     if (!decoded || !decoded.partnerId) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
     const partnerId = decoded.partnerId;
     // Obtener Partner
@@ -45,10 +42,7 @@ export async function GET(request: NextRequest) {
       },
     });
     if (!partner) {
-      return NextResponse.json(
-        { error: 'Partner no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Partner no encontrado' }, { status: 404 });
     }
     // Obtener clientes activos
     const clientes = await prisma.partnerClient.findMany({
@@ -76,19 +70,21 @@ export async function GET(request: NextRequest) {
     // Calcular totales
     const totalClientes = clientes.length;
     const totalComisionMes = comisiones
-      .filter(c => {
+      .filter((c) => {
         const now = new Date();
         const [year, month] = c.periodo.split('-');
-        return year === now.getFullYear().toString() && 
-               month === (now.getMonth() + 1).toString().padStart(2, '0');
+        return (
+          year === now.getFullYear().toString() &&
+          month === (now.getMonth() + 1).toString().padStart(2, '0')
+        );
       })
       .reduce((sum, c) => sum + c.montoComision, 0);
-    
+
     const totalComisionHistorica = comisiones
-      .filter(c => c.estado === 'PAID')
+      .filter((c) => c.estado === 'PAID')
       .reduce((sum, c) => sum + c.montoComision, 0);
     const totalPendientePago = comisiones
-      .filter(c => c.estado === 'APPROVED')
+      .filter((c) => c.estado === 'APPROVED')
       .reduce((sum, c) => sum + c.montoComision, 0);
     // Obtener invitaciones
     const invitaciones = await prisma.partnerInvitation.findMany({
@@ -96,8 +92,8 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' },
       take: 10,
     });
-    const invitacionesPendientes = invitaciones.filter(i => i.estado === 'PENDING').length;
-    const invitacionesAceptadas = invitaciones.filter(i => i.estado === 'ACCEPTED').length;
+    const invitacionesPendientes = invitaciones.filter((i) => i.estado === 'PENDING').length;
+    const invitacionesAceptadas = invitaciones.filter((i) => i.estado === 'ACCEPTED').length;
     return NextResponse.json({
       partner,
       metrics: {
@@ -107,9 +103,10 @@ export async function GET(request: NextRequest) {
         totalPendientePago: totalPendientePago.toFixed(2),
         invitacionesPendientes,
         invitacionesAceptadas,
-        tasaConversion: invitaciones.length > 0 
-          ? ((invitacionesAceptadas / invitaciones.length) * 100).toFixed(1)
-          : '0',
+        tasaConversion:
+          invitaciones.length > 0
+            ? ((invitacionesAceptadas / invitaciones.length) * 100).toFixed(1)
+            : '0',
       },
       clientes,
       comisiones,

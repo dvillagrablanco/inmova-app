@@ -1,6 +1,6 @@
 /**
  * Servicio de IA Assistant con Claude y Tool Calling
- * 
+ *
  * Capacidades:
  * - Uso de Claude (Anthropic) con tool calling nativo
  * - Herramientas para consultar y manipular datos del sistema
@@ -16,7 +16,7 @@ import logger from '@/lib/logger';
 // CONFIGURACIÓN ANTHROPIC
 // ============================================================================
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || ''
+  apiKey: process.env.ANTHROPIC_API_KEY || '',
 });
 
 const CLAUDE_MODEL = 'claude-3-5-sonnet-20241022'; // Modelo más reciente con tool calling
@@ -49,21 +49,22 @@ export interface AssistantResponse {
 const tools: Anthropic.Messages.Tool[] = [
   {
     name: 'search_buildings',
-    description: 'Busca edificios en el sistema. Puede filtrar por nombre, dirección, ciudad o estado.',
+    description:
+      'Busca edificios en el sistema. Puede filtrar por nombre, dirección, ciudad o estado.',
     input_schema: {
       type: 'object',
       properties: {
         query: {
           type: 'string',
-          description: 'Término de búsqueda para nombre, dirección o ciudad'
+          description: 'Término de búsqueda para nombre, dirección o ciudad',
         },
         limit: {
           type: 'number',
-          description: 'Número máximo de resultados (por defecto 10)'
-        }
+          description: 'Número máximo de resultados (por defecto 10)',
+        },
       },
-      required: ['query']
-    }
+      required: ['query'],
+    },
   },
   {
     name: 'search_tenants',
@@ -73,47 +74,49 @@ const tools: Anthropic.Messages.Tool[] = [
       properties: {
         query: {
           type: 'string',
-          description: 'Término de búsqueda para nombre, email o teléfono'
+          description: 'Término de búsqueda para nombre, email o teléfono',
         },
         buildingId: {
           type: 'string',
-          description: 'ID del edificio para filtrar inquilinos'
+          description: 'ID del edificio para filtrar inquilinos',
         },
         limit: {
           type: 'number',
-          description: 'Número máximo de resultados (por defecto 10)'
-        }
+          description: 'Número máximo de resultados (por defecto 10)',
+        },
       },
-      required: ['query']
-    }
+      required: ['query'],
+    },
   },
   {
     name: 'get_building_details',
-    description: 'Obtiene detalles completos de un edificio específico incluyendo unidades, inquilinos y contratos.',
+    description:
+      'Obtiene detalles completos de un edificio específico incluyendo unidades, inquilinos y contratos.',
     input_schema: {
       type: 'object',
       properties: {
         buildingId: {
           type: 'string',
-          description: 'ID del edificio'
-        }
+          description: 'ID del edificio',
+        },
       },
-      required: ['buildingId']
-    }
+      required: ['buildingId'],
+    },
   },
   {
     name: 'get_tenant_details',
-    description: 'Obtiene detalles completos de un inquilino incluyendo contratos activos, pagos y solicitudes de mantenimiento.',
+    description:
+      'Obtiene detalles completos de un inquilino incluyendo contratos activos, pagos y solicitudes de mantenimiento.',
     input_schema: {
       type: 'object',
       properties: {
         tenantId: {
           type: 'string',
-          description: 'ID del inquilino'
-        }
+          description: 'ID del inquilino',
+        },
       },
-      required: ['tenantId']
-    }
+      required: ['tenantId'],
+    },
   },
   {
     name: 'search_contracts',
@@ -124,22 +127,22 @@ const tools: Anthropic.Messages.Tool[] = [
         status: {
           type: 'string',
           description: 'Estado del contrato (activo, vencido, próximo_vencer)',
-          enum: ['activo', 'vencido', 'próximo_vencer']
+          enum: ['activo', 'vencido', 'próximo_vencer'],
         },
         tenantId: {
           type: 'string',
-          description: 'ID del inquilino'
+          description: 'ID del inquilino',
         },
         buildingId: {
           type: 'string',
-          description: 'ID del edificio'
+          description: 'ID del edificio',
         },
         limit: {
           type: 'number',
-          description: 'Número máximo de resultados (por defecto 10)'
-        }
-      }
-    }
+          description: 'Número máximo de resultados (por defecto 10)',
+        },
+      },
+    },
   },
   {
     name: 'get_payment_status',
@@ -149,18 +152,18 @@ const tools: Anthropic.Messages.Tool[] = [
       properties: {
         contractId: {
           type: 'string',
-          description: 'ID del contrato'
+          description: 'ID del contrato',
         },
         tenantId: {
           type: 'string',
-          description: 'ID del inquilino'
+          description: 'ID del inquilino',
         },
         includeHistory: {
           type: 'boolean',
-          description: 'Incluir historial de pagos'
-        }
-      }
-    }
+          description: 'Incluir historial de pagos',
+        },
+      },
+    },
   },
   {
     name: 'create_maintenance_request',
@@ -170,32 +173,32 @@ const tools: Anthropic.Messages.Tool[] = [
       properties: {
         title: {
           type: 'string',
-          description: 'Título de la solicitud'
+          description: 'Título de la solicitud',
         },
         description: {
           type: 'string',
-          description: 'Descripción detallada del problema'
+          description: 'Descripción detallada del problema',
         },
         unitId: {
           type: 'string',
-          description: 'ID de la unidad'
+          description: 'ID de la unidad',
         },
         buildingId: {
           type: 'string',
-          description: 'ID del edificio'
+          description: 'ID del edificio',
         },
         priority: {
           type: 'string',
           description: 'Prioridad (baja, media, alta, urgente)',
-          enum: ['baja', 'media', 'alta', 'urgente']
+          enum: ['baja', 'media', 'alta', 'urgente'],
         },
         category: {
           type: 'string',
-          description: 'Categoría (fontanería, electricidad, carpintería, limpieza, otro)'
-        }
+          description: 'Categoría (fontanería, electricidad, carpintería, limpieza, otro)',
+        },
       },
-      required: ['title', 'description']
-    }
+      required: ['title', 'description'],
+    },
   },
   {
     name: 'search_maintenance_requests',
@@ -205,22 +208,22 @@ const tools: Anthropic.Messages.Tool[] = [
       properties: {
         status: {
           type: 'string',
-          description: 'Estado (pendiente, en_progreso, completada, cancelada)'
+          description: 'Estado (pendiente, en_progreso, completada, cancelada)',
         },
         buildingId: {
           type: 'string',
-          description: 'ID del edificio'
+          description: 'ID del edificio',
         },
         priority: {
           type: 'string',
-          description: 'Prioridad (baja, media, alta, urgente)'
+          description: 'Prioridad (baja, media, alta, urgente)',
         },
         limit: {
           type: 'number',
-          description: 'Número máximo de resultados (por defecto 10)'
-        }
-      }
-    }
+          description: 'Número máximo de resultados (por defecto 10)',
+        },
+      },
+    },
   },
   {
     name: 'create_task',
@@ -230,28 +233,28 @@ const tools: Anthropic.Messages.Tool[] = [
       properties: {
         title: {
           type: 'string',
-          description: 'Título de la tarea'
+          description: 'Título de la tarea',
         },
         description: {
           type: 'string',
-          description: 'Descripción de la tarea'
+          description: 'Descripción de la tarea',
         },
         assignedTo: {
           type: 'string',
-          description: 'ID del usuario asignado'
+          description: 'ID del usuario asignado',
         },
         priority: {
           type: 'string',
           description: 'Prioridad (baja, media, alta, urgente)',
-          enum: ['baja', 'media', 'alta', 'urgente']
+          enum: ['baja', 'media', 'alta', 'urgente'],
         },
         dueDate: {
           type: 'string',
-          description: 'Fecha de vencimiento (ISO 8601)'
-        }
+          description: 'Fecha de vencimiento (ISO 8601)',
+        },
       },
-      required: ['title']
-    }
+      required: ['title'],
+    },
   },
   {
     name: 'search_tasks',
@@ -261,39 +264,40 @@ const tools: Anthropic.Messages.Tool[] = [
       properties: {
         status: {
           type: 'string',
-          description: 'Estado de la tarea (pendiente, en_progreso, completada)'
+          description: 'Estado de la tarea (pendiente, en_progreso, completada)',
         },
         assignedTo: {
           type: 'string',
-          description: 'ID del usuario asignado'
+          description: 'ID del usuario asignado',
         },
         priority: {
           type: 'string',
-          description: 'Prioridad'
+          description: 'Prioridad',
         },
         limit: {
           type: 'number',
-          description: 'Número máximo de resultados (por defecto 10)'
-        }
-      }
-    }
+          description: 'Número máximo de resultados (por defecto 10)',
+        },
+      },
+    },
   },
   {
     name: 'get_dashboard_stats',
-    description: 'Obtiene estadísticas del dashboard como número de edificios, inquilinos, contratos activos, pagos pendientes, etc.',
+    description:
+      'Obtiene estadísticas del dashboard como número de edificios, inquilinos, contratos activos, pagos pendientes, etc.',
     input_schema: {
       type: 'object',
       properties: {
         includeFinancial: {
           type: 'boolean',
-          description: 'Incluir datos financieros'
+          description: 'Incluir datos financieros',
         },
         includeMaintenance: {
           type: 'boolean',
-          description: 'Incluir datos de mantenimiento'
-        }
-      }
-    }
+          description: 'Incluir datos de mantenimiento',
+        },
+      },
+    },
   },
   {
     name: 'search_units',
@@ -303,20 +307,20 @@ const tools: Anthropic.Messages.Tool[] = [
       properties: {
         buildingId: {
           type: 'string',
-          description: 'ID del edificio'
+          description: 'ID del edificio',
         },
         status: {
           type: 'string',
           description: 'Estado (disponible, ocupada, mantenimiento)',
-          enum: ['disponible', 'ocupada', 'mantenimiento']
+          enum: ['disponible', 'ocupada', 'mantenimiento'],
         },
         limit: {
           type: 'number',
-          description: 'Número máximo de resultados (por defecto 10)'
-        }
-      }
-    }
-  }
+          description: 'Número máximo de resultados (por defecto 10)',
+        },
+      },
+    },
+  },
 ];
 
 // ============================================================================
@@ -334,40 +338,40 @@ async function executeTool(
     switch (toolName) {
       case 'search_buildings':
         return await searchBuildings(toolInput, context);
-      
+
       case 'search_tenants':
         return await searchTenants(toolInput, context);
-      
+
       case 'get_building_details':
         return await getBuildingDetails(toolInput, context);
-      
+
       case 'get_tenant_details':
         return await getTenantDetails(toolInput, context);
-      
+
       case 'search_contracts':
         return await searchContracts(toolInput, context);
-      
+
       case 'get_payment_status':
         return await getPaymentStatus(toolInput, context);
-      
+
       case 'create_maintenance_request':
         return await createMaintenanceRequest(toolInput, context);
-      
+
       case 'search_maintenance_requests':
         return await searchMaintenanceRequests(toolInput, context);
-      
+
       case 'create_task':
         return await createTask(toolInput, context);
-      
+
       case 'search_tasks':
         return await searchTasks(toolInput, context);
-      
+
       case 'get_dashboard_stats':
         return await getDashboardStats(toolInput, context);
-      
+
       case 'search_units':
         return await searchUnits(toolInput, context);
-      
+
       default:
         return { error: `Unknown tool: ${toolName}` };
     }
@@ -415,14 +419,14 @@ Cuando uses herramientas:
 
     // Preparar mensajes
     const messages: Anthropic.Messages.MessageParam[] = [
-      ...(context.conversationHistory?.map(msg => ({
+      ...(context.conversationHistory?.map((msg) => ({
         role: msg.role as 'user' | 'assistant',
-        content: msg.content
+        content: msg.content,
       })) || []),
       {
         role: 'user' as const,
-        content: userMessage
-      }
+        content: userMessage,
+      },
     ];
 
     logger.info(`🤖 Claude request - User: ${context.userName}`);
@@ -434,7 +438,7 @@ Cuando uses herramientas:
       temperature: 0.7,
       system: systemPrompt,
       tools: tools,
-      messages: messages
+      messages: messages,
     });
 
     logger.info(`💬 Claude response - Stop reason: ${response.stop_reason}`);
@@ -446,18 +450,14 @@ Cuando uses herramientas:
 
     while (response.stop_reason === 'tool_use' && iterations < MAX_ITERATIONS) {
       iterations++;
-      
+
       // Procesar todas las tool calls
       const toolResults: Anthropic.Messages.MessageParam[] = [];
-      
+
       for (const block of response.content) {
         if (block.type === 'tool_use') {
           toolsUsed.push(block.name);
-          const toolResult = await executeTool(
-            block.name,
-            block.input,
-            context
-          );
+          const toolResult = await executeTool(block.name, block.input, context);
 
           toolResults.push({
             role: 'user',
@@ -465,9 +465,9 @@ Cuando uses herramientas:
               {
                 type: 'tool_result',
                 tool_use_id: block.id,
-                content: JSON.stringify(toolResult)
-              }
-            ]
+                content: JSON.stringify(toolResult),
+              },
+            ],
           });
         }
       }
@@ -476,7 +476,7 @@ Cuando uses herramientas:
       messages.push(
         {
           role: 'assistant',
-          content: response.content
+          content: response.content,
         },
         ...toolResults
       );
@@ -488,7 +488,7 @@ Cuando uses herramientas:
         temperature: 0.7,
         system: systemPrompt,
         tools: tools,
-        messages: messages
+        messages: messages,
       });
 
       logger.info(`🔄 Claude iteration ${iterations} - Stop reason: ${response.stop_reason}`);
@@ -505,7 +505,7 @@ Cuando uses herramientas:
     const result: AssistantResponse = {
       type: toolsUsed.length > 0 ? 'action_executed' : 'text',
       content: finalText,
-      toolsUsed: toolsUsed.length > 0 ? toolsUsed : undefined
+      toolsUsed: toolsUsed.length > 0 ? toolsUsed : undefined,
     };
 
     logger.info(`✅ Claude completed - Tools used: ${toolsUsed.join(', ') || 'none'}`);
@@ -515,7 +515,7 @@ Cuando uses herramientas:
     logger.error('Error in chatWithClaude:', error);
     return {
       type: 'text',
-      content: 'Lo siento, hubo un error procesando tu solicitud. Por favor, inténtalo de nuevo.'
+      content: 'Lo siento, hubo un error procesando tu solicitud. Por favor, inténtalo de nuevo.',
     };
   }
 }
@@ -526,14 +526,14 @@ Cuando uses herramientas:
 
 async function searchBuildings(input: any, context: AssistantContext) {
   const { query, limit = 10 } = input;
-  
+
   const buildings = await prisma.building.findMany({
     where: {
       companyId: context.companyId,
       OR: [
         { nombre: { contains: query, mode: 'insensitive' } },
-        { direccion: { contains: query, mode: 'insensitive' } }
-      ]
+        { direccion: { contains: query, mode: 'insensitive' } },
+      ],
     },
     take: limit,
     select: {
@@ -544,38 +544,38 @@ async function searchBuildings(input: any, context: AssistantContext) {
       numeroUnidades: true,
       _count: {
         select: {
-          units: true
-        }
-      }
-    }
+          units: true,
+        },
+      },
+    },
   });
 
   return {
     success: true,
     count: buildings.length,
-    buildings
+    buildings,
   };
 }
 
 async function searchTenants(input: any, context: AssistantContext) {
   const { query, buildingId, limit = 10 } = input;
-  
+
   const where: any = {
     companyId: context.companyId,
     OR: [
       { nombreCompleto: { contains: query, mode: 'insensitive' } },
       { email: { contains: query, mode: 'insensitive' } },
-      { telefono: { contains: query, mode: 'insensitive' } }
-    ]
+      { telefono: { contains: query, mode: 'insensitive' } },
+    ],
   };
 
   if (buildingId) {
     where.contracts = {
       some: {
         unit: {
-          buildingId: buildingId
-        }
-      }
+          buildingId: buildingId,
+        },
+      },
     };
   }
 
@@ -589,7 +589,7 @@ async function searchTenants(input: any, context: AssistantContext) {
       telefono: true,
       contracts: {
         where: {
-          estado: 'activo'
+          estado: 'activo',
         },
         select: {
           id: true,
@@ -598,31 +598,31 @@ async function searchTenants(input: any, context: AssistantContext) {
               numero: true,
               building: {
                 select: {
-                  nombre: true
-                }
-              }
-            }
-          }
+                  nombre: true,
+                },
+              },
+            },
+          },
         },
-        take: 1
-      }
-    }
+        take: 1,
+      },
+    },
   });
 
   return {
     success: true,
     count: tenants.length,
-    tenants
+    tenants,
   };
 }
 
 async function getBuildingDetails(input: any, context: AssistantContext) {
   const { buildingId } = input;
-  
+
   const building = await prisma.building.findFirst({
     where: {
       id: buildingId,
-      companyId: context.companyId
+      companyId: context.companyId,
     },
     include: {
       units: {
@@ -634,27 +634,27 @@ async function getBuildingDetails(input: any, context: AssistantContext) {
           superficie: true,
           contracts: {
             where: {
-              estado: 'activo'
+              estado: 'activo',
             },
             select: {
               id: true,
               tenant: {
                 select: {
                   nombreCompleto: true,
-                  email: true
-                }
-              }
+                  email: true,
+                },
+              },
             },
-            take: 1
-          }
-        }
+            take: 1,
+          },
+        },
       },
       _count: {
         select: {
-          units: true
-        }
-      }
-    }
+          units: true,
+        },
+      },
+    },
   });
 
   if (!building) {
@@ -663,17 +663,17 @@ async function getBuildingDetails(input: any, context: AssistantContext) {
 
   return {
     success: true,
-    building
+    building,
   };
 }
 
 async function getTenantDetails(input: any, context: AssistantContext) {
   const { tenantId } = input;
-  
+
   const tenant = await prisma.tenant.findFirst({
     where: {
       id: tenantId,
-      companyId: context.companyId
+      companyId: context.companyId,
     },
     include: {
       contracts: {
@@ -689,27 +689,27 @@ async function getTenantDetails(input: any, context: AssistantContext) {
               building: {
                 select: {
                   nombre: true,
-                  direccion: true
-                }
-              }
-            }
+                  direccion: true,
+                },
+              },
+            },
           },
           payments: {
             take: 10,
             orderBy: {
-              fechaPago: 'desc'
+              fechaPago: 'desc',
             },
             select: {
               id: true,
               monto: true,
               fechaPago: true,
               estado: true,
-              metodoPago: true
-            }
-          }
-        }
-      }
-    }
+              metodoPago: true,
+            },
+          },
+        },
+      },
+    },
   });
 
   if (!tenant) {
@@ -718,15 +718,15 @@ async function getTenantDetails(input: any, context: AssistantContext) {
 
   return {
     success: true,
-    tenant
+    tenant,
   };
 }
 
 async function searchContracts(input: any, context: AssistantContext) {
   const { status, tenantId, buildingId, limit = 10 } = input;
-  
+
   const where: any = {
-    companyId: context.companyId
+    companyId: context.companyId,
   };
 
   if (status) {
@@ -739,7 +739,7 @@ async function searchContracts(input: any, context: AssistantContext) {
 
   if (buildingId) {
     where.unit = {
-      buildingId: buildingId
+      buildingId: buildingId,
     };
   }
 
@@ -755,39 +755,39 @@ async function searchContracts(input: any, context: AssistantContext) {
       tenant: {
         select: {
           nombreCompleto: true,
-          email: true
-        }
+          email: true,
+        },
       },
       unit: {
         select: {
           numero: true,
           building: {
             select: {
-              nombre: true
-            }
-          }
-        }
-      }
+              nombre: true,
+            },
+          },
+        },
+      },
     },
     orderBy: {
-      fechaInicio: 'desc'
-    }
+      fechaInicio: 'desc',
+    },
   });
 
   return {
     success: true,
     count: contracts.length,
-    contracts
+    contracts,
   };
 }
 
 async function getPaymentStatus(input: any, context: AssistantContext) {
   const { contractId, tenantId, includeHistory = true } = input;
-  
+
   const where: any = {
     contract: {
-      companyId: context.companyId
-    }
+      companyId: context.companyId,
+    },
   };
 
   if (contractId) {
@@ -797,7 +797,7 @@ async function getPaymentStatus(input: any, context: AssistantContext) {
   if (tenantId) {
     where.contract = {
       ...where.contract,
-      tenantId: tenantId
+      tenantId: tenantId,
     };
   }
 
@@ -805,7 +805,7 @@ async function getPaymentStatus(input: any, context: AssistantContext) {
     where,
     take: includeHistory ? 50 : 10,
     orderBy: {
-      fechaPago: 'desc'
+      fechaPago: 'desc',
     },
     select: {
       id: true,
@@ -814,12 +814,12 @@ async function getPaymentStatus(input: any, context: AssistantContext) {
       fechaVencimiento: true,
       estado: true,
       periodo: true,
-      metodoPago: true
-    }
+      metodoPago: true,
+    },
   });
 
   // Calcular resumen
-  const pending = payments.filter(p => p.estado === 'pendiente');
+  const pending = payments.filter((p) => p.estado === 'pendiente');
   const totalPending = pending.reduce((sum, p) => sum + (p.monto || 0), 0);
 
   return {
@@ -827,42 +827,42 @@ async function getPaymentStatus(input: any, context: AssistantContext) {
     summary: {
       totalPayments: payments.length,
       pendingCount: pending.length,
-      totalPending: totalPending
+      totalPending: totalPending,
     },
-    payments: includeHistory ? payments : payments.slice(0, 5)
+    payments: includeHistory ? payments : payments.slice(0, 5),
   };
 }
 
 async function createMaintenanceRequest(input: any, context: AssistantContext) {
   const { title, description, unitId, buildingId, priority = 'media', category = 'otro' } = input;
-  
+
   const request = await prisma.maintenanceRequest.create({
     data: {
       titulo: title,
       descripcion: description,
       unitId: unitId,
       prioridad: priority,
-      estado: 'pendiente'
-    }
+      estado: 'pendiente',
+    },
   });
 
   return {
     success: true,
     message: `Solicitud de mantenimiento creada exitosamente con ID: ${request.id}`,
     requestId: request.id,
-    request
+    request,
   };
 }
 
 async function searchMaintenanceRequests(input: any, context: AssistantContext) {
   const { status, buildingId, priority, limit = 10 } = input;
-  
+
   const where: any = {
     unit: {
       building: {
-        companyId: context.companyId
-      }
-    }
+        companyId: context.companyId,
+      },
+    },
   };
 
   if (status) {
@@ -872,7 +872,7 @@ async function searchMaintenanceRequests(input: any, context: AssistantContext) 
   if (buildingId) {
     where.unit = {
       ...where.unit,
-      buildingId: buildingId
+      buildingId: buildingId,
     };
   }
 
@@ -884,7 +884,7 @@ async function searchMaintenanceRequests(input: any, context: AssistantContext) 
     where,
     take: limit,
     orderBy: {
-      fechaSolicitud: 'desc'
+      fechaSolicitud: 'desc',
     },
     select: {
       id: true,
@@ -898,24 +898,24 @@ async function searchMaintenanceRequests(input: any, context: AssistantContext) 
           numero: true,
           building: {
             select: {
-              nombre: true
-            }
-          }
-        }
-      }
-    }
+              nombre: true,
+            },
+          },
+        },
+      },
+    },
   });
 
   return {
     success: true,
     count: requests.length,
-    requests
+    requests,
   };
 }
 
 async function createTask(input: any, context: AssistantContext) {
   const { title, description, assignedTo, priority = 'media', dueDate } = input;
-  
+
   const task = await prisma.task.create({
     data: {
       companyId: context.companyId,
@@ -925,23 +925,23 @@ async function createTask(input: any, context: AssistantContext) {
       prioridad: priority,
       asignadoA: assignedTo,
       creadoPor: context.userId,
-      fechaLimite: dueDate ? new Date(dueDate) : undefined
-    }
+      fechaLimite: dueDate ? new Date(dueDate) : undefined,
+    },
   });
 
   return {
     success: true,
     message: `Tarea creada exitosamente con ID: ${task.id}`,
     taskId: task.id,
-    task
+    task,
   };
 }
 
 async function searchTasks(input: any, context: AssistantContext) {
   const { status, assignedTo, priority, limit = 10 } = input;
-  
+
   const where: any = {
-    companyId: context.companyId
+    companyId: context.companyId,
   };
 
   if (status) {
@@ -960,7 +960,7 @@ async function searchTasks(input: any, context: AssistantContext) {
     where,
     take: limit,
     orderBy: {
-      createdAt: 'desc'
+      createdAt: 'desc',
     },
     select: {
       id: true,
@@ -969,47 +969,47 @@ async function searchTasks(input: any, context: AssistantContext) {
       estado: true,
       prioridad: true,
       fechaLimite: true,
-      createdAt: true
-    }
+      createdAt: true,
+    },
   });
 
   return {
     success: true,
     count: tasks.length,
-    tasks
+    tasks,
   };
 }
 
 async function getDashboardStats(input: any, context: AssistantContext) {
   const { includeFinancial = true, includeMaintenance = true } = input;
-  
+
   const [buildingsCount, unitsCount, tenantsCount, contractsCount] = await Promise.all([
     prisma.building.count({ where: { companyId: context.companyId } }),
-    prisma.unit.count({ 
-      where: { 
+    prisma.unit.count({
+      where: {
         building: {
-          companyId: context.companyId
-        }
-      } 
+          companyId: context.companyId,
+        },
+      },
     }),
     prisma.tenant.count({ where: { companyId: context.companyId } }),
-    prisma.contract.count({ 
-      where: { 
+    prisma.contract.count({
+      where: {
         unit: {
           building: {
-            companyId: context.companyId
-          }
+            companyId: context.companyId,
+          },
         },
-        estado: 'activo'
-      } 
-    })
+        estado: 'activo',
+      },
+    }),
   ]);
 
   const stats: any = {
     buildings: buildingsCount,
     units: unitsCount,
     tenants: tenantsCount,
-    activeContracts: contractsCount
+    activeContracts: contractsCount,
   };
 
   if (includeFinancial) {
@@ -1019,19 +1019,19 @@ async function getDashboardStats(input: any, context: AssistantContext) {
         contract: {
           unit: {
             building: {
-              companyId: context.companyId
-            }
-          }
-        }
+              companyId: context.companyId,
+            },
+          },
+        },
       },
       _sum: { monto: true },
-      _count: true
+      _count: true,
     });
 
     stats.payments = payments.reduce((acc: any, p) => {
       acc[p.estado] = {
         count: p._count,
-        total: p._sum.monto || 0
+        total: p._sum.monto || 0,
       };
       return acc;
     }, {});
@@ -1043,11 +1043,11 @@ async function getDashboardStats(input: any, context: AssistantContext) {
       where: {
         unit: {
           building: {
-            companyId: context.companyId
-          }
-        }
+            companyId: context.companyId,
+          },
+        },
       },
-      _count: true
+      _count: true,
     });
 
     stats.maintenance = maintenance.reduce((acc: any, m) => {
@@ -1058,15 +1058,15 @@ async function getDashboardStats(input: any, context: AssistantContext) {
 
   return {
     success: true,
-    stats
+    stats,
   };
 }
 
 async function searchUnits(input: any, context: AssistantContext) {
   const { buildingId, status, limit = 10 } = input;
-  
+
   const where: any = {
-    companyId: context.companyId
+    companyId: context.companyId,
   };
 
   if (buildingId) {
@@ -1090,29 +1090,29 @@ async function searchUnits(input: any, context: AssistantContext) {
       building: {
         select: {
           nombre: true,
-          direccion: true
-        }
+          direccion: true,
+        },
       },
       contracts: {
         where: {
-          estado: 'activo'
+          estado: 'activo',
         },
         select: {
           id: true,
           tenant: {
             select: {
-              nombreCompleto: true
-            }
-          }
+              nombreCompleto: true,
+            },
+          },
         },
-        take: 1
-      }
-    }
+        take: 1,
+      },
+    },
   });
 
   return {
     success: true,
     count: units.length,
-    units
+    units,
   };
 }

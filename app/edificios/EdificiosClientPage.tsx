@@ -202,7 +202,10 @@ export function EdificiosClientPage({ initialBuildings }: EdificiosClientPagePro
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {buildings.reduce((acc, b) => acc + (b.metrics?.totalUnits || b.numeroUnidades || 0), 0)}
+                    {buildings.reduce(
+                      (acc, b) => acc + (b.metrics?.totalUnits || b.numeroUnidades || 0),
+                      0
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -216,7 +219,8 @@ export function EdificiosClientPage({ initialBuildings }: EdificiosClientPagePro
                   <div className="text-2xl font-bold">
                     {buildings.length > 0
                       ? Math.round(
-                          buildings.reduce((acc, b) => acc + (b.metrics?.ocupacionPct || 0), 0) / buildings.length
+                          buildings.reduce((acc, b) => acc + (b.metrics?.ocupacionPct || 0), 0) /
+                            buildings.length
                         )
                       : 0}
                     %
@@ -231,7 +235,10 @@ export function EdificiosClientPage({ initialBuildings }: EdificiosClientPagePro
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    €{buildings.reduce((acc, b) => acc + (b.metrics?.ingresosMensuales || 0), 0).toLocaleString()}
+                    €
+                    {buildings
+                      .reduce((acc, b) => acc + (b.metrics?.ingresosMensuales || 0), 0)
+                      .toLocaleString()}
                   </div>
                 </CardContent>
               </Card>
@@ -267,12 +274,16 @@ export function EdificiosClientPage({ initialBuildings }: EdificiosClientPagePro
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => router.push(`/edificios/${building.id}`)}>
+                            <DropdownMenuItem
+                              onClick={() => router.push(`/edificios/${building.id}`)}
+                            >
                               <Eye className="mr-2 h-4 w-4" />
                               Ver detalles
                             </DropdownMenuItem>
                             {canUpdate && (
-                              <DropdownMenuItem onClick={() => router.push(`/edificios/${building.id}/editar`)}>
+                              <DropdownMenuItem
+                                onClick={() => router.push(`/edificios/${building.id}/editar`)}
+                              >
                                 <Pencil className="mr-2 h-4 w-4" />
                                 Editar
                               </DropdownMenuItem>
@@ -300,7 +311,9 @@ export function EdificiosClientPage({ initialBuildings }: EdificiosClientPagePro
                         <div className="flex items-center gap-2">
                           <Badge variant="secondary">{building.tipo}</Badge>
                           {building.anoConstructor && (
-                            <span className="text-xs text-gray-500">Año: {building.anoConstructor}</span>
+                            <span className="text-xs text-gray-500">
+                              Año: {building.anoConstructor}
+                            </span>
                           )}
                         </div>
 
@@ -314,7 +327,9 @@ export function EdificiosClientPage({ initialBuildings }: EdificiosClientPagePro
                             </div>
                             <div>
                               <p className="text-xs text-gray-500">Ocupación</p>
-                              <p className="text-sm font-semibold">{building.metrics.ocupacionPct}%</p>
+                              <p className="text-sm font-semibold">
+                                {building.metrics.ocupacionPct}%
+                              </p>
                             </div>
                             <div className="col-span-2">
                               <p className="text-xs text-gray-500">Ingresos Mensuales</p>
@@ -353,7 +368,9 @@ export function EdificiosClientPage({ initialBuildings }: EdificiosClientPagePro
                             </h3>
                             <div className="flex items-center gap-2 mt-1">
                               <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                              <p className="text-sm text-gray-600 dark:text-gray-400 truncate">{building.direccion}</p>
+                              <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                                {building.direccion}
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -369,7 +386,9 @@ export function EdificiosClientPage({ initialBuildings }: EdificiosClientPagePro
                               </div>
                               <div className="text-center">
                                 <p className="text-xs text-gray-500">Ocupación</p>
-                                <p className="text-sm font-semibold">{building.metrics.ocupacionPct}%</p>
+                                <p className="text-sm font-semibold">
+                                  {building.metrics.ocupacionPct}%
+                                </p>
                               </div>
                               <div className="text-center">
                                 <p className="text-xs text-gray-500">Ingresos</p>
@@ -416,23 +435,32 @@ export function EdificiosClientPage({ initialBuildings }: EdificiosClientPagePro
             {filteredBuildings.length === 0 && !searchTerm && (
               <EnhancedEmptyState
                 preset="buildings"
-                primaryAction={canCreate ? {
-                  label: 'Crear Primer Edificio',
-                  onClick: () => router.push('/edificios/nuevo'),
-                  icon: <Plus className="h-4 w-4" />,
-                } : undefined}
-                secondaryActions={canCreate ? [
-                  {
-                    label: 'Ver Guía',
-                    onClick: () => router.push('/ayuda/edificios'),
-                    variant: 'outline',
-                  },
-                  {
-                    label: 'Ver Video Tutorial',
-                    onClick: () => window.open('https://youtube.com/inmova-edificios', '_blank'),
-                    variant: 'ghost',
-                  },
-                ] : undefined}
+                primaryAction={
+                  canCreate
+                    ? {
+                        label: 'Crear Primer Edificio',
+                        onClick: () => router.push('/edificios/nuevo'),
+                        icon: <Plus className="h-4 w-4" />,
+                      }
+                    : undefined
+                }
+                secondaryActions={
+                  canCreate
+                    ? [
+                        {
+                          label: 'Ver Guía',
+                          onClick: () => router.push('/ayuda/edificios'),
+                          variant: 'outline',
+                        },
+                        {
+                          label: 'Ver Video Tutorial',
+                          onClick: () =>
+                            window.open('https://youtube.com/inmova-edificios', '_blank'),
+                          variant: 'ghost',
+                        },
+                      ]
+                    : undefined
+                }
                 chatSupport={!canCreate}
               />
             )}

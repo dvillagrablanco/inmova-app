@@ -60,7 +60,7 @@ export default function RoomRentalTenantsPage() {
   const loadTenants = async () => {
     try {
       setLoading(true);
-      
+
       // Mock data
       setTenants([
         {
@@ -133,7 +133,6 @@ export default function RoomRentalTenantsPage() {
           satisfactionScore: 3.2,
         },
       ]);
-
     } catch (error) {
       toast.error('Error al cargar inquilinos');
     } finally {
@@ -181,15 +180,16 @@ export default function RoomRentalTenantsPage() {
     });
   };
 
-  const filteredTenants = tenants.filter((tenant) =>
-    tenant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tenant.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tenant.roomNumber.includes(searchTerm)
+  const filteredTenants = tenants.filter(
+    (tenant) =>
+      tenant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tenant.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tenant.roomNumber.includes(searchTerm)
   );
 
   const totalRent = tenants.reduce((sum, t) => sum + t.rent, 0);
-  const paidCount = tenants.filter(t => t.paymentStatus === 'paid').length;
-  const activeCount = tenants.filter(t => t.contractStatus === 'active').length;
+  const paidCount = tenants.filter((t) => t.paymentStatus === 'paid').length;
+  const activeCount = tenants.filter((t) => t.contractStatus === 'active').length;
 
   if (status === 'unauthenticated') {
     router.push('/login');
@@ -199,195 +199,196 @@ export default function RoomRentalTenantsPage() {
   if (loading) {
     return (
       <AuthenticatedLayout>
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-              <p className="mt-4 text-muted-foreground">Cargando inquilinos...</p>
-            </div>
-          </AuthenticatedLayout>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Cargando inquilinos...</p>
+        </div>
+      </AuthenticatedLayout>
     );
   }
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto space-y-6">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <h1 className="text-3xl font-bold">Gestión de Inquilinos</h1>
-                <p className="text-muted-foreground mt-2">
-                  Control completo de inquilinos por habitación
-                </p>
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold">Gestión de Inquilinos</h1>
+            <p className="text-muted-foreground mt-2">
+              Control completo de inquilinos por habitación
+            </p>
+          </div>
+          <Button onClick={() => router.push('/room-rental/tenants/nuevo')}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nuevo Inquilino
+          </Button>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">Total Inquilinos</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{tenants.length}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {activeCount} con contrato activo
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">Ingresos Mensuales</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">{formatCurrency(totalRent)}</div>
+              <p className="text-xs text-muted-foreground mt-1">Alquileres</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">Pagos al Día</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {paidCount} / {tenants.length}
               </div>
-              <Button onClick={() => router.push('/room-rental/tenants/nuevo')}>
-                <Plus className="h-4 w-4 mr-2" />
-                Nuevo Inquilino
-              </Button>
+              <p className="text-xs text-muted-foreground mt-1">
+                {Math.round((paidCount / tenants.length) * 100)}% cobranza
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">Satisfacción Media</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {(
+                  tenants.reduce((sum, t) => sum + t.satisfactionScore, 0) / tenants.length
+                ).toFixed(1)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">sobre 5.0</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Search */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por nombre, email o número de habitación..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
             </div>
+          </CardContent>
+        </Card>
 
-            {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium">Total Inquilinos</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{tenants.length}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {activeCount} con contrato activo
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium">Ingresos Mensuales</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-green-600">
-                    {formatCurrency(totalRent)}
+        {/* Tenants List */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {filteredTenants.map((tenant) => (
+            <Card key={tenant.id} className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
+                      {tenant.name
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')}
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">{tenant.name}</CardTitle>
+                      <CardDescription className="flex items-center gap-2 mt-1">
+                        <Home className="h-3 w-3" />
+                        Habitación {tenant.roomNumber}
+                      </CardDescription>
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">Alquileres</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium">Pagos al Día</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {paidCount} / {tenants.length}
+                  <div className="flex flex-col gap-1 items-end">
+                    {getPaymentStatusBadge(tenant.paymentStatus)}
+                    {getContractStatusBadge(tenant.contractStatus)}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {Math.round((paidCount / tenants.length) * 100)}% cobranza
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium">Satisfacción Media</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {(tenants.reduce((sum, t) => sum + t.satisfactionScore, 0) / tenants.length).toFixed(1)}
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <p className="text-muted-foreground text-xs">Alquiler Mensual</p>
+                    <p className="font-bold text-lg">{formatCurrency(tenant.rent)}</p>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">sobre 5.0</p>
-                </CardContent>
-              </Card>
-            </div>
+                  <div>
+                    <p className="text-muted-foreground text-xs">Fianza</p>
+                    <p className="font-medium">{formatCurrency(tenant.deposit)}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground text-xs">Entrada</p>
+                    <p className="font-medium">{formatDate(tenant.moveInDate)}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground text-xs">Último Pago</p>
+                    <p className="font-medium">{formatDate(tenant.lastPayment)}</p>
+                  </div>
+                </div>
 
-            {/* Search */}
-            <Card>
-              <CardContent className="pt-6">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Buscar por nombre, email o número de habitación..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
+                <div className="flex items-center justify-between pt-3 border-t">
+                  <div className="flex items-center gap-4 text-xs">
+                    <div>
+                      <span className="text-muted-foreground">Incidencias:</span>{' '}
+                      <span
+                        className={`font-medium ${tenant.issuesReported > 3 ? 'text-red-600' : ''}`}
+                      >
+                        {tenant.issuesReported}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Satisfacción:</span>{' '}
+                      <span className="font-medium">{tenant.satisfactionScore}/5.0 ⭐</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-2 border-t">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => router.push(`/room-rental/tenants/${tenant.id}`)}
+                  >
+                    Ver Perfil
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => toast.info('Enviando mensaje...')}
+                  >
+                    <MessageSquare className="h-3 w-3 mr-1" />
+                    Contactar
+                  </Button>
                 </div>
               </CardContent>
             </Card>
+          ))}
+        </div>
 
-            {/* Tenants List */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {filteredTenants.map((tenant) => (
-                <Card key={tenant.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
-                          {tenant.name.split(' ').map(n => n[0]).join('')}
-                        </div>
-                        <div>
-                          <CardTitle className="text-lg">{tenant.name}</CardTitle>
-                          <CardDescription className="flex items-center gap-2 mt-1">
-                            <Home className="h-3 w-3" />
-                            Habitación {tenant.roomNumber}
-                          </CardDescription>
-                        </div>
-                      </div>
-                      <div className="flex flex-col gap-1 items-end">
-                        {getPaymentStatusBadge(tenant.paymentStatus)}
-                        {getContractStatusBadge(tenant.contractStatus)}
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div>
-                        <p className="text-muted-foreground text-xs">Alquiler Mensual</p>
-                        <p className="font-bold text-lg">{formatCurrency(tenant.rent)}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground text-xs">Fianza</p>
-                        <p className="font-medium">{formatCurrency(tenant.deposit)}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground text-xs">Entrada</p>
-                        <p className="font-medium">{formatDate(tenant.moveInDate)}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground text-xs">Último Pago</p>
-                        <p className="font-medium">{formatDate(tenant.lastPayment)}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-3 border-t">
-                      <div className="flex items-center gap-4 text-xs">
-                        <div>
-                          <span className="text-muted-foreground">Incidencias:</span>{' '}
-                          <span className={`font-medium ${tenant.issuesReported > 3 ? 'text-red-600' : ''}`}>
-                            {tenant.issuesReported}
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Satisfacción:</span>{' '}
-                          <span className="font-medium">
-                            {tenant.satisfactionScore}/5.0 ⭐
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-2 pt-2 border-t">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => router.push(`/room-rental/tenants/${tenant.id}`)}
-                      >
-                        Ver Perfil
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => toast.info('Enviando mensaje...')}
-                      >
-                        <MessageSquare className="h-3 w-3 mr-1" />
-                        Contactar
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {filteredTenants.length === 0 && (
-              <Card>
-                <CardContent className="text-center py-12">
-                  <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No se encontraron inquilinos</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Intenta ajustar los filtros de búsqueda
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </AuthenticatedLayout>
+        {filteredTenants.length === 0 && (
+          <Card>
+            <CardContent className="text-center py-12">
+              <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No se encontraron inquilinos</h3>
+              <p className="text-muted-foreground mb-4">Intenta ajustar los filtros de búsqueda</p>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </AuthenticatedLayout>
   );
 }

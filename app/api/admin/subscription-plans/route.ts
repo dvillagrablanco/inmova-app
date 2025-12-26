@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session || !session.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
@@ -37,10 +37,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(plans);
   } catch (error) {
     logger.error('Error fetching subscription plans:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener planes de suscripción' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener planes de suscripción' }, { status: 500 });
   }
 }
 
@@ -48,7 +45,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session || !session.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
@@ -65,10 +62,7 @@ export async function POST(request: NextRequest) {
 
     // Validaciones
     if (!data.nombre || !data.tier || !data.precioMensual) {
-      return NextResponse.json(
-        { error: 'Nombre, tier y precio son requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Nombre, tier y precio son requeridos' }, { status: 400 });
     }
 
     const plan = await prisma.subscriptionPlan.create({
@@ -87,9 +81,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(plan, { status: 201 });
   } catch (error) {
     logger.error('Error creating subscription plan:', error);
-    return NextResponse.json(
-      { error: 'Error al crear plan de suscripción' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear plan de suscripción' }, { status: 500 });
   }
 }

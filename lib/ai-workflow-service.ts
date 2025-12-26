@@ -30,7 +30,13 @@ export const AVAILABLE_TOOLS = [
         },
         actionType: {
           type: 'string',
-          enum: ['enviar_notificacion', 'crear_tarea', 'enviar_email', 'actualizar_registro', 'crear_incidencia'],
+          enum: [
+            'enviar_notificacion',
+            'crear_tarea',
+            'enviar_email',
+            'actualizar_registro',
+            'crear_incidencia',
+          ],
           description: 'Tipo de acción a ejecutar',
         },
         actionConfig: {
@@ -135,19 +141,19 @@ export async function executeTool(
     switch (toolName) {
       case 'create_workflow':
         return await handleCreateWorkflow(toolInput, context);
-      
+
       case 'execute_workflow':
         return await handleExecuteWorkflow(toolInput, context);
-      
+
       case 'search_workflows':
         return await handleSearchWorkflows(toolInput, context);
-      
+
       case 'get_workflow_stats':
         return await handleGetWorkflowStats(context);
-      
+
       case 'create_notification':
         return await handleCreateNotification(toolInput, context);
-      
+
       default:
         throw new Error(`Herramienta no reconocida: ${toolName}`);
     }
@@ -160,10 +166,7 @@ export async function executeTool(
 /**
  * Handler: Crear workflow
  */
-async function handleCreateWorkflow(
-  input: any,
-  context: { companyId: string; userId: string }
-) {
+async function handleCreateWorkflow(input: any, context: { companyId: string; userId: string }) {
   const workflow = await prisma.workflow.create({
     data: {
       companyId: context.companyId,
@@ -200,10 +203,7 @@ async function handleCreateWorkflow(
 /**
  * Handler: Ejecutar workflow
  */
-async function handleExecuteWorkflow(
-  input: any,
-  context: { companyId: string; userId: string }
-) {
+async function handleExecuteWorkflow(input: any, context: { companyId: string; userId: string }) {
   // Verificar que el workflow pertenece a la empresa
   const workflow = await prisma.workflow.findFirst({
     where: {
@@ -234,10 +234,7 @@ async function handleExecuteWorkflow(
 /**
  * Handler: Buscar workflows
  */
-async function handleSearchWorkflows(
-  input: any,
-  context: { companyId: string; userId: string }
-) {
+async function handleSearchWorkflows(input: any, context: { companyId: string; userId: string }) {
   const workflows = await prisma.workflow.findMany({
     where: {
       companyId: context.companyId,

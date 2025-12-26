@@ -21,10 +21,7 @@ export async function POST(request: Request) {
     const { currentPassword, newPassword } = body;
 
     if (!currentPassword || !newPassword) {
-      return NextResponse.json(
-        { error: 'Faltan datos requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Faltan datos requeridos' }, { status: 400 });
     }
 
     // Buscar usuario por email
@@ -33,19 +30,13 @@ export async function POST(request: Request) {
     });
 
     if (!dbUser) {
-      return NextResponse.json(
-        { error: 'Usuario no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
     // Verificar contraseña actual
     const passwordValid = await bcrypt.compare(currentPassword, dbUser.password);
     if (!passwordValid) {
-      return NextResponse.json(
-        { error: 'Contraseña actual incorrecta' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Contraseña actual incorrecta' }, { status: 400 });
     }
 
     // Hashear nueva contraseña
@@ -57,15 +48,12 @@ export async function POST(request: Request) {
       data: { password: hashedPassword },
     });
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
-      message: 'Contraseña actualizada correctamente' 
+      message: 'Contraseña actualizada correctamente',
     });
   } catch (error) {
     logger.error('Error changing password:', error);
-    return NextResponse.json(
-      { error: 'Error al cambiar contraseña' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al cambiar contraseña' }, { status: 500 });
   }
 }

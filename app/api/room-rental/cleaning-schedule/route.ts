@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { generateCleaningSchedule, saveCleaningScheduleToContracts } from '@/lib/room-rental-service';
+import {
+  generateCleaningSchedule,
+  saveCleaningScheduleToContracts,
+} from '@/lib/room-rental-service';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -23,10 +26,7 @@ export async function GET(request: NextRequest) {
     const weeksAhead = searchParams.get('weeksAhead');
 
     if (!unitId) {
-      return NextResponse.json(
-        { error: 'Falta parámetro: unitId' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Falta parámetro: unitId' }, { status: 400 });
     }
 
     const schedule = await generateCleaningSchedule(
@@ -57,10 +57,7 @@ export async function POST(request: NextRequest) {
     const data = await request.json();
 
     if (!data.unitId) {
-      return NextResponse.json(
-        { error: 'Falta campo requerido: unitId' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Falta campo requerido: unitId' }, { status: 400 });
     }
 
     const schedule = await saveCleaningScheduleToContracts(

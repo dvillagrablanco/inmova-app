@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.companyId) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
@@ -42,14 +42,11 @@ export async function GET(request: NextRequest) {
         createdAt: 'desc',
       },
     });
-    
+
     return NextResponse.json(communities);
   } catch (error) {
     logger.error('Error fetching communities:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener comunidades' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener comunidades' }, { status: 500 });
   }
 }
 
@@ -60,11 +57,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.companyId) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
-    
+
     const body = await request.json();
     const {
       buildingId,
@@ -77,15 +74,12 @@ export async function POST(request: NextRequest) {
       honorariosFijos,
       honorariosPorcentaje,
     } = body;
-    
+
     // Validar campos requeridos
     if (!buildingId || !nombreComunidad || !direccion) {
-      return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
-    
+
     // Verificar que el edificio pertenece a la compañía
     const building = await prisma.building.findFirst({
       where: {
@@ -93,26 +87,23 @@ export async function POST(request: NextRequest) {
         companyId: session.user.companyId,
       },
     });
-    
+
     if (!building) {
-      return NextResponse.json(
-        { error: 'Edificio no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Edificio no encontrado' }, { status: 404 });
     }
-    
+
     // Verificar si ya existe una comunidad para este edificio
     const existing = await prisma.communityManagement.findUnique({
       where: { buildingId },
     });
-    
+
     if (existing) {
       return NextResponse.json(
         { error: 'Ya existe una comunidad para este edificio' },
         { status: 400 }
       );
     }
-    
+
     const community = await prisma.communityManagement.create({
       data: {
         buildingId,
@@ -131,13 +122,10 @@ export async function POST(request: NextRequest) {
         building: true,
       },
     });
-    
+
     return NextResponse.json(community, { status: 201 });
   } catch (error) {
     logger.error('Error creating community:', error);
-    return NextResponse.json(
-      { error: 'Error al crear comunidad' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear comunidad' }, { status: 500 });
   }
 }

@@ -1,9 +1,9 @@
 /**
  * Error Display Component
- * 
+ *
  * Componente para mostrar errores con contexto, acciones de retry y navegación.
  * Proporciona una experiencia de error clara y accionable para el usuario.
- * 
+ *
  * @module error-display
  * @since Semana 2, Tarea 2.5
  */
@@ -59,7 +59,7 @@ const sizeClasses = {
 
 /**
  * Componente de visualización de errores
- * 
+ *
  * @example
  * ```tsx
  * // Error simple
@@ -67,14 +67,14 @@ const sizeClasses = {
  *   title="Error al cargar"
  *   message="No se pudieron cargar los datos"
  * />
- * 
+ *
  * // Error con retry
  * <ErrorDisplay
  *   title="Error de conexión"
  *   message="No se pudo conectar al servidor"
  *   retry={() => refetch()}
  * />
- * 
+ *
  * // Error con navegación
  * <ErrorDisplay
  *   title="Página no encontrada"
@@ -98,7 +98,7 @@ export function ErrorDisplay({
 
   const handleRetry = async () => {
     if (!retry) return;
-    
+
     setIsRetrying(true);
     try {
       await retry();
@@ -125,40 +125,19 @@ export function ErrorDisplay({
 
   return (
     <div
-      className={cn(
-        'flex w-full flex-col items-center justify-center',
-        sizes.container,
-        className
-      )}
+      className={cn('flex w-full flex-col items-center justify-center', sizes.container, className)}
     >
       <div className="flex flex-col items-center text-center space-y-4 max-w-md">
         {/* Ícono de error */}
         <div className="rounded-full bg-destructive/10 p-3">
-          <AlertCircle
-            className={cn('text-destructive', sizes.icon)}
-            aria-hidden="true"
-          />
+          <AlertCircle className={cn('text-destructive', sizes.icon)} aria-hidden="true" />
         </div>
 
         {/* Título */}
-        <h2
-          className={cn(
-            'font-semibold text-foreground',
-            sizes.title
-          )}
-        >
-          {title}
-        </h2>
+        <h2 className={cn('font-semibold text-foreground', sizes.title)}>{title}</h2>
 
         {/* Mensaje */}
-        <p
-          className={cn(
-            'text-muted-foreground',
-            sizes.message
-          )}
-        >
-          {message}
-        </p>
+        <p className={cn('text-muted-foreground', sizes.message)}>{message}</p>
 
         {/* Acciones */}
         <div className="flex flex-wrap gap-3 pt-2">
@@ -184,22 +163,14 @@ export function ErrorDisplay({
           )}
 
           {returnUrl && (
-            <Button
-              onClick={handleReturn}
-              variant="outline"
-              className={sizes.button}
-            >
+            <Button onClick={handleReturn} variant="outline" className={sizes.button}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Volver
             </Button>
           )}
 
           {showHomeButton && (
-            <Button
-              onClick={handleHome}
-              variant="outline"
-              className={sizes.button}
-            >
+            <Button onClick={handleHome} variant="outline" className={sizes.button}>
               <Home className="mr-2 h-4 w-4" />
               Ir al inicio
             </Button>
@@ -222,12 +193,7 @@ export function InlineErrorDisplay({
       <AlertCircle className="h-4 w-4 text-destructive flex-shrink-0" />
       <span className="flex-1 text-destructive">{message}</span>
       {retry && (
-        <Button
-          onClick={retry}
-          size="sm"
-          variant="ghost"
-          className="h-7 text-xs"
-        >
+        <Button onClick={retry} size="sm" variant="ghost" className="h-7 text-xs">
           <RefreshCw className="mr-1 h-3 w-3" />
           Retry
         </Button>

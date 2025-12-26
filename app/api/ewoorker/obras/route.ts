@@ -1,25 +1,22 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth-options";
-import prisma from "@/lib/prisma";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import prisma from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user?.id) {
-      return NextResponse.json(
-        { error: "No autenticado" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
-    const tab = searchParams.get("tab") || "mis-obras";
+    const tab = searchParams.get('tab') || 'mis-obras';
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { companyId: true }
+      select: { companyId: true },
     });
 
     if (!user?.companyId) {
@@ -27,7 +24,7 @@ export async function GET(request: NextRequest) {
     }
 
     const perfil = await prisma.ewoorkerPerfilEmpresa.findUnique({
-      where: { companyId: user.companyId }
+      where: { companyId: user.companyId },
     });
 
     if (!perfil) {
@@ -36,51 +33,47 @@ export async function GET(request: NextRequest) {
 
     let obras;
 
-    if (tab === "mis-obras") {
+    if (tab === 'mis-obras') {
       // Obras publicadas por mi empresa
       obras = await prisma.ewoorkerObra.findMany({
         where: {
-          perfilConstructorId: perfil.id
+          perfilConstructorId: perfil.id,
         },
         include: {
           _count: {
-            select: { ofertas: true }
-          }
+            select: { ofertas: true },
+          },
         },
-        orderBy: { createdAt: "desc" }
+        orderBy: { createdAt: 'desc' },
       });
     } else {
       // Obras disponibles para ofertar (públicas y que no sean mías)
       obras = await prisma.ewoorkerObra.findMany({
         where: {
           estado: {
-            in: ["PUBLICADA", "EN_LICITACION"]
+            in: ['PUBLICADA', 'EN_LICITACION'],
           },
           perfilConstructorId: {
-            not: perfil.id
+            not: perfil.id,
           },
           // Filtrar por especialidades del perfil
           especialidadesRequeridas: {
-            hasSome: perfil.especialidades
-          }
+            hasSome: perfil.especialidades,
+          },
         },
         include: {
           _count: {
-            select: { ofertas: true }
-          }
+            select: { ofertas: true },
+          },
         },
-        orderBy: { fechaPublicacion: "desc" }
+        orderBy: { fechaPublicacion: 'desc' },
       });
     }
 
     return NextResponse.json({ obras });
-
   } catch (error) {
-    console.error("[EWOORKER_OBRAS_GET]", error);
-    return NextResponse.json(
-      { error: "Error al obtener obras" },
-      { status: 500 }
-    );
+    console.error('[EWOORKER_OBRAS_GET]', error);
+    return NextResponse.json({ error: 'Error al obtener obras' }, { status: 500 });
   }
 }
 
@@ -89,10 +82,7 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user?.id) {
-      return NextResponse.json(
-        { error: "No autenticado" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -108,30 +98,24 @@ export async function POST(request: NextRequest) {
       presupuestoMinimo,
       presupuestoMaximo,
       fechaInicioDeseada,
-      duracionEstimadaDias
+      duracionEstimadaDias,
     } = body;
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { companyId: true }
+      select: { companyId: true },
     });
 
     if (!user?.companyId) {
-      return NextResponse.json(
-        { error: "Usuario sin empresa" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Usuario sin empresa' }, { status: 400 });
     }
 
     const perfil = await prisma.ewoorkerPerfilEmpresa.findUnique({
-      where: { companyId: user.companyId }
+      where: { companyId: user.companyId },
     });
 
     if (!perfil) {
-      return NextResponse.json(
-        { error: "Perfil ewoorker no encontrado" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Perfil ewoorker no encontrado' }, { status: 404 });
     }
 
     // Generar código único de obra
@@ -154,17 +138,13 @@ export async function POST(request: NextRequest) {
         presupuestoMaximo: parseFloat(presupuestoMaximo),
         fechaInicioDeseada: new Date(fechaInicioDeseada),
         duracionEstimadaDias: parseInt(duracionEstimadaDias),
-        estado: "BORRADOR"
-      }
+        estado: 'BORRADOR',
+      },
     });
 
     return NextResponse.json({ obra }, { status: 201 });
-
   } catch (error) {
-    console.error("[EWOORKER_OBRAS_POST]", error);
-    return NextResponse.json(
-      { error: "Error al crear obra" },
-      { status: 500 }
-    );
+    console.error('[EWOORKER_OBRAS_POST]', error);
+    return NextResponse.json({ error: 'Error al crear obra' }, { status: 500 });
   }
 }

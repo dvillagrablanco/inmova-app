@@ -21,16 +21,13 @@ export async function POST(req: NextRequest) {
     const isPortada = formData.get('isPortada') === 'true';
 
     if (!file || !entityType || !entityId) {
-      return NextResponse.json(
-        { error: 'Faltan datos requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Faltan datos requeridos' }, { status: 400 });
     }
 
     // Convertir el archivo a buffer
     const buffer = Buffer.from(await file.arrayBuffer());
     const fileName = `${entityType}s/${entityId}/${Date.now()}-${file.name}`;
-    
+
     // Subir a S3
     const key = await uploadFile(buffer, fileName);
     const url = await downloadFile(key);
@@ -43,8 +40,8 @@ export async function POST(req: NextRequest) {
       });
 
       const imagenes = unit?.imagenes || [];
-      const updatedImagenes = isPortada 
-        ? [key, ...imagenes.filter(img => img !== key)]
+      const updatedImagenes = isPortada
+        ? [key, ...imagenes.filter((img) => img !== key)]
         : [...imagenes, key];
 
       await prisma.unit.update({
@@ -58,8 +55,8 @@ export async function POST(req: NextRequest) {
       });
 
       const imagenes = building?.imagenes || [];
-      const updatedImagenes = isPortada 
-        ? [key, ...imagenes.filter(img => img !== key)]
+      const updatedImagenes = isPortada
+        ? [key, ...imagenes.filter((img) => img !== key)]
         : [...imagenes, key];
 
       await prisma.building.update({
@@ -68,18 +65,15 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       key,
       url,
-      message: 'Foto subida correctamente' 
+      message: 'Foto subida correctamente',
     });
   } catch (error) {
     logger.error('Error uploading photo:', error);
-    return NextResponse.json(
-      { error: 'Error al subir la foto' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al subir la foto' }, { status: 500 });
   }
 }
 
@@ -95,10 +89,7 @@ export async function GET(req: NextRequest) {
     const entityId = searchParams.get('entityId');
 
     if (!entityType || !entityId) {
-      return NextResponse.json(
-        { error: 'Faltan parámetros' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Faltan parámetros' }, { status: 400 });
     }
 
     let imagenes: string[] = [];
@@ -130,10 +121,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ photos });
   } catch (error) {
     logger.error('Error fetching photos:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener las fotos' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener las fotos' }, { status: 500 });
   }
 }
 
@@ -150,10 +138,7 @@ export async function DELETE(req: NextRequest) {
     const photoKey = searchParams.get('photoKey');
 
     if (!entityType || !entityId || !photoKey) {
-      return NextResponse.json(
-        { error: 'Faltan parámetros' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Faltan parámetros' }, { status: 400 });
     }
 
     // Eliminar de S3
@@ -167,7 +152,7 @@ export async function DELETE(req: NextRequest) {
       });
 
       const imagenes = unit?.imagenes || [];
-      const updatedImagenes = imagenes.filter(img => img !== photoKey);
+      const updatedImagenes = imagenes.filter((img) => img !== photoKey);
 
       await prisma.unit.update({
         where: { id: entityId },
@@ -180,7 +165,7 @@ export async function DELETE(req: NextRequest) {
       });
 
       const imagenes = building?.imagenes || [];
-      const updatedImagenes = imagenes.filter(img => img !== photoKey);
+      const updatedImagenes = imagenes.filter((img) => img !== photoKey);
 
       await prisma.building.update({
         where: { id: entityId },
@@ -188,15 +173,12 @@ export async function DELETE(req: NextRequest) {
       });
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
-      message: 'Foto eliminada correctamente' 
+      message: 'Foto eliminada correctamente',
     });
   } catch (error) {
     logger.error('Error deleting photo:', error);
-    return NextResponse.json(
-      { error: 'Error al eliminar la foto' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar la foto' }, { status: 500 });
   }
 }

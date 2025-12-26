@@ -16,10 +16,10 @@ interface VersionInfo {
  * Badge que muestra la versión actual de la aplicación
  * Solo visible en desarrollo o para administradores
  */
-export function VersionBadge({ 
+export function VersionBadge({
   showInProduction = false,
-  className = ''
-}: { 
+  className = '',
+}: {
   showInProduction?: boolean;
   className?: string;
 }) {
@@ -29,13 +29,13 @@ export function VersionBadge({
   useEffect(() => {
     // Cargar información de versión
     fetch('/api/version')
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         if (data.success) {
           setVersionInfo(data.data);
         }
       })
-      .catch(err => console.error('Error loading version:', err));
+      .catch((err) => console.error('Error loading version:', err));
   }, []);
 
   // No mostrar en producción a menos que se especifique
@@ -54,8 +54,7 @@ export function VersionBadge({
         className="bg-gray-900/90 text-white px-3 py-2 rounded-lg text-xs font-mono flex items-center gap-2 hover:bg-gray-800 transition-colors shadow-lg"
         title="Click para ver detalles de la versión"
       >
-        <Info size={14} />
-        v{versionInfo.version}
+        <Info size={14} />v{versionInfo.version}
       </button>
 
       {showDetails && (
@@ -69,7 +68,7 @@ export function VersionBadge({
               ✕
             </button>
           </div>
-          
+
           <div className="space-y-1">
             <div>
               <span className="text-gray-400">Versión:</span>{' '}

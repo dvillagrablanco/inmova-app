@@ -7,13 +7,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -214,7 +208,7 @@ export default function MFASettings() {
   // Descargar backup codes como TXT
   function downloadBackupCodes(codes: string[]) {
     const content = `INMOVA - Códigos de Backup MFA\n\nFecha: ${new Date().toLocaleString()}\nUsuario: ${session?.user?.email}\n\nCÓDIGOS (usar solo una vez cada uno):\n${codes.join('\n')}\n\n¡IMPORTANTE!\n- Guarda estos códigos en un lugar seguro\n- Cada código solo se puede usar una vez\n- Genera nuevos códigos si los pierdes\n`;
-    
+
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -274,17 +268,16 @@ export default function MFASettings() {
           <div className="flex items-center justify-between p-4 border rounded-lg">
             <div>
               <p className="font-medium">
-                Estado: {
-                  status?.mfaEnabled ? (
-                    <span className="text-green-600 inline-flex items-center gap-1">
-                      <Check className="h-4 w-4" /> Habilitado
-                    </span>
-                  ) : (
-                    <span className="text-gray-500 inline-flex items-center gap-1">
-                      <X className="h-4 w-4" /> Deshabilitado
-                    </span>
-                  )
-                }
+                Estado:{' '}
+                {status?.mfaEnabled ? (
+                  <span className="text-green-600 inline-flex items-center gap-1">
+                    <Check className="h-4 w-4" /> Habilitado
+                  </span>
+                ) : (
+                  <span className="text-gray-500 inline-flex items-center gap-1">
+                    <X className="h-4 w-4" /> Deshabilitado
+                  </span>
+                )}
               </p>
               {status?.mfaEnabled && (
                 <p className="text-sm text-gray-500 mt-1">
@@ -337,9 +330,7 @@ export default function MFASettings() {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Configurar Autenticación de Dos Factores</DialogTitle>
-            <DialogDescription>
-              Sigue los pasos para habilitar MFA en tu cuenta
-            </DialogDescription>
+            <DialogDescription>Sigue los pasos para habilitar MFA en tu cuenta</DialogDescription>
           </DialogHeader>
 
           {setupData && (
@@ -366,11 +357,7 @@ export default function MFASettings() {
               <div>
                 <Label>O ingresa la clave manualmente:</Label>
                 <div className="flex gap-2 mt-1">
-                  <Input
-                    value={setupData.secret}
-                    readOnly
-                    className="font-mono text-sm"
-                  />
+                  <Input value={setupData.secret} readOnly className="font-mono text-sm" />
                   <Button
                     variant="outline"
                     size="icon"
@@ -474,9 +461,7 @@ export default function MFASettings() {
           <div className="space-y-4">
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                Tu cuenta será menos segura sin MFA
-              </AlertDescription>
+              <AlertDescription>Tu cuenta será menos segura sin MFA</AlertDescription>
             </Alert>
 
             <div>
@@ -518,9 +503,7 @@ export default function MFASettings() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Regenerar Códigos de Backup</DialogTitle>
-            <DialogDescription>
-              Los códigos anteriores dejarán de funcionar
-            </DialogDescription>
+            <DialogDescription>Los códigos anteriores dejarán de funcionar</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
@@ -553,10 +536,7 @@ export default function MFASettings() {
             >
               Cancelar
             </Button>
-            <Button
-              onClick={handleRegenerateBackupCodes}
-              disabled={loading || !password}
-            >
+            <Button onClick={handleRegenerateBackupCodes} disabled={loading || !password}>
               Regenerar
             </Button>
           </DialogFooter>
@@ -614,9 +594,7 @@ export default function MFASettings() {
             </div>
 
             <DialogFooter>
-              <Button onClick={() => setNewBackupCodes([])}>
-                Cerrar
-              </Button>
+              <Button onClick={() => setNewBackupCodes([])}>Cerrar</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

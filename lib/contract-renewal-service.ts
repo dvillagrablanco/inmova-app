@@ -23,7 +23,7 @@ interface RenewalAlert {
 export async function detectContractsForRenewal(companyId?: string): Promise<RenewalAlert[]> {
   const now = new Date();
   const in90Days = addDays(now, 90);
-  
+
   const contractWhere: any = {
     estado: 'activo',
     fechaFin: {
@@ -31,7 +31,7 @@ export async function detectContractsForRenewal(companyId?: string): Promise<Ren
       gte: now,
     },
   };
-  
+
   if (companyId) {
     contractWhere.tenant = {
       companyId,
@@ -54,10 +54,10 @@ export async function detectContractsForRenewal(companyId?: string): Promise<Ren
 
   for (const contract of contracts) {
     const daysUntilExpiry = differenceInDays(new Date(contract.fechaFin), now);
-    
+
     let stage: RenewalAlert['stage'];
     let priority: RenewalAlert['priority'];
-    
+
     if (daysUntilExpiry <= 15) {
       stage = 'critical';
       priority = 'alto';
@@ -88,7 +88,7 @@ export async function detectContractsForRenewal(companyId?: string): Promise<Ren
  */
 export async function processRenewalAlerts(companyId?: string): Promise<void> {
   const alerts = await detectContractsForRenewal(companyId);
-  
+
   for (const alert of alerts) {
     await processRenewalAlert(alert);
   }
@@ -155,7 +155,7 @@ async function processRenewalAlert(alert: RenewalAlert): Promise<void> {
  */
 function getAlertTitle(alert: RenewalAlert, contract: any): string {
   const location = `${contract.unit?.building?.nombre} ${contract.unit?.numero}`;
-  
+
   switch (alert.stage) {
     case 'critical':
       return `⚠️ URGENTE: Contrato vence en ${alert.daysUntilExpiry} días - ${location}`;
@@ -177,12 +177,12 @@ function getAlertMessage(alert: RenewalAlert, contract: any): string {
   const tenantName = contract.tenant?.nombreCompleto || 'Inquilino';
   const expiryDate = format(new Date(contract.fechaFin), 'dd/MM/yyyy', { locale: es });
   const rent = contract.rentaMensual ? `€${contract.rentaMensual.toLocaleString('es-ES')}` : 'N/A';
-  
+
   let message = `El contrato de ${tenantName} vence el ${expiryDate} (en ${alert.daysUntilExpiry} días).\n\n`;
   message += `📌 Detalles:\n`;
   message += `• Renta mensual: ${rent}\n`;
   message += `• Días restantes: ${alert.daysUntilExpiry}\n\n`;
-  
+
   switch (alert.stage) {
     case 'critical':
       message += `⚠️ ACCIÓN INMEDIATA REQUERIDA:\n`;
@@ -209,7 +209,7 @@ function getAlertMessage(alert: RenewalAlert, contract: any): string {
       message += `• Considerar ajuste de renta según mercado`;
       break;
   }
-  
+
   return message;
 }
 
@@ -228,15 +228,15 @@ async function sendRenewalEmail(contract: any, alert: RenewalAlert): Promise<voi
   });
 
   const subject = getAlertTitle(alert, contract);
-  
+
   // Variables para el template del email
   const diasRestantes = alert.daysUntilExpiry;
   const etapa = alert.stage;
-  
+
   // Definir badge class según etapa
   let badgeClass = 'alert-badge-normal';
   let etapaTexto = 'INFORMACIÓN';
-  
+
   switch (etapa) {
     case 'critical':
       badgeClass = 'alert-badge-critical';
@@ -255,7 +255,7 @@ async function sendRenewalEmail(contract: any, alert: RenewalAlert): Promise<voi
       etapaTexto = 'PLANIFICACIÓN';
       break;
   }
-  
+
   // Generar acciones recomendadas según etapa
   let accionesRecomendadas = '';
   switch (etapa) {
@@ -550,11 +550,15 @@ async function sendRenewalEmail(contract: any, alert: RenewalAlert): Promise<voi
 
                     ${accionesRecomendadas}
                     
-                    ${etapa === 'critical' || etapa === 'urgent' ? `
+                    ${
+                      etapa === 'critical' || etapa === 'urgent'
+                        ? `
                     <div class="warning-box">
                       <p><strong>⚠️ Acción Inmediata Requerida:</strong> Este contrato vence en ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''}. Es fundamental tomar una decisión lo antes posible para evitar situaciones de incertidumbre legal.</p>
                     </div>
-                    ` : ''}
+                    `
+                        : ''
+                    }
                     
                     <div style="text-align: center;">
                       <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://inmova.app'}/contratos/${contract.id}" class="button">
@@ -597,10 +601,9 @@ async function sendRenewalEmail(contract: any, alert: RenewalAlert): Promise<voi
   await sendEmail({
     to: contract.unit.building.company.emailContacto!,
     subject,
-    html: htmlContent
+    html: htmlContent,
   });
 }
-
 
 /**
  * Genera reporte de renovaciones de contratos
@@ -608,17 +611,17 @@ async function sendRenewalEmail(contract: any, alert: RenewalAlert): Promise<voi
  */
 export async function generateRenewalReport(companyId: string): Promise<any> {
   const alerts = await detectContractsForRenewal(companyId);
-  
+
   // Agrupar por etapa
   const grouped = {
-    critical: alerts.filter(a => a.stage === 'critical'),
-    urgent: alerts.filter(a => a.stage === 'urgent'),
-    followup: alerts.filter(a => a.stage === 'followup'),
-    initial: alerts.filter(a => a.stage === 'initial'),
+    critical: alerts.filter((a) => a.stage === 'critical'),
+    urgent: alerts.filter((a) => a.stage === 'urgent'),
+    followup: alerts.filter((a) => a.stage === 'followup'),
+    initial: alerts.filter((a) => a.stage === 'initial'),
   };
-  
+
   // Obtener contratos completos
-  const contractIds = alerts.map(a => a.contractId);
+  const contractIds = alerts.map((a) => a.contractId);
   const contracts = await prisma.contract.findMany({
     where: {
       id: { in: contractIds },
@@ -637,7 +640,7 @@ export async function generateRenewalReport(companyId: string): Promise<any> {
       },
     },
   });
-  
+
   return {
     summary: {
       total: alerts.length,

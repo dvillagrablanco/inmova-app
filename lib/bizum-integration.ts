@@ -51,11 +51,12 @@ export class BizumClient {
     this.merchantId = config.merchantId;
     this.secretKey = config.secretKey;
     this.bankProvider = config.bankProvider;
-    
+
     // URLs según entorno
-    this.baseUrl = config.environment === 'production'
-      ? this.getProductionUrl(config.bankProvider)
-      : this.getSandboxUrl(config.bankProvider);
+    this.baseUrl =
+      config.environment === 'production'
+        ? this.getProductionUrl(config.bankProvider)
+        : this.getSandboxUrl(config.bankProvider);
   }
 
   private getProductionUrl(provider: string): string {
@@ -84,22 +85,22 @@ export class BizumClient {
   private normalizePhoneNumber(phone: string): string {
     // Eliminar espacios y caracteres especiales
     let normalized = phone.replace(/[\s\-\(\)]/g, '');
-    
+
     // Si empieza con +34, quitar el prefijo
     if (normalized.startsWith('+34')) {
       normalized = normalized.substring(3);
     }
-    
+
     // Si empieza con 34, quitar el prefijo
     if (normalized.startsWith('34') && normalized.length > 9) {
       normalized = normalized.substring(2);
     }
-    
+
     // Validar que tenga 9 dígitos
     if (normalized.length !== 9) {
       throw new Error('Invalid Spanish phone number. Must be 9 digits.');
     }
-    
+
     return normalized;
   }
 
@@ -140,7 +141,9 @@ export class BizumClient {
   /**
    * Crear pago Bizum vía Redsys
    */
-  private async createRedsysBizumPayment(params: CreateBizumPaymentParams & { phoneNumber: string }): Promise<BizumPaymentResult> {
+  private async createRedsysBizumPayment(
+    params: CreateBizumPaymentParams & { phoneNumber: string }
+  ): Promise<BizumPaymentResult> {
     try {
       const merchantParameters = {
         DS_MERCHANT_AMOUNT: (params.amount * 100).toString(), // Céntimos
@@ -157,7 +160,7 @@ export class BizumClient {
 
       // Codificar en Base64
       const merchantParamsB64 = Buffer.from(JSON.stringify(merchantParameters)).toString('base64');
-      
+
       // Generar firma
       const signature = this.generateSignature(merchantParamsB64);
 
@@ -199,7 +202,9 @@ export class BizumClient {
         phoneNumber: params.phoneNumber,
         reference: params.reference,
         transactionId: responseParams.Ds_AuthorisationCode,
-        errorMessage: responseParams.Ds_ErrorCode ? `Error ${responseParams.Ds_ErrorCode}` : undefined,
+        errorMessage: responseParams.Ds_ErrorCode
+          ? `Error ${responseParams.Ds_ErrorCode}`
+          : undefined,
       };
     } catch (error) {
       logger.error('Error creating Redsys Bizum payment:', error);
@@ -254,9 +259,7 @@ export class BizumClient {
       }
 
       // Decodificar parámetros
-      const params = JSON.parse(
-        Buffer.from(merchantParamsB64, 'base64').toString('utf-8')
-      );
+      const params = JSON.parse(Buffer.from(merchantParamsB64, 'base64').toString('utf-8'));
 
       logger.info(`Bizum webhook received: ${params.Ds_Order}`, {
         response: params.Ds_Response,
@@ -320,7 +323,8 @@ export class BizumClient {
         Buffer.from(data.Ds_MerchantParameters, 'base64').toString('utf-8')
       );
 
-      const success = parseInt(responseParams.Ds_Response) >= 0 && parseInt(responseParams.Ds_Response) <= 99;
+      const success =
+        parseInt(responseParams.Ds_Response) >= 0 && parseInt(responseParams.Ds_Response) <= 99;
 
       logger.info(`Bizum refund ${success ? 'successful' : 'failed'}: ${params.originalReference}`);
 
@@ -348,12 +352,7 @@ export class BizumClient {
  */
 export function isBizumConfigured(config?: BizumConfig | null): boolean {
   if (!config) return false;
-  return !!(
-    config.merchantId &&
-    config.secretKey &&
-    config.bankProvider &&
-    config.enabled
-  );
+  return !!(config.merchantId && config.secretKey && config.bankProvider && config.enabled);
 }
 
 /**

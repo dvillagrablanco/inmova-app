@@ -13,10 +13,7 @@ export async function POST(request: Request) {
     const { email, password } = await request.json();
 
     if (!email || !password) {
-      return NextResponse.json(
-        { error: 'Email y contraseña son requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email y contraseña son requeridos' }, { status: 400 });
     }
 
     // Buscar inquilino por email
@@ -25,20 +22,14 @@ export async function POST(request: Request) {
     });
 
     if (!tenant || !tenant.password) {
-      return NextResponse.json(
-        { error: 'Credenciales inválidas' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Credenciales inválidas' }, { status: 401 });
     }
 
     // Verificar contraseña
     const isValid = await bcrypt.compare(password, tenant.password);
 
     if (!isValid) {
-      return NextResponse.json(
-        { error: 'Credenciales inválidas' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Credenciales inválidas' }, { status: 401 });
     }
 
     // Generar token JWT
@@ -62,9 +53,6 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     logger.error('Error en login de inquilino:', error);
-    return NextResponse.json(
-      { error: 'Error al iniciar sesión' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al iniciar sesión' }, { status: 500 });
   }
 }

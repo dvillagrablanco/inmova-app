@@ -4,7 +4,7 @@ import { PageHeader } from '@/components/ui/page-header';
 
 export const metadata: Metadata = {
   title: 'Dashboard de Propietarios | INMOVA',
-  description: 'Vista completa de tus propiedades, ingresos y ocupación'
+  description: 'Vista completa de tus propiedades, ingresos y ocupación',
 };
 
 export default function OwnerDashboardPage() {

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from 'react';
 import {
@@ -124,8 +124,10 @@ export function ChangePlanDialog({
 
   const selectedPlan = plans.find((p) => p.id === selectedPlanId);
   const currentPlan = company.subscriptionPlan;
-  const isUpgrade = selectedPlan && currentPlan && selectedPlan.precioMensual > currentPlan.precioMensual;
-  const isDowngrade = selectedPlan && currentPlan && selectedPlan.precioMensual < currentPlan.precioMensual;
+  const isUpgrade =
+    selectedPlan && currentPlan && selectedPlan.precioMensual > currentPlan.precioMensual;
+  const isDowngrade =
+    selectedPlan && currentPlan && selectedPlan.precioMensual < currentPlan.precioMensual;
 
   const getTierColor = (tier: string) => {
     const colors: Record<string, string> = {
@@ -141,9 +143,7 @@ export function ChangePlanDialog({
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Cambiar Plan de Suscripción</DialogTitle>
-          <DialogDescription>
-            Selecciona un nuevo plan para {company.nombre}
-          </DialogDescription>
+          <DialogDescription>Selecciona un nuevo plan para {company.nombre}</DialogDescription>
         </DialogHeader>
 
         {isFetchingPlans ? (
@@ -187,9 +187,7 @@ export function ChangePlanDialog({
                     <SelectItem key={plan.id} value={plan.id}>
                       <div className="flex items-center justify-between w-full gap-4">
                         <span>{plan.nombre}</span>
-                        <span className="text-muted-foreground">
-                          €{plan.precioMensual}/mes
-                        </span>
+                        <span className="text-muted-foreground">€{plan.precioMensual}/mes</span>
                       </div>
                     </SelectItem>
                   ))}
@@ -233,12 +231,13 @@ export function ChangePlanDialog({
                               isUpgrade
                                 ? 'text-green-600'
                                 : isDowngrade
-                                ? 'text-orange-600'
-                                : 'text-gray-600'
+                                  ? 'text-orange-600'
+                                  : 'text-gray-600'
                             }`}
                           >
-                            {isUpgrade && '+'}
-                            €{(selectedPlan.precioMensual - currentPlan.precioMensual).toFixed(2)}/mes
+                            {isUpgrade && '+'}€
+                            {(selectedPlan.precioMensual - currentPlan.precioMensual).toFixed(2)}
+                            /mes
                           </span>
                         </div>
                       )}

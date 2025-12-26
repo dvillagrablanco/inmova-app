@@ -11,10 +11,7 @@ export async function GET(req: NextRequest) {
     const providerId = searchParams.get('providerId');
 
     if (!providerId) {
-      return NextResponse.json(
-        { error: 'Provider ID requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Provider ID requerido' }, { status: 400 });
     }
 
     // Verificar que el proveedor existe
@@ -23,10 +20,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (!proveedor) {
-      return NextResponse.json(
-        { error: 'Proveedor no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Proveedor no encontrado' }, { status: 404 });
     }
 
     // Obtener estadísticas de órdenes de trabajo
@@ -43,12 +37,8 @@ export async function GET(req: NextRequest) {
     const ordenesPendientes = ordenes.filter(
       (o) => o.estado === 'asignada' || o.estado === 'aceptada'
     ).length;
-    const ordenesEnProgreso = ordenes.filter(
-      (o) => o.estado === 'en_progreso'
-    ).length;
-    const ordenesCompletadas = ordenes.filter(
-      (o) => o.estado === 'completada'
-    ).length;
+    const ordenesEnProgreso = ordenes.filter((o) => o.estado === 'en_progreso').length;
+    const ordenesCompletadas = ordenes.filter((o) => o.estado === 'completada').length;
 
     // Calcular ingresos totales
     const ingresosTotales = ordenes
@@ -71,23 +61,16 @@ export async function GET(req: NextRequest) {
       .reduce((sum, o) => sum + (o.costoTotal || 0), 0);
 
     // Calcular rating promedio
-    const ordenesConValoracion = ordenes.filter(
-      (o) => o.valoracion !== null && o.valoracion > 0
-    );
+    const ordenesConValoracion = ordenes.filter((o) => o.valoracion !== null && o.valoracion > 0);
     const ratingPromedio =
       ordenesConValoracion.length > 0
-        ? ordenesConValoracion.reduce(
-            (sum, o) => sum + (o.valoracion || 0),
-            0
-          ) / ordenesConValoracion.length
+        ? ordenesConValoracion.reduce((sum, o) => sum + (o.valoracion || 0), 0) /
+          ordenesConValoracion.length
         : 0;
 
     // Órdenes recientes (las últimas 10)
     const ordenesRecientes = ordenes
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      )
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 10);
 
     return NextResponse.json({
@@ -112,9 +95,6 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     logger.error('Error al obtener dashboard de proveedor:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener dashboard' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener dashboard' }, { status: 500 });
   }
 }

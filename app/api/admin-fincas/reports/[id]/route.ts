@@ -15,7 +15,7 @@ interface Params {
 export async function GET(request: NextRequest, { params }: Params) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.companyId) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
@@ -30,18 +30,12 @@ export async function GET(request: NextRequest, { params }: Params) {
       },
     });
     if (!report) {
-      return NextResponse.json(
-        { error: 'Informe no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Informe no encontrado' }, { status: 404 });
     }
     return NextResponse.json(report);
   } catch (error) {
     logger.error('Error fetching report:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener informe' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener informe' }, { status: 500 });
   }
 }
 
@@ -65,10 +59,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       },
     });
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Informe no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Informe no encontrado' }, { status: 404 });
     }
     const report = await prisma.communityReport.update({
       where: { id },
@@ -77,9 +68,6 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     return NextResponse.json(report);
   } catch (error) {
     logger.error('Error updating report:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar informe' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar informe' }, { status: 500 });
   }
 }

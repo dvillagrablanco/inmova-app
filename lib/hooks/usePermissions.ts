@@ -1,15 +1,15 @@
 import { useSession } from 'next-auth/react';
 import type { UserRole } from '@prisma/client';
 
-type Permission = 
-  | 'read' 
-  | 'create' 
-  | 'update' 
-  | 'delete' 
-  | 'manageUsers' 
-  | 'manageCompany' 
-  | 'viewReports' 
-  | 'manageClients' 
+type Permission =
+  | 'read'
+  | 'create'
+  | 'update'
+  | 'delete'
+  | 'manageUsers'
+  | 'manageCompany'
+  | 'viewReports'
+  | 'manageClients'
   | 'impersonateClients'
   | 'viewFinances'
   | 'manageEvents'

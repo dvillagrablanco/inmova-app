@@ -1,6 +1,6 @@
 /**
  * UI MODE SERVICE - Sistema de Modos Adaptativos de Interfaz
- * 
+ *
  * Este servicio gestiona la adaptación de la interfaz según:
  * - experienceLevel: principiante, intermedio, avanzado
  * - techSavviness: bajo, medio, alto
@@ -41,7 +41,7 @@ export const MODULES_BY_VERTICAL = {
     { id: 'documentos', name: 'Documentos', priority: 7, complexity: 'low' },
     { id: 'comunicacion', name: 'Comunicación', priority: 8, complexity: 'medium' },
   ],
-  
+
   room_rental: [
     { id: 'edificios', name: 'Propiedades', priority: 1, complexity: 'low' },
     { id: 'room-rental', name: 'Habitaciones', priority: 2, complexity: 'medium' },
@@ -52,7 +52,7 @@ export const MODULES_BY_VERTICAL = {
     { id: 'normas', name: 'Normas Coliving', priority: 7, complexity: 'medium' },
     { id: 'analytics', name: 'Analytics', priority: 8, complexity: 'high' },
   ],
-  
+
   str: [
     { id: 'str', name: 'Channel Manager', priority: 1, complexity: 'high' },
     { id: 'edificios', name: 'Propiedades', priority: 2, complexity: 'low' },
@@ -62,7 +62,7 @@ export const MODULES_BY_VERTICAL = {
     { id: 'analytics', name: 'Analytics STR', priority: 6, complexity: 'high' },
     { id: 'reviews', name: 'Reseñas', priority: 7, complexity: 'low' },
   ],
-  
+
   flipping: [
     { id: 'flipping', name: 'Proyectos', priority: 1, complexity: 'high' },
     { id: 'edificios', name: 'Propiedades', priority: 2, complexity: 'low' },
@@ -72,7 +72,7 @@ export const MODULES_BY_VERTICAL = {
     { id: 'roi-calculator', name: 'Calculadora ROI', priority: 6, complexity: 'high' },
     { id: 'analytics', name: 'Analytics', priority: 7, complexity: 'high' },
   ],
-  
+
   general: [
     { id: 'edificios', name: 'Propiedades', priority: 1, complexity: 'low' },
     { id: 'contratos', name: 'Contratos', priority: 2, complexity: 'medium' },
@@ -154,11 +154,9 @@ export function getVisibleModules(
  */
 export function shouldShowTooltips(profile: UserProfile): boolean {
   const { experienceLevel, techSavviness } = profile;
-  
+
   return (
-    experienceLevel === 'principiante' ||
-    techSavviness === 'bajo' ||
-    profile.uiMode === 'simple'
+    experienceLevel === 'principiante' || techSavviness === 'bajo' || profile.uiMode === 'simple'
   );
 }
 
@@ -175,9 +173,7 @@ export function shouldShowAdvancedFields(profile: UserProfile): boolean {
  * - standard: Métricas principales + algunos gráficos
  * - detailed: Todo el detalle, gráficos avanzados
  */
-export function getDashboardDetailLevel(
-  profile: UserProfile
-): 'basic' | 'standard' | 'detailed' {
+export function getDashboardDetailLevel(profile: UserProfile): 'basic' | 'standard' | 'detailed' {
   if (profile.uiMode === 'simple') return 'basic';
   if (profile.uiMode === 'advanced') return 'detailed';
   return 'standard';
@@ -205,16 +201,12 @@ export function getVisibleFormFields(
 ): FormFieldConfig[] {
   if (profile.uiMode === 'simple') {
     // Solo campos obligatorios y de baja complejidad
-    return allFields.filter(
-      (field) => field.required || field.complexity === 'low'
-    );
+    return allFields.filter((field) => field.required || field.complexity === 'low');
   }
 
   if (profile.uiMode === 'standard') {
     // Obligatorios + baja y media complejidad
-    return allFields.filter(
-      (field) => field.required || field.complexity !== 'high'
-    );
+    return allFields.filter((field) => field.required || field.complexity !== 'high');
   }
 
   // Modo Advanced: Todos los campos
@@ -224,10 +216,7 @@ export function getVisibleFormFields(
 /**
  * Obtiene mensajes contextuales según el perfil
  */
-export function getContextualMessage(
-  context: string,
-  profile: UserProfile
-): string | null {
+export function getContextualMessage(context: string, profile: UserProfile): string | null {
   if (!shouldShowTooltips(profile)) return null;
 
   const messages: Record<string, string> = {

@@ -14,7 +14,12 @@ interface PasswordGeneratorProps {
   required?: boolean;
 }
 
-export function PasswordGenerator({ value, onChange, label = 'Contraseña', required = false }: PasswordGeneratorProps) {
+export function PasswordGenerator({
+  value,
+  onChange,
+  label = 'Contraseña',
+  required = false,
+}: PasswordGeneratorProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -38,7 +43,10 @@ export function PasswordGenerator({ value, onChange, label = 'Contraseña', requ
     }
 
     // Mezclar los caracteres
-    password = password.split('').sort(() => Math.random() - 0.5).join('');
+    password = password
+      .split('')
+      .sort(() => Math.random() - 0.5)
+      .join('');
 
     onChange(password);
     toast.success('Contraseña segura generada');
@@ -103,18 +111,34 @@ export function PasswordGenerator({ value, onChange, label = 'Contraseña', requ
       {value && (
         <div className="text-xs space-y-1">
           <div className="flex items-center gap-2">
-            <div className={`h-2 flex-1 rounded-full ${
-              value.length >= 12 && /[A-Z]/.test(value) && /[a-z]/.test(value) && /[0-9]/.test(value) && /[^A-Za-z0-9]/.test(value)
-                ? 'bg-green-500'
-                : value.length >= 8 ? 'bg-yellow-500' : 'bg-red-500'
-            }`} />
+            <div
+              className={`h-2 flex-1 rounded-full ${
+                value.length >= 12 &&
+                /[A-Z]/.test(value) &&
+                /[a-z]/.test(value) &&
+                /[0-9]/.test(value) &&
+                /[^A-Za-z0-9]/.test(value)
+                  ? 'bg-green-500'
+                  : value.length >= 8
+                    ? 'bg-yellow-500'
+                    : 'bg-red-500'
+              }`}
+            />
             <span className="text-muted-foreground">
-              {value.length >= 12 && /[A-Z]/.test(value) && /[a-z]/.test(value) && /[0-9]/.test(value) && /[^A-Za-z0-9]/.test(value)
-                ? 'Segura' : value.length >= 8 ? 'Media' : 'Débil'}
+              {value.length >= 12 &&
+              /[A-Z]/.test(value) &&
+              /[a-z]/.test(value) &&
+              /[0-9]/.test(value) &&
+              /[^A-Za-z0-9]/.test(value)
+                ? 'Segura'
+                : value.length >= 8
+                  ? 'Media'
+                  : 'Débil'}
             </span>
           </div>
           <p className="text-muted-foreground">
-            La contraseña debe contener: mayúsculas, minúsculas, números y caracteres especiales (min. 8 caracteres)
+            La contraseña debe contener: mayúsculas, minúsculas, números y caracteres especiales
+            (min. 8 caracteres)
           </p>
         </div>
       )}

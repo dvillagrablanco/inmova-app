@@ -20,25 +20,25 @@ export interface Invoice {
   clientName: string;
   clientAddress?: string;
   clientTaxId?: string;
-  
+
   issueDate: Date;
   dueDate: Date;
   paymentTerms: PaymentTerms;
-  
+
   lineItems: InvoiceLineItem[];
-  
+
   subtotal: number;
   taxRate: number;
   taxAmount: number;
   total: number;
-  
+
   status: InvoiceStatus;
   paidDate?: Date;
   paidAmount?: number;
-  
+
   notes?: string;
   paymentInstructions?: string;
-  
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -70,28 +70,30 @@ export async function generateInvoiceFromTimesheet(
   const project = await prisma.professionalProject.findUnique({
     where: { id: projectId },
   });
-  
+
   if (!project) {
     throw new Error('Proyecto no encontrado');
   }
-  
+
   // Generar número de factura
   const invoiceNumber = await generateInvoiceNumber(companyId);
-  
+
   // Crear line items desde timesheet
   const lineItems: InvoiceLineItem[] = [];
-  
+
   if (options.groupByTask) {
     // Agrupar por tarea
     const taskGroups = new Map<string, { hours: number; rate: number }>();
-    
-    timesheet.entries.filter(e => e.billable).forEach(entry => {
-      const task = entry.task || 'Servicios profesionales';
-      const existing = taskGroups.get(task) || { hours: 0, rate: entry.hourlyRate || 0 };
-      existing.hours += entry.duration / 60;
-      taskGroups.set(task, existing);
-    });
-    
+
+    timesheet.entries
+      .filter((e) => e.billable)
+      .forEach((entry) => {
+        const task = entry.task || 'Servicios profesionales';
+        const existing = taskGroups.get(task) || { hours: 0, rate: entry.hourlyRate || 0 };
+        existing.hours += entry.duration / 60;
+        taskGroups.set(task, existing);
+      });
+
     taskGroups.forEach((data, task) => {
       lineItems.push({
         description: task,
@@ -106,7 +108,7 @@ export async function generateInvoiceFromTimesheet(
     // Una sola línea con todas las horas
     const totalHours = timesheet.billableHours;
     const avgRate = timesheet.totalAmount / totalHours || 0;
-    
+
     lineItems.push({
       description: `Servicios profesionales - ${timesheet.period}`,
       quantity: parseFloat(totalHours.toFixed(2)),
@@ -116,25 +118,25 @@ export async function generateInvoiceFromTimesheet(
       taxable: true,
     });
   }
-  
+
   // Calcular totales
   const subtotal = lineItems.reduce((sum, item) => sum + item.amount, 0);
   const taxRate = options.taxRate || 21; // IVA 21% por defecto en España
   const taxAmount = subtotal * (taxRate / 100);
   const total = subtotal + taxAmount;
-  
+
   // Calcular fecha de vencimiento
   const paymentTerms = options.paymentTerms || 'net_30';
   const daysToAdd = {
-    'immediate': 0,
-    'net_15': 15,
-    'net_30': 30,
-    'net_60': 60,
+    immediate: 0,
+    net_15: 15,
+    net_30: 30,
+    net_60: 60,
   }[paymentTerms];
-  
+
   const issueDate = new Date();
   const dueDate = addDays(issueDate, daysToAdd);
-  
+
   const invoice: Invoice = {
     id: `inv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     invoiceNumber,
@@ -158,10 +160,10 @@ export async function generateInvoiceFromTimesheet(
     createdAt: new Date(),
     updatedAt: new Date(),
   };
-  
+
   // Guardar en base de datos
   // await prisma.invoice.create({ data: invoice });
-  
+
   return invoice;
 }
 
@@ -171,11 +173,11 @@ export async function generateInvoiceFromTimesheet(
 async function generateInvoiceNumber(companyId: string): Promise<string> {
   const year = new Date().getFullYear();
   const prefix = `F${year}`;
-  
+
   // En producción, consultarías la última factura
   const lastNumber = 1; // Placeholder
   const nextNumber = (lastNumber + 1).toString().padStart(4, '0');
-  
+
   return `${prefix}-${nextNumber}`;
 }
 
@@ -185,9 +187,9 @@ async function generateInvoiceNumber(companyId: string): Promise<string> {
 export async function sendInvoice(invoiceId: string): Promise<Invoice> {
   // Actualizar estado
   // await prisma.invoice.update({ where: { id: invoiceId }, data: { status: 'sent' } });
-  
+
   // Enviar por email (integrar con servicio de email)
-  
+
   return {} as Invoice; // Placeholder
 }
 
@@ -205,9 +207,9 @@ export async function recordPayment(
     paidAmount: amount,
     paidDate: paymentDate || new Date(),
   };
-  
+
   // await prisma.invoice.update({ where: { id: invoiceId }, data: updateData });
-  
+
   return {} as Invoice; // Placeholder
 }
 
@@ -267,14 +269,18 @@ export function generateInvoicePDF(invoice: Invoice): string {
       </tr>
     </thead>
     <tbody>
-      ${invoice.lineItems.map(item => `
+      ${invoice.lineItems
+        .map(
+          (item) => `
         <tr>
           <td>${item.description}</td>
           <td style="text-align: center;">${item.quantity} ${item.unit}</td>
           <td style="text-align: right;">€${item.unitPrice.toFixed(2)}</td>
           <td style="text-align: right;">€${item.amount.toFixed(2)}</td>
         </tr>
-      `).join('')}
+      `
+        )
+        .join('')}
     </tbody>
   </table>
 
@@ -293,19 +299,27 @@ export function generateInvoicePDF(invoice: Invoice): string {
     </div>
   </div>
 
-  ${invoice.notes ? `
+  ${
+    invoice.notes
+      ? `
     <div class="section" style="margin-top: 40px;">
       <div class="section-title">NOTAS</div>
       <div>${invoice.notes}</div>
     </div>
-  ` : ''}
+  `
+      : ''
+  }
 
-  ${invoice.paymentInstructions ? `
+  ${
+    invoice.paymentInstructions
+      ? `
     <div class="section" style="margin-top: 20px;">
       <div class="section-title">INSTRUCCIONES DE PAGO</div>
       <div>${invoice.paymentInstructions}</div>
     </div>
-  ` : ''}
+  `
+      : ''
+  }
 
   <div style="margin-top: 60px; text-align: center; color: #999; font-size: 12px;">
     Generado por INMOVA - Sistema de Gestión Inmobiliaria

@@ -28,27 +28,24 @@ export async function GET(req: NextRequest) {
             precioMensual: true,
             maxUsuarios: true,
             maxPropiedades: true,
-            modulosIncluidos: true
-          }
-        }
-      }
+            modulosIncluidos: true,
+          },
+        },
+      },
     });
 
     if (!company || !company.subscriptionPlan) {
       return NextResponse.json({ currentPlan: null });
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       currentPlan: {
         ...company.subscriptionPlan,
-        modulosIncluidos: company.subscriptionPlan.modulosIncluidos as string[]
-      }
+        modulosIncluidos: company.subscriptionPlan.modulosIncluidos as string[],
+      },
     });
   } catch (error: any) {
     logger.error('Error al obtener plan actual:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener plan actual' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener plan actual' }, { status: 500 });
   }
 }

@@ -30,7 +30,7 @@ export function MobileTable({
   titleKey,
   subtitleKey,
   statusKey,
-  className
+  className,
 }: MobileTableProps) {
   // En desktop, mostrar tabla tradicional
   const renderDesktopTable = () => (
@@ -39,10 +39,7 @@ export function MobileTable({
         <thead>
           <tr className="border-b">
             {columns.map((col) => (
-              <th
-                key={col.key}
-                className="text-left p-3 text-sm font-semibold text-gray-700"
-              >
+              <th key={col.key} className="text-left p-3 text-sm font-semibold text-gray-700">
                 {col.label}
               </th>
             ))}
@@ -95,18 +92,10 @@ export function MobileTable({
             <div className="mobile-table-card-header">
               <div className="flex-1">
                 <div className="mobile-table-card-title">{title}</div>
-                {subtitle && (
-                  <div className="text-sm text-gray-500 mt-1">{subtitle}</div>
-                )}
+                {subtitle && <div className="text-sm text-gray-500 mt-1">{subtitle}</div>}
               </div>
-              {status && (
-                <Badge variant={getStatusVariant(status)}>
-                  {status}
-                </Badge>
-              )}
-              {onRowClick && (
-                <ChevronRight className="h-5 w-5 text-gray-400 ml-2" />
-              )}
+              {status && <Badge variant={getStatusVariant(status)}>{status}</Badge>}
+              {onRowClick && <ChevronRight className="h-5 w-5 text-gray-400 ml-2" />}
             </div>
             <div className="mobile-table-card-body">
               {visibleColumns.map((col) => (

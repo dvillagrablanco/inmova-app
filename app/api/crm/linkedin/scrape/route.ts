@@ -1,6 +1,6 @@
 /**
  * API: /api/crm/linkedin/scrape
- * 
+ *
  * POST: Iniciar job de scraping de LinkedIn
  * GET:  Listar jobs de scraping
  */
@@ -29,10 +29,7 @@ export async function POST(request: Request) {
     const { searchQuery, targetCount, linkedInEmail, linkedInPassword } = body;
 
     if (!searchQuery) {
-      return NextResponse.json(
-        { error: 'Se requiere searchQuery' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Se requiere searchQuery' }, { status: 400 });
     }
 
     if (!linkedInEmail || !linkedInPassword) {
@@ -51,19 +48,20 @@ export async function POST(request: Request) {
 
     // Ejecutar job en background (no esperar)
     // En producción, usar una queue (Bull, BullMQ, etc.)
-    LinkedInScrapingJobManager.executeJob(
-      job.id,
-      linkedInEmail,
-      linkedInPassword
-    ).catch((error) => {
-      console.error('Error executing LinkedIn scraping job:', error);
-    });
+    LinkedInScrapingJobManager.executeJob(job.id, linkedInEmail, linkedInPassword).catch(
+      (error) => {
+        console.error('Error executing LinkedIn scraping job:', error);
+      }
+    );
 
-    return NextResponse.json({
-      jobId: job.id,
-      status: 'pending',
-      message: 'Scraping job iniciado. Usa el jobId para consultar el estado.',
-    }, { status: 202 });
+    return NextResponse.json(
+      {
+        jobId: job.id,
+        status: 'pending',
+        message: 'Scraping job iniciado. Usa el jobId para consultar el estado.',
+      },
+      { status: 202 }
+    );
   } catch (error: any) {
     console.error('Error starting LinkedIn scraping:', error);
     return NextResponse.json(

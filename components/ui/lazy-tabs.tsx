@@ -16,21 +16,21 @@ const TabsLoadingFallback = () => (
 
 // Lazy load de componentes Tabs usando dynamic con named exports
 export const Tabs = dynamic(
-  () => import('@/components/ui/tabs').then(mod => mod.Tabs as ComponentType<any>),
+  () => import('@/components/ui/tabs').then((mod) => mod.Tabs as ComponentType<any>),
   { loading: () => <TabsLoadingFallback />, ssr: true }
 );
 
 export const TabsContent = dynamic(
-  () => import('@/components/ui/tabs').then(mod => mod.TabsContent as ComponentType<any>),
+  () => import('@/components/ui/tabs').then((mod) => mod.TabsContent as ComponentType<any>),
   { loading: () => <TabsLoadingFallback />, ssr: true }
 );
 
 export const TabsList = dynamic(
-  () => import('@/components/ui/tabs').then(mod => mod.TabsList as ComponentType<any>),
+  () => import('@/components/ui/tabs').then((mod) => mod.TabsList as ComponentType<any>),
   { loading: () => <TabsLoadingFallback />, ssr: true }
 );
 
 export const TabsTrigger = dynamic(
-  () => import('@/components/ui/tabs').then(mod => mod.TabsTrigger as ComponentType<any>),
+  () => import('@/components/ui/tabs').then((mod) => mod.TabsTrigger as ComponentType<any>),
   { loading: () => <TabsLoadingFallback />, ssr: true }
 );

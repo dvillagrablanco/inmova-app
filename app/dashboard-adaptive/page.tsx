@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
@@ -9,7 +9,7 @@ import { Loader2 } from 'lucide-react';
 
 /**
  * EJEMPLO DE PÁGINA CON DASHBOARD ADAPTATIVO
- * 
+ *
  * Esta página demuestra cómo usar:
  * - AdaptiveDashboard: Dashboard que cambia según uiMode
  * - AdaptiveSidebar: Sidebar contextual
@@ -81,10 +81,7 @@ export default function AdaptiveDashboardPage() {
   return (
     <div className="flex min-h-screen">
       {/* Sidebar Adaptativo */}
-      <AdaptiveSidebar
-        vertical="alquiler_tradicional"
-        userProfile={userProfile}
-      />
+      <AdaptiveSidebar vertical="alquiler_tradicional" userProfile={userProfile} />
 
       {/* Contenido Principal */}
       <main className="flex-1 p-8">

@@ -16,11 +16,12 @@ export function MarketPotentialSection() {
           <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">
             <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
               €850M
-            </span>
-            {' '}de Mercado Disponible
+            </span>{' '}
+            de Mercado Disponible
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            El mercado español de PropTech está listo para ser liderado por una plataforma multi-vertical
+            El mercado español de PropTech está listo para ser liderado por una plataforma
+            multi-vertical
           </p>
         </div>
 
@@ -58,7 +59,9 @@ export function MarketPotentialSection() {
                 <Rocket className="h-8 w-8 text-white" />
               </div>
               <h3 className="text-3xl font-bold text-gray-900 mb-2">€150M</h3>
-              <p className="text-sm font-semibold text-green-600 mb-3">SOM (53% del SAM en 5 años)</p>
+              <p className="text-sm font-semibold text-green-600 mb-3">
+                SOM (53% del SAM en 5 años)
+              </p>
               <p className="text-sm text-gray-600">
                 Objetivo alcanzable convirtiéndonos en líderes del mercado
               </p>
@@ -72,8 +75,10 @@ export function MarketPotentialSection() {
             <div className="flex items-center justify-center mb-6">
               <Award className="h-12 w-12 text-yellow-300" />
             </div>
-            <h3 className="text-3xl font-bold text-center mb-8">Proyección de Crecimiento 2026-2030</h3>
-            
+            <h3 className="text-3xl font-bold text-center mb-8">
+              Proyección de Crecimiento 2026-2030
+            </h3>
+
             <div className="grid md:grid-cols-5 gap-6">
               {[
                 { year: 'Año 1', arr: '€8.5M', cuota: '3%' },
@@ -82,29 +87,31 @@ export function MarketPotentialSection() {
                 { year: 'Año 4', arr: '€91M', cuota: '32%' },
                 { year: 'Año 5', arr: '€150M', cuota: '53%', highlight: true },
               ].map((item, idx) => (
-                <div 
-                  key={idx} 
+                <div
+                  key={idx}
                   className={`text-center p-6 rounded-xl ${
-                    item.highlight 
-                      ? 'bg-yellow-400 text-gray-900 scale-110 shadow-2xl' 
+                    item.highlight
+                      ? 'bg-yellow-400 text-gray-900 scale-110 shadow-2xl'
                       : 'bg-white/10 backdrop-blur-sm'
                   } transition-all hover:scale-105`}
                 >
                   <div className="text-sm font-medium mb-2 opacity-90">{item.year}</div>
-                  <div className={`text-2xl md:text-3xl font-black mb-1 ${
-                    item.highlight ? 'text-gray-900' : 'text-white'
-                  }`}>
+                  <div
+                    className={`text-2xl md:text-3xl font-black mb-1 ${
+                      item.highlight ? 'text-gray-900' : 'text-white'
+                    }`}
+                  >
                     {item.arr}
                   </div>
-                  <div className={`text-xs font-semibold ${
-                    item.highlight ? 'text-gray-700' : 'text-white/80'
-                  }`}>
+                  <div
+                    className={`text-xs font-semibold ${
+                      item.highlight ? 'text-gray-700' : 'text-white/80'
+                    }`}
+                  >
                     {item.cuota} cuota
                   </div>
                   {item.highlight && (
-                    <div className="mt-2 text-xs font-bold text-gray-900">
-                      🏆 LÍDER
-                    </div>
+                    <div className="mt-2 text-xs font-bold text-gray-900">🏆 LÍDER</div>
                   )}
                 </div>
               ))}
@@ -115,7 +122,8 @@ export function MarketPotentialSection() {
                 De 3% a 53% de cuota de mercado en 5 años
               </p>
               <p className="text-white/90 mt-2">
-                Crecimiento de +1,665% posicionándonos como el líder absoluto en PropTech multi-vertical en España
+                Crecimiento de +1,665% posicionándonos como el líder absoluto en PropTech
+                multi-vertical en España
               </p>
             </div>
           </CardContent>
@@ -132,19 +140,28 @@ export function MarketPotentialSection() {
               <ul className="space-y-2 text-sm text-gray-700">
                 <li className="flex items-start gap-2">
                   <span className="text-green-600 font-bold">✓</span>
-                  <span><strong>Única multi-vertical:</strong> 6 verticales vs 1 de la competencia</span>
+                  <span>
+                    <strong>Única multi-vertical:</strong> 6 verticales vs 1 de la competencia
+                  </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-green-600 font-bold">✓</span>
-                  <span><strong>Módulos transversales:</strong> IA, IoT, Blockchain (nadie más los tiene)</span>
+                  <span>
+                    <strong>Módulos transversales:</strong> IA, IoT, Blockchain (nadie más los
+                    tiene)
+                  </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-green-600 font-bold">✓</span>
-                  <span><strong>70% más barato:</strong> €49 vs €120 de Homming</span>
+                  <span>
+                    <strong>70% más barato:</strong> €49 vs €120 de Homming
+                  </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-green-600 font-bold">✓</span>
-                  <span><strong>Dual-channel:</strong> Directo + 34 tipos de partners</span>
+                  <span>
+                    <strong>Dual-channel:</strong> Directo + 34 tipos de partners
+                  </span>
                 </li>
               </ul>
             </CardContent>
@@ -159,19 +176,27 @@ export function MarketPotentialSection() {
               <ul className="space-y-2 text-sm text-gray-700">
                 <li className="flex items-start gap-2">
                   <span className="text-indigo-600 font-bold">→</span>
-                  <span><strong>88.5% fragmentado:</strong> Sin líder dominante actual</span>
+                  <span>
+                    <strong>88.5% fragmentado:</strong> Sin líder dominante actual
+                  </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-indigo-600 font-bold">→</span>
-                  <span><strong>1.17M propiedades:</strong> Gestionadas profesionalmente en España</span>
+                  <span>
+                    <strong>1.17M propiedades:</strong> Gestionadas profesionalmente en España
+                  </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-indigo-600 font-bold">→</span>
-                  <span><strong>Competencia limitada:</strong> Solo productos mono-verticales</span>
+                  <span>
+                    <strong>Competencia limitada:</strong> Solo productos mono-verticales
+                  </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-indigo-600 font-bold">→</span>
-                  <span><strong>Momento ideal:</strong> Mercado maduro para consolidación</span>
+                  <span>
+                    <strong>Momento ideal:</strong> Mercado maduro para consolidación
+                  </span>
                 </li>
               </ul>
             </CardContent>

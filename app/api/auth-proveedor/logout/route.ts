@@ -16,9 +16,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     logger.error('Error en logout de proveedor:', error);
-    return NextResponse.json(
-      { error: 'Error al cerrar sesión' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al cerrar sesión' }, { status: 500 });
   }
 }

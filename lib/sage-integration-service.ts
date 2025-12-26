@@ -1,16 +1,16 @@
 // @ts-nocheck
 /**
  * Sage Integration Service
- * 
+ *
  * Servicio de integración con Sage 50cloud / Sage 200cloud
  * Sistema ERP y contable líder en UK y Europa
- * 
+ *
  * Características:
  * - Gestión de clientes (Customers)
  * - Emisión de facturas (Sales Invoices)
  * - Registro de pagos (Payment Receipts)
  * - Sincronización de gastos (Purchase Invoices)
- * 
+ *
  * Documentación API: https://developer.sage.com/api/
  */
 
@@ -77,15 +77,16 @@ class SageIntegrationService {
       clientId: process.env.SAGE_CLIENT_ID || '',
       clientSecret: process.env.SAGE_CLIENT_SECRET || '',
       apiUrl: process.env.SAGE_API_URL || 'https://api.accounting.sage.com/v3.1',
-      redirectUri: process.env.SAGE_REDIRECT_URI || `${process.env.NEXTAUTH_URL}/api/accounting/sage/callback`
+      redirectUri:
+        process.env.SAGE_REDIRECT_URI || `${process.env.NEXTAUTH_URL}/api/accounting/sage/callback`,
     };
 
     this.client = axios.create({
       baseURL: this.config.apiUrl,
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
+        Accept: 'application/json',
+      },
     });
   }
 
@@ -105,7 +106,7 @@ class SageIntegrationService {
       client_id: this.config.clientId,
       redirect_uri: this.config.redirectUri,
       scope: 'full_access',
-      state: state || Math.random().toString(36).substring(7)
+      state: state || Math.random().toString(36).substring(7),
     });
 
     return `https://www.sageone.com/oauth2/auth?${params.toString()}`;
@@ -114,13 +115,15 @@ class SageIntegrationService {
   /**
    * Intercambia el código de autorización por tokens de acceso
    */
-  async exchangeCodeForTokens(code: string): Promise<{ accessToken: string; refreshToken: string }> {
+  async exchangeCodeForTokens(
+    code: string
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const response = await axios.post('https://oauth.accounting.sage.com/token', {
       grant_type: 'authorization_code',
       client_id: this.config.clientId,
       client_secret: this.config.clientSecret,
       code,
-      redirect_uri: this.config.redirectUri
+      redirect_uri: this.config.redirectUri,
     });
 
     this.accessToken = response.data.access_token;
@@ -128,7 +131,7 @@ class SageIntegrationService {
 
     return {
       accessToken: this.accessToken,
-      refreshToken: this.refreshToken
+      refreshToken: this.refreshToken,
     };
   }
 
@@ -140,7 +143,7 @@ class SageIntegrationService {
       grant_type: 'refresh_token',
       client_id: this.config.clientId,
       client_secret: this.config.clientSecret,
-      refresh_token: refreshToken
+      refresh_token: refreshToken,
     });
 
     this.accessToken = response.data.access_token;
@@ -168,7 +171,7 @@ class SageIntegrationService {
       name: customer.name,
       email: customer.email,
       telephone: customer.telephone,
-      main_address: customer.address
+      main_address: customer.address,
     });
 
     return response.data;
@@ -197,8 +200,8 @@ class SageIntegrationService {
     const response = await this.client.get('/contacts', {
       params: {
         email,
-        contact_type_ids: 'CUSTOMER'
-      }
+        contact_type_ids: 'CUSTOMER',
+      },
     });
 
     return response.data.$items?.[0] || null;
@@ -229,12 +232,12 @@ class SageIntegrationService {
       date: invoice.date,
       due_date: invoice.due_date,
       currency_id: invoice.currency_code || 'EUR',
-      invoice_lines: invoice.line_items.map(item => ({
+      invoice_lines: invoice.line_items.map((item) => ({
         description: item.description,
         quantity: item.quantity,
         unit_price: item.unit_price,
-        tax_rate_id: item.tax_rate_id
-      }))
+        tax_rate_id: item.tax_rate_id,
+      })),
     });
 
     return response.data;
@@ -269,9 +272,9 @@ class SageIntegrationService {
       allocated_artefacts: [
         {
           artefact_id: payment.invoice_id,
-          amount: payment.amount
-        }
-      ]
+          amount: payment.amount,
+        },
+      ],
     });
 
     return response.data;
@@ -283,7 +286,7 @@ class SageIntegrationService {
   async syncTenantToCustomer(tenantId: string, companyId: string): Promise<any> {
     const tenant = await prisma.tenant.findUnique({
       where: { id: tenantId },
-      include: { units: { include: { building: true } } }
+      include: { units: { include: { building: true } } },
     });
 
     if (!tenant || tenant.companyId !== companyId) {
@@ -308,8 +311,8 @@ class SageIntegrationService {
         address_line_1: firstUnit?.building?.direccion || '',
         city: firstUnit?.building?.ciudad,
         postal_code: firstUnit?.building?.codigoPostal,
-        country: firstUnit?.building?.pais || 'ES'
-      }
+        country: firstUnit?.building?.pais || 'ES',
+      },
     };
 
     return await this.createCustomer(customer);
@@ -323,8 +326,8 @@ class SageIntegrationService {
       where: { id: contractId },
       include: {
         tenant: true,
-        unit: { include: { building: true } }
-      }
+        unit: { include: { building: true } },
+      },
     });
 
     if (!contract || contract.tenant.companyId !== companyId) {
@@ -346,9 +349,9 @@ class SageIntegrationService {
           description: `Renta mensual - ${contract.unit?.numero} (${contract.unit?.building?.nombre})`,
           quantity: 1,
           unit_price: contract.rentaMensual,
-          tax_rate_id: process.env.SAGE_DEFAULT_TAX_RATE_ID
-        }
-      ]
+          tax_rate_id: process.env.SAGE_DEFAULT_TAX_RATE_ID,
+        },
+      ],
     };
 
     if (contract.deposito) {
@@ -356,7 +359,7 @@ class SageIntegrationService {
         description: 'Depósito de garantía',
         quantity: 1,
         unit_price: contract.deposito,
-        tax_rate_id: process.env.SAGE_DEFAULT_TAX_RATE_ID
+        tax_rate_id: process.env.SAGE_DEFAULT_TAX_RATE_ID,
       });
     }
 
@@ -373,10 +376,10 @@ class SageIntegrationService {
         contract: {
           include: {
             tenant: true,
-            unit: { include: { building: true } }
-          }
-        }
-      }
+            unit: { include: { building: true } },
+          },
+        },
+      },
     });
 
     if (!payment || payment.contract.tenant.companyId !== companyId) {
@@ -390,11 +393,12 @@ class SageIntegrationService {
     // En un caso real, necesitarías almacenar el sageInvoiceId en la tabla Payment
     const sagePayment: SagePayment = {
       customer_id: customer.id,
-      invoice_id: payment.sageInvoiceId || '',  // Necesitas almacenar esto
-      payment_date: payment.fechaPago?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
+      invoice_id: payment.sageInvoiceId || '', // Necesitas almacenar esto
+      payment_date:
+        payment.fechaPago?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
       amount: payment.monto,
       payment_method: payment.metodoPago || 'bank_transfer',
-      reference: `INMOVA-${paymentId}`
+      reference: `INMOVA-${paymentId}`,
     };
 
     return await this.registerPayment(sagePayment);
@@ -408,7 +412,7 @@ class SageIntegrationService {
       if (!this.accessToken) {
         return {
           success: false,
-          message: 'No hay token de acceso. Por favor, autentícate primero.'
+          message: 'No hay token de acceso. Por favor, autentícate primero.',
         };
       }
 
@@ -417,12 +421,12 @@ class SageIntegrationService {
 
       return {
         success: true,
-        message: `Conectado exitosamente a Sage (${response.data.$items?.[0]?.name || 'Cuenta activa'})`
+        message: `Conectado exitosamente a Sage (${response.data.$items?.[0]?.name || 'Cuenta activa'})`,
       };
     } catch (error: any) {
       return {
         success: false,
-        message: `Error de conexión: ${error.message}`
+        message: `Error de conexión: ${error.message}`,
       };
     }
   }

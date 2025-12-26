@@ -1,14 +1,14 @@
 export type Expense = {
-  id: string
-  amount: number
-  category: string
-  description: string
-  date: Date
-}
+  id: string;
+  amount: number;
+  category: string;
+  description: string;
+  date: Date;
+};
 
 export type ExpenseFormData = Omit<Expense, 'id' | 'date'> & {
-  date: string
-}
+  date: string;
+};
 
 export const EXPENSE_CATEGORIES = [
   'Food',
@@ -19,10 +19,10 @@ export const EXPENSE_CATEGORIES = [
   'Healthcare',
   'Shopping',
   'Education',
-  'Other'
-] as const
+  'Other',
+] as const;
 
 export type DateRange = {
-  from: Date | undefined
-  to: Date | undefined
-}
+  from: Date | undefined;
+  to: Date | undefined;
+};

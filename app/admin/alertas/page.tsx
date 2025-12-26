@@ -151,155 +151,153 @@ export default function AlertsPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
-              <div>
-                <h1 className="text-3xl font-bold gradient-text flex items-center">
-                  <AlertTriangle className="h-8 w-8 mr-3" />
-                  Centro de Alertas
-                </h1>
-                <p className="text-gray-600 mt-1">
-                  Notificaciones automáticas de eventos importantes
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+          <div>
+            <h1 className="text-3xl font-bold gradient-text flex items-center">
+              <AlertTriangle className="h-8 w-8 mr-3" />
+              Centro de Alertas
+            </h1>
+            <p className="text-gray-600 mt-1">Notificaciones automáticas de eventos importantes</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Select value={filterType} onValueChange={setFilterType}>
+              <SelectTrigger className="w-[160px]">
+                <Filter className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Filtrar" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas</SelectItem>
+                <SelectItem value="error">Errores</SelectItem>
+                <SelectItem value="warning">Advertencias</SelectItem>
+                <SelectItem value="info">Informativas</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              onClick={() => setAutoRefresh(!autoRefresh)}
+              variant={autoRefresh ? 'default' : 'outline'}
+              size="sm"
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${autoRefresh ? 'animate-spin' : ''}`} />
+              Auto
+            </Button>
+            <Button onClick={fetchAlerts} variant="outline" size="sm">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Actualizar
+            </Button>
+          </div>
+        </div>
+
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <Card className="border-l-4 border-l-gray-600">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{summary.total}</div>
+              <p className="text-xs text-muted-foreground">alertas activas</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-l-4 border-l-red-600">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Errores</CardTitle>
+              <AlertCircle className="h-4 w-4 text-red-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-600">{summary.errors}</div>
+              <p className="text-xs text-muted-foreground">críticas</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-l-4 border-l-yellow-600">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Advertencias</CardTitle>
+              <AlertTriangle className="h-4 w-4 text-yellow-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-yellow-600">{summary.warnings}</div>
+              <p className="text-xs text-muted-foreground">requieren atención</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-l-4 border-l-blue-600">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Informativas</CardTitle>
+              <Info className="h-4 w-4 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-600">{summary.info}</div>
+              <p className="text-xs text-muted-foreground">para revisar</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Alerts List */}
+        {filteredAlerts.length === 0 ? (
+          <Card>
+            <CardContent className="py-12">
+              <div className="text-center">
+                <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                  {filterType === 'all' ? '¡Todo en orden!' : 'Sin alertas de este tipo'}
+                </h3>
+                <p className="text-gray-600">
+                  {filterType === 'all'
+                    ? 'No hay alertas activas en este momento'
+                    : `No hay alertas de tipo "${filterType}" en este momento`}
                 </p>
               </div>
-              <div className="flex items-center gap-3">
-                <Select value={filterType} onValueChange={setFilterType}>
-                  <SelectTrigger className="w-[160px]">
-                    <Filter className="h-4 w-4 mr-2" />
-                    <SelectValue placeholder="Filtrar" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas</SelectItem>
-                    <SelectItem value="error">Errores</SelectItem>
-                    <SelectItem value="warning">Advertencias</SelectItem>
-                    <SelectItem value="info">Informativas</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button
-                  onClick={() => setAutoRefresh(!autoRefresh)}
-                  variant={autoRefresh ? 'default' : 'outline'}
-                  size="sm"
-                >
-                  <RefreshCw className={`h-4 w-4 mr-2 ${autoRefresh ? 'animate-spin' : ''}`} />
-                  Auto
-                </Button>
-                <Button onClick={fetchAlerts} variant="outline" size="sm">
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Actualizar
-                </Button>
-              </div>
-            </div>
-
-            {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              <Card className="border-l-4 border-l-gray-600">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{summary.total}</div>
-                  <p className="text-xs text-muted-foreground">alertas activas</p>
-                </CardContent>
-              </Card>
-
-              <Card className="border-l-4 border-l-red-600">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Errores</CardTitle>
-                  <AlertCircle className="h-4 w-4 text-red-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-red-600">{summary.errors}</div>
-                  <p className="text-xs text-muted-foreground">críticas</p>
-                </CardContent>
-              </Card>
-
-              <Card className="border-l-4 border-l-yellow-600">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Advertencias</CardTitle>
-                  <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-yellow-600">{summary.warnings}</div>
-                  <p className="text-xs text-muted-foreground">requieren atención</p>
-                </CardContent>
-              </Card>
-
-              <Card className="border-l-4 border-l-blue-600">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Informativas</CardTitle>
-                  <Info className="h-4 w-4 text-blue-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-blue-600">{summary.info}</div>
-                  <p className="text-xs text-muted-foreground">para revisar</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Alerts List */}
-            {filteredAlerts.length === 0 ? (
-              <Card>
-                <CardContent className="py-12">
-                  <div className="text-center">
-                    <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                      {filterType === 'all' ? '¡Todo en orden!' : 'Sin alertas de este tipo'}
-                    </h3>
-                    <p className="text-gray-600">
-                      {filterType === 'all'
-                        ? 'No hay alertas activas en este momento'
-                        : `No hay alertas de tipo "${filterType}" en este momento`}
-                    </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-4">
+            {filteredAlerts.map((alert) => (
+              <Card key={alert.id} className={`border ${getAlertBgColor(alert.type)}`}>
+                <CardContent className="pt-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start space-x-4 flex-1">
+                      <div className="mt-1">{getAlertIcon(alert.type)}</div>
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <h3 className="text-lg font-semibold text-gray-900">{alert.title}</h3>
+                          <Badge variant={alert.type === 'error' ? 'destructive' : 'secondary'}>
+                            {alert.type.toUpperCase()}
+                          </Badge>
+                        </div>
+                        <p className="text-gray-700 mb-2">{alert.description}</p>
+                        {alert.companyName && (
+                          <p className="text-sm text-gray-600">
+                            Empresa: <span className="font-medium">{alert.companyName}</span>
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 ml-4">
+                      {alert.actionUrl && (
+                        <Button size="sm" onClick={() => router.push(alert.actionUrl!)}>
+                          {alert.action || 'Ver'}
+                          <ExternalLink className="h-4 w-4 ml-2" />
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDismissAlert(alert.id)}
+                        title="Desestimar alerta"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
-            ) : (
-              <div className="space-y-4">
-                {filteredAlerts.map((alert) => (
-                  <Card key={alert.id} className={`border ${getAlertBgColor(alert.type)}`}>
-                    <CardContent className="pt-6">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start space-x-4 flex-1">
-                          <div className="mt-1">{getAlertIcon(alert.type)}</div>
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-2 mb-1">
-                              <h3 className="text-lg font-semibold text-gray-900">{alert.title}</h3>
-                              <Badge variant={alert.type === 'error' ? 'destructive' : 'secondary'}>
-                                {alert.type.toUpperCase()}
-                              </Badge>
-                            </div>
-                            <p className="text-gray-700 mb-2">{alert.description}</p>
-                            {alert.companyName && (
-                              <p className="text-sm text-gray-600">
-                                Empresa: <span className="font-medium">{alert.companyName}</span>
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 ml-4">
-                          {alert.actionUrl && (
-                            <Button size="sm" onClick={() => router.push(alert.actionUrl!)}>
-                              {alert.action || 'Ver'}
-                              <ExternalLink className="h-4 w-4 ml-2" />
-                            </Button>
-                          )}
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleDismissAlert(alert.id)}
-                            title="Desestimar alerta"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
+            ))}
           </div>
-        </AuthenticatedLayout>
+        )}
+      </div>
+    </AuthenticatedLayout>
   );
 }

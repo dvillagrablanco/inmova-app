@@ -146,7 +146,8 @@ export function ImprovedChatInterface({
                 onClick={() => onSelectConversation(conversation)}
                 className={cn(
                   'p-4 border-b cursor-pointer transition-colors hover:bg-accent',
-                  selectedConversation?.id === conversation.id && 'bg-accent border-l-4 border-l-primary'
+                  selectedConversation?.id === conversation.id &&
+                    'bg-accent border-l-4 border-l-primary'
                 )}
               >
                 <div className="flex items-start gap-3">
@@ -319,7 +320,9 @@ export function ImprovedChatInterface({
               />
               <Button
                 onClick={onSendMessage}
-                disabled={!newMessage.trim() || sending || selectedConversation.estado === 'cerrada'}
+                disabled={
+                  !newMessage.trim() || sending || selectedConversation.estado === 'cerrada'
+                }
                 className="h-11 w-11 rounded-full flex-shrink-0"
                 size="icon"
               >

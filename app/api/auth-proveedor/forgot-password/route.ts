@@ -11,10 +11,7 @@ export async function POST(req: NextRequest) {
     const { email } = await req.json();
 
     if (!email) {
-      return NextResponse.json(
-        { error: 'El email es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'El email es requerido' }, { status: 400 });
     }
 
     // Buscar proveedor por email
@@ -60,9 +57,7 @@ export async function POST(req: NextRequest) {
     //   html: `<p>Haz clic en el siguiente enlace para restablecer tu contraseña: <a href="${resetUrl}">${resetUrl}</a></p>`
     // });
 
-    logger.info(
-      `Token de recuperación generado para proveedor: ${proveedor.email}`
-    );
+    logger.info(`Token de recuperación generado para proveedor: ${proveedor.email}`);
 
     return NextResponse.json({
       success: true,
@@ -72,9 +67,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     logger.error('Error en solicitud de recuperación de contraseña:', error);
-    return NextResponse.json(
-      { error: 'Error al procesar la solicitud' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al procesar la solicitud' }, { status: 500 });
   }
 }

@@ -1,6 +1,6 @@
 /**
  * Error Boundary para Pagos
- * 
+ *
  * @since Semana 2, Tarea 2.5
  */
 

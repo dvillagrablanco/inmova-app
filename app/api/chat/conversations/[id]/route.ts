@@ -6,10 +6,7 @@ import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -21,10 +18,7 @@ export async function GET(
     });
 
     if (!conversation) {
-      return NextResponse.json(
-        { error: 'Conversación no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Conversación no encontrada' }, { status: 404 });
     }
 
     // Get tenant info
@@ -55,10 +49,7 @@ export async function GET(
   }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

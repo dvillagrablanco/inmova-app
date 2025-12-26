@@ -22,10 +22,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(settings);
   } catch (error) {
     logger.error('Error fetching pricing settings:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener configuración' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener configuración' }, { status: 500 });
   }
 }
 
@@ -37,19 +34,16 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    
+
     // TODO: Guardar en base de datos
     logger.info('Updating pricing settings:', body);
 
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Configuración actualizada' 
+    return NextResponse.json({
+      success: true,
+      message: 'Configuración actualizada',
     });
   } catch (error) {
     logger.error('Error updating pricing settings:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar configuración' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar configuración' }, { status: 500 });
   }
 }

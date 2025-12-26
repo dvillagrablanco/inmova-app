@@ -6,19 +6,19 @@ import { requireAuth, hasPermission, forbiddenResponse } from '@/lib/permissions
 export async function GET(request: NextRequest) {
   try {
     const user = await requireAuth();
-    
+
     const { searchParams } = new URL(request.url);
     const buildingId = searchParams.get('buildingId');
     const limit = parseInt(searchParams.get('limit') || '20');
     const offset = parseInt(searchParams.get('offset') || '0');
-    
+
     const where: any = {
       companyId: user.companyId,
       moderado: false,
     };
-    
+
     if (buildingId) where.buildingId = buildingId;
-    
+
     const posts = await prisma.socialPost.findMany({
       where,
       orderBy: { createdAt: 'desc' },
@@ -26,29 +26,29 @@ export async function GET(request: NextRequest) {
       skip: offset,
       include: {
         author: {
-          select: { id: true, nombreCompleto: true }
+          select: { id: true, nombreCompleto: true },
         },
         building: {
-          select: { id: true, nombre: true }
+          select: { id: true, nombre: true },
         },
         comentarios: {
           take: 3,
           orderBy: { createdAt: 'desc' },
           include: {
             author: {
-              select: { id: true, nombreCompleto: true }
-            }
-          }
-        }
-      }
+              select: { id: true, nombreCompleto: true },
+            },
+          },
+        },
+      },
     });
-    
+
     const total = await prisma.socialPost.count({ where });
-    
+
     return NextResponse.json({
       posts,
       total,
-      hasMore: offset + limit < total
+      hasMore: offset + limit < total,
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 401 });
@@ -60,12 +60,13 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth();
     const data = await request.json();
-    
+
     // Community managers pueden crear posts
-    const isCommunityPost = user.role === 'community_manager' || 
-                            user.role === 'administrador' || 
-                            user.role === 'super_admin';
-    
+    const isCommunityPost =
+      user.role === 'community_manager' ||
+      user.role === 'administrador' ||
+      user.role === 'super_admin';
+
     const post = await prisma.socialPost.create({
       data: {
         companyId: user.companyId,
@@ -80,11 +81,11 @@ export async function POST(request: NextRequest) {
       },
       include: {
         author: {
-          select: { id: true, nombreCompleto: true }
-        }
-      }
+          select: { id: true, nombreCompleto: true },
+        },
+      },
     });
-    
+
     return NextResponse.json(post, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 400 });

@@ -19,10 +19,7 @@ export async function cachedDashboardStats<T>(
 /**
  * Cache wrapper for building list
  */
-export async function cachedBuildings<T>(
-  companyId: string,
-  fetchFn: () => Promise<T>
-): Promise<T> {
+export async function cachedBuildings<T>(companyId: string, fetchFn: () => Promise<T>): Promise<T> {
   const key = companyKey(companyId, 'buildings');
   return getCached(key, fetchFn, CACHE_TTL.MEDIUM);
 }
@@ -44,10 +41,7 @@ export async function cachedUnits<T>(
 /**
  * Cache wrapper for tenants list
  */
-export async function cachedTenants<T>(
-  companyId: string,
-  fetchFn: () => Promise<T>
-): Promise<T> {
+export async function cachedTenants<T>(companyId: string, fetchFn: () => Promise<T>): Promise<T> {
   const key = companyKey(companyId, 'tenants');
   return getCached(key, fetchFn, CACHE_TTL.MEDIUM);
 }
@@ -55,10 +49,7 @@ export async function cachedTenants<T>(
 /**
  * Cache wrapper for contracts list
  */
-export async function cachedContracts<T>(
-  companyId: string,
-  fetchFn: () => Promise<T>
-): Promise<T> {
+export async function cachedContracts<T>(companyId: string, fetchFn: () => Promise<T>): Promise<T> {
   const key = companyKey(companyId, 'contracts');
   return getCached(key, fetchFn, CACHE_TTL.SHORT);
 }
@@ -66,10 +57,7 @@ export async function cachedContracts<T>(
 /**
  * Cache wrapper for payments list
  */
-export async function cachedPayments<T>(
-  companyId: string,
-  fetchFn: () => Promise<T>
-): Promise<T> {
+export async function cachedPayments<T>(companyId: string, fetchFn: () => Promise<T>): Promise<T> {
   const key = companyKey(companyId, 'payments');
   return getCached(key, fetchFn, CACHE_TTL.SHORT);
 }
@@ -98,10 +86,7 @@ export async function invalidateCompanyCache(companyId: string): Promise<void> {
 /**
  * Invalidate specific resource cache for a company
  */
-export async function invalidateResourceCache(
-  companyId: string,
-  resource: string
-): Promise<void> {
+export async function invalidateResourceCache(companyId: string, resource: string): Promise<void> {
   const key = companyKey(companyId, resource);
   await invalidateCache(key);
   logger.info(`Invalidated cache for ${resource} in company: ${companyId}`);

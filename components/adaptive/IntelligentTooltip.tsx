@@ -1,12 +1,7 @@
-"use client";
+'use client';
 
 import React, { useState } from 'react';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { HelpCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -16,42 +11,42 @@ interface IntelligentTooltipProps {
    * Contenido del tooltip
    */
   content: string;
-  
+
   /**
    * Título opcional
    */
   title?: string;
-  
+
   /**
    * Si debe mostrarse siempre o solo para principiantes
    */
   forceShow?: boolean;
-  
+
   /**
    * Nivel de importancia: info, warning, tip
    */
   variant?: 'info' | 'warning' | 'tip';
-  
+
   /**
    * Posición del tooltip
    */
   side?: 'top' | 'right' | 'bottom' | 'left';
-  
+
   /**
    * Si se puede cerrar permanentemente
    */
   dismissible?: boolean;
-  
+
   /**
    * ID único para recordar si fue cerrado
    */
   tooltipId?: string;
-  
+
   /**
    * Children (el elemento que activa el tooltip)
    */
   children?: React.ReactNode;
-  
+
   /**
    * Mostrar icono de ayuda automáticamente
    */
@@ -60,7 +55,7 @@ interface IntelligentTooltipProps {
 
 /**
  * INTELLIGENT TOOLTIP - Tooltips contextuales para principiantes
- * 
+ *
  * Características:
  * - Se ocultan automáticamente para usuarios avanzados
  * - Pueden ser cerrados permanentemente (localStorage)
@@ -112,29 +107,20 @@ export function IntelligentTooltip({
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          {children || (
-            showIcon ? (
+          {children ||
+            (showIcon ? (
               <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
             ) : (
               <span className="cursor-help">{content}</span>
-            )
-          )}
+            ))}
         </TooltipTrigger>
-        <TooltipContent
-          side={side}
-          className={cn(
-            'max-w-sm border',
-            variantStyles[variant]
-          )}
-        >
+        <TooltipContent side={side} className={cn('max-w-sm border', variantStyles[variant])}>
           <div className="space-y-2">
             {/* Header con icono y título */}
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-2">
                 <span className="text-lg">{variantIcons[variant]}</span>
-                {title && (
-                  <p className="font-semibold text-sm">{title}</p>
-                )}
+                {title && <p className="font-semibold text-sm">{title}</p>}
               </div>
               {dismissible && (
                 <button
@@ -146,7 +132,7 @@ export function IntelligentTooltip({
                 </button>
               )}
             </div>
-            
+
             {/* Contenido */}
             <p className="text-sm leading-relaxed">{content}</p>
           </div>
@@ -162,11 +148,9 @@ export function IntelligentTooltip({
 export function useIntelligentTooltips() {
   const clearAllTooltips = () => {
     if (typeof window === 'undefined') return;
-    
-    const keys = Object.keys(localStorage).filter((key) =>
-      key.startsWith('tooltip-dismissed-')
-    );
-    
+
+    const keys = Object.keys(localStorage).filter((key) => key.startsWith('tooltip-dismissed-'));
+
     keys.forEach((key) => localStorage.removeItem(key));
   };
 

@@ -71,9 +71,9 @@ export class TwilioClient {
    */
   private getAuthHeaders(): HeadersInit {
     const credentials = Buffer.from(`${this.accountSid}:${this.authToken}`).toString('base64');
-    
+
     return {
-      'Authorization': `Basic ${credentials}`,
+      Authorization: `Basic ${credentials}`,
       'Content-Type': 'application/x-www-form-urlencoded',
     };
   }
@@ -84,12 +84,12 @@ export class TwilioClient {
   private normalizePhoneNumber(phone: string): string {
     // Eliminar espacios, guiones, paréntesis
     let normalized = phone.replace(/[\s\-\(\)]/g, '');
-    
+
     // Si no empieza con +, agregar +34 (España por defecto)
     if (!normalized.startsWith('+')) {
       normalized = '+34' + normalized;
     }
-    
+
     return normalized;
   }
 
@@ -109,19 +109,16 @@ export class TwilioClient {
 
       // Añadir media si existe
       if (params.mediaUrls && params.mediaUrls.length > 0) {
-        params.mediaUrls.forEach(url => {
+        params.mediaUrls.forEach((url) => {
           body.append('MediaUrl', url);
         });
       }
 
-      const response = await fetch(
-        `${this.baseUrl}/Accounts/${this.accountSid}/Messages.json`,
-        {
-          method: 'POST',
-          headers: this.getAuthHeaders(),
-          body: body.toString(),
-        }
-      );
+      const response = await fetch(`${this.baseUrl}/Accounts/${this.accountSid}/Messages.json`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: body.toString(),
+      });
 
       if (!response.ok) {
         const error = await response.json();
@@ -165,19 +162,16 @@ export class TwilioClient {
 
       // Añadir media si existe
       if (params.mediaUrls && params.mediaUrls.length > 0) {
-        params.mediaUrls.forEach(url => {
+        params.mediaUrls.forEach((url) => {
           body.append('MediaUrl', url);
         });
       }
 
-      const response = await fetch(
-        `${this.baseUrl}/Accounts/${this.accountSid}/Messages.json`,
-        {
-          method: 'POST',
-          headers: this.getAuthHeaders(),
-          body: body.toString(),
-        }
-      );
+      const response = await fetch(`${this.baseUrl}/Accounts/${this.accountSid}/Messages.json`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: body.toString(),
+      });
 
       if (!response.ok) {
         const error = await response.json();
@@ -269,7 +263,7 @@ export class TwilioClient {
   async getMessageHistory(phoneNumber: string, limit: number = 50): Promise<any[]> {
     try {
       const to = this.normalizePhoneNumber(phoneNumber);
-      
+
       const response = await fetch(
         `${this.baseUrl}/Accounts/${this.accountSid}/Messages.json?To=${to}&PageSize=${limit}`,
         {
@@ -300,12 +294,7 @@ export class TwilioClient {
  */
 export function isTwilioConfigured(config?: TwilioConfig | null): boolean {
   if (!config) return false;
-  return !!(
-    config.accountSid &&
-    config.authToken &&
-    config.phoneNumber &&
-    config.enabled
-  );
+  return !!(config.accountSid && config.authToken && config.phoneNumber && config.enabled);
 }
 
 /**
@@ -394,7 +383,7 @@ export async function sendQuickWhatsApp(
  */
 export const MessageTemplates = {
   // Recordatorio de pago
-  paymentReminder: (tenantName: string, amount: number, dueDate: string) => 
+  paymentReminder: (tenantName: string, amount: number, dueDate: string) =>
     `Hola ${tenantName}, te recordamos que tu próximo pago de €${amount} vence el ${dueDate}. ¡Gracias!`,
 
   // Confirmación de pago

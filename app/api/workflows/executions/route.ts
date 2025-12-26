@@ -13,10 +13,7 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const { searchParams } = new URL(req.url);
@@ -57,9 +54,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(executions);
   } catch (error: any) {
     console.error('Error obteniendo ejecuciones:', error);
-    return NextResponse.json(
-      { error: 'Error obteniendo ejecuciones' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error obteniendo ejecuciones' }, { status: 500 });
   }
 }

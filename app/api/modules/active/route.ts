@@ -19,9 +19,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ activeModules });
   } catch (error: any) {
     logger.error('Error al obtener módulos activos:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener módulos activos' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener módulos activos' }, { status: 500 });
   }
 }

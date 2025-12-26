@@ -10,16 +10,13 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     let preferences = await prisma.userPreference.findUnique({
-      where: { userId: session.user.id }
+      where: { userId: session.user.id },
     });
 
     // Si no existen preferencias, crear con valores por defecto
@@ -30,9 +27,9 @@ export async function GET(request: NextRequest) {
           notificationPreferences: {
             pushEnabled: true,
             emailEnabled: true,
-            smsEnabled: false
-          }
-        }
+            smsEnabled: false,
+          },
+        },
       });
     }
 
@@ -49,12 +46,9 @@ export async function GET(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const preferences = await request.json();
@@ -63,17 +57,17 @@ export async function PUT(request: NextRequest) {
       where: { userId: session.user.id },
       create: {
         userId: session.user.id,
-        notificationPreferences: preferences
+        notificationPreferences: preferences,
       },
       update: {
-        notificationPreferences: preferences
-      }
+        notificationPreferences: preferences,
+      },
     });
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       preferences: updated.notificationPreferences,
-      message: 'Preferencias actualizadas exitosamente' 
+      message: 'Preferencias actualizadas exitosamente',
     });
   } catch (error: any) {
     logger.error('Error updating notification preferences:', error);

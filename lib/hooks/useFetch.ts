@@ -26,13 +26,7 @@ export function useFetch<T = any>(
   url: string | null,
   options: UseFetchOptions = {}
 ): UseFetchResult<T> {
-  const {
-    enabled = true,
-    onSuccess,
-    onError,
-    retryCount = 0,
-    retryDelay = 1000,
-  } = options;
+  const { enabled = true, onSuccess, onError, retryCount = 0, retryDelay = 1000 } = options;
 
   const [data, setData] = useState<T | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -47,32 +41,35 @@ export function useFetch<T = any>(
 
     try {
       const response = await fetch(url);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const result = await response.json();
       setData(result);
       onSuccess?.(result);
       setAttemptCount(0); // Reset on success
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Unknown error');
-      
+
       logError(error, {
         context: 'useFetch',
         url,
         attemptCount,
       });
-      
+
       setError(error);
       onError?.(error);
 
       // Retry logic
       if (attemptCount < retryCount) {
-        setTimeout(() => {
-          setAttemptCount((prev) => prev + 1);
-        }, retryDelay * (attemptCount + 1)); // Exponential backoff
+        setTimeout(
+          () => {
+            setAttemptCount((prev) => prev + 1);
+          },
+          retryDelay * (attemptCount + 1)
+        ); // Exponential backoff
       }
     } finally {
       setIsLoading(false);

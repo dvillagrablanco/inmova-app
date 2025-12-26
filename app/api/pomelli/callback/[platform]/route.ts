@@ -8,10 +8,7 @@ import { prisma } from '@/lib/prisma';
 import { logger } from '@/lib/logger';
 import { getPomelliService, type SocialPlatform } from '@/lib/pomelli-integration';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { platform: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { platform: string } }) {
   try {
     const { platform } = params;
     const searchParams = request.nextUrl.searchParams;
@@ -21,9 +18,7 @@ export async function GET(
 
     if (error) {
       // Usuario canceló autorización
-      return NextResponse.redirect(
-        new URL(`/dashboard/social-media?error=${error}`, request.url)
-      );
+      return NextResponse.redirect(new URL(`/dashboard/social-media?error=${error}`, request.url));
     }
 
     if (!authCode || !companyId) {
@@ -51,7 +46,7 @@ export async function GET(
 
     // Obtener servicio de Pomelli
     const pomelliService = getPomelliService();
-    
+
     if (!pomelliService) {
       return NextResponse.redirect(
         new URL('/dashboard/social-media?error=service_error', request.url)

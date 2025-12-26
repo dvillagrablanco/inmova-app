@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
 
     const widgets = await prisma.dashboardWidget.findMany({
       where: { userId },
-      orderBy: { createdAt: 'asc' }
+      orderBy: { createdAt: 'asc' },
     });
 
     return NextResponse.json(widgets);
@@ -43,12 +43,12 @@ export async function POST(req: NextRequest) {
 
     // Buscar o crear preferencia
     let preference = await prisma.userDashboardPreference.findUnique({
-      where: { userId }
+      where: { userId },
     });
 
     if (!preference) {
       preference = await prisma.userDashboardPreference.create({
-        data: { userId }
+        data: { userId },
       });
     }
 
@@ -67,8 +67,8 @@ export async function POST(req: NextRequest) {
         position: body.position,
         color: body.color,
         icon: body.icon,
-        enabled: true
-      }
+        enabled: true,
+      },
     });
 
     return NextResponse.json(widget);
@@ -94,7 +94,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     await prisma.dashboardWidget.delete({
-      where: { id: widgetId }
+      where: { id: widgetId },
     });
 
     return NextResponse.json({ message: 'Widget eliminado' });

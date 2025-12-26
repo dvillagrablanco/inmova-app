@@ -66,9 +66,11 @@ export async function POST(request: Request) {
                 numeroUnidades: parseInt(row.numeroUnidades) || 0,
                 estadoConservacion: row.estadoConservacion || null,
                 certificadoEnergetico: row.certificadoEnergetico || null,
-                ascensor: row.ascensor?.toLowerCase() === 'sí' || row.ascensor?.toLowerCase() === 'si',
+                ascensor:
+                  row.ascensor?.toLowerCase() === 'sí' || row.ascensor?.toLowerCase() === 'si',
                 garaje: row.garaje?.toLowerCase() === 'sí' || row.garaje?.toLowerCase() === 'si',
-                trastero: row.trastero?.toLowerCase() === 'sí' || row.trastero?.toLowerCase() === 'si',
+                trastero:
+                  row.trastero?.toLowerCase() === 'sí' || row.trastero?.toLowerCase() === 'si',
                 piscina: row.piscina?.toLowerCase() === 'sí' || row.piscina?.toLowerCase() === 'si',
                 jardin: row.jardin?.toLowerCase() === 'sí' || row.jardin?.toLowerCase() === 'si',
                 gastosComunidad: row.gastosComunidad ? parseFloat(row.gastosComunidad) : null,
@@ -110,9 +112,14 @@ export async function POST(request: Request) {
                 planta: row.planta ? parseInt(row.planta) : null,
                 orientacion: row.orientacion || null,
                 rentaMensual: parseFloat(row.rentaMensual) || 0,
-                amueblado: row.amueblado?.toLowerCase() === 'sí' || row.amueblado?.toLowerCase() === 'si',
-                aireAcondicionado: row.aireAcondicionado?.toLowerCase() === 'sí' || row.aireAcondicionado?.toLowerCase() === 'si',
-                calefaccion: row.calefaccion?.toLowerCase() === 'sí' || row.calefaccion?.toLowerCase() === 'si',
+                amueblado:
+                  row.amueblado?.toLowerCase() === 'sí' || row.amueblado?.toLowerCase() === 'si',
+                aireAcondicionado:
+                  row.aireAcondicionado?.toLowerCase() === 'sí' ||
+                  row.aireAcondicionado?.toLowerCase() === 'si',
+                calefaccion:
+                  row.calefaccion?.toLowerCase() === 'sí' ||
+                  row.calefaccion?.toLowerCase() === 'si',
               },
             });
             results.success++;
@@ -166,10 +173,7 @@ export async function POST(request: Request) {
     return NextResponse.json(results);
   } catch (error) {
     logger.error('Error al importar:', error);
-    return NextResponse.json(
-      { error: 'Error al importar datos' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al importar datos' }, { status: 500 });
   }
 }
 
@@ -209,9 +213,6 @@ export async function DELETE(request: Request) {
     });
   } catch (error) {
     logger.error('Error al limpiar datos:', error);
-    return NextResponse.json(
-      { error: 'Error al limpiar datos' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al limpiar datos' }, { status: 500 });
   }
 }

@@ -31,9 +31,9 @@ const CONTEXTUAL_SUGGESTIONS: Record<string, ProactiveSuggestion[]> = {
       description: 'Puedes reordenar las tarjetas arrastrándolas y ocultar las que no necesites.',
       action: {
         label: 'Ver Tutorial',
-        href: '/knowledge-base?article=kb-001'
+        href: '/knowledge-base?article=kb-001',
       },
-      dismissible: true
+      dismissible: true,
     },
     {
       id: 'dashboard-bi',
@@ -42,10 +42,10 @@ const CONTEXTUAL_SUGGESTIONS: Record<string, ProactiveSuggestion[]> = {
       description: 'Obtén insights avanzados con nuestro módulo de BI y análisis predictivo.',
       action: {
         label: 'Ir a BI',
-        href: '/bi'
+        href: '/bi',
       },
-      dismissible: true
-    }
+      dismissible: true,
+    },
   ],
   '/edificios': [
     {
@@ -55,9 +55,9 @@ const CONTEXTUAL_SUGGESTIONS: Record<string, ProactiveSuggestion[]> = {
       description: '¿Tienes muchos edificios? Puedes importarlos desde un archivo Excel.',
       action: {
         label: 'Ver Cómo',
-        href: '/knowledge-base?article=kb-002'
+        href: '/knowledge-base?article=kb-002',
       },
-      dismissible: true
+      dismissible: true,
     },
     {
       id: 'buildings-map',
@@ -66,34 +66,36 @@ const CONTEXTUAL_SUGGESTIONS: Record<string, ProactiveSuggestion[]> = {
       description: 'Visualiza todos tus edificios en un mapa interactivo georreferenciado.',
       action: {
         label: 'Ver Mapa',
-        href: '/edificios/mapa'
+        href: '/edificios/mapa',
       },
-      dismissible: true
-    }
+      dismissible: true,
+    },
   ],
   '/inquilinos': [
     {
       id: 'tenants-screening',
       type: 'warning',
       title: '🔍 Verifica a tus Inquilinos',
-      description: 'El screening automático reduce la morosidad hasta en un 70%. ¡Activa la verificación!',
+      description:
+        'El screening automático reduce la morosidad hasta en un 70%. ¡Activa la verificación!',
       action: {
         label: 'Configurar',
-        href: '/configuracion/screening'
+        href: '/configuracion/screening',
       },
-      dismissible: true
+      dismissible: true,
     },
     {
       id: 'tenants-portal',
       type: 'tip',
       title: '📱 Portal del Inquilino',
-      description: 'Tus inquilinos pueden pagar, ver recibos y reportar incidencias desde su portal.',
+      description:
+        'Tus inquilinos pueden pagar, ver recibos y reportar incidencias desde su portal.',
       action: {
         label: 'Más Info',
-        href: '/knowledge-base?article=kb-012'
+        href: '/knowledge-base?article=kb-012',
       },
-      dismissible: true
-    }
+      dismissible: true,
+    },
   ],
   '/pagos': [
     {
@@ -103,9 +105,9 @@ const CONTEXTUAL_SUGGESTIONS: Record<string, ProactiveSuggestion[]> = {
       description: 'Configura pagos recurrentes y olvídate de perseguir a los inquilinos cada mes.',
       action: {
         label: 'Configurar Ahora',
-        href: '/automatizacion/pagos'
+        href: '/automatizacion/pagos',
       },
-      dismissible: true
+      dismissible: true,
     },
     {
       id: 'payments-reminders',
@@ -114,10 +116,10 @@ const CONTEXTUAL_SUGGESTIONS: Record<string, ProactiveSuggestion[]> = {
       description: 'Envía recordatorios de pago automáticamente 3 días antes del vencimiento.',
       action: {
         label: 'Activar',
-        href: '/automatizacion/recordatorios'
+        href: '/automatizacion/recordatorios',
       },
-      dismissible: true
-    }
+      dismissible: true,
+    },
   ],
   '/contratos': [
     {
@@ -127,21 +129,22 @@ const CONTEXTUAL_SUGGESTIONS: Record<string, ProactiveSuggestion[]> = {
       description: 'Usa nuestras plantillas de contrato que cumplen toda la normativa vigente.',
       action: {
         label: 'Ver Plantillas',
-        href: '/contratos/plantillas'
+        href: '/contratos/plantillas',
       },
-      dismissible: true
+      dismissible: true,
     },
     {
       id: 'contracts-digital',
       type: 'guide',
       title: '✍️ Firma Digital',
-      description: 'Los contratos con firma digital tienen validez legal completa y ahorran tiempo.',
+      description:
+        'Los contratos con firma digital tienen validez legal completa y ahorran tiempo.',
       action: {
         label: 'Aprender Más',
-        href: '/knowledge-base?article=kb-005'
+        href: '/knowledge-base?article=kb-005',
       },
-      dismissible: true
-    }
+      dismissible: true,
+    },
   ],
   '/mantenimiento': [
     {
@@ -151,22 +154,23 @@ const CONTEXTUAL_SUGGESTIONS: Record<string, ProactiveSuggestion[]> = {
       description: 'Programa revisiones periódicas para evitar problemas mayores y ahorrar costos.',
       action: {
         label: 'Programar',
-        href: '/mantenimiento/preventivo'
+        href: '/mantenimiento/preventivo',
       },
-      dismissible: true
+      dismissible: true,
     },
     {
       id: 'maintenance-providers',
       type: 'tip',
       title: '👷 Red de Proveedores',
-      description: 'Construye una base de datos de proveedores de confianza para respuestas rápidas.',
+      description:
+        'Construye una base de datos de proveedores de confianza para respuestas rápidas.',
       action: {
         label: 'Gestionar',
-        href: '/proveedores'
+        href: '/proveedores',
       },
-      dismissible: true
-    }
-  ]
+      dismissible: true,
+    },
+  ],
 };
 
 export default function ProactiveAssistant() {
@@ -186,7 +190,7 @@ export default function ProactiveAssistant() {
   useEffect(() => {
     // Determinar si mostrar asistente basado en la ruta
     if (!pathname) return;
-    
+
     const suggestions = CONTEXTUAL_SUGGESTIONS[pathname] || [];
     const availableSuggestions = suggestions.filter(
       (s: ProactiveSuggestion) => !dismissedSuggestions.has(s.id)
@@ -217,7 +221,7 @@ export default function ProactiveAssistant() {
 
   const handleDismissAll = () => {
     if (!pathname) return;
-    
+
     const suggestions = CONTEXTUAL_SUGGESTIONS[pathname] || [];
     const newDismissed = new Set(dismissedSuggestions);
     suggestions.forEach((s: ProactiveSuggestion) => newDismissed.add(s.id));
@@ -272,9 +276,7 @@ export default function ProactiveAssistant() {
               <div className="flex items-start gap-3">
                 <div className="mt-0.5">{getIcon()}</div>
                 <div className="flex-1">
-                  <CardTitle className="text-base">
-                    {currentSuggestion.title}
-                  </CardTitle>
+                  <CardTitle className="text-base">{currentSuggestion.title}</CardTitle>
                   <CardDescription className="mt-1">
                     {currentSuggestion.description}
                   </CardDescription>
@@ -294,21 +296,12 @@ export default function ProactiveAssistant() {
             <CardContent className="pt-0">
               <div className="flex gap-2">
                 <Link href={currentSuggestion.action.href} className="flex-1">
-                  <Button
-                    variant="default"
-                    size="sm"
-                    className="w-full"
-                    onClick={handleDismiss}
-                  >
+                  <Button variant="default" size="sm" className="w-full" onClick={handleDismiss}>
                     {currentSuggestion.action.label}
                     <ExternalLink className="ml-2 h-3 w-3" />
                   </Button>
                 </Link>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleDismissAll}
-                >
+                <Button variant="ghost" size="sm" onClick={handleDismissAll}>
                   No mostrar más
                 </Button>
               </div>

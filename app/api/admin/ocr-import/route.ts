@@ -15,17 +15,11 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     if (session.user.role !== 'administrador' && session.user.role !== 'super_admin') {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
 
     const formData = await request.formData();
@@ -33,10 +27,7 @@ export async function POST(request: NextRequest) {
     const documentType = formData.get('documentType') as string; // 'dni', 'invoice', 'contract', 'generic'
 
     if (!file) {
-      return NextResponse.json(
-        { error: 'No se proporcionó ningún archivo' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No se proporcionó ningún archivo' }, { status: 400 });
     }
 
     // Validar tipo de archivo (imágenes)
@@ -60,7 +51,8 @@ export async function POST(request: NextRequest) {
 
     switch (documentType) {
       case 'dni':
-        systemPrompt = 'Eres un asistente especializado en extraer información de DNI/NIE españoles.';
+        systemPrompt =
+          'Eres un asistente especializado en extraer información de DNI/NIE españoles.';
         userPrompt = `Analiza esta imagen de un DNI/NIE español y extrae la siguiente información en formato JSON:
 {
   "tipo": "DNI" o "NIE",
@@ -100,7 +92,8 @@ Si algún campo no es visible o legible, déjalo como null.`;
         break;
 
       case 'contract':
-        systemPrompt = 'Eres un asistente especializado en extraer información de contratos de arrendamiento.';
+        systemPrompt =
+          'Eres un asistente especializado en extraer información de contratos de arrendamiento.';
         userPrompt = `Analiza esta imagen de un contrato de arrendamiento y extrae la siguiente información en formato JSON:
 {
   "tipoContrato": "tipo de contrato",
@@ -140,7 +133,7 @@ Devuelve el resultado en formato JSON.`;
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         messages: [
@@ -183,8 +176,8 @@ Devuelve el resultado en formato JSON.`;
     let extractedData: any = null;
     try {
       // Buscar y extraer el JSON del texto
-      const jsonMatch = extractedText.match(/```json\s*([\s\S]*?)\s*```/) || 
-                        extractedText.match(/\{[\s\S]*\}/);
+      const jsonMatch =
+        extractedText.match(/```json\s*([\s\S]*?)\s*```/) || extractedText.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         const jsonStr = jsonMatch[1] || jsonMatch[0];
         extractedData = JSON.parse(jsonStr);

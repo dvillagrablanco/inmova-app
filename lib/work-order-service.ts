@@ -1,10 +1,10 @@
 /**
  * Servicio de Gestión de Órdenes de Trabajo para Operadores
- * 
+ *
  * Este servicio gestiona todas las operaciones relacionadas con las órdenes de trabajo
  * asignadas a operadores de campo, incluyendo check-in/check-out, actualización de estado,
  * adjuntar fotos, y reporte de finalización.
- * 
+ *
  * Nota: Adaptado para usar los campos del modelo ProviderWorkOrder existente
  */
 
@@ -255,9 +255,7 @@ export async function addWorkOrderPhotos(
   // Actualizar orden
   const updated = await prisma.providerWorkOrder.update({
     where: { id: workOrderId },
-    data: isCompleted
-      ? { fotosDespues: updatedPhotos }
-      : { fotosAntes: updatedPhotos },
+    data: isCompleted ? { fotosDespues: updatedPhotos } : { fotosAntes: updatedPhotos },
   });
 
   return updated;
@@ -267,7 +265,16 @@ export async function addWorkOrderPhotos(
  * Crea un reporte de trabajo completado
  */
 export async function createWorkReport(data: WorkReport) {
-  const { workOrderId, operatorId, description, timeSpent, materials, photos, issuesFound, recommendations } = data;
+  const {
+    workOrderId,
+    operatorId,
+    description,
+    timeSpent,
+    materials,
+    photos,
+    issuesFound,
+    recommendations,
+  } = data;
 
   // Verificar que la orden existe
   const workOrder = await prisma.providerWorkOrder.findFirst({
@@ -294,9 +301,10 @@ export async function createWorkReport(data: WorkReport) {
       horasTrabajadas: timeSpent / 60, // Convertir minutos a horas
       ...(materialesUsados && { materialesUsados }),
       fotosDespues: photos || workOrder.fotosDespues,
-      comentarios: issuesFound || recommendations
-        ? `${issuesFound ? `Problemas: ${issuesFound}\n` : ''}${recommendations ? `Recomendaciones: ${recommendations}` : ''}`
-        : workOrder.comentarios,
+      comentarios:
+        issuesFound || recommendations
+          ? `${issuesFound ? `Problemas: ${issuesFound}\n` : ''}${recommendations ? `Recomendaciones: ${recommendations}` : ''}`
+          : workOrder.comentarios,
     },
   });
 
@@ -370,7 +378,7 @@ export async function getOperatorStats(operatorId: string, companyId: string) {
   });
 
   // horasTrabajadas está en horas, convertir a minutos para consistencia con la interfaz
-  const totalTimeSpent = workOrders.reduce((acc, wo) => acc + ((wo.horasTrabajadas || 0) * 60), 0);
+  const totalTimeSpent = workOrders.reduce((acc, wo) => acc + (wo.horasTrabajadas || 0) * 60, 0);
 
   return {
     completedToday,
@@ -406,7 +414,7 @@ export async function getMaintenanceHistory(
     select: { id: true },
   });
 
-  const unitIds = units.map(u => u.id);
+  const unitIds = units.map((u) => u.id);
 
   const where: any = {
     unitId: {
@@ -436,8 +444,8 @@ export async function getMaintenanceHistory(
       },
       select: { id: true },
     });
-    
-    const buildingUnitIds = buildingUnits.map(u => u.id);
+
+    const buildingUnitIds = buildingUnits.map((u) => u.id);
     where.unitId = {
       in: buildingUnitIds,
     };

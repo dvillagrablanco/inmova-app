@@ -33,7 +33,10 @@ export async function POST(request: NextRequest) {
     const stripe = getStripe();
     if (!stripe) {
       return NextResponse.json(
-        { error: 'Stripe no está configurado. Configure STRIPE_SECRET_KEY en las variables de entorno.' },
+        {
+          error:
+            'Stripe no está configurado. Configure STRIPE_SECRET_KEY en las variables de entorno.',
+        },
         { status: 503 }
       );
     }
@@ -47,10 +50,7 @@ export async function POST(request: NextRequest) {
     const { invoiceId, returnUrl } = body;
 
     if (!invoiceId) {
-      return NextResponse.json(
-        { error: 'Invoice ID requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invoice ID requerido' }, { status: 400 });
     }
 
     // Obtener factura
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
       where: { id: invoiceId },
       include: {
         company: true,
-      }
+      },
     });
 
     if (!invoice) {
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
 
     // Verificar permisos
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
+      where: { id: session.user.id },
     });
 
     if (user?.role !== 'super_admin' && invoice.companyId !== user?.companyId) {
@@ -76,15 +76,12 @@ export async function POST(request: NextRequest) {
 
     // Verificar que la factura está pendiente
     if (invoice.estado === 'PAGADA') {
-      return NextResponse.json(
-        { error: 'La factura ya ha sido pagada' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'La factura ya ha sido pagada' }, { status: 400 });
     }
 
     // Crear o recuperar Stripe Customer
     let stripeCustomerId = invoice.company.stripeCustomerId;
-    
+
     if (!stripeCustomerId) {
       const customer = await stripe.customers.create({
         name: invoice.company.nombre,
@@ -124,7 +121,7 @@ export async function POST(request: NextRequest) {
       where: { id: invoice.id },
       data: {
         stripePaymentIntentId: paymentIntent.id,
-      }
+      },
     });
 
     return NextResponse.json({
@@ -146,10 +143,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   const stripe = getStripe();
   if (!stripe) {
-    return NextResponse.json(
-      { error: 'Stripe no está configurado' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Stripe no está configurado' }, { status: 500 });
   }
 
   try {
@@ -157,10 +151,7 @@ export async function PUT(request: NextRequest) {
     const { paymentIntentId } = body;
 
     if (!paymentIntentId) {
-      return NextResponse.json(
-        { error: 'Payment Intent ID requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Payment Intent ID requerido' }, { status: 400 });
     }
 
     // Buscar factura por payment intent ID
@@ -169,10 +160,7 @@ export async function PUT(request: NextRequest) {
     });
 
     if (!invoice) {
-      return NextResponse.json(
-        { error: 'Factura no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Factura no encontrada' }, { status: 404 });
     }
 
     // Verificar el estado del payment intent en Stripe
@@ -183,10 +171,9 @@ export async function PUT(request: NextRequest) {
     if (paymentIntent.status === 'succeeded') {
       // Registrar el pago
       const charge = paymentIntent.latest_charge as Stripe.Charge | null;
-      const stripeFee = charge?.balance_transaction 
-        ? (await stripe.balanceTransactions.retrieve(
-            charge.balance_transaction as string
-          )).fee / 100
+      const stripeFee = charge?.balance_transaction
+        ? (await stripe.balanceTransactions.retrieve(charge.balance_transaction as string)).fee /
+          100
         : 0;
 
       await registerInvoicePayment(invoice.id, {
@@ -197,9 +184,9 @@ export async function PUT(request: NextRequest) {
         stripeFee,
       });
 
-      return NextResponse.json({ 
+      return NextResponse.json({
         success: true,
-        message: 'Pago registrado correctamente' 
+        message: 'Pago registrado correctamente',
       });
     }
 

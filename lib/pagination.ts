@@ -106,7 +106,7 @@ export function createPaginatedResponse<T>(
 
 /**
  * Helper para paginación con Prisma
- * 
+ *
  * Ejemplo de uso:
  * ```typescript
  * const { data, pagination } = await paginateWithPrisma(
@@ -138,10 +138,7 @@ export async function paginateWithPrisma<T>(
  * Helper para paginación con arrays (datos ya cargados en memoria)
  * Úsalo solo cuando necesites filtrar/ordenar en memoria
  */
-export function paginateArray<T>(
-  items: T[],
-  params: PaginationParams
-): PaginatedResponse<T> {
+export function paginateArray<T>(items: T[], params: PaginationParams): PaginatedResponse<T> {
   const totalItems = items.length;
   const data = items.slice(params.skip, params.skip + params.limit);
 
@@ -185,7 +182,7 @@ export function getSortParams(
 
 /**
  * Wrapper completo para paginación + ordenamiento con Prisma
- * 
+ *
  * Ejemplo de uso:
  * ```typescript
  * const result = await paginateAndSort(

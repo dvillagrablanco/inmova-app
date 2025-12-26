@@ -7,10 +7,7 @@ import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -32,10 +29,7 @@ export async function GET(
   }
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -47,10 +41,7 @@ export async function POST(
     const comentario = formData.get('comentario') as string | null;
 
     if (!file) {
-      return NextResponse.json(
-        { error: 'Archivo requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Archivo requerido' }, { status: 400 });
     }
 
     // Get current document
@@ -65,10 +56,7 @@ export async function POST(
     });
 
     if (!document) {
-      return NextResponse.json(
-        { error: 'Documento no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Documento no encontrado' }, { status: 404 });
     }
 
     // Upload new version to S3
@@ -101,9 +89,6 @@ export async function POST(
     return NextResponse.json({ version }, { status: 201 });
   } catch (error: any) {
     logger.error('Error creating version:', error);
-    return NextResponse.json(
-      { error: error.message || 'Error al crear versión' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Error al crear versión' }, { status: 500 });
   }
 }

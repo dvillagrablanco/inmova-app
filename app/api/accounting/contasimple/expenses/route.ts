@@ -23,10 +23,7 @@ export async function POST(request: NextRequest) {
     const { expenseId } = body;
 
     if (!expenseId) {
-      return NextResponse.json(
-        { error: 'Se requiere expenseId' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Se requiere expenseId' }, { status: 400 });
     }
 
     // Obtener datos del gasto
@@ -43,14 +40,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    if (
-      !expense ||
-      expense.unit?.building?.companyId !== session?.user?.companyId
-    ) {
-      return NextResponse.json(
-        { error: 'Gasto no encontrado' },
-        { status: 404 }
-      );
+    if (!expense || expense.unit?.building?.companyId !== session?.user?.companyId) {
+      return NextResponse.json({ error: 'Gasto no encontrado' }, { status: 404 });
     }
 
     // Registrar gasto en ContaSimple
@@ -72,9 +63,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error al registrar gasto en ContaSimple:', error);
-    return NextResponse.json(
-      { error: 'Error al registrar gasto' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al registrar gasto' }, { status: 500 });
   }
 }

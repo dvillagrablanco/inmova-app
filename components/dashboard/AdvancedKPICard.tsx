@@ -58,26 +58,19 @@ export function AdvancedKPICard({
   className,
 }: AdvancedKPICardProps) {
   return (
-    <Card className={cn(
-      'transition-all duration-200 hover:shadow-lg',
-      variantStyles[variant],
-      className
-    )}>
+    <Card
+      className={cn(
+        'transition-all duration-200 hover:shadow-lg',
+        variantStyles[variant],
+        className
+      )}
+    >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
-          {title}
-        </CardTitle>
+        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
         <div className="flex items-center gap-2">
-          {badge && (
-            <Badge variant={badge.variant}>
-              {badge.label}
-            </Badge>
-          )}
+          {badge && <Badge variant={badge.variant}>{badge.label}</Badge>}
           {Icon && (
-            <div className={cn(
-              'p-2 rounded-full bg-white/80',
-              iconVariantStyles[variant]
-            )}>
+            <div className={cn('p-2 rounded-full bg-white/80', iconVariantStyles[variant])}>
               <Icon className="h-4 w-4" />
             </div>
           )}
@@ -87,33 +80,25 @@ export function AdvancedKPICard({
         <div className="space-y-3">
           {/* Valor principal */}
           <div className="flex items-baseline gap-2">
-            <div className="text-3xl font-bold tracking-tight">
-              {value}
-            </div>
+            <div className="text-3xl font-bold tracking-tight">{value}</div>
             {trend && (
-              <div className={cn(
-                'flex items-center text-sm font-medium',
-                trend.isPositive ? 'text-green-600' : 'text-red-600'
-              )}>
-                <span className="mr-1">
-                  {trend.isPositive ? '↑' : '↓'}
-                </span>
+              <div
+                className={cn(
+                  'flex items-center text-sm font-medium',
+                  trend.isPositive ? 'text-green-600' : 'text-red-600'
+                )}
+              >
+                <span className="mr-1">{trend.isPositive ? '↑' : '↓'}</span>
                 <span>{Math.abs(trend.value)}%</span>
                 {trend.label && (
-                  <span className="ml-1 text-xs text-muted-foreground">
-                    {trend.label}
-                  </span>
+                  <span className="ml-1 text-xs text-muted-foreground">{trend.label}</span>
                 )}
               </div>
             )}
           </div>
 
           {/* Subtitulo */}
-          {subtitle && (
-            <p className="text-sm text-muted-foreground">
-              {subtitle}
-            </p>
-          )}
+          {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
 
           {/* Barra de progreso */}
           {progress && (
@@ -124,10 +109,7 @@ export function AdvancedKPICard({
                   {progress.value} / {progress.max}
                 </span>
               </div>
-              <Progress 
-                value={(progress.value / progress.max) * 100} 
-                className="h-2"
-              />
+              <Progress value={(progress.value / progress.max) * 100} className="h-2" />
             </div>
           )}
         </div>

@@ -6,10 +6,7 @@ import { prisma } from '@/lib/db';
 export const dynamic = 'force-dynamic';
 
 // GET - Obtener tarea específica
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -43,18 +40,12 @@ export async function GET(
     return NextResponse.json(task);
   } catch (error) {
     console.error('Error al obtener tarea:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener tarea' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener tarea' }, { status: 500 });
   }
 }
 
 // PATCH - Actualizar tarea
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -89,8 +80,10 @@ export async function PATCH(
     }
     if (body.asignadoA !== undefined) updateData.asignadoA = body.asignadoA;
     if (body.prioridad !== undefined) updateData.prioridad = body.prioridad;
-    if (body.instruccionesEspeciales !== undefined) updateData.instruccionesEspeciales = body.instruccionesEspeciales;
-    if (body.checklistCompletado !== undefined) updateData.checklistCompletado = body.checklistCompletado;
+    if (body.instruccionesEspeciales !== undefined)
+      updateData.instruccionesEspeciales = body.instruccionesEspeciales;
+    if (body.checklistCompletado !== undefined)
+      updateData.checklistCompletado = body.checklistCompletado;
     if (body.fotosAntes !== undefined) updateData.fotosAntes = body.fotosAntes;
     if (body.fotosDespues !== undefined) updateData.fotosDespues = body.fotosDespues;
     if (body.tiempoRealMin !== undefined) updateData.tiempoRealMin = body.tiempoRealMin;
@@ -99,7 +92,8 @@ export async function PATCH(
     if (body.incidencias !== undefined) updateData.incidencias = body.incidencias;
     if (body.requiereAtencion !== undefined) updateData.requiereAtencion = body.requiereAtencion;
     if (body.notas !== undefined) updateData.notas = body.notas;
-    if (body.fechaProgramada !== undefined) updateData.fechaProgramada = new Date(body.fechaProgramada);
+    if (body.fechaProgramada !== undefined)
+      updateData.fechaProgramada = new Date(body.fechaProgramada);
     if (body.tiempoEstimadoMin !== undefined) updateData.tiempoEstimadoMin = body.tiempoEstimadoMin;
     if (body.fechaInicio !== undefined) updateData.fechaInicio = new Date(body.fechaInicio);
     if (body.fechaFin !== undefined) updateData.fechaFin = new Date(body.fechaFin);
@@ -124,18 +118,12 @@ export async function PATCH(
     return NextResponse.json(task);
   } catch (error) {
     console.error('Error al actualizar tarea:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar tarea' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar tarea' }, { status: 500 });
   }
 }
 
 // DELETE - Eliminar tarea
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -161,9 +149,6 @@ export async function DELETE(
     return NextResponse.json({ message: 'Tarea eliminada correctamente' });
   } catch (error) {
     console.error('Error al eliminar tarea:', error);
-    return NextResponse.json(
-      { error: 'Error al eliminar tarea' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar tarea' }, { status: 500 });
   }
 }

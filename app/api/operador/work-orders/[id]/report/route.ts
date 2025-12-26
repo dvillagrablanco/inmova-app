@@ -11,18 +11,12 @@ import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const userId = (session.user as any).id;
@@ -30,20 +24,14 @@ export async function POST(
 
     // Verificar que es un operador
     if (role !== 'operador') {
-      return NextResponse.json(
-        { error: 'Acceso denegado' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
     const body = await request.json();
     const { description, timeSpent, materials, photos, issuesFound, recommendations } = body;
 
     if (!description) {
-      return NextResponse.json(
-        { error: 'Se requiere descripción del reporte' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Se requiere descripción del reporte' }, { status: 400 });
     }
 
     // Crear reporte

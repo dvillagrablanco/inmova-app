@@ -30,10 +30,8 @@ export async function predictRevenue(
   const predictions: PredictionResult[] = [];
 
   // Calculate trend
-  const avgRevenue =
-    snapshots.reduce((sum, s) => sum + s.ingresosMensuales, 0) / snapshots.length;
-  const recentAvg =
-    snapshots.slice(0, 3).reduce((sum, s) => sum + s.ingresosMensuales, 0) / 3;
+  const avgRevenue = snapshots.reduce((sum, s) => sum + s.ingresosMensuales, 0) / snapshots.length;
+  const recentAvg = snapshots.slice(0, 3).reduce((sum, s) => sum + s.ingresosMensuales, 0) / 3;
   const trend = recentAvg / avgRevenue;
 
   // Calculate seasonal factors
@@ -105,8 +103,7 @@ export async function predictOccupancy(
   const predictions: PredictionResult[] = [];
 
   // Calculate average and trend
-  const avgOccupancy =
-    snapshots.reduce((sum, s) => sum + s.tasaOcupacion, 0) / snapshots.length;
+  const avgOccupancy = snapshots.reduce((sum, s) => sum + s.tasaOcupacion, 0) / snapshots.length;
   const recentAvg = snapshots.slice(0, 3).reduce((sum, s) => sum + s.tasaOcupacion, 0) / 3;
   const trend = (recentAvg - avgOccupancy) / avgOccupancy;
 
@@ -129,7 +126,8 @@ export async function predictOccupancy(
     const periodo = format(targetDate, 'yyyy-MM');
 
     // Predict with trend and contract impact
-    let valorPredicho = recentAvg + trend * avgOccupancy * i - impactFromContracts * (i / monthsAhead);
+    let valorPredicho =
+      recentAvg + trend * avgOccupancy * i - impactFromContracts * (i / monthsAhead);
     valorPredicho = Math.max(0, Math.min(100, valorPredicho));
 
     const confianza = 0.8 - i * 0.05; // Confidence decreases over time
@@ -179,11 +177,11 @@ export async function predictTenantDefaultRisk(tenantId: string): Promise<number
   if (payments.length === 0) return 0.5; // Neutral risk for new tenants
 
   const latePayments = payments.filter(
-    p => p.estado === 'pagado' && p.fechaPago && p.fechaPago > p.fechaVencimiento
+    (p) => p.estado === 'pagado' && p.fechaPago && p.fechaPago > p.fechaVencimiento
   ).length;
 
   const pendingPayments = payments.filter(
-    p => p.estado === 'pendiente' && new Date(p.fechaVencimiento) < new Date()
+    (p) => p.estado === 'pendiente' && new Date(p.fechaVencimiento) < new Date()
   ).length;
 
   // Calculate risk score

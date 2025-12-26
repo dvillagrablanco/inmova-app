@@ -6,7 +6,7 @@
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-export type ExpenseCategory = 
+export type ExpenseCategory =
   | 'structural'
   | 'plumbing'
   | 'electrical'
@@ -77,7 +77,7 @@ export function initializeBudget(
 ): BudgetTracking {
   const categories: BudgetCategory[] = [];
   let totalBudget = 0;
-  
+
   Object.entries(categoryBudgets).forEach(([cat, budget]) => {
     if (budget && budget > 0) {
       const category = cat as ExpenseCategory;
@@ -95,7 +95,7 @@ export function initializeBudget(
       totalBudget += budget;
     }
   });
-  
+
   return {
     projectId,
     projectName,
@@ -112,26 +112,23 @@ export function initializeBudget(
 /**
  * Añade un gasto al presupuesto
  */
-export function addExpense(
-  tracking: BudgetTracking,
-  expense: Expense
-): BudgetTracking {
-  const category = tracking.categories.find(c => c.category === expense.category);
-  
+export function addExpense(tracking: BudgetTracking, expense: Expense): BudgetTracking {
+  const category = tracking.categories.find((c) => c.category === expense.category);
+
   if (!category) {
     throw new Error(`Categoría ${expense.category} no encontrada en el presupuesto`);
   }
-  
+
   // Añadir gasto
   category.expenses.push(expense);
-  
+
   // Actualizar spent o committed según estado de pago
   if (expense.paymentStatus === 'paid') {
     category.spent += expense.amount;
   } else {
     category.committed += expense.amount;
   }
-  
+
   // Recalcular métricas
   return recalculateBudget(tracking);
 }
@@ -139,12 +136,9 @@ export function addExpense(
 /**
  * Marca un gasto como pagado
  */
-export function markExpenseAsPaid(
-  tracking: BudgetTracking,
-  expenseId: string
-): BudgetTracking {
+export function markExpenseAsPaid(tracking: BudgetTracking, expenseId: string): BudgetTracking {
   for (const category of tracking.categories) {
-    const expense = category.expenses.find(e => e.id === expenseId);
+    const expense = category.expenses.find((e) => e.id === expenseId);
     if (expense) {
       if (expense.paymentStatus !== 'paid') {
         // Mover de committed a spent
@@ -155,7 +149,7 @@ export function markExpenseAsPaid(
       break;
     }
   }
-  
+
   return recalculateBudget(tracking);
 }
 
@@ -166,15 +160,13 @@ function recalculateBudget(tracking: BudgetTracking): BudgetTracking {
   tracking.totalSpent = 0;
   tracking.totalCommitted = 0;
   tracking.alerts = [];
-  
+
   // Actualizar cada categoría
-  tracking.categories.forEach(category => {
+  tracking.categories.forEach((category) => {
     const totalUsed = category.spent + category.committed;
     category.remaining = category.budgeted - totalUsed;
-    category.percentUsed = category.budgeted > 0 
-      ? (totalUsed / category.budgeted) * 100 
-      : 0;
-    
+    category.percentUsed = category.budgeted > 0 ? (totalUsed / category.budgeted) * 100 : 0;
+
     // Determinar estado
     if (category.percentUsed > 100) {
       category.status = 'over_budget';
@@ -195,17 +187,18 @@ function recalculateBudget(tracking: BudgetTracking): BudgetTracking {
     } else {
       category.status = 'under_budget';
     }
-    
+
     tracking.totalSpent += category.spent;
     tracking.totalCommitted += category.committed;
   });
-  
+
   // Calcular totales
   tracking.totalRemaining = tracking.totalBudget - tracking.totalSpent - tracking.totalCommitted;
-  tracking.percentUsed = tracking.totalBudget > 0
-    ? ((tracking.totalSpent + tracking.totalCommitted) / tracking.totalBudget) * 100
-    : 0;
-  
+  tracking.percentUsed =
+    tracking.totalBudget > 0
+      ? ((tracking.totalSpent + tracking.totalCommitted) / tracking.totalBudget) * 100
+      : 0;
+
   // Alertas globales
   if (tracking.percentUsed > 100) {
     tracking.alerts.unshift({
@@ -218,7 +211,7 @@ function recalculateBudget(tracking: BudgetTracking): BudgetTracking {
       message: `⚠️ Presupuesto total al ${tracking.percentUsed.toFixed(1)}%`,
     });
   }
-  
+
   return tracking;
 }
 
@@ -242,15 +235,17 @@ export function generateBudgetReport(tracking: BudgetTracking): string {
 
 ### ⚠️ ALERTAS
 
-${tracking.alerts.length > 0 ? tracking.alerts.map(a => `${a.message}`).join('\n') : '✅ Sin alertas'}
+${tracking.alerts.length > 0 ? tracking.alerts.map((a) => `${a.message}`).join('\n') : '✅ Sin alertas'}
 
 ---
 
 ### 💰 PRESUPUESTO POR CATEGORÍA
 
-${tracking.categories.map(cat => {
-  const statusIcon = cat.status === 'over_budget' ? '❌' : cat.status === 'on_track' ? '⚠️' : '✅';
-  return `
+${tracking.categories
+  .map((cat) => {
+    const statusIcon =
+      cat.status === 'over_budget' ? '❌' : cat.status === 'on_track' ? '⚠️' : '✅';
+    return `
 #### ${statusIcon} ${cat.name}
 
 | Concepto | Importe |
@@ -261,16 +256,21 @@ ${tracking.categories.map(cat => {
 | Restante | €${cat.remaining.toLocaleString()} |
 | **% Usado** | **${cat.percentUsed.toFixed(1)}%** |
 
-${cat.expenses.length > 0 ? `
+${
+  cat.expenses.length > 0
+    ? `
 **Gastos:**
-${cat.expenses.map(e => `- ${format(e.date, 'dd/MM/yyyy')}: ${e.description} - €${e.amount.toLocaleString()} (${e.paymentStatus})`).join('\n')}
-` : ''}
+${cat.expenses.map((e) => `- ${format(e.date, 'dd/MM/yyyy')}: ${e.description} - €${e.amount.toLocaleString()} (${e.paymentStatus})`).join('\n')}
+`
+    : ''
+}
 `;
-}).join('\n')}
+  })
+  .join('\n')}
 
 ---
 
-*Generado: ${format(new Date(), "dd/MM/yyyy HH:mm", { locale: es })}*
+*Generado: ${format(new Date(), 'dd/MM/yyyy HH:mm', { locale: es })}*
   `.trim();
 }
 
@@ -287,20 +287,22 @@ export function projectBudget(
   recommendations: string[];
 } {
   let projectedSpending = tracking.totalSpent + tracking.totalCommitted;
-  
+
   Object.entries(additionalExpenses).forEach(([cat, amount]) => {
     if (amount) {
       projectedSpending += amount;
     }
   });
-  
+
   const projectedRemaining = tracking.totalBudget - projectedSpending;
   const willExceedBudget = projectedRemaining < 0;
-  
+
   const recommendations: string[] = [];
-  
+
   if (willExceedBudget) {
-    recommendations.push(`Se proyecta exceder el presupuesto en €${Math.abs(projectedRemaining).toLocaleString()}`);
+    recommendations.push(
+      `Se proyecta exceder el presupuesto en €${Math.abs(projectedRemaining).toLocaleString()}`
+    );
     recommendations.push('Considerar:');
     recommendations.push('- Renegociar precios con proveedores');
     recommendations.push('- Buscar alternativas más económicas');
@@ -309,7 +311,7 @@ export function projectBudget(
   } else {
     recommendations.push('✅ El proyecto se mantiene dentro del presupuesto proyectado');
   }
-  
+
   return {
     currentRemaining: tracking.totalRemaining,
     projectedRemaining,
@@ -320,23 +322,23 @@ export function projectBudget(
 
 function getCategoryName(category: ExpenseCategory): string {
   const names: Record<ExpenseCategory, string> = {
-    'structural': 'Obra Estructural',
-    'plumbing': 'Fontanería',
-    'electrical': 'Electricidad',
-    'hvac': 'Climatización',
-    'flooring': 'Suelos',
-    'painting': 'Pintura',
-    'kitchen': 'Cocina',
-    'bathrooms': 'Baños',
-    'exterior': 'Exterior',
-    'landscaping': 'Paisajismo',
-    'permits': 'Permisos y Licencias',
-    'labor': 'Mano de Obra',
-    'materials': 'Materiales',
-    'professional_fees': 'Honorarios Profesionales',
-    'holding_costs': 'Costes de Mantenimiento',
-    'contingency': 'Contingencia',
-    'other': 'Otros',
+    structural: 'Obra Estructural',
+    plumbing: 'Fontanería',
+    electrical: 'Electricidad',
+    hvac: 'Climatización',
+    flooring: 'Suelos',
+    painting: 'Pintura',
+    kitchen: 'Cocina',
+    bathrooms: 'Baños',
+    exterior: 'Exterior',
+    landscaping: 'Paisajismo',
+    permits: 'Permisos y Licencias',
+    labor: 'Mano de Obra',
+    materials: 'Materiales',
+    professional_fees: 'Honorarios Profesionales',
+    holding_costs: 'Costes de Mantenimiento',
+    contingency: 'Contingencia',
+    other: 'Otros',
   };
   return names[category];
 }

@@ -61,10 +61,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(eventos);
   } catch (error) {
     logger.error('Error obteniendo eventos del calendario:', error);
-    return NextResponse.json(
-      { error: 'Error obteniendo eventos del calendario' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error obteniendo eventos del calendario' }, { status: 500 });
   }
 }
 
@@ -96,7 +93,7 @@ export async function POST(request: NextRequest) {
       contractId,
       recordatorioActivo = false,
       recordatorioMinutos,
-      notas
+      notas,
     } = body;
 
     if (!titulo || !tipo || !fechaInicio) {
@@ -125,22 +122,19 @@ export async function POST(request: NextRequest) {
         recordatorioActivo,
         recordatorioMinutos,
         notas,
-        creadoPor: session.user.id
+        creadoPor: session.user.id,
       },
       include: {
         building: true,
         unit: true,
         tenant: true,
-        contract: true
-      }
+        contract: true,
+      },
     });
 
     return NextResponse.json(evento, { status: 201 });
   } catch (error) {
     logger.error('Error creando evento:', error);
-    return NextResponse.json(
-      { error: 'Error creando evento' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error creando evento' }, { status: 500 });
   }
 }

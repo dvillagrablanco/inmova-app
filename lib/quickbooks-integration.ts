@@ -92,10 +92,11 @@ export class QuickBooksClient {
     this.accessToken = config.accessToken;
     this.refreshToken = config.refreshToken;
     this.realmId = config.realmId;
-    
-    this.baseUrl = config.environment === 'production'
-      ? 'https://quickbooks.api.intuit.com/v3'
-      : 'https://sandbox-quickbooks.api.intuit.com/v3';
+
+    this.baseUrl =
+      config.environment === 'production'
+        ? 'https://quickbooks.api.intuit.com/v3'
+        : 'https://sandbox-quickbooks.api.intuit.com/v3';
   }
 
   /**
@@ -112,7 +113,7 @@ export class QuickBooksClient {
       const response = await fetch('https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer', {
         method: 'POST',
         headers: {
-          'Authorization': `Basic ${credentials}`,
+          Authorization: `Basic ${credentials}`,
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({
@@ -147,8 +148,8 @@ export class QuickBooksClient {
     }
 
     return {
-      'Authorization': `Bearer ${this.accessToken}`,
-      'Accept': 'application/json',
+      Authorization: `Bearer ${this.accessToken}`,
+      Accept: 'application/json',
       'Content-Type': 'application/json',
     };
   }
@@ -171,23 +172,22 @@ export class QuickBooksClient {
         CompanyName: customer.companyName,
         PrimaryEmailAddr: customer.email ? { Address: customer.email } : undefined,
         PrimaryPhone: customer.phone ? { FreeFormNumber: customer.phone } : undefined,
-        BillAddr: customer.billingAddress ? {
-          Line1: customer.billingAddress.line1,
-          City: customer.billingAddress.city,
-          CountrySubDivisionCode: customer.billingAddress.countrySubDivisionCode,
-          PostalCode: customer.billingAddress.postalCode,
-          Country: customer.billingAddress.country,
-        } : undefined,
+        BillAddr: customer.billingAddress
+          ? {
+              Line1: customer.billingAddress.line1,
+              City: customer.billingAddress.city,
+              CountrySubDivisionCode: customer.billingAddress.countrySubDivisionCode,
+              PostalCode: customer.billingAddress.postalCode,
+              Country: customer.billingAddress.country,
+            }
+          : undefined,
       };
 
-      const response = await fetch(
-        `${this.baseUrl}/company/${this.realmId}/customer`,
-        {
-          method: 'POST',
-          headers,
-          body: JSON.stringify(payload),
-        }
-      );
+      const response = await fetch(`${this.baseUrl}/company/${this.realmId}/customer`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload),
+      });
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -262,13 +262,15 @@ export class QuickBooksClient {
       companyName: qbCustomer.CompanyName,
       email: qbCustomer.PrimaryEmailAddr?.Address,
       phone: qbCustomer.PrimaryPhone?.FreeFormNumber,
-      billingAddress: qbCustomer.BillAddr ? {
-        line1: qbCustomer.BillAddr.Line1,
-        city: qbCustomer.BillAddr.City,
-        countrySubDivisionCode: qbCustomer.BillAddr.CountrySubDivisionCode,
-        postalCode: qbCustomer.BillAddr.PostalCode,
-        country: qbCustomer.BillAddr.Country,
-      } : undefined,
+      billingAddress: qbCustomer.BillAddr
+        ? {
+            line1: qbCustomer.BillAddr.Line1,
+            city: qbCustomer.BillAddr.City,
+            countrySubDivisionCode: qbCustomer.BillAddr.CountrySubDivisionCode,
+            postalCode: qbCustomer.BillAddr.PostalCode,
+            country: qbCustomer.BillAddr.Country,
+          }
+        : undefined,
     };
   }
 
@@ -301,14 +303,11 @@ export class QuickBooksClient {
         CustomerMemo: invoice.notes ? { value: invoice.notes } : undefined,
       };
 
-      const response = await fetch(
-        `${this.baseUrl}/company/${this.realmId}/invoice`,
-        {
-          method: 'POST',
-          headers,
-          body: JSON.stringify(payload),
-        }
-      );
+      const response = await fetch(`${this.baseUrl}/company/${this.realmId}/invoice`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload),
+      });
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -345,12 +344,12 @@ export class QuickBooksClient {
       const headers = await this.getAuthHeaders();
 
       let query = 'SELECT * FROM Invoice';
-      
+
       if (params?.startDate) {
         const startStr = params.startDate.toISOString().split('T')[0];
         query += ` WHERE TxnDate >= '${startStr}'`;
       }
-      
+
       query += ' MAXRESULTS 100';
 
       const response = await fetch(
@@ -431,24 +430,23 @@ export class QuickBooksClient {
         PaymentType: expense.paymentType,
         AccountRef: { value: expense.accountRef },
         EntityRef: expense.vendorName ? { name: expense.vendorName } : undefined,
-        Line: [{
-          Amount: expense.amount,
-          DetailType: 'AccountBasedExpenseLineDetail',
-          AccountBasedExpenseLineDetail: {
-            AccountRef: { value: expense.categoryRef || expense.accountRef },
+        Line: [
+          {
+            Amount: expense.amount,
+            DetailType: 'AccountBasedExpenseLineDetail',
+            AccountBasedExpenseLineDetail: {
+              AccountRef: { value: expense.categoryRef || expense.accountRef },
+            },
           },
-        }],
+        ],
         PrivateNote: expense.description,
       };
 
-      const response = await fetch(
-        `${this.baseUrl}/company/${this.realmId}/purchase`,
-        {
-          method: 'POST',
-          headers,
-          body: JSON.stringify(payload),
-        }
-      );
+      const response = await fetch(`${this.baseUrl}/company/${this.realmId}/purchase`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload),
+      });
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -479,11 +477,7 @@ export class QuickBooksClient {
 
 export function isQuickBooksConfigured(config?: QuickBooksConfig | null): boolean {
   if (!config) return false;
-  return !!(
-    config.clientId &&
-    config.clientSecret &&
-    config.enabled
-  );
+  return !!(config.clientId && config.clientSecret && config.enabled);
 }
 
 export function getQuickBooksClient(config?: QuickBooksConfig): QuickBooksClient | null {

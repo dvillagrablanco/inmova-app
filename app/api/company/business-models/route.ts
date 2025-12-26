@@ -6,7 +6,7 @@ import {
   activateBusinessModelForCompany,
   deactivateBusinessModelForCompany,
   getActiveModulesForCompany,
-  BUSINESS_MODEL_MODULES
+  BUSINESS_MODEL_MODULES,
 } from '@/lib/modules-service';
 import logger from '@/lib/logger';
 
@@ -32,25 +32,22 @@ export async function GET(req: NextRequest) {
     const activeModules = await getActiveModulesForCompany(companyId);
 
     // Obtener información de módulos por modelo de negocio
-    const businessModelInfo = Object.keys(BUSINESS_MODEL_MODULES).map(model => ({
+    const businessModelInfo = Object.keys(BUSINESS_MODEL_MODULES).map((model) => ({
       model,
       isActive: activeBusinessModels.includes(model),
       modules: BUSINESS_MODEL_MODULES[model],
-      moduleCount: BUSINESS_MODEL_MODULES[model].length
+      moduleCount: BUSINESS_MODEL_MODULES[model].length,
     }));
 
     return NextResponse.json({
       activeBusinessModels,
       activeModules,
       businessModelInfo,
-      availableBusinessModels: Object.keys(BUSINESS_MODEL_MODULES)
+      availableBusinessModels: Object.keys(BUSINESS_MODEL_MODULES),
     });
   } catch (error: any) {
     logger.error('Error al obtener modelos de negocio:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener modelos de negocio' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener modelos de negocio' }, { status: 500 });
   }
 }
 
@@ -83,18 +80,12 @@ export async function POST(req: NextRequest) {
     const { businessModel, active } = body;
 
     if (!businessModel) {
-      return NextResponse.json(
-        { error: 'El modelo de negocio es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'El modelo de negocio es requerido' }, { status: 400 });
     }
 
     // Verificar que el modelo de negocio existe
     if (!BUSINESS_MODEL_MODULES[businessModel]) {
-      return NextResponse.json(
-        { error: 'Modelo de negocio no válido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Modelo de negocio no válido' }, { status: 400 });
     }
 
     if (active) {
@@ -112,13 +103,10 @@ export async function POST(req: NextRequest) {
       success: true,
       businessModel,
       active,
-      activeModules
+      activeModules,
     });
   } catch (error: any) {
     logger.error('Error al modificar modelo de negocio:', error);
-    return NextResponse.json(
-      { error: 'Error al modificar modelo de negocio' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al modificar modelo de negocio' }, { status: 500 });
   }
 }

@@ -79,10 +79,7 @@ export async function GET(request: NextRequest) {
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
-    return NextResponse.json(
-      { error: 'Error al obtener logs de notificaciones' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener logs de notificaciones' }, { status: 500 });
   }
 }
 
@@ -113,7 +110,7 @@ export async function POST(request: NextRequest) {
 
       // Calcular tasa de éxito por canal
       const channelStats: Record<string, any> = {};
-      stats.forEach(stat => {
+      stats.forEach((stat) => {
         if (!channelStats[stat.canal]) {
           channelStats[stat.canal] = {
             canal: stat.canal,
@@ -135,10 +132,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return NextResponse.json(
-      { error: 'Acción no válida' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Acción no válida' }, { status: 400 });
   } catch (error: any) {
     logger.error('Error al obtener estadísticas de notificaciones:', error);
     if (error.message === 'No autenticado') {

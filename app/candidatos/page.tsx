@@ -158,8 +158,8 @@ export default function CandidatosPage() {
   if (status === 'loading' || loading) {
     return (
       <AuthenticatedLayout>
-            <LoadingState message="Cargando candidatos..." />
-          </AuthenticatedLayout>
+        <LoadingState message="Cargando candidatos..." />
+      </AuthenticatedLayout>
     );
   }
 
@@ -207,357 +207,351 @@ export default function CandidatosPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto space-y-6">
-            {/* Botón Volver y Breadcrumbs */}
-            <div className="flex items-center gap-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push('/dashboard')}
-                className="gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Volver al Dashboard
-              </Button>
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/dashboard">
-                      <Home className="h-4 w-4" />
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>Candidatos</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
-            </div>
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Botón Volver y Breadcrumbs */}
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push('/dashboard')}
+            className="gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Volver al Dashboard
+          </Button>
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/dashboard">
+                  <Home className="h-4 w-4" />
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Candidatos</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
 
-            {/* Header Section */}
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight">Candidatos</h1>
-                <p className="text-muted-foreground">Gestión de candidatos a inquilinos</p>
+        {/* Header Section */}
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Candidatos</h1>
+            <p className="text-muted-foreground">Gestión de candidatos a inquilinos</p>
+          </div>
+          {canCreate && (
+            <Button onClick={() => router.push('/candidatos/nuevo')}>
+              <UserPlus className="mr-2 h-4 w-4" />
+              Nuevo Candidato
+            </Button>
+          )}
+        </div>
+
+        {/* Estadísticas */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Total Candidatos
+              </CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.total}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Nuevos</CardTitle>
+              <Clock className="h-4 w-4 text-blue-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.nuevos}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                En Revisión
+              </CardTitle>
+              <TrendingUp className="h-4 w-4 text-yellow-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.enRevision}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Aprobados</CardTitle>
+              <CheckCircle className="h-4 w-4 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.aprobados}</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Búsqueda y Filtros */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Buscar Candidatos</CardTitle>
+            <CardDescription>
+              Filtra candidatos por nombre, email, estado o puntuación
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar por nombre, email, DNI o edificio..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
               </div>
-              {canCreate && (
-                <Button onClick={() => router.push('/candidatos/nuevo')}>
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Nuevo Candidato
-                </Button>
-              )}
+              <Select value={estadoFilter} onValueChange={setEstadoFilter}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los estados</SelectItem>
+                  <SelectItem value="nuevo">Nuevo</SelectItem>
+                  <SelectItem value="en_revision">En Revisión</SelectItem>
+                  <SelectItem value="preseleccionado">Preseleccionado</SelectItem>
+                  <SelectItem value="aprobado">Aprobado</SelectItem>
+                  <SelectItem value="rechazado">Rechazado</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={scoringFilter} onValueChange={setScoringFilter}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Puntuación" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas las puntuaciones</SelectItem>
+                  <SelectItem value="alto">Alta (80-100)</SelectItem>
+                  <SelectItem value="medio">Media (60-79)</SelectItem>
+                  <SelectItem value="bajo">Baja (&lt;60)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
-            {/* Estadísticas */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Total Candidatos
-                  </CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.total}</div>
-                </CardContent>
-              </Card>
+            {/* Filter Chips */}
+            <FilterChips
+              filters={[
+                ...(searchTerm
+                  ? [
+                      {
+                        id: 'search',
+                        label: 'Búsqueda',
+                        value: searchTerm,
+                      },
+                    ]
+                  : []),
+                ...(estadoFilter !== 'all'
+                  ? [
+                      {
+                        id: 'estado',
+                        label: 'Estado',
+                        value: getEstadoLabel(estadoFilter),
+                      },
+                    ]
+                  : []),
+                ...(scoringFilter !== 'all'
+                  ? [
+                      {
+                        id: 'scoring',
+                        label: 'Puntuación',
+                        value:
+                          scoringFilter === 'alto'
+                            ? 'Alta (80-100)'
+                            : scoringFilter === 'medio'
+                              ? 'Media (60-79)'
+                              : 'Baja (<60)',
+                      },
+                    ]
+                  : []),
+              ]}
+              onRemove={(id) => {
+                if (id === 'search') setSearchTerm('');
+                else if (id === 'estado') setEstadoFilter('all');
+                else if (id === 'scoring') setScoringFilter('all');
+              }}
+              onClearAll={() => {
+                setSearchTerm('');
+                setEstadoFilter('all');
+                setScoringFilter('all');
+              }}
+            />
+          </CardContent>
+        </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Nuevos
-                  </CardTitle>
-                  <Clock className="h-4 w-4 text-blue-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.nuevos}</div>
-                </CardContent>
-              </Card>
+        {/* Lista de Candidatos */}
+        <div className="space-y-4">
+          {filteredCandidates.length === 0 ? (
+            <EmptyState
+              icon={<UserPlus className="h-12 w-12" />}
+              title={
+                searchTerm || estadoFilter !== 'all' || scoringFilter !== 'all'
+                  ? 'No se encontraron candidatos'
+                  : 'No hay candidatos registrados'
+              }
+              description={
+                searchTerm || estadoFilter !== 'all' || scoringFilter !== 'all'
+                  ? 'No se encontraron candidatos con los filtros aplicados. Intenta ajustar tu búsqueda.'
+                  : 'Comienza registrando tu primer candidato a inquilino para gestionar el proceso de selección.'
+              }
+              action={
+                canCreate && !searchTerm && estadoFilter === 'all' && scoringFilter === 'all'
+                  ? {
+                      label: 'Registrar Primer Candidato',
+                      onClick: () => router.push('/candidatos/nuevo'),
+                      icon: <UserPlus className="h-4 w-4" />,
+                    }
+                  : undefined
+              }
+            />
+          ) : (
+            filteredCandidates.map((candidate) => (
+              <Card
+                key={candidate.id}
+                className="hover:shadow-lg transition-all duration-200 cursor-pointer"
+              >
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    {/* Avatar */}
+                    <Avatar className="h-12 w-12 sm:h-14 sm:w-14 flex-shrink-0">
+                      <AvatarFallback className="bg-primary/10 text-primary font-semibold text-lg">
+                        {getInitials(candidate.nombreCompleto)}
+                      </AvatarFallback>
+                    </Avatar>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    En Revisión
-                  </CardTitle>
-                  <TrendingUp className="h-4 w-4 text-yellow-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.enRevision}</div>
-                </CardContent>
-              </Card>
+                    {/* Información Principal */}
+                    <div className="flex-1 space-y-3">
+                      {/* Nombre y Estado */}
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                        <h3 className="text-lg font-semibold break-words">
+                          {candidate.nombreCompleto}
+                        </h3>
+                        <Badge className={getEstadoBadgeVariant(candidate.estado)}>
+                          {getEstadoLabel(candidate.estado)}
+                        </Badge>
+                      </div>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Aprobados
-                  </CardTitle>
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.aprobados}</div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Búsqueda y Filtros */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Buscar Candidatos</CardTitle>
-                <CardDescription>
-                  Filtra candidatos por nombre, email, estado o puntuación
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Buscar por nombre, email, DNI o edificio..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                  <Select value={estadoFilter} onValueChange={setEstadoFilter}>
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                      <SelectValue placeholder="Estado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos los estados</SelectItem>
-                      <SelectItem value="nuevo">Nuevo</SelectItem>
-                      <SelectItem value="en_revision">En Revisión</SelectItem>
-                      <SelectItem value="preseleccionado">Preseleccionado</SelectItem>
-                      <SelectItem value="aprobado">Aprobado</SelectItem>
-                      <SelectItem value="rechazado">Rechazado</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={scoringFilter} onValueChange={setScoringFilter}>
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                      <SelectValue placeholder="Puntuación" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todas las puntuaciones</SelectItem>
-                      <SelectItem value="alto">Alta (80-100)</SelectItem>
-                      <SelectItem value="medio">Media (60-79)</SelectItem>
-                      <SelectItem value="bajo">Baja (&lt;60)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Filter Chips */}
-                <FilterChips
-                  filters={[
-                    ...(searchTerm
-                      ? [
-                          {
-                            id: 'search',
-                            label: 'Búsqueda',
-                            value: searchTerm,
-                          },
-                        ]
-                      : []),
-                    ...(estadoFilter !== 'all'
-                      ? [
-                          {
-                            id: 'estado',
-                            label: 'Estado',
-                            value: getEstadoLabel(estadoFilter),
-                          },
-                        ]
-                      : []),
-                    ...(scoringFilter !== 'all'
-                      ? [
-                          {
-                            id: 'scoring',
-                            label: 'Puntuación',
-                            value:
-                              scoringFilter === 'alto'
-                                ? 'Alta (80-100)'
-                                : scoringFilter === 'medio'
-                                  ? 'Media (60-79)'
-                                  : 'Baja (<60)',
-                          },
-                        ]
-                      : []),
-                  ]}
-                  onRemove={(id) => {
-                    if (id === 'search') setSearchTerm('');
-                    else if (id === 'estado') setEstadoFilter('all');
-                    else if (id === 'scoring') setScoringFilter('all');
-                  }}
-                  onClearAll={() => {
-                    setSearchTerm('');
-                    setEstadoFilter('all');
-                    setScoringFilter('all');
-                  }}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Lista de Candidatos */}
-            <div className="space-y-4">
-              {filteredCandidates.length === 0 ? (
-                <EmptyState
-                  icon={<UserPlus className="h-12 w-12" />}
-                  title={
-                    searchTerm || estadoFilter !== 'all' || scoringFilter !== 'all'
-                      ? 'No se encontraron candidatos'
-                      : 'No hay candidatos registrados'
-                  }
-                  description={
-                    searchTerm || estadoFilter !== 'all' || scoringFilter !== 'all'
-                      ? 'No se encontraron candidatos con los filtros aplicados. Intenta ajustar tu búsqueda.'
-                      : 'Comienza registrando tu primer candidato a inquilino para gestionar el proceso de selección.'
-                  }
-                  action={
-                    canCreate && !searchTerm && estadoFilter === 'all' && scoringFilter === 'all'
-                      ? {
-                          label: 'Registrar Primer Candidato',
-                          onClick: () => router.push('/candidatos/nuevo'),
-                          icon: <UserPlus className="h-4 w-4" />,
-                        }
-                      : undefined
-                  }
-                />
-              ) : (
-                filteredCandidates.map((candidate) => (
-                  <Card
-                    key={candidate.id}
-                    className="hover:shadow-lg transition-all duration-200 cursor-pointer"
-                  >
-                    <CardContent className="p-4 sm:p-6">
-                      <div className="flex flex-col sm:flex-row gap-4">
-                        {/* Avatar */}
-                        <Avatar className="h-12 w-12 sm:h-14 sm:w-14 flex-shrink-0">
-                          <AvatarFallback className="bg-primary/10 text-primary font-semibold text-lg">
-                            {getInitials(candidate.nombreCompleto)}
-                          </AvatarFallback>
-                        </Avatar>
-
-                        {/* Información Principal */}
-                        <div className="flex-1 space-y-3">
-                          {/* Nombre y Estado */}
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                            <h3 className="text-lg font-semibold break-words">
-                              {candidate.nombreCompleto}
-                            </h3>
-                            <Badge className={getEstadoBadgeVariant(candidate.estado)}>
-                              {getEstadoLabel(candidate.estado)}
-                            </Badge>
+                      {/* Información de Contacto */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                          <Mail className="h-4 w-4 flex-shrink-0" />
+                          <span className="truncate">{candidate.email}</span>
+                        </div>
+                        {candidate.telefono && (
+                          <div className="flex items-center gap-2">
+                            <Phone className="h-4 w-4 flex-shrink-0" />
+                            <span>{candidate.telefono}</span>
                           </div>
+                        )}
+                      </div>
 
-                          {/* Información de Contacto */}
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-2">
-                              <Mail className="h-4 w-4 flex-shrink-0" />
-                              <span className="truncate">{candidate.email}</span>
-                            </div>
-                            {candidate.telefono && (
-                              <div className="flex items-center gap-2">
-                                <Phone className="h-4 w-4 flex-shrink-0" />
-                                <span>{candidate.telefono}</span>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Unidad y Fecha */}
-                          {candidate.unit && (
-                            <div className="bg-muted/50 rounded-lg p-3">
-                              <div className="flex items-center gap-2 text-sm">
-                                <Building2 className="h-4 w-4 flex-shrink-0 text-primary" />
-                                <span className="font-medium">
-                                  {candidate.unit.building.nombre} - Unidad {candidate.unit.numero}
-                                </span>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Información Adicional */}
-                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
-                            <div className="space-y-1">
-                              <div className="text-muted-foreground flex items-center gap-1">
-                                <TrendingUp className="h-3 w-3" />
-                                Scoring
-                              </div>
-                              <div className={getScoringColor(candidate.scoring)}>
-                                {candidate.scoring}/100
-                              </div>
-                            </div>
-                            {candidate.situacionLaboral && (
-                              <div className="space-y-1">
-                                <div className="text-muted-foreground flex items-center gap-1">
-                                  <Briefcase className="h-3 w-3" />
-                                  Empleo
-                                </div>
-                                <div className="font-medium truncate">
-                                  {candidate.situacionLaboral}
-                                </div>
-                              </div>
-                            )}
-                            {candidate.ingresosMensuales && (
-                              <div className="space-y-1">
-                                <div className="text-muted-foreground flex items-center gap-1">
-                                  <DollarSign className="h-3 w-3" />
-                                  Ingresos
-                                </div>
-                                <div className="font-medium">
-                                  €{candidate.ingresosMensuales.toLocaleString()}
-                                </div>
-                              </div>
-                            )}
-                            <div className="space-y-1">
-                              <div className="text-muted-foreground flex items-center gap-1">
-                                <Calendar className="h-3 w-3" />
-                                Registro
-                              </div>
-                              <div className="font-medium">
-                                {new Date(candidate.createdAt).toLocaleDateString('es-ES', {
-                                  day: '2-digit',
-                                  month: 'short',
-                                })}
-                              </div>
-                            </div>
+                      {/* Unidad y Fecha */}
+                      {candidate.unit && (
+                        <div className="bg-muted/50 rounded-lg p-3">
+                          <div className="flex items-center gap-2 text-sm">
+                            <Building2 className="h-4 w-4 flex-shrink-0 text-primary" />
+                            <span className="font-medium">
+                              {candidate.unit.building.nombre} - Unidad {candidate.unit.numero}
+                            </span>
                           </div>
                         </div>
+                      )}
 
-                        {/* Acciones */}
-                        <div className="flex sm:flex-col items-center gap-2 self-start">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => router.push(`/candidatos/${candidate.id}`)}
-                            className="w-full sm:w-auto"
-                          >
-                            <Eye className="h-4 w-4 sm:mr-2" />
-                            <span className="hidden sm:inline">Ver</span>
-                          </Button>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem
-                                onClick={() => router.push(`/candidatos/${candidate.id}`)}
-                              >
-                                <Eye className="h-4 w-4 mr-2" />
-                                Ver Detalles
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <CalendarClock className="h-4 w-4 mr-2" />
-                                Programar Visita
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                      {/* Información Adicional */}
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                        <div className="space-y-1">
+                          <div className="text-muted-foreground flex items-center gap-1">
+                            <TrendingUp className="h-3 w-3" />
+                            Scoring
+                          </div>
+                          <div className={getScoringColor(candidate.scoring)}>
+                            {candidate.scoring}/100
+                          </div>
+                        </div>
+                        {candidate.situacionLaboral && (
+                          <div className="space-y-1">
+                            <div className="text-muted-foreground flex items-center gap-1">
+                              <Briefcase className="h-3 w-3" />
+                              Empleo
+                            </div>
+                            <div className="font-medium truncate">{candidate.situacionLaboral}</div>
+                          </div>
+                        )}
+                        {candidate.ingresosMensuales && (
+                          <div className="space-y-1">
+                            <div className="text-muted-foreground flex items-center gap-1">
+                              <DollarSign className="h-3 w-3" />
+                              Ingresos
+                            </div>
+                            <div className="font-medium">
+                              €{candidate.ingresosMensuales.toLocaleString()}
+                            </div>
+                          </div>
+                        )}
+                        <div className="space-y-1">
+                          <div className="text-muted-foreground flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            Registro
+                          </div>
+                          <div className="font-medium">
+                            {new Date(candidate.createdAt).toLocaleDateString('es-ES', {
+                              day: '2-digit',
+                              month: 'short',
+                            })}
+                          </div>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
-          </div>
-        </AuthenticatedLayout>
+                    </div>
+
+                    {/* Acciones */}
+                    <div className="flex sm:flex-col items-center gap-2 self-start">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => router.push(`/candidatos/${candidate.id}`)}
+                        className="w-full sm:w-auto"
+                      >
+                        <Eye className="h-4 w-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Ver</span>
+                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => router.push(`/candidatos/${candidate.id}`)}
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            Ver Detalles
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <CalendarClock className="h-4 w-4 mr-2" />
+                            Programar Visita
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
+      </div>
+    </AuthenticatedLayout>
   );
 }

@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     }
 
     const isConfigured = isA3Configured();
-    
+
     return NextResponse.json({
       integrated: isConfigured,
       mode: isConfigured ? 'production' : 'demo',
@@ -24,15 +24,12 @@ export async function GET(req: NextRequest) {
         'Gestión financiera',
         'Nóminas',
         'Facturación electrónica',
-        'Cumplimiento fiscal'
+        'Cumplimiento fiscal',
       ],
-      status: isConfigured ? 'active' : 'demo'
+      status: isConfigured ? 'active' : 'demo',
     });
   } catch (error) {
     logger.error('Error checking A3 status:', error);
-    return NextResponse.json(
-      { error: 'Error al verificar estado de A3' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al verificar estado de A3' }, { status: 500 });
   }
 }

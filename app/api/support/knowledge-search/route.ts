@@ -4,7 +4,6 @@ import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-
 /**
  * API para buscar en la base de conocimientos usando IA
  */
@@ -13,10 +12,7 @@ export async function POST(request: NextRequest) {
     const { query } = await request.json();
 
     if (!query) {
-      return NextResponse.json(
-        { error: 'Query is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Query is required' }, { status: 400 });
     }
 
     // Primero buscar con el método tradicional basado en keywords
@@ -43,8 +39,7 @@ Respond with raw JSON only. Do not include code blocks, markdown, or any other f
 
     const userMessage = `Consulta del usuario: "${query}"\n\nArtículos encontrados:\n${keywordResults
       .map(
-        (article, idx) =>
-          `${idx + 1}. ${article.title} (ID: ${article.id})\n   ${article.excerpt}`
+        (article, idx) => `${idx + 1}. ${article.title} (ID: ${article.id})\n   ${article.excerpt}`
       )
       .join('\n\n')}`;
 
@@ -75,7 +70,7 @@ Respond with raw JSON only. Do not include code blocks, markdown, or any other f
           id: article.id,
           title: article.title,
           excerpt: article.excerpt,
-          relevance: 1 - (index * 0.1), // Relevancia descendente
+          relevance: 1 - index * 0.1, // Relevancia descendente
           url: `/knowledge-base/${article.id}`,
         })),
       });
@@ -87,7 +82,7 @@ Respond with raw JSON only. Do not include code blocks, markdown, or any other f
     // Combinar resultados de IA con datos originales
     const finalResults = aiResult.results
       .map((aiArticle: any) => {
-        const originalArticle = keywordResults.find(a => a.id === aiArticle.id);
+        const originalArticle = keywordResults.find((a) => a.id === aiArticle.id);
         if (!originalArticle) return null;
 
         return {
@@ -113,7 +108,7 @@ Respond with raw JSON only. Do not include code blocks, markdown, or any other f
         id: article.id,
         title: article.title,
         excerpt: article.excerpt,
-        relevance: 1 - (index * 0.1),
+        relevance: 1 - index * 0.1,
         url: `/knowledge-base/${article.id}`,
       })),
     });

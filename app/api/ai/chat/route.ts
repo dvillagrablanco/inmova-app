@@ -22,14 +22,10 @@ export async function POST(request: NextRequest) {
 
     // Si es una llamada directa a herramienta (tool call)
     if (toolCall) {
-      const result = await executeTool(
-        toolCall.name,
-        toolCall.input,
-        {
-          companyId: session.user.companyId,
-          userId: session.user.id,
-        }
-      );
+      const result = await executeTool(toolCall.name, toolCall.input, {
+        companyId: session.user.companyId,
+        userId: session.user.id,
+      });
 
       return NextResponse.json({
         success: true,
@@ -39,10 +35,7 @@ export async function POST(request: NextRequest) {
 
     // Si es una consulta normal de chat
     if (!message) {
-      return NextResponse.json(
-        { error: 'Mensaje requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Mensaje requerido' }, { status: 400 });
     }
 
     const result = await processAIQuery(
@@ -66,10 +59,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     logError(error as Error, { context: 'Error en endpoint de IA' });
-    return NextResponse.json(
-      { error: 'Error procesando la solicitud' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error procesando la solicitud' }, { status: 500 });
   }
 }
 
@@ -90,9 +80,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     logError(error as Error, { context: 'Error obteniendo herramientas de IA' });
-    return NextResponse.json(
-      { error: 'Error al obtener herramientas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener herramientas' }, { status: 500 });
   }
 }

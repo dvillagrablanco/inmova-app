@@ -71,7 +71,7 @@ export default function ProfessionalInvoicingPage() {
   const loadInvoices = async () => {
     try {
       setLoading(true);
-      
+
       // Mock data
       setInvoices([
         {
@@ -84,7 +84,12 @@ export default function ProfessionalInvoicingPage() {
           amount: 850,
           status: 'paid',
           items: [
-            { description: 'Gestión de 5 propiedades - Diciembre 2025', quantity: 1, unitPrice: 850, total: 850 },
+            {
+              description: 'Gestión de 5 propiedades - Diciembre 2025',
+              quantity: 1,
+              unitPrice: 850,
+              total: 850,
+            },
           ],
         },
         {
@@ -97,7 +102,12 @@ export default function ProfessionalInvoicingPage() {
           amount: 2400,
           status: 'paid',
           items: [
-            { description: 'Gestión de 12 propiedades - Diciembre 2025', quantity: 1, unitPrice: 2400, total: 2400 },
+            {
+              description: 'Gestión de 12 propiedades - Diciembre 2025',
+              quantity: 1,
+              unitPrice: 2400,
+              total: 2400,
+            },
           ],
         },
         {
@@ -110,7 +120,12 @@ export default function ProfessionalInvoicingPage() {
           amount: 450,
           status: 'sent',
           items: [
-            { description: 'Gestión de 3 propiedades - Diciembre 2025', quantity: 1, unitPrice: 450, total: 450 },
+            {
+              description: 'Gestión de 3 propiedades - Diciembre 2025',
+              quantity: 1,
+              unitPrice: 450,
+              total: 450,
+            },
           ],
         },
         {
@@ -123,7 +138,12 @@ export default function ProfessionalInvoicingPage() {
           amount: 1600,
           status: 'overdue',
           items: [
-            { description: 'Gestión de 8 propiedades - Noviembre 2025', quantity: 1, unitPrice: 1600, total: 1600 },
+            {
+              description: 'Gestión de 8 propiedades - Noviembre 2025',
+              quantity: 1,
+              unitPrice: 1600,
+              total: 1600,
+            },
           ],
           notes: 'Pago vencido. Enviado recordatorio 3 veces.',
         },
@@ -137,7 +157,12 @@ export default function ProfessionalInvoicingPage() {
           amount: 850,
           status: 'draft',
           items: [
-            { description: 'Gestión de 5 propiedades - Enero 2026', quantity: 1, unitPrice: 850, total: 850 },
+            {
+              description: 'Gestión de 5 propiedades - Enero 2026',
+              quantity: 1,
+              unitPrice: 850,
+              total: 850,
+            },
           ],
         },
       ]);
@@ -181,13 +206,18 @@ export default function ProfessionalInvoicingPage() {
   };
 
   const totalAmount = invoices.reduce((sum, inv) => sum + inv.amount, 0);
-  const paidAmount = invoices.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + inv.amount, 0);
-  const pendingAmount = invoices.filter(inv => inv.status === 'sent').reduce((sum, inv) => sum + inv.amount, 0);
-  const overdueAmount = invoices.filter(inv => inv.status === 'overdue').reduce((sum, inv) => sum + inv.amount, 0);
+  const paidAmount = invoices
+    .filter((inv) => inv.status === 'paid')
+    .reduce((sum, inv) => sum + inv.amount, 0);
+  const pendingAmount = invoices
+    .filter((inv) => inv.status === 'sent')
+    .reduce((sum, inv) => sum + inv.amount, 0);
+  const overdueAmount = invoices
+    .filter((inv) => inv.status === 'overdue')
+    .reduce((sum, inv) => sum + inv.amount, 0);
 
-  const filteredInvoices = selectedTab === 'all' 
-    ? invoices 
-    : invoices.filter(inv => inv.status === selectedTab);
+  const filteredInvoices =
+    selectedTab === 'all' ? invoices : invoices.filter((inv) => inv.status === selectedTab);
 
   // Mock chart data
   const monthlyData = [
@@ -207,203 +237,226 @@ export default function ProfessionalInvoicingPage() {
   if (loading) {
     return (
       <AuthenticatedLayout>
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-              <p className="mt-4 text-muted-foreground">Cargando facturas...</p>
-            </div>
-          </AuthenticatedLayout>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Cargando facturas...</p>
+        </div>
+      </AuthenticatedLayout>
     );
   }
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto space-y-6">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <h1 className="text-3xl font-bold">Facturación Automatizada</h1>
-                <p className="text-muted-foreground mt-2">
-                  Gestión completa de facturación y cobros
-                </p>
-              </div>
-              <Button onClick={() => router.push('/professional/invoicing/nueva')}>
-                <Plus className="h-4 w-4 mr-2" />
-                Nueva Factura
-              </Button>
-            </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium">Total Facturado</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{formatCurrency(totalAmount)}</div>
-                  <p className="text-xs text-muted-foreground mt-1">Este mes</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium">Cobrado</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-green-600">{formatCurrency(paidAmount)}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {totalAmount > 0 ? Math.round((paidAmount / totalAmount) * 100) : 0}% del total
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium">Pendiente</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-blue-600">{formatCurrency(pendingAmount)}</div>
-                  <p className="text-xs text-muted-foreground mt-1">Por cobrar</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium">Vencido</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-red-600">{formatCurrency(overdueAmount)}</div>
-                  <p className="text-xs text-muted-foreground mt-1">Requiere atención</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Charts */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Evolución Facturación</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={250}>
-                    <LineChart data={monthlyData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis />
-                      <Tooltip formatter={(value: any) => formatCurrency(value)} />
-                      <Legend />
-                      <Line
-                        type="monotone"
-                        dataKey="amount"
-                        stroke="#10B981"
-                        strokeWidth={2}
-                        name="Facturación (€)"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Estado de Facturas</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={250}>
-                    <BarChart
-                      data={[
-                        { status: 'Pagadas', count: invoices.filter(i => i.status === 'paid').length },
-                        { status: 'Enviadas', count: invoices.filter(i => i.status === 'sent').length },
-                        { status: 'Vencidas', count: invoices.filter(i => i.status === 'overdue').length },
-                        { status: 'Borrador', count: invoices.filter(i => i.status === 'draft').length },
-                      ]}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="status" />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="count" fill="#4F46E5" name="Cantidad" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Invoices Tabs */}
-            <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4">
-              <TabsList>
-                <TabsTrigger value="all">Todas ({invoices.length})</TabsTrigger>
-                <TabsTrigger value="draft">Borrador ({invoices.filter(i => i.status === 'draft').length})</TabsTrigger>
-                <TabsTrigger value="sent">Enviadas ({invoices.filter(i => i.status === 'sent').length})</TabsTrigger>
-                <TabsTrigger value="paid">Pagadas ({invoices.filter(i => i.status === 'paid').length})</TabsTrigger>
-                <TabsTrigger value="overdue">Vencidas ({invoices.filter(i => i.status === 'overdue').length})</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value={selectedTab}>
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="space-y-4">
-                      {filteredInvoices.map((invoice) => (
-                        <div
-                          key={invoice.id}
-                          className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
-                        >
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <h4 className="font-semibold">{invoice.number}</h4>
-                              {getStatusBadge(invoice.status)}
-                            </div>
-                            <p className="text-sm text-muted-foreground mb-1">
-                              Cliente: <span className="font-medium">{invoice.clientName}</span>
-                            </p>
-                            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                              <span>Emitida: {formatDate(invoice.issueDate)}</span>
-                              <span>Vencimiento: {formatDate(invoice.dueDate)}</span>
-                            </div>
-                            {invoice.notes && (
-                              <p className="text-xs text-red-600 mt-2">{invoice.notes}</p>
-                            )}
-                          </div>
-                          <div className="text-right mr-6">
-                            <p className="text-2xl font-bold">{formatCurrency(invoice.amount)}</p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {invoice.items.length} {invoice.items.length === 1 ? 'concepto' : 'conceptos'}
-                            </p>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button variant="outline" size="sm">
-                              <Download className="h-4 w-4" />
-                            </Button>
-                            {invoice.status === 'draft' && (
-                              <Button size="sm">
-                                <Send className="h-4 w-4 mr-1" />
-                                Enviar
-                              </Button>
-                            )}
-                            {invoice.status === 'overdue' && (
-                              <Button size="sm" variant="destructive">
-                                <AlertTriangle className="h-4 w-4 mr-1" />
-                                Reclamar
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-
-                      {filteredInvoices.length === 0 && (
-                        <div className="text-center py-12">
-                          <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                          <h3 className="text-lg font-semibold mb-2">No hay facturas</h3>
-                          <p className="text-muted-foreground">
-                            {selectedTab === 'all' ? 'Crea tu primera factura' : `No hay facturas en estado "${selectedTab}"`}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold">Facturación Automatizada</h1>
+            <p className="text-muted-foreground mt-2">Gestión completa de facturación y cobros</p>
           </div>
-        </AuthenticatedLayout>
+          <Button onClick={() => router.push('/professional/invoicing/nueva')}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nueva Factura
+          </Button>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">Total Facturado</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{formatCurrency(totalAmount)}</div>
+              <p className="text-xs text-muted-foreground mt-1">Este mes</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">Cobrado</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">{formatCurrency(paidAmount)}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {totalAmount > 0 ? Math.round((paidAmount / totalAmount) * 100) : 0}% del total
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">Pendiente</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-600">
+                {formatCurrency(pendingAmount)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Por cobrar</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">Vencido</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-600">{formatCurrency(overdueAmount)}</div>
+              <p className="text-xs text-muted-foreground mt-1">Requiere atención</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Charts */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Evolución Facturación</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={250}>
+                <LineChart data={monthlyData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip formatter={(value: any) => formatCurrency(value)} />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="amount"
+                    stroke="#10B981"
+                    strokeWidth={2}
+                    name="Facturación (€)"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Estado de Facturas</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart
+                  data={[
+                    {
+                      status: 'Pagadas',
+                      count: invoices.filter((i) => i.status === 'paid').length,
+                    },
+                    {
+                      status: 'Enviadas',
+                      count: invoices.filter((i) => i.status === 'sent').length,
+                    },
+                    {
+                      status: 'Vencidas',
+                      count: invoices.filter((i) => i.status === 'overdue').length,
+                    },
+                    {
+                      status: 'Borrador',
+                      count: invoices.filter((i) => i.status === 'draft').length,
+                    },
+                  ]}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="status" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="#4F46E5" name="Cantidad" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Invoices Tabs */}
+        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="all">Todas ({invoices.length})</TabsTrigger>
+            <TabsTrigger value="draft">
+              Borrador ({invoices.filter((i) => i.status === 'draft').length})
+            </TabsTrigger>
+            <TabsTrigger value="sent">
+              Enviadas ({invoices.filter((i) => i.status === 'sent').length})
+            </TabsTrigger>
+            <TabsTrigger value="paid">
+              Pagadas ({invoices.filter((i) => i.status === 'paid').length})
+            </TabsTrigger>
+            <TabsTrigger value="overdue">
+              Vencidas ({invoices.filter((i) => i.status === 'overdue').length})
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value={selectedTab}>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="space-y-4">
+                  {filteredInvoices.map((invoice) => (
+                    <div
+                      key={invoice.id}
+                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h4 className="font-semibold">{invoice.number}</h4>
+                          {getStatusBadge(invoice.status)}
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-1">
+                          Cliente: <span className="font-medium">{invoice.clientName}</span>
+                        </p>
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <span>Emitida: {formatDate(invoice.issueDate)}</span>
+                          <span>Vencimiento: {formatDate(invoice.dueDate)}</span>
+                        </div>
+                        {invoice.notes && (
+                          <p className="text-xs text-red-600 mt-2">{invoice.notes}</p>
+                        )}
+                      </div>
+                      <div className="text-right mr-6">
+                        <p className="text-2xl font-bold">{formatCurrency(invoice.amount)}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {invoice.items.length}{' '}
+                          {invoice.items.length === 1 ? 'concepto' : 'conceptos'}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm">
+                          <Download className="h-4 w-4" />
+                        </Button>
+                        {invoice.status === 'draft' && (
+                          <Button size="sm">
+                            <Send className="h-4 w-4 mr-1" />
+                            Enviar
+                          </Button>
+                        )}
+                        {invoice.status === 'overdue' && (
+                          <Button size="sm" variant="destructive">
+                            <AlertTriangle className="h-4 w-4 mr-1" />
+                            Reclamar
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+
+                  {filteredInvoices.length === 0 && (
+                    <div className="text-center py-12">
+                      <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">No hay facturas</h3>
+                      <p className="text-muted-foreground">
+                        {selectedTab === 'all'
+                          ? 'Crea tu primera factura'
+                          : `No hay facturas en estado "${selectedTab}"`}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </AuthenticatedLayout>
   );
 }

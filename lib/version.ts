@@ -1,6 +1,6 @@
 /**
  * Sistema de versionado automático para INMOVA
- * 
+ *
  * Este módulo proporciona información de versión dinámica basada en:
  * - Variables de entorno de Vercel
  * - Git commit SHA
@@ -32,7 +32,7 @@ export function getVersionInfo(): VersionInfo {
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   const shortCommit = gitCommit.substring(0, 7);
-  
+
   const version = `${year}.${month}.${day}-${shortCommit}`;
 
   return {
@@ -65,7 +65,7 @@ export function getCacheBustingHash(): string {
  */
 export function getVersionHeaders(): Record<string, string> {
   const info = getVersionInfo();
-  
+
   return {
     'X-App-Version': info.version,
     'X-Build-Time': info.buildTime,
@@ -80,7 +80,7 @@ export function getVersionHeaders(): Record<string, string> {
  */
 export function getVersionDebugInfo(): string {
   const info = getVersionInfo();
-  
+
   return `
 === INMOVA Version Info ===
 Version: ${info.version}

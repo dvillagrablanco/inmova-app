@@ -31,8 +31,9 @@ export const EMAIL_TEMPLATES: Record<string, EmailTemplate> = {
   WELCOME: {
     id: 'welcome',
     subject: '🎉 ¡Bienvenido a INMOVA! Tu cuenta está lista',
-    preheader: 'Configura tu cuenta en 2 minutos y descubre cómo INMOVA puede transformar tu negocio',
-    trigger: 'immediate'
+    preheader:
+      'Configura tu cuenta en 2 minutos y descubre cómo INMOVA puede transformar tu negocio',
+    trigger: 'immediate',
   },
   ACTIVATION_REMINDER: {
     id: 'activation_reminder',
@@ -40,14 +41,14 @@ export const EMAIL_TEMPLATES: Record<string, EmailTemplate> = {
     preheader: 'No te pierdas las funcionalidades que harán crecer tu negocio',
     trigger: 'delayed',
     delayHours: 24,
-    condition: (user) => !user.lastLoginAt || user.onboardingProgress < 50
+    condition: (user) => !user.lastLoginAt || user.onboardingProgress < 50,
   },
   FIRST_WIN: {
     id: 'first_win',
     subject: '🎯 ¡Genial! Ya tienes tu primera propiedad en INMOVA',
     preheader: 'Descubre qué hacer ahora para aprovechar al máximo la plataforma',
     trigger: 'immediate',
-    condition: (user) => user.buildingsCount === 1
+    condition: (user) => user.buildingsCount === 1,
   },
   FEATURE_DISCOVERY: {
     id: 'feature_discovery',
@@ -55,7 +56,7 @@ export const EMAIL_TEMPLATES: Record<string, EmailTemplate> = {
     preheader: 'Saca el máximo provecho a INMOVA con estos tips',
     trigger: 'delayed',
     delayHours: 168, // 7 días
-    condition: (user) => user.featuresUsed < 5
+    condition: (user) => user.featuresUsed < 5,
   },
   REACTIVATION: {
     id: 'reactivation',
@@ -64,12 +65,12 @@ export const EMAIL_TEMPLATES: Record<string, EmailTemplate> = {
     trigger: 'delayed',
     delayHours: 336, // 14 días
     condition: (user) => {
-      const daysSinceLastLogin = user.lastLoginAt 
+      const daysSinceLastLogin = user.lastLoginAt
         ? Math.floor((Date.now() - new Date(user.lastLoginAt).getTime()) / (1000 * 60 * 60 * 24))
         : 999;
       return daysSinceLastLogin >= 14;
-    }
-  }
+    },
+  },
 };
 
 /**
@@ -110,25 +111,29 @@ export class EmailService {
   /**
    * Enviar email usando SendGrid
    */
-  private async sendWithSendGrid(data: EmailData): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  private async sendWithSendGrid(
+    data: EmailData
+  ): Promise<{ success: boolean; messageId?: string; error?: string }> {
     const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${this.apiKey}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${this.apiKey}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        personalizations: [{
-          to: [{ email: data.to }],
-          subject: data.subject
-        }],
+        personalizations: [
+          {
+            to: [{ email: data.to }],
+            subject: data.subject,
+          },
+        ],
         from: { email: data.from || this.fromEmail, name: this.fromName },
         reply_to: data.replyTo ? { email: data.replyTo } : undefined,
         content: [
           { type: 'text/plain', value: data.text },
-          { type: 'text/html', value: data.html }
-        ]
-      })
+          { type: 'text/html', value: data.html },
+        ],
+      }),
     });
 
     if (response.ok) {
@@ -142,12 +147,14 @@ export class EmailService {
   /**
    * Enviar email usando Postmark
    */
-  private async sendWithPostmark(data: EmailData): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  private async sendWithPostmark(
+    data: EmailData
+  ): Promise<{ success: boolean; messageId?: string; error?: string }> {
     const response = await fetch('https://api.postmarkapp.com/email', {
       method: 'POST',
       headers: {
         'X-Postmark-Server-Token': this.apiKey,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         From: data.from || this.fromEmail,
@@ -156,8 +163,8 @@ export class EmailService {
         HtmlBody: data.html,
         TextBody: data.text,
         ReplyTo: data.replyTo,
-        MessageStream: 'outbound'
-      })
+        MessageStream: 'outbound',
+      }),
     });
 
     if (response.ok) {
@@ -180,7 +187,7 @@ export class EmailService {
       to: user.email,
       subject: EMAIL_TEMPLATES.WELCOME.subject,
       html,
-      text
+      text,
     });
   }
 
@@ -193,9 +200,12 @@ export class EmailService {
 
     return await this.send({
       to: user.email,
-      subject: EMAIL_TEMPLATES.ACTIVATION_REMINDER.subject.replace('{{firstName}}', user.name.split(' ')[0]),
+      subject: EMAIL_TEMPLATES.ACTIVATION_REMINDER.subject.replace(
+        '{{firstName}}',
+        user.name.split(' ')[0]
+      ),
       html,
-      text
+      text,
     });
   }
 
@@ -210,7 +220,7 @@ export class EmailService {
       to: user.email,
       subject: EMAIL_TEMPLATES.FIRST_WIN.subject,
       html,
-      text
+      text,
     });
   }
 
@@ -219,7 +229,7 @@ export class EmailService {
    */
   private renderWelcomeEmail(user: { name: string; businessModel?: string }): string {
     const firstName = user.name.split(' ')[0];
-    
+
     return `
 <!DOCTYPE html>
 <html lang="es">
@@ -350,7 +360,7 @@ Enlaces útiles:
    */
   private renderActivationReminderEmail(user: { name: string; businessModel?: string }): string {
     const firstName = user.name.split(' ')[0];
-    
+
     return `
 <!DOCTYPE html>
 <html lang="es">
@@ -427,7 +437,7 @@ Completar configuración: ${process.env.NEXTAUTH_URL}/home?reminder=true
    */
   private renderFirstWinEmail(user: { name: string; achievement: string }): string {
     const firstName = user.name.split(' ')[0];
-    
+
     return `
 <!DOCTYPE html>
 <html lang="es">

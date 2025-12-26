@@ -84,10 +84,11 @@ export class VrboClient {
     this.clientId = config.clientId;
     this.clientSecret = config.clientSecret;
     this.partnerId = config.partnerId;
-    
-    this.baseUrl = config.environment === 'production'
-      ? 'https://api.vrbo.com/v1'
-      : 'https://api-sandbox.vrbo.com/v1';
+
+    this.baseUrl =
+      config.environment === 'production'
+        ? 'https://api.vrbo.com/v1'
+        : 'https://api-sandbox.vrbo.com/v1';
   }
 
   /**
@@ -105,7 +106,7 @@ export class VrboClient {
       const response = await fetch('https://api.vrbo.com/v1/oauth2/token', {
         method: 'POST',
         headers: {
-          'Authorization': `Basic ${credentials}`,
+          Authorization: `Basic ${credentials}`,
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: 'grant_type=client_credentials',
@@ -116,9 +117,9 @@ export class VrboClient {
       }
 
       const data = await response.json();
-      
+
       this.accessToken = data.access_token;
-      this.tokenExpiresAt = Date.now() + (data.expires_in * 1000);
+      this.tokenExpiresAt = Date.now() + data.expires_in * 1000;
 
       return this.accessToken;
     } catch (error) {
@@ -132,11 +133,11 @@ export class VrboClient {
    */
   private async getAuthHeaders(): Promise<HeadersInit> {
     const token = await this.getAccessToken();
-    
+
     return {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      Accept: 'application/json',
       'X-Partner-Id': this.partnerId,
     };
   }
@@ -224,9 +225,9 @@ export class VrboClient {
    */
   private mapListingStatus(status: string): VrboListing['status'] {
     const statusMap: Record<string, VrboListing['status']> = {
-      'ACTIVE': 'active',
-      'INACTIVE': 'inactive',
-      'PENDING': 'pending',
+      ACTIVE: 'active',
+      INACTIVE: 'inactive',
+      PENDING: 'pending',
     };
     return statusMap[status] || 'pending';
   }
@@ -253,13 +254,10 @@ export class VrboClient {
         queryParams.append('listingId', params.listingId);
       }
 
-      const response = await fetch(
-        `${this.baseUrl}/reservations?${queryParams}`,
-        {
-          method: 'GET',
-          headers,
-        }
-      );
+      const response = await fetch(`${this.baseUrl}/reservations?${queryParams}`, {
+        method: 'GET',
+        headers,
+      });
 
       if (!response.ok) {
         throw new Error(`Failed to get reservations: ${response.statusText}`);
@@ -306,11 +304,11 @@ export class VrboClient {
    */
   private mapReservationStatus(status: string): VrboReservation['status'] {
     const statusMap: Record<string, VrboReservation['status']> = {
-      'INQUIRY': 'inquiry',
-      'REQUEST': 'request',
-      'CONFIRMED': 'confirmed',
-      'CANCELLED': 'cancelled',
-      'COMPLETED': 'completed',
+      INQUIRY: 'inquiry',
+      REQUEST: 'request',
+      CONFIRMED: 'confirmed',
+      CANCELLED: 'cancelled',
+      COMPLETED: 'completed',
     };
     return statusMap[status] || 'inquiry';
   }
@@ -323,19 +321,22 @@ export class VrboClient {
       const headers = await this.getAuthHeaders();
 
       // Agrupar por listing
-      const byListing = updates.reduce((acc, update) => {
-        if (!acc[update.listingId]) {
-          acc[update.listingId] = [];
-        }
-        acc[update.listingId].push(update);
-        return acc;
-      }, {} as Record<string, AvailabilityUpdate[]>);
+      const byListing = updates.reduce(
+        (acc, update) => {
+          if (!acc[update.listingId]) {
+            acc[update.listingId] = [];
+          }
+          acc[update.listingId].push(update);
+          return acc;
+        },
+        {} as Record<string, AvailabilityUpdate[]>
+      );
 
       // Enviar actualizaciones
       for (const [listingId, listingUpdates] of Object.entries(byListing)) {
         const payload = {
           listingId,
-          availability: listingUpdates.map(u => ({
+          availability: listingUpdates.map((u) => ({
             date: u.date.toISOString().split('T')[0],
             available: u.available,
             minNights: u.minNights,
@@ -343,14 +344,11 @@ export class VrboClient {
           })),
         };
 
-        const response = await fetch(
-          `${this.baseUrl}/listings/${listingId}/calendar`,
-          {
-            method: 'PUT',
-            headers,
-            body: JSON.stringify(payload),
-          }
-        );
+        const response = await fetch(`${this.baseUrl}/listings/${listingId}/calendar`, {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify(payload),
+        });
 
         if (!response.ok) {
           logger.error(`Failed to update availability for listing ${listingId}`);
@@ -369,21 +367,22 @@ export class VrboClient {
   /**
    * Aceptar/Rechazar solicitud de reserva
    */
-  async respondToInquiry(reservationId: string, accept: boolean, message?: string): Promise<boolean> {
+  async respondToInquiry(
+    reservationId: string,
+    accept: boolean,
+    message?: string
+  ): Promise<boolean> {
     try {
       const headers = await this.getAuthHeaders();
 
-      const response = await fetch(
-        `${this.baseUrl}/reservations/${reservationId}/respond`,
-        {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({
-            action: accept ? 'ACCEPT' : 'DECLINE',
-            message: message || (accept ? 'Confirmed' : 'Not available'),
-          }),
-        }
-      );
+      const response = await fetch(`${this.baseUrl}/reservations/${reservationId}/respond`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          action: accept ? 'ACCEPT' : 'DECLINE',
+          message: message || (accept ? 'Confirmed' : 'Not available'),
+        }),
+      });
 
       if (!response.ok) {
         throw new Error(`Failed to respond to inquiry: ${response.statusText}`);
@@ -404,17 +403,14 @@ export class VrboClient {
     try {
       const headers = await this.getAuthHeaders();
 
-      const response = await fetch(
-        `${this.baseUrl}/reservations/${reservationId}/messages`,
-        {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({
-            message,
-            sender: 'HOST',
-          }),
-        }
-      );
+      const response = await fetch(`${this.baseUrl}/reservations/${reservationId}/messages`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          message,
+          sender: 'HOST',
+        }),
+      });
 
       if (!response.ok) {
         throw new Error(`Failed to send message: ${response.statusText}`);
@@ -435,12 +431,7 @@ export class VrboClient {
 
 export function isVrboConfigured(config?: VrboConfig | null): boolean {
   if (!config) return false;
-  return !!(
-    config.clientId &&
-    config.clientSecret &&
-    config.partnerId &&
-    config.enabled
-  );
+  return !!(config.clientId && config.clientSecret && config.partnerId && config.enabled);
 }
 
 export function getVrboClient(config?: VrboConfig): VrboClient | null {

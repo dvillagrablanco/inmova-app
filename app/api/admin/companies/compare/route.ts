@@ -11,17 +11,11 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     if (session.user.role !== 'super_admin') {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
 
     const { companyIds } = await request.json();
@@ -90,16 +84,8 @@ export async function POST(request: NextRequest) {
         });
 
         // Contar pagos del mes actual
-        const startOfMonth = new Date(
-          new Date().getFullYear(),
-          new Date().getMonth(),
-          1
-        );
-        const endOfMonth = new Date(
-          new Date().getFullYear(),
-          new Date().getMonth() + 1,
-          0
-        );
+        const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+        const endOfMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0);
 
         const monthlyPayments = await prisma.payment.findMany({
           where: {
@@ -121,10 +107,7 @@ export async function POST(request: NextRequest) {
           },
         });
 
-        const monthlyRevenue = monthlyPayments.reduce(
-          (sum, payment) => sum + payment.monto,
-          0
-        );
+        const monthlyRevenue = monthlyPayments.reduce((sum, payment) => sum + payment.monto, 0);
 
         // Contar unidades totales y ocupadas
         const totalUnits = company.buildings.reduce(
@@ -152,13 +135,10 @@ export async function POST(request: NextRequest) {
         });
 
         // Roles de usuarios
-        const roleDistribution = company.users.reduce(
-          (acc: Record<string, number>, user) => {
-            acc[user.role] = (acc[user.role] || 0) + 1;
-            return acc;
-          },
-          {}
-        );
+        const roleDistribution = company.users.reduce((acc: Record<string, number>, user) => {
+          acc[user.role] = (acc[user.role] || 0) + 1;
+          return acc;
+        }, {});
 
         // Actividad reciente (acciónes en los últimos 7 días)
         const sevenDaysAgo = new Date();
@@ -190,11 +170,13 @@ export async function POST(request: NextRequest) {
           tags: company.tags || [],
           contactoPrincipal: company.contactoPrincipal,
           emailContacto: company.emailContacto,
-          subscriptionPlan: company.subscriptionPlan ? {
-            id: company.subscriptionPlan.id,
-            nombre: company.subscriptionPlan.nombre,
-            precio: company.subscriptionPlan.precioMensual,
-          } : null,
+          subscriptionPlan: company.subscriptionPlan
+            ? {
+                id: company.subscriptionPlan.id,
+                nombre: company.subscriptionPlan.nombre,
+                precio: company.subscriptionPlan.precioMensual,
+              }
+            : null,
           metrics: {
             users: company._count.users,
             buildings: company._count.buildings,
@@ -226,9 +208,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error comparing companies:', error);
-    return NextResponse.json(
-      { error: 'Error al comparar empresas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al comparar empresas' }, { status: 500 });
   }
 }

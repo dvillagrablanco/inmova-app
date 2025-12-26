@@ -17,10 +17,7 @@ export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email || !session?.user?.companyId) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const { searchParams } = new URL(req.url);
@@ -96,10 +93,9 @@ export async function GET(req: NextRequest) {
     const rentaMensualEsperada = contratos.reduce((sum, c) => sum + c.rentaMensual, 0);
 
     // 2. DATOS DE INTEGRACIÓN
-    const pagosSincronizados = pagosRealizados.filter(p => p.contasimplePaymentId).length;
-    const tasaSincronizacion = pagosRealizados.length > 0 
-      ? (pagosSincronizados / pagosRealizados.length) * 100 
-      : 0;
+    const pagosSincronizados = pagosRealizados.filter((p) => p.contasimplePaymentId).length;
+    const tasaSincronizacion =
+      pagosRealizados.length > 0 ? (pagosSincronizados / pagosRealizados.length) * 100 : 0;
 
     // 3. EVOLUCIÓN MENSUAL (COMPARATIVA)
     const evolucionMensual: any[] = [];
@@ -148,11 +144,11 @@ export async function GET(req: NextRequest) {
     }, {});
 
     // 5. ANÁLISIS PREDICTIVO
-    const promedioIngresosMensuales = 
+    const promedioIngresosMensuales =
       evolucionMensual.length > 0
         ? evolucionMensual.reduce((sum, m) => sum + m.ingresos, 0) / evolucionMensual.length
         : 0;
-    const promedioGastosMensuales = 
+    const promedioGastosMensuales =
       evolucionMensual.length > 0
         ? evolucionMensual.reduce((sum, m) => sum + m.gastos, 0) / evolucionMensual.length
         : 0;

@@ -25,10 +25,7 @@ export async function GET(request: NextRequest) {
     // Verificar autenticación
     const decoded = verifyToken(request);
     if (!decoded || !decoded.partnerId) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
     const partnerId = decoded.partnerId;
     const { searchParams } = new URL(request.url);
@@ -37,7 +34,7 @@ export async function GET(request: NextRequest) {
     if (periodo) {
       where.periodo = periodo;
     }
-    
+
     const comisiones = await prisma.commission.findMany({
       where,
       include: {
@@ -53,13 +50,13 @@ export async function GET(request: NextRequest) {
     // Calcular totales por estado
     const totales = {
       pending: comisiones
-        .filter(c => c.estado === 'PENDING')
+        .filter((c) => c.estado === 'PENDING')
         .reduce((sum, c) => sum + c.montoComision, 0),
       approved: comisiones
-        .filter(c => c.estado === 'APPROVED')
+        .filter((c) => c.estado === 'APPROVED')
         .reduce((sum, c) => sum + c.montoComision, 0),
       paid: comisiones
-        .filter(c => c.estado === 'PAID')
+        .filter((c) => c.estado === 'PAID')
         .reduce((sum, c) => sum + c.montoComision, 0),
       total: comisiones.reduce((sum, c) => sum + c.montoComision, 0),
     };

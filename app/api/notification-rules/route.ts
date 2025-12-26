@@ -37,10 +37,7 @@ export async function GET(request: NextRequest) {
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
-    return NextResponse.json(
-      { error: 'Error al obtener reglas de notificación' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener reglas de notificación' }, { status: 500 });
   }
 }
 
@@ -84,9 +81,6 @@ export async function POST(request: NextRequest) {
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
-    return NextResponse.json(
-      { error: 'Error al crear regla de notificación' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear regla de notificación' }, { status: 500 });
   }
 }

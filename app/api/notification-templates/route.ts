@@ -15,17 +15,10 @@ export async function GET(request: NextRequest) {
 
     const templates = await prisma.notificationTemplate.findMany({
       where: {
-        OR: [
-          { companyId: user.companyId },
-          { esPlantillaGlobal: true, companyId: null },
-        ],
+        OR: [{ companyId: user.companyId }, { esPlantillaGlobal: true, companyId: null }],
         activa: true,
       },
-      orderBy: [
-        { esPlantillaGlobal: 'desc' },
-        { categoria: 'asc' },
-        { nombre: 'asc' },
-      ],
+      orderBy: [{ esPlantillaGlobal: 'desc' }, { categoria: 'asc' }, { nombre: 'asc' }],
     });
 
     return NextResponse.json(templates);

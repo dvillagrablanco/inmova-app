@@ -4,12 +4,12 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Sparkles, 
-  Home, 
-  Users, 
-  Zap, 
-  Calculator, 
+import {
+  Sparkles,
+  Home,
+  Users,
+  Zap,
+  Calculator,
   CalendarClock,
   BarChart3,
   Tag,
@@ -17,7 +17,7 @@ import {
   Clock,
   Target,
   Gift,
-  CheckCircle2
+  CheckCircle2,
 } from 'lucide-react';
 
 interface Feature {
@@ -30,66 +30,66 @@ const roomRentalFeatures: Feature[] = [
   {
     icon: <Calculator className="h-5 w-5" />,
     title: 'Prorrateo Automático',
-    description: 'Distribuye automáticamente luz, agua y gas por habitación o persona'
+    description: 'Distribuye automáticamente luz, agua y gas por habitación o persona',
   },
   {
     icon: <CalendarClock className="h-5 w-5" />,
     title: 'Calendario de Limpieza',
-    description: 'Programa y gestiona la limpieza de habitaciones y espacios comunes'
+    description: 'Programa y gestiona la limpieza de habitaciones y espacios comunes',
   },
   {
     icon: <Users className="h-5 w-5" />,
     title: 'Reglas de Co-living',
-    description: 'Define y aplica reglas personalizadas para cada propiedad compartida'
+    description: 'Define y aplica reglas personalizadas para cada propiedad compartida',
   },
   {
     icon: <Home className="h-5 w-5" />,
     title: 'Espacios Comunes',
-    description: 'Gestiona salón, cocina, baños compartidos y otros espacios'
+    description: 'Gestiona salón, cocina, baños compartidos y otros espacios',
   },
   {
     icon: <BarChart3 className="h-5 w-5" />,
     title: 'Dashboard Especializado',
-    description: 'Vista 360º con ocupación, ingresos y estadísticas por habitación'
+    description: 'Vista 360º con ocupación, ingresos y estadísticas por habitación',
   },
   {
     icon: <Clock className="h-5 w-5" />,
     title: 'Ahorra 10h/mes',
-    description: 'Elimina cálculos manuales y gestiona hasta 100 habitaciones fácilmente'
-  }
+    description: 'Elimina cálculos manuales y gestiona hasta 100 habitaciones fácilmente',
+  },
 ];
 
 const couponSystemFeatures: Feature[] = [
   {
     icon: <Tag className="h-5 w-5" />,
     title: 'Cupones Flexibles',
-    description: 'Crea descuentos por porcentaje o monto fijo con total control'
+    description: 'Crea descuentos por porcentaje o monto fijo con total control',
   },
   {
     icon: <Target className="h-5 w-5" />,
     title: 'Límites Inteligentes',
-    description: 'Define usos máximos, validez temporal y restricciones por usuario'
+    description: 'Define usos máximos, validez temporal y restricciones por usuario',
   },
   {
     icon: <Zap className="h-5 w-5" />,
     title: 'Validación en Tiempo Real',
-    description: 'El sistema valida automáticamente elegibilidad y condiciones'
+    description: 'El sistema valida automáticamente elegibilidad y condiciones',
   },
   {
     icon: <BarChart3 className="h-5 w-5" />,
     title: 'Panel de Estadísticas',
-    description: 'Monitorea conversión, ingresos y usuarios únicos en tiempo real'
+    description: 'Monitorea conversión, ingresos y usuarios únicos en tiempo real',
   },
   {
     icon: <TrendingUp className="h-5 w-5" />,
     title: 'ROI Comprobado',
-    description: '25-35% aumento en conversión de leads, €4 generados por cada €1 de descuento'
+    description: '25-35% aumento en conversión de leads, €4 generados por cada €1 de descuento',
   },
   {
     icon: <Gift className="h-5 w-5" />,
     title: 'Campañas Automatizadas',
-    description: 'Lanza promociones estacionales y ofertas flash sin esfuerzo manual'
-  }
+    description: 'Lanza promociones estacionales y ofertas flash sin esfuerzo manual',
+  },
 ];
 
 const useCases = [
@@ -97,20 +97,20 @@ const useCases = [
     type: 'Coliving Urbano',
     problem: 'Calcular facturas de luz manualmente para 15 inquilinos',
     solution: 'INMOVA prorratea automáticamente por habitación en 3 clics',
-    savings: 'Ahorra 8h/mes'
+    savings: 'Ahorra 8h/mes',
   },
   {
     type: 'Residencia Estudiantil',
     problem: 'Gestionar 50 habitaciones con contratos escalonados',
     solution: 'Dashboard unificado con ocupación, vencimientos y alertas',
-    savings: 'Visibilidad total'
+    savings: 'Visibilidad total',
   },
   {
     type: 'Agencia Inmobiliaria',
     problem: 'Lanzar campaña de descuento para inquilinos nuevos',
     solution: 'Sistema de cupones con límites y tracking de conversión',
-    savings: '+30% leads'
-  }
+    savings: '+30% leads',
+  },
 ];
 
 export function NewFeaturesSection() {
@@ -133,7 +133,9 @@ export function NewFeaturesSection() {
             Las Características que Revolucionan el Sector
           </h2>
           <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-            Dos <strong className="text-indigo-600">killer features</strong> que ningún competidor tiene y que ya están ayudando a cientos de gestoras a ahorrar tiempo y aumentar ingresos.
+            Dos <strong className="text-indigo-600">killer features</strong> que ningún competidor
+            tiene y que ya están ayudando a cientos de gestoras a ahorrar tiempo y aumentar
+            ingresos.
           </p>
         </div>
 
@@ -157,7 +159,9 @@ export function NewFeaturesSection() {
                 </div>
               </div>
               <p className="text-lg text-gray-700 leading-relaxed">
-                El <strong>primer y único sistema</strong> del mercado español que automatiza completamente la gestión de alquiler por habitaciones con <strong>prorrateo inteligente de suministros</strong>.
+                El <strong>primer y único sistema</strong> del mercado español que automatiza
+                completamente la gestión de alquiler por habitaciones con{' '}
+                <strong>prorrateo inteligente de suministros</strong>.
               </p>
             </CardHeader>
 
@@ -165,7 +169,10 @@ export function NewFeaturesSection() {
               {/* Features */}
               <div className="grid sm:grid-cols-2 gap-3">
                 {roomRentalFeatures.map((feature, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-green-50 hover:bg-green-100 transition-colors">
+                  <div
+                    key={i}
+                    className="flex items-start gap-3 p-3 rounded-lg bg-green-50 hover:bg-green-100 transition-colors"
+                  >
                     <div className="p-2 bg-green-100 rounded-lg text-green-600 shrink-0">
                       {feature.icon}
                     </div>
@@ -222,11 +229,14 @@ export function NewFeaturesSection() {
                 </div>
                 <div>
                   <h3 className="text-3xl font-black text-gray-900">Sistema de Cupones</h3>
-                  <p className="text-sm text-purple-600 font-bold">Marketing Automatizado Inteligente</p>
+                  <p className="text-sm text-purple-600 font-bold">
+                    Marketing Automatizado Inteligente
+                  </p>
                 </div>
               </div>
               <p className="text-lg text-gray-700 leading-relaxed">
-                Lanza <strong>campañas de descuento profesionales</strong> con tracking en tiempo real, límites de uso y estadísticas avanzadas. Integrado con tu sistema de pagos.
+                Lanza <strong>campañas de descuento profesionales</strong> con tracking en tiempo
+                real, límites de uso y estadísticas avanzadas. Integrado con tu sistema de pagos.
               </p>
             </CardHeader>
 
@@ -234,7 +244,10 @@ export function NewFeaturesSection() {
               {/* Features */}
               <div className="grid sm:grid-cols-2 gap-3">
                 {couponSystemFeatures.map((feature, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-purple-50 hover:bg-purple-100 transition-colors">
+                  <div
+                    key={i}
+                    className="flex items-start gap-3 p-3 rounded-lg bg-purple-50 hover:bg-purple-100 transition-colors"
+                  >
                     <div className="p-2 bg-purple-100 rounded-lg text-purple-600 shrink-0">
                       {feature.icon}
                     </div>
@@ -280,16 +293,17 @@ export function NewFeaturesSection() {
 
         {/* Casos de Uso Reales */}
         <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12">
-          <h3 className="text-3xl font-black text-center mb-2">
-            Casos de Uso Reales
-          </h3>
+          <h3 className="text-3xl font-black text-center mb-2">Casos de Uso Reales</h3>
           <p className="text-center text-gray-600 mb-8">
             Cómo nuestros clientes están usando estas características para transformar su negocio
           </p>
 
           <div className="grid md:grid-cols-3 gap-6">
             {useCases.map((useCase, i) => (
-              <div key={i} className="p-6 rounded-xl border-2 border-gray-200 hover:border-indigo-300 hover:shadow-lg transition-all">
+              <div
+                key={i}
+                className="p-6 rounded-xl border-2 border-gray-200 hover:border-indigo-300 hover:shadow-lg transition-all"
+              >
                 <Badge className="mb-3 bg-indigo-100 text-indigo-700 border-indigo-200">
                   {useCase.type}
                 </Badge>
@@ -303,9 +317,7 @@ export function NewFeaturesSection() {
                     <div className="text-sm text-gray-900 font-semibold">{useCase.solution}</div>
                   </div>
                   <div className="pt-2 border-t border-gray-200">
-                    <div className="text-sm font-black text-indigo-600">
-                      📈 {useCase.savings}
-                    </div>
+                    <div className="text-sm font-black text-indigo-600">📈 {useCase.savings}</div>
                   </div>
                 </div>
               </div>
@@ -319,7 +331,10 @@ export function NewFeaturesSection() {
             ¿Quieres ver estas características en acción?
           </p>
           <Link href="/register">
-            <Button size="lg" className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold px-8 py-6 text-lg shadow-2xl hover:shadow-3xl transition-all hover:scale-105">
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold px-8 py-6 text-lg shadow-2xl hover:shadow-3xl transition-all hover:scale-105"
+            >
               Prueba Gratis 30 Días
               <Sparkles className="ml-2 h-6 w-6" />
             </Button>

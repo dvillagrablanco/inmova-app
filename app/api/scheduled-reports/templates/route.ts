@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger from '@/lib/logger';
-
-
 
 interface ReportTemplate {
   id: string;
@@ -22,7 +20,8 @@ const TEMPLATES: ReportTemplate[] = [
   {
     id: 'morosidad-semanal',
     nombre: 'Reporte Semanal de Morosidad',
-    descripcion: 'Análisis completo de pagos pendientes y atrasados, con detalle por inquilino y unidad',
+    descripcion:
+      'Análisis completo de pagos pendientes y atrasados, con detalle por inquilino y unidad',
     tipo: 'morosidad',
     frecuenciaSugerida: 'semanal',
     incluirPdf: true,
@@ -146,10 +145,7 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const { searchParams } = new URL(req.url);
@@ -159,15 +155,12 @@ export async function GET(req: NextRequest) {
 
     // Filtrar por tipo si se especifica
     if (tipo) {
-      templates = templates.filter(t => t.tipo === tipo);
+      templates = templates.filter((t) => t.tipo === tipo);
     }
 
     return NextResponse.json(templates);
   } catch (error) {
     logger.error('Error al obtener plantillas:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener plantillas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener plantillas' }, { status: 500 });
   }
 }

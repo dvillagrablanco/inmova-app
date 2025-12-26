@@ -125,15 +125,13 @@ export function PhotoGallery({ entityType, entityId, canEdit = false }: PhotoGal
       )}
 
       {photos.length === 0 ? (
-        <p className="text-center text-sm text-muted-foreground">
-          No hay fotos disponibles
-        </p>
+        <p className="text-center text-sm text-muted-foreground">No hay fotos disponibles</p>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
           {photos.map((photo) => (
             <Card key={photo.id} className="group relative overflow-hidden">
               <CardContent className="p-0">
-                <div 
+                <div
                   className="relative aspect-video cursor-pointer bg-muted"
                   onClick={() => setSelectedPhoto(photo)}
                 >
@@ -179,9 +177,7 @@ export function PhotoGallery({ entityType, entityId, canEdit = false }: PhotoGal
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Subir Foto</DialogTitle>
-            <DialogDescription>
-              Selecciona una foto para agregar a la galería
-            </DialogDescription>
+            <DialogDescription>Selecciona una foto para agregar a la galería</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
@@ -223,11 +219,7 @@ export function PhotoGallery({ entityType, entityId, canEdit = false }: PhotoGal
           <DialogHeader>
             <div className="flex items-center justify-between">
               <DialogTitle>Vista de Foto</DialogTitle>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSelectedPhoto(null)}
-              >
+              <Button variant="ghost" size="icon" onClick={() => setSelectedPhoto(null)}>
                 <X className="h-4 w-4" />
               </Button>
             </div>

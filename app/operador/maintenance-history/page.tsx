@@ -180,167 +180,167 @@ export default function MaintenanceHistory() {
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto">
-            {/* Header */}
-            <div className="mb-6">
-              <Button variant="ghost" onClick={() => router.back()} className="mb-4 -ml-2">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Volver
-              </Button>
-              <h1 className="text-2xl md:text-3xl font-bold mb-2">Historial de Mantenimiento</h1>
-              <p className="text-muted-foreground">
-                {filteredRequests.length} de {requests.length} solicitudes
-              </p>
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-6">
+          <Button variant="ghost" onClick={() => router.back()} className="mb-4 -ml-2">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Volver
+          </Button>
+          <h1 className="text-2xl md:text-3xl font-bold mb-2">Historial de Mantenimiento</h1>
+          <p className="text-muted-foreground">
+            {filteredRequests.length} de {requests.length} solicitudes
+          </p>
+        </div>
+
+        {/* Búsqueda y filtros */}
+        <Card className="p-4 mb-6">
+          <div className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por título, descripción o edificio..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
             </div>
 
-            {/* Búsqueda y filtros */}
-            <Card className="p-4 mb-6">
-              <div className="space-y-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Buscar por título, descripción o edificio..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
+            <Button
+              variant="outline"
+              onClick={() => setShowFilters(!showFilters)}
+              className="w-full"
+            >
+              <Filter className="h-4 w-4 mr-2" />
+              {showFilters ? 'Ocultar' : 'Mostrar'} Filtros
+            </Button>
+
+            {showFilters && (
+              <div className="grid md:grid-cols-2 gap-3">
+                <div>
+                  <Label>Estado</Label>
+                  <Select value={estadoFilter} onValueChange={setEstadoFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="todos">Todos</SelectItem>
+                      <SelectItem value="pendiente">Pendiente</SelectItem>
+                      <SelectItem value="en_progreso">En Progreso</SelectItem>
+                      <SelectItem value="completada">Completada</SelectItem>
+                      <SelectItem value="cancelada">Cancelada</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                <Button
-                  variant="outline"
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="w-full"
-                >
-                  <Filter className="h-4 w-4 mr-2" />
-                  {showFilters ? 'Ocultar' : 'Mostrar'} Filtros
-                </Button>
-
-                {showFilters && (
-                  <div className="grid md:grid-cols-2 gap-3">
-                    <div>
-                      <Label>Estado</Label>
-                      <Select value={estadoFilter} onValueChange={setEstadoFilter}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Todos" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="todos">Todos</SelectItem>
-                          <SelectItem value="pendiente">Pendiente</SelectItem>
-                          <SelectItem value="en_progreso">En Progreso</SelectItem>
-                          <SelectItem value="completada">Completada</SelectItem>
-                          <SelectItem value="cancelada">Cancelada</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <Label>Prioridad</Label>
-                      <Select value={prioridadFilter} onValueChange={setPrioridadFilter}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Todas" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="todos">Todas</SelectItem>
-                          <SelectItem value="urgente">Urgente</SelectItem>
-                          <SelectItem value="alta">Alta</SelectItem>
-                          <SelectItem value="media">Media</SelectItem>
-                          <SelectItem value="baja">Baja</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </Card>
-
-            {/* Lista de solicitudes */}
-            {filteredRequests.length === 0 ? (
-              <Card className="p-8 text-center">
-                <Wrench className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-lg font-medium mb-2">No se encontraron solicitudes</p>
-                <p className="text-muted-foreground">
-                  {searchTerm || estadoFilter !== 'todos' || prioridadFilter !== 'todos'
-                    ? 'Intenta ajustar tus filtros'
-                    : 'Aún no hay solicitudes de mantenimiento'}
-                </p>
-              </Card>
-            ) : (
-              <div className="space-y-3">
-                {filteredRequests.map((request) => (
-                  <Card key={request.id} className="p-4 hover:shadow-md transition-shadow">
-                    <div className="space-y-3">
-                      {/* Header */}
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            {getTypeIcon(request.tipo)}
-                            <h3 className="font-semibold text-lg truncate">{request.titulo}</h3>
-                          </div>
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {request.descripcion}
-                          </p>
-                        </div>
-                        <div className="flex flex-col gap-1 items-end flex-shrink-0">
-                          {getStatusBadge(request.estado)}
-                          <Badge className={getPriorityColor(request.prioridad)}>
-                            {request.prioridad}
-                          </Badge>
-                        </div>
-                      </div>
-
-                      {/* Ubicación */}
-                      {request.building && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                          <span className="truncate">
-                            {request.building.nombre}
-                            {request.unit && ` - Unidad ${request.unit.numero}`}
-                          </span>
-                        </div>
-                      )}
-
-                      {/* Fechas */}
-                      <div className="flex flex-wrap items-center gap-4 text-sm">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
-                          <span>
-                            Solicitada:{' '}
-                            {format(new Date(request.fechaSolicitud), "d 'de' MMM 'de' yyyy", {
-                              locale: es,
-                            })}
-                          </span>
-                        </div>
-                        {request.fechaResolucion && (
-                          <div className="flex items-center gap-2">
-                            <AlertCircle className="h-4 w-4 text-green-500" />
-                            <span>
-                              Resuelta:{' '}
-                              {format(new Date(request.fechaResolucion), "d 'de' MMM", {
-                                locale: es,
-                              })}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Botón de ver detalle */}
-                      <div className="pt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => router.push(`/mantenimiento/${request.id}`)}
-                          className="w-full"
-                        >
-                          <FileText className="h-4 w-4 mr-2" />
-                          Ver Detalle
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
+                <div>
+                  <Label>Prioridad</Label>
+                  <Select value={prioridadFilter} onValueChange={setPrioridadFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Todas" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="todos">Todas</SelectItem>
+                      <SelectItem value="urgente">Urgente</SelectItem>
+                      <SelectItem value="alta">Alta</SelectItem>
+                      <SelectItem value="media">Media</SelectItem>
+                      <SelectItem value="baja">Baja</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             )}
           </div>
-        </AuthenticatedLayout>
+        </Card>
+
+        {/* Lista de solicitudes */}
+        {filteredRequests.length === 0 ? (
+          <Card className="p-8 text-center">
+            <Wrench className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <p className="text-lg font-medium mb-2">No se encontraron solicitudes</p>
+            <p className="text-muted-foreground">
+              {searchTerm || estadoFilter !== 'todos' || prioridadFilter !== 'todos'
+                ? 'Intenta ajustar tus filtros'
+                : 'Aún no hay solicitudes de mantenimiento'}
+            </p>
+          </Card>
+        ) : (
+          <div className="space-y-3">
+            {filteredRequests.map((request) => (
+              <Card key={request.id} className="p-4 hover:shadow-md transition-shadow">
+                <div className="space-y-3">
+                  {/* Header */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        {getTypeIcon(request.tipo)}
+                        <h3 className="font-semibold text-lg truncate">{request.titulo}</h3>
+                      </div>
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {request.descripcion}
+                      </p>
+                    </div>
+                    <div className="flex flex-col gap-1 items-end flex-shrink-0">
+                      {getStatusBadge(request.estado)}
+                      <Badge className={getPriorityColor(request.prioridad)}>
+                        {request.prioridad}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {/* Ubicación */}
+                  {request.building && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <span className="truncate">
+                        {request.building.nombre}
+                        {request.unit && ` - Unidad ${request.unit.numero}`}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Fechas */}
+                  <div className="flex flex-wrap items-center gap-4 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      <span>
+                        Solicitada:{' '}
+                        {format(new Date(request.fechaSolicitud), "d 'de' MMM 'de' yyyy", {
+                          locale: es,
+                        })}
+                      </span>
+                    </div>
+                    {request.fechaResolucion && (
+                      <div className="flex items-center gap-2">
+                        <AlertCircle className="h-4 w-4 text-green-500" />
+                        <span>
+                          Resuelta:{' '}
+                          {format(new Date(request.fechaResolucion), "d 'de' MMM", {
+                            locale: es,
+                          })}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Botón de ver detalle */}
+                  <div className="pt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => router.push(`/mantenimiento/${request.id}`)}
+                      className="w-full"
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Ver Detalle
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    </AuthenticatedLayout>
   );
 }

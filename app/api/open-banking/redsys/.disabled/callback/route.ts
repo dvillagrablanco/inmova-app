@@ -1,12 +1,12 @@
 /**
  * API Endpoint: Callback OAuth de Redsys PSD2
- * 
+ *
  * Este endpoint maneja el callback después de que el usuario autoriza
  * el acceso en su banco a través de Redsys PSD2.
- * 
+ *
  * Método: GET
  * Query params: code, state
- * 
+ *
  * @author INMOVA Development Team
  */
 
@@ -22,7 +22,6 @@ import { pkceStorage } from '../authorize/route';
 
 // Force dynamic rendering for this route
 export const dynamic = 'force-dynamic';
-
 
 export async function GET(request: NextRequest) {
   try {
@@ -44,17 +43,13 @@ export async function GET(request: NextRequest) {
     }
 
     if (!code || !state) {
-      return NextResponse.redirect(
-        new URL('/open-banking?error=missing_parameters', request.url)
-      );
+      return NextResponse.redirect(new URL('/open-banking?error=missing_parameters', request.url));
     }
 
     // Recuperar el code_verifier y validar el state
     const pkceData = pkceStorage.get(state);
     if (!pkceData) {
-      return NextResponse.redirect(
-        new URL('/open-banking?error=invalid_state', request.url)
-      );
+      return NextResponse.redirect(new URL('/open-banking?error=invalid_state', request.url));
     }
 
     // Eliminar el state usado (prevenir reutilización)
@@ -63,16 +58,12 @@ export async function GET(request: NextRequest) {
     // Verificar sesión
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return NextResponse.redirect(
-        new URL('/login?callbackUrl=/open-banking', request.url)
-      );
+      return NextResponse.redirect(new URL('/login?callbackUrl=/open-banking', request.url));
     }
 
     // Verificar que el userId coincida
     if (session.user.id !== pkceData.userId) {
-      return NextResponse.redirect(
-        new URL('/open-banking?error=user_mismatch', request.url)
-      );
+      return NextResponse.redirect(new URL('/open-banking?error=user_mismatch', request.url));
     }
 
     // Intercambiar el código por un access token
@@ -92,9 +83,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Redirigir a la página de open banking con éxito
-    return NextResponse.redirect(
-      new URL('/open-banking?success=true', request.url)
-    );
+    return NextResponse.redirect(new URL('/open-banking?success=true', request.url));
   } catch (error: any) {
     logger.error('Error en callback OAuth:', error);
     return NextResponse.redirect(

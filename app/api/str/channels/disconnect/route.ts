@@ -21,18 +21,12 @@ export async function POST(request: NextRequest) {
     const { listingId, channel } = body;
 
     if (!listingId || !channel) {
-      return NextResponse.json(
-        { error: 'Faltan parámetros requeridos' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'Faltan parámetros requeridos' }, { status: 400 });
     }
 
     // Validar que el canal es válido
-    if (!["airbnb", "booking", "vrbo", "homeaway"].includes(channel)) {
-      return NextResponse.json(
-        { error: 'Canal no válido' },
-        { status: 400 },
-      );
+    if (!['airbnb', 'booking', 'vrbo', 'homeaway'].includes(channel)) {
+      return NextResponse.json({ error: 'Canal no válido' }, { status: 400 });
     }
 
     logger.info(`[STR API] Desconectando canal ${channel} de listing ${listingId}`);
@@ -50,7 +44,7 @@ export async function POST(request: NextRequest) {
           success: false,
           message: 'Error al desconectar el canal',
         },
-        { status: 500 },
+        { status: 500 }
       );
     }
   } catch (error) {
@@ -60,7 +54,7 @@ export async function POST(request: NextRequest) {
         error: 'Error al desconectar el canal',
         details: (error as Error).message,
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

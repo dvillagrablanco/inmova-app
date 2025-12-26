@@ -1,9 +1,9 @@
 /**
  * CSV Export Helpers
- * 
+ *
  * Utilidades reutilizables para exportación de CSV con formato
  * optimizado para Excel y compatibilidad UTF-8.
- * 
+ *
  * @module csv-export-helpers
  * @since Semana 2, Tarea 2.6
  */
@@ -27,13 +27,13 @@ export const CSV_CONFIG = {
 
 /**
  * Genera CSV con formato optimizado para Excel
- * 
+ *
  * Incluye BOM (Byte Order Mark) para que Excel detecte automáticamente
  * la codificación UTF-8 y muestre correctamente caracteres especiales.
- * 
+ *
  * @param data - Array de objetos a convertir a CSV
  * @returns String CSV con BOM
- * 
+ *
  * @example
  * ```typescript
  * const data = [
@@ -59,10 +59,10 @@ export function generateCSV<T extends Record<string, any>>(data: T[]): string {
 
 /**
  * Formatea fechas para CSV en formato ISO 8601 (YYYY-MM-DD)
- * 
+ *
  * @param date - Fecha a formatear
  * @returns String de fecha o vacío si null
- * 
+ *
  * @example
  * ```typescript
  * formatDateForCSV(new Date('2024-12-18')) // '2024-12-18'
@@ -71,7 +71,7 @@ export function generateCSV<T extends Record<string, any>>(data: T[]): string {
  */
 export function formatDateForCSV(date: Date | null | undefined): string {
   if (!date) return '';
-  
+
   try {
     const d = date instanceof Date ? date : new Date(date);
     return d.toISOString().split('T')[0]; // YYYY-MM-DD
@@ -82,10 +82,10 @@ export function formatDateForCSV(date: Date | null | undefined): string {
 
 /**
  * Formatea fecha y hora para CSV en formato ISO 8601
- * 
+ *
  * @param date - Fecha a formatear
  * @returns String de fecha-hora o vacío si null
- * 
+ *
  * @example
  * ```typescript
  * formatDateTimeForCSV(new Date()) // '2024-12-18 14:30:00'
@@ -93,7 +93,7 @@ export function formatDateForCSV(date: Date | null | undefined): string {
  */
 export function formatDateTimeForCSV(date: Date | null | undefined): string {
   if (!date) return '';
-  
+
   try {
     const d = date instanceof Date ? date : new Date(date);
     return d.toISOString().replace('T', ' ').split('.')[0]; // YYYY-MM-DD HH:mm:ss
@@ -104,10 +104,10 @@ export function formatDateTimeForCSV(date: Date | null | undefined): string {
 
 /**
  * Formatea booleanos para CSV (Sí/No en lugar de true/false)
- * 
+ *
  * @param value - Valor booleano
  * @returns 'Sí' o 'No'
- * 
+ *
  * @example
  * ```typescript
  * formatBooleanForCSV(true) // 'Sí'
@@ -121,10 +121,10 @@ export function formatBooleanForCSV(value: boolean | null | undefined): string {
 
 /**
  * Formatea números monetarios para CSV con 2 decimales
- * 
+ *
  * @param value - Valor numérico
  * @returns String con 2 decimales o '0.00' si null
- * 
+ *
  * @example
  * ```typescript
  * formatMoneyForCSV(1234.5) // '1234.50'
@@ -138,10 +138,10 @@ export function formatMoneyForCSV(value: number | null | undefined): string {
 
 /**
  * Formatea arrays para CSV (separados por punto y coma)
- * 
+ *
  * @param arr - Array a formatear
  * @returns String separado por '; '
- * 
+ *
  * @example
  * ```typescript
  * formatArrayForCSV(['agua', 'luz', 'gas']) // 'agua; luz; gas'
@@ -154,13 +154,13 @@ export function formatArrayForCSV(arr: string[] | null | undefined): string {
 
 /**
  * Limpia texto para CSV (elimina saltos de línea y comillas dobles)
- * 
+ *
  * @param text - Texto a limpiar
  * @returns Texto limpio
  */
 export function sanitizeTextForCSV(text: string | null | undefined): string {
   if (!text) return '';
-  
+
   return text
     .replace(/\r\n|\r|\n/g, ' ') // Reemplazar saltos de línea con espacio
     .replace(/"/g, "'") // Reemplazar comillas dobles con simples
@@ -169,11 +169,11 @@ export function sanitizeTextForCSV(text: string | null | undefined): string {
 
 /**
  * Crea una respuesta HTTP de CSV con headers apropiados
- * 
+ *
  * @param csv - String CSV
  * @param filename - Nombre del archivo (sin extensión)
  * @returns NextResponse con headers correctos
- * 
+ *
  * @example
  * ```typescript
  * const csv = generateCSV(data);
@@ -190,8 +190,8 @@ export function createCSVResponse(csv: string, filename: string): NextResponse {
       'Content-Type': 'text/csv; charset=utf-8',
       'Content-Disposition': `attachment; filename="${fullFilename}"`,
       'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0',
+      Pragma: 'no-cache',
+      Expires: '0',
     },
   });
 }
@@ -208,21 +208,18 @@ export interface ExportOptions {
 
 /**
  * Genera nombre de archivo con timestamp opcional
- * 
+ *
  * @param baseName - Nombre base del archivo
  * @param options - Opciones de exportación
  * @returns Nombre de archivo con timestamp si aplica
- * 
+ *
  * @example
  * ```typescript
  * generateFilename('contratos', { includeTimestamp: true })
  * // 'contratos_2024-12-18_14-30-00.csv'
  * ```
  */
-export function generateFilename(
-  baseName: string,
-  options: ExportOptions = {}
-): string {
+export function generateFilename(baseName: string, options: ExportOptions = {}): string {
   const { includeTimestamp = false } = options;
 
   if (!includeTimestamp) {
@@ -230,17 +227,14 @@ export function generateFilename(
   }
 
   const now = new Date();
-  const timestamp = now
-    .toISOString()
-    .replace(/[T:]/g, '-')
-    .split('.')[0];
+  const timestamp = now.toISOString().replace(/[T:]/g, '-').split('.')[0];
 
   return `${baseName}_${timestamp}.csv`;
 }
 
 /**
  * Valida que los datos no excedan el límite de filas
- * 
+ *
  * @param dataLength - Número de filas
  * @param maxRows - Límite máximo
  * @returns true si está dentro del límite
@@ -278,7 +272,7 @@ export interface ExportMetadata {
 
 /**
  * Genera metadata para el export
- * 
+ *
  * @param totalRecords - Total de registros exportados
  * @param maxRecords - Máximo permitido
  * @returns Objeto con metadata

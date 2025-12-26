@@ -8,15 +8,7 @@ export const dynamic = 'force-dynamic';
 // POST /api/auth-proveedor/register - Registro de proveedores
 export async function POST(req: NextRequest) {
   try {
-    const { 
-      nombre, 
-      tipo, 
-      telefono, 
-      email, 
-      password, 
-      direccion,
-      companyId 
-    } = await req.json();
+    const { nombre, tipo, telefono, email, password, direccion, companyId } = await req.json();
 
     // Validaciones
     if (!nombre || !tipo || !telefono || !email || !password) {
@@ -32,10 +24,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (proveedorExistente) {
-      return NextResponse.json(
-        { error: 'El email ya está registrado' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'El email ya está registrado' }, { status: 400 });
     }
 
     // Si no se proporciona companyId, usar el primero disponible (para demo)
@@ -44,10 +33,7 @@ export async function POST(req: NextRequest) {
     if (!targetCompanyId) {
       const firstCompany = await prisma.company.findFirst();
       if (!firstCompany) {
-        return NextResponse.json(
-          { error: 'No hay empresas disponibles' },
-          { status: 500 }
-        );
+        return NextResponse.json({ error: 'No hay empresas disponibles' }, { status: 500 });
       }
       targetCompanyId = firstCompany.id;
     }
@@ -70,13 +56,12 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    logger.info(
-      `Nuevo proveedor registrado: ${nuevoProveedor.nombre} (${nuevoProveedor.email})`
-    );
+    logger.info(`Nuevo proveedor registrado: ${nuevoProveedor.nombre} (${nuevoProveedor.email})`);
 
     return NextResponse.json({
       success: true,
-      message: 'Registro exitoso. Tu cuenta está pendiente de aprobación por parte del administrador.',
+      message:
+        'Registro exitoso. Tu cuenta está pendiente de aprobación por parte del administrador.',
       proveedor: {
         id: nuevoProveedor.id,
         nombre: nuevoProveedor.nombre,
@@ -85,9 +70,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     logger.error('Error en registro de proveedor:', error);
-    return NextResponse.json(
-      { error: 'Error al registrar proveedor' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al registrar proveedor' }, { status: 500 });
   }
 }

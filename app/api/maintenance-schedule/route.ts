@@ -80,10 +80,7 @@ export async function POST(request: NextRequest) {
     } = body;
 
     if (!titulo || !descripcion || !tipo || !frecuencia || !proximaFecha) {
-      return NextResponse.json(
-        { error: 'Campos requeridos faltantes' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Campos requeridos faltantes' }, { status: 400 });
     }
 
     const schedule = await prisma.maintenanceSchedule.create({
@@ -115,9 +112,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(schedule, { status: 201 });
   } catch (error) {
     logger.error('Error creating maintenance schedule:', error);
-    return NextResponse.json(
-      { error: 'Error al crear mantenimiento programado' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear mantenimiento programado' }, { status: 500 });
   }
 }

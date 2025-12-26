@@ -147,11 +147,7 @@ export async function getColivingProfile(tenantId: string) {
   }
 }
 
-export async function addReputationPoints(
-  profileId: string,
-  points: number,
-  reason: string
-) {
+export async function addReputationPoints(profileId: string, points: number, reason: string) {
   try {
     const profile = await prisma.colivingProfile.findUnique({
       where: { id: profileId },
@@ -219,10 +215,7 @@ export async function addBadge(
 // SISTEMA DE MATCHING
 // =====================
 
-export async function calculateCompatibilityScore(
-  profile1: any,
-  profile2: any
-): Promise<number> {
+export async function calculateCompatibilityScore(profile1: any, profile2: any): Promise<number> {
   let score = 0;
 
   // Comparar intereses (40%)
@@ -301,11 +294,7 @@ export async function findMatches(profileId: string) {
   }
 }
 
-export async function createMatch(
-  profile1Id: string,
-  profile2Id: string,
-  companyId: string
-) {
+export async function createMatch(profile1Id: string, profile2Id: string, companyId: string) {
   try {
     const profile1 = await prisma.colivingProfile.findUnique({
       where: { id: profile1Id },
@@ -530,7 +519,7 @@ export async function likePost(postId: string, tenantId: string) {
     }
 
     const likes = (post.likes as string[]) || [];
-    
+
     if (likes.includes(tenantId)) {
       // Ya le dio like, quitar like
       const newLikes = likes.filter((id) => id !== tenantId);
@@ -554,11 +543,7 @@ export async function likePost(postId: string, tenantId: string) {
   }
 }
 
-export async function addComment(
-  postId: string,
-  tenantId: string,
-  comentario: string
-) {
+export async function addComment(postId: string, tenantId: string, comentario: string) {
   try {
     const post = await prisma.colivingActivityPost.findUnique({
       where: { id: postId },

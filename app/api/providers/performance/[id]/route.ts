@@ -1,8 +1,8 @@
 /**
  * API ENDPOINT: Métricas de Rendimiento de Proveedor
- * 
+ *
  * GET /api/providers/performance/[id]
- * 
+ *
  * Obtiene las métricas detalladas de rendimiento de un proveedor específico.
  */
 
@@ -75,7 +75,9 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       ...response,
     });
   } catch (error: any) {
-    logError(new Error(error.message || 'Error obteniendo métricas de rendimiento'), { context: 'GET /api/providers/performance/[id]' });
+    logError(new Error(error.message || 'Error obteniendo métricas de rendimiento'), {
+      context: 'GET /api/providers/performance/[id]',
+    });
 
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });

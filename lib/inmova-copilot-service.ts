@@ -7,7 +7,7 @@ import { prisma } from './db';
 import { format, addDays, differenceInDays, isPast, isToday, isTomorrow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-export type CopilotNotificationType = 
+export type CopilotNotificationType =
   | 'payment_reminder' // Recordatorio de pago
   | 'contract_expiring' // Contrato próximo a vencer
   | 'maintenance_due' // Mantenimiento pendiente
@@ -59,44 +59,42 @@ export interface CopilotInsights {
 /**
  * Genera insights y notificaciones proactivas
  */
-export async function generateCopilotInsights(
-  companyId: string
-): Promise<CopilotInsights> {
+export async function generateCopilotInsights(companyId: string): Promise<CopilotInsights> {
   const notifications: CopilotNotification[] = [];
-  
+
   // 1. Verificar pagos pendientes
   const paymentNotifications = await checkPendingPayments(companyId);
   notifications.push(...paymentNotifications);
-  
+
   // 2. Verificar contratos por vencer
   const contractNotifications = await checkExpiringContracts(companyId);
   notifications.push(...contractNotifications);
-  
+
   // 3. Verificar mantenimientos pendientes
   const maintenanceNotifications = await checkMaintenanceDue(companyId);
   notifications.push(...maintenanceNotifications);
-  
+
   // 4. Verificar ocupación
   const occupancyNotifications = await checkOccupancyRates(companyId);
   notifications.push(...occupancyNotifications);
-  
+
   // 5. Sugerencias de precios
   const pricingNotifications = await checkPricingOpportunities(companyId);
   notifications.push(...pricingNotifications);
-  
+
   // Ordenar por prioridad
   const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
   notifications.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
-  
+
   // Generar KPIs
   const kpis = await generateKPIs(companyId);
-  
+
   // Generar recomendaciones
   const recommendations = generateRecommendations(notifications, kpis);
-  
+
   // Generar resumen
   const summary = generateSummary(notifications, kpis);
-  
+
   return {
     summary,
     kpis,
@@ -110,7 +108,7 @@ export async function generateCopilotInsights(
  */
 async function checkPendingPayments(companyId: string): Promise<CopilotNotification[]> {
   const notifications: CopilotNotification[] = [];
-  
+
   const payments = await prisma.payment.findMany({
     where: {
       contract: {
@@ -135,23 +133,23 @@ async function checkPendingPayments(companyId: string): Promise<CopilotNotificat
     },
     take: 10,
   });
-  
-  payments.forEach(payment => {
+
+  payments.forEach((payment) => {
     const daysUntilDue = differenceInDays(payment.fechaVencimiento, new Date());
     const isOverdue = daysUntilDue < 0;
-    
+
     let priority: Priority = 'medium';
     if (isOverdue) {
       priority = 'urgent';
     } else if (daysUntilDue <= 1) {
       priority = 'high';
     }
-    
+
     notifications.push({
       id: `payment_${payment.id}`,
       type: 'payment_reminder',
       priority,
-      title: isOverdue 
+      title: isOverdue
         ? `Pago vencido - ${payment.contract?.tenant?.nombreCompleto}`
         : `Pago próximo a vencer - ${payment.contract?.tenant?.nombreCompleto}`,
       message: `Pago de €${payment.monto} ${isOverdue ? 'vencido hace' : 'vence en'} ${Math.abs(daysUntilDue)} días`,
@@ -176,7 +174,7 @@ async function checkPendingPayments(companyId: string): Promise<CopilotNotificat
       createdAt: new Date(),
     });
   });
-  
+
   return notifications;
 }
 
@@ -185,7 +183,7 @@ async function checkPendingPayments(companyId: string): Promise<CopilotNotificat
  */
 async function checkExpiringContracts(companyId: string): Promise<CopilotNotification[]> {
   const notifications: CopilotNotification[] = [];
-  
+
   const contracts = await prisma.contract.findMany({
     where: {
       unit: {
@@ -205,17 +203,17 @@ async function checkExpiringContracts(companyId: string): Promise<CopilotNotific
     },
     take: 10,
   });
-  
-  contracts.forEach(contract => {
+
+  contracts.forEach((contract) => {
     const daysUntilEnd = differenceInDays(contract.fechaFin, new Date());
-    
+
     let priority: Priority = 'low';
     if (daysUntilEnd <= 30) {
       priority = 'high';
     } else if (daysUntilEnd <= 45) {
       priority = 'medium';
     }
-    
+
     notifications.push({
       id: `contract_${contract.id}`,
       type: 'contract_expiring',
@@ -243,7 +241,7 @@ async function checkExpiringContracts(companyId: string): Promise<CopilotNotific
       createdAt: new Date(),
     });
   });
-  
+
   return notifications;
 }
 
@@ -252,7 +250,7 @@ async function checkExpiringContracts(companyId: string): Promise<CopilotNotific
  */
 async function checkMaintenanceDue(companyId: string): Promise<CopilotNotification[]> {
   const notifications: CopilotNotification[] = [];
-  
+
   const maintenances = await prisma.maintenanceRequest.findMany({
     where: {
       unit: {
@@ -272,10 +270,10 @@ async function checkMaintenanceDue(companyId: string): Promise<CopilotNotificati
     },
     take: 10,
   });
-  
-  maintenances.forEach(maintenance => {
+
+  maintenances.forEach((maintenance) => {
     const isOverdue = maintenance.fechaProgramada ? isPast(maintenance.fechaProgramada) : false;
-    
+
     notifications.push({
       id: `maintenance_${maintenance.id}`,
       type: 'maintenance_due',
@@ -298,7 +296,7 @@ async function checkMaintenanceDue(companyId: string): Promise<CopilotNotificati
       createdAt: new Date(),
     });
   });
-  
+
   return notifications;
 }
 
@@ -307,10 +305,10 @@ async function checkMaintenanceDue(companyId: string): Promise<CopilotNotificati
  */
 async function checkOccupancyRates(companyId: string): Promise<CopilotNotification[]> {
   const notifications: CopilotNotification[] = [];
-  
+
   // Calcular ocupación
-  const totalUnits = await prisma.unit.count({ 
-    where: { 
+  const totalUnits = await prisma.unit.count({
+    where: {
       building: {
         companyId,
       },
@@ -328,9 +326,9 @@ async function checkOccupancyRates(companyId: string): Promise<CopilotNotificati
       },
     },
   });
-  
+
   const occupancyRate = totalUnits > 0 ? (occupiedUnits / totalUnits) * 100 : 0;
-  
+
   if (occupancyRate < 70) {
     notifications.push({
       id: 'occupancy_low',
@@ -349,7 +347,7 @@ async function checkOccupancyRates(companyId: string): Promise<CopilotNotificati
       createdAt: new Date(),
     });
   }
-  
+
   return notifications;
 }
 
@@ -358,10 +356,10 @@ async function checkOccupancyRates(companyId: string): Promise<CopilotNotificati
  */
 async function checkPricingOpportunities(companyId: string): Promise<CopilotNotification[]> {
   const notifications: CopilotNotification[] = [];
-  
+
   // Aquí podrías implementar lógica de análisis de mercado
   // Por ahora, ejemplo simple
-  
+
   return notifications;
 }
 
@@ -369,8 +367,8 @@ async function checkPricingOpportunities(companyId: string): Promise<CopilotNoti
  * Genera KPIs principales
  */
 async function generateKPIs(companyId: string) {
-  const totalUnits = await prisma.unit.count({ 
-    where: { 
+  const totalUnits = await prisma.unit.count({
+    where: {
       building: {
         companyId,
       },
@@ -384,7 +382,7 @@ async function generateKPIs(companyId: string) {
       contracts: { some: { estado: 'activo' } },
     },
   });
-  
+
   const pendingPayments = await prisma.payment.count({
     where: {
       contract: {
@@ -397,7 +395,7 @@ async function generateKPIs(companyId: string) {
       estado: 'pendiente',
     },
   });
-  
+
   const activeContracts = await prisma.contract.count({
     where: {
       unit: {
@@ -408,14 +406,19 @@ async function generateKPIs(companyId: string) {
       estado: 'activo',
     },
   });
-  
+
   const occupancyRate = totalUnits > 0 ? (occupiedUnits / totalUnits) * 100 : 0;
-  
+
   return [
     {
       label: 'Tasa de Ocupación',
       value: `${occupancyRate.toFixed(1)}%`,
-      trend: occupancyRate > 80 ? 'up' as const : occupancyRate < 60 ? 'down' as const : 'neutral' as const,
+      trend:
+        occupancyRate > 80
+          ? ('up' as const)
+          : occupancyRate < 60
+            ? ('down' as const)
+            : ('neutral' as const),
       good: occupancyRate > 70,
     },
     {
@@ -426,7 +429,7 @@ async function generateKPIs(companyId: string) {
     {
       label: 'Pagos Pendientes',
       value: pendingPayments.toString(),
-      trend: pendingPayments > 5 ? 'down' as const : 'neutral' as const,
+      trend: pendingPayments > 5 ? ('down' as const) : ('neutral' as const),
       good: pendingPayments < 5,
     },
   ];
@@ -437,34 +440,40 @@ async function generateKPIs(companyId: string) {
  */
 function generateRecommendations(notifications: CopilotNotification[], kpis: any[]): string[] {
   const recommendations: string[] = [];
-  
+
   // Recomendaciones basadas en notificaciones urgentes
-  const urgentCount = notifications.filter(n => n.priority === 'urgent').length;
+  const urgentCount = notifications.filter((n) => n.priority === 'urgent').length;
   if (urgentCount > 0) {
-    recommendations.push(`⚠️ Tienes ${urgentCount} notificaciones urgentes que requieren atención inmediata`);
+    recommendations.push(
+      `⚠️ Tienes ${urgentCount} notificaciones urgentes que requieren atención inmediata`
+    );
   }
-  
+
   // Recomendaciones basadas en KPIs
-  const occupancyKPI = kpis.find(k => k.label === 'Tasa de Ocupación');
+  const occupancyKPI = kpis.find((k) => k.label === 'Tasa de Ocupación');
   if (occupancyKPI && !occupancyKPI.good) {
-    recommendations.push('📉 Considera ajustar precios o mejorar el marketing para aumentar la ocupación');
+    recommendations.push(
+      '📉 Considera ajustar precios o mejorar el marketing para aumentar la ocupación'
+    );
   }
-  
-  const paymentsKPI = kpis.find(k => k.label === 'Pagos Pendientes');
+
+  const paymentsKPI = kpis.find((k) => k.label === 'Pagos Pendientes');
   if (paymentsKPI && !paymentsKPI.good) {
     recommendations.push('💳 Revisa los pagos pendientes y envía recordatorios a los inquilinos');
   }
-  
+
   // Recomendaciones generales
-  const expiringContracts = notifications.filter(n => n.type === 'contract_expiring').length;
+  const expiringContracts = notifications.filter((n) => n.type === 'contract_expiring').length;
   if (expiringContracts > 3) {
-    recommendations.push(`📝 Planifica la renovación de ${expiringContracts} contratos que vencen próximamente`);
+    recommendations.push(
+      `📝 Planifica la renovación de ${expiringContracts} contratos que vencen próximamente`
+    );
   }
-  
+
   if (recommendations.length === 0) {
     recommendations.push('✅ Todo está funcionando correctamente. Mantén el buen trabajo!');
   }
-  
+
   return recommendations;
 }
 
@@ -472,9 +481,9 @@ function generateRecommendations(notifications: CopilotNotification[], kpis: any
  * Genera resumen ejecutivo
  */
 function generateSummary(notifications: CopilotNotification[], kpis: any[]): string {
-  const urgent = notifications.filter(n => n.priority === 'urgent').length;
-  const high = notifications.filter(n => n.priority === 'high').length;
-  
+  const urgent = notifications.filter((n) => n.priority === 'urgent').length;
+  const high = notifications.filter((n) => n.priority === 'high').length;
+
   if (urgent > 0) {
     return `Tienes ${urgent} notificaciones urgentes y ${high} de alta prioridad que requieren tu atención.`;
   } else if (high > 0) {

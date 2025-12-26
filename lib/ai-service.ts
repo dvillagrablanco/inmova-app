@@ -27,12 +27,7 @@ export async function generateAICompletion(
   messages: AIMessage[],
   options: AICompletionOptions = {}
 ): Promise<string> {
-  const {
-    model = 'gpt-4',
-    temperature = 0.7,
-    maxTokens = 1000,
-    systemPrompt,
-  } = options;
+  const { model = 'gpt-4', temperature = 0.7, maxTokens = 1000, systemPrompt } = options;
 
   try {
     // Agregar system prompt si se proporciona
@@ -44,7 +39,7 @@ export async function generateAICompletion(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_KEY}`,
+        Authorization: `Bearer ${API_KEY}`,
       },
       body: JSON.stringify({
         model,
@@ -69,14 +64,12 @@ export async function generateAICompletion(
 /**
  * Genera sugerencias proactivas basadas en contexto
  */
-export async function generateProactiveSuggestions(
-  context: {
-    userRole: string;
-    companyType: string;
-    recentActivities: string[];
-    currentPage: string;
-  }
-): Promise<string[]> {
+export async function generateProactiveSuggestions(context: {
+  userRole: string;
+  companyType: string;
+  recentActivities: string[];
+  currentPage: string;
+}): Promise<string[]> {
   try {
     const systemPrompt = `Eres un asistente experto en gestión inmobiliaria. 
 Analiza el contexto del usuario y genera 3-5 sugerencias proactivas y accionables 
@@ -90,10 +83,11 @@ para mejorar su productividad. Responde SOLO con un array JSON de strings, sin e
 
 Genera sugerencias relevantes.`;
 
-    const response = await generateAICompletion(
-      [{ role: 'user', content: userPrompt }],
-      { systemPrompt, temperature: 0.8, maxTokens: 500 }
-    );
+    const response = await generateAICompletion([{ role: 'user', content: userPrompt }], {
+      systemPrompt,
+      temperature: 0.8,
+      maxTokens: 500,
+    });
 
     // Parsear el JSON de la respuesta
     const suggestions = JSON.parse(response);
@@ -129,10 +123,11 @@ Extrae:
 
 Responde SOLO con JSON válido.`;
 
-    const response = await generateAICompletion(
-      [{ role: 'user', content: userPrompt }],
-      { systemPrompt, temperature: 0.3, maxTokens: 1500 }
-    );
+    const response = await generateAICompletion([{ role: 'user', content: userPrompt }], {
+      systemPrompt,
+      temperature: 0.3,
+      maxTokens: 1500,
+    });
 
     return JSON.parse(response);
   } catch (error) {
@@ -170,10 +165,7 @@ Tu objetivo es:
 
 Responde en español de manera concisa pero completa.`;
 
-    const messages: AIMessage[] = [
-      ...conversationHistory,
-      { role: 'user', content: userQuery },
-    ];
+    const messages: AIMessage[] = [...conversationHistory, { role: 'user', content: userQuery }];
 
     return await generateAICompletion(messages, {
       systemPrompt,
@@ -189,17 +181,15 @@ Responde en español de manera concisa pero completa.`;
 /**
  * Genera descripciones optimizadas para listings de STR
  */
-export async function generateSTRDescription(
-  propertyDetails: {
-    tipo: string;
-    ubicacion: string;
-    habitaciones: number;
-    baños: number;
-    superficie: number;
-    amenidades: string[];
-    cercaDe: string[];
-  }
-): Promise<{
+export async function generateSTRDescription(propertyDetails: {
+  tipo: string;
+  ubicacion: string;
+  habitaciones: number;
+  baños: number;
+  superficie: number;
+  amenidades: string[];
+  cercaDe: string[];
+}): Promise<{
   titulo: string;
   descripcionCorta: string;
   descripcionLarga: string;
@@ -226,10 +216,11 @@ Genera un JSON con:
 - descripcionLarga (3-4 párrafos, detallada y persuasiva)
 - highlights (array de 5-7 puntos clave)`;
 
-    const response = await generateAICompletion(
-      [{ role: 'user', content: userPrompt }],
-      { systemPrompt, temperature: 0.8, maxTokens: 1200 }
-    );
+    const response = await generateAICompletion([{ role: 'user', content: userPrompt }], {
+      systemPrompt,
+      temperature: 0.8,
+      maxTokens: 1200,
+    });
 
     return JSON.parse(response);
   } catch (error) {
@@ -271,10 +262,11 @@ Responde en formato JSON con:
 - predicciones: array con {mes, ocupacionEstimada, confianza}
 - recomendaciones: array de strings con sugerencias accionables`;
 
-    const response = await generateAICompletion(
-      [{ role: 'user', content: userPrompt }],
-      { systemPrompt, temperature: 0.5, maxTokens: 1000 }
-    );
+    const response = await generateAICompletion([{ role: 'user', content: userPrompt }], {
+      systemPrompt,
+      temperature: 0.5,
+      maxTokens: 1000,
+    });
 
     return JSON.parse(response);
   } catch (error) {
@@ -326,10 +318,11 @@ Genera un JSON con:
 - hashtags: array de hashtags relevantes
 - callToAction: llamada a la acción persuasiva`;
 
-    const response = await generateAICompletion(
-      [{ role: 'user', content: userPrompt }],
-      { systemPrompt, temperature: 0.8, maxTokens: 600 }
-    );
+    const response = await generateAICompletion([{ role: 'user', content: userPrompt }], {
+      systemPrompt,
+      temperature: 0.8,
+      maxTokens: 600,
+    });
 
     return JSON.parse(response);
   } catch (error) {

@@ -60,16 +60,14 @@ export function VerticalOnboardingTour({ onComplete, onSkip }: VerticalOnboardin
           </Button>
         </div>
         <p className="text-muted-foreground mb-6">
-          El sistema de tours interactivos está temporalmente deshabilitado. 
-          Explora el panel lateral para acceder a todas las funcionalidades.
+          El sistema de tours interactivos está temporalmente deshabilitado. Explora el panel
+          lateral para acceder a todas las funcionalidades.
         </p>
         <div className="flex gap-2 justify-end">
           <Button variant="outline" onClick={handleSkip}>
             Saltar
           </Button>
-          <Button onClick={handleComplete}>
-            Entendido
-          </Button>
+          <Button onClick={handleComplete}>Entendido</Button>
         </div>
       </Card>
     </div>

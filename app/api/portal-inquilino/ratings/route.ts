@@ -39,10 +39,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ ratings });
   } catch (error: any) {
     logger.error('Error al obtener valoraciones:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener valoraciones' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener valoraciones' }, { status: 500 });
   }
 }
 
@@ -62,17 +59,11 @@ export async function POST(request: NextRequest) {
 
     // Validaciones
     if (!tipo || !puntuacion) {
-      return NextResponse.json(
-        { error: 'Tipo y puntuación son requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Tipo y puntuación son requeridos' }, { status: 400 });
     }
 
     if (puntuacion < 1 || puntuacion > 5) {
-      return NextResponse.json(
-        { error: 'La puntuación debe estar entre 1 y 5' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'La puntuación debe estar entre 1 y 5' }, { status: 400 });
     }
 
     // Buscar el inquilino
@@ -104,10 +95,7 @@ export async function POST(request: NextRequest) {
     // Obtener la compañía del contrato activo
     const companyId = tenant.contracts[0]?.unit?.building?.company?.id;
     if (!companyId) {
-      return NextResponse.json(
-        { error: 'No se encontró una compañía asociada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'No se encontró una compañía asociada' }, { status: 404 });
     }
 
     // Crear la valoración
@@ -125,9 +113,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ rating }, { status: 201 });
   } catch (error: any) {
     logger.error('Error al crear valoración:', error);
-    return NextResponse.json(
-      { error: 'Error al crear valoración' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear valoración' }, { status: 500 });
   }
 }

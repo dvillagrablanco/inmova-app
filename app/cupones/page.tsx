@@ -170,11 +170,11 @@ export default function CuponesPage() {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-      ...formData,
-      valor: parseFloat(formData.valor),
-      usosMaximos: formData.usosMaximos ? parseInt(formData.usosMaximos) : null,
-      usosPorUsuario: formData.usosPorUsuario ? parseInt(formData.usosPorUsuario) : null,
-      montoMinimo: formData.montoMinimo ? parseFloat(formData.montoMinimo) : null,
+          ...formData,
+          valor: parseFloat(formData.valor),
+          usosMaximos: formData.usosMaximos ? parseInt(formData.usosMaximos) : null,
+          usosPorUsuario: formData.usosPorUsuario ? parseInt(formData.usosPorUsuario) : null,
+          montoMinimo: formData.montoMinimo ? parseFloat(formData.montoMinimo) : null,
         }),
       });
 
@@ -332,9 +332,7 @@ export default function CuponesPage() {
               <Tag className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                Cupones de Descuento
-              </h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Cupones de Descuento</h1>
               <p className="text-sm text-gray-600 mt-1">
                 Gestiona códigos promocionales y descuentos
               </p>
@@ -356,9 +354,7 @@ export default function CuponesPage() {
               </DialogTrigger>
               <DialogContent className="max-w-2xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>
-                    {editingCoupon ? 'Editar Cupón' : 'Crear Nuevo Cupón'}
-                  </DialogTitle>
+                  <DialogTitle>{editingCoupon ? 'Editar Cupón' : 'Crear Nuevo Cupón'}</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -441,9 +437,7 @@ export default function CuponesPage() {
                     <Input
                       id="descripcion"
                       value={formData.descripcion}
-                      onChange={(e) =>
-                        setFormData({ ...formData, descripcion: e.target.value })
-                      }
+                      onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
                       placeholder="Descuento de verano 2024"
                     />
                   </div>
@@ -456,9 +450,7 @@ export default function CuponesPage() {
                         type="number"
                         min="1"
                         value={formData.usosMaximos}
-                        onChange={(e) =>
-                          setFormData({ ...formData, usosMaximos: e.target.value })
-                        }
+                        onChange={(e) => setFormData({ ...formData, usosMaximos: e.target.value })}
                         placeholder="Ilimitado"
                       />
                     </div>
@@ -484,9 +476,7 @@ export default function CuponesPage() {
                         id="fechaInicio"
                         type="date"
                         value={formData.fechaInicio}
-                        onChange={(e) =>
-                          setFormData({ ...formData, fechaInicio: e.target.value })
-                        }
+                        onChange={(e) => setFormData({ ...formData, fechaInicio: e.target.value })}
                         required
                       />
                     </div>
@@ -505,11 +495,7 @@ export default function CuponesPage() {
                   </div>
 
                   <div className="flex justify-end gap-2 pt-4 border-t">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setOpenDialog(false)}
-                    >
+                    <Button type="button" variant="outline" onClick={() => setOpenDialog(false)}>
                       Cancelar
                     </Button>
                     <Button type="submit" className="gradient-primary shadow-primary">
@@ -714,8 +700,7 @@ export default function CuponesPage() {
                     <div className="flex items-center justify-between">
                       <span className="text-gray-600">Usos:</span>
                       <span className="font-medium">
-                        {coupon.usosActuales}{' '}
-                        {coupon.usosMaximos ? `/ ${coupon.usosMaximos}` : ''}
+                        {coupon.usosActuales} {coupon.usosMaximos ? `/ ${coupon.usosMaximos}` : ''}
                       </span>
                     </div>
                     {coupon.montoMinimo && (
@@ -742,9 +727,7 @@ export default function CuponesPage() {
                       <div className="pt-3 border-t">
                         <div className="flex items-center gap-1 text-indigo-600">
                           <TrendingUp className="h-4 w-4" />
-                          <span className="font-medium">
-                            {coupon._count.usos} usos registrados
-                          </span>
+                          <span className="font-medium">{coupon._count.usos} usos registrados</span>
                         </div>
                       </div>
                     )}
@@ -755,6 +738,6 @@ export default function CuponesPage() {
           </div>
         )}
       </div>
-      </AuthenticatedLayout>
+    </AuthenticatedLayout>
   );
 }

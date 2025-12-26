@@ -25,10 +25,10 @@ export function useLocalStorage<T>(
         setStoredValue(JSON.parse(item));
       }
     } catch (error) {
-      logError(
-        error instanceof Error ? error : new Error('localStorage read error'),
-        { context: 'useLocalStorage', key }
-      );
+      logError(error instanceof Error ? error : new Error('localStorage read error'), {
+        context: 'useLocalStorage',
+        key,
+      });
     } finally {
       setIsLoaded(true);
     }
@@ -40,19 +40,19 @@ export function useLocalStorage<T>(
     try {
       // Allow value to be a function so we have same API as useState
       const valueToStore = value instanceof Function ? value(storedValue) : value;
-      
+
       // Save state
       setStoredValue(valueToStore);
-      
+
       // Save to local storage
       if (typeof window !== 'undefined') {
         window.localStorage.setItem(key, JSON.stringify(valueToStore));
       }
     } catch (error) {
-      logError(
-        error instanceof Error ? error : new Error('localStorage write error'),
-        { context: 'useLocalStorage', key }
-      );
+      logError(error instanceof Error ? error : new Error('localStorage write error'), {
+        context: 'useLocalStorage',
+        key,
+      });
     }
   };
 

@@ -29,8 +29,11 @@ export function getRecommendedDimensions(type: 'card' | 'hero' | 'thumbnail' | '
 /**
  * Genera srcset para imágenes responsivas
  */
-export function generateSrcSet(src: string, widths: number[] = [320, 640, 960, 1280, 1920]): string {
-  return widths.map(width => `${src}?w=${width} ${width}w`).join(', ');
+export function generateSrcSet(
+  src: string,
+  widths: number[] = [320, 640, 960, 1280, 1920]
+): string {
+  return widths.map((width) => `${src}?w=${width} ${width}w`).join(', ');
 }
 
 /**
@@ -56,7 +59,10 @@ export function calculateImageSizes(breakpoints?: Record<string, string>): strin
 /**
  * Prioriza la carga de imágenes críticas
  */
-export function shouldPrioritizeImage(index: number, viewportPosition: 'above-fold' | 'below-fold'): boolean {
+export function shouldPrioritizeImage(
+  index: number,
+  viewportPosition: 'above-fold' | 'below-fold'
+): boolean {
   // Priorizar las primeras 2 imágenes above-fold
   if (viewportPosition === 'above-fold' && index < 2) {
     return true;

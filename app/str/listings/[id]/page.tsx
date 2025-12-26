@@ -4,13 +4,7 @@ import { useEffect, useState } from 'react';
 import logger from '@/lib/logger';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -106,12 +100,12 @@ export default function ListingDetailPage() {
   if (loading) {
     return (
       <AuthenticatedLayout>
-            <div className="max-w-7xl mx-auto">
-              <div className="flex items-center justify-center py-12">
-                <RefreshCw className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            </div>
-          </AuthenticatedLayout>
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-center py-12">
+            <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        </div>
+      </AuthenticatedLayout>
     );
   }
 
@@ -133,11 +127,7 @@ export default function ListingDetailPage() {
     <div className="container mx-auto py-8">
       {/* Header */}
       <div className="mb-6">
-        <Button
-          variant="ghost"
-          onClick={() => router.push('/str/listings')}
-          className="mb-4"
-        >
+        <Button variant="ghost" onClick={() => router.push('/str/listings')} className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Volver a Listings
         </Button>
@@ -146,7 +136,7 @@ export default function ListingDetailPage() {
           <div>
             <div className="flex items-center space-x-2">
               <h1 className="text-3xl font-bold">{listing.titulo}</h1>
-                {listing.activo ? (
+              {listing.activo ? (
                 <Badge className="bg-green-500">
                   <CheckCircle2 className="mr-1 h-3 w-3" />
                   Activo
@@ -171,11 +161,7 @@ export default function ListingDetailPage() {
               <Edit className="mr-2 h-4 w-4" />
               Editar
             </Button>
-            <Button
-              onClick={() =>
-                router.push(`/str/listings/${listingId}/channels`)
-              }
-            >
+            <Button onClick={() => router.push(`/str/listings/${listingId}/channels`)}>
               <Wifi className="mr-2 h-4 w-4" />
               Gestionar Canales
             </Button>
@@ -187,23 +173,17 @@ export default function ListingDetailPage() {
       <div className="mb-6 grid gap-4 md:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Precio por Noche
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Precio por Noche</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              €{listing.precioPorNoche}
-            </div>
+            <div className="text-2xl font-bold">€{listing.precioPorNoche}</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Reservas Totales
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Reservas Totales</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -214,23 +194,19 @@ export default function ListingDetailPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Rating</CardTitle>
-              <Star className="h-4 w-4 text-muted-foreground" />
+            <Star className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               {listing.ratingPromedio ? listing.ratingPromedio.toFixed(1) : '--'}
             </div>
-            <p className="text-xs text-muted-foreground">
-              {listing.totalReviews} reseñas
-            </p>
+            <p className="text-xs text-muted-foreground">{listing.totalReviews} reseñas</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Tasa de Ocupación
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Tasa de Ocupación</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -242,14 +218,12 @@ export default function ListingDetailPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Canales Conectados
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Canales Conectados</CardTitle>
             <Wifi className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{connectedChannels}</div>
-              <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               de {listing.channels.length} configurados
             </p>
           </CardContent>
@@ -286,9 +260,7 @@ export default function ListingDetailPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Descripción
-                  </p>
+                  <p className="text-sm font-medium text-muted-foreground">Descripción</p>
                   <p className="text-sm">{listing.descripcion}</p>
                 </div>
 
@@ -296,35 +268,23 @@ export default function ListingDetailPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Tipo de Propiedad
-                    </p>
+                    <p className="text-sm font-medium text-muted-foreground">Tipo de Propiedad</p>
                     <p className="text-sm">{listing.tipoPropiedad}</p>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Capacidad Máxima
-                    </p>
-                    <p className="text-sm">
-                      {listing.capacidadMaxima} personas
-                    </p>
+                    <p className="text-sm font-medium text-muted-foreground">Capacidad Máxima</p>
+                    <p className="text-sm">{listing.capacidadMaxima} personas</p>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Dormitorios
-                    </p>
+                    <p className="text-sm font-medium text-muted-foreground">Dormitorios</p>
                     <p className="text-sm">{listing.numDormitorios}</p>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Camas
-                    </p>
+                    <p className="text-sm font-medium text-muted-foreground">Camas</p>
                     <p className="text-sm">{listing.numCamas}</p>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Baños
-                    </p>
+                    <p className="text-sm font-medium text-muted-foreground">Baños</p>
                     <p className="text-sm">{listing.numBanos}</p>
                   </div>
                 </div>
@@ -332,9 +292,7 @@ export default function ListingDetailPage() {
                 <Separator />
 
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Amenities
-                  </p>
+                  <p className="text-sm font-medium text-muted-foreground">Amenities</p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {listing.amenities.map((amenity, index) => (
                       <Badge key={index} variant="secondary">
@@ -353,15 +311,11 @@ export default function ListingDetailPage() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Check-in
-                    </p>
+                    <p className="text-sm font-medium text-muted-foreground">Check-in</p>
                     <p className="text-sm">{listing.checkInTime}</p>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Check-out
-                    </p>
+                    <p className="text-sm font-medium text-muted-foreground">Check-out</p>
                     <p className="text-sm">{listing.checkOutTime}</p>
                   </div>
                 </div>
@@ -375,40 +329,34 @@ export default function ListingDetailPage() {
                     </p>
                     {listing.cancelacionFlexible ? (
                       <Badge className="bg-green-500">Sí</Badge>
-                        ) : (
+                    ) : (
                       <Badge variant="secondary">No</Badge>
-                        )}
+                    )}
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Reserva Instantánea
-                    </p>
+                    <p className="text-sm font-medium text-muted-foreground">Reserva Instantánea</p>
                     {listing.reservaInstantanea ? (
                       <Badge className="bg-green-500">Sí</Badge>
-                        ) : (
+                    ) : (
                       <Badge variant="secondary">No</Badge>
-                        )}
+                    )}
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Sincronizar Canales
-                    </p>
+                    <p className="text-sm font-medium text-muted-foreground">Sincronizar Canales</p>
                     {listing.sincronizarCanales ? (
                       <Badge className="bg-green-500">Sí</Badge>
-                        ) : (
+                    ) : (
                       <Badge variant="secondary">No</Badge>
-                        )}
+                    )}
                   </div>
                 </div>
 
                 <Separator />
 
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Reglas del Hospedaje
-                  </p>
+                  <p className="text-sm font-medium text-muted-foreground">Reglas del Hospedaje</p>
                   <ul className="mt-2 space-y-1">
                     {listing.reglasHospedaje.map((regla, index) => (
                       <li key={index} className="text-sm">
@@ -427,15 +375,11 @@ export default function ListingDetailPage() {
           <Card>
             <CardHeader>
               <CardTitle>Últimas Reservas</CardTitle>
-                <CardDescription>
-                {listing.bookings.length} reservas recientes
-              </CardDescription>
+              <CardDescription>{listing.bookings.length} reservas recientes</CardDescription>
             </CardHeader>
             <CardContent>
               {listing.bookings.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">
-                  No hay reservas recientes
-                </p>
+                <p className="text-center text-muted-foreground py-8">No hay reservas recientes</p>
               ) : (
                 <div className="space-y-4">
                   {listing.bookings.slice(0, 5).map((booking: any) => (
@@ -445,7 +389,7 @@ export default function ListingDetailPage() {
                     >
                       <div>
                         <p className="font-medium">{booking.guestNombre}</p>
-                          <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground">
                           {format(new Date(booking.checkInDate), "d MMM 'al' ", {
                             locale: es,
                           })}
@@ -455,14 +399,10 @@ export default function ListingDetailPage() {
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium">
-                          €{booking.precioTotal.toFixed(2)}
-                        </p>
+                        <p className="font-medium">€{booking.precioTotal.toFixed(2)}</p>
                         <Badge
                           className={
-                            booking.estado === 'CONFIRMADA'
-                              ? 'bg-green-500'
-                              : 'bg-blue-500'
+                            booking.estado === 'CONFIRMADA' ? 'bg-green-500' : 'bg-blue-500'
                           }
                         >
                           {booking.estado}
@@ -481,26 +421,19 @@ export default function ListingDetailPage() {
           <Card>
             <CardHeader>
               <CardTitle>Reseñas</CardTitle>
-                <CardDescription>
-                {listing.reviews.length} reseñas recientes
-              </CardDescription>
+              <CardDescription>{listing.reviews.length} reseñas recientes</CardDescription>
             </CardHeader>
             <CardContent>
               {listing.reviews.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">
-                  No hay reseñas aún
-                </p>
+                <p className="text-center text-muted-foreground py-8">No hay reseñas aún</p>
               ) : (
                 <div className="space-y-4">
                   {listing.reviews.slice(0, 5).map((review: any) => (
-                    <div
-                      key={review.id}
-                      className="rounded-lg border p-4 space-y-2"
-                    >
+                    <div key={review.id} className="rounded-lg border p-4 space-y-2">
                       <div className="flex items-start justify-between">
                         <div>
                           <p className="font-medium">{review.guestNombre}</p>
-                            <p className="text-sm text-muted-foreground">
+                          <p className="text-sm text-muted-foreground">
                             {format(new Date(review.fecha), "d 'de' MMMM yyyy", {
                               locale: es,
                             })}
@@ -508,9 +441,7 @@ export default function ListingDetailPage() {
                         </div>
                         <div className="flex items-center">
                           <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          <span className="ml-1 font-medium">
-                            {review.rating}
-                          </span>
+                          <span className="ml-1 font-medium">{review.rating}</span>
                         </div>
                       </div>
                       <p className="text-sm">{review.comentario}</p>
@@ -532,22 +463,18 @@ export default function ListingDetailPage() {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">Precio por noche</p>
-                    <p className="text-lg font-bold">
-                    €{listing.precioPorNoche}
-                  </p>
+                  <p className="text-lg font-bold">€{listing.precioPorNoche}</p>
                 </div>
                 {listing.precioSemana && (
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium">Precio por semana</p>
-                      <p className="text-lg font-bold">
-                      €{listing.precioSemana}
-                    </p>
+                    <p className="text-lg font-bold">€{listing.precioSemana}</p>
                   </div>
                 )}
                 {listing.precioMes && (
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium">Precio por mes</p>
-                      <p className="text-lg font-bold">€{listing.precioMes}</p>
+                    <p className="text-lg font-bold">€{listing.precioMes}</p>
                   </div>
                 )}
 
@@ -555,21 +482,15 @@ export default function ListingDetailPage() {
 
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">Tarifa de limpieza</p>
-                    <p className="text-lg font-bold">
-                    €{listing.tarifaLimpieza}
-                  </p>
+                  <p className="text-lg font-bold">€{listing.tarifaLimpieza}</p>
                 </div>
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">Depósito de seguridad</p>
-                    <p className="text-lg font-bold">
-                    €{listing.depositoSeguridad}
-                  </p>
+                  <p className="text-lg font-bold">€{listing.depositoSeguridad}</p>
                 </div>
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">Comisión plataforma</p>
-                    <p className="text-lg font-bold">
-                    {listing.comisionPlataforma}%
-                  </p>
+                  <p className="text-lg font-bold">{listing.comisionPlataforma}%</p>
                 </div>
               </CardContent>
             </Card>
@@ -586,30 +507,23 @@ export default function ListingDetailPage() {
                 ) : (
                   <div className="space-y-4">
                     {listing.seasonPricing.map((season: any) => (
-                      <div
-                        key={season.id}
-                        className="rounded-lg border p-4 space-y-2"
-                      >
+                      <div key={season.id} className="rounded-lg border p-4 space-y-2">
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="font-medium">{season.nombre}</p>
-                              <p className="text-sm text-muted-foreground">
-                              {format(new Date(season.fechaInicio), "d MMM", {
+                            <p className="text-sm text-muted-foreground">
+                              {format(new Date(season.fechaInicio), 'd MMM', {
                                 locale: es,
                               })}
                               {' - '}
-                              {format(new Date(season.fechaFin), "d MMM yyyy", {
+                              {format(new Date(season.fechaFin), 'd MMM yyyy', {
                                 locale: es,
                               })}
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="text-lg font-bold">
-                              €{season.precioPorNoche}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              por noche
-                            </p>
+                            <p className="text-lg font-bold">€{season.precioPorNoche}</p>
+                            <p className="text-xs text-muted-foreground">por noche</p>
                           </div>
                         </div>
                       </div>

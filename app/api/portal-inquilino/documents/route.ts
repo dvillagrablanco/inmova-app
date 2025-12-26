@@ -39,9 +39,6 @@ export async function GET() {
     return NextResponse.json(documents);
   } catch (error) {
     logger.error('Error obteniendo documentos:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener documentos' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener documentos' }, { status: 500 });
   }
 }

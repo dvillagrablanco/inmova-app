@@ -1,7 +1,7 @@
 /**
  * ONBOARDING EMAIL AUTOMATION
  * Sistema de emails transaccionales para Zero-Touch Onboarding
- * 
+ *
  * Features:
  * - Emails automáticos en momentos clave
  * - Templates personalizados por vertical
@@ -17,7 +17,7 @@ import { sendEmail } from './email-service';
 // TIPOS Y CONSTANTES
 // ══════════════════════════════════════════════════════════════════════════════
 
-export type EmailTemplate = 
+export type EmailTemplate =
   | 'welcome'
   | 'reminder_24h'
   | 'reminder_72h'
@@ -241,9 +241,9 @@ const EMAIL_TEMPLATES = {
         </div>
       </body>
       </html>
-    `
+    `,
   },
-  
+
   reminder_24h: {
     subject: (ctx: EmailContext) => `${ctx.userName}, ¿Continuamos donde lo dejaste? 🤔`,
     html: (ctx: EmailContext) => `
@@ -279,12 +279,16 @@ const EMAIL_TEMPLATES = {
             
             <p>Solo te quedan <strong>${(ctx.progress?.totalSteps || 8) - (ctx.progress?.completedSteps || 0)} pasos</strong> para tener INMOVA completamente configurado. ¡No te detengas ahora!</p>
             
-            ${ctx.nextRecommendedStep ? `
+            ${
+              ctx.nextRecommendedStep
+                ? `
               <div style="background: #eff6ff; border-radius: 8px; padding: 20px; margin: 20px 0;">
                 <h3 style="margin: 0 0 10px 0; color: #1e40af;">📌 Próximo paso recomendado:</h3>
                 <p style="margin: 0; font-weight: 600;">${ctx.nextRecommendedStep}</p>
               </div>
-            ` : ''}
+            `
+                : ''
+            }
             
             <center>
               <a href="${process.env.NEXT_PUBLIC_URL}/onboarding" class="button">
@@ -303,9 +307,9 @@ const EMAIL_TEMPLATES = {
         </div>
       </body>
       </html>
-    `
+    `,
   },
-  
+
   milestone_50: {
     subject: (ctx: EmailContext) => `🎉 ¡Mitad del camino, ${ctx.userName}!`,
     html: (ctx: EmailContext) => `
@@ -366,11 +370,12 @@ const EMAIL_TEMPLATES = {
         </div>
       </body>
       </html>
-    `
+    `,
   },
-  
+
   completion: {
-    subject: (ctx: EmailContext) => `🎊 ¡Felicitaciones, ${ctx.userName}! Has completado el onboarding`,
+    subject: (ctx: EmailContext) =>
+      `🎊 ¡Felicitaciones, ${ctx.userName}! Has completado el onboarding`,
     html: (ctx: EmailContext) => `
       <!DOCTYPE html>
       <html>
@@ -476,8 +481,8 @@ const EMAIL_TEMPLATES = {
         </div>
       </body>
       </html>
-    `
-  }
+    `,
+  },
 };
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -493,22 +498,22 @@ export async function sendOnboardingEmail(
 ): Promise<boolean> {
   try {
     const emailTemplate = EMAIL_TEMPLATES[template];
-    
+
     if (!emailTemplate) {
       logger.error(`[ONBOARDING_EMAIL] Template not found: ${template}`);
       return false;
     }
-    
+
     const subject = emailTemplate.subject(context);
     const html = emailTemplate.html(context);
-    
+
     // Enviar email
     await sendEmail({
       to: context.userEmail,
       subject,
-      html
+      html,
     });
-    
+
     logger.info(`[ONBOARDING_EMAIL] Sent ${template} to ${context.userEmail}`);
     return true;
   } catch (error) {
@@ -525,27 +530,27 @@ export async function processOnboardingReminders(): Promise<void> {
     const now = new Date();
     const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     const seventyTwoHoursAgo = new Date(now.getTime() - 72 * 60 * 60 * 1000);
-    
+
     // Reminder 24h: usuarios sin actividad en últimas 24h
     const usersFor24hReminder = await prisma.onboardingProgress.findMany({
       where: {
         completedAt: null,
         lastActivityAt: {
           gte: seventyTwoHoursAgo,
-          lte: twentyFourHoursAgo
+          lte: twentyFourHoursAgo,
         },
         remindersSent: {
-          lt: 1
-        }
+          lt: 1,
+        },
       },
       include: {
-        user: true
-      }
+        user: true,
+      },
     });
-    
+
     for (const progress of usersFor24hReminder) {
       const nextStep = await getNextRecommendedStep(progress.userId, progress.companyId);
-      
+
       await sendOnboardingEmail('reminder_24h', {
         userName: progress.user.name,
         userEmail: progress.user.email,
@@ -553,48 +558,48 @@ export async function processOnboardingReminders(): Promise<void> {
         progress: {
           percentage: Math.round((progress.completedSteps.length / progress.totalSteps) * 100),
           completedSteps: progress.completedSteps.length,
-          totalSteps: progress.totalSteps
+          totalSteps: progress.totalSteps,
         },
-        nextRecommendedStep: nextStep?.title
+        nextRecommendedStep: nextStep?.title,
       });
-      
+
       // Actualizar contador de reminders
       await prisma.onboardingProgress.update({
         where: { id: progress.id },
         data: {
           remindersSent: { increment: 1 },
-          emailsSent: { increment: 1 }
-        }
+          emailsSent: { increment: 1 },
+        },
       });
     }
-    
+
     // Reminder 72h: usuarios sin actividad en 72h (abandonados)
     const usersAbandoned = await prisma.onboardingProgress.findMany({
       where: {
         completedAt: null,
         lastActivityAt: {
-          lte: seventyTwoHoursAgo
+          lte: seventyTwoHoursAgo,
         },
         abandonedAt: null,
         remindersSent: {
-          lt: 3
-        }
+          lt: 3,
+        },
       },
       include: {
-        user: true
-      }
+        user: true,
+      },
     });
-    
+
     for (const progress of usersAbandoned) {
       // Marcar como abandonado
       await prisma.onboardingProgress.update({
         where: { id: progress.id },
         data: {
           abandonedAt: now,
-          remindersSent: { increment: 1 }
-        }
+          remindersSent: { increment: 1 },
+        },
       });
-      
+
       // Enviar email especial de recuperación
       await sendOnboardingEmail('reminder_72h', {
         userName: progress.user.name,
@@ -603,12 +608,14 @@ export async function processOnboardingReminders(): Promise<void> {
         progress: {
           percentage: Math.round((progress.completedSteps.length / progress.totalSteps) * 100),
           completedSteps: progress.completedSteps.length,
-          totalSteps: progress.totalSteps
-        }
+          totalSteps: progress.totalSteps,
+        },
       });
     }
-    
-    logger.info(`[ONBOARDING_REMINDERS] Processed ${usersFor24hReminder.length} 24h reminders and ${usersAbandoned.length} abandoned`);
+
+    logger.info(
+      `[ONBOARDING_REMINDERS] Processed ${usersFor24hReminder.length} 24h reminders and ${usersAbandoned.length} abandoned`
+    );
   } catch (error) {
     logger.error('[ONBOARDING_REMINDERS] Error processing reminders:', error);
   }
@@ -626,26 +633,26 @@ export async function checkAndSendMilestoneEmails(
       where: {
         userId_companyId: {
           userId,
-          companyId
-        }
+          companyId,
+        },
       },
       include: {
-        user: true
-      }
+        user: true,
+      },
     });
-    
+
     if (!progress) return;
-    
+
     const percentage = Math.round((progress.completedSteps.length / progress.totalSteps) * 100);
-    
+
     // Verificar hitos
     const milestones = [
       { threshold: 25, template: 'milestone_25' as EmailTemplate },
       { threshold: 50, template: 'milestone_50' as EmailTemplate },
       { threshold: 75, template: 'milestone_75' as EmailTemplate },
-      { threshold: 100, template: 'completion' as EmailTemplate }
+      { threshold: 100, template: 'completion' as EmailTemplate },
     ];
-    
+
     for (const milestone of milestones) {
       if (percentage >= milestone.threshold) {
         // Verificar si ya enviamos este email
@@ -653,10 +660,10 @@ export async function checkAndSendMilestoneEmails(
           where: {
             userId,
             companyId,
-            template: milestone.template
-          }
+            template: milestone.template,
+          },
         });
-        
+
         if (!alreadySent) {
           await sendOnboardingEmail(milestone.template, {
             userName: progress.user.name,
@@ -665,10 +672,10 @@ export async function checkAndSendMilestoneEmails(
             progress: {
               percentage,
               completedSteps: progress.completedSteps.length,
-              totalSteps: progress.totalSteps
-            }
+              totalSteps: progress.totalSteps,
+            },
           });
-          
+
           // Log del email enviado
           await prisma.emailLog.create({
             data: {
@@ -679,19 +686,19 @@ export async function checkAndSendMilestoneEmails(
               subject: EMAIL_TEMPLATES[milestone.template].subject({
                 userName: progress.user.name,
                 userEmail: progress.user.email,
-                vertical: progress.vertical
+                vertical: progress.vertical,
               }),
               status: 'sent',
-              sentAt: new Date()
-            }
+              sentAt: new Date(),
+            },
           });
-          
+
           // Actualizar contador
           await prisma.onboardingProgress.update({
             where: { id: progress.id },
             data: {
-              emailsSent: { increment: 1 }
-            }
+              emailsSent: { increment: 1 },
+            },
           });
         }
       }
@@ -709,48 +716,45 @@ async function getNextRecommendedStep(userId: string, companyId: string) {
     where: {
       userId_companyId: {
         userId,
-        companyId
-      }
-    }
+        companyId,
+      },
+    },
   });
-  
+
   if (!progress) return null;
-  
+
   // Buscar el primer paso no completado
   const nextTask = await prisma.onboardingTask.findFirst({
     where: {
       userId,
       companyId,
-      status: 'pending'
+      status: 'pending',
     },
     orderBy: {
-      createdAt: 'asc'
-    }
+      createdAt: 'asc',
+    },
   });
-  
+
   return nextTask;
 }
 
 /**
  * Envía email de bienvenida al registrarse
  */
-export async function sendWelcomeEmail(
-  userId: string,
-  companyId: string
-): Promise<void> {
+export async function sendWelcomeEmail(userId: string, companyId: string): Promise<void> {
   try {
     const user = await prisma.user.findUnique({
-      where: { id: userId }
+      where: { id: userId },
     });
-    
+
     if (!user) return;
-    
+
     await sendOnboardingEmail('welcome', {
       userName: user.name,
       userEmail: user.email,
-      vertical: user.businessVertical || undefined
+      vertical: user.businessVertical || undefined,
     });
-    
+
     // Log del email
     await prisma.emailLog.create({
       data: {
@@ -760,10 +764,10 @@ export async function sendWelcomeEmail(
         to: user.email,
         subject: `¡Bienvenido a INMOVA, ${user.name}! 🎉`,
         status: 'sent',
-        sentAt: new Date()
-      }
+        sentAt: new Date(),
+      },
     });
-    
+
     logger.info(`[WELCOME_EMAIL] Sent to ${user.email}`);
   } catch (error) {
     logger.error('[WELCOME_EMAIL] Error:', error);

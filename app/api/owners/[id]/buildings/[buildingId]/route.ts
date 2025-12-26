@@ -15,10 +15,7 @@ export async function PUT(
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Verificar permisos
@@ -39,10 +36,7 @@ export async function PUT(
     });
 
     if (!assignment) {
-      return NextResponse.json(
-        { error: 'Asignación no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Asignación no encontrada' }, { status: 404 });
     }
 
     const body = await req.json();
@@ -89,10 +83,7 @@ export async function PUT(
     });
   } catch (error) {
     logger.error('Error al actualizar asignación:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar asignación' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar asignación' }, { status: 500 });
   }
 }
 
@@ -105,10 +96,7 @@ export async function DELETE(
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Verificar permisos
@@ -129,10 +117,7 @@ export async function DELETE(
     });
 
     if (!assignment) {
-      return NextResponse.json(
-        { error: 'Asignación no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Asignación no encontrada' }, { status: 404 });
     }
 
     // Eliminar asignación
@@ -150,9 +135,6 @@ export async function DELETE(
     });
   } catch (error) {
     logger.error('Error al eliminar asignación:', error);
-    return NextResponse.json(
-      { error: 'Error al eliminar asignación' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar asignación' }, { status: 500 });
   }
 }

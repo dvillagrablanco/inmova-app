@@ -221,215 +221,210 @@ export default function B2BBillingDashboard() {
 
   return (
     <AuthenticatedLayout>
-          <div className="container mx-auto space-y-6">
-            {/* Header */}
+      <div className="container mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Facturación B2B</h1>
+            <p className="text-muted-foreground">
+              Gestión de facturación de INMOVA a empresas clientes
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={handleGenerateMonthlyInvoices}
+              disabled={isGeneratingMonthly}
+              variant="outline"
+            >
+              <Calendar className="w-4 h-4 mr-2" />
+              {isGeneratingMonthly ? 'Generando...' : 'Generar Facturas Mensuales'}
+            </Button>
+            <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nueva Factura
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Crear Factura Manual</DialogTitle>
+                  <DialogDescription>Funcionalidad disponible próximamente</DialogDescription>
+                </DialogHeader>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+
+        {/* KPIs */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Ingresos del Mes</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                €{stats?.monthlyRevenue.toFixed(2) || '0.00'}
+              </div>
+              <p className="text-xs text-muted-foreground">Facturas pagadas este mes</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Pendiente de Cobro</CardTitle>
+              <AlertCircle className="h-4 w-4 text-yellow-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">€{stats?.pendingAmount.toFixed(2) || '0.00'}</div>
+              <p className="text-xs text-muted-foreground">
+                {stats?.pendingInvoices || 0} facturas pendientes
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Facturas</CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats?.totalInvoices || 0}</div>
+              <p className="text-xs text-muted-foreground">
+                {stats?.paidInvoices || 0} pagadas, {stats?.overdueInvoices || 0} vencidas
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Tasa de Pago</CardTitle>
+              <TrendingUp className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {stats?.totalInvoices
+                  ? Math.round((stats.paidInvoices / stats.totalInvoices) * 100)
+                  : 0}
+                %
+              </div>
+              <p className="text-xs text-muted-foreground">Facturas pagadas a tiempo</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Lista de Facturas */}
+        <Card>
+          <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold">Facturación B2B</h1>
-                <p className="text-muted-foreground">
-                  Gestión de facturación de INMOVA a empresas clientes
+                <CardTitle>Facturas Recientes</CardTitle>
+                <CardDescription>Gestiona las facturas emitidas a las empresas</CardDescription>
+              </div>
+              <Select value={selectedEstado} onValueChange={setSelectedEstado}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Filtrar por estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los estados</SelectItem>
+                  <SelectItem value="PENDIENTE">Pendiente</SelectItem>
+                  <SelectItem value="PAGADA">Pagada</SelectItem>
+                  <SelectItem value="VENCIDA">Vencida</SelectItem>
+                  <SelectItem value="CANCELADA">Cancelada</SelectItem>
+                  <SelectItem value="PARCIALMENTE_PAGADA">Parcialmente Pagada</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {filteredInvoices.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>
+                  No hay facturas {selectedEstado !== 'all' ? `con estado ${selectedEstado}` : ''}.
                 </p>
               </div>
-              <div className="flex gap-2">
-                <Button
-                  onClick={handleGenerateMonthlyInvoices}
-                  disabled={isGeneratingMonthly}
-                  variant="outline"
-                >
-                  <Calendar className="w-4 h-4 mr-2" />
-                  {isGeneratingMonthly ? 'Generando...' : 'Generar Facturas Mensuales'}
-                </Button>
-                <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-                  <DialogTrigger asChild>
-                    <Button>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Nueva Factura
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Crear Factura Manual</DialogTitle>
-                      <DialogDescription>Funcionalidad disponible próximamente</DialogDescription>
-                    </DialogHeader>
-                  </DialogContent>
-                </Dialog>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nº Factura</TableHead>
+                      <TableHead>Empresa</TableHead>
+                      <TableHead>Plan</TableHead>
+                      <TableHead>Período</TableHead>
+                      <TableHead>Emisión</TableHead>
+                      <TableHead>Vencimiento</TableHead>
+                      <TableHead className="text-right">Total</TableHead>
+                      <TableHead>Estado</TableHead>
+                      <TableHead className="text-right">Acciones</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredInvoices.map((invoice) => (
+                      <TableRow key={invoice.id}>
+                        <TableCell className="font-medium">{invoice.numeroFactura}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Building className="w-4 h-4 text-muted-foreground" />
+                            <div>
+                              <div className="font-medium">{invoice.company.nombre}</div>
+                              <div className="text-xs text-muted-foreground">
+                                {invoice.company.email}
+                              </div>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {invoice.subscriptionPlan ? (
+                            <Badge variant="outline">{invoice.subscriptionPlan.nombre}</Badge>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell>{invoice.periodo}</TableCell>
+                        <TableCell>
+                          {format(new Date(invoice.fechaEmision), 'dd/MM/yyyy', { locale: es })}
+                        </TableCell>
+                        <TableCell>
+                          {format(new Date(invoice.fechaVencimiento), 'dd/MM/yyyy', {
+                            locale: es,
+                          })}
+                        </TableCell>
+                        <TableCell className="text-right font-medium">
+                          €{invoice.total.toFixed(2)}
+                        </TableCell>
+                        <TableCell>{getEstadoBadge(invoice.estado)}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex gap-1 justify-end">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => router.push(`/admin/facturacion-b2b/${invoice.id}`)}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                toast.info('Funcionalidad de descarga disponible próximamente');
+                              }}
+                            >
+                              <Download className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
-            </div>
-
-            {/* KPIs */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Ingresos del Mes</CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    €{stats?.monthlyRevenue.toFixed(2) || '0.00'}
-                  </div>
-                  <p className="text-xs text-muted-foreground">Facturas pagadas este mes</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Pendiente de Cobro</CardTitle>
-                  <AlertCircle className="h-4 w-4 text-yellow-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    €{stats?.pendingAmount.toFixed(2) || '0.00'}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {stats?.pendingInvoices || 0} facturas pendientes
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Facturas</CardTitle>
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats?.totalInvoices || 0}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {stats?.paidInvoices || 0} pagadas, {stats?.overdueInvoices || 0} vencidas
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Tasa de Pago</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-green-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {stats?.totalInvoices
-                      ? Math.round((stats.paidInvoices / stats.totalInvoices) * 100)
-                      : 0}
-                    %
-                  </div>
-                  <p className="text-xs text-muted-foreground">Facturas pagadas a tiempo</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Lista de Facturas */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Facturas Recientes</CardTitle>
-                    <CardDescription>Gestiona las facturas emitidas a las empresas</CardDescription>
-                  </div>
-                  <Select value={selectedEstado} onValueChange={setSelectedEstado}>
-                    <SelectTrigger className="w-[200px]">
-                      <SelectValue placeholder="Filtrar por estado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos los estados</SelectItem>
-                      <SelectItem value="PENDIENTE">Pendiente</SelectItem>
-                      <SelectItem value="PAGADA">Pagada</SelectItem>
-                      <SelectItem value="VENCIDA">Vencida</SelectItem>
-                      <SelectItem value="CANCELADA">Cancelada</SelectItem>
-                      <SelectItem value="PARCIALMENTE_PAGADA">Parcialmente Pagada</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {filteredInvoices.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>
-                      No hay facturas{' '}
-                      {selectedEstado !== 'all' ? `con estado ${selectedEstado}` : ''}.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Nº Factura</TableHead>
-                          <TableHead>Empresa</TableHead>
-                          <TableHead>Plan</TableHead>
-                          <TableHead>Período</TableHead>
-                          <TableHead>Emisión</TableHead>
-                          <TableHead>Vencimiento</TableHead>
-                          <TableHead className="text-right">Total</TableHead>
-                          <TableHead>Estado</TableHead>
-                          <TableHead className="text-right">Acciones</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredInvoices.map((invoice) => (
-                          <TableRow key={invoice.id}>
-                            <TableCell className="font-medium">{invoice.numeroFactura}</TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <Building className="w-4 h-4 text-muted-foreground" />
-                                <div>
-                                  <div className="font-medium">{invoice.company.nombre}</div>
-                                  <div className="text-xs text-muted-foreground">
-                                    {invoice.company.email}
-                                  </div>
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              {invoice.subscriptionPlan ? (
-                                <Badge variant="outline">{invoice.subscriptionPlan.nombre}</Badge>
-                              ) : (
-                                <span className="text-muted-foreground">-</span>
-                              )}
-                            </TableCell>
-                            <TableCell>{invoice.periodo}</TableCell>
-                            <TableCell>
-                              {format(new Date(invoice.fechaEmision), 'dd/MM/yyyy', { locale: es })}
-                            </TableCell>
-                            <TableCell>
-                              {format(new Date(invoice.fechaVencimiento), 'dd/MM/yyyy', {
-                                locale: es,
-                              })}
-                            </TableCell>
-                            <TableCell className="text-right font-medium">
-                              €{invoice.total.toFixed(2)}
-                            </TableCell>
-                            <TableCell>{getEstadoBadge(invoice.estado)}</TableCell>
-                            <TableCell className="text-right">
-                              <div className="flex gap-1 justify-end">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() =>
-                                    router.push(`/admin/facturacion-b2b/${invoice.id}`)
-                                  }
-                                >
-                                  <Eye className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    toast.info('Funcionalidad de descarga disponible próximamente');
-                                  }}
-                                >
-                                  <Download className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </AuthenticatedLayout>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </AuthenticatedLayout>
   );
 }

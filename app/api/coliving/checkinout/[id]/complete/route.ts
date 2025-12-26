@@ -5,10 +5,7 @@ import { authOptions } from '@/lib/auth-options';
 import * as conciergeService from '@/lib/services/coliving-concierge-service';
 
 export const dynamic = 'force-dynamic';
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -28,9 +25,6 @@ export async function POST(
     return NextResponse.json(result.checkInOut);
   } catch (error) {
     logger.error('Error en POST /api/coliving/checkinout/[id]/complete:', error);
-    return NextResponse.json(
-      { error: 'Error al completar check-in/out' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al completar check-in/out' }, { status: 500 });
   }
 }

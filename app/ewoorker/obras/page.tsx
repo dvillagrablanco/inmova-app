@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Building2, Plus, MapPin, Calendar, Euro, Eye } from "lucide-react";
-import { toast } from "sonner";
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { Building2, Plus, MapPin, Calendar, Euro, Eye } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Obra {
   id: string;
@@ -27,7 +27,7 @@ export default function ObrasPage() {
   const router = useRouter();
   const [obras, setObras] = useState<Obra[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"mis-obras" | "disponibles">("mis-obras");
+  const [tab, setTab] = useState<'mis-obras' | 'disponibles'>('mis-obras');
 
   useEffect(() => {
     fetchObras();
@@ -41,7 +41,7 @@ export default function ObrasPage() {
         setObras(data.obras || []);
       }
     } catch (error) {
-      toast.error("Error al cargar obras");
+      toast.error('Error al cargar obras');
     } finally {
       setLoading(false);
     }
@@ -54,15 +54,15 @@ export default function ObrasPage() {
           <div>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
               <Building2 className="h-8 w-8 text-blue-600" />
-              {tab === "mis-obras" ? "Mis Obras" : "Obras Disponibles"}
+              {tab === 'mis-obras' ? 'Mis Obras' : 'Obras Disponibles'}
             </h1>
             <p className="text-gray-600 mt-2">
-              {tab === "mis-obras" ? "Gestiona tus proyectos" : "Encuentra nuevas oportunidades"}
+              {tab === 'mis-obras' ? 'Gestiona tus proyectos' : 'Encuentra nuevas oportunidades'}
             </p>
           </div>
-          {tab === "mis-obras" && (
+          {tab === 'mis-obras' && (
             <button
-              onClick={() => router.push("/ewoorker/obras/nueva")}
+              onClick={() => router.push('/ewoorker/obras/nueva')}
               className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 flex items-center gap-2"
             >
               <Plus className="h-5 w-5" />
@@ -74,17 +74,17 @@ export default function ObrasPage() {
         {/* Tabs */}
         <div className="flex gap-4 mb-6 border-b">
           <button
-            onClick={() => setTab("mis-obras")}
+            onClick={() => setTab('mis-obras')}
             className={`pb-3 px-4 font-medium ${
-              tab === "mis-obras" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-600"
+              tab === 'mis-obras' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600'
             }`}
           >
             Mis Obras
           </button>
           <button
-            onClick={() => setTab("disponibles")}
+            onClick={() => setTab('disponibles')}
             className={`pb-3 px-4 font-medium ${
-              tab === "disponibles" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-600"
+              tab === 'disponibles' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600'
             }`}
           >
             Obras Disponibles
@@ -113,11 +113,15 @@ export default function ObrasPage() {
                   <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
                     {obra.categoria}
                   </span>
-                  <span className={`ml-2 text-xs px-2 py-1 rounded-full ${
-                    obra.estado === "PUBLICADA" ? "bg-green-100 text-green-800" :
-                    obra.estado === "EN_LICITACION" ? "bg-yellow-100 text-yellow-800" :
-                    "bg-gray-100 text-gray-800"
-                  }`}>
+                  <span
+                    className={`ml-2 text-xs px-2 py-1 rounded-full ${
+                      obra.estado === 'PUBLICADA'
+                        ? 'bg-green-100 text-green-800'
+                        : obra.estado === 'EN_LICITACION'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-gray-100 text-gray-800'
+                    }`}
+                  >
                     {obra.estado}
                   </span>
                 </div>
@@ -130,11 +134,11 @@ export default function ObrasPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    {new Date(obra.fechaInicioDeseada).toLocaleDateString("es-ES")}
+                    {new Date(obra.fechaInicioDeseada).toLocaleDateString('es-ES')}
                   </div>
                   <div className="flex items-center gap-2">
-                    <Euro className="h-4 w-4" />
-                    €{obra.presupuestoMinimo?.toLocaleString()} - €{obra.presupuestoMaximo?.toLocaleString()}
+                    <Euro className="h-4 w-4" />€{obra.presupuestoMinimo?.toLocaleString()} - €
+                    {obra.presupuestoMaximo?.toLocaleString()}
                   </div>
                 </div>
                 <div className="mt-4 pt-4 border-t flex items-center justify-between">

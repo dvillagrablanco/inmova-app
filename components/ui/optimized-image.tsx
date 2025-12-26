@@ -23,7 +23,7 @@ interface OptimizedImageProps {
 
 /**
  * Componente OptimizedImage - Optimiza la carga de imágenes
- * 
+ *
  * Características:
  * - Lazy loading automático (excepto con priority=true)
  * - Blur placeholder mientras carga
@@ -74,9 +74,7 @@ export function OptimizedImage({
 
   return (
     <div className={cn('relative overflow-hidden', className)}>
-      {isLoading && (
-        <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 animate-pulse" />
-      )}
+      {isLoading && <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 animate-pulse" />}
       <Image
         src={imageError ? fallbackSrc : src}
         alt={alt}
@@ -121,13 +119,7 @@ export function OptimizedImageCard({
 
   return (
     <div className={cn('relative', aspectRatioClass, className)}>
-      <OptimizedImage
-        src={src}
-        alt={alt}
-        fill
-        objectFit="cover"
-        {...props}
-      />
+      <OptimizedImage src={src} alt={alt} fill objectFit="cover" {...props} />
     </div>
   );
 }
@@ -153,13 +145,7 @@ export function OptimizedAvatar({
 
   return (
     <div className={cn('relative rounded-full overflow-hidden', sizeClasses, className)}>
-      <OptimizedImage
-        src={src}
-        alt={alt}
-        fill
-        objectFit="cover"
-        {...props}
-      />
+      <OptimizedImage src={src} alt={alt} fill objectFit="cover" {...props} />
     </div>
   );
 }

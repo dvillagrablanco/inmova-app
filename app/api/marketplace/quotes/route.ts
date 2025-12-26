@@ -36,10 +36,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(quotes);
   } catch (error) {
     logger.error('Error fetching quotes:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener cotizaciones' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener cotizaciones' }, { status: 500 });
   }
 }
 
@@ -52,15 +49,8 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const {
-      providerId,
-      buildingId,
-      unitId,
-      titulo,
-      descripcion,
-      servicioRequerido,
-      urgencia,
-    } = body;
+    const { providerId, buildingId, unitId, titulo, descripcion, servicioRequerido, urgencia } =
+      body;
 
     // Si no se proporciona proveedor, sugerir uno
     const selectedProviderId = providerId;
@@ -91,7 +81,7 @@ export async function POST(req: NextRequest) {
         descripcion,
         servicioRequerido,
         urgencia: urgencia || 'media',
-        solicitadoPor: session?.user?.email|| '',
+        solicitadoPor: session?.user?.email || '',
       },
       include: {
         provider: true,
@@ -103,9 +93,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(quote, { status: 201 });
   } catch (error) {
     logger.error('Error creating quote:', error);
-    return NextResponse.json(
-      { error: 'Error al crear cotización' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear cotización' }, { status: 500 });
   }
 }

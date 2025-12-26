@@ -1,12 +1,12 @@
 /**
  * API Endpoint: Obtener Cuentas Bancarias via Redsys PSD2
- * 
+ *
  * Este endpoint obtiene la lista de cuentas bancarias del usuario
  * a través de la API de Redsys PSD2.
- * 
+ *
  * Método: GET
  * Query params: aspsp, connectionId
- * 
+ *
  * @author INMOVA Development Team
  */
 
@@ -23,7 +23,6 @@ import { prisma } from '@/lib/db';
 
 // Force dynamic rendering for this route
 export const dynamic = 'force-dynamic';
-
 
 export async function GET(request: NextRequest) {
   try {
@@ -80,11 +79,7 @@ export async function GET(request: NextRequest) {
     const consent = connection.consents[0];
 
     // Obtener cuentas bancarias
-    const accounts = await getAccounts(
-      aspsp,
-      consent.consentId,
-      connection.accessToken
-    );
+    const accounts = await getAccounts(aspsp, consent.consentId, connection.accessToken);
 
     // Obtener saldos para cada cuenta
     const accountsWithBalances = await Promise.all(

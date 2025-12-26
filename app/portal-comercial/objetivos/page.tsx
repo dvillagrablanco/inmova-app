@@ -98,10 +98,10 @@ export default function ObjetivosPage() {
   if (status === 'loading' || loading) {
     return (
       <AuthenticatedLayout>
-            <div className="max-w-7xl mx-auto">
-              <LoadingState message="Cargando objetivos..." />
-            </div>
-          </AuthenticatedLayout>
+        <div className="max-w-7xl mx-auto">
+          <LoadingState message="Cargando objetivos..." />
+        </div>
+      </AuthenticatedLayout>
     );
   }
 
@@ -122,7 +122,7 @@ export default function ObjetivosPage() {
               </Link>
               <div>
                 <h1 className="text-2xl font-bold gradient-text">Mis Objetivos</h1>
-                  <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   Seguimiento de objetivos y metas comerciales
                 </p>
               </div>
@@ -139,17 +139,13 @@ export default function ObjetivosPage() {
         {/* Objetivos Activos */}
         <div>
           <h2 className="text-xl font-bold mb-4">Objetivos Activos</h2>
-            {objetivosActivos.length === 0 ? (
+          {objetivosActivos.length === 0 ? (
             <Card>
               <CardContent className="py-12">
                 <div className="text-center text-muted-foreground">
                   <Target className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                  <p className="text-lg font-medium mb-2">
-                    No tienes objetivos activos
-                  </p>
-                  <p className="text-sm">
-                    Los objetivos serán asignados por tu administrador
-                  </p>
+                  <p className="text-lg font-medium mb-2">No tienes objetivos activos</p>
+                  <p className="text-sm">Los objetivos serán asignados por tu administrador</p>
                 </div>
               </CardContent>
             </Card>
@@ -157,10 +153,7 @@ export default function ObjetivosPage() {
             <div className="space-y-6">
               {objetivosActivos.map((objetivo) => {
                 const diasRestantes = getDiasRestantes(objetivo);
-                const progresoLeads = calcularProgreso(
-                  objetivo.leadsActuales,
-                  objetivo.metaLeads
-                );
+                const progresoLeads = calcularProgreso(objetivo.leadsActuales, objetivo.metaLeads);
                 const progresoConversiones = calcularProgreso(
                   objetivo.conversionesActuales,
                   objetivo.metaConversiones
@@ -203,7 +196,7 @@ export default function ObjetivosPage() {
                           <Target className="h-6 w-6 text-primary" />
                           <div>
                             <CardTitle>Objetivos - {objetivo.periodo}</CardTitle>
-                              <p className="text-sm text-muted-foreground mt-1">
+                            <p className="text-sm text-muted-foreground mt-1">
                               {format(new Date(objetivo.fechaInicio), "d 'de' MMM", {
                                 locale: es,
                               })}
@@ -219,13 +212,9 @@ export default function ObjetivosPage() {
                             variant={diasRestantes > 7 ? 'default' : 'destructive'}
                             className="mb-2"
                           >
-                            {diasRestantes > 0
-                              ? `${diasRestantes} días restantes`
-                              : 'Finalizado'}
+                            {diasRestantes > 0 ? `${diasRestantes} días restantes` : 'Finalizado'}
                           </Badge>
-                          <div className="text-2xl font-bold">
-                            {progresoGeneral.toFixed(0)}%
-                          </div>
+                          <div className="text-2xl font-bold">{progresoGeneral.toFixed(0)}%</div>
                           <p className="text-xs text-muted-foreground">Progreso general</p>
                         </div>
                       </div>
@@ -345,9 +334,7 @@ export default function ObjetivosPage() {
                             <p className="font-medium text-green-900">
                               ¡Felicidades! Has alcanzado tu objetivo
                             </p>
-                            <p className="text-sm text-green-700">
-                              Excelente trabajo este período
-                            </p>
+                            <p className="text-sm text-green-700">Excelente trabajo este período</p>
                           </div>
                         </div>
                       )}
@@ -363,12 +350,9 @@ export default function ObjetivosPage() {
         {objetivosHistoricos.length > 0 && (
           <div>
             <h2 className="text-xl font-bold mb-4">Objetivos Anteriores</h2>
-              <div className="space-y-4">
+            <div className="space-y-4">
               {objetivosHistoricos.map((objetivo) => {
-                const progresoLeads = calcularProgreso(
-                  objetivo.leadsActuales,
-                  objetivo.metaLeads
-                );
+                const progresoLeads = calcularProgreso(objetivo.leadsActuales, objetivo.metaLeads);
                 const progresoConversiones = calcularProgreso(
                   objetivo.conversionesActuales,
                   objetivo.metaConversiones
@@ -408,7 +392,7 @@ export default function ObjetivosPage() {
                       <div className="flex items-center justify-between">
                         <div>
                           <h3 className="font-semibold">{objetivo.periodo}</h3>
-                            <p className="text-sm text-muted-foreground">
+                          <p className="text-sm text-muted-foreground">
                             {format(new Date(objetivo.fechaInicio), "d 'de' MMM", {
                               locale: es,
                             })}
@@ -419,9 +403,7 @@ export default function ObjetivosPage() {
                           </p>
                         </div>
                         <div className="text-right">
-                          <div className="text-2xl font-bold">
-                            {progresoGeneral.toFixed(0)}%
-                          </div>
+                          <div className="text-2xl font-bold">{progresoGeneral.toFixed(0)}%</div>
                           <Badge
                             variant={progresoGeneral >= 100 ? 'default' : 'outline'}
                             className="mt-1"

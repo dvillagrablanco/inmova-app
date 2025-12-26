@@ -5,7 +5,13 @@
 
 import * as OTPAuth from 'otpauth';
 import QRCode from 'qrcode';
-import { encryptField, decryptField, generateBackupCodes, hashWithSalt, verifyHash } from './encryption';
+import {
+  encryptField,
+  decryptField,
+  generateBackupCodes,
+  hashWithSalt,
+  verifyHash,
+} from './encryption';
 import { prisma } from './db';
 
 const ISSUER = 'INMOVA';
@@ -88,7 +94,7 @@ export async function verifyAndEnableMFA(
   const encryptedSecret = encryptField(secret);
 
   // Hashear los códigos de respaldo
-  const hashedBackupCodes = backupCodes.map(code => {
+  const hashedBackupCodes = backupCodes.map((code) => {
     const { hash, salt } = hashWithSalt(code.replace('-', ''));
     return `${salt}:${hash}`; // Formato: salt:hash
   });
@@ -207,10 +213,7 @@ export async function disableMFA(userId: string, code: string): Promise<void> {
 /**
  * Regenera códigos de respaldo
  */
-export async function regenerateBackupCodes(
-  userId: string,
-  code: string
-): Promise<string[]> {
+export async function regenerateBackupCodes(userId: string, code: string): Promise<string[]> {
   // Verificar el código primero
   const isValid = await verifyMFACode(userId, code);
 
@@ -222,7 +225,7 @@ export async function regenerateBackupCodes(
   const newBackupCodes = generateBackupCodes(10);
 
   // Hashear los códigos
-  const hashedBackupCodes = newBackupCodes.map(code => {
+  const hashedBackupCodes = newBackupCodes.map((code) => {
     const { hash, salt } = hashWithSalt(code.replace('-', ''));
     return `${salt}:${hash}`;
   });

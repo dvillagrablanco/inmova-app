@@ -36,7 +36,7 @@ export function PullToRefresh({
   const handleTouchStart = useCallback(
     (e: TouchEvent) => {
       if (!isMobile || disabled || isRefreshing) return;
-      
+
       const scrollTop = containerRef.current?.scrollTop || 0;
       if (scrollTop > 0) return; // Solo si estamos en el top
 
@@ -56,10 +56,7 @@ export function PullToRefresh({
       if (distance > 0) {
         // Aplicar resistencia: pull distance se reduce mientras más se arrastra
         const resistance = 0.5;
-        const adjustedDistance = Math.min(
-          distance * resistance,
-          maxPullDistance
-        );
+        const adjustedDistance = Math.min(distance * resistance, maxPullDistance);
         setPullDistance(adjustedDistance);
 
         // Prevenir scroll mientras se hace pull
@@ -160,8 +157,8 @@ export function PullToRefresh({
             {isRefreshing
               ? 'Actualizando...'
               : isReady
-              ? 'Suelta para actualizar'
-              : 'Arrastra para actualizar'}
+                ? 'Suelta para actualizar'
+                : 'Arrastra para actualizar'}
           </p>
         </div>
       </div>

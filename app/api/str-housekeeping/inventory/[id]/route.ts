@@ -6,10 +6,7 @@ import { prisma } from '@/lib/db';
 export const dynamic = 'force-dynamic';
 
 // GET - Obtener item específico
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -38,18 +35,12 @@ export async function GET(
     return NextResponse.json(item);
   } catch (error) {
     console.error('Error al obtener item:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener item' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener item' }, { status: 500 });
   }
 }
 
 // PATCH - Actualizar item
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -91,18 +82,12 @@ export async function PATCH(
     return NextResponse.json(item);
   } catch (error) {
     console.error('Error al actualizar item:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar item' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar item' }, { status: 500 });
   }
 }
 
 // DELETE - Eliminar item
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -128,9 +113,6 @@ export async function DELETE(
     return NextResponse.json({ message: 'Item eliminado correctamente' });
   } catch (error) {
     console.error('Error al eliminar item:', error);
-    return NextResponse.json(
-      { error: 'Error al eliminar item' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar item' }, { status: 500 });
   }
 }

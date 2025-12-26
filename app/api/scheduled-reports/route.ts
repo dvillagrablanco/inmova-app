@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
   try {
     const user = await requireAuth();
-    
+
     // Solo administradores y gestores pueden ver reportes programados
     if (user.role === 'operador') {
       return NextResponse.json(
@@ -37,10 +37,7 @@ export async function GET(request: Request) {
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
-    return NextResponse.json(
-      { error: 'Error al obtener reportes programados' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener reportes programados' }, { status: 500 });
   }
 }
 
@@ -51,7 +48,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const user = await requireAuth();
-    
+
     // Solo administradores pueden crear reportes programados
     if (user.role !== 'administrador') {
       return NextResponse.json(
@@ -65,10 +62,7 @@ export async function POST(request: Request) {
 
     // Validaciones
     if (!nombre || !tipo || !frecuencia || !destinatarios || destinatarios.length === 0) {
-      return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
 
     // Calcular la fecha del próximo envío
@@ -112,9 +106,6 @@ export async function POST(request: Request) {
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
-    return NextResponse.json(
-      { error: 'Error al crear reporte programado' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear reporte programado' }, { status: 500 });
   }
 }

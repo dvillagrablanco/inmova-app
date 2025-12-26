@@ -1,15 +1,11 @@
-"use client";
+'use client';
 
 import React, { useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import {
-  getVisibleModules,
-  MODULES_BY_VERTICAL,
-  UserProfile,
-} from '@/lib/ui-mode-service';
+import { getVisibleModules, MODULES_BY_VERTICAL, UserProfile } from '@/lib/ui-mode-service';
 import {
   Building2,
   FileText,
@@ -28,12 +24,7 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const MODULE_ICONS: Record<string, any> = {
   edificios: Building2,
@@ -64,17 +55,17 @@ interface AdaptiveSidebarProps {
    * Vertical de negocio del usuario
    */
   vertical: keyof typeof MODULES_BY_VERTICAL;
-  
+
   /**
    * Perfil del usuario con preferencias
    */
   userProfile: UserProfile;
-  
+
   /**
    * Si el sidebar está colapsado (versión mobile)
    */
   collapsed?: boolean;
-  
+
   /**
    * Clase CSS adicional
    */
@@ -83,7 +74,7 @@ interface AdaptiveSidebarProps {
 
 /**
  * ADAPTIVE SIDEBAR - Sidebar contextual que muestra solo módulos relevantes
- * 
+ *
  * Características:
  * - Filtra módulos según vertical de negocio
  * - Adapta visibilidad según experienceLevel y uiMode
@@ -98,7 +89,7 @@ export function AdaptiveSidebar({
   className,
 }: AdaptiveSidebarProps) {
   const pathname = usePathname();
-  
+
   // Obtener módulos visibles según el perfil
   const visibleModules = useMemo(
     () => getVisibleModules(vertical, userProfile),
@@ -125,9 +116,7 @@ export function AdaptiveSidebar({
         )}
       >
         <Icon className="h-5 w-5 flex-shrink-0" />
-        {!collapsed && (
-          <span className="flex-1 truncate">{module.name}</span>
-        )}
+        {!collapsed && <span className="flex-1 truncate">{module.name}</span>}
         {!collapsed && module.featured && (
           <Badge variant="secondary" className="ml-auto text-xs">
             ⭐
@@ -145,9 +134,7 @@ export function AdaptiveSidebar({
             <TooltipContent side="right">
               <p className="font-medium">{module.name}</p>
               {module.featured && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  Módulo destacado para ti
-                </p>
+                <p className="text-xs text-muted-foreground mt-1">Módulo destacado para ti</p>
               )}
             </TooltipContent>
           </Tooltip>
@@ -169,9 +156,7 @@ export function AdaptiveSidebar({
       {/* Header del Sidebar */}
       {!collapsed && (
         <div className="px-3 py-4">
-          <h2 className="text-lg font-semibold tracking-tight">
-            Tus Módulos
-          </h2>
+          <h2 className="text-lg font-semibold tracking-tight">Tus Módulos</h2>
           <p className="text-xs text-muted-foreground mt-1">
             {userProfile.uiMode === 'simple' && 'Vista simplificada'}
             {userProfile.uiMode === 'standard' && 'Vista estándar'}
@@ -184,38 +169,28 @@ export function AdaptiveSidebar({
       {featuredModules.length > 0 && (
         <div className="px-3">
           {!collapsed && (
-            <p className="text-xs font-medium text-muted-foreground mb-2 px-3">
-              DESTACADOS
-            </p>
+            <p className="text-xs font-medium text-muted-foreground mb-2 px-3">DESTACADOS</p>
           )}
           <nav className="space-y-1">
             {featuredModules.map((module) => (
-              <React.Fragment key={module.id}>
-                {renderModuleLink(module)}
-              </React.Fragment>
+              <React.Fragment key={module.id}>{renderModuleLink(module)}</React.Fragment>
             ))}
           </nav>
         </div>
       )}
 
       {/* Separador */}
-      {featuredModules.length > 0 && regularModules.length > 0 && (
-        <Separator className="mx-3" />
-      )}
+      {featuredModules.length > 0 && regularModules.length > 0 && <Separator className="mx-3" />}
 
       {/* Módulos Regulares */}
       {regularModules.length > 0 && (
         <div className="px-3">
           {!collapsed && featuredModules.length > 0 && (
-            <p className="text-xs font-medium text-muted-foreground mb-2 px-3">
-              TODOS LOS MÓDULOS
-            </p>
+            <p className="text-xs font-medium text-muted-foreground mb-2 px-3">TODOS LOS MÓDULOS</p>
           )}
           <nav className="space-y-1">
             {regularModules.map((module) => (
-              <React.Fragment key={module.id}>
-                {renderModuleLink(module)}
-              </React.Fragment>
+              <React.Fragment key={module.id}>{renderModuleLink(module)}</React.Fragment>
             ))}
           </nav>
         </div>
@@ -225,9 +200,7 @@ export function AdaptiveSidebar({
       {visibleModules.filter((m) => m.visible).length === 0 && !collapsed && (
         <div className="px-6 py-8 text-center text-sm text-muted-foreground">
           <p>No hay módulos disponibles</p>
-          <p className="mt-2 text-xs">
-            Contacta con soporte para activar módulos
-          </p>
+          <p className="mt-2 text-xs">Contacta con soporte para activar módulos</p>
         </div>
       )}
 

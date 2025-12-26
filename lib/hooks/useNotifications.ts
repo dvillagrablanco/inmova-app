@@ -1,7 +1,7 @@
 /**
  * CUSTOM HOOK: useNotifications
  * Hook para gestionar notificaciones in-app desde componentes cliente
- * 
+ *
  * Funcionalidades:
  * - Obtener lista de notificaciones
  * - Contador de no leídas
@@ -72,34 +72,26 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
   }, []);
 
   // Mark as read
-  const markAsRead = useCallback(
-    async (notificationId: string) => {
-      try {
-        const response = await fetch(
-          `/api/notifications/${notificationId}/read`,
-          {
-            method: 'PATCH',
-          }
-        );
+  const markAsRead = useCallback(async (notificationId: string) => {
+    try {
+      const response = await fetch(`/api/notifications/${notificationId}/read`, {
+        method: 'PATCH',
+      });
 
-        if (response.ok) {
-          // Actualizar estado local
-          setNotifications((prev) =>
-            prev.map((n) =>
-              n.id === notificationId ? { ...n, read: true } : n
-            )
-          );
-          setUnreadCount((prev) => Math.max(0, prev - 1));
-          return true;
-        }
-        return false;
-      } catch (err) {
-        console.error('Error marking notification as read:', err);
-        return false;
+      if (response.ok) {
+        // Actualizar estado local
+        setNotifications((prev) =>
+          prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
+        );
+        setUnreadCount((prev) => Math.max(0, prev - 1));
+        return true;
       }
-    },
-    []
-  );
+      return false;
+    } catch (err) {
+      console.error('Error marking notification as read:', err);
+      return false;
+    }
+  }, []);
 
   // Mark all as read
   const markAllAsRead = useCallback(async () => {
@@ -110,9 +102,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
 
       if (response.ok) {
         // Actualizar estado local
-        setNotifications((prev) =>
-          prev.map((n) => ({ ...n, read: true }))
-        );
+        setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
         setUnreadCount(0);
         return true;
       }

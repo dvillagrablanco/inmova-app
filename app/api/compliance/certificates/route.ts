@@ -12,7 +12,6 @@ import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-
 /**
  * @swagger
  * /api/compliance/certificates:
@@ -72,10 +71,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(certificates);
     }
 
-    return NextResponse.json(
-      { error: 'Tipo de certificado no válido' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Tipo de certificado no válido' }, { status: 400 });
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message || 'Error al obtener certificados' },
@@ -126,17 +122,11 @@ export async function POST(req: NextRequest) {
 
     if (body.action === 'check_expirations' && body.type === 'energy') {
       // Verificar certificados próximos a vencer
-      const expiringCerts = await checkCEEExpirations(
-        body.companyId,
-        body.diasAnticipacion || 90
-      );
+      const expiringCerts = await checkCEEExpirations(body.companyId, body.diasAnticipacion || 90);
       return NextResponse.json(expiringCerts);
     }
 
-    return NextResponse.json(
-      { error: 'Tipo o acción no válida' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Tipo o acción no válida' }, { status: 400 });
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message || 'Error al registrar certificado' },

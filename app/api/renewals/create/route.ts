@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import {
-  createContractRenewal,
-  CreateRenewalParams,
-} from '@/lib/services/renewal-service-simple';
+import { createContractRenewal, CreateRenewalParams } from '@/lib/services/renewal-service-simple';
 
 export const dynamic = 'force-dynamic';
 

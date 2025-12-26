@@ -46,9 +46,7 @@ export async function performDocumentOCR(
 /**
  * Extract specific fields from an invoice
  */
-export async function extractInvoiceFields(
-  invoiceBuffer: Buffer
-): Promise<DocumentField[]> {
+export async function extractInvoiceFields(invoiceBuffer: Buffer): Promise<DocumentField[]> {
   try {
     logger.info('Extracting invoice fields');
 
@@ -71,9 +69,7 @@ export async function extractInvoiceFields(
 /**
  * Extract specific fields from an ID document
  */
-export async function extractIDFields(
-  idBuffer: Buffer
-): Promise<DocumentField[]> {
+export async function extractIDFields(idBuffer: Buffer): Promise<DocumentField[]> {
   try {
     logger.info('Extracting ID fields');
 
@@ -96,14 +92,12 @@ export async function extractIDFields(
 /**
  * Extract tables from a document
  */
-export async function extractDocumentTables(
-  documentBuffer: Buffer
-): Promise<any[]> {
+export async function extractDocumentTables(documentBuffer: Buffer): Promise<any[]> {
   try {
     logger.info('Extracting tables from document');
 
     // TODO: Use AWS Textract or similar to extract tables
-    
+
     return [];
   } catch (error: any) {
     logger.error('Error extracting tables:', error);

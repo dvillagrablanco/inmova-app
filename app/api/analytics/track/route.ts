@@ -20,10 +20,7 @@ export async function POST(request: NextRequest) {
 
     // 3. Validar que el eventName sea válido
     if (!eventName || typeof eventName !== 'string') {
-      return NextResponse.json(
-        { error: 'Invalid eventName' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid eventName' }, { status: 400 });
     }
 
     // 4. Enviar evento
@@ -32,9 +29,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('[API /analytics/track] Error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -54,7 +54,14 @@ export function MobileDrawer({
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-hidden">
-          <div className={cn('flex min-h-full', position === 'right' && 'justify-end', position === 'left' && 'justify-start', position === 'bottom' && 'items-end')}>
+          <div
+            className={cn(
+              'flex min-h-full',
+              position === 'right' && 'justify-end',
+              position === 'left' && 'justify-start',
+              position === 'bottom' && 'items-end'
+            )}
+          >
             <Transition.Child
               as={Fragment}
               enter="transform transition ease-in-out duration-300"
@@ -80,9 +87,7 @@ export function MobileDrawer({
                 {/* Header */}
                 <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
                   {title && (
-                    <Dialog.Title className="text-xl font-bold text-gray-900">
-                      {title}
-                    </Dialog.Title>
+                    <Dialog.Title className="text-xl font-bold text-gray-900">{title}</Dialog.Title>
                   )}
                   <button
                     onClick={onClose}

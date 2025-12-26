@@ -115,10 +115,7 @@ export async function validateCoupon(params: ValidateCouponParams) {
     include: {
       usos: {
         where: {
-          OR: [
-            { userId: params.userId },
-            { tenantId: params.tenantId },
-          ],
+          OR: [{ userId: params.userId }, { tenantId: params.tenantId }],
         },
       },
     },
@@ -292,10 +289,7 @@ export async function getCouponStats(couponId: string) {
     throw new Error('Cupón no encontrado');
   }
 
-  const totalDescuentoOtorgado = coupon.usos.reduce(
-    (sum, uso) => sum + uso.montoDescuento,
-    0
-  );
+  const totalDescuentoOtorgado = coupon.usos.reduce((sum, uso) => sum + uso.montoDescuento, 0);
 
   const usuariosUnicos = new Set(
     coupon.usos.map((uso) => uso.userId || uso.tenantId).filter(Boolean)
@@ -306,9 +300,7 @@ export async function getCouponStats(couponId: string) {
     stats: {
       usosActuales: coupon.usosActuales,
       usosMaximos: coupon.usosMaximos,
-      porcentajeUso: coupon.usosMaximos
-        ? (coupon.usosActuales / coupon.usosMaximos) * 100
-        : 0,
+      porcentajeUso: coupon.usosMaximos ? (coupon.usosActuales / coupon.usosMaximos) * 100 : 0,
       totalDescuentoOtorgado,
       usuariosUnicos,
       promedioDescuento: coupon.usosActuales > 0 ? totalDescuentoOtorgado / coupon.usosActuales : 0,

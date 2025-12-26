@@ -19,10 +19,10 @@ export async function GET(request: NextRequest) {
       include: {
         transactions: {
           orderBy: { fecha: 'desc' },
-          take: 5
-        }
+          take: 5,
+        },
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
 
     return NextResponse.json(connections);
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const result = await conectarCuentaBancaria({
       ...body,
-      companyId: session.user.companyId
+      companyId: session.user.companyId,
     });
 
     return NextResponse.json(result, { status: 201 });

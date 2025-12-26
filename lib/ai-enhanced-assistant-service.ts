@@ -1,6 +1,6 @@
 /**
  * Servicio Mejorado de Asistente IA - Fase 3
- * 
+ *
  * Capacidades:
  * 1. Detección de intenciones con LLM
  * 2. Ejecución automática de acciones
@@ -22,7 +22,15 @@ const DEFAULT_MODEL = 'gpt-4.1-mini';
 // TIPOS
 // ============================================================================
 export interface IntentDetectionResult {
-  intent: 'create_maintenance_request' | 'check_payment' | 'view_contract' | 'schedule_visit' | 'general_inquiry' | 'complaint' | 'document_request' | 'unknown';
+  intent:
+    | 'create_maintenance_request'
+    | 'check_payment'
+    | 'view_contract'
+    | 'schedule_visit'
+    | 'general_inquiry'
+    | 'complaint'
+    | 'document_request'
+    | 'unknown';
   confidence: number;
   entities: Record<string, any>;
   response: string;
@@ -85,22 +93,22 @@ Información del usuario:
     const messages = [
       { role: 'system', content: systemPrompt },
       ...(context.conversationHistory || []),
-      { role: 'user', content: userMessage }
+      { role: 'user', content: userMessage },
     ];
 
     const response = await fetch(LLM_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${LLM_API_KEY}`
+        Authorization: `Bearer ${LLM_API_KEY}`,
       },
       body: JSON.stringify({
         model: DEFAULT_MODEL,
         messages,
         response_format: { type: 'json_object' },
         temperature: 0.3,
-        max_tokens: 500
-      })
+        max_tokens: 500,
+      }),
     });
 
     if (!response.ok) {
@@ -120,7 +128,7 @@ Información del usuario:
       intent: 'unknown',
       confidence: 0,
       entities: {},
-      response: 'Lo siento, no pude entender tu solicitud. ¿Podrías reformularla?'
+      response: 'Lo siento, no pude entender tu solicitud. ¿Podrías reformularla?',
     };
   }
 }
@@ -136,24 +144,24 @@ export async function executeAction(
     switch (intent.intent) {
       case 'create_maintenance_request':
         return await createMaintenanceRequest(intent, context);
-      
+
       case 'check_payment':
         return await checkPaymentStatus(intent, context);
-      
+
       case 'view_contract':
         return await getContractInfo(intent, context);
-      
+
       case 'schedule_visit':
         return await scheduleVisit(intent, context);
-      
+
       case 'document_request':
         return await handleDocumentRequest(intent, context);
-      
+
       default:
         return {
           success: false,
           action: 'none',
-          message: intent.response
+          message: intent.response,
         };
     }
   } catch (error) {
@@ -161,7 +169,7 @@ export async function executeAction(
     return {
       success: false,
       action: intent.intent,
-      message: 'Hubo un error al procesar tu solicitud. Por favor, inténtalo de nuevo más tarde.'
+      message: 'Hubo un error al procesar tu solicitud. Por favor, inténtalo de nuevo más tarde.',
     };
   }
 }
@@ -179,7 +187,7 @@ async function createMaintenanceRequest(
     const tenant = await prisma.tenant.findFirst({
       where: {
         email: context.userEmail,
-        companyId: context.companyId
+        companyId: context.companyId,
       },
       include: {
         contracts: {
@@ -187,20 +195,20 @@ async function createMaintenanceRequest(
           include: {
             unit: {
               include: {
-                building: true
-              }
-            }
+                building: true,
+              },
+            },
           },
-          take: 1
-        }
-      }
+          take: 1,
+        },
+      },
     });
 
     if (!tenant || !tenant.contracts[0]) {
       return {
         success: false,
         action: 'create_maintenance_request',
-        message: 'No se encontró un contrato activo asociado a tu cuenta.'
+        message: 'No se encontró un contrato activo asociado a tu cuenta.',
       };
     }
 
@@ -213,8 +221,8 @@ async function createMaintenanceRequest(
         descripcion: intent.entities.description || 'Solicitud creada desde el asistente IA',
         prioridad: intent.entities.priority || 'media',
         estado: 'pendiente',
-        unitId: contract.unitId
-      }
+        unitId: contract.unitId,
+      },
     });
 
     logger.info(`✅ Mantenimiento creado automáticamente: ${maintenanceRequest.id}`);
@@ -223,14 +231,15 @@ async function createMaintenanceRequest(
       success: true,
       action: 'create_maintenance_request',
       result: maintenanceRequest,
-      message: `✅ ¡Perfecto! He creado tu solicitud de mantenimiento #${maintenanceRequest.id.slice(0, 8)}. Un técnico se pondrá en contacto contigo pronto. Puedes ver el estado en la sección de Mantenimiento.`
+      message: `✅ ¡Perfecto! He creado tu solicitud de mantenimiento #${maintenanceRequest.id.slice(0, 8)}. Un técnico se pondrá en contacto contigo pronto. Puedes ver el estado en la sección de Mantenimiento.`,
     };
   } catch (error) {
     logger.error('Error creating maintenance request:', error);
     return {
       success: false,
       action: 'create_maintenance_request',
-      message: 'No pude crear la solicitud de mantenimiento. Por favor, inténtalo manualmente desde la sección de Mantenimiento.'
+      message:
+        'No pude crear la solicitud de mantenimiento. Por favor, inténtalo manualmente desde la sección de Mantenimiento.',
     };
   }
 }
@@ -243,15 +252,15 @@ async function checkPaymentStatus(
     const tenant = await prisma.tenant.findFirst({
       where: {
         email: context.userEmail,
-        companyId: context.companyId
-      }
+        companyId: context.companyId,
+      },
     });
 
     if (!tenant) {
       return {
         success: false,
         action: 'check_payment',
-        message: 'No se encontró información de pagos para tu cuenta.'
+        message: 'No se encontró información de pagos para tu cuenta.',
       };
     }
 
@@ -261,8 +270,8 @@ async function checkPaymentStatus(
         estado: 'pendiente',
         contract: {
           tenantId: tenant.id,
-          estado: 'activo'
-        }
+          estado: 'activo',
+        },
       },
       orderBy: { fechaVencimiento: 'asc' },
       take: 3,
@@ -271,12 +280,12 @@ async function checkPaymentStatus(
           include: {
             unit: {
               include: {
-                building: true
-              }
-            }
-          }
-        }
-      }
+                building: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (upcomingPayments.length === 0) {
@@ -284,28 +293,31 @@ async function checkPaymentStatus(
         success: true,
         action: 'check_payment',
         result: { payments: [] },
-        message: '🎉 ¡Excelente! No tienes pagos pendientes en este momento. Todos tus pagos están al día.'
+        message:
+          '🎉 ¡Excelente! No tienes pagos pendientes en este momento. Todos tus pagos están al día.',
       };
     }
 
-    const paymentDetails = upcomingPayments.map(p => {
-      const vencimiento = new Date(p.fechaVencimiento);
-      const dias = Math.ceil((vencimiento.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-      return `- $${p.monto.toLocaleString()} - Vence en ${dias} días (${vencimiento.toLocaleDateString('es-ES')})`;
-    }).join('\n');
+    const paymentDetails = upcomingPayments
+      .map((p) => {
+        const vencimiento = new Date(p.fechaVencimiento);
+        const dias = Math.ceil((vencimiento.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+        return `- $${p.monto.toLocaleString()} - Vence en ${dias} días (${vencimiento.toLocaleDateString('es-ES')})`;
+      })
+      .join('\n');
 
     return {
       success: true,
       action: 'check_payment',
       result: { payments: upcomingPayments },
-      message: `💳 Aquí están tus próximos pagos:\n\n${paymentDetails}\n\nPuedes realizar el pago desde la sección de Pagos.`
+      message: `💳 Aquí están tus próximos pagos:\n\n${paymentDetails}\n\nPuedes realizar el pago desde la sección de Pagos.`,
     };
   } catch (error) {
     logger.error('Error checking payment status:', error);
     return {
       success: false,
       action: 'check_payment',
-      message: 'No pude obtener la información de pagos. Por favor, verifica la sección de Pagos.'
+      message: 'No pude obtener la información de pagos. Por favor, verifica la sección de Pagos.',
     };
   }
 }
@@ -318,7 +330,7 @@ async function getContractInfo(
     const tenant = await prisma.tenant.findFirst({
       where: {
         email: context.userEmail,
-        companyId: context.companyId
+        companyId: context.companyId,
       },
       include: {
         contracts: {
@@ -326,20 +338,20 @@ async function getContractInfo(
           include: {
             unit: {
               include: {
-                building: true
-              }
-            }
+                building: true,
+              },
+            },
           },
-          take: 1
-        }
-      }
+          take: 1,
+        },
+      },
     });
 
     if (!tenant || !tenant.contracts[0]) {
       return {
         success: false,
         action: 'view_contract',
-        message: 'No se encontró un contrato activo asociado a tu cuenta.'
+        message: 'No se encontró un contrato activo asociado a tu cuenta.',
       };
     }
 
@@ -361,14 +373,15 @@ Puedes ver el documento completo en la sección de Contratos.`;
       success: true,
       action: 'view_contract',
       result: contract,
-      message
+      message,
     };
   } catch (error) {
     logger.error('Error getting contract info:', error);
     return {
       success: false,
       action: 'view_contract',
-      message: 'No pude obtener la información del contrato. Por favor, verifica la sección de Contratos.'
+      message:
+        'No pude obtener la información del contrato. Por favor, verifica la sección de Contratos.',
     };
   }
 }
@@ -381,7 +394,8 @@ async function scheduleVisit(
   return {
     success: true,
     action: 'schedule_visit',
-    message: '📅 Para agendar una visita, puedes:\n\n1. Ir a la sección de "Visitas" en el menú\n2. Seleccionar fecha y hora disponible\n3. Indicar el motivo de la visita\n\n¿Te gustaría que te dirija allí?'
+    message:
+      '📅 Para agendar una visita, puedes:\n\n1. Ir a la sección de "Visitas" en el menú\n2. Seleccionar fecha y hora disponible\n3. Indicar el motivo de la visita\n\n¿Te gustaría que te dirija allí?',
   };
 }
 
@@ -392,7 +406,8 @@ async function handleDocumentRequest(
   return {
     success: true,
     action: 'document_request',
-    message: '📂 Puedes encontrar tus documentos en:\n\n📄 Sección "Documentos" - Todos los documentos relacionados con tu propiedad\n📝 Sección "Contratos" - Tu contrato de arrendamiento\n🧾e Sección "Pagos" - Recibos y comprobantes de pago\n\n¿Qué documento específico necesitas?'
+    message:
+      '📂 Puedes encontrar tus documentos en:\n\n📄 Sección "Documentos" - Todos los documentos relacionados con tu propiedad\n📝 Sección "Contratos" - Tu contrato de arrendamiento\n🧾e Sección "Pagos" - Recibos y comprobantes de pago\n\n¿Qué documento específico necesitas?',
   };
 }
 
@@ -423,27 +438,27 @@ ${additionalContext ? `\nContexto adicional:\n${additionalContext}` : ''}`;
     const messages = [
       { role: 'system', content: systemPrompt },
       ...(context.conversationHistory || []),
-      { role: 'user', content: userMessage }
+      { role: 'user', content: userMessage },
     ];
 
     const response = await fetch(LLM_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${LLM_API_KEY}`
+        Authorization: `Bearer ${LLM_API_KEY}`,
       },
       body: JSON.stringify({
         model: DEFAULT_MODEL,
         messages,
         temperature: 0.7,
-        max_tokens: 500
-      })
+        max_tokens: 500,
+      }),
     });
 
     if (!response.ok) {
       throw new Error(`LLM API error: ${response.status}`);
     }
-    
+
     const data = await response.json();
     return data.choices[0].message.content;
   } catch (error) {

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -60,9 +60,7 @@ const triggerTypes = [
 export function WorkflowForm({ workflow, onSuccess, onCancel }: WorkflowFormProps) {
   const [nombre, setNombre] = useState(workflow?.nombre || '');
   const [descripcion, setDescripcion] = useState(workflow?.descripcion || '');
-  const [triggerType, setTriggerType] = useState(
-    workflow?.triggerType || 'manual'
-  );
+  const [triggerType, setTriggerType] = useState(workflow?.triggerType || 'manual');
   const [triggerConfig, setTriggerConfig] = useState<Record<string, any>>(
     workflow?.triggerConfig || {}
   );
@@ -98,11 +96,7 @@ export function WorkflowForm({ workflow, onSuccess, onCancel }: WorkflowFormProp
     setActions(newActions);
   };
 
-  const updateAction = (
-    index: number,
-    field: keyof WorkflowAction,
-    value: any
-  ) => {
+  const updateAction = (index: number, field: keyof WorkflowAction, value: any) => {
     const newActions = [...actions];
     newActions[index] = {
       ...newActions[index],
@@ -136,9 +130,7 @@ export function WorkflowForm({ workflow, onSuccess, onCancel }: WorkflowFormProp
         actions,
       };
 
-      const url = workflow
-        ? `/api/workflows/${workflow.id}`
-        : '/api/workflows';
+      const url = workflow ? `/api/workflows/${workflow.id}` : '/api/workflows';
 
       const response = await fetch(url, {
         method: workflow ? 'PATCH' : 'POST',
@@ -150,9 +142,7 @@ export function WorkflowForm({ workflow, onSuccess, onCancel }: WorkflowFormProp
 
       if (response.ok) {
         toast.success(
-          workflow
-            ? 'Workflow actualizado correctamente'
-            : 'Workflow creado correctamente'
+          workflow ? 'Workflow actualizado correctamente' : 'Workflow creado correctamente'
         );
         onSuccess();
       } else {
@@ -204,11 +194,7 @@ export function WorkflowForm({ workflow, onSuccess, onCancel }: WorkflowFormProp
                 El workflow se ejecutará automáticamente cuando esté activo
               </p>
             </div>
-            <Switch
-              id="isActive"
-              checked={isActive}
-              onCheckedChange={setIsActive}
-            />
+            <Switch id="isActive" checked={isActive} onCheckedChange={setIsActive} />
           </div>
         </CardContent>
       </Card>
@@ -233,9 +219,7 @@ export function WorkflowForm({ workflow, onSuccess, onCancel }: WorkflowFormProp
                   <SelectItem key={type.value} value={type.value}>
                     <div>
                       <div className="font-medium">{type.label}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {type.description}
-                      </div>
+                      <div className="text-xs text-muted-foreground">{type.description}</div>
                     </div>
                   </SelectItem>
                 ))}
@@ -249,9 +233,7 @@ export function WorkflowForm({ workflow, onSuccess, onCancel }: WorkflowFormProp
               <Input
                 id="cron"
                 value={triggerConfig.cron || ''}
-                onChange={(e) =>
-                  setTriggerConfig({ ...triggerConfig, cron: e.target.value })
-                }
+                onChange={(e) => setTriggerConfig({ ...triggerConfig, cron: e.target.value })}
                 placeholder="0 9 * * * (Cada día a las 9:00)"
               />
               <p className="text-xs text-muted-foreground mt-1">
@@ -265,9 +247,7 @@ export function WorkflowForm({ workflow, onSuccess, onCancel }: WorkflowFormProp
               <Label htmlFor="eventType">Tipo de Evento</Label>
               <Select
                 value={triggerConfig.eventType || ''}
-                onValueChange={(value) =>
-                  setTriggerConfig({ ...triggerConfig, eventType: value })
-                }
+                onValueChange={(value) => setTriggerConfig({ ...triggerConfig, eventType: value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecciona un evento" />
@@ -275,12 +255,8 @@ export function WorkflowForm({ workflow, onSuccess, onCancel }: WorkflowFormProp
                 <SelectContent>
                   <SelectItem value="payment_received">Pago Recibido</SelectItem>
                   <SelectItem value="contract_expiring">Contrato Por Vencer</SelectItem>
-                  <SelectItem value="maintenance_requested">
-                    Mantenimiento Solicitado
-                  </SelectItem>
-                  <SelectItem value="tenant_registered">
-                    Inquilino Registrado
-                  </SelectItem>
+                  <SelectItem value="maintenance_requested">Mantenimiento Solicitado</SelectItem>
+                  <SelectItem value="tenant_registered">Inquilino Registrado</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -322,10 +298,7 @@ export function WorkflowForm({ workflow, onSuccess, onCancel }: WorkflowFormProp
           ) : (
             <div className="space-y-4">
               {actions.map((action, index) => (
-                <div
-                  key={index}
-                  className="p-4 border rounded-lg space-y-3 relative"
-                >
+                <div key={index} className="p-4 border rounded-lg space-y-3 relative">
                   <div className="flex items-start justify-between">
                     <Badge variant="outline" className="mb-2">
                       Acción {action.orden}
@@ -345,9 +318,7 @@ export function WorkflowForm({ workflow, onSuccess, onCancel }: WorkflowFormProp
                     <Label>Tipo de Acción</Label>
                     <Select
                       value={action.actionType}
-                      onValueChange={(value) =>
-                        updateAction(index, 'actionType', value)
-                      }
+                      onValueChange={(value) => updateAction(index, 'actionType', value)}
                     >
                       <SelectTrigger>
                         <SelectValue />

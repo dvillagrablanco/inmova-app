@@ -22,106 +22,105 @@ export async function GET(request: NextRequest) {
 
     // Total de anuncios
     const totalListings = await prisma.sTRListing.count({
-      where: { companyId: session.user.companyId }
+      where: { companyId: session.user.companyId },
     });
 
     const activeListings = await prisma.sTRListing.count({
-      where: { 
+      where: {
         companyId: session.user.companyId,
-        activo: true 
-      }
+        activo: true,
+      },
     });
 
     // Reservas
     const totalBookings = await prisma.sTRBooking.count({
       where: {
         listing: {
-          companyId: session.user.companyId
-        }
-      }
+          companyId: session.user.companyId,
+        },
+      },
     });
 
     const bookingsThisMonth = await prisma.sTRBooking.count({
       where: {
         listing: {
-          companyId: session.user.companyId
+          companyId: session.user.companyId,
         },
         checkInDate: {
           gte: monthStart,
-          lte: monthEnd
-        }
-      }
+          lte: monthEnd,
+        },
+      },
     });
 
     const confirmedBookings = await prisma.sTRBooking.count({
       where: {
         listing: {
-          companyId: session.user.companyId
+          companyId: session.user.companyId,
         },
-        estado: 'CONFIRMADA'
-      }
+        estado: 'CONFIRMADA',
+      },
     });
 
     const checkInTodayBookings = await prisma.sTRBooking.count({
       where: {
         listing: {
-          companyId: session.user.companyId
+          companyId: session.user.companyId,
         },
         checkInDate: {
-          gte: new Date(today.setHours(0,0,0,0)),
-          lt: new Date(today.setHours(23,59,59,999))
+          gte: new Date(today.setHours(0, 0, 0, 0)),
+          lt: new Date(today.setHours(23, 59, 59, 999)),
         },
-        estado: 'CONFIRMADA'
-      }
+        estado: 'CONFIRMADA',
+      },
     });
 
     const checkOutTodayBookings = await prisma.sTRBooking.count({
       where: {
         listing: {
-          companyId: session.user.companyId
+          companyId: session.user.companyId,
         },
         checkOutDate: {
-          gte: new Date(today.setHours(0,0,0,0)),
-          lt: new Date(today.setHours(23,59,59,999))
+          gte: new Date(today.setHours(0, 0, 0, 0)),
+          lt: new Date(today.setHours(23, 59, 59, 999)),
         },
-        estado: { in: ['CONFIRMADA', 'CHECK_IN'] }
-      }
+        estado: { in: ['CONFIRMADA', 'CHECK_IN'] },
+      },
     });
 
     // Ingresos
     const allBookings = await prisma.sTRBooking.findMany({
       where: {
         listing: {
-          companyId: session.user.companyId
+          companyId: session.user.companyId,
         },
-        estado: { in: ['CONFIRMADA', 'CHECK_IN', 'CHECK_OUT'] }
+        estado: { in: ['CONFIRMADA', 'CHECK_IN', 'CHECK_OUT'] },
       },
       select: {
         ingresoNeto: true,
-        checkInDate: true
-      }
+        checkInDate: true,
+      },
     });
 
     const totalRevenue = allBookings.reduce((sum, b) => sum + (b.ingresoNeto || 0), 0);
     const revenueThisMonth = allBookings
-      .filter(b => b.checkInDate >= monthStart && b.checkInDate <= monthEnd)
+      .filter((b) => b.checkInDate >= monthStart && b.checkInDate <= monthEnd)
       .reduce((sum, b) => sum + (b.ingresoNeto || 0), 0);
 
     // Rating promedio
     const reviews = await prisma.sTRReview.findMany({
       where: {
         listing: {
-          companyId: session.user.companyId
-        }
+          companyId: session.user.companyId,
+        },
       },
       select: {
-        rating: true
-      }
+        rating: true,
+      },
     });
 
-    const averageRating = reviews.length > 0
-      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-      : 0;
+    const averageRating =
+      reviews.length > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : 0;
 
     const totalReviews = reviews.length;
 
@@ -129,23 +128,24 @@ export async function GET(request: NextRequest) {
     const occupiedDays = await prisma.sTRBooking.aggregate({
       where: {
         listing: {
-          companyId: session.user.companyId
+          companyId: session.user.companyId,
         },
         estado: { in: ['CONFIRMADA', 'CHECK_IN', 'CHECK_OUT'] },
         checkInDate: {
           gte: monthStart,
-          lte: monthEnd
-        }
+          lte: monthEnd,
+        },
       },
       _sum: {
-        numNoches: true
-      }
+        numNoches: true,
+      },
     });
 
     const totalPossibleNights = activeListings * 30; // Simplificado
-    const occupancyRate = totalPossibleNights > 0
-      ? ((occupiedDays._sum?.numNoches || 0) / totalPossibleNights) * 100
-      : 0;
+    const occupancyRate =
+      totalPossibleNights > 0
+        ? ((occupiedDays._sum?.numNoches || 0) / totalPossibleNights) * 100
+        : 0;
 
     // Ingresos por mes (últimos 6 meses)
     const revenueByMonth: Array<{
@@ -158,13 +158,13 @@ export async function GET(request: NextRequest) {
       const end = endOfMonth(monthDate);
 
       const bookingsInMonth = allBookings.filter(
-        b => b.checkInDate >= start && b.checkInDate <= end
+        (b) => b.checkInDate >= start && b.checkInDate <= end
       );
       const revenue = bookingsInMonth.reduce((sum, b) => sum + (b.ingresoNeto || 0), 0);
 
       revenueByMonth.push({
         mes: format(monthDate, 'MMM yyyy', { locale: es }),
-        ingresos: Math.round(revenue)
+        ingresos: Math.round(revenue),
       });
     }
 
@@ -173,46 +173,49 @@ export async function GET(request: NextRequest) {
       by: ['canal'],
       where: {
         listing: {
-          companyId: session.user.companyId
-        }
+          companyId: session.user.companyId,
+        },
       },
       _count: {
-        id: true
-      }
+        id: true,
+      },
     });
 
-    const bookingsByChannel = bookingsByChannelData.map(item => ({
+    const bookingsByChannel = bookingsByChannelData.map((item) => ({
       canal: item.canal,
-      reservas: item._count.id
+      reservas: item._count.id,
     }));
 
     // Top listings
     const topListingsData = await prisma.sTRListing.findMany({
       where: {
-        companyId: session.user.companyId
+        companyId: session.user.companyId,
       },
       include: {
         bookings: {
           where: {
-            estado: { in: ['CONFIRMADA', 'CHECK_IN', 'CHECK_OUT'] }
+            estado: { in: ['CONFIRMADA', 'CHECK_IN', 'CHECK_OUT'] },
           },
           select: {
-            ingresoNeto: true
-          }
-        }
+            ingresoNeto: true,
+          },
+        },
       },
       orderBy: {
-        totalReservas: 'desc'
+        totalReservas: 'desc',
       },
-      take: 5
+      take: 5,
     });
 
-    const topListings = topListingsData.map(listing => ({
+    const topListings = topListingsData.map((listing) => ({
       id: listing.id,
       titulo: listing.titulo,
       totalReservas: listing.totalReservas,
-      ingresoTotal: listing.bookings.reduce((sum: number, b: { ingresoNeto: number | null }) => sum + (b.ingresoNeto || 0), 0),
-      ratingPromedio: listing.ratingPromedio || 0
+      ingresoTotal: listing.bookings.reduce(
+        (sum: number, b: { ingresoNeto: number | null }) => sum + (b.ingresoNeto || 0),
+        0
+      ),
+      ratingPromedio: listing.ratingPromedio || 0,
     }));
 
     return NextResponse.json({
@@ -230,14 +233,11 @@ export async function GET(request: NextRequest) {
       checkOutTodayBookings,
       revenueByMonth,
       bookingsByChannel,
-      topListings
+      topListings,
     });
   } catch (error) {
     logger.error('Error fetching STR dashboard stats:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener estadísticas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener estadísticas' }, { status: 500 });
   }
 }
 

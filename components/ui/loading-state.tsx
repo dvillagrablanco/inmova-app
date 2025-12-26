@@ -42,9 +42,7 @@ export function LoadingState({
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
         <div className="flex flex-col items-center gap-4">
           <Spinner />
-          {message && (
-            <p className="text-sm text-muted-foreground">{message}</p>
-          )}
+          {message && <p className="text-sm text-muted-foreground">{message}</p>}
         </div>
       </div>
     );
@@ -92,16 +90,8 @@ export function LoadingSpinner({
 /**
  * Skeleton loader for content
  */
-export function Skeleton({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      className={cn('animate-pulse rounded-md bg-muted', className)}
-      {...props}
-    />
-  );
+export function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return <div className={cn('animate-pulse rounded-md bg-muted', className)} {...props} />;
 }
 
 /**

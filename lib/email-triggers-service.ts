@@ -1,12 +1,12 @@
 /**
  * 📧 SERVICIO DE TRIGGERS DE EMAILS AUTOMÁTICOS
- * 
+ *
  * Sistema de envío automático de emails en momentos específicos del journey del usuario:
  * - 2 horas después del signup (si no ha completado onboarding)
  * - 24 horas después del signup (recordatorio)
  * - 7 días después (seguimiento)
  * - 30 días después (feedback y tips avanzados)
- * 
+ *
  * Los emails se programan al momento del signup y se procesan periódicamente
  * mediante un cron job.
  */
@@ -111,16 +111,12 @@ export async function processScheduledEmails() {
 
         // Determinar el tipo de email a enviar
         const emailType = mapTriggerToEmailType(emailLog.templateType);
-        
+
         // Enviar el email
-        const result = await sendOnboardingEmail(
-          emailLog.recipientEmail,
-          emailType,
-          {
-            userName: emailLog.user.name || 'Usuario',
-            vertical: emailLog.user.vertical || 'GENERAL',
-          }
-        );
+        const result = await sendOnboardingEmail(emailLog.recipientEmail, emailType, {
+          userName: emailLog.user.name || 'Usuario',
+          vertical: emailLog.user.vertical || 'GENERAL',
+        });
 
         // Actualizar el log
         await prisma.emailLog.update({
@@ -143,7 +139,7 @@ export async function processScheduledEmails() {
         }
       } catch (error) {
         console.error(`[EmailTriggers] Error processing email ${emailLog.id}:`, error);
-        
+
         // Marcar como fallido
         await prisma.emailLog.update({
           where: { id: emailLog.id },
@@ -197,9 +193,7 @@ export async function cancelScheduledEmails(userId: string, reason?: string) {
       },
     });
 
-    console.log(
-      `[EmailTriggers] Cancelled ${result.count} scheduled emails for user ${userId}`
-    );
+    console.log(`[EmailTriggers] Cancelled ${result.count} scheduled emails for user ${userId}`);
     return result.count;
   } catch (error) {
     console.error('[EmailTriggers] Error cancelling emails:', error);

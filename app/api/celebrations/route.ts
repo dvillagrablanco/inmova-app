@@ -1,7 +1,7 @@
 /**
  * API: /api/celebrations
  * Gestión de celebraciones de logros del usuario
- * 
+ *
  * GET: Obtener celebraciones pendientes
  * POST: Crear una celebración (solo sistema)
  */
@@ -24,10 +24,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const result = await getPendingCelebrations(session.user.id);
@@ -44,10 +41,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('[API] Error in GET /api/celebrations:', error);
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }
 
@@ -60,10 +54,7 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -82,10 +73,7 @@ export async function POST(request: NextRequest) {
 
     // Validaciones
     if (!params.type || !params.title || !params.message) {
-      return NextResponse.json(
-        { error: 'Type, title y message son requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Type, title y message son requeridos' }, { status: 400 });
     }
 
     const result = await createCelebration(params);
@@ -97,15 +85,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { celebration: result.celebration },
-      { status: 201 }
-    );
+    return NextResponse.json({ celebration: result.celebration }, { status: 201 });
   } catch (error) {
     console.error('[API] Error in POST /api/celebrations:', error);
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }

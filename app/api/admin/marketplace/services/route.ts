@@ -6,45 +6,41 @@ import { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-
 export async function GET(req: NextRequest) {
   let session: any;
   try {
     session = await getServerSession(authOptions);
 
     if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const services = await prisma.marketplaceService.findMany({
       where: {
-        companyId: session.user.companyId
+        companyId: session.user.companyId,
       },
       include: {
         provider: {
           select: {
-            nombre: true
-          }
-        }
+            nombre: true,
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: 'desc',
+      },
     });
 
     return NextResponse.json(services);
   } catch (error) {
-    logError(new Error(error instanceof Error ? error.message : 'Error fetching marketplace services'), {
-      context: 'GET /api/admin/marketplace/services',
-      companyId: session?.user?.companyId,
-    });
-    return NextResponse.json(
-      { error: 'Error al obtener servicios' },
-      { status: 500 }
+    logError(
+      new Error(error instanceof Error ? error.message : 'Error fetching marketplace services'),
+      {
+        context: 'GET /api/admin/marketplace/services',
+        companyId: session?.user?.companyId,
+      }
     );
+    return NextResponse.json({ error: 'Error al obtener servicios' }, { status: 500 });
   }
 }
 
@@ -55,10 +51,7 @@ export async function POST(req: NextRequest) {
     session = await getServerSession(authOptions);
 
     if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     body = await req.json();
@@ -75,14 +68,11 @@ export async function POST(req: NextRequest) {
       disponible,
       duracionEstimada,
       destacado,
-      activo
+      activo,
     } = body;
 
     if (!nombre || !descripcion || !categoria || !tipoPrecio) {
-      return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
 
     const service = await prisma.marketplaceService.create({
@@ -99,27 +89,27 @@ export async function POST(req: NextRequest) {
         disponible: disponible !== false,
         duracionEstimada: duracionEstimada ? parseInt(duracionEstimada) : null,
         destacado: destacado === true,
-        activo: activo !== false
+        activo: activo !== false,
       },
       include: {
         provider: {
           select: {
-            nombre: true
-          }
-        }
-      }
+            nombre: true,
+          },
+        },
+      },
     });
 
     return NextResponse.json(service, { status: 201 });
   } catch (error) {
-    logError(new Error(error instanceof Error ? error.message : 'Error creating marketplace service'), {
-      context: 'POST /api/admin/marketplace/services',
-      nombre: body?.nombre,
-      companyId: session?.user?.companyId,
-    });
-    return NextResponse.json(
-      { error: 'Error al crear servicio' },
-      { status: 500 }
+    logError(
+      new Error(error instanceof Error ? error.message : 'Error creating marketplace service'),
+      {
+        context: 'POST /api/admin/marketplace/services',
+        nombre: body?.nombre,
+        companyId: session?.user?.companyId,
+      }
     );
+    return NextResponse.json({ error: 'Error al crear servicio' }, { status: 500 });
   }
 }

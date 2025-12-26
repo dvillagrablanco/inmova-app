@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 export async function PUT(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session || !session.user?.email) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
@@ -46,10 +46,7 @@ export async function PUT(request: Request) {
       // Verificar contraseña actual
       const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
       if (!isPasswordValid) {
-        return NextResponse.json(
-          { error: 'Contraseña actual incorrecta' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Contraseña actual incorrecta' }, { status: 400 });
       }
 
       // Validar nueva contraseña
@@ -66,10 +63,7 @@ export async function PUT(request: Request) {
 
     // Si no hay nada que actualizar
     if (Object.keys(updateData).length === 0) {
-      return NextResponse.json(
-        { message: 'No hay cambios para actualizar' },
-        { status: 200 }
-      );
+      return NextResponse.json({ message: 'No hay cambios para actualizar' }, { status: 200 });
     }
 
     // Actualizar usuario
@@ -90,9 +84,6 @@ export async function PUT(request: Request) {
     });
   } catch (error) {
     logger.error('Error updating profile:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar el perfil' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar el perfil' }, { status: 500 });
   }
 }

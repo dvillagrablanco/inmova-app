@@ -13,19 +13,13 @@ export async function POST(request: Request) {
     // Autenticación
     const session = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const { taskId } = await request.json();
 
     if (!taskId) {
-      return NextResponse.json(
-        { error: 'taskId requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'taskId requerido' }, { status: 400 });
     }
 
     const userId = session.user.id;
@@ -36,7 +30,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: 'Tarea completada'
+      message: 'Tarea completada',
     });
   } catch (error: any) {
     console.error('Error completando tarea de onboarding:', error);

@@ -251,7 +251,7 @@ export default function MantenimientoPreventivoPage() {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Cargando...</p>
         </div>
       </div>
@@ -262,9 +262,9 @@ export default function MantenimientoPreventivoPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
             {/* Botón Volver y Breadcrumbs */}
-            <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4">
               <Button
                 variant="outline"
                 size="sm"
@@ -290,14 +290,14 @@ export default function MantenimientoPreventivoPage() {
             </div>
 
             {/* Header Section */}
-            <div>
+        <div>
               <h1 className="text-3xl font-bold tracking-tight">Mantenimiento Preventivo</h1>
               <p className="text-muted-foreground">
                 Gestiona las programaciones de mantenimiento recurrente
               </p>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
               <div className="flex flex-col md:flex-row gap-4 items-end">
                 <div className="flex-1">
                   <label className="block text-sm font-medium text-gray-700 mb-2">Estado</label>
@@ -339,7 +339,7 @@ export default function MantenimientoPreventivoPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 gap-4">
               {filteredSchedules.map((schedule) => {
                 const daysUntil = getDaysUntil(schedule.proximaFecha);
                 const priorityColor = getPriorityColor(daysUntil);
@@ -478,8 +478,8 @@ export default function MantenimientoPreventivoPage() {
         </main>
 
         {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">
                   {editingId ? 'Editar Mantenimiento' : 'Nuevo Mantenimiento Preventivo'}

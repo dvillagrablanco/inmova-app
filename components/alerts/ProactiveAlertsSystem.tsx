@@ -20,7 +20,14 @@ import {
 import { cn } from '@/lib/utils';
 
 type AlertSeverity = 'critical' | 'high' | 'medium' | 'low' | 'info';
-type AlertType = 'contract_expiring' | 'payment_overdue' | 'maintenance_due' | 'document_expiring' | 'occupancy_low' | 'revenue_drop' | 'inspection_due';
+type AlertType =
+  | 'contract_expiring'
+  | 'payment_overdue'
+  | 'maintenance_due'
+  | 'document_expiring'
+  | 'occupancy_low'
+  | 'revenue_drop'
+  | 'inspection_due';
 
 interface Alert {
   id: string;
@@ -172,20 +179,20 @@ export function ProactiveAlertsSystem() {
   };
 
   const dismissAlert = (alertId: string) => {
-    setAlerts(prev => prev.map(alert =>
-      alert.id === alertId ? { ...alert, dismissed: true } : alert
-    ));
+    setAlerts((prev) =>
+      prev.map((alert) => (alert.id === alertId ? { ...alert, dismissed: true } : alert))
+    );
   };
 
-  const filteredAlerts = alerts.filter(alert => {
+  const filteredAlerts = alerts.filter((alert) => {
     if (!alert.dismissed && (filter === 'all' || alert.severity === filter)) {
       return true;
     }
     return false;
   });
 
-  const activeAlerts = alerts.filter(a => !a.dismissed);
-  const criticalCount = activeAlerts.filter(a => a.severity === 'critical').length;
+  const activeAlerts = alerts.filter((a) => !a.dismissed);
+  const criticalCount = activeAlerts.filter((a) => a.severity === 'critical').length;
 
   const getTimeAgo = (timestamp: Date): string => {
     const now = Date.now();
@@ -243,7 +250,7 @@ export function ProactiveAlertsSystem() {
                 <CheckCircle className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <div className="text-2xl font-bold">{alerts.filter(a => a.dismissed).length}</div>
+                <div className="text-2xl font-bold">{alerts.filter((a) => a.dismissed).length}</div>
                 <div className="text-sm text-muted-foreground">Resueltas</div>
               </div>
             </div>
@@ -284,13 +291,11 @@ export function ProactiveAlertsSystem() {
             <CardContent className="py-12 text-center">
               <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">¡Todo en orden!</h3>
-              <p className="text-muted-foreground">
-                No hay alertas activas en este momento
-              </p>
+              <p className="text-muted-foreground">No hay alertas activas en este momento</p>
             </CardContent>
           </Card>
         ) : (
-          filteredAlerts.map(alert => {
+          filteredAlerts.map((alert) => {
             const config = alertConfig[alert.type];
             const Icon = config.icon;
             const severity = severityConfig[alert.severity];
@@ -320,9 +325,7 @@ export function ProactiveAlertsSystem() {
                               {severity.label}
                             </Badge>
                           </div>
-                          <p className="text-sm text-muted-foreground mb-2">
-                            {alert.description}
-                          </p>
+                          <p className="text-sm text-muted-foreground mb-2">{alert.description}</p>
                           {alert.entityName && (
                             <div className="text-sm font-medium text-indigo-600">
                               {alert.entityName}
@@ -332,22 +335,23 @@ export function ProactiveAlertsSystem() {
 
                         <div className="text-right shrink-0">
                           {alert.daysUntil !== undefined && (
-                            <div className={cn(
-                              'text-sm font-semibold mb-1',
-                              alert.daysUntil < 0 ? 'text-red-600' :
-                              alert.daysUntil <= 7 ? 'text-orange-600' :
-                              'text-blue-600'
-                            )}>
-                              {alert.daysUntil < 0 
+                            <div
+                              className={cn(
+                                'text-sm font-semibold mb-1',
+                                alert.daysUntil < 0
+                                  ? 'text-red-600'
+                                  : alert.daysUntil <= 7
+                                    ? 'text-orange-600'
+                                    : 'text-blue-600'
+                              )}
+                            >
+                              {alert.daysUntil < 0
                                 ? `Hace ${Math.abs(alert.daysUntil)} días`
-                                : `En ${alert.daysUntil} días`
-                              }
+                                : `En ${alert.daysUntil} días`}
                             </div>
                           )}
                           {alert.amount !== undefined && (
-                            <div className="text-lg font-bold text-red-600">
-                              €{alert.amount}
-                            </div>
+                            <div className="text-lg font-bold text-red-600">€{alert.amount}</div>
                           )}
                           <div className="text-xs text-muted-foreground flex items-center gap-1 justify-end">
                             <Clock className="h-3 w-3" />
@@ -359,16 +363,10 @@ export function ProactiveAlertsSystem() {
                       <div className="flex items-center gap-2 mt-4">
                         {alert.actionLabel && alert.actionUrl && (
                           <Button size="sm" asChild>
-                            <a href={alert.actionUrl}>
-                              {alert.actionLabel}
-                            </a>
+                            <a href={alert.actionUrl}>{alert.actionLabel}</a>
                           </Button>
                         )}
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => dismissAlert(alert.id)}
-                        >
+                        <Button size="sm" variant="outline" onClick={() => dismissAlert(alert.id)}>
                           <XCircle className="h-4 w-4 mr-1" />
                           Descartar
                         </Button>

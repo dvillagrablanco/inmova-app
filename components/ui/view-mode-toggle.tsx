@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { LayoutGrid, List, LayoutList } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,7 @@ export function ViewModeToggle({ value, onChange, className }: ViewModeTogglePro
   ];
 
   return (
-    <div 
+    <div
       className={cn('inline-flex rounded-lg border bg-background p-1', className)}
       role="group"
       aria-label="Seleccionar modo de visualización"
@@ -31,10 +31,7 @@ export function ViewModeToggle({ value, onChange, className }: ViewModeTogglePro
           variant={value === mode ? 'default' : 'ghost'}
           size="sm"
           onClick={() => onChange(mode)}
-          className={cn(
-            'gap-2',
-            value === mode && 'gradient-primary text-white shadow-primary'
-          )}
+          className={cn('gap-2', value === mode && 'gradient-primary text-white shadow-primary')}
           title={label}
           aria-label={`Vista ${label.toLowerCase()}`}
           aria-pressed={value === mode}

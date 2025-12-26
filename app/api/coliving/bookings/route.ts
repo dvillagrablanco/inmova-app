@@ -14,10 +14,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const tenantId = searchParams.get('tenantId');
     if (!tenantId) {
-      return NextResponse.json(
-        { error: 'tenantId requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'tenantId requerido' }, { status: 400 });
     }
     const result = await conciergeService.getTenantBookings(tenantId);
     if (!result.success) {
@@ -26,10 +23,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(result.bookings);
   } catch (error) {
     logger.error('Error en GET /api/coliving/bookings:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener reservas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener reservas' }, { status: 500 });
   }
 }
 
@@ -50,10 +44,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result.booking, { status: 201 });
   } catch (error) {
     logger.error('Error en POST /api/coliving/bookings:', error);
-    return NextResponse.json(
-      { error: 'Error al crear reserva' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear reserva' }, { status: 500 });
   }
 }
 
@@ -65,10 +56,7 @@ export async function PATCH(request: NextRequest) {
     }
     const { bookingId, estado, valoracion, comentario } = await request.json();
     if (!bookingId || !estado) {
-      return NextResponse.json(
-        { error: 'Datos incompletos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Datos incompletos' }, { status: 400 });
     }
     const result = await conciergeService.updateBookingStatus(
       bookingId,
@@ -82,9 +70,6 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json(result.booking);
   } catch (error) {
     logger.error('Error en PATCH /api/coliving/bookings:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar reserva' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar reserva' }, { status: 500 });
   }
 }

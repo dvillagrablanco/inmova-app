@@ -68,24 +68,22 @@ export function EmptyState({
         {/* Icon */}
         {Icon && (
           <div className="flex justify-center">
-            <div className={cn(
-              sizes.iconBg,
-              'rounded-full bg-gray-100 flex items-center justify-center'
-            )}>
+            <div
+              className={cn(
+                sizes.iconBg,
+                'rounded-full bg-gray-100 flex items-center justify-center'
+              )}
+            >
               <Icon className={cn(sizes.icon, 'text-gray-400')} />
             </div>
           </div>
         )}
 
         {/* Title */}
-        <h3 className={cn('font-semibold text-gray-900', sizes.title)}>
-          {title}
-        </h3>
+        <h3 className={cn('font-semibold text-gray-900', sizes.title)}>{title}</h3>
 
         {/* Description */}
-        <p className={cn('text-gray-600', sizes.description)}>
-          {description}
-        </p>
+        <p className={cn('text-gray-600', sizes.description)}>{description}</p>
 
         {/* Custom children */}
         {children}
@@ -94,20 +92,12 @@ export function EmptyState({
         {(action || secondaryAction) && (
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center pt-2">
             {action && (
-              <Button
-                onClick={action.onClick}
-                variant={action.variant || 'default'}
-                size={size}
-              >
+              <Button onClick={action.onClick} variant={action.variant || 'default'} size={size}>
                 {action.label}
               </Button>
             )}
             {secondaryAction && (
-              <Button
-                onClick={secondaryAction.onClick}
-                variant="outline"
-                size={size}
-              >
+              <Button onClick={secondaryAction.onClick} variant="outline" size={size}>
                 {secondaryAction.label}
               </Button>
             )}

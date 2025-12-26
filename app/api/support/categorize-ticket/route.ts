@@ -4,7 +4,6 @@ import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-
 /**
  * API para categorizar automáticamente tickets de soporte usando IA
  */
@@ -13,10 +12,7 @@ export async function POST(request: NextRequest) {
     const { subject, description, attachments } = await request.json();
 
     if (!subject || !description) {
-      return NextResponse.json(
-        { error: 'Subject and description are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Subject and description are required' }, { status: 400 });
     }
 
     const systemPrompt = `Eres un experto en soporte técnico de software de gestión inmobiliaria.
@@ -75,7 +71,7 @@ Respond with raw JSON only. Do not include code blocks, markdown, or any other f
     // Buscar artículos relacionados en la base de conocimientos
     const query = `${subject} ${description}`;
     const articles = searchArticles(query);
-    const relatedArticles = articles.slice(0, 3).map(article => ({
+    const relatedArticles = articles.slice(0, 3).map((article) => ({
       title: article.title,
       url: `/knowledge-base/${article.id}`,
     }));

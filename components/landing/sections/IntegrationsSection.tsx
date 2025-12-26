@@ -2,7 +2,16 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, CreditCard, Globe, Hotel, MessageSquare, FileText, Shield, LinkIcon } from 'lucide-react';
+import {
+  CheckCircle,
+  CreditCard,
+  Globe,
+  Hotel,
+  MessageSquare,
+  FileText,
+  Shield,
+  LinkIcon,
+} from 'lucide-react';
 
 const integrations = [
   {
@@ -14,7 +23,7 @@ const integrations = [
       { name: 'Stripe', desc: 'Pagos recurrentes y one-time' },
       { name: 'Open Banking', desc: 'Verificación de ingresos' },
       { name: 'Zucchetti', desc: 'Integración ERP/contabilidad' },
-    ]
+    ],
   },
   {
     icon: Globe,
@@ -25,7 +34,7 @@ const integrations = [
       { name: 'Idealista', desc: 'Sincronización automática' },
       { name: 'Fotocasa', desc: 'Anuncios optimizados' },
       { name: 'Habitaclia', desc: 'Multi-publicación' },
-    ]
+    ],
   },
   {
     icon: Hotel,
@@ -36,7 +45,7 @@ const integrations = [
       { name: 'Airbnb', desc: 'Sincronización calendario' },
       { name: 'Booking.com', desc: 'Gestión reservas' },
       { name: 'VRBO', desc: 'Pricing dinámico' },
-    ]
+    ],
   },
   {
     icon: MessageSquare,
@@ -47,7 +56,7 @@ const integrations = [
       { name: 'WhatsApp', desc: 'Chat integrado' },
       { name: 'Email', desc: 'Notificaciones automáticas' },
       { name: 'SMS', desc: 'Recordatorios y alertas' },
-    ]
+    ],
   },
   {
     icon: FileText,
@@ -58,7 +67,7 @@ const integrations = [
       { name: 'Signaturit', desc: 'Firma electrónica certificada' },
       { name: 'DocuSign', desc: 'Flujos de firma múltiples' },
       { name: 'Autoridad Certificadora', desc: 'Sello de tiempo' },
-    ]
+    ],
   },
   {
     icon: Shield,
@@ -69,7 +78,7 @@ const integrations = [
       { name: 'Biometría', desc: 'Autenticación facial/huella' },
       { name: 'GDPR', desc: 'Cumplimiento normativo' },
       { name: 'SOC2/ISO27001', desc: 'Auditorías de seguridad' },
-    ]
+    ],
   },
 ];
 
@@ -86,7 +95,8 @@ export function IntegrationsSection() {
             Conecta con tus Herramientas Favoritas
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            INMOVA se integra perfectamente con las principales plataformas del sector inmobiliario y financiero
+            INMOVA se integra perfectamente con las principales plataformas del sector inmobiliario
+            y financiero
           </p>
         </div>
 
@@ -94,7 +104,9 @@ export function IntegrationsSection() {
           {integrations.map((integration, i) => (
             <Card key={i} className="group hover:shadow-2xl transition-all border-2">
               <CardHeader>
-                <div className={`p-3 bg-gradient-to-br ${integration.gradient} rounded-xl w-fit mb-3`}>
+                <div
+                  className={`p-3 bg-gradient-to-br ${integration.gradient} rounded-xl w-fit mb-3`}
+                >
                   <integration.icon className="h-6 w-6 text-white" />
                 </div>
                 <CardTitle className="text-lg">{integration.title}</CardTitle>

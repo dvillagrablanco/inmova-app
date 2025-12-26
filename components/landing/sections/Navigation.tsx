@@ -30,7 +30,10 @@ export function Navigation() {
             <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
               INMOVA
             </span>
-            <Badge variant="secondary" className="ml-2 bg-gradient-to-r from-indigo-500 to-violet-500 text-white border-0 hidden sm:inline-flex">
+            <Badge
+              variant="secondary"
+              className="ml-2 bg-gradient-to-r from-indigo-500 to-violet-500 text-white border-0 hidden sm:inline-flex"
+            >
               <Sparkles className="h-3 w-3 mr-1" />
               PropTech
             </Badge>
@@ -63,7 +66,11 @@ export function Navigation() {
           <div className="md:hidden">
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-gray-700 hover:text-indigo-600 hover:bg-indigo-50">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-gray-700 hover:text-indigo-600 hover:bg-indigo-50"
+                >
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>

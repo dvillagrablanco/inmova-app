@@ -5,7 +5,6 @@ import { getRenewalStats } from '@/lib/services/renewal-service-simple';
 
 export const dynamic = 'force-dynamic';
 
-
 /**
  * @swagger
  * /api/renewals/stats:
@@ -25,10 +24,7 @@ export async function GET(req: NextRequest) {
     const companyId = searchParams.get('companyId');
 
     if (!companyId) {
-      return NextResponse.json(
-        { error: 'companyId es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'companyId es requerido' }, { status: 400 });
     }
 
     const stats = await getRenewalStats(companyId);

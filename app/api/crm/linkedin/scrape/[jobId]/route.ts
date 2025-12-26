@@ -1,6 +1,6 @@
 /**
  * API: /api/crm/linkedin/scrape/[jobId]
- * 
+ *
  * GET: Obtener estado del job de scraping
  */
 
@@ -9,10 +9,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { LinkedInScrapingJobManager } from '@/lib/linkedin-scraper';
 
-export async function GET(
-  request: Request,
-  { params }: { params: { jobId: string } }
-) {
+export async function GET(request: Request, { params }: { params: { jobId: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id || !session.user.companyId) {

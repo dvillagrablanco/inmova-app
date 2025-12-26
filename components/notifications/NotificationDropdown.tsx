@@ -15,23 +15,24 @@ const notificationTypeIcons: Record<string, React.ReactNode> = {
   unidad_vacante: <Info className="w-4 h-4 text-gray-500" />,
   inspeccion_programada: <Info className="w-4 h-4 text-indigo-500" />,
   alerta_sistema: <AlertTriangle className="w-4 h-4 text-orange-600" />,
-  info: <Info className="w-4 h-4 text-blue-500" />
+  info: <Info className="w-4 h-4 text-blue-500" />,
 };
 
 const priorityColors: Record<string, string> = {
   urgente: 'bg-red-100 border-red-300',
   alto: 'bg-orange-100 border-orange-300',
   medio: 'bg-yellow-100 border-yellow-300',
-  bajo: 'bg-gray-50 border-gray-200'
+  bajo: 'bg-gray-50 border-gray-200',
 };
 
 export function NotificationDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { notifications, unreadCount, loading, markAsRead, markAllAsRead, refresh } = useNotifications({
-    limit: 20,
-    autoRefresh: 60000 // Refrescar cada minuto
-  });
+  const { notifications, unreadCount, loading, markAsRead, markAllAsRead, refresh } =
+    useNotifications({
+      limit: 20,
+      autoRefresh: 60000, // Refrescar cada minuto
+    });
 
   // Cerrar dropdown al hacer click fuera
   useEffect(() => {
@@ -64,7 +65,7 @@ export function NotificationDropdown() {
     }
   };
 
-  const unreadNotifications = notifications.filter(n => !n.leida);
+  const unreadNotifications = notifications.filter((n) => !n.leida);
   const hasUnread = unreadCount > 0;
 
   return (
@@ -127,9 +128,7 @@ export function NotificationDropdown() {
             ) : notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 px-4">
                 <Bell className="w-12 h-12 text-gray-300 mb-3" />
-                <p className="text-gray-500 text-sm text-center">
-                  No tienes notificaciones
-                </p>
+                <p className="text-gray-500 text-sm text-center">No tienes notificaciones</p>
               </div>
             ) : (
               <div className="divide-y divide-gray-100">
@@ -138,9 +137,7 @@ export function NotificationDropdown() {
                     key={notification.id}
                     className={`p-4 transition-colors hover:bg-gray-50 ${
                       !notification.leida ? 'bg-blue-50/50' : ''
-                    } ${
-                      priorityColors[notification.prioridad] || 'bg-white'
-                    }`}
+                    } ${priorityColors[notification.prioridad] || 'bg-white'}`}
                   >
                     <div className="flex gap-3">
                       <div className="flex-shrink-0 mt-1">
@@ -170,14 +167,15 @@ export function NotificationDropdown() {
                           <span className="text-xs text-gray-500">
                             {formatDistanceToNow(new Date(notification.createdAt), {
                               addSuffix: true,
-                              locale: es
+                              locale: es,
                             })}
                           </span>
                           {notification.fechaLimite && (
                             <>
                               <span className="text-gray-300">•</span>
                               <span className="text-xs text-orange-600 font-medium">
-                                Vence: {new Date(notification.fechaLimite).toLocaleDateString('es-ES')}
+                                Vence:{' '}
+                                {new Date(notification.fechaLimite).toLocaleDateString('es-ES')}
                               </span>
                             </>
                           )}

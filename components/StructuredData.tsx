@@ -16,7 +16,8 @@ export function StructuredData() {
       availability: 'https://schema.org/InStock',
     },
     operatingSystem: 'Web-based',
-    description: 'Software de gestión inmobiliaria profesional todo-en-uno. Alternativa superior a Homming, Rentger, Nester, Buildium y AppFolio. 88 módulos integrados, 7 modelos de negocio, tecnología avanzada con IA, Blockchain e IoT.',
+    description:
+      'Software de gestión inmobiliaria profesional todo-en-uno. Alternativa superior a Homming, Rentger, Nester, Buildium y AppFolio. 88 módulos integrados, 7 modelos de negocio, tecnología avanzada con IA, Blockchain e IoT.',
     aggregateRating: {
       '@type': 'AggregateRating',
       ratingValue: '4.8',
@@ -36,10 +37,7 @@ export function StructuredData() {
         areaServed: 'ES',
         availableLanguage: ['Spanish', 'English'],
       },
-      sameAs: [
-        'https://www.linkedin.com/company/inmova',
-        'https://twitter.com/inmova_tech',
-      ],
+      sameAs: ['https://www.linkedin.com/company/inmova', 'https://twitter.com/inmova_tech'],
     },
     featureList: [
       'Gestión de propiedades y alquileres',
@@ -59,7 +57,8 @@ export function StructuredData() {
     name: 'INMOVA',
     url: 'https://inmova.app',
     logo: 'https://inmova.app/inmova-logo-cover.jpg',
-    description: 'Software de gestión inmobiliaria profesional todo-en-uno para empresas que gestionan múltiples propiedades',
+    description:
+      'Software de gestión inmobiliaria profesional todo-en-uno para empresas que gestionan múltiples propiedades',
     foundingDate: '2024',
     numberOfEmployees: {
       '@type': 'QuantitativeValue',

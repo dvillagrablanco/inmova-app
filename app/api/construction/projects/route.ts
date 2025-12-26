@@ -15,38 +15,35 @@ export async function GET(request: NextRequest) {
 
     const projects = await prisma.constructionProject.findMany({
       where: {
-        companyId: session.user.companyId
+        companyId: session.user.companyId,
       },
       include: {
         building: true,
         workOrders: {
           orderBy: {
-            createdAt: 'desc'
-          }
+            createdAt: 'desc',
+          },
         },
         inspections: {
           orderBy: {
-            fecha: 'desc'
-          }
+            fecha: 'desc',
+          },
         },
         suppliers: {
           orderBy: {
-            createdAt: 'desc'
-          }
-        }
+            createdAt: 'desc',
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: 'desc',
+      },
     });
 
     return NextResponse.json(projects);
   } catch (error) {
     logger.error('Error fetching construction projects:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch projects' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch projects' }, { status: 500 });
   }
 }
 
@@ -58,23 +55,20 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await request.json();
-    
+
     const project = await prisma.constructionProject.create({
       data: {
         ...data,
-        companyId: session.user.companyId
+        companyId: session.user.companyId,
       },
       include: {
-        building: true
-      }
+        building: true,
+      },
     });
 
     return NextResponse.json(project, { status: 201 });
   } catch (error) {
     logger.error('Error creating construction project:', error);
-    return NextResponse.json(
-      { error: 'Failed to create project' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create project' }, { status: 500 });
   }
 }

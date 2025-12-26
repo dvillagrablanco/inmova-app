@@ -122,12 +122,7 @@ export function generateInvoicePDF(data: InvoiceData): jsPDF {
   const pageHeight = doc.internal.pageSize.height;
   doc.setFontSize(8);
   doc.setTextColor(128, 128, 128);
-  doc.text(
-    'Gracias por su preferencia',
-    105,
-    pageHeight - 20,
-    { align: 'center' }
-  );
+  doc.text('Gracias por su preferencia', 105, pageHeight - 20, { align: 'center' });
 
   return doc;
 }

@@ -19,8 +19,8 @@ const MODULE_DEFINITIONS = [
       'Dashboards ejecutivos personalizables',
       'Análisis predictivo con IA',
       'Benchmarking vs mercado',
-      'Alertas inteligentes automáticas'
-    ]
+      'Alertas inteligentes automáticas',
+    ],
   },
   {
     codigo: 'str',
@@ -33,8 +33,8 @@ const MODULE_DEFINITIONS = [
       'Sincronización con Airbnb y Booking',
       'Pricing dinámico automático',
       'Gestión de calendarios unificada',
-      'Automatización de mensajes a huéspedes'
-    ]
+      'Automatización de mensajes a huéspedes',
+    ],
   },
   {
     codigo: 'flipping',
@@ -47,8 +47,8 @@ const MODULE_DEFINITIONS = [
       'Cálculo de ROI y TIR en tiempo real',
       'Seguimiento de presupuestos de reforma',
       'Análisis comparativo de mercado',
-      'Proyecciones de venta'
-    ]
+      'Proyecciones de venta',
+    ],
   },
   {
     codigo: 'construction',
@@ -61,8 +61,8 @@ const MODULE_DEFINITIONS = [
       'Control de permisos y licencias',
       'Gestión de fases y cronogramas',
       'Seguimiento de agentes y subcontratas',
-      'Alertas de hitos críticos'
-    ]
+      'Alertas de hitos críticos',
+    ],
   },
   {
     codigo: 'professional',
@@ -75,8 +75,8 @@ const MODULE_DEFINITIONS = [
       'Time tracking integrado',
       'Facturación automática recurrente',
       'Portfolio público personalizable',
-      'Gestión de proyectos y clientes'
-    ]
+      'Gestión de proyectos y clientes',
+    ],
   },
   {
     codigo: 'room_rental',
@@ -89,8 +89,8 @@ const MODULE_DEFINITIONS = [
       'Prorrateo automático de gastos comunes',
       'Gestión de normas de convivencia',
       'Control de habitaciones individuales',
-      'Contratos y pagos por inquilino'
-    ]
+      'Contratos y pagos por inquilino',
+    ],
   },
   {
     codigo: 'legal',
@@ -103,8 +103,8 @@ const MODULE_DEFINITIONS = [
       'Plantillas de documentos actualizadas',
       'Alertas de cambios legislativos',
       'Gestión de desahucios y reclamaciones',
-      'Consultas con abogados especializados'
-    ]
+      'Consultas con abogados especializados',
+    ],
   },
   {
     codigo: 'seguros',
@@ -117,8 +117,8 @@ const MODULE_DEFINITIONS = [
       'Comparador de pólizas de seguros',
       'Recordatorios de renovación',
       'Gestión de siniestros y reclamaciones',
-      'Integración con aseguradoras'
-    ]
+      'Integración con aseguradoras',
+    ],
   },
   {
     codigo: 'energia',
@@ -131,8 +131,8 @@ const MODULE_DEFINITIONS = [
       'Monitorización de consumos en tiempo real',
       'Alertas de consumos anómalos',
       'Cálculo de certificación energética',
-      'Sugerencias de mejora de eficiencia'
-    ]
+      'Sugerencias de mejora de eficiencia',
+    ],
   },
   {
     codigo: 'esg',
@@ -145,31 +145,25 @@ const MODULE_DEFINITIONS = [
       'Cálculo de huella de carbono',
       'Reportes ESG para inversores',
       'Certificaciones de sostenibilidad',
-      'Análisis de impacto social'
-    ]
-  }
+      'Análisis de impacto social',
+    ],
+  },
 ];
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
+      where: { id: session.user.id },
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Usuario no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -179,16 +173,16 @@ export async function GET(request: NextRequest) {
     const activeModules = await prisma.companyModule.findMany({
       where: {
         companyId: user.companyId,
-        activo: true
-      }
+        activo: true,
+      },
     });
 
-    const activeModuleCodes = new Set(activeModules.map(m => m.moduloCodigo));
+    const activeModuleCodes = new Set(activeModules.map((m) => m.moduloCodigo));
 
     // Filtrar módulos según el estado solicitado
-    let modules = MODULE_DEFINITIONS.map(def => ({
+    let modules = MODULE_DEFINITIONS.map((def) => ({
       ...def,
-      activo: activeModuleCodes.has(def.codigo)
+      activo: activeModuleCodes.has(def.codigo),
     }));
 
     if (status === 'active') {
@@ -201,13 +195,10 @@ export async function GET(request: NextRequest) {
       modules,
       total: modules.length,
       active: modules.filter((m: { activo: boolean }) => m.activo).length,
-      inactive: modules.filter((m: { activo: boolean }) => !m.activo).length
+      inactive: modules.filter((m: { activo: boolean }) => !m.activo).length,
     });
   } catch (error) {
     logger.error('Error loading modules:', error);
-    return NextResponse.json(
-      { error: 'Error al cargar módulos' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al cargar módulos' }, { status: 500 });
   }
 }

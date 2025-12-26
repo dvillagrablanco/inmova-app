@@ -1,12 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { HelpCircle, PlayCircle, BookOpen, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -33,7 +28,7 @@ export default function HelpTooltip({
   examples = [],
   size = 'md',
   side = 'top',
-  className = ''
+  className = '',
 }: HelpTooltipProps) {
   const iconSize = size === 'sm' ? 'h-3.5 w-3.5' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4';
 
@@ -41,15 +36,15 @@ export default function HelpTooltip({
     <TooltipProvider>
       <Tooltip delayDuration={300}>
         <TooltipTrigger asChild>
-          <button 
+          <button
             className={`inline-flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors ${className}`}
             type="button"
           >
             <HelpCircle className={iconSize} />
           </button>
         </TooltipTrigger>
-        <TooltipContent 
-          side={side} 
+        <TooltipContent
+          side={side}
           className="max-w-sm p-4 bg-popover text-popover-foreground shadow-lg border"
           sideOffset={5}
         >
@@ -60,10 +55,8 @@ export default function HelpTooltip({
                 {title}
               </h4>
             )}
-            
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {description}
-            </p>
+
+            <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
 
             {tips.length > 0 && (
               <>
@@ -140,7 +133,7 @@ export function QuickHelp({ text, className = '' }: { text: string; className?: 
     <TooltipProvider>
       <Tooltip delayDuration={200}>
         <TooltipTrigger asChild>
-          <button 
+          <button
             className={`inline-flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors ${className}`}
             type="button"
           >

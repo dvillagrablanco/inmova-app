@@ -53,7 +53,7 @@ export function EnhancedEmptyState({
 
   // Construir array de acciones
   const actions = [];
-  
+
   if (primaryAction) {
     actions.push({
       ...primaryAction,

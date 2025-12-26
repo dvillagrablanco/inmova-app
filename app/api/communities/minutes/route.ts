@@ -10,7 +10,6 @@ import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-
 /**
  * @swagger
  * /api/communities/minutes:
@@ -47,10 +46,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(minutes);
   } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Error al obtener actas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Error al obtener actas' }, { status: 500 });
   }
 }
 
@@ -79,9 +75,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(minute, { status: 201 });
   } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Error al crear acta' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Error al crear acta' }, { status: 500 });
   }
 }

@@ -58,15 +58,10 @@ export async function POST(request: NextRequest) {
 
     // Check if payment already has a payment intent
     if (payment.stripePaymentIntentId) {
-      const existingIntent = await stripe.paymentIntents.retrieve(
-        payment.stripePaymentIntentId
-      );
+      const existingIntent = await stripe.paymentIntents.retrieve(payment.stripePaymentIntentId);
 
       if (existingIntent.status === 'succeeded') {
-        return NextResponse.json(
-          { error: 'Este pago ya ha sido procesado' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Este pago ya ha sido procesado' }, { status: 400 });
       }
 
       // Return existing intent if not succeeded

@@ -41,7 +41,7 @@ export function ReportsScheduler() {
       reportType,
       frequency,
       email,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
     setScheduledReports([...scheduledReports, newReport]);
     setReportType('');
@@ -128,8 +128,8 @@ export function ReportsScheduler() {
           ) : (
             <div className="space-y-3">
               {scheduledReports.map((report) => {
-                const type = reportTypes.find(t => t.value === report.reportType);
-                const freq = frequencies.find(f => f.value === report.frequency);
+                const type = reportTypes.find((t) => t.value === report.reportType);
+                const freq = frequencies.find((f) => f.value === report.frequency);
                 return (
                   <div
                     key={report.id}
@@ -148,9 +148,7 @@ export function ReportsScheduler() {
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        setScheduledReports(
-                          scheduledReports.filter((r) => r.id !== report.id)
-                        );
+                        setScheduledReports(scheduledReports.filter((r) => r.id !== report.id));
                       }}
                     >
                       Eliminar
@@ -167,9 +165,9 @@ export function ReportsScheduler() {
       <Card className="border-blue-200 bg-blue-50">
         <CardContent className="pt-6">
           <p className="text-sm text-blue-800">
-            <strong>Nota:</strong> Los reportes programados se generarán automáticamente según
-            la frecuencia seleccionada y se enviarán al email especificado. Los reportes incluyen
-            datos actualizados y gráficos visuales.
+            <strong>Nota:</strong> Los reportes programados se generarán automáticamente según la
+            frecuencia seleccionada y se enviarán al email especificado. Los reportes incluyen datos
+            actualizados y gráficos visuales.
           </p>
         </CardContent>
       </Card>

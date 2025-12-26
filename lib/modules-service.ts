@@ -25,7 +25,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: [],
     tiersIncluido: ['basico', 'profesional', 'empresarial'],
     esCore: true,
-    orden: 1
+    orden: 1,
   },
   {
     codigo: 'edificios',
@@ -37,7 +37,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: [],
     tiersIncluido: ['basico', 'profesional', 'empresarial'],
     esCore: true,
-    orden: 2
+    orden: 2,
   },
   {
     codigo: 'unidades',
@@ -49,7 +49,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['edificios'],
     tiersIncluido: ['basico', 'profesional', 'empresarial'],
     esCore: true,
-    orden: 3
+    orden: 3,
   },
   {
     codigo: 'inquilinos',
@@ -61,7 +61,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: [],
     tiersIncluido: ['basico', 'profesional', 'empresarial'],
     esCore: true,
-    orden: 4
+    orden: 4,
   },
   {
     codigo: 'contratos',
@@ -73,7 +73,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['inquilinos', 'unidades'],
     tiersIncluido: ['basico', 'profesional', 'empresarial'],
     esCore: true,
-    orden: 5
+    orden: 5,
   },
   {
     codigo: 'pagos',
@@ -85,7 +85,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['contratos'],
     tiersIncluido: ['basico', 'profesional', 'empresarial'],
     esCore: true,
-    orden: 6
+    orden: 6,
   },
 
   // === MÓDULOS DE GESTIÓN BÁSICA ===
@@ -99,7 +99,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: [],
     tiersIncluido: ['basico', 'profesional', 'empresarial'],
     esCore: false,
-    orden: 10
+    orden: 10,
   },
   {
     codigo: 'mantenimiento',
@@ -111,7 +111,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['edificios'],
     tiersIncluido: ['basico', 'profesional', 'empresarial'],
     esCore: true,
-    orden: 7
+    orden: 7,
   },
   {
     codigo: 'proveedores',
@@ -123,7 +123,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: [],
     tiersIncluido: ['profesional', 'empresarial'],
     esCore: false,
-    orden: 12
+    orden: 12,
   },
   {
     codigo: 'gastos',
@@ -135,7 +135,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: [],
     tiersIncluido: ['profesional', 'empresarial'],
     esCore: false,
-    orden: 13
+    orden: 13,
   },
 
   // === MÓDULOS FINANCIEROS ===
@@ -149,7 +149,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['pagos'],
     tiersIncluido: ['profesional', 'empresarial'],
     esCore: false,
-    orden: 20
+    orden: 20,
   },
   {
     codigo: 'contabilidad',
@@ -161,7 +161,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['pagos', 'gastos'],
     tiersIncluido: ['empresarial'],
     esCore: false,
-    orden: 21
+    orden: 21,
   },
   {
     codigo: 'analytics',
@@ -173,7 +173,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['pagos'],
     tiersIncluido: ['empresarial'],
     esCore: false,
-    orden: 22
+    orden: 22,
   },
   {
     codigo: 'bi',
@@ -185,7 +185,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['pagos', 'gastos'],
     tiersIncluido: ['empresarial'],
     esCore: false,
-    orden: 23
+    orden: 23,
   },
 
   // === MÓDULOS DE COMUNICACIÓN ===
@@ -199,7 +199,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: [],
     tiersIncluido: ['basico', 'profesional', 'empresarial'],
     esCore: false,
-    orden: 30
+    orden: 30,
   },
   {
     codigo: 'chat',
@@ -211,7 +211,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['inquilinos'],
     tiersIncluido: ['basico', 'profesional', 'empresarial'],
     esCore: true,
-    orden: 9
+    orden: 9,
   },
   {
     codigo: 'sms',
@@ -223,7 +223,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['inquilinos'],
     tiersIncluido: ['empresarial'],
     esCore: false,
-    orden: 32
+    orden: 32,
   },
 
   // === MÓDULOS AVANZADOS ===
@@ -237,7 +237,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['inquilinos'],
     tiersIncluido: ['empresarial'],
     esCore: false,
-    orden: 40
+    orden: 40,
   },
   {
     codigo: 'legal',
@@ -249,7 +249,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['contratos'],
     tiersIncluido: ['empresarial'],
     esCore: false,
-    orden: 41
+    orden: 41,
   },
   {
     codigo: 'marketplace',
@@ -261,7 +261,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['proveedores'],
     tiersIncluido: ['empresarial'],
     esCore: false,
-    orden: 42
+    orden: 42,
   },
   {
     codigo: 'mantenimiento_pro',
@@ -273,7 +273,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['mantenimiento'],
     tiersIncluido: ['empresarial'],
     esCore: false,
-    orden: 43
+    orden: 43,
   },
   {
     codigo: 'calendario',
@@ -285,7 +285,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: [],
     tiersIncluido: ['basico', 'profesional', 'empresarial'],
     esCore: true,
-    orden: 8
+    orden: 8,
   },
   {
     codigo: 'valoraciones',
@@ -297,7 +297,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['edificios'],
     tiersIncluido: ['empresarial'],
     esCore: false,
-    orden: 45
+    orden: 45,
   },
   {
     codigo: 'publicaciones',
@@ -309,7 +309,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['unidades'],
     tiersIncluido: ['empresarial'],
     esCore: false,
-    orden: 46
+    orden: 46,
   },
   {
     codigo: 'screening',
@@ -321,7 +321,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['inquilinos'],
     tiersIncluido: ['empresarial'],
     esCore: false,
-    orden: 47
+    orden: 47,
   },
   {
     codigo: 'energia',
@@ -333,7 +333,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['edificios'],
     tiersIncluido: ['empresarial'],
     esCore: false,
-    orden: 48
+    orden: 48,
   },
 
   // === MÓDULOS COMUNITARIOS (FASE 3-4) ===
@@ -347,7 +347,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['edificios'],
     tiersIncluido: ['profesional', 'empresarial'],
     esCore: false,
-    orden: 50
+    orden: 50,
   },
   {
     codigo: 'votaciones',
@@ -359,7 +359,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['edificios'],
     tiersIncluido: ['empresarial'],
     esCore: false,
-    orden: 51
+    orden: 51,
   },
   {
     codigo: 'anuncios',
@@ -371,7 +371,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['edificios'],
     tiersIncluido: ['profesional', 'empresarial'],
     esCore: false,
-    orden: 52
+    orden: 52,
   },
   {
     codigo: 'reuniones',
@@ -383,7 +383,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['edificios'],
     tiersIncluido: ['empresarial'],
     esCore: false,
-    orden: 53
+    orden: 53,
   },
   {
     codigo: 'reservas',
@@ -395,7 +395,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['edificios'],
     tiersIncluido: ['profesional', 'empresarial'],
     esCore: false,
-    orden: 54
+    orden: 54,
   },
   {
     codigo: 'galerias',
@@ -407,7 +407,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['unidades'],
     tiersIncluido: ['profesional', 'empresarial'],
     esCore: false,
-    orden: 55
+    orden: 55,
   },
 
   // === MÓDULOS DE PORTALES ===
@@ -421,7 +421,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['inquilinos'],
     tiersIncluido: ['profesional', 'empresarial'],
     esCore: false,
-    orden: 60
+    orden: 60,
   },
   {
     codigo: 'portal_propietario',
@@ -433,7 +433,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['edificios'],
     tiersIncluido: ['empresarial'],
     esCore: false,
-    orden: 61
+    orden: 61,
   },
   {
     codigo: 'portal_proveedor',
@@ -445,7 +445,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['proveedores'],
     tiersIncluido: ['empresarial'],
     esCore: false,
-    orden: 62
+    orden: 62,
   },
 
   // === MÓDULOS DE ADMINISTRACIÓN ===
@@ -459,7 +459,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: [],
     tiersIncluido: ['basico', 'profesional', 'empresarial'],
     esCore: false,
-    orden: 70
+    orden: 70,
   },
   {
     codigo: 'configuracion',
@@ -471,7 +471,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: [],
     tiersIncluido: ['basico', 'profesional', 'empresarial'],
     esCore: false,
-    orden: 71
+    orden: 71,
   },
   {
     codigo: 'auditoria',
@@ -483,133 +483,143 @@ export const MODULOS_CATALOGO = [
     requiereModulos: [],
     tiersIncluido: ['empresarial'],
     esCore: false,
-    orden: 72
+    orden: 72,
   },
-  
+
   // ========================================
   // NUEVOS MÓDULOS ESTRATÉGICOS 🚀
   // ========================================
-  
+
   {
     codigo: 'esg',
     nombre: 'ESG y Sostenibilidad',
-    descripcion: 'Gestión de huella de carbono, planes de descarbonización, certificaciones ESG y reportes de sostenibilidad conforme CSRD',
+    descripcion:
+      'Gestión de huella de carbono, planes de descarbonización, certificaciones ESG y reportes de sostenibilidad conforme CSRD',
     categoria: 'avanzado',
     icono: 'Leaf',
     ruta: '/esg',
     requiereModulos: ['edificios', 'energia'],
     tiersIncluido: ['empresarial'],
     esCore: false,
-    orden: 73
+    orden: 73,
   },
   {
     codigo: 'marketplace',
     nombre: 'Marketplace de Servicios',
-    descripcion: 'Plataforma B2C para que inquilinos contraten servicios verificados (limpieza, reparaciones, internet, seguros) con programa de fidelización',
+    descripcion:
+      'Plataforma B2C para que inquilinos contraten servicios verificados (limpieza, reparaciones, internet, seguros) con programa de fidelización',
     categoria: 'avanzado',
     icono: 'ShoppingBag',
     ruta: '/marketplace-servicios',
     requiereModulos: ['inquilinos'],
     tiersIncluido: ['profesional', 'empresarial'],
     esCore: false,
-    orden: 74
+    orden: 74,
   },
   {
     codigo: 'tours_virtuales',
     nombre: 'Tours Virtuales AR/VR',
-    descripcion: 'Tours 360° inmersivos, visualización AR de reformas, decoración virtual y medición de engagement para maximizar conversiones',
+    descripcion:
+      'Tours 360° inmersivos, visualización AR de reformas, decoración virtual y medición de engagement para maximizar conversiones',
     categoria: 'avanzado',
     icono: 'View',
     ruta: '/tours-virtuales',
     requiereModulos: ['unidades', 'galerias'],
     tiersIncluido: ['profesional', 'empresarial'],
     esCore: false,
-    orden: 75
+    orden: 75,
   },
   {
     codigo: 'pricing_dinamico',
     nombre: 'Pricing Dinámico IA',
-    descripcion: 'Optimización automática de precios con IA basada en análisis de mercado, estacionalidad, eventos y demanda en tiempo real',
+    descripcion:
+      'Optimización automática de precios con IA basada en análisis de mercado, estacionalidad, eventos y demanda en tiempo real',
     categoria: 'avanzado',
     icono: 'TrendingUp',
     ruta: '/pricing-dinamico',
     requiereModulos: ['unidades', 'contratos'],
     tiersIncluido: ['empresarial'],
     esCore: false,
-    orden: 76
+    orden: 76,
   },
   {
     codigo: 'iot',
     nombre: 'Edificios Inteligentes IoT',
-    descripcion: 'Integración con dispositivos IoT (termostatos, sensores, cerraduras), automatizaciones inteligentes y monitoreo en tiempo real',
+    descripcion:
+      'Integración con dispositivos IoT (termostatos, sensores, cerraduras), automatizaciones inteligentes y monitoreo en tiempo real',
     categoria: 'avanzado',
     icono: 'Wifi',
     ruta: '/edificios-inteligentes',
     requiereModulos: ['edificios', 'unidades'],
     tiersIncluido: ['empresarial'],
     esCore: false,
-    orden: 77
+    orden: 77,
   },
   // ========== NUEVOS M\u00d3DULOS ESTRAT\u00c9GICOS FASE 2 ==========
   {
     codigo: 'blockchain',
     nombre: 'Blockchain y Tokenizaci\u00f3n',
-    descripcion: 'Tokenizaci\u00f3n de propiedades, inversi\u00f3n fraccionada, Smart Contracts, distribuci\u00f3n autom\u00e1tica de rentas y NFT de certificados',
+    descripcion:
+      'Tokenizaci\u00f3n de propiedades, inversi\u00f3n fraccionada, Smart Contracts, distribuci\u00f3n autom\u00e1tica de rentas y NFT de certificados',
     categoria: 'avanzado',
     icono: 'Link',
     ruta: '/blockchain',
     requiereModulos: ['edificios', 'unidades', 'contratos'],
     tiersIncluido: ['empresarial'],
     esCore: false,
-    orden: 78
+    orden: 78,
   },
   {
     codigo: 'ai_assistant',
     nombre: 'Asistente IA Conversacional',
-    descripcion: 'Chatbot GPT-4 con comandos de voz, automatizaci\u00f3n de tareas administrativas, integraci\u00f3n WhatsApp y an\u00e1lisis de sentimiento',
+    descripcion:
+      'Chatbot GPT-4 con comandos de voz, automatizaci\u00f3n de tareas administrativas, integraci\u00f3n WhatsApp y an\u00e1lisis de sentimiento',
     categoria: 'avanzado',
     icono: 'Bot',
     ruta: '/asistente-ia',
     requiereModulos: ['usuarios', 'inquilinos'],
     tiersIncluido: ['profesional', 'empresarial'],
     esCore: false,
-    orden: 79
+    orden: 79,
   },
   {
     codigo: 'economia_circular',
     nombre: 'Econom\u00eda Circular y Sostenibilidad Social',
-    descripcion: 'Marketplace de intercambio, huertos urbanos, gesti\u00f3n de residuos, reciclaje gamificado y certificaci\u00f3n de econom\u00eda circular',
+    descripcion:
+      'Marketplace de intercambio, huertos urbanos, gesti\u00f3n de residuos, reciclaje gamificado y certificaci\u00f3n de econom\u00eda circular',
     categoria: 'comunidad',
     icono: 'Recycle',
     ruta: '/economia-circular',
     requiereModulos: ['edificios', 'inquilinos'],
     tiersIncluido: ['profesional', 'empresarial'],
     esCore: false,
-    orden: 80
+    orden: 80,
   },
   {
     codigo: 'comunidad_social',
     nombre: 'Plataforma de Comunidad Social',
-    descripcion: 'Red social interna, marketplace P2P de servicios, gamificaci\u00f3n, eventos comunitarios y programa de embajadores',
+    descripcion:
+      'Red social interna, marketplace P2P de servicios, gamificaci\u00f3n, eventos comunitarios y programa de embajadores',
     categoria: 'comunidad',
     icono: 'Users',
     ruta: '/comunidad-social',
     requiereModulos: ['inquilinos', 'edificios'],
     tiersIncluido: ['profesional', 'empresarial'],
     esCore: false,
-    orden: 81
+    orden: 81,
   },
   {
     codigo: 'seguridad_compliance',
     nombre: 'Seguridad y Compliance Avanzado',
-    descripcion: 'Verificaci\u00f3n biom\u00e9trica, cumplimiento GDPR automatizado, detecci\u00f3n de fraude con ML, auditor\u00edas de seguridad y SIEM',
+    descripcion:
+      'Verificaci\u00f3n biom\u00e9trica, cumplimiento GDPR automatizado, detecci\u00f3n de fraude con ML, auditor\u00edas de seguridad y SIEM',
     categoria: 'administracion',
     icono: 'Shield',
     ruta: '/seguridad-compliance',
     requiereModulos: ['usuarios', 'inquilinos'],
     tiersIncluido: ['empresarial'],
     esCore: false,
-    orden: 82
+    orden: 82,
   },
 
   // ============================================
@@ -618,14 +628,15 @@ export const MODULOS_CATALOGO = [
   {
     codigo: 'str_listings',
     nombre: 'Anuncios Turísticos STR',
-    descripcion: 'Gestión de propiedades en plataformas como Airbnb, Booking, VRBO con sincronización multi-canal',
+    descripcion:
+      'Gestión de propiedades en plataformas como Airbnb, Booking, VRBO con sincronización multi-canal',
     categoria: 'gestion',
     icono: 'Hotel',
     ruta: '/str/listings',
     requiereModulos: ['unidades', 'edificios'],
     tiersIncluido: ['profesional', 'empresarial'],
     esCore: false,
-    orden: 83
+    orden: 83,
   },
   {
     codigo: 'str_bookings',
@@ -637,7 +648,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['str_listings'],
     tiersIncluido: ['profesional', 'empresarial'],
     esCore: false,
-    orden: 84
+    orden: 84,
   },
   {
     codigo: 'str_channels',
@@ -649,7 +660,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['str_listings'],
     tiersIncluido: ['empresarial'],
     esCore: false,
-    orden: 85
+    orden: 85,
   },
   {
     codigo: 'flipping_projects',
@@ -661,7 +672,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['edificios', 'unidades'],
     tiersIncluido: ['profesional', 'empresarial'],
     esCore: false,
-    orden: 86
+    orden: 86,
   },
   {
     codigo: 'construction_projects',
@@ -673,7 +684,7 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['edificios'],
     tiersIncluido: ['empresarial'],
     esCore: false,
-    orden: 87
+    orden: 87,
   },
   {
     codigo: 'professional_projects',
@@ -685,19 +696,20 @@ export const MODULOS_CATALOGO = [
     requiereModulos: ['usuarios'],
     tiersIncluido: ['profesional', 'empresarial'],
     esCore: false,
-    orden: 88
+    orden: 88,
   },
   {
     codigo: 'room_rental',
     nombre: 'Alquiler por Habitaciones',
-    descripcion: 'Gestión completa de coliving y alquiler por habitaciones: prorrateo de suministros, normas de convivencia, calendario de limpieza',
+    descripcion:
+      'Gestión completa de coliving y alquiler por habitaciones: prorrateo de suministros, normas de convivencia, calendario de limpieza',
     categoria: 'gestion',
     icono: 'Home',
     ruta: '/room-rental',
     requiereModulos: ['unidades', 'inquilinos', 'contratos'],
     tiersIncluido: ['profesional', 'empresarial'],
     esCore: false,
-    orden: 89
+    orden: 89,
   },
 ];
 
@@ -708,66 +720,154 @@ export const MODULOS_CATALOGO = [
 export const BUSINESS_MODEL_MODULES: Record<string, string[]> = {
   RESIDENCIAL_LARGA: [
     // Core
-    'dashboard', 'edificios', 'unidades', 'inquilinos', 'contratos', 'pagos',
-    'mantenimiento', 'chat', 'calendario',
+    'dashboard',
+    'edificios',
+    'unidades',
+    'inquilinos',
+    'contratos',
+    'pagos',
+    'mantenimiento',
+    'chat',
+    'calendario',
     // Específicos
-    'documentos', 'proveedores', 'gastos', 'reportes', 'notificaciones',
-    'incidencias', 'anuncios', 'reservas', 'portal_inquilino',
-    'crm', 'screening', 'valoraciones', 'publicaciones'
+    'documentos',
+    'proveedores',
+    'gastos',
+    'reportes',
+    'notificaciones',
+    'incidencias',
+    'anuncios',
+    'reservas',
+    'portal_inquilino',
+    'crm',
+    'screening',
+    'valoraciones',
+    'publicaciones',
   ],
   TURISTICO_STR: [
     // Core
-    'dashboard', 'edificios', 'unidades', 'calendario', 'chat',
+    'dashboard',
+    'edificios',
+    'unidades',
+    'calendario',
+    'chat',
     // STR Específicos
-    'str_listings', 'str_bookings', 'str_channels',
-    'documentos', 'reportes', 'notificaciones',
-    'pricing_dinamico', 'galerias', 'tours_virtuales',
-    'analytics', 'bi', 'portal_inquilino'
+    'str_listings',
+    'str_bookings',
+    'str_channels',
+    'documentos',
+    'reportes',
+    'notificaciones',
+    'pricing_dinamico',
+    'galerias',
+    'tours_virtuales',
+    'analytics',
+    'bi',
+    'portal_inquilino',
   ],
   COLIVING_MEDIA: [
     // Core
-    'dashboard', 'edificios', 'unidades', 'inquilinos', 'contratos', 'pagos',
-    'mantenimiento', 'chat', 'calendario',
+    'dashboard',
+    'edificios',
+    'unidades',
+    'inquilinos',
+    'contratos',
+    'pagos',
+    'mantenimiento',
+    'chat',
+    'calendario',
     // Coliving Específicos
-    'room_rental', 'reservas', 'anuncios', 'galerias',
-    'comunidad_social', 'economia_circular', 'marketplace',
-    'portal_inquilino', 'documentos', 'reportes', 'notificaciones'
+    'room_rental',
+    'reservas',
+    'anuncios',
+    'galerias',
+    'comunidad_social',
+    'economia_circular',
+    'marketplace',
+    'portal_inquilino',
+    'documentos',
+    'reportes',
+    'notificaciones',
   ],
   HOTEL_APARTHOT: [
     // Core
-    'dashboard', 'edificios', 'unidades', 'calendario',
+    'dashboard',
+    'edificios',
+    'unidades',
+    'calendario',
     // Hotel Específicos
-    'str_bookings', 'str_channels', 'pricing_dinamico',
-    'mantenimiento', 'proveedores', 'gastos', 'reportes',
-    'analytics', 'bi', 'documentos', 'notificaciones'
+    'str_bookings',
+    'str_channels',
+    'pricing_dinamico',
+    'mantenimiento',
+    'proveedores',
+    'gastos',
+    'reportes',
+    'analytics',
+    'bi',
+    'documentos',
+    'notificaciones',
   ],
   HOUSE_FLIPPING: [
     // Core
-    'dashboard', 'edificios', 'unidades',
+    'dashboard',
+    'edificios',
+    'unidades',
     // Flipping Específicos
-    'flipping_projects', 'proveedores', 'gastos', 'documentos',
-    'mantenimiento', 'reportes', 'analytics', 'bi',
-    'valoraciones', 'galerias', 'tours_virtuales',
-    'crm', 'notificaciones', 'calendario'
+    'flipping_projects',
+    'proveedores',
+    'gastos',
+    'documentos',
+    'mantenimiento',
+    'reportes',
+    'analytics',
+    'bi',
+    'valoraciones',
+    'galerias',
+    'tours_virtuales',
+    'crm',
+    'notificaciones',
+    'calendario',
   ],
   CONSTRUCCION: [
     // Core
-    'dashboard', 'edificios', 'unidades',
+    'dashboard',
+    'edificios',
+    'unidades',
     // Construcción Específicos
-    'construction_projects', 'proveedores', 'gastos', 'documentos',
-    'mantenimiento', 'reportes', 'calendario',
-    'valoraciones', 'galerias', 'legal',
-    'crm', 'notificaciones', 'analytics'
+    'construction_projects',
+    'proveedores',
+    'gastos',
+    'documentos',
+    'mantenimiento',
+    'reportes',
+    'calendario',
+    'valoraciones',
+    'galerias',
+    'legal',
+    'crm',
+    'notificaciones',
+    'analytics',
   ],
   SERVICIOS_PROF: [
     // Core
-    'dashboard', 'calendario', 'chat',
+    'dashboard',
+    'calendario',
+    'chat',
     // Profesional Específicos
-    'professional_projects', 'crm', 'documentos',
-    'valoraciones', 'galerias', 'tours_virtuales',
-    'reportes', 'notificaciones', 'marketplace',
-    'edificios', 'unidades', 'proveedores'
-  ]
+    'professional_projects',
+    'crm',
+    'documentos',
+    'valoraciones',
+    'galerias',
+    'tours_virtuales',
+    'reportes',
+    'notificaciones',
+    'marketplace',
+    'edificios',
+    'unidades',
+    'proveedores',
+  ],
 };
 
 /**
@@ -792,7 +892,7 @@ export const SUBSCRIPTION_PACKS = [
       'mantenimiento',
       'notificaciones',
       'usuarios',
-      'configuracion'
+      'configuracion',
     ],
     caracteristicas: [
       'Hasta 3 usuarios',
@@ -800,8 +900,8 @@ export const SUBSCRIPTION_PACKS = [
       'Gestión básica de propiedades',
       'Control de pagos y contratos',
       'Almacenamiento de documentos',
-      'Soporte por email'
-    ]
+      'Soporte por email',
+    ],
   },
   {
     tier: 'profesional',
@@ -822,7 +922,7 @@ export const SUBSCRIPTION_PACKS = [
         'mantenimiento',
         'notificaciones',
         'usuarios',
-        'configuracion'
+        'configuracion',
       ],
       'proveedores',
       'gastos',
@@ -833,7 +933,7 @@ export const SUBSCRIPTION_PACKS = [
       'anuncios',
       'reservas',
       'galerias',
-      'portal_inquilino'
+      'portal_inquilino',
     ],
     caracteristicas: [
       'Hasta 10 usuarios',
@@ -845,8 +945,8 @@ export const SUBSCRIPTION_PACKS = [
       'Portal del inquilino',
       'Calendario unificado',
       'Espacios comunes y reservas',
-      'Soporte prioritario'
-    ]
+      'Soporte prioritario',
+    ],
   },
   {
     tier: 'empresarial',
@@ -855,7 +955,7 @@ export const SUBSCRIPTION_PACKS = [
     precioMensual: 149.99,
     maxUsuarios: -1, // Ilimitado
     maxPropiedades: -1, // Ilimitado
-    modulosIncluidos: MODULOS_CATALOGO.map(m => m.codigo), // Todos los módulos
+    modulosIncluidos: MODULOS_CATALOGO.map((m) => m.codigo), // Todos los módulos
     caracteristicas: [
       'Usuarios ilimitados',
       'Propiedades ilimitadas',
@@ -870,9 +970,9 @@ export const SUBSCRIPTION_PACKS = [
       'Múltiples portales (inquilino, propietario, proveedor)',
       'Auditoría y seguridad',
       'Soporte 24/7',
-      'API personalizada'
-    ]
-  }
+      'API personalizada',
+    ],
+  },
 ];
 
 /**
@@ -883,7 +983,7 @@ export async function isModuleActiveForCompany(
   moduloCodigo: string
 ): Promise<boolean> {
   // Verificar si el módulo es core (siempre activo)
-  const moduloDefinicion = MODULOS_CATALOGO.find(m => m.codigo === moduloCodigo);
+  const moduloDefinicion = MODULOS_CATALOGO.find((m) => m.codigo === moduloCodigo);
   if (moduloDefinicion?.esCore) {
     return true;
   }
@@ -893,9 +993,9 @@ export async function isModuleActiveForCompany(
     where: {
       companyId_moduloCodigo: {
         companyId,
-        moduloCodigo
-      }
-    }
+        moduloCodigo,
+      },
+    },
   });
 
   return companyModule?.activo || false;
@@ -907,19 +1007,17 @@ export async function isModuleActiveForCompany(
  */
 export async function getActiveModulesForCompany(companyId: string): Promise<string[]> {
   // 1. Obtener módulos core (siempre activos)
-  const coreModules = MODULOS_CATALOGO
-    .filter(m => m.esCore)
-    .map(m => m.codigo);
+  const coreModules = MODULOS_CATALOGO.filter((m) => m.esCore).map((m) => m.codigo);
 
   // 2. Obtener modelos de negocio activos de la empresa
   const businessModels = await prisma.companyBusinessModel.findMany({
     where: {
       companyId,
-      activo: true
+      activo: true,
     },
     select: {
-      businessModel: true
-    }
+      businessModel: true,
+    },
   });
 
   // Obtener módulos según los modelos de negocio activos
@@ -933,21 +1031,17 @@ export async function getActiveModulesForCompany(companyId: string): Promise<str
   const activeModules = await prisma.companyModule.findMany({
     where: {
       companyId,
-      activo: true
+      activo: true,
     },
     select: {
-      moduloCodigo: true
-    }
+      moduloCodigo: true,
+    },
   });
 
-  const activatedModules = activeModules.map(m => m.moduloCodigo);
+  const activatedModules = activeModules.map((m) => m.moduloCodigo);
 
   // 4. Combinar todas las fuentes y eliminar duplicados
-  const allModules = [
-    ...coreModules,
-    ...businessModelModules,
-    ...activatedModules
-  ];
+  const allModules = [...coreModules, ...businessModelModules, ...activatedModules];
 
   return Array.from(new Set(allModules));
 }
@@ -964,20 +1058,20 @@ export async function activateModuleForCompany(
     where: {
       companyId_moduloCodigo: {
         companyId,
-        moduloCodigo
-      }
+        moduloCodigo,
+      },
     },
     update: {
       activo: true,
       activadoPor,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     },
     create: {
       companyId,
       moduloCodigo,
       activo: true,
-      activadoPor
-    }
+      activadoPor,
+    },
   });
 }
 
@@ -989,7 +1083,7 @@ export async function deactivateModuleForCompany(
   moduloCodigo: string
 ): Promise<void> {
   // No se pueden desactivar módulos core
-  const moduloDefinicion = MODULOS_CATALOGO.find(m => m.codigo === moduloCodigo);
+  const moduloDefinicion = MODULOS_CATALOGO.find((m) => m.codigo === moduloCodigo);
   if (moduloDefinicion?.esCore) {
     throw new Error('No se pueden desactivar módulos esenciales');
   }
@@ -998,13 +1092,13 @@ export async function deactivateModuleForCompany(
     where: {
       companyId_moduloCodigo: {
         companyId,
-        moduloCodigo
-      }
+        moduloCodigo,
+      },
     },
     data: {
       activo: false,
-      updatedAt: new Date()
-    }
+      updatedAt: new Date(),
+    },
   });
 }
 
@@ -1016,7 +1110,7 @@ export async function initializeModulesForCompany(
   tier: 'basico' | 'profesional' | 'empresarial',
   activadoPor: string
 ): Promise<void> {
-  const pack = SUBSCRIPTION_PACKS.find(p => p.tier === tier);
+  const pack = SUBSCRIPTION_PACKS.find((p) => p.tier === tier);
   if (!pack) {
     throw new Error(`Plan de suscripción no encontrado: ${tier}`);
   }
@@ -1034,14 +1128,14 @@ export async function getBusinessModelsForCompany(companyId: string): Promise<st
   const businessModels = await prisma.companyBusinessModel.findMany({
     where: {
       companyId,
-      activo: true
+      activo: true,
     },
     select: {
-      businessModel: true
-    }
+      businessModel: true,
+    },
   });
 
-  return businessModels.map(bm => bm.businessModel);
+  return businessModels.map((bm) => bm.businessModel);
 }
 
 /**
@@ -1056,18 +1150,18 @@ export async function activateBusinessModelForCompany(
     where: {
       companyId_businessModel: {
         companyId,
-        businessModel: businessModel as any
-      }
+        businessModel: businessModel as any,
+      },
     },
     update: {
       activo: true,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     },
     create: {
       companyId,
       businessModel: businessModel as any,
-      activo: true
-    }
+      activo: true,
+    },
   });
 }
 
@@ -1082,13 +1176,13 @@ export async function deactivateBusinessModelForCompany(
     where: {
       companyId_businessModel: {
         companyId,
-        businessModel: businessModel as any
-      }
+        businessModel: businessModel as any,
+      },
     },
     data: {
       activo: false,
-      updatedAt: new Date()
-    }
+      updatedAt: new Date(),
+    },
   });
 }
 

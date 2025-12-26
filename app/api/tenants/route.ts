@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { requireAuth, requirePermission, forbiddenResponse, badRequestResponse } from '@/lib/permissions';
+import {
+  requireAuth,
+  requirePermission,
+  forbiddenResponse,
+  badRequestResponse,
+} from '@/lib/permissions';
 import logger, { logError } from '@/lib/logger';
 import { tenantCreateSchema } from '@/lib/validations';
 
@@ -84,7 +89,7 @@ export async function POST(req: NextRequest) {
     const user = await requirePermission('create');
 
     const body = await req.json();
-    
+
     // Preparar datos: convertir nombreCompleto a nombre/apellidos si es necesario
     let dataToValidate = { ...body };
     if (body.nombreCompleto && !body.nombre) {
@@ -92,24 +97,21 @@ export async function POST(req: NextRequest) {
       dataToValidate.nombre = nombre;
       dataToValidate.apellidos = apellidos.join(' ') || nombre;
     }
-    
+
     // Validación con Zod
     const validationResult = tenantCreateSchema.safeParse(dataToValidate);
-    
+
     if (!validationResult.success) {
-      const errors = validationResult.error.errors.map(err => ({
+      const errors = validationResult.error.errors.map((err) => ({
         field: err.path.join('.'),
-        message: err.message
+        message: err.message,
       }));
       logger.warn('Validation error creating tenant:', { errors });
-      return NextResponse.json(
-        { error: 'Datos inv\u00e1lidos', details: errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Datos inv\u00e1lidos', details: errors }, { status: 400 });
     }
 
     const validatedData = validationResult.data;
-    
+
     // Combinar nombre y apellidos de vuelta a nombreCompleto para la BD
     const nombreCompleto = `${validatedData.nombre} ${validatedData.apellidos}`.trim();
 
@@ -120,7 +122,9 @@ export async function POST(req: NextRequest) {
         dni: validatedData.dni || '',
         email: validatedData.email,
         telefono: validatedData.telefono,
-        fechaNacimiento: validatedData.fechaNacimiento ? new Date(validatedData.fechaNacimiento) : new Date(),
+        fechaNacimiento: validatedData.fechaNacimiento
+          ? new Date(validatedData.fechaNacimiento)
+          : new Date(),
         notas: validatedData.notasInternas || '',
       },
     });

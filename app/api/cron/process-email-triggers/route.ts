@@ -1,7 +1,7 @@
 /**
  * API: GET /api/cron/process-email-triggers
  * Cron job para procesar emails programados que deben enviarse
- * 
+ *
  * Ejecutar cada 10 minutos via cron externo o Vercel Cron:
  * Expresión cron: (asterisco)/10 * * * * (cada 10 minutos)
  */

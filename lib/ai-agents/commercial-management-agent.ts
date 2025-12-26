@@ -1,6 +1,6 @@
 /**
  * Agente de Gestión Comercial
- * 
+ *
  * Especializado en:
  * - Prospección y captación de leads
  * - Gestión de oportunidades comerciales
@@ -34,50 +34,50 @@ const capabilities: AgentCapability[] = [
     name: 'Gestión de Leads',
     description: 'Capturar, clasificar y dar seguimiento a leads potenciales',
     category: 'Ventas',
-    estimatedTime: '2-3 minutos'
+    estimatedTime: '2-3 minutos',
   },
   {
     id: 'opportunity_tracking',
     name: 'Seguimiento de Oportunidades',
     description: 'Gestionar pipeline de oportunidades comerciales',
     category: 'Ventas',
-    estimatedTime: '3-5 minutos'
+    estimatedTime: '3-5 minutos',
   },
   {
     id: 'pricing_optimization',
     name: 'Optimización de Precios',
     description: 'Analizar y sugerir estrategias de precios competitivos',
     category: 'Estrategia',
-    estimatedTime: '5-10 minutos'
+    estimatedTime: '5-10 minutos',
   },
   {
     id: 'market_analysis',
     name: 'Análisis de Mercado',
     description: 'Analizar tendencias de mercado y competencia',
     category: 'Análisis',
-    estimatedTime: '10-15 minutos'
+    estimatedTime: '10-15 minutos',
   },
   {
     id: 'occupancy_optimization',
     name: 'Optimización de Ocupación',
     description: 'Estrategias para maximizar tasas de ocupación',
     category: 'Estrategia',
-    estimatedTime: '5-10 minutos'
+    estimatedTime: '5-10 minutos',
   },
   {
     id: 'proposal_generation',
     name: 'Generación de Propuestas',
     description: 'Crear propuestas comerciales personalizadas',
     category: 'Documentación',
-    estimatedTime: '5-10 minutos'
+    estimatedTime: '5-10 minutos',
   },
   {
     id: 'performance_reporting',
     name: 'Reportes de Desempeño',
     description: 'Generar reportes de métricas comerciales',
     category: 'Análisis',
-    estimatedTime: '3-5 minutos'
-  }
+    estimatedTime: '3-5 minutos',
+  },
 ];
 
 // ============================================================================
@@ -93,40 +93,40 @@ const tools: AgentTool[] = [
       properties: {
         nombre: {
           type: 'string',
-          description: 'Nombre completo del lead'
+          description: 'Nombre completo del lead',
         },
         email: {
           type: 'string',
-          description: 'Email del lead'
+          description: 'Email del lead',
         },
         telefono: {
           type: 'string',
-          description: 'Teléfono de contacto'
+          description: 'Teléfono de contacto',
         },
         origen: {
           type: 'string',
           enum: ['website', 'referido', 'redes_sociales', 'llamada_fria', 'evento', 'otro'],
-          description: 'Fuente de origen del lead'
+          description: 'Fuente de origen del lead',
         },
         interes: {
           type: 'string',
-          description: 'Tipo de propiedad o servicio de interés'
+          description: 'Tipo de propiedad o servicio de interés',
         },
         presupuesto: {
           type: 'number',
-          description: 'Presupuesto estimado'
+          description: 'Presupuesto estimado',
         },
         notas: {
           type: 'string',
-          description: 'Notas adicionales sobre el lead'
+          description: 'Notas adicionales sobre el lead',
         },
         prioridad: {
           type: 'string',
           enum: ['baja', 'media', 'alta'],
-          description: 'Nivel de prioridad del lead'
-        }
+          description: 'Nivel de prioridad del lead',
+        },
       },
-      required: ['nombre', 'email']
+      required: ['nombre', 'email'],
     },
     handler: async (input, context) => {
       const lead = await prisma.lead.create({
@@ -142,20 +142,20 @@ const tools: AgentTool[] = [
           estado: 'nuevo',
           companyId: context.companyId,
           asignadoA: context.userId,
-          fechaCaptura: new Date()
-        }
+          fechaCaptura: new Date(),
+        },
       });
 
       // Calcular score del lead
       const score = calculateLeadScore({
         presupuesto: input.presupuesto,
         origen: input.origen,
-        prioridad: input.prioridad
+        prioridad: input.prioridad,
       });
 
       await prisma.lead.update({
         where: { id: lead.id },
-        data: { score }
+        data: { score },
       });
 
       logger.info(`📊 Nuevo lead capturado: ${lead.nombre} (Score: ${score})`);
@@ -166,10 +166,10 @@ const tools: AgentTool[] = [
         score: score,
         estado: lead.estado,
         prioridad: lead.prioridad,
-        mensaje: `Lead "${lead.nombre}" capturado exitosamente con un score de ${score}/100. ${score >= 70 ? 'Este es un lead de alta calidad, se recomienda seguimiento inmediato.' : score >= 40 ? 'Lead de calidad media, seguimiento en 24-48 horas.' : 'Lead de baja prioridad, seguimiento rutinario.'}`
+        mensaje: `Lead "${lead.nombre}" capturado exitosamente con un score de ${score}/100. ${score >= 70 ? 'Este es un lead de alta calidad, se recomienda seguimiento inmediato.' : score >= 40 ? 'Lead de calidad media, seguimiento en 24-48 horas.' : 'Lead de baja prioridad, seguimiento rutinario.'}`,
       };
     },
-    requiresConfirmation: false
+    requiresConfirmation: false,
   },
   {
     name: 'search_leads',
@@ -179,35 +179,43 @@ const tools: AgentTool[] = [
       properties: {
         estado: {
           type: 'string',
-          enum: ['nuevo', 'contactado', 'calificado', 'propuesta', 'negociacion', 'ganado', 'perdido'],
-          description: 'Estado del lead'
+          enum: [
+            'nuevo',
+            'contactado',
+            'calificado',
+            'propuesta',
+            'negociacion',
+            'ganado',
+            'perdido',
+          ],
+          description: 'Estado del lead',
         },
         prioridad: {
           type: 'string',
           enum: ['baja', 'media', 'alta'],
-          description: 'Prioridad'
+          description: 'Prioridad',
         },
         origen: {
           type: 'string',
-          description: 'Fuente de origen'
+          description: 'Fuente de origen',
         },
         scoreMinimo: {
           type: 'number',
-          description: 'Score mínimo del lead'
+          description: 'Score mínimo del lead',
         },
         asignadoA: {
           type: 'string',
-          description: 'ID del usuario asignado'
+          description: 'ID del usuario asignado',
         },
         limit: {
           type: 'number',
-          description: 'Número máximo de resultados'
-        }
-      }
+          description: 'Número máximo de resultados',
+        },
+      },
     },
     handler: async (input, context) => {
       const where: any = {
-        companyId: context.companyId
+        companyId: context.companyId,
       };
 
       if (input.estado) where.estado = input.estado;
@@ -219,23 +227,19 @@ const tools: AgentTool[] = [
       const leads = await prisma.lead.findMany({
         where,
         take: input.limit || 20,
-        orderBy: [
-          { prioridad: 'desc' },
-          { score: 'desc' },
-          { fechaCaptura: 'desc' }
-        ],
+        orderBy: [{ prioridad: 'desc' }, { score: 'desc' }, { fechaCaptura: 'desc' }],
         include: {
           _count: {
             select: {
-              interacciones: true
-            }
-          }
-        }
+              interacciones: true,
+            },
+          },
+        },
       });
 
       return {
         count: leads.length,
-        leads: leads.map(l => ({
+        leads: leads.map((l) => ({
           id: l.id,
           nombre: l.nombre,
           email: l.email,
@@ -246,10 +250,10 @@ const tools: AgentTool[] = [
           origen: l.origen,
           interacciones: l._count.interacciones,
           fechaCaptura: l.fechaCaptura,
-          ultimoContacto: l.ultimoContacto
-        }))
+          ultimoContacto: l.ultimoContacto,
+        })),
       };
-    }
+    },
   },
   {
     name: 'create_opportunity',
@@ -259,35 +263,35 @@ const tools: AgentTool[] = [
       properties: {
         leadId: {
           type: 'string',
-          description: 'ID del lead asociado'
+          description: 'ID del lead asociado',
         },
         nombre: {
           type: 'string',
-          description: 'Nombre de la oportunidad'
+          description: 'Nombre de la oportunidad',
         },
         valor: {
           type: 'number',
-          description: 'Valor estimado de la oportunidad'
+          description: 'Valor estimado de la oportunidad',
         },
         probabilidad: {
           type: 'number',
-          description: 'Probabilidad de cierre (0-100)'
+          description: 'Probabilidad de cierre (0-100)',
         },
         fechaCierreEstimada: {
           type: 'string',
-          description: 'Fecha estimada de cierre (ISO 8601)'
+          description: 'Fecha estimada de cierre (ISO 8601)',
         },
         productos: {
           type: 'array',
           items: { type: 'string' },
-          description: 'Productos o servicios de interés'
+          description: 'Productos o servicios de interés',
         },
         notas: {
           type: 'string',
-          description: 'Notas adicionales'
-        }
+          description: 'Notas adicionales',
+        },
       },
-      required: ['nombre', 'valor']
+      required: ['nombre', 'valor'],
     },
     handler: async (input, context) => {
       const opportunity = await prisma.opportunity.create({
@@ -296,21 +300,23 @@ const tools: AgentTool[] = [
           nombre: input.nombre,
           valorEstimado: input.valor,
           probabilidad: input.probabilidad || 50,
-          fechaCierreEstimada: input.fechaCierreEstimada ? new Date(input.fechaCierreEstimada) : undefined,
+          fechaCierreEstimada: input.fechaCierreEstimada
+            ? new Date(input.fechaCierreEstimada)
+            : undefined,
           productos: input.productos || [],
           notas: input.notas,
           etapa: 'calificacion',
           companyId: context.companyId,
           propietario: context.userId,
-          fechaCreacion: new Date()
-        }
+          fechaCreacion: new Date(),
+        },
       });
 
       // Actualizar estado del lead si está asociado
       if (input.leadId) {
         await prisma.lead.update({
           where: { id: input.leadId },
-          data: { estado: 'propuesta' }
+          data: { estado: 'propuesta' },
         });
       }
 
@@ -330,11 +336,11 @@ const tools: AgentTool[] = [
           'Realizar reunión de descubrimiento',
           'Preparar propuesta comercial personalizada',
           'Definir timeline y próximos pasos',
-          'Programar seguimiento en 3 días'
-        ]
+          'Programar seguimiento en 3 días',
+        ],
       };
     },
-    requiresConfirmation: false
+    requiresConfirmation: false,
   },
   {
     name: 'get_pipeline_metrics',
@@ -345,48 +351,49 @@ const tools: AgentTool[] = [
         periodo: {
           type: 'string',
           enum: ['semana', 'mes', 'trimestre', 'año'],
-          description: 'Período de análisis'
+          description: 'Período de análisis',
         },
         includeComparacion: {
           type: 'boolean',
-          description: 'Incluir comparación con período anterior'
-        }
-      }
+          description: 'Incluir comparación con período anterior',
+        },
+      },
     },
     handler: async (input, context) => {
       const periodoInicio = calcularFechaInicio(input.periodo || 'mes');
-      
+
       // Métricas de leads
       const totalLeads = await prisma.lead.count({
         where: {
           companyId: context.companyId,
-          fechaCaptura: { gte: periodoInicio }
-        }
+          fechaCaptura: { gte: periodoInicio },
+        },
       });
 
       const leadsPorEstado = await prisma.lead.groupBy({
         by: ['estado'],
         where: {
           companyId: context.companyId,
-          fechaCaptura: { gte: periodoInicio }
+          fechaCaptura: { gte: periodoInicio },
         },
-        _count: true
+        _count: true,
       });
 
       // Métricas de oportunidades
       const opportunities = await prisma.opportunity.findMany({
         where: {
           companyId: context.companyId,
-          fechaCreacion: { gte: periodoInicio }
-        }
+          fechaCreacion: { gte: periodoInicio },
+        },
       });
 
       const valorTotalPipeline = opportunities.reduce((sum, o) => sum + (o.valorEstimado || 0), 0);
-      const valorPonderado = opportunities.reduce((sum, o) => 
-        sum + ((o.valorEstimado || 0) * (o.probabilidad || 0) / 100), 0
+      const valorPonderado = opportunities.reduce(
+        (sum, o) => sum + ((o.valorEstimado || 0) * (o.probabilidad || 0)) / 100,
+        0
       );
 
-      const oportunidadesGanadas = opportunities.filter(o => o.etapa === 'ganada');
+      const oportunidadesGanadas = opportunities.filter((o) => o.etapa === 'ganada');
       const tasaConversion = totalLeads > 0 ? (oportunidadesGanadas.length / totalLeads) * 100 : 0;
 
       const valorGanado = oportunidadesGanadas.reduce((sum, o) => sum + (o.valorEstimado || 0), 0);
@@ -396,12 +403,12 @@ const tools: AgentTool[] = [
         by: ['etapa'],
         where: {
           companyId: context.companyId,
-          fechaCreacion: { gte: periodoInicio }
+          fechaCreacion: { gte: periodoInicio },
         },
         _count: true,
         _sum: {
-          valorEstimado: true
-        }
+          valorEstimado: true,
+        },
       });
 
       return {
@@ -413,28 +420,28 @@ const tools: AgentTool[] = [
           valorPonderado,
           valorGanado,
           tasaConversion: Math.round(tasaConversion * 100) / 100,
-          oportunidadesGanadas: oportunidadesGanadas.length
+          oportunidadesGanadas: oportunidadesGanadas.length,
         },
-        leadsPorEstado: leadsPorEstado.map(l => ({
+        leadsPorEstado: leadsPorEstado.map((l) => ({
           estado: l.estado,
-          cantidad: l._count
+          cantidad: l._count,
         })),
-        oportunidadesPorEtapa: opportunitiesPorEtapa.map(o => ({
+        oportunidadesPorEtapa: opportunitiesPorEtapa.map((o) => ({
           etapa: o.etapa,
           cantidad: o._count,
-          valor: o._sum.valorEstimado || 0
+          valor: o._sum.valorEstimado || 0,
         })),
         topOportunidades: opportunities
           .sort((a, b) => (b.valorEstimado || 0) - (a.valorEstimado || 0))
           .slice(0, 5)
-          .map(o => ({
+          .map((o) => ({
             nombre: o.nombre,
             valor: o.valorEstimado,
             probabilidad: o.probabilidad,
-            etapa: o.etapa
-          }))
+            etapa: o.etapa,
+          })),
       };
-    }
+    },
   },
   {
     name: 'analyze_pricing_strategy',
@@ -444,30 +451,30 @@ const tools: AgentTool[] = [
       properties: {
         buildingId: {
           type: 'string',
-          description: 'ID del edificio a analizar'
+          description: 'ID del edificio a analizar',
         },
         includeCompetencia: {
           type: 'boolean',
-          description: 'Incluir análisis de competencia'
-        }
-      }
+          description: 'Incluir análisis de competencia',
+        },
+      },
     },
     handler: async (input, context) => {
       const building = await prisma.building.findFirst({
         where: {
           id: input.buildingId,
-          companyId: context.companyId
+          companyId: context.companyId,
         },
         include: {
           units: {
             include: {
               contracts: {
                 where: { estado: 'activo' },
-                take: 1
-              }
-            }
-          }
-        }
+                take: 1,
+              },
+            },
+          },
+        },
       });
 
       if (!building) {
@@ -475,13 +482,14 @@ const tools: AgentTool[] = [
       }
 
       // Análisis de precios actuales
-      const unitsWithRent = building.units.filter(u => u.rentaMensual);
-      const avgRent = unitsWithRent.reduce((sum, u) => sum + (u.rentaMensual || 0), 0) / unitsWithRent.length;
-      const minRent = Math.min(...unitsWithRent.map(u => u.rentaMensual || 0));
-      const maxRent = Math.max(...unitsWithRent.map(u => u.rentaMensual || 0));
+      const unitsWithRent = building.units.filter((u) => u.rentaMensual);
+      const avgRent =
+        unitsWithRent.reduce((sum, u) => sum + (u.rentaMensual || 0), 0) / unitsWithRent.length;
+      const minRent = Math.min(...unitsWithRent.map((u) => u.rentaMensual || 0));
+      const maxRent = Math.max(...unitsWithRent.map((u) => u.rentaMensual || 0));
 
       // Tasa de ocupación
-      const occupiedUnits = building.units.filter(u => u.estado === 'ocupada').length;
+      const occupiedUnits = building.units.filter((u) => u.estado === 'ocupada').length;
       const occupancyRate = (occupiedUnits / building.units.length) * 100;
 
       // Análisis de mercado (simulado)
@@ -490,20 +498,21 @@ const tools: AgentTool[] = [
 
       // Recomendaciones
       const recomendaciones = [];
-      
+
       if (occupancyRate < 85) {
         recomendaciones.push({
           tipo: 'descuento',
           descripcion: 'Considerar descuentos promocionales para aumentar ocupación',
-          impactoEstimado: `+${Math.round((100 - occupancyRate) * 0.3)}% ocupación`
+          impactoEstimado: `+${Math.round((100 - occupancyRate) * 0.3)}% ocupación`,
         });
       }
 
       if (competitiveIndex < 90) {
         recomendaciones.push({
           tipo: 'incremento',
-          descripcion: 'Los precios están por debajo del mercado, se puede incrementar gradualmente',
-          impactoEstimado: `+${Math.round((marketAvgRent - avgRent) * occupiedUnits)} en ingresos mensuales`
+          descripcion:
+            'Los precios están por debajo del mercado, se puede incrementar gradualmente',
+          impactoEstimado: `+${Math.round((marketAvgRent - avgRent) * occupiedUnits)} en ingresos mensuales`,
         });
       }
 
@@ -511,7 +520,7 @@ const tools: AgentTool[] = [
         recomendaciones.push({
           tipo: 'optimizacion',
           descripcion: 'Alta demanda detectada, oportunidad para optimizar precios',
-          impactoEstimado: '+10-15% en ingresos sin afectar ocupación'
+          impactoEstimado: '+10-15% en ingresos sin afectar ocupación',
         });
       }
 
@@ -523,22 +532,26 @@ const tools: AgentTool[] = [
           precioMaximo: maxRent,
           tasaOcupacion: Math.round(occupancyRate * 100) / 100,
           unidadesOcupadas: occupiedUnits,
-          unidadesTotales: building.units.length
+          unidadesTotales: building.units.length,
         },
         mercado: {
           promedioMercado: marketAvgRent,
           indiceCompetitivo: Math.round(competitiveIndex * 100) / 100,
-          posicionamiento: competitiveIndex >= 100 ? 'Por encima del mercado' : 
-                          competitiveIndex >= 90 ? 'Competitivo' : 'Por debajo del mercado'
+          posicionamiento:
+            competitiveIndex >= 100
+              ? 'Por encima del mercado'
+              : competitiveIndex >= 90
+                ? 'Competitivo'
+                : 'Por debajo del mercado',
         },
         recomendaciones,
         proyeccion: {
           ingresoActual: avgRent * occupiedUnits,
           ingresoOptimizado: marketAvgRent * (occupiedUnits * 0.98), // Asumiendo 2% de pérdida de ocupación
-          incrementoPotencial: (marketAvgRent * (occupiedUnits * 0.98)) - (avgRent * occupiedUnits)
-        }
+          incrementoPotencial: marketAvgRent * (occupiedUnits * 0.98) - avgRent * occupiedUnits,
+        },
       };
-    }
+    },
   },
   {
     name: 'generate_commercial_proposal',
@@ -548,34 +561,34 @@ const tools: AgentTool[] = [
       properties: {
         leadId: {
           type: 'string',
-          description: 'ID del lead'
+          description: 'ID del lead',
         },
         opportunityId: {
           type: 'string',
-          description: 'ID de la oportunidad'
+          description: 'ID de la oportunidad',
         },
         productos: {
           type: 'array',
           items: { type: 'string' },
-          description: 'Productos o servicios a incluir'
+          description: 'Productos o servicios a incluir',
         },
         duracionContrato: {
           type: 'number',
-          description: 'Duración del contrato en meses'
+          description: 'Duración del contrato en meses',
         },
         descuentoEspecial: {
           type: 'number',
-          description: 'Descuento especial a aplicar (%)'
-        }
+          description: 'Descuento especial a aplicar (%)',
+        },
       },
-      required: ['opportunityId']
+      required: ['opportunityId'],
     },
     handler: async (input, context) => {
       const opportunity = await prisma.opportunity.findUnique({
         where: { id: input.opportunityId },
         include: {
-          lead: true
-        }
+          lead: true,
+        },
       });
 
       if (!opportunity) {
@@ -600,15 +613,15 @@ const tools: AgentTool[] = [
           'Incluye mantenimiento básico',
           'Soporte 24/7',
           'Portal de inquilino incluido',
-          'Reportes mensuales de desempeño'
+          'Reportes mensuales de desempeño',
         ],
         validez: '30 días',
         proximosPasos: [
           'Revisión de la propuesta',
           'Programar reunión de aclaración',
           'Firma de contrato',
-          'Inicio de servicios'
-        ]
+          'Inicio de servicios',
+        ],
       };
 
       // Guardar propuesta en BD
@@ -625,8 +638,8 @@ const tools: AgentTool[] = [
           companyId: context.companyId,
           creadoPor: context.userId,
           fechaCreacion: new Date(),
-          validaHasta: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-        }
+          validaHasta: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        },
       });
 
       logger.info(`📄 Propuesta generada: ${propuesta.numero} - Valor: $${valorFinal}`);
@@ -637,11 +650,11 @@ const tools: AgentTool[] = [
         siguientesAcciones: [
           'Enviar propuesta por email',
           'Programar seguimiento en 3 días',
-          'Preparar materiales de soporte'
-        ]
+          'Preparar materiales de soporte',
+        ],
       };
     },
-    requiresConfirmation: true
+    requiresConfirmation: true,
   },
   {
     name: 'track_lead_interaction',
@@ -651,32 +664,32 @@ const tools: AgentTool[] = [
       properties: {
         leadId: {
           type: 'string',
-          description: 'ID del lead'
+          description: 'ID del lead',
         },
         tipo: {
           type: 'string',
           enum: ['llamada', 'email', 'reunion', 'whatsapp', 'visita', 'otro'],
-          description: 'Tipo de interacción'
+          description: 'Tipo de interacción',
         },
         notas: {
           type: 'string',
-          description: 'Notas de la interacción'
+          description: 'Notas de la interacción',
         },
         resultado: {
           type: 'string',
           enum: ['exitosa', 'sin_respuesta', 'reagendar', 'no_interesado'],
-          description: 'Resultado de la interacción'
+          description: 'Resultado de la interacción',
         },
         proximaAccion: {
           type: 'string',
-          description: 'Próxima acción a realizar'
+          description: 'Próxima acción a realizar',
         },
         fechaProximaAccion: {
           type: 'string',
-          description: 'Fecha de la próxima acción (ISO 8601)'
-        }
+          description: 'Fecha de la próxima acción (ISO 8601)',
+        },
       },
-      required: ['leadId', 'tipo', 'notas']
+      required: ['leadId', 'tipo', 'notas'],
     },
     handler: async (input, context) => {
       const interaction = await prisma.leadInteraction.create({
@@ -686,10 +699,12 @@ const tools: AgentTool[] = [
           notas: input.notas,
           resultado: input.resultado,
           proximaAccion: input.proximaAccion,
-          fechaProximaAccion: input.fechaProximaAccion ? new Date(input.fechaProximaAccion) : undefined,
+          fechaProximaAccion: input.fechaProximaAccion
+            ? new Date(input.fechaProximaAccion)
+            : undefined,
           realizadoPor: context.userId,
-          fecha: new Date()
-        }
+          fecha: new Date(),
+        },
       });
 
       // Actualizar último contacto del lead
@@ -698,8 +713,8 @@ const tools: AgentTool[] = [
         data: {
           ultimoContacto: new Date(),
           // Actualizar estado basado en resultado
-          ...(input.resultado === 'no_interesado' ? { estado: 'perdido' } : {})
-        }
+          ...(input.resultado === 'no_interesado' ? { estado: 'perdido' } : {}),
+        },
       });
 
       return {
@@ -708,11 +723,11 @@ const tools: AgentTool[] = [
         resultado: input.resultado,
         proximaAccion: input.proximaAccion,
         mensaje: 'Interacción registrada exitosamente.',
-        recordatorio: input.fechaProximaAccion ? 
-          `Se ha programado un recordatorio para ${new Date(input.fechaProximaAccion).toLocaleDateString('es-ES')}` : 
-          undefined
+        recordatorio: input.fechaProximaAccion
+          ? `Se ha programado un recordatorio para ${new Date(input.fechaProximaAccion).toLocaleDateString('es-ES')}`
+          : undefined,
       };
-    }
+    },
   },
   {
     name: 'analyze_conversion_funnel',
@@ -723,9 +738,9 @@ const tools: AgentTool[] = [
         periodo: {
           type: 'string',
           enum: ['semana', 'mes', 'trimestre'],
-          description: 'Período de análisis'
-        }
-      }
+          description: 'Período de análisis',
+        },
+      },
     },
     handler: async (input, context) => {
       const periodoInicio = calcularFechaInicio(input.periodo || 'mes');
@@ -737,7 +752,7 @@ const tools: AgentTool[] = [
         { etapa: 'Leads Calificados', estado: 'calificado' },
         { etapa: 'Propuestas Enviadas', estado: 'propuesta' },
         { etapa: 'En Negociación', estado: 'negociacion' },
-        { etapa: 'Ganados', estado: 'ganado' }
+        { etapa: 'Ganados', estado: 'ganado' },
       ];
 
       const resultados = await Promise.all(
@@ -746,8 +761,8 @@ const tools: AgentTool[] = [
             where: {
               companyId: context.companyId,
               estado: e.estado,
-              fechaCaptura: { gte: periodoInicio }
-            }
+              fechaCaptura: { gte: periodoInicio },
+            },
           });
           return { ...e, cantidad: count };
         })
@@ -763,25 +778,28 @@ const tools: AgentTool[] = [
           de: actual.etapa,
           a: siguiente.etapa,
           tasa: Math.round(tasa * 100) / 100,
-          perdidos: actual.cantidad - siguiente.cantidad
+          perdidos: actual.cantidad - siguiente.cantidad,
         });
       }
 
       // Identificar cuellos de botella (tasas < 50%)
-      const cuellosBottella = tasasConversion.filter(t => t.tasa < 50);
+      const cuellosBottella = tasasConversion.filter((t) => t.tasa < 50);
 
       return {
         periodo: input.periodo || 'mes',
         embudo: resultados,
         tasasConversion,
-        cuellosBottella: cuellosBottella.length > 0 ? cuellosBottella : 'No se detectaron cuellos de botella significativos',
-        recomendaciones: cuellosBottella.map(c => ({
+        cuellosBottella:
+          cuellosBottella.length > 0
+            ? cuellosBottella
+            : 'No se detectaron cuellos de botella significativos',
+        recomendaciones: cuellosBottella.map((c) => ({
           problema: `Baja conversión de ${c.de} a ${c.a} (${c.tasa}%)`,
-          sugerencia: generarRecomendacionConversion(c.de, c.a)
-        }))
+          sugerencia: generarRecomendacionConversion(c.de, c.a),
+        })),
       };
-    }
-  }
+    },
+  },
 ];
 
 // ============================================================================
@@ -800,19 +818,19 @@ function calculateLeadScore(data: any): number {
 
   // Origen
   const origenScores: Record<string, number> = {
-    'referido': 20,
-    'website': 15,
-    'evento': 15,
-    'redes_sociales': 10,
-    'llamada_fria': 5
+    referido: 20,
+    website: 15,
+    evento: 15,
+    redes_sociales: 10,
+    llamada_fria: 5,
   };
   score += origenScores[data.origen] || 0;
 
   // Prioridad
   const prioridadScores: Record<string, number> = {
-    'alta': 20,
-    'media': 10,
-    'baja': 0
+    alta: 20,
+    media: 10,
+    baja: 0,
   };
   score += prioridadScores[data.prioridad] || 0;
 
@@ -837,11 +855,16 @@ function calcularFechaInicio(periodo: string): Date {
 
 function generarRecomendacionConversion(de: string, a: string): string {
   const recomendaciones: Record<string, string> = {
-    'Leads Capturados->Leads Contactados': 'Mejorar tiempo de respuesta inicial. Implementar auto-respuestas inmediatas.',
-    'Leads Contactados->Leads Calificados': 'Optimizar script de calificación. Capacitar al equipo en técnicas BANT.',
-    'Leads Calificados->Propuestas Enviadas': 'Agilizar proceso de creación de propuestas. Usar templates personalizables.',
-    'Propuestas Enviadas->En Negociación': 'Mejorar seguimiento post-propuesta. Programar llamadas de revisión.',
-    'En Negociación->Ganados': 'Entrenar en técnicas de cierre. Ofrecer incentivos de cierre temprano.'
+    'Leads Capturados->Leads Contactados':
+      'Mejorar tiempo de respuesta inicial. Implementar auto-respuestas inmediatas.',
+    'Leads Contactados->Leads Calificados':
+      'Optimizar script de calificación. Capacitar al equipo en técnicas BANT.',
+    'Leads Calificados->Propuestas Enviadas':
+      'Agilizar proceso de creación de propuestas. Usar templates personalizables.',
+    'Propuestas Enviadas->En Negociación':
+      'Mejorar seguimiento post-propuesta. Programar llamadas de revisión.',
+    'En Negociación->Ganados':
+      'Entrenar en técnicas de cierre. Ofrecer incentivos de cierre temprano.',
   };
 
   return recomendaciones[`${de}->${a}`] || 'Analizar causas específicas de abandono en esta etapa.';
@@ -892,7 +915,7 @@ Métricas clave:
   model: 'claude-3-5-sonnet-20241022',
   temperature: 0.65,
   maxTokens: 4096,
-  enabled: true
+  enabled: true,
 };
 
 // ============================================================================
@@ -915,12 +938,28 @@ export class CommercialManagementAgent extends BaseAgent {
   async canHandle(message: string, context: UserContext): Promise<boolean> {
     const messageLower = message.toLowerCase();
     const keywords = [
-      'lead', 'venta', 'prospecto', 'oportunidad', 'cliente',
-      'propuesta', 'comercial', 'cotización', 'pipeline', 'embudo',
-      'conversión', 'cierre', 'negociación', 'precio', 'mercado',
-      'competencia', 'ocupación', 'estrategia', 'crm', 'captación'
+      'lead',
+      'venta',
+      'prospecto',
+      'oportunidad',
+      'cliente',
+      'propuesta',
+      'comercial',
+      'cotización',
+      'pipeline',
+      'embudo',
+      'conversión',
+      'cierre',
+      'negociación',
+      'precio',
+      'mercado',
+      'competencia',
+      'ocupación',
+      'estrategia',
+      'crm',
+      'captación',
     ];
 
-    return keywords.some(keyword => messageLower.includes(keyword));
+    return keywords.some((keyword) => messageLower.includes(keyword));
   }
 }

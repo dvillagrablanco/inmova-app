@@ -238,311 +238,299 @@ export default function AuditoriaPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="mb-6">
-            <Button variant="ghost" onClick={() => router.push('/dashboard')} className="mb-4">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Volver al Dashboard
-            </Button>
-            <Breadcrumb className="mb-4">
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/dashboard">
-                    <Home className="h-4 w-4" />
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Auditoría y Seguridad</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                  Auditoría y Seguridad
-                </h1>
-                <p className="text-muted-foreground mt-1">
-                  Monitorea actividad y eventos de seguridad
-                </p>
-              </div>
-              <Dialog open={openReportDialog} onOpenChange={setOpenReportDialog}>
-                <DialogTrigger asChild>
-                  <Button className="w-full sm:w-auto">
-                    <FileText className="mr-2 h-4 w-4" />
-                    Generar Reporte
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>Generar Reporte de Auditoría</DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={handleCreateReport} className="space-y-4">
-                    <div>
-                      <Label>Título *</Label>
-                      <Input
-                        value={reportForm.titulo}
-                        onChange={(e) => setReportForm({ ...reportForm, titulo: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label>Tipo de Reporte *</Label>
-                      <Select
-                        value={reportForm.tipoReporte}
-                        onValueChange={(value) =>
-                          setReportForm({ ...reportForm, tipoReporte: value })
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="accesos">Accesos</SelectItem>
-                          <SelectItem value="cambios">Cambios</SelectItem>
-                          <SelectItem value="errores">Errores</SelectItem>
-                          <SelectItem value="seguridad">Seguridad</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <div>
-                        <Label>Fecha Inicio *</Label>
-                        <Input
-                          type="date"
-                          value={reportForm.fechaInicio}
-                          onChange={(e) =>
-                            setReportForm({ ...reportForm, fechaInicio: e.target.value })
-                          }
-                          required
-                        />
-                      </div>
-                      <div>
-                        <Label>Fecha Fin *</Label>
-                        <Input
-                          type="date"
-                          value={reportForm.fechaFin}
-                          onChange={(e) =>
-                            setReportForm({ ...reportForm, fechaFin: e.target.value })
-                          }
-                          required
-                        />
-                      </div>
-                    </div>
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setOpenReportDialog(false)}
-                      >
-                        Cancelar
-                      </Button>
-                      <Button type="submit">Generar</Button>
-                    </div>
-                  </form>
-                </DialogContent>
-              </Dialog>
-            </div>
+      <div className="mb-6">
+        <Button variant="ghost" onClick={() => router.push('/dashboard')} className="mb-4">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Volver al Dashboard
+        </Button>
+        <Breadcrumb className="mb-4">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/dashboard">
+                <Home className="h-4 w-4" />
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Auditoría y Seguridad</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Auditoría y Seguridad</h1>
+            <p className="text-muted-foreground mt-1">Monitorea actividad y eventos de seguridad</p>
           </div>
+          <Dialog open={openReportDialog} onOpenChange={setOpenReportDialog}>
+            <DialogTrigger asChild>
+              <Button className="w-full sm:w-auto">
+                <FileText className="mr-2 h-4 w-4" />
+                Generar Reporte
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Generar Reporte de Auditoría</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleCreateReport} className="space-y-4">
+                <div>
+                  <Label>Título *</Label>
+                  <Input
+                    value={reportForm.titulo}
+                    onChange={(e) => setReportForm({ ...reportForm, titulo: e.target.value })}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label>Tipo de Reporte *</Label>
+                  <Select
+                    value={reportForm.tipoReporte}
+                    onValueChange={(value) => setReportForm({ ...reportForm, tipoReporte: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="accesos">Accesos</SelectItem>
+                      <SelectItem value="cambios">Cambios</SelectItem>
+                      <SelectItem value="errores">Errores</SelectItem>
+                      <SelectItem value="seguridad">Seguridad</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <Label>Fecha Inicio *</Label>
+                    <Input
+                      type="date"
+                      value={reportForm.fechaInicio}
+                      onChange={(e) =>
+                        setReportForm({ ...reportForm, fechaInicio: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label>Fecha Fin *</Label>
+                    <Input
+                      type="date"
+                      value={reportForm.fechaFin}
+                      onChange={(e) => setReportForm({ ...reportForm, fechaFin: e.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setOpenReportDialog(false)}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button type="submit">Generar</Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
 
-          {stats && (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Eventos de Seguridad</CardTitle>
-                  <Shield className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalSecurityEvents}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {stats.unresolvedEvents} sin resolver
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Eventos Críticos</CardTitle>
-                  <AlertTriangle className="h-4 w-4 text-red-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.criticalEvents}</div>
-                  <p className="text-xs text-muted-foreground">Requieren atención</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Logs de Auditoría</CardTitle>
-                  <Activity className="h-4 w-4 text-blue-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalAuditLogs}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {stats.recentAuditLogs} últimos 30 días
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Usuarios Activos</CardTitle>
-                  <Users className="h-4 w-4 text-green-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.activeUsers}</div>
-                  <p className="text-xs text-muted-foreground">En la plataforma</p>
-                </CardContent>
-              </Card>
-            </div>
-          )}
+      {stats && (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Eventos de Seguridad</CardTitle>
+              <Shield className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalSecurityEvents}</div>
+              <p className="text-xs text-muted-foreground">{stats.unresolvedEvents} sin resolver</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Eventos Críticos</CardTitle>
+              <AlertTriangle className="h-4 w-4 text-red-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.criticalEvents}</div>
+              <p className="text-xs text-muted-foreground">Requieren atención</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Logs de Auditoría</CardTitle>
+              <Activity className="h-4 w-4 text-blue-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalAuditLogs}</div>
+              <p className="text-xs text-muted-foreground">
+                {stats.recentAuditLogs} últimos 30 días
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Usuarios Activos</CardTitle>
+              <Users className="h-4 w-4 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.activeUsers}</div>
+              <p className="text-xs text-muted-foreground">En la plataforma</p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
-          <Tabs defaultValue="events" className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="events">Eventos de Seguridad</TabsTrigger>
-              <TabsTrigger value="reports">Reportes</TabsTrigger>
-            </TabsList>
-            <TabsContent value="events" className="space-y-4">
+      <Tabs defaultValue="events" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="events">Eventos de Seguridad</TabsTrigger>
+          <TabsTrigger value="reports">Reportes</TabsTrigger>
+        </TabsList>
+        <TabsContent value="events" className="space-y-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <Label>Severidad</Label>
+                  <Select value={filterSeverity} onValueChange={setFilterSeverity}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="info">Info</SelectItem>
+                      <SelectItem value="warning">Advertencia</SelectItem>
+                      <SelectItem value="error">Error</SelectItem>
+                      <SelectItem value="critical">Crítico</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Estado</Label>
+                  <Select value={filterResolved} onValueChange={setFilterResolved}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="false">Sin resolver</SelectItem>
+                      <SelectItem value="true">Resueltos</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <div className="space-y-4">
+            {securityEvents.length === 0 ? (
               <Card>
-                <CardContent className="pt-6">
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div>
-                      <Label>Severidad</Label>
-                      <Select value={filterSeverity} onValueChange={setFilterSeverity}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Todos</SelectItem>
-                          <SelectItem value="info">Info</SelectItem>
-                          <SelectItem value="warning">Advertencia</SelectItem>
-                          <SelectItem value="error">Error</SelectItem>
-                          <SelectItem value="critical">Crítico</SelectItem>
-                        </SelectContent>
-                      </Select>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Shield className="h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">No se encontraron eventos</p>
+                </CardContent>
+              </Card>
+            ) : (
+              securityEvents.map((event) => (
+                <Card key={event.id}>
+                  <CardContent className="p-6">
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                      <div className="flex-1 space-y-2">
+                        <div className="flex items-center gap-3 flex-wrap">
+                          {getSeverityBadge(event.severidad)}
+                          <Badge variant="outline">{event.tipo}</Badge>
+                          {event.resuelta ? (
+                            <Badge variant="outline" className="bg-green-50">
+                              <CheckCircle2 className="mr-1 h-3 w-3" />
+                              Resuelto
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="bg-yellow-50">
+                              <Clock className="mr-1 h-3 w-3" />
+                              Pendiente
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-sm font-medium">{event.descripcion}</p>
+                        {event.user && (
+                          <p className="text-xs text-muted-foreground">
+                            Usuario: {event.user.name}
+                          </p>
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(event.createdAt), "d 'de' MMMM, yyyy 'a las' HH:mm", {
+                            locale: es,
+                          })}
+                        </p>
+                      </div>
+                      {!event.resuelta && (
+                        <Button size="sm" onClick={() => handleResolveEvent(event.id)}>
+                          Resolver
+                        </Button>
+                      )}
                     </div>
-                    <div>
-                      <Label>Estado</Label>
-                      <Select value={filterResolved} onValueChange={setFilterResolved}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Todos</SelectItem>
-                          <SelectItem value="false">Sin resolver</SelectItem>
-                          <SelectItem value="true">Resueltos</SelectItem>
-                        </SelectContent>
-                      </Select>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        </TabsContent>
+        <TabsContent value="reports" className="space-y-4">
+          {auditReports.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <FileText className="h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">No hay reportes generados</p>
+              </CardContent>
+            </Card>
+          ) : (
+            auditReports.map((report) => (
+              <Card key={report.id}>
+                <CardContent className="p-6">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold">{report.titulo}</h3>
+                      <Badge>{report.tipoReporte}</Badge>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">Total Eventos</p>
+                        <p className="font-medium">{report.totalEventos}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Errores</p>
+                        <p className="font-medium text-red-600">{report.eventosError}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Críticos</p>
+                        <p className="font-medium text-orange-600">{report.eventosCriticos}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Generado por</p>
+                        <p className="font-medium text-xs">{report.generadoPor}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <span>
+                        Período: {format(new Date(report.fechaInicio), 'dd/MM/yyyy')} -{' '}
+                        {format(new Date(report.fechaFin), 'dd/MM/yyyy')}
+                      </span>
+                      <span>•</span>
+                      <span>
+                        Creado:{' '}
+                        {format(new Date(report.createdAt), "d 'de' MMMM, yyyy", {
+                          locale: es,
+                        })}
+                      </span>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-              <div className="space-y-4">
-                {securityEvents.length === 0 ? (
-                  <Card>
-                    <CardContent className="flex flex-col items-center justify-center py-12">
-                      <Shield className="h-12 w-12 text-muted-foreground mb-4" />
-                      <p className="text-muted-foreground">No se encontraron eventos</p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  securityEvents.map((event) => (
-                    <Card key={event.id}>
-                      <CardContent className="p-6">
-                        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                          <div className="flex-1 space-y-2">
-                            <div className="flex items-center gap-3 flex-wrap">
-                              {getSeverityBadge(event.severidad)}
-                              <Badge variant="outline">{event.tipo}</Badge>
-                              {event.resuelta ? (
-                                <Badge variant="outline" className="bg-green-50">
-                                  <CheckCircle2 className="mr-1 h-3 w-3" />
-                                  Resuelto
-                                </Badge>
-                              ) : (
-                                <Badge variant="outline" className="bg-yellow-50">
-                                  <Clock className="mr-1 h-3 w-3" />
-                                  Pendiente
-                                </Badge>
-                              )}
-                            </div>
-                            <p className="text-sm font-medium">{event.descripcion}</p>
-                            {event.user && (
-                              <p className="text-xs text-muted-foreground">
-                                Usuario: {event.user.name}
-                              </p>
-                            )}
-                            <p className="text-xs text-muted-foreground">
-                              {format(
-                                new Date(event.createdAt),
-                                "d 'de' MMMM, yyyy 'a las' HH:mm",
-                                { locale: es }
-                              )}
-                            </p>
-                          </div>
-                          {!event.resuelta && (
-                            <Button size="sm" onClick={() => handleResolveEvent(event.id)}>
-                              Resolver
-                            </Button>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
-                )}
-              </div>
-            </TabsContent>
-            <TabsContent value="reports" className="space-y-4">
-              {auditReports.length === 0 ? (
-                <Card>
-                  <CardContent className="flex flex-col items-center justify-center py-12">
-                    <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">No hay reportes generados</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                auditReports.map((report) => (
-                  <Card key={report.id}>
-                    <CardContent className="p-6">
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-lg font-semibold">{report.titulo}</h3>
-                          <Badge>{report.tipoReporte}</Badge>
-                        </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                          <div>
-                            <p className="text-muted-foreground">Total Eventos</p>
-                            <p className="font-medium">{report.totalEventos}</p>
-                          </div>
-                          <div>
-                            <p className="text-muted-foreground">Errores</p>
-                            <p className="font-medium text-red-600">{report.eventosError}</p>
-                          </div>
-                          <div>
-                            <p className="text-muted-foreground">Críticos</p>
-                            <p className="font-medium text-orange-600">{report.eventosCriticos}</p>
-                          </div>
-                          <div>
-                            <p className="text-muted-foreground">Generado por</p>
-                            <p className="font-medium text-xs">{report.generadoPor}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          <span>
-                            Período: {format(new Date(report.fechaInicio), 'dd/MM/yyyy')} -{' '}
-                            {format(new Date(report.fechaFin), 'dd/MM/yyyy')}
-                          </span>
-                          <span>•</span>
-                          <span>
-                            Creado:{' '}
-                            {format(new Date(report.createdAt), "d 'de' MMMM, yyyy", {
-                              locale: es,
-                            })}
-                          </span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </TabsContent>
-          </Tabs>
-        </AuthenticatedLayout>
+            ))
+          )}
+        </TabsContent>
+      </Tabs>
+    </AuthenticatedLayout>
   );
 }

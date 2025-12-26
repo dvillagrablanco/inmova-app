@@ -34,10 +34,7 @@ export async function GET(req: NextRequest) {
 
     const alerts = await prisma.complianceAlert.findMany({
       where,
-      orderBy: [
-        { completada: 'asc' },
-        { fechaLimite: 'asc' },
-      ],
+      orderBy: [{ completada: 'asc' }, { fechaLimite: 'asc' }],
     });
 
     return NextResponse.json(alerts);
@@ -85,9 +82,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(alert, { status: 201 });
   } catch (error) {
     logger.error('Error creating compliance alert:', error);
-    return NextResponse.json(
-      { error: 'Error al crear alerta de cumplimiento' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear alerta de cumplimiento' }, { status: 500 });
   }
 }

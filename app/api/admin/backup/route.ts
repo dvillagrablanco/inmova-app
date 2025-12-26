@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger from '@/lib/logger';
@@ -7,8 +7,6 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import path from 'path';
 import fs from 'fs/promises';
-
-
 
 const execAsync = promisify(exec);
 
@@ -18,17 +16,14 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session || session.user?.role !== 'super_admin') {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const { type = 'full', companyId } = await req.json();
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const backupDir = path.join(process.cwd(), 'backups');
-    
+
     // Crear directorio de backups si no existe
     try {
       await fs.mkdir(backupDir, { recursive: true });
@@ -78,7 +73,7 @@ export async function POST(req: NextRequest) {
       });
     } catch (execError: any) {
       logger.error('Error al ejecutar pg_dump:', execError);
-      
+
       // Si pg_dump no está disponible, crear un backup alternativo
       return NextResponse.json({
         message: 'Backup programado (pg_dump no disponible en este entorno)',
@@ -93,10 +88,7 @@ export async function POST(req: NextRequest) {
     }
   } catch (error) {
     logger.error('Error al crear backup:', error);
-    return NextResponse.json(
-      { error: 'Error al crear backup' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear backup' }, { status: 500 });
   }
 }
 
@@ -106,10 +98,7 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session || session.user?.role !== 'super_admin') {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const backupDir = path.join(process.cwd(), 'backups');
@@ -118,7 +107,7 @@ export async function GET(req: NextRequest) {
       const files = await fs.readdir(backupDir);
       const backups = await Promise.all(
         files
-          .filter(f => f.startsWith('backup-'))
+          .filter((f) => f.startsWith('backup-'))
           .map(async (file) => {
             const filePath = path.join(backupDir, file);
             const stats = await fs.stat(filePath);
@@ -142,10 +131,7 @@ export async function GET(req: NextRequest) {
     }
   } catch (error) {
     logger.error('Error al listar backups:', error);
-    return NextResponse.json(
-      { error: 'Error al listar backups' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al listar backups' }, { status: 500 });
   }
 }
 
@@ -155,19 +141,13 @@ export async function PUT(req: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session || session.user?.role !== 'super_admin') {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const { filename } = await req.json();
 
     if (!filename) {
-      return NextResponse.json(
-        { error: 'Filename es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Filename es requerido' }, { status: 400 });
     }
 
     const backupDir = path.join(process.cwd(), 'backups');
@@ -177,10 +157,7 @@ export async function PUT(req: NextRequest) {
     try {
       await fs.access(backupFile);
     } catch (error) {
-      return NextResponse.json(
-        { error: 'Backup no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Backup no encontrado' }, { status: 404 });
     }
 
     // Obtener configuración de la base de datos
@@ -215,9 +192,6 @@ export async function PUT(req: NextRequest) {
     }
   } catch (error) {
     logger.error('Error al restaurar backup:', error);
-    return NextResponse.json(
-      { error: 'Error al restaurar backup' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al restaurar backup' }, { status: 500 });
   }
 }

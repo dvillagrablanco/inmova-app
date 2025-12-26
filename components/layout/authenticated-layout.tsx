@@ -76,7 +76,7 @@ export function AuthenticatedLayout({
 
 /**
  * Ejemplo de uso en una página:
- * 
+ *
  * export default function EdificiosPage() {
  *   return (
  *     <AuthenticatedLayout maxWidth="7xl">

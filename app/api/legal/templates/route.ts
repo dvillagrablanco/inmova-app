@@ -40,10 +40,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(templates);
   } catch (error) {
     logger.error('Error fetching legal templates:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener plantillas legales' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener plantillas legales' }, { status: 500 });
   }
 }
 
@@ -81,9 +78,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(template, { status: 201 });
   } catch (error) {
     logger.error('Error creating legal template:', error);
-    return NextResponse.json(
-      { error: 'Error al crear plantilla legal' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear plantilla legal' }, { status: 500 });
   }
 }

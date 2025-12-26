@@ -76,9 +76,7 @@ export interface ListItem {
 /**
  * Genera Structured Data para la organización INMOVA
  */
-export function generateOrganizationSchema(
-  baseUrl: string = 'https://inmova.app'
-): Organization {
+export function generateOrganizationSchema(baseUrl: string = 'https://inmova.app'): Organization {
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
@@ -142,7 +140,8 @@ export function generatePropertySchema(
       '@type': 'Offer',
       price: precio.toString(),
       priceCurrency: 'EUR',
-      availability: estado === 'disponible' ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      availability:
+        estado === 'disponible' ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
       priceValidUntil: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 90 días
     };
   }

@@ -12,7 +12,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { Shield, CheckCircle2, Copy, Download, AlertTriangle, RefreshCw, X } from 'lucide-react';
 import Image from 'next/image';
@@ -149,7 +156,7 @@ export function MFASetup() {
 
       if (response.ok) {
         const data = await response.json();
-        setSetupData(prev => prev ? { ...prev, backupCodes: data.data.backupCodes } : null);
+        setSetupData((prev) => (prev ? { ...prev, backupCodes: data.data.backupCodes } : null));
         setShowBackupCodes(true);
         toast.success('Códigos regenerados correctamente');
       } else {
@@ -172,7 +179,7 @@ export function MFASetup() {
     if (!setupData?.backupCodes) return;
 
     const text = `INMOVA - Códigos de Respaldo MFA\n\nGuarda estos códigos en un lugar seguro.\nCada código sólo puede usarse una vez.\n\n${setupData.backupCodes.join('\n')}\n\nFecha de generación: ${new Date().toLocaleString()}`;
-    
+
     const blob = new Blob([text], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -180,7 +187,7 @@ export function MFASetup() {
     a.download = `inmova-backup-codes-${Date.now()}.txt`;
     a.click();
     URL.revokeObjectURL(url);
-    
+
     toast.success('Códigos descargados');
   };
 
@@ -192,9 +199,7 @@ export function MFASetup() {
             <Shield className="h-5 w-5" />
             Autenticación de Dos Factores (MFA)
           </CardTitle>
-          <CardDescription>
-            Cargando estado de seguridad...
-          </CardDescription>
+          <CardDescription>Cargando estado de seguridad...</CardDescription>
         </CardHeader>
       </Card>
     );
@@ -228,7 +233,8 @@ export function MFASetup() {
               <Alert>
                 <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>
-                  Tu cuenta no tiene MFA habilitado. Habilita la autenticación de dos factores para proteger mejor tu cuenta.
+                  Tu cuenta no tiene MFA habilitado. Habilita la autenticación de dos factores para
+                  proteger mejor tu cuenta.
                 </AlertDescription>
               </Alert>
               <Button onClick={startSetup} disabled={loading}>
@@ -241,16 +247,15 @@ export function MFASetup() {
               <Alert className="border-green-200 bg-green-50">
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
                 <AlertDescription className="text-green-800">
-                  MFA está activo desde {mfaStatus.verifiedAt ? new Date(mfaStatus.verifiedAt).toLocaleDateString() : 'fecha desconocida'}
+                  MFA está activo desde{' '}
+                  {mfaStatus.verifiedAt
+                    ? new Date(mfaStatus.verifiedAt).toLocaleDateString()
+                    : 'fecha desconocida'}
                 </AlertDescription>
               </Alert>
 
               <div className="flex flex-col sm:flex-row gap-3">
-                <Button
-                  variant="outline"
-                  onClick={regenerateCodes}
-                  disabled={loading}
-                >
+                <Button variant="outline" onClick={regenerateCodes} disabled={loading}>
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Regenerar Códigos ({mfaStatus.recoveryCodesRemaining} restantes)
                 </Button>
@@ -273,9 +278,7 @@ export function MFASetup() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Configurar Autenticación de Dos Factores</DialogTitle>
-            <DialogDescription>
-              Sigue estos pasos para habilitar MFA en tu cuenta
-            </DialogDescription>
+            <DialogDescription>Sigue estos pasos para habilitar MFA en tu cuenta</DialogDescription>
           </DialogHeader>
 
           {setupData && (
@@ -284,7 +287,8 @@ export function MFASetup() {
               <div className="space-y-3">
                 <h3 className="font-semibold">Paso 1: Escanea el código QR</h3>
                 <p className="text-sm text-muted-foreground">
-                  Usa una aplicación autenticadora como Google Authenticator, Authy, o Microsoft Authenticator
+                  Usa una aplicación autenticadora como Google Authenticator, Authy, o Microsoft
+                  Authenticator
                 </p>
                 <div className="flex justify-center p-4 bg-white rounded-lg border">
                   <Image
@@ -317,11 +321,16 @@ export function MFASetup() {
                   <Input
                     placeholder="000000"
                     value={verificationCode}
-                    onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    onChange={(e) =>
+                      setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))
+                    }
                     maxLength={6}
                     className="text-center text-2xl tracking-widest font-mono"
                   />
-                  <Button onClick={verifyAndEnable} disabled={loading || verificationCode.length !== 6}>
+                  <Button
+                    onClick={verifyAndEnable}
+                    disabled={loading || verificationCode.length !== 6}
+                  >
                     Verificar
                   </Button>
                 </div>
@@ -331,7 +340,8 @@ export function MFASetup() {
               <Alert>
                 <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>
-                  Después de activar MFA, recibirás 10 códigos de respaldo. Guárdalos en un lugar seguro.
+                  Después de activar MFA, recibirás 10 códigos de respaldo. Guárdalos en un lugar
+                  seguro.
                 </AlertDescription>
               </Alert>
             </div>
@@ -353,20 +363,28 @@ export function MFASetup() {
             <Alert>
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
-                Si pierdes el acceso a tu aplicación autenticadora, usa estos códigos para iniciar sesión.
+                Si pierdes el acceso a tu aplicación autenticadora, usa estos códigos para iniciar
+                sesión.
               </AlertDescription>
             </Alert>
 
             <div className="grid grid-cols-2 gap-2 p-4 bg-muted rounded-lg">
               {setupData?.backupCodes.map((code, index) => (
-                <div key={index} className="font-mono text-sm p-2 bg-background rounded text-center">
+                <div
+                  key={index}
+                  className="font-mono text-sm p-2 bg-background rounded text-center"
+                >
                   {code}
                 </div>
               ))}
             </div>
 
             <div className="flex gap-2">
-              <Button onClick={() => setupData && copyToClipboard(setupData.backupCodes.join('\n'))} variant="outline" className="flex-1">
+              <Button
+                onClick={() => setupData && copyToClipboard(setupData.backupCodes.join('\n'))}
+                variant="outline"
+                className="flex-1"
+              >
                 <Copy className="h-4 w-4 mr-2" />
                 Copiar Todos
               </Button>
@@ -384,16 +402,15 @@ export function MFASetup() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Deshabilitar Autenticación de Dos Factores</DialogTitle>
-            <DialogDescription>
-              Ingresa tu código MFA actual para confirmar
-            </DialogDescription>
+            <DialogDescription>Ingresa tu código MFA actual para confirmar</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
-                Deshabilitar MFA reducirá la seguridad de tu cuenta. Solo hazlo si es absolutamente necesario.
+                Deshabilitar MFA reducirá la seguridad de tu cuenta. Solo hazlo si es absolutamente
+                necesario.
               </AlertDescription>
             </Alert>
 

@@ -12,10 +12,10 @@ interface ClientResponsiveContainerProps {
 
 /**
  * Client-side only ResponsiveContainer wrapper
- * 
+ *
  * This component fixes the "WidthProvider is not a function" error
  * by ensuring ResponsiveContainer only renders on the client side.
- * 
+ *
  * During SSR, it renders a placeholder div with the same dimensions.
  * After hydration, it replaces the placeholder with the actual ResponsiveContainer.
  */

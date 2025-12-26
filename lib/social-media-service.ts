@@ -2,31 +2,37 @@ import { prisma } from './db';
 import logger, { logError } from '@/lib/logger';
 
 // Definiciones de tipos inline (reemplaza imports de @prisma/client)
-type SocialMediaPlatform = 'FACEBOOK' | 'INSTAGRAM' | 'TWITTER' | 'LINKEDIN' | 'WHATSAPP_BUSINESS' | 'TIKTOK';
+type SocialMediaPlatform =
+  | 'FACEBOOK'
+  | 'INSTAGRAM'
+  | 'TWITTER'
+  | 'LINKEDIN'
+  | 'WHATSAPP_BUSINESS'
+  | 'TIKTOK';
 type SocialPostStatus = 'borrador' | 'programado' | 'publicado' | 'error';
 
 /**
  * SERVICIO DE REDES SOCIALES
- * 
+ *
  * Este servicio proporciona la estructura para integrar con las principales redes sociales.
  * Para activar en producción, necesitas:
- * 
+ *
  * 1. Facebook/Instagram:
  *    - Crear App en https://developers.facebook.com
  *    - Obtener App ID y App Secret
  *    - Configurar OAuth redirect URI
  *    - Solicitar permisos: pages_manage_posts, instagram_basic, instagram_content_publish
- * 
+ *
  * 2. Twitter/X:
  *    - Crear App en https://developer.twitter.com
  *    - Obtener API Key, API Secret, Access Token, Access Secret
  *    - Habilitar OAuth 2.0
- * 
+ *
  * 3. LinkedIn:
  *    - Crear App en https://www.linkedin.com/developers
  *    - Obtener Client ID y Client Secret
  *    - Solicitar permisos: w_member_social, r_basicprofile
- * 
+ *
  * 4. WhatsApp Business:
  *    - Configurar en https://business.facebook.com/
  *    - Obtener Business Account ID y Phone Number ID
@@ -195,10 +201,7 @@ export async function publishToSocialMedia(
  * Ejecutar publicación (llamado inmediatamente o por scheduler)
  * DEMO: Simula publicación exitosa
  */
-async function executePublish(
-  postId: string,
-  account: any
-): Promise<PostResult> {
+async function executePublish(postId: string, account: any): Promise<PostResult> {
   try {
     // En producción, aquí irían las llamadas a las APIs:
     // - Facebook: POST /v18.0/{page-id}/feed
@@ -302,7 +305,7 @@ export async function updatePostMetrics(postId: string) {
  */
 export async function processScheduledPosts() {
   const now = new Date();
-  
+
   const scheduledPosts = await prisma.socialMediaPost.findMany({
     where: {
       estado: 'programado',
@@ -390,12 +393,14 @@ export async function generatePropertyPostContent(propertyData: {
   const hashtags = ['#InmovaApp', '#PropTech', '#GestiónInmobiliaria'];
 
   if (type === 'building') {
-    mensaje = `🏢 ¡Nuevo edificio incorporado a nuestra cartera!\n\n` +
+    mensaje =
+      `🏢 ¡Nuevo edificio incorporado a nuestra cartera!\n\n` +
       `📍 ${name}${address ? `\n${address}` : ''}\n\n` +
       `Gestionado con tecnología INMOVA para máxima eficiencia operativa.\n\n` +
       `#NuevaPropiedad #Inmobiliaria ${hashtags.join(' ')}`;
   } else {
-    mensaje = `🏠 ¡Nueva propiedad disponible!\n\n` +
+    mensaje =
+      `🏠 ¡Nueva propiedad disponible!\n\n` +
       `${name}\n` +
       `${habitaciones ? `🛏️ ${habitaciones} habitaciones\n` : ''}` +
       `${superficie ? `📐 ${superficie} m²\n` : ''}` +
@@ -408,7 +413,7 @@ export async function generatePropertyPostContent(propertyData: {
   return {
     mensaje,
     imagenesUrls: imageUrl ? [imageUrl] : [],
-    hashtags
+    hashtags,
   };
 }
 
@@ -436,7 +441,7 @@ export async function autoPublishProperty(
   try {
     // Obtener cuentas activas
     const accounts = await getConnectedAccounts(companyId);
-    
+
     if (accounts.length === 0) {
       logger.info('No hay cuentas de redes sociales conectadas para autopublicar');
       return {
@@ -444,7 +449,7 @@ export async function autoPublishProperty(
         published: 0,
         failed: 0,
         total: 0,
-        message: 'No hay cuentas conectadas'
+        message: 'No hay cuentas conectadas',
       };
     }
 
@@ -454,9 +459,7 @@ export async function autoPublishProperty(
     // Filtrar cuentas por plataforma si se especifica
     let targetAccounts = accounts;
     if (options?.platforms) {
-      targetAccounts = accounts.filter(acc => 
-        options.platforms!.includes(acc.platform)
-      );
+      targetAccounts = accounts.filter((acc) => options.platforms!.includes(acc.platform));
     }
 
     if (targetAccounts.length === 0) {
@@ -465,13 +468,13 @@ export async function autoPublishProperty(
         published: 0,
         failed: 0,
         total: 0,
-        message: 'No hay cuentas para las plataformas especificadas'
+        message: 'No hay cuentas para las plataformas especificadas',
       };
     }
 
     // Crear posts en cada cuenta
     const publishPromises = targetAccounts.map(async (account) => {
-      const scheduledFor = options?.scheduleMinutesDelay 
+      const scheduledFor = options?.scheduleMinutesDelay
         ? new Date(Date.now() + options.scheduleMinutesDelay * 60 * 1000)
         : undefined;
 
@@ -487,9 +490,11 @@ export async function autoPublishProperty(
     });
 
     const results = await Promise.allSettled(publishPromises);
-    
-    const successful = results.filter(r => r.status === 'fulfilled' && r.value.success).length;
-    const failed = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value.success)).length;
+
+    const successful = results.filter((r) => r.status === 'fulfilled' && r.value.success).length;
+    const failed = results.filter(
+      (r) => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value.success)
+    ).length;
 
     logger.info(`Autopublicación de propiedad: ${successful} éxitos, ${failed} fallos`);
 
@@ -498,20 +503,20 @@ export async function autoPublishProperty(
       published: successful,
       failed,
       total: results.length,
-      message: `Publicado en ${successful} de ${results.length} cuentas`
+      message: `Publicado en ${successful} de ${results.length} cuentas`,
     };
   } catch (error) {
     logError(new Error(error instanceof Error ? error.message : 'Error en autopublicación'), {
       companyId,
-      propertyId: propertyData.id
+      propertyId: propertyData.id,
     });
-    
+
     return {
       success: false,
       published: 0,
       failed: 1,
       total: 1,
-      message: 'Error en autopublicación'
+      message: 'Error en autopublicación',
     };
   }
 }

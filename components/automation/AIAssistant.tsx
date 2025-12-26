@@ -60,7 +60,7 @@ export function AIAssistant() {
       sender: 'user',
       timestamp: new Date(),
     };
-    setMessages(prev => [...prev, newMessage]);
+    setMessages((prev) => [...prev, newMessage]);
   };
 
   const addBotMessage = (text: string, suggestions?: Array<{ label: string; action: string }>) => {
@@ -71,7 +71,7 @@ export function AIAssistant() {
       timestamp: new Date(),
       suggestions,
     };
-    setMessages(prev => [...prev, newMessage]);
+    setMessages((prev) => [...prev, newMessage]);
   };
 
   const handleSend = async () => {
@@ -126,7 +126,7 @@ export function AIAssistant() {
               .slice(0, 3)
               .map((a, i) => `${i + 1}. ${a.title}\n   ${a.excerpt}`)
               .join('\n\n')}`;
-            suggestions = articles.slice(0, 3).map(a => ({
+            suggestions = articles.slice(0, 3).map((a) => ({
               label: `Ver: ${a.title}`,
               action: a.url,
             }));
@@ -170,8 +170,7 @@ export function AIAssistant() {
           break;
 
         case 'configure':
-          response =
-            '¿Qué quieres configurar? Puedo ayudarte con varias configuraciones.';
+          response = '¿Qué quieres configurar? Puedo ayudarte con varias configuraciones.';
           suggestions = [
             { label: '⚙️ Configuración general', action: '/admin/configuracion' },
             { label: '🔔 Notificaciones', action: '/configuracion/notificaciones' },
@@ -275,7 +274,11 @@ export function AIAssistant() {
                 className="h-8 w-8 text-white hover:bg-white/20"
                 onClick={() => setIsMinimized(!isMinimized)}
               >
-                {isMinimized ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
+                {isMinimized ? (
+                  <Maximize2 className="h-4 w-4" />
+                ) : (
+                  <Minimize2 className="h-4 w-4" />
+                )}
               </Button>
               <Button
                 size="icon"
@@ -292,7 +295,7 @@ export function AIAssistant() {
             <>
               {/* Messages */}
               <CardContent className="h-[440px] overflow-y-auto p-4 space-y-4 bg-gradient-to-br from-slate-50 to-indigo-50">
-                {messages.map(message => (
+                {messages.map((message) => (
                   <div
                     key={message.id}
                     className={`flex gap-2 ${message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
@@ -354,8 +357,8 @@ export function AIAssistant() {
                 <div className="flex gap-2">
                   <Input
                     value={inputValue}
-                    onChange={e => setInputValue(e.target.value)}
-                    onKeyPress={e => e.key === 'Enter' && handleSend()}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                     placeholder="Escribe tu pregunta..."
                     disabled={isProcessing}
                     className="flex-1 border-indigo-200"

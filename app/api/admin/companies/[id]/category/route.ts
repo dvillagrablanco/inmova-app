@@ -12,13 +12,10 @@ const updateCategorySchema = z.object({
 });
 
 // PATCH - Actualizar categoría de un cliente
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session || !session.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
@@ -45,14 +42,14 @@ export async function PATCH(
     return NextResponse.json(company);
   } catch (error: any) {
     logger.error('Error al actualizar categoría:', error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Datos inválidos', details: error.errors },
         { status: 400 }
       );
     }
-    
+
     return NextResponse.json(
       { error: error.message || 'Error al actualizar categoría' },
       { status: 500 }

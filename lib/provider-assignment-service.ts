@@ -1,6 +1,6 @@
 /**
  * SERVICIO DE ASIGNACIÓN INTELIGENTE DE PROVEEDORES
- * 
+ *
  * Sistema avanzado de recomendación de proveedores basado en múltiples criterios:
  * - Rating y reseñas históricas
  * - Disponibilidad actual
@@ -19,12 +19,12 @@ interface ProviderScore {
   providerId: string;
   totalScore: number;
   breakdown: {
-    rating: number;          // 0-25 puntos
-    availability: number;    // 0-20 puntos
-    specialization: number;  // 0-15 puntos
-    workload: number;        // 0-15 puntos
-    performance: number;     // 0-15 puntos
-    responseTime: number;    // 0-10 puntos
+    rating: number; // 0-25 puntos
+    availability: number; // 0-20 puntos
+    specialization: number; // 0-15 puntos
+    workload: number; // 0-15 puntos
+    performance: number; // 0-15 puntos
+    responseTime: number; // 0-10 puntos
   };
   provider: any;
   reasoning: string[];
@@ -32,17 +32,17 @@ interface ProviderScore {
 
 interface RecommendationCriteria {
   buildingId: string;
-  tipo: string;              // tipo de trabajo (plomería, electricidad, etc.)
+  tipo: string; // tipo de trabajo (plomería, electricidad, etc.)
   prioridad: 'baja' | 'media' | 'alta' | 'urgente';
   presupuestoMax?: number;
   fechaRequerida?: Date;
 }
 
 interface ProviderPerformanceMetrics {
-  avgCompletionTime: number;      // días promedio
-  completionRate: number;         // % de trabajos completados
-  onTimeRate: number;             // % de trabajos a tiempo
-  avgResponseTime: number;        // horas promedio de respuesta
+  avgCompletionTime: number; // días promedio
+  completionRate: number; // % de trabajos completados
+  onTimeRate: number; // % de trabajos a tiempo
+  avgResponseTime: number; // horas promedio de respuesta
   totalJobsCompleted: number;
   totalJobsPending: number;
   avgCustomerRating: number;
@@ -126,14 +126,11 @@ export async function calculateProviderPerformance(
       return order.fechaCompletado <= order.fechaEstimada;
     }).length;
 
-    const onTimeRate =
-      completedOrders.length > 0 ? (onTimeJobs / completedOrders.length) * 100 : 0;
+    const onTimeRate = completedOrders.length > 0 ? (onTimeJobs / completedOrders.length) * 100 : 0;
 
     // Calcular rating promedio de reseñas
     const avgCustomerRating =
-      reviews.length > 0
-        ? reviews.reduce((sum, r) => sum + r.puntuacion, 0) / reviews.length
-        : 0;
+      reviews.length > 0 ? reviews.reduce((sum, r) => sum + r.puntuacion, 0) / reviews.length : 0;
 
     // Calcular tiempo promedio de respuesta (simulado - en producción se mediría desde la asignación hasta la aceptación)
     const avgResponseTime = Math.random() * 24; // placeholder: 0-24 horas
@@ -149,8 +146,7 @@ export async function calculateProviderPerformance(
     if (recentReviews.length > 0 && olderReviews.length > 0) {
       const recentAvg =
         recentReviews.reduce((sum, r) => sum + r.puntuacion, 0) / recentReviews.length;
-      const olderAvg =
-        olderReviews.reduce((sum, r) => sum + r.puntuacion, 0) / olderReviews.length;
+      const olderAvg = olderReviews.reduce((sum, r) => sum + r.puntuacion, 0) / olderReviews.length;
 
       if (recentAvg > olderAvg + 0.3) recentTrend = 'improving';
       else if (recentAvg < olderAvg - 0.3) recentTrend = 'declining';

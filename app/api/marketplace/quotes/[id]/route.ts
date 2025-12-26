@@ -7,10 +7,7 @@ import logger, { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 // GET /api/marketplace/quotes/[id] - Obtener cotización específica
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -31,27 +28,18 @@ export async function GET(
     });
 
     if (!quote) {
-      return NextResponse.json(
-        { error: 'Cotización no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Cotización no encontrada' }, { status: 404 });
     }
 
     return NextResponse.json(quote);
   } catch (error) {
     logger.error('Error fetching quote:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener cotización' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener cotización' }, { status: 500 });
   }
 }
 
 // PATCH /api/marketplace/quotes/[id] - Actualizar cotización
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -69,10 +57,7 @@ export async function PATCH(
     });
 
     if (!existingQuote) {
-      return NextResponse.json(
-        { error: 'Cotización no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Cotización no encontrada' }, { status: 404 });
     }
 
     const updateData: any = {};
@@ -83,11 +68,16 @@ export async function PATCH(
     if (body.servicioRequerido !== undefined) updateData.servicioRequerido = body.servicioRequerido;
     if (body.urgencia !== undefined) updateData.urgencia = body.urgencia;
     if (body.estado !== undefined) updateData.estado = body.estado;
-    if (body.fechaRespuesta !== undefined) updateData.fechaRespuesta = body.fechaRespuesta ? new Date(body.fechaRespuesta) : null;
-    if (body.montoCotizado !== undefined) updateData.montoCotizado = body.montoCotizado ? parseFloat(body.montoCotizado) : null;
+    if (body.fechaRespuesta !== undefined)
+      updateData.fechaRespuesta = body.fechaRespuesta ? new Date(body.fechaRespuesta) : null;
+    if (body.montoCotizado !== undefined)
+      updateData.montoCotizado = body.montoCotizado ? parseFloat(body.montoCotizado) : null;
     if (body.tiempoEstimado !== undefined) updateData.tiempoEstimado = body.tiempoEstimado;
     if (body.notasProveedor !== undefined) updateData.notasProveedor = body.notasProveedor;
-    if (body.validezCotizacion !== undefined) updateData.validezCotizacion = body.validezCotizacion ? new Date(body.validezCotizacion) : null;
+    if (body.validezCotizacion !== undefined)
+      updateData.validezCotizacion = body.validezCotizacion
+        ? new Date(body.validezCotizacion)
+        : null;
     if (body.buildingId !== undefined) updateData.buildingId = body.buildingId || null;
     if (body.unitId !== undefined) updateData.unitId = body.unitId || null;
 
@@ -105,18 +95,12 @@ export async function PATCH(
     return NextResponse.json(quote);
   } catch (error) {
     logger.error('Error updating quote:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar cotización' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar cotización' }, { status: 500 });
   }
 }
 
 // DELETE /api/marketplace/quotes/[id] - Eliminar cotización
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -132,10 +116,7 @@ export async function DELETE(
     });
 
     if (!existingQuote) {
-      return NextResponse.json(
-        { error: 'Cotización no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Cotización no encontrada' }, { status: 404 });
     }
 
     await prisma.serviceQuote.delete({
@@ -145,9 +126,6 @@ export async function DELETE(
     return NextResponse.json({ success: true, message: 'Cotización eliminada correctamente' });
   } catch (error) {
     logger.error('Error deleting quote:', error);
-    return NextResponse.json(
-      { error: 'Error al eliminar cotización' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar cotización' }, { status: 500 });
   }
 }

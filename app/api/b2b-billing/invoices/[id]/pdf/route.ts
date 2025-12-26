@@ -18,10 +18,7 @@ interface RouteParams {
   };
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: RouteParams
-) {
+export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -29,7 +26,7 @@ export async function GET(
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
+      where: { id: session.user.id },
     });
 
     // Obtener la factura con todos los datos necesarios
@@ -38,7 +35,7 @@ export async function GET(
       include: {
         company: true,
         subscriptionPlan: true,
-      }
+      },
     });
 
     if (!invoice) {

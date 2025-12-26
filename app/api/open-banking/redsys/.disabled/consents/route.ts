@@ -1,11 +1,11 @@
 /**
  * API Endpoint: Gestionar Consentimientos Redsys PSD2
- * 
+ *
  * Este endpoint permite crear y consultar consentimientos para acceder
  * a información de cuentas bancarias.
- * 
+ *
  * Métodos: POST (crear), GET (listar)
- * 
+ *
  * @author INMOVA Development Team
  */
 
@@ -13,7 +13,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import logger from '@/lib/logger';
 
 import {
-
   createAISConsent,
   getConsentStatus,
   getConsentExpirationDate,
@@ -27,7 +26,6 @@ import { prisma } from '@/lib/db';
 
 // Force dynamic rendering for this route
 export const dynamic = 'force-dynamic';
-
 
 export async function POST(request: NextRequest) {
   try {
@@ -74,11 +72,7 @@ export async function POST(request: NextRequest) {
       frequencyPerDay: 4,
     };
 
-    const consentResponse = await createAISConsent(
-      aspsp,
-      connection.accessToken,
-      consentRequest
-    );
+    const consentResponse = await createAISConsent(aspsp, connection.accessToken, consentRequest);
 
     // Guardar el consentimiento en la base de datos
     const consent = await prisma.bankConsent.create({

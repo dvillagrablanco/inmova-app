@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `${results.filter(r => r.success).length}/${results.length} clientes sincronizados con Alegra`,
+      message: `${results.filter((r) => r.success).length}/${results.length} clientes sincronizados con Alegra`,
       results,
     });
   } catch (error) {

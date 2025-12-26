@@ -5,7 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Star } from 'lucide-react';
 import { toast } from 'sonner';
 import logger from '@/lib/logger';
@@ -17,7 +23,11 @@ interface RatingFormProps {
 const ratingTypes = [
   { value: 'general', label: 'General', description: 'Valoración general del servicio' },
   { value: 'plataforma', label: 'Plataforma', description: 'Usabilidad de la plataforma' },
-  { value: 'atencion_cliente', label: 'Atención al Cliente', description: 'Servicio de atención al cliente' },
+  {
+    value: 'atencion_cliente',
+    label: 'Atención al Cliente',
+    description: 'Servicio de atención al cliente',
+  },
   { value: 'mantenimiento', label: 'Mantenimiento', description: 'Servicio de mantenimiento' },
   { value: 'comunicacion', label: 'Comunicación', description: 'Comunicación y respuesta' },
 ];
@@ -61,12 +71,12 @@ export default function RatingForm({ onSuccess }: RatingFormProps) {
       }
 
       toast.success('¡Gracias por tu valoración!');
-      
+
       // Resetear formulario
       setTipo('');
       setPuntuacion(0);
       setComentario('');
-      
+
       if (onSuccess) {
         onSuccess();
       }
@@ -82,9 +92,7 @@ export default function RatingForm({ onSuccess }: RatingFormProps) {
     <Card>
       <CardHeader>
         <CardTitle>Enviar Valoración</CardTitle>
-        <CardDescription>
-          Tu opinión nos ayuda a mejorar el servicio
-        </CardDescription>
+        <CardDescription>Tu opinión nos ayuda a mejorar el servicio</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -151,9 +159,7 @@ export default function RatingForm({ onSuccess }: RatingFormProps) {
               rows={4}
               maxLength={1000}
             />
-            <p className="text-xs text-gray-500">
-              {comentario.length}/1000 caracteres
-            </p>
+            <p className="text-xs text-gray-500">{comentario.length}/1000 caracteres</p>
           </div>
 
           {/* Botón de envío */}

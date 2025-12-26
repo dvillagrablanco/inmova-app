@@ -1,6 +1,6 @@
 /**
  * API: Enviar Email de Onboarding
- * 
+ *
  * Permite enviar un email específico de onboarding
  * Puede ser inmediato o programado para el futuro
  */
@@ -21,7 +21,7 @@ interface SendEmailRequest {
 
 /**
  * POST /api/onboarding/emails/send
- * 
+ *
  * Body:
  * {
  *   type: 'welcome' | 'onboarding_reminder' | etc.,
@@ -34,20 +34,14 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const body: SendEmailRequest = await req.json();
     const { type, templateData = {}, scheduledFor } = body;
 
     if (!type) {
-      return NextResponse.json(
-        { error: 'El campo "type" es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'El campo "type" es requerido' }, { status: 400 });
     }
 
     // Validar tipo de email
@@ -73,10 +67,7 @@ export async function POST(req: NextRequest) {
     if (scheduledFor) {
       scheduledDate = new Date(scheduledFor);
       if (isNaN(scheduledDate.getTime())) {
-        return NextResponse.json(
-          { error: 'Fecha inválida en scheduledFor' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Fecha inválida en scheduledFor' }, { status: 400 });
       }
     }
 
@@ -92,7 +83,7 @@ export async function POST(req: NextRequest) {
     if (result.success) {
       return NextResponse.json({
         success: true,
-        message: scheduledDate 
+        message: scheduledDate
           ? `Email programado para ${scheduledDate.toISOString()}`
           : 'Email enviado exitosamente',
         emailLogId: result.emailLogId,

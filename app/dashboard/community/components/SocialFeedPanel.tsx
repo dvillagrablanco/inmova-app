@@ -304,7 +304,10 @@ export default function SocialFeedPanel() {
                 {post.multimedia?.length > 0 && (
                   <div className="mt-3 grid gap-2">
                     {post.multimedia.map((url, i) => (
-                      <div key={i} className="relative aspect-video bg-muted rounded-lg overflow-hidden max-h-96">
+                      <div
+                        key={i}
+                        className="relative aspect-video bg-muted rounded-lg overflow-hidden max-h-96"
+                      >
                         <Image
                           src={url}
                           alt={`Imagen ${i + 1} de publicación`}

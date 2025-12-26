@@ -8,7 +8,16 @@ import { addHours, format, isAfter, isBefore, parseISO } from 'date-fns';
 import logger, { logError } from '@/lib/logger';
 
 // Definiciones de tipos inline (reemplaza imports de @prisma/client)
-type CommonSpaceType = 'salon_fiestas' | 'gimnasio' | 'piscina' | 'sala_reuniones' | 'zona_bbq' | 'lavanderia' | 'terraza' | 'coworking' | 'otros';
+type CommonSpaceType =
+  | 'salon_fiestas'
+  | 'gimnasio'
+  | 'piscina'
+  | 'sala_reuniones'
+  | 'zona_bbq'
+  | 'lavanderia'
+  | 'terraza'
+  | 'coworking'
+  | 'otros';
 type ReservationStatus = 'pendiente' | 'confirmada' | 'cancelada' | 'completada';
 
 /**
@@ -81,8 +90,8 @@ export async function calcularCostoReserva(
   // Calcular horas de duración
   const [horaInicioH, horaInicioM] = horaInicio.split(':').map(Number);
   const [horaFinH, horaFinM] = horaFin.split(':').map(Number);
-  
-  const minutos = (horaFinH * 60 + horaFinM) - (horaInicioH * 60 + horaInicioM);
+
+  const minutos = horaFinH * 60 + horaFinM - (horaInicioH * 60 + horaInicioM);
   const horas = minutos / 60;
 
   return space.costoPorHora * horas;
@@ -121,7 +130,7 @@ export async function validarReglasEspacio(
   // Validar duración máxima
   const [horaInicioH, horaInicioM] = horaInicio.split(':').map(Number);
   const [horaFinH, horaFinM] = horaFin.split(':').map(Number);
-  const minutos = (horaFinH * 60 + horaFinM) - (horaInicioH * 60 + horaInicioM);
+  const minutos = horaFinH * 60 + horaFinM - (horaInicioH * 60 + horaInicioM);
   const horas = minutos / 60;
 
   if (horas > space.duracionMaximaHoras) {
@@ -130,10 +139,15 @@ export async function validarReglasEspacio(
 
   // Validar anticipación mínima
   const hoy = new Date();
-  const diasAnticipacion = Math.ceil((fechaReserva.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
-  
+  const diasAnticipacion = Math.ceil(
+    (fechaReserva.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
   if (diasAnticipacion > space.anticipacionDias) {
-    return { valido: false, error: `No se puede reservar con más de ${space.anticipacionDias} días de anticipación` };
+    return {
+      valido: false,
+      error: `No se puede reservar con más de ${space.anticipacionDias} días de anticipación`,
+    };
   }
 
   return { valido: true };
@@ -163,18 +177,16 @@ export async function enviarRecordatoriosReservas(): Promise<void> {
 
   for (const reserva of reservas) {
     // Aquí se integraría con el servicio de notificaciones o email
-    logger.info(`Recordatorio: ${reserva.tenant.nombreCompleto} - ${reserva.space.nombre} - ${format(reserva.fechaReserva, 'dd/MM/yyyy')} ${reserva.horaInicio}`);
+    logger.info(
+      `Recordatorio: ${reserva.tenant.nombreCompleto} - ${reserva.space.nombre} - ${format(reserva.fechaReserva, 'dd/MM/yyyy')} ${reserva.horaInicio}`
+    );
   }
 }
 
 /**
  * Obtiene estadísticas de uso de espacios comunes
  */
-export async function obtenerEstadisticasEspacios(
-  companyId: string,
-  mes?: number,
-  anio?: number
-) {
+export async function obtenerEstadisticasEspacios(companyId: string, mes?: number, anio?: number) {
   const now = new Date();
   const mesActual = mes || now.getMonth() + 1;
   const anioActual = anio || now.getFullYear();

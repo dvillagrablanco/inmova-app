@@ -17,20 +17,30 @@ export function PromoSection() {
                 OFERTA Q1 2026
               </Badge>
               <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-4">
-                50% DE DESCUENTO<br />Primer Mes
+                50% DE DESCUENTO
+                <br />
+                Primer Mes
               </h2>
               <p className="text-xl text-indigo-100 mb-6">
-                Únete a la campaña <strong className="text-yellow-300">LAUNCH2025</strong> y obtén acceso completo a los 56 módulos profesionales.
+                Únete a la campaña <strong className="text-yellow-300">LAUNCH2025</strong> y obtén
+                acceso completo a los 56 módulos profesionales.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link href="/landing/campanas/launch2025">
-                  <Button size="lg" className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold text-lg h-14 px-8">
+                  <Button
+                    size="lg"
+                    className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold text-lg h-14 px-8"
+                  >
                     <Rocket className="mr-2 h-5 w-5" />
                     Ver Oferta Completa
                   </Button>
                 </Link>
                 <Link href="/landing/calculadora-roi">
-                  <Button size="lg" variant="outline" className="bg-white/10 hover:bg-white/20 text-white border-white/30 font-semibold text-lg h-14 px-8">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="bg-white/10 hover:bg-white/20 text-white border-white/30 font-semibold text-lg h-14 px-8"
+                  >
                     Calcular Mi Ahorro
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
@@ -45,11 +55,15 @@ export function PromoSection() {
               <div className="space-y-3 text-white">
                 <div className="flex items-start gap-3">
                   <CheckCircle className="h-5 w-5 text-green-400 flex-shrink-0 mt-0.5" />
-                  <p>Acceso a los <strong>56 módulos profesionales</strong></p>
+                  <p>
+                    Acceso a los <strong>56 módulos profesionales</strong>
+                  </p>
                 </div>
                 <div className="flex items-start gap-3">
                   <CheckCircle className="h-5 w-5 text-green-400 flex-shrink-0 mt-0.5" />
-                  <p>Migración asistida <strong>GRATIS</strong> (valor €500)</p>
+                  <p>
+                    Migración asistida <strong>GRATIS</strong> (valor €500)
+                  </p>
                 </div>
                 <div className="flex items-start gap-3">
                   <CheckCircle className="h-5 w-5 text-green-400 flex-shrink-0 mt-0.5" />

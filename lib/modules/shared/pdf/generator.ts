@@ -61,9 +61,9 @@ export async function generatePDFFromTemplate(
   try {
     // TODO: Load template from database or file system
     // TODO: Render template with data (use handlebars, ejs, etc.)
-    
+
     const html = `<html><body><h1>Template ${templateId}</h1><pre>${JSON.stringify(data, null, 2)}</pre></body></html>`;
-    
+
     return generatePDFFromHTML(html, options);
   } catch (error: any) {
     logger.error('Error generating PDF from template:', error);
@@ -82,7 +82,7 @@ export async function mergePDFs(pdfBuffers: Buffer[]): Promise<PDFGenerationResu
     logger.info('Merging PDFs', { count: pdfBuffers.length });
 
     // TODO: Implement PDF merging using pdf-lib or similar
-    
+
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     const mockBuffer = Buffer.concat(pdfBuffers);
@@ -113,7 +113,7 @@ export async function addWatermarkToPDF(
     logger.info('Adding watermark to PDF', { watermarkText });
 
     // TODO: Implement watermarking using pdf-lib
-    
+
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     return {

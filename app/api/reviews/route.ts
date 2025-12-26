@@ -25,10 +25,10 @@ export async function GET(req: NextRequest) {
         companyId: user.companyId,
         ...(entityType && { entityType: entityType as any }),
         ...(entityId && { entityId }),
-        ...(estado && { estado: estado as any })
+        ...(estado && { estado: estado as any }),
       },
       orderBy: { createdAt: 'desc' },
-      take: 100
+      take: 100,
     });
 
     return NextResponse.json(reviews);
@@ -64,8 +64,8 @@ export async function POST(req: NextRequest) {
         verificado: body.verificado || false,
         contratoId: body.contratoId,
         ordenTrabajoId: body.ordenTrabajoId,
-        estado: 'pendiente'
-      }
+        estado: 'pendiente',
+      },
     });
 
     return NextResponse.json(review, { status: 201 });
@@ -101,7 +101,7 @@ export async function PATCH(req: NextRequest) {
 
     const review = await prisma.review.update({
       where: { id },
-      data: updateData
+      data: updateData,
     });
 
     return NextResponse.json(review);

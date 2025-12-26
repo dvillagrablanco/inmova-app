@@ -29,10 +29,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(alerts);
   } catch (error) {
     logger.error('Error fetching alerts:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener alertas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener alertas' }, { status: 500 });
   }
 }
 
@@ -81,9 +78,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(alert, { status: 201 });
   } catch (error) {
     logger.error('Error creating alert:', error);
-    return NextResponse.json(
-      { error: 'Error al crear alerta' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear alerta' }, { status: 500 });
   }
 }

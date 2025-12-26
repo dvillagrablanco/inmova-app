@@ -4,7 +4,7 @@ import { PageHeader } from '@/components/ui/page-header';
 
 export const metadata: Metadata = {
   title: 'Búsqueda de Documentos | INMOVA',
-  description: 'Busca y encuentra documentos rápidamente'
+  description: 'Busca y encuentra documentos rápidamente',
 };
 
 export default function DocumentSearchPage() {

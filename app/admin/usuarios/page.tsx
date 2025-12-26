@@ -432,258 +432,258 @@ export default function UsersPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto space-y-6">
-            {/* Botón Volver y Breadcrumbs */}
-            <div className="flex items-center gap-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push('/dashboard')}
-                className="gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Volver al Dashboard
-              </Button>
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/dashboard">
-                      <Home className="h-4 w-4" />
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>Usuarios</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
-            </div>
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Botón Volver y Breadcrumbs */}
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push('/dashboard')}
+            className="gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Volver al Dashboard
+          </Button>
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/dashboard">
+                  <Home className="h-4 w-4" />
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Usuarios</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
 
-            {/* Header Section */}
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight">Gestión de Usuarios</h1>
-                <p className="text-muted-foreground">Administra los usuarios de tu empresa</p>
-              </div>
-              <Button
-                size="lg"
-                onClick={() => setShowDialog(true)}
-                className="shadow-md hover:shadow-lg transition-all"
-              >
-                <Plus className="mr-2 h-5 w-5" />
-                Nuevo Usuario
-              </Button>
-            </div>
-
-            {/* Stats */}
-            <div className="grid gap-4 md:grid-cols-3">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Usuarios</CardTitle>
-                  <Shield className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{users.length}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Activos</CardTitle>
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{users.filter((u) => u.activo).length}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Administradores</CardTitle>
-                  <Shield className="h-4 w-4 text-red-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {users.filter((u) => u.role === 'administrador').length}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Tabla */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Usuarios</CardTitle>
-                <CardDescription>Lista de todos los usuarios de la empresa</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <DataTable data={users} columns={columns} />
-              </CardContent>
-            </Card>
-
-            {/* Dialog */}
-            <Dialog
-              open={showDialog}
-              onOpenChange={(open) => {
-                setShowDialog(open);
-                if (!open) resetForm();
-              }}
-            >
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>{editingUser ? 'Editar Usuario' : 'Nuevo Usuario'}</DialogTitle>
-                  <DialogDescription>
-                    {editingUser
-                      ? 'Actualiza la información del usuario'
-                      : 'Crea un nuevo usuario para tu empresa'}
-                  </DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleSubmit}>
-                  <div className="space-y-4 py-4">
-                    {!editingUser && (
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <Label htmlFor="email">Email</Label>
-                          <InfoTooltip content="El email será utilizado para iniciar sesión y recibir notificaciones del sistema." />
-                        </div>
-                        <Input
-                          id="email"
-                          type="email"
-                          value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          required
-                          placeholder="usuario@ejemplo.com"
-                        />
-                      </div>
-                    )}
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Nombre</Label>
-                      <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        required
-                        placeholder="Nombre completo del usuario"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <PasswordGenerator
-                        value={formData.password}
-                        onChange={(password) => setFormData({ ...formData, password })}
-                        label={`Contraseña${editingUser ? ' (dejar vacío para no cambiar)' : ''}`}
-                        required={!editingUser}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Label htmlFor="role">Rol</Label>
-                        <InfoTooltip content="Define los permisos del usuario: Super Admin (acceso total), Administrador (gestión de empresa), Gestor (operaciones diarias), Operador (solo lectura)." />
-                      </div>
-                      <Select
-                        value={formData.role}
-                        onValueChange={(value) => setFormData({ ...formData, role: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {isSuperAdmin && (
-                            <SelectItem value="super_admin">Super Administrador</SelectItem>
-                          )}
-                          <SelectItem value="administrador">Administrador</SelectItem>
-                          <SelectItem value="gestor">Gestor</SelectItem>
-                          <SelectItem value="operador">Operador</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    {isSuperAdmin && !editingUser && (
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <Label htmlFor="companyId">Empresa</Label>
-                          <InfoTooltip content="Asigna el usuario a una empresa específica. Solo usuarios Super Admin pueden no tener empresa asignada." />
-                        </div>
-                        <Select
-                          value={formData.companyId}
-                          onValueChange={(value) => setFormData({ ...formData, companyId: value })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar empresa (opcional)" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="no-company">
-                              Sin empresa (solo para Super Admin)
-                            </SelectItem>
-                            {companies.map((company) => (
-                              <SelectItem key={company.id} value={company.id}>
-                                {company.nombre}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <p className="text-xs text-muted-foreground mt-1.5">
-                          💡 Los usuarios de empresa solo verán los datos de su empresa asignada
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                  <DialogFooter>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        setShowDialog(false);
-                        resetForm();
-                      }}
-                      disabled={isSaving}
-                    >
-                      Cancelar
-                    </Button>
-                    <Button type="submit" disabled={isSaving}>
-                      {isSaving ? (
-                        <>
-                          <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
-                          Guardando...
-                        </>
-                      ) : editingUser ? (
-                        'Actualizar'
-                      ) : (
-                        'Crear'
-                      )}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
-
-            {/* Diálogo de Confirmación de Eliminación */}
-            <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Confirmar Eliminación</DialogTitle>
-                  <DialogDescription>
-                    ¿Estás seguro de que deseas eliminar al usuario{' '}
-                    <strong>{deletingUser?.name}</strong> ({deletingUser?.email})?
-                    <br />
-                    <br />
-                    Esta acción no se puede deshacer.
-                  </DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      setShowDeleteDialog(false);
-                      setDeletingUser(null);
-                    }}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button type="button" variant="destructive" onClick={handleDelete}>
-                    Eliminar
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+        {/* Header Section */}
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Gestión de Usuarios</h1>
+            <p className="text-muted-foreground">Administra los usuarios de tu empresa</p>
           </div>
-        </AuthenticatedLayout>
+          <Button
+            size="lg"
+            onClick={() => setShowDialog(true)}
+            className="shadow-md hover:shadow-lg transition-all"
+          >
+            <Plus className="mr-2 h-5 w-5" />
+            Nuevo Usuario
+          </Button>
+        </div>
+
+        {/* Stats */}
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Usuarios</CardTitle>
+              <Shield className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{users.length}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Activos</CardTitle>
+              <CheckCircle className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{users.filter((u) => u.activo).length}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Administradores</CardTitle>
+              <Shield className="h-4 w-4 text-red-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {users.filter((u) => u.role === 'administrador').length}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Tabla */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Usuarios</CardTitle>
+            <CardDescription>Lista de todos los usuarios de la empresa</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <DataTable data={users} columns={columns} />
+          </CardContent>
+        </Card>
+
+        {/* Dialog */}
+        <Dialog
+          open={showDialog}
+          onOpenChange={(open) => {
+            setShowDialog(open);
+            if (!open) resetForm();
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{editingUser ? 'Editar Usuario' : 'Nuevo Usuario'}</DialogTitle>
+              <DialogDescription>
+                {editingUser
+                  ? 'Actualiza la información del usuario'
+                  : 'Crea un nuevo usuario para tu empresa'}
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmit}>
+              <div className="space-y-4 py-4">
+                {!editingUser && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="email">Email</Label>
+                      <InfoTooltip content="El email será utilizado para iniciar sesión y recibir notificaciones del sistema." />
+                    </div>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      required
+                      placeholder="usuario@ejemplo.com"
+                    />
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <Label htmlFor="name">Nombre</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
+                    placeholder="Nombre completo del usuario"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <PasswordGenerator
+                    value={formData.password}
+                    onChange={(password) => setFormData({ ...formData, password })}
+                    label={`Contraseña${editingUser ? ' (dejar vacío para no cambiar)' : ''}`}
+                    required={!editingUser}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="role">Rol</Label>
+                    <InfoTooltip content="Define los permisos del usuario: Super Admin (acceso total), Administrador (gestión de empresa), Gestor (operaciones diarias), Operador (solo lectura)." />
+                  </div>
+                  <Select
+                    value={formData.role}
+                    onValueChange={(value) => setFormData({ ...formData, role: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {isSuperAdmin && (
+                        <SelectItem value="super_admin">Super Administrador</SelectItem>
+                      )}
+                      <SelectItem value="administrador">Administrador</SelectItem>
+                      <SelectItem value="gestor">Gestor</SelectItem>
+                      <SelectItem value="operador">Operador</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                {isSuperAdmin && !editingUser && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="companyId">Empresa</Label>
+                      <InfoTooltip content="Asigna el usuario a una empresa específica. Solo usuarios Super Admin pueden no tener empresa asignada." />
+                    </div>
+                    <Select
+                      value={formData.companyId}
+                      onValueChange={(value) => setFormData({ ...formData, companyId: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar empresa (opcional)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="no-company">
+                          Sin empresa (solo para Super Admin)
+                        </SelectItem>
+                        {companies.map((company) => (
+                          <SelectItem key={company.id} value={company.id}>
+                            {company.nombre}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground mt-1.5">
+                      💡 Los usuarios de empresa solo verán los datos de su empresa asignada
+                    </p>
+                  </div>
+                )}
+              </div>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowDialog(false);
+                    resetForm();
+                  }}
+                  disabled={isSaving}
+                >
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={isSaving}>
+                  {isSaving ? (
+                    <>
+                      <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
+                      Guardando...
+                    </>
+                  ) : editingUser ? (
+                    'Actualizar'
+                  ) : (
+                    'Crear'
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Diálogo de Confirmación de Eliminación */}
+        <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirmar Eliminación</DialogTitle>
+              <DialogDescription>
+                ¿Estás seguro de que deseas eliminar al usuario{' '}
+                <strong>{deletingUser?.name}</strong> ({deletingUser?.email})?
+                <br />
+                <br />
+                Esta acción no se puede deshacer.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setShowDeleteDialog(false);
+                  setDeletingUser(null);
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button type="button" variant="destructive" onClick={handleDelete}>
+                Eliminar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </AuthenticatedLayout>
   );
 }

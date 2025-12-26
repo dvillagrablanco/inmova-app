@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 
 /**
  * PUT /api/user/preferences
- * 
+ *
  * Actualiza las preferencias de módulos del usuario:
  * - preferredModules: Módulos favoritos (se muestran destacados en sidebar)
  * - hiddenModules: Módulos ocultos (no se muestran en sidebar)
@@ -14,10 +14,7 @@ export async function PUT(request: NextRequest) {
     const session = await getServerSession();
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -71,7 +68,7 @@ export async function PUT(request: NextRequest) {
 
 /**
  * GET /api/user/preferences
- * 
+ *
  * Obtiene las preferencias de módulos del usuario
  */
 export async function GET(request: NextRequest) {
@@ -79,10 +76,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession();
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -98,10 +92,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Usuario no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
     return NextResponse.json({

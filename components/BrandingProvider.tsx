@@ -14,7 +14,7 @@ interface BrandingContextType {
 const BrandingContext = createContext<BrandingContextType>({
   branding: null,
   isLoading: true,
-  refreshBranding: async () => {}
+  refreshBranding: async () => {},
 });
 
 export const useBranding = () => useContext(BrandingContext);
@@ -32,7 +32,7 @@ export function BrandingProvider({ children }: BrandingProviderProps) {
     try {
       if (session?.user?.companyId) {
         const response = await fetch('/api/branding');
-        
+
         if (response.ok) {
           const data = await response.json();
           setBranding(data);
@@ -75,7 +75,7 @@ function applyBrandingToDOM(config: BrandingConfigData) {
   const style = document.getElementById('dynamic-branding') || document.createElement('style');
   style.id = 'dynamic-branding';
   style.innerHTML = generateCSSVariables(config);
-  
+
   if (!document.getElementById('dynamic-branding')) {
     document.head.appendChild(style);
   }
@@ -83,13 +83,13 @@ function applyBrandingToDOM(config: BrandingConfigData) {
   // 2. Actualizar Favicon
   if (config.faviconUrl) {
     let link = document.querySelector("link[rel*='icon']") as HTMLLinkElement;
-    
+
     if (!link) {
       link = document.createElement('link');
       link.rel = 'icon';
       document.head.appendChild(link);
     }
-    
+
     link.href = config.faviconUrl;
   }
 
@@ -103,26 +103,26 @@ function applyBrandingToDOM(config: BrandingConfigData) {
   // 4. Actualizar Meta Description
   if (config.metaDescription) {
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement;
-    
+
     if (!meta) {
       meta = document.createElement('meta');
       meta.name = 'description';
       document.head.appendChild(meta);
     }
-    
+
     meta.content = config.metaDescription;
   }
 
   // 5. Actualizar OG Image
   if (config.ogImageUrl) {
     let ogImage = document.querySelector('meta[property="og:image"]') as HTMLMetaElement;
-    
+
     if (!ogImage) {
       ogImage = document.createElement('meta');
       ogImage.setAttribute('property', 'og:image');
       document.head.appendChild(ogImage);
     }
-    
+
     ogImage.content = config.ogImageUrl;
   }
 

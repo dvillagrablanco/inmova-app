@@ -13,10 +13,7 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const owners = await prisma.owner.findMany({
@@ -49,7 +46,7 @@ export async function GET(req: NextRequest) {
     });
 
     // No exponer las contraseñas
-    const ownersWithoutPassword = owners.map(owner => {
+    const ownersWithoutPassword = owners.map((owner) => {
       const { password, resetToken, resetTokenExpiry, ...ownerData } = owner;
       return ownerData;
     });
@@ -57,10 +54,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(ownersWithoutPassword);
   } catch (error) {
     logger.error('Error al obtener propietarios:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener propietarios' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener propietarios' }, { status: 500 });
   }
 }
 
@@ -70,10 +64,7 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Verificar que el usuario tenga permisos de administrador
@@ -113,10 +104,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (existingOwner) {
-      return NextResponse.json(
-        { error: 'El email ya está en uso' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'El email ya está en uso' }, { status: 400 });
     }
 
     // Si hay DNI, verificar que no esté en uso
@@ -126,10 +114,7 @@ export async function POST(req: NextRequest) {
       });
 
       if (existingDni) {
-        return NextResponse.json(
-          { error: 'El DNI ya está en uso' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'El DNI ya está en uso' }, { status: 400 });
       }
     }
 
@@ -150,7 +135,7 @@ export async function POST(req: NextRequest) {
         notificarOcupacion,
         notificarMantenimiento,
         notificarVencimientos,
-        createdBy: session?.user?.id
+        createdBy: session?.user?.id,
       },
     });
 
@@ -166,7 +151,7 @@ export async function POST(req: NextRequest) {
         verOcupacion: assignment.verOcupacion ?? true,
         verMantenimiento: assignment.verMantenimiento ?? true,
         verDocumentos: assignment.verDocumentos ?? false,
-        asignadoPor: session?.user?.id
+        asignadoPor: session?.user?.id,
       }));
 
       await prisma.ownerBuilding.createMany({
@@ -205,9 +190,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     logger.error('Error al crear propietario:', error);
-    return NextResponse.json(
-      { error: 'Error al crear propietario' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear propietario' }, { status: 500 });
   }
 }

@@ -12,7 +12,7 @@ export const BREAKPOINTS = {
   md: 768,
   lg: 1024,
   xl: 1280,
-  '2xl': 1536
+  '2xl': 1536,
 } as const;
 
 /**
@@ -24,7 +24,7 @@ export function useBreakpoint(): Breakpoint {
   useEffect(() => {
     const updateBreakpoint = () => {
       const width = window.innerWidth;
-      
+
       if (width < BREAKPOINTS.sm) {
         setBreakpoint('xs');
       } else if (width < BREAKPOINTS.md) {
@@ -42,7 +42,7 @@ export function useBreakpoint(): Breakpoint {
 
     updateBreakpoint();
     window.addEventListener('resize', updateBreakpoint);
-    
+
     return () => window.removeEventListener('resize', updateBreakpoint);
   }, []);
 
@@ -62,7 +62,7 @@ export function useMobile(): boolean {
 
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    
+
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
@@ -77,14 +77,12 @@ export function useOrientation(): 'portrait' | 'landscape' {
 
   useEffect(() => {
     const updateOrientation = () => {
-      setOrientation(
-        window.innerHeight > window.innerWidth ? 'portrait' : 'landscape'
-      );
+      setOrientation(window.innerHeight > window.innerWidth ? 'portrait' : 'landscape');
     };
 
     updateOrientation();
     window.addEventListener('resize', updateOrientation);
-    
+
     return () => window.removeEventListener('resize', updateOrientation);
   }, []);
 
@@ -98,10 +96,7 @@ export function useTouchDevice(): boolean {
   const [isTouch, setIsTouch] = useState(false);
 
   useEffect(() => {
-    setIsTouch(
-      'ontouchstart' in window ||
-      navigator.maxTouchPoints > 0
-    );
+    setIsTouch('ontouchstart' in window || navigator.maxTouchPoints > 0);
   }, []);
 
   return isTouch;

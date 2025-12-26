@@ -11,10 +11,7 @@ export async function GET(req: NextRequest) {
     const owner = await getAuthenticatedOwner();
 
     if (!owner) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Obtener notificaciones del propietario
@@ -34,10 +31,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     logger.error('Error al obtener notificaciones:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener notificaciones' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener notificaciones' }, { status: 500 });
   }
 }
 
@@ -47,10 +41,7 @@ export async function PATCH(req: NextRequest) {
     const owner = await getAuthenticatedOwner();
 
     if (!owner) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const { notificationId, markAllAsRead } = await req.json();
@@ -75,10 +66,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     if (!notificationId) {
-      return NextResponse.json(
-        { error: 'notificationId es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'notificationId es requerido' }, { status: 400 });
     }
 
     // Marcar notificación específica como leída
@@ -90,10 +78,7 @@ export async function PATCH(req: NextRequest) {
     });
 
     if (!notification) {
-      return NextResponse.json(
-        { error: 'Notificación no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Notificación no encontrada' }, { status: 404 });
     }
 
     await prisma.ownerNotification.update({
@@ -110,9 +95,6 @@ export async function PATCH(req: NextRequest) {
     });
   } catch (error) {
     logger.error('Error al actualizar notificación:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar notificación' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar notificación' }, { status: 500 });
   }
 }

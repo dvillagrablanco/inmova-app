@@ -61,16 +61,16 @@ interface FinancialMetrics {
 export async function generateInvoiceNumber(): Promise<string> {
   const year = new Date().getFullYear();
   const month = format(new Date(), 'MM');
-  
+
   const lastInvoice = await prisma.b2BInvoice.findFirst({
     where: {
       numeroFactura: {
-        startsWith: `INV-${year}-${month}`
-      }
+        startsWith: `INV-${year}-${month}`,
+      },
     },
     orderBy: {
-      numeroFactura: 'desc'
-    }
+      numeroFactura: 'desc',
+    },
   });
 
   let sequence = 1;
@@ -87,7 +87,7 @@ export async function generateInvoiceNumber(): Promise<string> {
  */
 export async function createB2BInvoice(data: InvoiceData) {
   const numeroFactura = await generateInvoiceNumber();
-  
+
   // Calcular totales
   const subtotal = data.conceptos.reduce((sum, item) => sum + item.total, 0);
   const descuento = data.descuento || 0;
@@ -116,7 +116,7 @@ export async function createB2BInvoice(data: InvoiceData) {
     include: {
       company: true,
       subscriptionPlan: true,
-    }
+    },
   });
 
   return invoice;
@@ -127,19 +127,19 @@ export async function createB2BInvoice(data: InvoiceData) {
  */
 export async function generateMonthlyInvoices(periodo?: string) {
   const targetPeriodo = periodo || format(new Date(), 'yyyy-MM');
-  
+
   // Obtener empresas activas con plan de suscripción
   const companies = await prisma.company.findMany({
     where: {
       activo: true,
       estadoCliente: 'activo',
       subscriptionPlanId: {
-        not: null
-      }
+        not: null,
+      },
     },
     include: {
       subscriptionPlan: true,
-    }
+    },
   });
 
   const results = {
@@ -154,7 +154,7 @@ export async function generateMonthlyInvoices(periodo?: string) {
         where: {
           companyId: company.id,
           periodo: targetPeriodo,
-        }
+        },
       });
 
       if (existingInvoice) {
@@ -166,12 +166,14 @@ export async function generateMonthlyInvoices(periodo?: string) {
       }
 
       // Crear concepto de factura
-      const conceptos: InvoiceItem[] = [{
-        descripcion: `Suscripción ${company.subscriptionPlan.nombre} - ${format(new Date(targetPeriodo), 'MMMM yyyy', { locale: es })}`,
-        cantidad: 1,
-        precioUnitario: company.subscriptionPlan.precioMensual,
-        total: company.subscriptionPlan.precioMensual,
-      }];
+      const conceptos: InvoiceItem[] = [
+        {
+          descripcion: `Suscripción ${company.subscriptionPlan.nombre} - ${format(new Date(targetPeriodo), 'MMMM yyyy', { locale: es })}`,
+          cantidad: 1,
+          precioUnitario: company.subscriptionPlan.precioMensual,
+          total: company.subscriptionPlan.precioMensual,
+        },
+      ];
 
       // Aplicar descuento si la empresa tiene cupones activos o descuentos especiales
       // (Esta lógica se puede extender)
@@ -221,7 +223,7 @@ export async function registerInvoicePayment(
 ) {
   const invoice = await prisma.b2BInvoice.findUnique({
     where: { id: invoiceId },
-    include: { company: true }
+    include: { company: true },
   });
 
   if (!invoice) {
@@ -229,9 +231,7 @@ export async function registerInvoicePayment(
   }
 
   // Actualizar estado de la factura
-  const nuevoEstado = paymentData.monto >= invoice.total 
-    ? 'PAGADA' 
-    : 'PARCIALMENTE_PAGADA';
+  const nuevoEstado = paymentData.monto >= invoice.total ? 'PAGADA' : 'PARCIALMENTE_PAGADA';
 
   await prisma.b2BInvoice.update({
     where: { id: invoiceId },
@@ -240,7 +240,7 @@ export async function registerInvoicePayment(
       metodoPago: paymentData.metodoPago,
       fechaPago: nuevoEstado === 'PAGADA' ? new Date() : undefined,
       stripePaymentIntentId: paymentData.stripePaymentId,
-    }
+    },
   });
 
   // Registrar en historial de pagos
@@ -256,7 +256,7 @@ export async function registerInvoicePayment(
       stripeFee: paymentData.stripeFee,
       stripeNetAmount: paymentData.monto - (paymentData.stripeFee || 0),
       estado: 'completado',
-    }
+    },
   });
 
   return { invoice, payment };
@@ -267,17 +267,17 @@ export async function registerInvoicePayment(
  */
 export async function markOverdueInvoices() {
   const today = new Date();
-  
+
   const result = await prisma.b2BInvoice.updateMany({
     where: {
       fechaVencimiento: {
-        lt: today
+        lt: today,
       },
-      estado: 'PENDIENTE'
+      estado: 'PENDIENTE',
     },
     data: {
-      estado: 'VENCIDA'
-    }
+      estado: 'VENCIDA',
+    },
   });
 
   return result.count;
@@ -292,21 +292,21 @@ export async function markOverdueInvoices() {
  */
 export async function sendPaymentReminders() {
   const threeDaysFromNow = addDays(new Date(), 3);
-  
+
   const invoices = await prisma.b2BInvoice.findMany({
     where: {
       estado: 'PENDIENTE',
       fechaVencimiento: {
-        lte: threeDaysFromNow
+        lte: threeDaysFromNow,
       },
       OR: [
         { ultimoRecordatorio: null },
-        { ultimoRecordatorio: { lt: subMonths(new Date(), 0.5) } } // Último recordatorio hace más de 15 días
-      ]
+        { ultimoRecordatorio: { lt: subMonths(new Date(), 0.5) } }, // Último recordatorio hace más de 15 días
+      ],
     },
     include: {
       company: true,
-    }
+    },
   });
 
   const results: Array<{
@@ -326,7 +326,7 @@ export async function sendPaymentReminders() {
         data: {
           recordatoriosEnviados: invoice.recordatoriosEnviados + 1,
           ultimoRecordatorio: new Date(),
-        }
+        },
       });
 
       results.push({
@@ -367,12 +367,12 @@ export async function calculateFinancialMetrics(
       fechaEmision: {
         gte: startDate,
         lte: endDate,
-      }
+      },
     },
     include: {
       company: true,
       subscriptionPlan: true,
-    }
+    },
   });
 
   // Calcular totales
@@ -382,8 +382,8 @@ export async function calculateFinancialMetrics(
   const ingresosNetos = invoices.reduce((sum, inv) => sum + inv.total, 0);
 
   const facturasEmitidas = invoices.length;
-  const facturasPagadas = invoices.filter(inv => inv.estado === 'PAGADA').length;
-  const facturasVencidas = invoices.filter(inv => inv.estado === 'VENCIDA').length;
+  const facturasPagadas = invoices.filter((inv) => inv.estado === 'PAGADA').length;
+  const facturasVencidas = invoices.filter((inv) => inv.estado === 'VENCIDA').length;
   const ticketPromedio = facturasEmitidas > 0 ? ingresosNetos / facturasEmitidas : 0;
 
   // Métricas de empresas
@@ -391,7 +391,7 @@ export async function calculateFinancialMetrics(
     where: {
       activo: true,
       estadoCliente: 'activo',
-    }
+    },
   });
 
   const empresasNuevas = await prisma.company.count({
@@ -399,8 +399,8 @@ export async function calculateFinancialMetrics(
       createdAt: {
         gte: startDate,
         lte: endDate,
-      }
-    }
+      },
+    },
   });
 
   // Empresas canceladas (cambiar a estado suspendido/cancelado en el período)
@@ -411,22 +411,21 @@ export async function calculateFinancialMetrics(
         lte: endDate,
       },
       accion: 'cancelacion',
-    }
+    },
   });
   const empresasCanceladas = subscriptionChanges.length;
 
-  const tasaRetencion = empresasActivas > 0 
-    ? ((empresasActivas - empresasCanceladas) / empresasActivas) * 100 
-    : 100;
+  const tasaRetencion =
+    empresasActivas > 0 ? ((empresasActivas - empresasCanceladas) / empresasActivas) * 100 : 100;
 
   // Crecimiento MoM (Month over Month)
   const previousMonth = format(subMonths(startDate, 1), 'yyyy-MM');
   const previousReport = await prisma.b2BFinancialReport.findUnique({
-    where: { periodo: previousMonth }
+    where: { periodo: previousMonth },
   });
 
-  const crecimientoMoM = previousReport 
-    ? ((ingresosNetos - previousReport.ingresosNetos) / previousReport.ingresosNetos) * 100 
+  const crecimientoMoM = previousReport
+    ? ((ingresosNetos - previousReport.ingresosNetos) / previousReport.ingresosNetos) * 100
     : undefined;
 
   // Detalles por plan
@@ -438,19 +437,19 @@ export async function calculateFinancialMetrics(
         lte: endDate,
       },
       subscriptionPlanId: {
-        not: null
-      }
+        not: null,
+      },
     },
     _count: true,
     _sum: {
       total: true,
-    }
+    },
   });
 
   const detallesPorPlan = await Promise.all(
     planBreakdown.map(async (item) => {
       const plan = await prisma.subscriptionPlan.findUnique({
-        where: { id: item.subscriptionPlanId! }
+        where: { id: item.subscriptionPlanId! },
       });
       return {
         planId: item.subscriptionPlanId,
@@ -483,7 +482,10 @@ export async function calculateFinancialMetrics(
 /**
  * Guarda o actualiza un reporte financiero
  */
-export async function saveFinancialReport(metrics: FinancialMetrics, tipoReporte: string = 'mensual') {
+export async function saveFinancialReport(
+  metrics: FinancialMetrics,
+  tipoReporte: string = 'mensual'
+) {
   const report = await prisma.b2BFinancialReport.upsert({
     where: { periodo: metrics.periodo },
     create: {
@@ -495,7 +497,7 @@ export async function saveFinancialReport(metrics: FinancialMetrics, tipoReporte
       ...metrics,
       detalles: metrics.detallesPorPlan as any,
       fechaGeneracion: new Date(),
-    }
+    },
   });
 
   return report;
@@ -536,7 +538,7 @@ export async function recordSubscriptionChange(
       companyId,
       accion,
       ...data,
-    }
+    },
   });
 
   return change;
@@ -545,14 +547,10 @@ export async function recordSubscriptionChange(
 /**
  * Procesa un upgrade de plan
  */
-export async function upgradeCompanyPlan(
-  companyId: string,
-  newPlanId: string,
-  userId: string
-) {
+export async function upgradeCompanyPlan(companyId: string, newPlanId: string, userId: string) {
   const company = await prisma.company.findUnique({
     where: { id: companyId },
-    include: { subscriptionPlan: true }
+    include: { subscriptionPlan: true },
   });
 
   if (!company) {
@@ -560,7 +558,7 @@ export async function upgradeCompanyPlan(
   }
 
   const newPlan = await prisma.subscriptionPlan.findUnique({
-    where: { id: newPlanId }
+    where: { id: newPlanId },
   });
 
   if (!newPlan) {
@@ -587,7 +585,7 @@ export async function upgradeCompanyPlan(
       subscriptionPlanId: newPlanId,
       maxUsuarios: newPlan.maxUsuarios,
       maxPropiedades: newPlan.maxPropiedades,
-    }
+    },
   });
 
   // Registrar cambio
@@ -600,12 +598,14 @@ export async function upgradeCompanyPlan(
 
   // Si hay costo adicional, generar factura
   if (costoAdicional > 0) {
-    const conceptos: InvoiceItem[] = [{
-      descripcion: `Upgrade a ${newPlan.nombre} - Prorrateo`,
-      cantidad: 1,
-      precioUnitario: costoAdicional,
-      total: costoAdicional,
-    }];
+    const conceptos: InvoiceItem[] = [
+      {
+        descripcion: `Upgrade a ${newPlan.nombre} - Prorrateo`,
+        cantidad: 1,
+        precioUnitario: costoAdicional,
+        total: costoAdicional,
+      },
+    ];
 
     await createB2BInvoice({
       companyId,
@@ -648,7 +648,7 @@ export async function getBillingStats() {
     },
     _sum: {
       total: true,
-    }
+    },
   });
 
   const pendingAmount = await prisma.b2BInvoice.aggregate({
@@ -657,7 +657,7 @@ export async function getBillingStats() {
     },
     _sum: {
       total: true,
-    }
+    },
   });
 
   return {
@@ -681,14 +681,14 @@ export async function getCompanyInvoiceHistory(companyId: string) {
     },
     orderBy: {
       fechaEmision: 'desc',
-    }
+    },
   });
 
   const payments = await prisma.b2BPaymentHistory.findMany({
     where: { companyId },
     orderBy: {
       fechaPago: 'desc',
-    }
+    },
   });
 
   return { invoices, payments };

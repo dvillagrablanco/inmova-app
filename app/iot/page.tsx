@@ -92,7 +92,7 @@ export default function IoTPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      
+
       // Mock data
       setDevices([
         {
@@ -301,315 +301,320 @@ export default function IoTPage() {
   if (loading && devices.length === 0) {
     return (
       <AuthenticatedLayout>
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-              <p className="mt-4 text-muted-foreground">Cargando dispositivos IoT...</p>
-            </div>
-          </AuthenticatedLayout>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Cargando dispositivos IoT...</p>
+        </div>
+      </AuthenticatedLayout>
     );
   }
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto space-y-6">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                  IoT & Edificios Inteligentes
-                </h1>
-                <p className="text-muted-foreground mt-2">
-                  Monitorización en tiempo real y automatizaciones inteligentes
-                </p>
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+              IoT & Edificios Inteligentes
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              Monitorización en tiempo real y automatizaciones inteligentes
+            </p>
+          </div>
+          <Button onClick={() => router.push('/iot/nuevo-dispositivo')}>
+            <Plus className="h-4 w-4 mr-2" />
+            Añadir Dispositivo
+          </Button>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">Dispositivos Activos</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">
+                {devices.filter((d) => d.status === 'online').length} / {devices.length}
               </div>
-              <Button onClick={() => router.push('/iot/nuevo-dispositivo')}>
-                <Plus className="h-4 w-4 mr-2" />
-                Añadir Dispositivo
-              </Button>
-            </div>
+              <div className="flex items-center gap-1 mt-2">
+                <CheckCircle className="h-3 w-3 text-green-600" />
+                <span className="text-xs text-green-600">
+                  {Math.round(
+                    (devices.filter((d) => d.status === 'online').length / devices.length) * 100
+                  )}
+                  % uptime
+                </span>
+              </div>
+            </CardContent>
+          </Card>
 
-            {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium">Dispositivos Activos</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">
-                    {devices.filter((d) => d.status === 'online').length} / {devices.length}
-                  </div>
-                  <div className="flex items-center gap-1 mt-2">
-                    <CheckCircle className="h-3 w-3 text-green-600" />
-                    <span className="text-xs text-green-600">
-                      {Math.round((devices.filter((d) => d.status === 'online').length / devices.length) * 100)}% uptime
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">Automatizaciones</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">
+                {automations.filter((a) => a.enabled).length}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                {automations.length} configuradas
+              </p>
+            </CardContent>
+          </Card>
 
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium">Automatizaciones</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">
-                    {automations.filter((a) => a.enabled).length}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    {automations.length} configuradas
-                  </p>
-                </CardContent>
-              </Card>
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">Alertas Activas</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-yellow-600">
+                {alerts.filter((a) => !a.resolved).length}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">Requieren atención</p>
+            </CardContent>
+          </Card>
 
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium">Alertas Activas</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-yellow-600">
-                    {alerts.filter((a) => !a.resolved).length}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-2">Requieren atención</p>
-                </CardContent>
-              </Card>
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">Ahorro Energético</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-green-600">15%</div>
+              <div className="flex items-center gap-1 mt-2">
+                <TrendingDown className="h-3 w-3 text-green-600" />
+                <span className="text-xs text-green-600">vs mes anterior</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium">Ahorro Energético</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-green-600">15%</div>
-                  <div className="flex items-center gap-1 mt-2">
-                    <TrendingDown className="h-3 w-3 text-green-600" />
-                    <span className="text-xs text-green-600">vs mes anterior</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+        <Tabs defaultValue="devices" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="devices">Dispositivos</TabsTrigger>
+            <TabsTrigger value="automations">Automatizaciones</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="alerts">Alertas</TabsTrigger>
+          </TabsList>
 
-            <Tabs defaultValue="devices" className="space-y-4">
-              <TabsList>
-                <TabsTrigger value="devices">Dispositivos</TabsTrigger>
-                <TabsTrigger value="automations">Automatizaciones</TabsTrigger>
-                <TabsTrigger value="analytics">Analytics</TabsTrigger>
-                <TabsTrigger value="alerts">Alertas</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="devices" className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {devices.map((device) => {
-                    const Icon = getDeviceIcon(device.type);
-                    return (
-                      <Card key={device.id} className="hover:shadow-lg transition-shadow">
-                        <CardHeader>
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-blue-100 rounded-lg">
-                                <Icon className="h-5 w-5 text-blue-600" />
-                              </div>
-                              <div>
-                                <CardTitle className="text-base">{device.name}</CardTitle>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  {device.buildingName} • {device.location}
-                                </p>
-                              </div>
-                            </div>
-                            {getStatusBadge(device.status)}
-                          </div>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                          {device.currentValue !== undefined && (
-                            <div className="text-center py-2">
-                              <p className="text-3xl font-bold">
-                                {device.currentValue}
-                                <span className="text-lg text-muted-foreground ml-1">{device.unit}</span>
-                              </p>
-                            </div>
-                          )}
-
-                          {device.battery !== undefined && (
-                            <div>
-                              <div className="flex justify-between text-xs mb-1">
-                                <span className="text-muted-foreground">Batería</span>
-                                <span className={device.battery < 20 ? 'text-red-600 font-medium' : ''}>
-                                  {device.battery}%
-                                </span>
-                              </div>
-                              <div className="w-full bg-gray-200 rounded-full h-1.5">
-                                <div
-                                  className={`h-1.5 rounded-full ${
-                                    device.battery < 20 ? 'bg-red-500' : 'bg-green-500'
-                                  }`}
-                                  style={{ width: `${device.battery}%` }}
-                                />
-                              </div>
-                            </div>
-                          )}
-
-                          <div className="flex justify-between text-xs text-muted-foreground pt-2 border-t">
-                            <span>Actualizado {formatTime(device.lastUpdate)}</span>
-                            <Button variant="ghost" size="sm" className="h-6 px-2">
-                              <Settings className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-              </TabsContent>
-
-              <TabsContent value="automations" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Automatizaciones Configuradas</CardTitle>
-                    <CardDescription>
-                      Reglas automáticas para gestionar tus dispositivos inteligentes
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {automations.map((automation) => (
-                        <div
-                          key={automation.id}
-                          className="flex items-start justify-between p-4 border rounded-lg"
-                        >
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <h4 className="font-semibold">{automation.name}</h4>
-                              <Badge variant={automation.enabled ? 'default' : 'secondary'}>
-                                {automation.enabled ? 'Activa' : 'Desactivada'}
-                              </Badge>
-                            </div>
-                            <div className="space-y-1 text-sm">
-                              <p>
-                                <span className="text-muted-foreground">Cuando:</span>{' '}
-                                <span className="font-medium">{automation.trigger}</span>
-                              </p>
-                              <p>
-                                <span className="text-muted-foreground">Entonces:</span>{' '}
-                                <span className="font-medium">{automation.action}</span>
-                              </p>
-                              {automation.lastTriggered && (
-                                <p className="text-xs text-muted-foreground">
-                                  Última ejecución: {automation.lastTriggered}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                          <Button variant="ghost" size="sm">
-                            <Settings className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="analytics" className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Card>
+          <TabsContent value="devices" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {devices.map((device) => {
+                const Icon = getDeviceIcon(device.type);
+                return (
+                  <Card key={device.id} className="hover:shadow-lg transition-shadow">
                     <CardHeader>
-                      <CardTitle>Temperatura - Últimas 24h</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <AreaChart data={temperatureData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="time" />
-                          <YAxis />
-                          <Tooltip />
-                          <Legend />
-                          <Area
-                            type="monotone"
-                            dataKey="temp"
-                            stroke="#3B82F6"
-                            fill="#3B82F6"
-                            fillOpacity={0.3}
-                            name="Temperatura Real (°C)"
-                          />
-                          <Area
-                            type="monotone"
-                            dataKey="target"
-                            stroke="#10B981"
-                            fill="#10B981"
-                            fillOpacity={0.1}
-                            name="Objetivo (°C)"
-                          />
-                        </AreaChart>
-                      </ResponsiveContainer>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Consumo Energético Semanal</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={energyData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="day" />
-                          <YAxis />
-                          <Tooltip />
-                          <Legend />
-                          <Line
-                            type="monotone"
-                            dataKey="consumption"
-                            stroke="#F59E0B"
-                            strokeWidth={2}
-                            name="kWh"
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="alerts" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Alertas y Notificaciones</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {alerts.map((alert) => (
-                        <div
-                          key={alert.id}
-                          className={`flex items-start gap-4 p-4 border rounded-lg ${
-                            alert.resolved ? 'bg-gray-50 opacity-60' : ''
-                          }`}
-                        >
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              {getAlertBadge(alert.type)}
-                              {alert.resolved && (
-                                <Badge variant="outline" className="text-xs">
-                                  <CheckCircle className="h-3 w-3 mr-1" />
-                                  Resuelta
-                                </Badge>
-                              )}
-                            </div>
-                            <p className="font-medium">{alert.message}</p>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {alert.deviceName} • {formatTime(alert.timestamp)}
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-blue-100 rounded-lg">
+                            <Icon className="h-5 w-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-base">{device.name}</CardTitle>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {device.buildingName} • {device.location}
                             </p>
                           </div>
-                          {!alert.resolved && (
-                            <Button size="sm" variant="outline">
-                              Resolver
-                            </Button>
+                        </div>
+                        {getStatusBadge(device.status)}
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {device.currentValue !== undefined && (
+                        <div className="text-center py-2">
+                          <p className="text-3xl font-bold">
+                            {device.currentValue}
+                            <span className="text-lg text-muted-foreground ml-1">
+                              {device.unit}
+                            </span>
+                          </p>
+                        </div>
+                      )}
+
+                      {device.battery !== undefined && (
+                        <div>
+                          <div className="flex justify-between text-xs mb-1">
+                            <span className="text-muted-foreground">Batería</span>
+                            <span className={device.battery < 20 ? 'text-red-600 font-medium' : ''}>
+                              {device.battery}%
+                            </span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-1.5">
+                            <div
+                              className={`h-1.5 rounded-full ${
+                                device.battery < 20 ? 'bg-red-500' : 'bg-green-500'
+                              }`}
+                              style={{ width: `${device.battery}%` }}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex justify-between text-xs text-muted-foreground pt-2 border-t">
+                        <span>Actualizado {formatTime(device.lastUpdate)}</span>
+                        <Button variant="ghost" size="sm" className="h-6 px-2">
+                          <Settings className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="automations" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Automatizaciones Configuradas</CardTitle>
+                <CardDescription>
+                  Reglas automáticas para gestionar tus dispositivos inteligentes
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {automations.map((automation) => (
+                    <div
+                      key={automation.id}
+                      className="flex items-start justify-between p-4 border rounded-lg"
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h4 className="font-semibold">{automation.name}</h4>
+                          <Badge variant={automation.enabled ? 'default' : 'secondary'}>
+                            {automation.enabled ? 'Activa' : 'Desactivada'}
+                          </Badge>
+                        </div>
+                        <div className="space-y-1 text-sm">
+                          <p>
+                            <span className="text-muted-foreground">Cuando:</span>{' '}
+                            <span className="font-medium">{automation.trigger}</span>
+                          </p>
+                          <p>
+                            <span className="text-muted-foreground">Entonces:</span>{' '}
+                            <span className="font-medium">{automation.action}</span>
+                          </p>
+                          {automation.lastTriggered && (
+                            <p className="text-xs text-muted-foreground">
+                              Última ejecución: {automation.lastTriggered}
+                            </p>
                           )}
                         </div>
-                      ))}
+                      </div>
+                      <Button variant="ghost" size="sm">
+                        <Settings className="h-4 w-4" />
+                      </Button>
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </AuthenticatedLayout>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Temperatura - Últimas 24h</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <AreaChart data={temperatureData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="time" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Area
+                        type="monotone"
+                        dataKey="temp"
+                        stroke="#3B82F6"
+                        fill="#3B82F6"
+                        fillOpacity={0.3}
+                        name="Temperatura Real (°C)"
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="target"
+                        stroke="#10B981"
+                        fill="#10B981"
+                        fillOpacity={0.1}
+                        name="Objetivo (°C)"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Consumo Energético Semanal</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={energyData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="day" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="consumption"
+                        stroke="#F59E0B"
+                        strokeWidth={2}
+                        name="kWh"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="alerts" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Alertas y Notificaciones</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {alerts.map((alert) => (
+                    <div
+                      key={alert.id}
+                      className={`flex items-start gap-4 p-4 border rounded-lg ${
+                        alert.resolved ? 'bg-gray-50 opacity-60' : ''
+                      }`}
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          {getAlertBadge(alert.type)}
+                          {alert.resolved && (
+                            <Badge variant="outline" className="text-xs">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Resuelta
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="font-medium">{alert.message}</p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {alert.deviceName} • {formatTime(alert.timestamp)}
+                        </p>
+                      </div>
+                      {!alert.resolved && (
+                        <Button size="sm" variant="outline">
+                          Resolver
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </AuthenticatedLayout>
   );
 }

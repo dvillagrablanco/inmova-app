@@ -20,12 +20,7 @@ interface SwipeableCardProps {
   className?: string;
 }
 
-export function SwipeableCard({
-  children,
-  actions = [],
-  onSwipe,
-  className
-}: SwipeableCardProps) {
+export function SwipeableCard({ children, actions = [], onSwipe, className }: SwipeableCardProps) {
   const [translateX, setTranslateX] = useState(0);
   const [isSwiping, setIsSwiping] = useState(false);
   const startX = useRef(0);
@@ -38,10 +33,10 @@ export function SwipeableCard({
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isSwiping) return;
-    
+
     currentX.current = e.touches[0].clientX;
     const diff = currentX.current - startX.current;
-    
+
     // Solo permitir swipe hacia la izquierda (mostrar acciones a la derecha)
     if (diff < 0) {
       setTranslateX(Math.max(diff, -120)); // Máximo 120px de swipe
@@ -50,7 +45,7 @@ export function SwipeableCard({
 
   const handleTouchEnd = () => {
     setIsSwiping(false);
-    
+
     // Si el swipe fue suficiente, mantener las acciones visibles
     if (translateX < -60) {
       setTranslateX(-100);
@@ -79,7 +74,7 @@ export function SwipeableCard({
         className="swipeable-content bg-white"
         style={{
           transform: `translateX(${translateX}px)`,
-          transition: isSwiping ? 'none' : 'transform 0.3s ease'
+          transition: isSwiping ? 'none' : 'transform 0.3s ease',
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}

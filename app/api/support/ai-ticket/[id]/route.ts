@@ -9,18 +9,12 @@ export const dynamic = 'force-dynamic';
 /**
  * GET: Obtener un ticket específico con todos sus mensajes
  */
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const ticket = await prisma.supportTicket.findUnique({
@@ -43,46 +37,31 @@ export async function GET(
     });
 
     if (!ticket) {
-      return NextResponse.json(
-        { error: 'Ticket no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Ticket no encontrado' }, { status: 404 });
     }
 
     return NextResponse.json({ ticket });
   } catch (error) {
     logger.error('Error al obtener ticket:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener el ticket' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener el ticket' }, { status: 500 });
   }
 }
 
 /**
  * POST: Agregar un nuevo mensaje al ticket
  */
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const { message } = await req.json();
 
     if (!message) {
-      return NextResponse.json(
-        { error: 'El mensaje es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'El mensaje es requerido' }, { status: 400 });
     }
 
     // Verificar que el ticket pertenece al usuario
@@ -94,10 +73,7 @@ export async function POST(
     });
 
     if (!ticket) {
-      return NextResponse.json(
-        { error: 'Ticket no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Ticket no encontrado' }, { status: 404 });
     }
 
     // Crear el mensaje del usuario
@@ -175,28 +151,19 @@ export async function POST(
     });
   } catch (error) {
     logger.error('Error al agregar mensaje al ticket:', error);
-    return NextResponse.json(
-      { error: 'Error al agregar el mensaje' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al agregar el mensaje' }, { status: 500 });
   }
 }
 
 /**
  * PATCH: Actualizar el estado del ticket o calificarlo
  */
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const { status, rating, feedback } = await req.json();
@@ -210,10 +177,7 @@ export async function PATCH(
     });
 
     if (!ticket) {
-      return NextResponse.json(
-        { error: 'Ticket no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Ticket no encontrado' }, { status: 404 });
     }
 
     const updateData: any = {};
@@ -226,7 +190,8 @@ export async function PATCH(
     }
 
     if (rating !== undefined) {
-      const existingTags = (ticket.tags && typeof ticket.tags === 'object') ? ticket.tags as Record<string, any> : {};
+      const existingTags =
+        ticket.tags && typeof ticket.tags === 'object' ? (ticket.tags as Record<string, any>) : {};
       updateData.tags = {
         ...existingTags,
         rating,
@@ -261,10 +226,7 @@ export async function PATCH(
     return NextResponse.json({ ticket: updatedTicket });
   } catch (error) {
     logger.error('Error al actualizar ticket:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar el ticket' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar el ticket' }, { status: 500 });
   }
 }
 

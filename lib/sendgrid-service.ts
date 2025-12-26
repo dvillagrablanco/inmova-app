@@ -1,6 +1,6 @@
 /**
  * Servicio de SendGrid para envío de emails transaccionales
- * 
+ *
  * Este servicio proporciona una interfaz simplificada para enviar emails
  * usando SendGrid, con soporte para templates HTML y texto plano.
  */
@@ -47,19 +47,20 @@ export function isSendGridConfigured(): boolean {
 export async function sendEmail(options: EmailOptions): Promise<SendGridResponse> {
   // Verificar configuración
   if (!isSendGridConfigured()) {
-    const errorMsg = 'SendGrid no está configurado. Por favor, configura SENDGRID_API_KEY en las variables de entorno.';
+    const errorMsg =
+      'SendGrid no está configurado. Por favor, configura SENDGRID_API_KEY en las variables de entorno.';
     logger.warn('[SendGrid] ' + errorMsg);
-    
+
     // En desarrollo, solo log pero no falla
     if (process.env.NODE_ENV === 'development') {
       console.log('[SendGrid] Email simulado:', {
         to: options.to,
         subject: options.subject,
-        text: options.text?.substring(0, 100) + '...'
+        text: options.text?.substring(0, 100) + '...',
       });
       return { success: true, messageId: 'dev-' + Date.now() };
     }
-    
+
     return { success: false, error: errorMsg };
   }
 
@@ -72,14 +73,14 @@ export async function sendEmail(options: EmailOptions): Promise<SendGridResponse
     const payload: any = {
       personalizations: [
         {
-          to: Array.isArray(options.to) 
-            ? options.to.map(email => ({ email })) 
+          to: Array.isArray(options.to)
+            ? options.to.map((email) => ({ email }))
             : [{ email: options.to }],
-        }
+        },
       ],
       from: {
         email: fromEmail,
-        name: fromName
+        name: fromName,
       },
       subject: options.subject,
     };
@@ -87,14 +88,14 @@ export async function sendEmail(options: EmailOptions): Promise<SendGridResponse
     // Añadir CC si existe
     if (options.cc) {
       payload.personalizations[0].cc = Array.isArray(options.cc)
-        ? options.cc.map(email => ({ email }))
+        ? options.cc.map((email) => ({ email }))
         : [{ email: options.cc }];
     }
 
     // Añadir BCC si existe
     if (options.bcc) {
       payload.personalizations[0].bcc = Array.isArray(options.bcc)
-        ? options.bcc.map(email => ({ email }))
+        ? options.bcc.map((email) => ({ email }))
         : [{ email: options.bcc }];
     }
 
@@ -113,18 +114,18 @@ export async function sendEmail(options: EmailOptions): Promise<SendGridResponse
     } else {
       // Usar contenido directo
       payload.content = [];
-      
+
       if (options.text) {
         payload.content.push({
           type: 'text/plain',
-          value: options.text
+          value: options.text,
         });
       }
-      
+
       if (options.html) {
         payload.content.push({
           type: 'text/html',
-          value: options.html
+          value: options.html,
         });
       }
 
@@ -132,7 +133,7 @@ export async function sendEmail(options: EmailOptions): Promise<SendGridResponse
       if (payload.content.length === 0) {
         payload.content.push({
           type: 'text/plain',
-          value: options.subject
+          value: options.subject,
         });
       }
     }
@@ -146,10 +147,10 @@ export async function sendEmail(options: EmailOptions): Promise<SendGridResponse
     const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
@@ -159,24 +160,23 @@ export async function sendEmail(options: EmailOptions): Promise<SendGridResponse
 
     // SendGrid devuelve 202 Accepted en éxito
     const messageId = response.headers.get('X-Message-Id') || 'unknown';
-    
+
     logger.info(`[SendGrid] Email enviado exitosamente a ${options.to}`, { messageId });
-    
+
     return {
       success: true,
-      messageId
+      messageId,
     };
-
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
     logError(new Error(`[SendGrid] Error enviando email: ${errorMessage}`), {
       to: options.to,
-      subject: options.subject
+      subject: options.subject,
     });
-    
+
     return {
       success: false,
-      error: errorMessage
+      error: errorMessage,
     };
   }
 }
@@ -241,7 +241,7 @@ export const EmailTemplates = {
       Ya puedes acceder a tu cuenta en: ${loginUrl}
       
       Gracias por elegir INMOVA.
-    `.trim()
+    `.trim(),
   }),
 
   /**
@@ -296,7 +296,7 @@ export const EmailTemplates = {
       Fecha: ${new Date().toLocaleDateString('es-ES')}
       
       Gracias por tu pago puntual.
-    `.trim()
+    `.trim(),
   }),
 
   /**
@@ -355,6 +355,6 @@ export const EmailTemplates = {
       Por favor, realiza el pago antes de la fecha de vencimiento.
       
       Accede a: https://inmova.app/portal-inquilino/pagos
-    `.trim()
-  })
+    `.trim(),
+  }),
 };

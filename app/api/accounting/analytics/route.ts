@@ -12,10 +12,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.companyId) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const searchParams = request.nextUrl.searchParams;
@@ -39,9 +36,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error al obtener contabilidad analítica:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener contabilidad analítica' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener contabilidad analítica' }, { status: 500 });
   }
 }

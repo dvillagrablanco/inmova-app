@@ -1,7 +1,7 @@
 /**
  * API Endpoint: Validar fortaleza de contraseña
  * POST /api/auth/validate-password
- * 
+ *
  * Evaluar la fortaleza de una contraseña en tiempo real
  */
 
@@ -44,9 +44,6 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error: any) {
-    return NextResponse.json(
-      { error: 'Error al validar contraseña' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al validar contraseña' }, { status: 500 });
   }
 }

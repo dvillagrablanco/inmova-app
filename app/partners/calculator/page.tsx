@@ -15,75 +15,86 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { DollarSign, TrendingUp, Target, ArrowRight, Calculator, Mail } from 'lucide-react';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
 
 const partnerTypes = [
-  { 
-    value: 'banco', 
+  {
+    value: 'banco',
     label: 'Banco / Banca Privada',
     captacion: 500,
     recurrente: 10,
     ticketPromedio: 349,
-    premium: true
+    premium: true,
   },
-  { 
-    value: 'aseguradora', 
+  {
+    value: 'aseguradora',
     label: 'Aseguradora',
     captacion: 300,
     recurrente: 12,
     ticketPromedio: 149,
-    premium: true
+    premium: true,
   },
-  { 
-    value: 'familyoffice', 
+  {
+    value: 'familyoffice',
     label: 'Multifamily Office',
     captacion: 2000,
     recurrente: 25,
     ticketPromedio: 500,
-    premium: true
+    premium: true,
   },
-  { 
-    value: 'autonomo', 
+  {
+    value: 'autonomo',
     label: 'Autónomo Inmobiliario',
     captacion: 150,
     recurrente: 15,
-    ticketPromedio: 100
+    ticketPromedio: 100,
   },
-  { 
-    value: 'inmobiliaria', 
+  {
+    value: 'inmobiliaria',
     label: 'Inmobiliaria / Gestora',
     captacion: 200,
     recurrente: 20,
-    ticketPromedio: 149
+    ticketPromedio: 149,
   },
-  { 
-    value: 'centro', 
+  {
+    value: 'centro',
     label: 'Centro de Estudios',
     captacion: 300,
     recurrente: 10,
-    ticketPromedio: 149
+    ticketPromedio: 149,
   },
-  { 
-    value: 'plataforma', 
+  {
+    value: 'plataforma',
     label: 'Plataforma Sector',
     captacion: 0,
     recurrente: 30,
-    ticketPromedio: 149
+    ticketPromedio: 149,
   },
-  { 
-    value: 'asociacion', 
+  {
+    value: 'asociacion',
     label: 'Asociación Profesional',
     captacion: 100,
     recurrente: 15,
-    ticketPromedio: 104
+    ticketPromedio: 104,
   },
-  { 
-    value: 'asesor', 
+  {
+    value: 'asesor',
     label: 'Asesor Fiscal / Gestoría',
     captacion: 100,
     recurrente: 12,
-    ticketPromedio: 149
-  }
+    ticketPromedio: 149,
+  },
 ];
 
 export default function PartnerCalculatorPage() {
@@ -92,26 +103,28 @@ export default function PartnerCalculatorPage() {
   const [email, setEmail] = useState('');
   const [showResults, setShowResults] = useState(false);
 
-  const selectedType = partnerTypes.find(p => p.value === partnerType);
-  
+  const selectedType = partnerTypes.find((p) => p.value === partnerType);
+
   const comisionCaptacion = selectedType ? numClients * selectedType.captacion : 0;
-  const mrrRecurrente = selectedType ? numClients * selectedType.ticketPromedio * (selectedType.recurrente / 100) : 0;
-  const ingresoAnual = comisionCaptacion + (mrrRecurrente * 12);
+  const mrrRecurrente = selectedType
+    ? numClients * selectedType.ticketPromedio * (selectedType.recurrente / 100)
+    : 0;
+  const ingresoAnual = comisionCaptacion + mrrRecurrente * 12;
   const ingresoMes1 = comisionCaptacion + mrrRecurrente;
-  
+
   // Datos para gráfico de evolución
   const chartData = Array.from({ length: 12 }, (_, i) => ({
     mes: `Mes ${i + 1}`,
-    acumulado: i === 0 ? ingresoMes1 : comisionCaptacion + (mrrRecurrente * (i + 1)),
-    recurrente: mrrRecurrente * (i + 1)
+    acumulado: i === 0 ? ingresoMes1 : comisionCaptacion + mrrRecurrente * (i + 1),
+    recurrente: mrrRecurrente * (i + 1),
   }));
 
   // Datos para comparativa de niveles
   const nivelComparison = [
     { nivel: 'Bronce\n(0-10)', comision: mrrRecurrente, color: '#CD7F32' },
     { nivel: 'Plata\n(11-25)', comision: mrrRecurrente * 1.05, color: '#C0C0C0' },
-    { nivel: 'Oro\n(26-50)', comision: mrrRecurrente * 1.10, color: '#FFD700' },
-    { nivel: 'Platino\n(50+)', comision: mrrRecurrente * 1.15, color: '#E5E4E2' }
+    { nivel: 'Oro\n(26-50)', comision: mrrRecurrente * 1.1, color: '#FFD700' },
+    { nivel: 'Platino\n(50+)', comision: mrrRecurrente * 1.15, color: '#E5E4E2' },
   ];
 
   const handleCalculate = () => {
@@ -125,7 +138,7 @@ export default function PartnerCalculatorPage() {
       alert('Por favor introduce tu email');
       return;
     }
-    
+
     // TODO: Implementar envío de email
     alert('¡Cálculo enviado a tu email!');
   };
@@ -211,7 +224,7 @@ export default function PartnerCalculatorPage() {
               </div>
             )}
 
-            <Button 
+            <Button
               onClick={handleCalculate}
               size="lg"
               className="w-full gradient-primary text-white text-lg"
@@ -286,17 +299,17 @@ export default function PartnerCalculatorPage() {
                     <YAxis />
                     <Tooltip formatter={(value: number) => `€${value.toLocaleString()}`} />
                     <Legend />
-                    <Line 
-                      type="monotone" 
-                      dataKey="acumulado" 
-                      stroke="#8b5cf6" 
+                    <Line
+                      type="monotone"
+                      dataKey="acumulado"
+                      stroke="#8b5cf6"
                       strokeWidth={3}
                       name="Ingreso Acumulado"
                     />
-                    <Line 
-                      type="monotone" 
-                      dataKey="recurrente" 
-                      stroke="#10b981" 
+                    <Line
+                      type="monotone"
+                      dataKey="recurrente"
+                      stroke="#10b981"
                       strokeWidth={2}
                       name="Solo Recurrente"
                     />
@@ -327,7 +340,9 @@ export default function PartnerCalculatorPage() {
                   {nivelComparison.map((nivel, idx) => (
                     <div key={idx} className="text-center p-2 bg-gray-50 rounded">
                       <p className="text-xs text-gray-600">{nivel.nivel.replace('\n', ' ')}</p>
-                      <p className="font-bold text-lg">€{Math.round(nivel.comision).toLocaleString()}</p>
+                      <p className="font-bold text-lg">
+                        €{Math.round(nivel.comision).toLocaleString()}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -351,12 +366,18 @@ export default function PartnerCalculatorPage() {
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">MRR:</span>
-                          <span className="font-semibold">€{(mrrRecurrente * year).toLocaleString()}</span>
+                          <span className="font-semibold">
+                            €{(mrrRecurrente * year).toLocaleString()}
+                          </span>
                         </div>
                         <div className="flex justify-between border-t pt-2">
                           <span className="font-semibold">Total Año:</span>
                           <span className="font-bold text-indigo-600">
-                            €{(comisionCaptacion * year + mrrRecurrente * year * 12).toLocaleString()}
+                            €
+                            {(
+                              comisionCaptacion * year +
+                              mrrRecurrente * year * 12
+                            ).toLocaleString()}
                           </span>
                         </div>
                       </div>
@@ -395,9 +416,7 @@ export default function PartnerCalculatorPage() {
 
             {/* CTA Final */}
             <div className="text-center p-8 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-2xl text-white">
-              <h3 className="text-2xl font-bold mb-4">
-                ¿Listo para Empezar a Ganar?
-              </h3>
+              <h3 className="text-2xl font-bold mb-4">¿Listo para Empezar a Ganar?</h3>
               <p className="text-lg mb-6 opacity-90">
                 Regístrate gratis y empieza a generar ingresos desde tu primera venta
               </p>
@@ -409,7 +428,11 @@ export default function PartnerCalculatorPage() {
                   </Button>
                 </Link>
                 <Link href="/partners">
-                  <Button size="lg" variant="outline" className="px-8 py-6 border-white text-white hover:bg-white/10">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="px-8 py-6 border-white text-white hover:bg-white/10"
+                  >
                     Ver Más Info
                   </Button>
                 </Link>

@@ -7,18 +7,12 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 // POST /api/owners/[id]/buildings - Asignar edificio a propietario
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Verificar permisos
@@ -38,10 +32,7 @@ export async function POST(
     });
 
     if (!owner) {
-      return NextResponse.json(
-        { error: 'Propietario no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Propietario no encontrado' }, { status: 404 });
     }
 
     const body = await req.json();
@@ -56,10 +47,7 @@ export async function POST(
     } = body;
 
     if (!buildingId) {
-      return NextResponse.json(
-        { error: 'buildingId es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'buildingId es requerido' }, { status: 400 });
     }
 
     // Verificar que el edificio existe y pertenece a la empresa
@@ -71,10 +59,7 @@ export async function POST(
     });
 
     if (!building) {
-      return NextResponse.json(
-        { error: 'Edificio no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Edificio no encontrado' }, { status: 404 });
     }
 
     // Verificar que no existe ya la asignación
@@ -104,7 +89,7 @@ export async function POST(
         verOcupacion,
         verMantenimiento,
         verDocumentos,
-        asignadoPor: session?.user?.id
+        asignadoPor: session?.user?.id,
       },
       include: {
         building: {
@@ -129,9 +114,6 @@ export async function POST(
     });
   } catch (error) {
     logger.error('Error al asignar edificio:', error);
-    return NextResponse.json(
-      { error: 'Error al asignar edificio' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al asignar edificio' }, { status: 500 });
   }
 }

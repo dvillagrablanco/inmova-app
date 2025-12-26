@@ -22,14 +22,11 @@ export function createLazyRoute<P = {}>(
   importFn: () => Promise<{ default: ComponentType<P> }>,
   options: LazyRouteOptions = {}
 ) {
-  const {
-    loadingMessage = 'Cargando...',
-    fallback,
-    ssr = false,
-  } = options;
+  const { loadingMessage = 'Cargando...', fallback, ssr = false } = options;
 
   const LazyComponent = dynamic(importFn, {
-    loading: () => (fallback as React.ReactElement) || <LoadingState message={loadingMessage} fullScreen />,
+    loading: () =>
+      (fallback as React.ReactElement) || <LoadingState message={loadingMessage} fullScreen />,
     ssr,
   });
 

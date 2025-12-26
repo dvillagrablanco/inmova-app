@@ -8,10 +8,7 @@ import logger, { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 // POST - Upload document
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -73,18 +70,12 @@ export async function POST(
     });
   } catch (error) {
     logger.error('Error uploading document:', error);
-    return NextResponse.json(
-      { error: 'Error al subir el documento' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al subir el documento' }, { status: 500 });
   }
 }
 
 // DELETE - Remove document
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -96,10 +87,7 @@ export async function DELETE(
     const documentUrl = searchParams.get('url');
 
     if (!documentUrl) {
-      return NextResponse.json(
-        { error: 'URL del documento no proporcionada' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'URL del documento no proporcionada' }, { status: 400 });
     }
 
     // Verify insurance belongs to company
@@ -137,9 +125,6 @@ export async function DELETE(
     });
   } catch (error) {
     logger.error('Error deleting document:', error);
-    return NextResponse.json(
-      { error: 'Error al eliminar el documento' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar el documento' }, { status: 500 });
   }
 }

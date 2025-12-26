@@ -12,13 +12,13 @@ export const BRAND_COLORS = {
     200: '#C7D2FE',
     300: '#A5B4FC',
     400: '#818CF8',
-    500: '#6366F1',  // Color principal
+    500: '#6366F1', // Color principal
     600: '#4F46E5',
     700: '#4338CA',
     800: '#3730A3',
     900: '#312E81',
   },
-  
+
   // Secundarios (violeta/púrpura)
   secondary: {
     50: '#FAF5FF',
@@ -32,7 +32,7 @@ export const BRAND_COLORS = {
     800: '#6B21A8',
     900: '#581C87',
   },
-  
+
   // Acento (rosa para destacados)
   accent: {
     50: '#FDF2F8',
@@ -46,13 +46,13 @@ export const BRAND_COLORS = {
     800: '#9D174D',
     900: '#831843',
   },
-  
+
   // Estados
   success: '#10B981',
   warning: '#F59E0B',
   error: '#EF4444',
   info: '#3B82F6',
-  
+
   // Neutrales
   neutral: {
     50: '#F9FAFB',
@@ -84,19 +84,19 @@ export const BRAND_TYPOGRAPHY = {
     sans: 'Inter, system-ui, -apple-system, sans-serif',
     mono: 'JetBrains Mono, Menlo, Monaco, monospace',
   },
-  
+
   fontSize: {
-    xs: '0.75rem',      // 12px
-    sm: '0.875rem',     // 14px
-    base: '1rem',       // 16px
-    lg: '1.125rem',     // 18px
-    xl: '1.25rem',      // 20px
-    '2xl': '1.5rem',    // 24px
-    '3xl': '1.875rem',  // 30px
-    '4xl': '2.25rem',   // 36px
-    '5xl': '3rem',      // 48px
+    xs: '0.75rem', // 12px
+    sm: '0.875rem', // 14px
+    base: '1rem', // 16px
+    lg: '1.125rem', // 18px
+    xl: '1.25rem', // 20px
+    '2xl': '1.5rem', // 24px
+    '3xl': '1.875rem', // 30px
+    '4xl': '2.25rem', // 36px
+    '5xl': '3rem', // 48px
   },
-  
+
   fontWeight: {
     normal: 400,
     medium: 500,
@@ -104,7 +104,7 @@ export const BRAND_TYPOGRAPHY = {
     bold: 700,
     extrabold: 800,
   },
-  
+
   lineHeight: {
     tight: 1.25,
     normal: 1.5,
@@ -114,27 +114,27 @@ export const BRAND_TYPOGRAPHY = {
 
 // Espaciado
 export const BRAND_SPACING = {
-  xs: '0.25rem',   // 4px
-  sm: '0.5rem',    // 8px
-  md: '1rem',      // 16px
-  lg: '1.5rem',    // 24px
-  xl: '2rem',      // 32px
-  '2xl': '3rem',   // 48px
-  '3xl': '4rem',   // 64px
+  xs: '0.25rem', // 4px
+  sm: '0.5rem', // 8px
+  md: '1rem', // 16px
+  lg: '1.5rem', // 24px
+  xl: '2rem', // 32px
+  '2xl': '3rem', // 48px
+  '3xl': '4rem', // 64px
 } as const;
 
 // Bordes y radios
 export const BRAND_BORDERS = {
   radius: {
     none: '0',
-    sm: '0.25rem',    // 4px
-    md: '0.5rem',     // 8px
-    lg: '0.75rem',    // 12px
-    xl: '1rem',       // 16px
-    '2xl': '1.5rem',  // 24px
+    sm: '0.25rem', // 4px
+    md: '0.5rem', // 8px
+    lg: '0.75rem', // 12px
+    xl: '1rem', // 16px
+    '2xl': '1.5rem', // 24px
     full: '9999px',
   },
-  
+
   width: {
     thin: '1px',
     normal: '2px',
@@ -150,7 +150,7 @@ export const BRAND_SHADOWS = {
   xl: '0 20px 25px -5px rgb(0 0 0 / 0.1)',
   '2xl': '0 25px 50px -12px rgb(0 0 0 / 0.25)',
   inner: 'inset 0 2px 4px 0 rgb(0 0 0 / 0.05)',
-  
+
   // Sombras con color de marca
   primaryGlow: '0 10px 40px -10px rgba(99, 102, 241, 0.5)',
   secondaryGlow: '0 10px 40px -10px rgba(168, 85, 247, 0.5)',
@@ -163,7 +163,7 @@ export const BRAND_ANIMATIONS = {
     normal: '300ms',
     slow: '500ms',
   },
-  
+
   easing: {
     default: 'cubic-bezier(0.4, 0, 0.2, 1)',
     in: 'cubic-bezier(0.4, 0, 1, 1)',
@@ -210,7 +210,7 @@ export function withOpacity(color: string, opacity: number): string {
   const r = parseInt(hex.substring(0, 2), 16);
   const g = parseInt(hex.substring(2, 4), 16);
   const b = parseInt(hex.substring(4, 6), 16);
-  
+
   return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 }
 

@@ -7,10 +7,7 @@ import logger, { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 // GET - Obtener un plan específico
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== 'super_admin') {
@@ -21,9 +18,9 @@ export async function GET(
       where: { id: params.id },
       include: {
         _count: {
-          select: { companies: true }
-        }
-      }
+          select: { companies: true },
+        },
+      },
     });
 
     if (!plan) {
@@ -38,10 +35,7 @@ export async function GET(
 }
 
 // PATCH - Actualizar un plan
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== 'super_admin') {
@@ -57,7 +51,7 @@ export async function PATCH(
       maxUsuarios,
       maxPropiedades,
       modulosIncluidos,
-      activo
+      activo,
     } = body;
 
     const plan = await prisma.subscriptionPlan.update({
@@ -70,13 +64,13 @@ export async function PATCH(
         ...(maxUsuarios !== undefined && { maxUsuarios }),
         ...(maxPropiedades !== undefined && { maxPropiedades }),
         ...(modulosIncluidos !== undefined && { modulosIncluidos }),
-        ...(activo !== undefined && { activo })
+        ...(activo !== undefined && { activo }),
       },
       include: {
         _count: {
-          select: { companies: true }
-        }
-      }
+          select: { companies: true },
+        },
+      },
     });
 
     return NextResponse.json(plan);
@@ -87,10 +81,7 @@ export async function PATCH(
 }
 
 // DELETE - Eliminar un plan
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== 'super_admin') {
@@ -99,7 +90,7 @@ export async function DELETE(
 
     // Verificar si hay empresas usando este plan
     const companiesCount = await prisma.company.count({
-      where: { subscriptionPlanId: params.id }
+      where: { subscriptionPlanId: params.id },
     });
 
     if (companiesCount > 0) {
@@ -110,7 +101,7 @@ export async function DELETE(
     }
 
     await prisma.subscriptionPlan.delete({
-      where: { id: params.id }
+      where: { id: params.id },
     });
 
     return NextResponse.json({ success: true, message: 'Plan eliminado correctamente' });

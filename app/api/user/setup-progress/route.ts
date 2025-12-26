@@ -26,9 +26,9 @@ export async function GET(request: NextRequest) {
 
     // El campo setupProgress puede ser un JSON almacenado como string
     const completedActions = user.setupProgress
-      ? (typeof user.setupProgress === 'string'
-          ? JSON.parse(user.setupProgress)
-          : user.setupProgress)
+      ? typeof user.setupProgress === 'string'
+        ? JSON.parse(user.setupProgress)
+        : user.setupProgress
       : [];
 
     return NextResponse.json({ completedActions });

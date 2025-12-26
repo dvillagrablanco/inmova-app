@@ -83,16 +83,14 @@ export function addMessageToConversation(
 /**
  * Get conversation summary
  */
-export async function summarizeConversation(
-  conversation: AIConversation
-): Promise<string> {
+export async function summarizeConversation(conversation: AIConversation): Promise<string> {
   try {
     logger.info('Summarizing conversation', {
       messageCount: conversation.messages.length,
     });
 
     // TODO: Use AI to generate summary
-    
+
     return 'Conversation summary';
   } catch (error: any) {
     logger.error('Error summarizing conversation:', error);

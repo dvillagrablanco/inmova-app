@@ -10,15 +10,12 @@ export async function GET(request: NextRequest) {
     if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
-    
+
     // Funcionalidad pendiente de implementación
     return NextResponse.json({ message: 'En desarrollo', data: [] });
   } catch (error) {
     logger.error('Error en GET:', error);
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }
 export async function POST(request: NextRequest) {
@@ -30,9 +27,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: 'En desarrollo' });
   } catch (error) {
     logger.error('Error en POST:', error);
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }

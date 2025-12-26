@@ -4,11 +4,11 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger, { logError } from '@/lib/logger';
 import { contractCreateSchema } from '@/lib/validations';
-import { 
-  cachedContracts, 
-  invalidateContractsCache, 
-  invalidateUnitsCache, 
-  invalidateDashboardCache 
+import {
+  cachedContracts,
+  invalidateContractsCache,
+  invalidateUnitsCache,
+  invalidateDashboardCache,
 } from '@/lib/api-cache-helpers';
 
 export const dynamic = 'force-dynamic';
@@ -74,7 +74,7 @@ export async function GET(req: NextRequest) {
     ]);
 
     // Calcular días hasta vencimiento para cada contrato
-    const contractsWithExpiration = contracts.map(contract => {
+    const contractsWithExpiration = contracts.map((contract) => {
       const daysUntilExpiration = Math.ceil(
         (new Date(contract.fechaFin).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
       );
@@ -108,20 +108,17 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    
+
     // Validación con Zod
     const validationResult = contractCreateSchema.safeParse(body);
-    
+
     if (!validationResult.success) {
-      const errors = validationResult.error.errors.map(err => ({
+      const errors = validationResult.error.errors.map((err) => ({
         field: err.path.join('.'),
-        message: err.message
+        message: err.message,
       }));
       logger.warn('Validation error creating contract:', { errors });
-      return NextResponse.json(
-        { error: 'Datos inv\u00e1lidos', details: errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Datos inv\u00e1lidos', details: errors }, { status: 400 });
     }
 
     const validatedData = validationResult.data;

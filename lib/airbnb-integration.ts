@@ -83,7 +83,9 @@ export class AirbnbClient {
   /**
    * Obtener access token con OAuth 2.0
    */
-  async authenticate(authorizationCode: string): Promise<{ accessToken: string; refreshToken: string }> {
+  async authenticate(
+    authorizationCode: string
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     try {
       const response = await fetch('https://api.airbnb.com/v1/oauth2/token', {
         method: 'POST',
@@ -165,7 +167,7 @@ export class AirbnbClient {
     }
 
     return {
-      'Authorization': `Bearer ${this.accessToken}`,
+      Authorization: `Bearer ${this.accessToken}`,
       'Content-Type': 'application/json',
       'X-Airbnb-API-Key': this.clientId,
     };
@@ -320,11 +322,11 @@ export class AirbnbClient {
    */
   private mapReservationStatus(status: string): AirbnbReservation['status'] {
     const statusMap: Record<string, AirbnbReservation['status']> = {
-      'pending': 'pending',
-      'accept': 'accepted',
-      'deny': 'declined',
-      'cancelled': 'cancelled',
-      'completed': 'completed',
+      pending: 'pending',
+      accept: 'accepted',
+      deny: 'declined',
+      cancelled: 'cancelled',
+      completed: 'completed',
     };
     return statusMap[status] || 'pending';
   }
@@ -400,10 +402,7 @@ export class AirbnbClient {
   /**
    * Enviar mensaje al huésped
    */
-  async sendMessage(params: {
-    reservationId: string;
-    message: string;
-  }): Promise<boolean> {
+  async sendMessage(params: { reservationId: string; message: string }): Promise<boolean> {
     try {
       const headers = await this.getAuthHeaders();
 
@@ -435,11 +434,7 @@ export class AirbnbClient {
 
 export function isAirbnbConfigured(config?: AirbnbConfig | null): boolean {
   if (!config) return false;
-  return !!(
-    config.clientId &&
-    config.clientSecret &&
-    config.enabled
-  );
+  return !!(config.clientId && config.clientSecret && config.enabled);
 }
 
 export function getAirbnbClient(config?: AirbnbConfig): AirbnbClient | null {

@@ -9,7 +9,12 @@ import logger from './logger';
 // Definiciones de tipos inline (reemplaza imports de @prisma/client)
 type WorkflowStatus = 'activo' | 'inactivo' | 'borrador';
 type WorkflowTriggerType = 'manual' | 'evento' | 'programado' | 'webhook';
-type WorkflowActionType = 'enviar_notificacion' | 'crear_tarea' | 'enviar_email' | 'ejecutar_script' | 'actualizar_registro';
+type WorkflowActionType =
+  | 'enviar_notificacion'
+  | 'crear_tarea'
+  | 'enviar_email'
+  | 'ejecutar_script'
+  | 'actualizar_registro';
 
 /**
  * Crea un nuevo workflow
@@ -179,7 +184,7 @@ async function evaluateConditions(conditions: any, triggerData: any): Promise<bo
  */
 function evaluateRule(rule: any, data: any): boolean {
   const value = getNestedValue(data, rule.field);
-  
+
   switch (rule.operator) {
     case 'equals':
       return value === rule.value;
@@ -349,7 +354,7 @@ async function createIncident(config: any, triggerData: any): Promise<any> {
  */
 function replaceTemplateVariables(template: string, data: any): string {
   if (!template) return '';
-  
+
   return template.replace(/\{\{([^}]+)\}\}/g, (match, path) => {
     const value = getNestedValue(data, path.trim());
     return value !== undefined ? String(value) : match;
@@ -359,10 +364,13 @@ function replaceTemplateVariables(template: string, data: any): string {
 /**
  * Obtiene workflows de una empresa
  */
-export async function getCompanyWorkflows(companyId: string, filters?: {
-  status?: WorkflowStatus;
-  isActive?: boolean;
-}) {
+export async function getCompanyWorkflows(
+  companyId: string,
+  filters?: {
+    status?: WorkflowStatus;
+    isActive?: boolean;
+  }
+) {
   try {
     const workflows = await prisma.workflow.findMany({
       where: {

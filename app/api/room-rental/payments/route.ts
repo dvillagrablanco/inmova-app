@@ -3,12 +3,12 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
-import { 
-  selectUnitMinimal, 
-  selectBuildingMinimal, 
-  selectRoomContractMinimal, 
+import {
+  selectUnitMinimal,
+  selectBuildingMinimal,
+  selectRoomContractMinimal,
   selectTenantMinimal,
-  selectRoomPaymentMinimal
+  selectRoomPaymentMinimal,
 } from '@/lib/query-optimizer';
 
 export const dynamic = 'force-dynamic';
@@ -92,19 +92,13 @@ export async function POST(request: NextRequest) {
 
     // Validaciones
     if (!data.contractId || !data.mes || !data.monto || !data.fechaVencimiento) {
-      return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
 
     // BUG FIX: Validar montos positivos
     const monto = parseFloat(data.monto);
     if (isNaN(monto) || monto <= 0) {
-      return NextResponse.json(
-        { error: 'El monto debe ser un número positivo' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'El monto debe ser un número positivo' }, { status: 400 });
     }
 
     // Validar montos de prorrateo si existen
@@ -139,8 +133,12 @@ export async function POST(request: NextRequest) {
         montoProrrateoLuz: data.montoProrrateoLuz ? parseFloat(data.montoProrrateoLuz) : null,
         montoProrrateoAgua: data.montoProrrateoAgua ? parseFloat(data.montoProrrateoAgua) : null,
         montoProrrateoGas: data.montoProrrateoGas ? parseFloat(data.montoProrrateoGas) : null,
-        montoProrrateoInternet: data.montoProrrateoInternet ? parseFloat(data.montoProrrateoInternet) : null,
-        montoProrrateoLimpieza: data.montoProrrateoLimpieza ? parseFloat(data.montoProrrateoLimpieza) : null,
+        montoProrrateoInternet: data.montoProrrateoInternet
+          ? parseFloat(data.montoProrrateoInternet)
+          : null,
+        montoProrrateoLimpieza: data.montoProrrateoLimpieza
+          ? parseFloat(data.montoProrrateoLimpieza)
+          : null,
         estado: data.estado || 'pendiente',
         fechaVencimiento: new Date(data.fechaVencimiento),
         fechaPago: data.fechaPago ? new Date(data.fechaPago) : null,

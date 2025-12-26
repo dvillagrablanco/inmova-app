@@ -50,14 +50,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `${results.filter(r => r.success).length}/${results.length} clientes sincronizados con Sage`,
+      message: `${results.filter((r) => r.success).length}/${results.length} clientes sincronizados con Sage`,
       results,
     });
   } catch (error) {
     logger.error('Error syncing customers to Sage:', error);
-    return NextResponse.json(
-      { error: 'Error al sincronizar clientes con Sage' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al sincronizar clientes con Sage' }, { status: 500 });
   }
 }

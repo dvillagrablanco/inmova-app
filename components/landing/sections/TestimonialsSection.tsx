@@ -30,13 +30,14 @@ const testimonials: Testimonial[] = [
     vertical: 'Coliving',
     avatar: '/testimonials/maria-garcia.jpg',
     rating: 5,
-    quote: 'Antes tardábamos 8 horas al mes calculando el prorrateo de luz, agua y gas para 25 habitaciones. Con Room Rental PRO de INMOVA, son literalmente 3 clics y está todo hecho. Los inquilinos reciben su factura individualizada automáticamente. Un cambio de juego total.',
+    quote:
+      'Antes tardábamos 8 horas al mes calculando el prorrateo de luz, agua y gas para 25 habitaciones. Con Room Rental PRO de INMOVA, son literalmente 3 clics y está todo hecho. Los inquilinos reciben su factura individualizada automáticamente. Un cambio de juego total.',
     stats: [
       { metric: 'Tiempo ahorrado', value: '8h/mes' },
       { metric: 'Habitaciones', value: '25' },
-      { metric: 'Satisfacción', value: '98%' }
+      { metric: 'Satisfacción', value: '98%' },
     ],
-    highlight: 'Ahorra 8h/mes en cálculos manuales'
+    highlight: 'Ahorra 8h/mes en cálculos manuales',
   },
   {
     id: '2',
@@ -46,13 +47,14 @@ const testimonials: Testimonial[] = [
     vertical: 'Residencia Estudiantil',
     avatar: '/testimonials/javier-martinez.jpg',
     rating: 5,
-    quote: 'Gestionamos 3 residencias con 150 habitaciones en total. El dashboard de Room Rental PRO nos da visibilidad instantánea de ocupación, vencimientos de contratos y alertas. Hemos reducido la tasa de impagos un 35% gracias al sistema de seguimiento automatizado.',
+    quote:
+      'Gestionamos 3 residencias con 150 habitaciones en total. El dashboard de Room Rental PRO nos da visibilidad instantánea de ocupación, vencimientos de contratos y alertas. Hemos reducido la tasa de impagos un 35% gracias al sistema de seguimiento automatizado.',
     stats: [
       { metric: 'Habitaciones', value: '150' },
       { metric: 'Impagos', value: '-35%' },
-      { metric: 'Residencias', value: '3' }
+      { metric: 'Residencias', value: '3' },
     ],
-    highlight: 'Redujo impagos en 35%'
+    highlight: 'Redujo impagos en 35%',
   },
   {
     id: '3',
@@ -62,13 +64,14 @@ const testimonials: Testimonial[] = [
     vertical: 'Agencia Inmobiliaria',
     avatar: '/testimonials/laura-sanchez.jpg',
     rating: 5,
-    quote: 'El Sistema de Cupones de INMOVA nos permitió lanzar una campaña "Primer mes 50% OFF" en 10 minutos. Antes, teníamos que hacerlo manualmente con Excel y llamadas. Resultado: +42% de leads convertidos y ROI de 5x en la primera campaña.',
+    quote:
+      'El Sistema de Cupones de INMOVA nos permitió lanzar una campaña "Primer mes 50% OFF" en 10 minutos. Antes, teníamos que hacerlo manualmente con Excel y llamadas. Resultado: +42% de leads convertidos y ROI de 5x en la primera campaña.',
     stats: [
       { metric: 'Leads convertidos', value: '+42%' },
       { metric: 'ROI', value: '5x' },
-      { metric: 'Setup', value: '10min' }
+      { metric: 'Setup', value: '10min' },
     ],
-    highlight: '+42% conversión con cupones'
+    highlight: '+42% conversión con cupones',
   },
   {
     id: '4',
@@ -78,13 +81,14 @@ const testimonials: Testimonial[] = [
     vertical: 'Coliving',
     avatar: '/testimonials/carlos-ruiz.jpg',
     rating: 5,
-    quote: 'Las reglas de co-living personalizables son oro puro. Definimos horarios de limpieza, turnos de cocina, política de visitas... todo en el sistema. Los inquilinos lo ven en su app y las fricciones desaparecieron. La satisfacción subió de 6.5/10 a 9.2/10.',
+    quote:
+      'Las reglas de co-living personalizables son oro puro. Definimos horarios de limpieza, turnos de cocina, política de visitas... todo en el sistema. Los inquilinos lo ven en su app y las fricciones desaparecieron. La satisfacción subió de 6.5/10 a 9.2/10.',
     stats: [
       { metric: 'Satisfacción', value: '9.2/10' },
       { metric: 'Fricciones', value: '-70%' },
-      { metric: 'Retention', value: '+25%' }
+      { metric: 'Retention', value: '+25%' },
     ],
-    highlight: 'Satisfacción de 6.5 a 9.2/10'
+    highlight: 'Satisfacción de 6.5 a 9.2/10',
   },
   {
     id: '5',
@@ -94,13 +98,14 @@ const testimonials: Testimonial[] = [
     vertical: 'Coliving',
     avatar: '/testimonials/ana-torres.jpg',
     rating: 5,
-    quote: 'Migrar desde nuestra solución anterior fue increíblemente fácil. El equipo de INMOVA nos ayudó a importar 80 habitaciones, 50 inquilinos y 2 años de historial de pagos en una tarde. Room Rental PRO nos permite escalar sin contratar más personal administrativo.',
+    quote:
+      'Migrar desde nuestra solución anterior fue increíblemente fácil. El equipo de INMOVA nos ayudó a importar 80 habitaciones, 50 inquilinos y 2 años de historial de pagos en una tarde. Room Rental PRO nos permite escalar sin contratar más personal administrativo.',
     stats: [
       { metric: 'Migración', value: '1 tarde' },
       { metric: 'Habitaciones', value: '80' },
-      { metric: 'Escalabilidad', value: '∞' }
+      { metric: 'Escalabilidad', value: '∞' },
     ],
-    highlight: 'Escala sin más personal'
+    highlight: 'Escala sin más personal',
   },
   {
     id: '6',
@@ -110,14 +115,15 @@ const testimonials: Testimonial[] = [
     vertical: 'Promotora',
     avatar: '/testimonials/pedro-lopez.jpg',
     rating: 5,
-    quote: 'Usamos el módulo de Construcción y cuando terminamos la obra, activamos Room Rental PRO para comercializar habitaciones individuales. Todo en la misma plataforma. De obra a ingresos recurrentes sin cambiar de sistema. Brillante.',
+    quote:
+      'Usamos el módulo de Construcción y cuando terminamos la obra, activamos Room Rental PRO para comercializar habitaciones individuales. Todo en la misma plataforma. De obra a ingresos recurrentes sin cambiar de sistema. Brillante.',
     stats: [
       { metric: 'Proyectos', value: '4' },
       { metric: 'Hab. vendidas', value: '95%' },
-      { metric: 'Time to market', value: '-40%' }
+      { metric: 'Time to market', value: '-40%' },
     ],
-    highlight: 'De obra a ingresos en un sistema'
-  }
+    highlight: 'De obra a ingresos en un sistema',
+  },
 ];
 
 export function TestimonialsSection() {
@@ -134,14 +140,18 @@ export function TestimonialsSection() {
             Lo que Dicen Nuestros Clientes
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Historias reales de gestoras, agencias y operadores de coliving que transformaron su negocio con INMOVA
+            Historias reales de gestoras, agencias y operadores de coliving que transformaron su
+            negocio con INMOVA
           </p>
         </div>
 
         {/* Testimonials Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {testimonials.map((testimonial) => (
-            <Card key={testimonial.id} className="group hover:shadow-2xl transition-all duration-300 border-2 hover:border-indigo-300 relative">
+            <Card
+              key={testimonial.id}
+              className="group hover:shadow-2xl transition-all duration-300 border-2 hover:border-indigo-300 relative"
+            >
               {/* Badge de Vertical */}
               <div className="absolute -top-3 right-4">
                 <Badge className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold shadow-lg">

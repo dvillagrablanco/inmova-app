@@ -61,14 +61,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `${results.filter(r => r.success).length}/${results.length} facturas creadas en Alegra`,
+      message: `${results.filter((r) => r.success).length}/${results.length} facturas creadas en Alegra`,
       results,
     });
   } catch (error) {
     logger.error('Error creating invoices in Alegra:', error);
-    return NextResponse.json(
-      { error: 'Error al crear facturas en Alegra' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear facturas en Alegra' }, { status: 500 });
   }
 }

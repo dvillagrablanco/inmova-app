@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
       revenue: number;
       bookings: number;
     }> = [];
-    
+
     for (let i = 11; i >= 0; i--) {
       const monthDate = subMonths(new Date(), i);
       const monthStart = startOfMonth(monthDate);

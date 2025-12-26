@@ -83,10 +83,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(plans);
   } catch (error) {
     logger.error('Error fetching decarbonization plans:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener planes' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener planes' }, { status: 500 });
   }
 }
 
@@ -98,20 +95,17 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    
+
     // TODO: Implementar creación real en base de datos
-    
+
     logger.info('Creating new decarbonization plan:', body);
 
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Plan de descarbonización creado' 
+    return NextResponse.json({
+      success: true,
+      message: 'Plan de descarbonización creado',
     });
   } catch (error) {
     logger.error('Error creating decarbonization plan:', error);
-    return NextResponse.json(
-      { error: 'Error al crear plan' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear plan' }, { status: 500 });
   }
 }

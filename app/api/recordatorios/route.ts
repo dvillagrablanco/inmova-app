@@ -23,9 +23,9 @@ export async function GET(req: NextRequest) {
       where: {
         companyId: user.companyId,
         ...(tipo && { tipo: tipo as any }),
-        ...(activo !== null && { activo: activo === 'true' })
+        ...(activo !== null && { activo: activo === 'true' }),
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
 
     return NextResponse.json(reminders);
@@ -66,8 +66,8 @@ export async function POST(req: NextRequest) {
         mensajePlantilla: body.mensajePlantilla,
         variables: body.variables || [],
         creadoPor: user.id,
-        activo: true
-      }
+        activo: true,
+      },
     });
 
     return NextResponse.json(reminder, { status: 201 });
@@ -90,7 +90,7 @@ export async function PATCH(req: NextRequest) {
 
     const reminder = await prisma.automaticReminder.update({
       where: { id },
-      data
+      data,
     });
 
     return NextResponse.json(reminder);

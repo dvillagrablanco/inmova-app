@@ -41,9 +41,7 @@ export function ProgressIndicator({ steps, currentStep, className }: ProgressInd
             {step.status === 'in_progress' && (
               <Loader2 className="h-5 w-5 text-primary animate-spin" />
             )}
-            {step.status === 'completed' && (
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
-            )}
+            {step.status === 'completed' && <CheckCircle2 className="h-5 w-5 text-green-600" />}
             {step.status === 'error' && <XCircle className="h-5 w-5 text-red-600" />}
             <span
               className={cn(

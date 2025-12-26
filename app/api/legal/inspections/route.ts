@@ -44,10 +44,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(inspections);
   } catch (error) {
     logger.error('Error fetching inspections:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener inspecciones' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener inspecciones' }, { status: 500 });
   }
 }
 
@@ -87,9 +84,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(inspection, { status: 201 });
   } catch (error) {
     logger.error('Error creating inspection:', error);
-    return NextResponse.json(
-      { error: 'Error al crear inspección' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear inspección' }, { status: 500 });
   }
 }

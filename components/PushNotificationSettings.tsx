@@ -1,14 +1,8 @@
-"use client";
+'use client';
 
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
@@ -16,14 +10,8 @@ import { Bell, BellOff, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export function PushNotificationSettings() {
-  const {
-    isSupported,
-    isSubscribed,
-    isLoading,
-    permission,
-    subscribe,
-    unsubscribe,
-  } = usePushNotifications();
+  const { isSupported, isSubscribed, isLoading, permission, subscribe, unsubscribe } =
+    usePushNotifications();
 
   const handleToggle = async (checked: boolean) => {
     if (checked) {
@@ -49,7 +37,8 @@ export function PushNotificationSettings() {
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Tu navegador no soporta notificaciones push. Considera usar Chrome, Firefox, Edge o Safari.
+              Tu navegador no soporta notificaciones push. Considera usar Chrome, Firefox, Edge o
+              Safari.
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -158,15 +147,15 @@ export function PushNotificationSettings() {
               const response = await fetch('/api/push/send', {
                 method: 'POST',
                 headers: {
-                  'Content-Type': 'application/json'
+                  'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                   userIds: ['current'], // Se puede implementar para enviar solo al usuario actual
                   title: '👋 Notificación de prueba',
                   body: 'Esta es una notificación de prueba de INMOVA',
                   url: '/dashboard',
-                  tag: 'test'
-                })
+                  tag: 'test',
+                }),
               });
 
               if (response.ok) {

@@ -59,8 +59,15 @@ export function generateB2BInvoicePDF(data: B2BInvoiceData): jsPDF {
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 100, 100);
   doc.text(`Factura Nº: ${data.numeroFactura}`, pageWidth - margin, 25, { align: 'right' });
-  doc.text(`Fecha: ${data.fechaEmision.toLocaleDateString('es-ES')}`, pageWidth - margin, 32, { align: 'right' });
-  doc.text(`Vencimiento: ${data.fechaVencimiento.toLocaleDateString('es-ES')}`, pageWidth - margin, 39, { align: 'right' });
+  doc.text(`Fecha: ${data.fechaEmision.toLocaleDateString('es-ES')}`, pageWidth - margin, 32, {
+    align: 'right',
+  });
+  doc.text(
+    `Vencimiento: ${data.fechaVencimiento.toLocaleDateString('es-ES')}`,
+    pageWidth - margin,
+    39,
+    { align: 'right' }
+  );
   doc.text(`Periodo: ${data.periodo}`, pageWidth - margin, 46, { align: 'right' });
 
   // Línea separadora
@@ -75,30 +82,30 @@ export function generateB2BInvoicePDF(data: B2BInvoiceData): jsPDF {
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(33, 37, 41);
   doc.text('DATOS DEL EMISOR', margin, currentY);
-  
+
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(60, 60, 60);
   currentY += 7;
   doc.text(data.emisor.nombre, margin, currentY);
   currentY += 5;
-  
+
   if (data.emisor.cif) {
     doc.text(`CIF: ${data.emisor.cif}`, margin, currentY);
     currentY += 5;
   }
-  
+
   if (data.emisor.direccion) {
     const direccionLines = doc.splitTextToSize(data.emisor.direccion, 80);
     doc.text(direccionLines, margin, currentY);
     currentY += direccionLines.length * 5;
   }
-  
+
   if (data.emisor.telefono) {
     doc.text(`Tel: ${data.emisor.telefono}`, margin, currentY);
     currentY += 5;
   }
-  
+
   if (data.emisor.email) {
     doc.text(`Email: ${data.emisor.email}`, margin, currentY);
   }
@@ -106,42 +113,42 @@ export function generateB2BInvoicePDF(data: B2BInvoiceData): jsPDF {
   // Cliente (derecha)
   currentY = 62;
   const clientX = pageWidth / 2 + 10;
-  
+
   doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(33, 37, 41);
   doc.text('DATOS DEL CLIENTE', clientX, currentY);
-  
+
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(60, 60, 60);
   currentY += 7;
   doc.text(data.cliente.nombre, clientX, currentY);
   currentY += 5;
-  
+
   if (data.cliente.cif) {
     doc.text(`CIF: ${data.cliente.cif}`, clientX, currentY);
     currentY += 5;
   }
-  
+
   if (data.cliente.direccion) {
     const direccionLines = doc.splitTextToSize(data.cliente.direccion, 80);
     doc.text(direccionLines, clientX, currentY);
     currentY += direccionLines.length * 5;
   }
-  
+
   if (data.cliente.telefono) {
     doc.text(`Tel: ${data.cliente.telefono}`, clientX, currentY);
     currentY += 5;
   }
-  
+
   if (data.cliente.email) {
     doc.text(`Email: ${data.cliente.email}`, clientX, currentY);
   }
 
   // ==== TABLA DE CONCEPTOS ====
   const tableStartY = 125;
-  
+
   const tableData = data.conceptos.map((concepto) => [
     concepto.descripcion,
     concepto.cantidad.toString(),
@@ -186,22 +193,22 @@ export function generateB2BInvoicePDF(data: B2BInvoiceData): jsPDF {
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(60, 60, 60);
-  
+
   // Subtotal
   doc.text('Subtotal:', totalsX, totalsY);
   doc.text(`€${data.subtotal.toFixed(2)}`, pageWidth - margin, totalsY, { align: 'right' });
   totalsY += 7;
-  
+
   // IVA
   doc.text('IVA:', totalsX, totalsY);
   doc.text(`€${data.totalIva.toFixed(2)}`, pageWidth - margin, totalsY, { align: 'right' });
   totalsY += 7;
-  
+
   // Línea separadora
   doc.setDrawColor(200, 200, 200);
   doc.line(totalsX, totalsY, pageWidth - margin, totalsY);
   totalsY += 7;
-  
+
   // Total
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
@@ -211,27 +218,27 @@ export function generateB2BInvoicePDF(data: B2BInvoiceData): jsPDF {
 
   // ==== NOTAS Y TÉRMINOS DE PAGO ====
   totalsY += 15;
-  
+
   if (data.terminosPago && totalsY < pageHeight - 40) {
     doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(60, 60, 60);
     doc.text('Términos de Pago:', margin, totalsY);
-    
+
     doc.setFont('helvetica', 'normal');
     totalsY += 5;
     const terminosLines = doc.splitTextToSize(data.terminosPago, pageWidth - 2 * margin);
     doc.text(terminosLines, margin, totalsY);
     totalsY += terminosLines.length * 4;
   }
-  
+
   if (data.notas && totalsY < pageHeight - 30) {
     totalsY += 5;
     doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(60, 60, 60);
     doc.text('Notas:', margin, totalsY);
-    
+
     doc.setFont('helvetica', 'normal');
     totalsY += 5;
     const notasLines = doc.splitTextToSize(data.notas, pageWidth - 2 * margin);

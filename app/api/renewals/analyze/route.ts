@@ -30,10 +30,7 @@ export async function GET(req: NextRequest) {
     const contractId = searchParams.get('contractId');
 
     if (!contractId) {
-      return NextResponse.json(
-        { error: 'contractId es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'contractId es requerido' }, { status: 400 });
     }
 
     const analysis = await analyzeContractForRenewal(contractId);
@@ -57,10 +54,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     if (!body.companyId) {
-      return NextResponse.json(
-        { error: 'companyId es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'companyId es requerido' }, { status: 400 });
     }
 
     const recommendations = await generateRenewalRecommendations(body.companyId);

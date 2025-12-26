@@ -6,10 +6,7 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 // POST /api/portal-proveedor/work-orders/[id]/accept - Aceptar orden de trabajo
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Verificar autenticación
     const auth = await requireProviderAuth(req);
@@ -28,10 +25,7 @@ export async function POST(
     });
 
     if (!workOrder) {
-      return NextResponse.json(
-        { error: 'Orden de trabajo no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Orden de trabajo no encontrada' }, { status: 404 });
     }
 
     if (workOrder.providerId !== auth.provider.id) {
@@ -62,9 +56,7 @@ export async function POST(
       },
     });
 
-    logger.info(
-      `Orden ${workOrderId} aceptada por proveedor ${auth.provider.nombre}`
-    );
+    logger.info(`Orden ${workOrderId} aceptada por proveedor ${auth.provider.nombre}`);
 
     // TODO: Enviar notificación al gestor que asignó la orden
 
@@ -75,9 +67,6 @@ export async function POST(
     });
   } catch (error) {
     logger.error('Error al aceptar orden de trabajo:', error);
-    return NextResponse.json(
-      { error: 'Error al aceptar orden de trabajo' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al aceptar orden de trabajo' }, { status: 500 });
   }
 }

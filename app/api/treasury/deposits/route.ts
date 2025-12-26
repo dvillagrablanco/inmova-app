@@ -10,7 +10,6 @@ import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-
 /**
  * @swagger
  * /api/treasury/deposits:
@@ -91,10 +90,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(deposit);
     }
 
-    return NextResponse.json(
-      { error: 'Acción no válida' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Acción no válida' }, { status: 400 });
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message || 'Error al procesar fianza' },

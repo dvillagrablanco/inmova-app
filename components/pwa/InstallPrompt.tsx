@@ -96,12 +96,7 @@ export function InstallPrompt() {
                 Instala la aplicación para un acceso rápido y experiencia completa
               </CardDescription>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 -mt-1"
-              onClick={handleDismiss}
-            >
+            <Button variant="ghost" size="icon" className="h-6 w-6 -mt-1" onClick={handleDismiss}>
               <X className="h-4 w-4" />
             </Button>
           </div>

@@ -22,19 +22,13 @@ export async function GET() {
     });
 
     if (!tenant) {
-      return NextResponse.json(
-        { error: 'Inquilino no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Inquilino no encontrado' }, { status: 404 });
     }
 
     return NextResponse.json(tenant);
   } catch (error) {
     logger.error('Error fetching tenant profile:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener perfil' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener perfil' }, { status: 500 });
   }
 }
 
@@ -54,10 +48,7 @@ export async function PATCH(request: Request) {
     });
 
     if (!tenant) {
-      return NextResponse.json(
-        { error: 'Inquilino no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Inquilino no encontrado' }, { status: 404 });
     }
 
     const body = await request.json();
@@ -89,9 +80,6 @@ export async function PATCH(request: Request) {
     return NextResponse.json(updatedTenant);
   } catch (error) {
     logger.error('Error updating tenant profile:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar perfil' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar perfil' }, { status: 500 });
   }
 }

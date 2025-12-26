@@ -16,10 +16,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const userId = (session.user as any).id;
@@ -57,9 +54,6 @@ export async function GET(request: NextRequest) {
     logError(error instanceof Error ? error : new Error(String(error)), {
       context: 'GET /api/operador/work-orders/history',
     });
-    return NextResponse.json(
-      { error: 'Error al obtener historial' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener historial' }, { status: 500 });
   }
 }

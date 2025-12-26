@@ -10,10 +10,7 @@ export const dynamic = 'force-dynamic';
  * GET /api/scheduled-reports/[id]/history
  * Obtiene el historial de envíos de un reporte programado
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -29,10 +26,7 @@ export async function GET(
     });
 
     if (!report) {
-      return NextResponse.json(
-        { error: 'Reporte no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Reporte no encontrado' }, { status: 404 });
     }
 
     if (report.companyId !== session?.user?.companyId && session.user.role !== 'super_admin') {
@@ -56,9 +50,6 @@ export async function GET(
     return NextResponse.json(history);
   } catch (error) {
     logger.error('Error al obtener historial:', error);
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }

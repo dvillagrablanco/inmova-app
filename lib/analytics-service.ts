@@ -1,7 +1,7 @@
 /**
  * ANALYTICS SERVICE
  * Servicio para tracking de eventos con Google Analytics 4
- * 
+ *
  * Funcionalidades:
  * - Tracking de eventos de onboarding
  * - Tracking de conversiones
@@ -17,10 +17,7 @@
  * Envía un evento a Google Analytics 4 (client-side)
  * Usa el objeto window.gtag si está disponible
  */
-export function trackEvent(
-  eventName: string,
-  eventParams?: Record<string, any>
-) {
+export function trackEvent(eventName: string, eventParams?: Record<string, any>) {
   if (typeof window !== 'undefined' && (window as any).gtag) {
     (window as any).gtag('event', eventName, eventParams);
     console.log('[Analytics] Event tracked:', eventName, eventParams);
@@ -46,11 +43,7 @@ export function trackPageView(url: string, title?: string) {
 /**
  * Usuario inicia onboarding
  */
-export function trackOnboardingStart(
-  userId: string,
-  vertical?: string,
-  experienceLevel?: string
-) {
+export function trackOnboardingStart(userId: string, vertical?: string, experienceLevel?: string) {
   trackEvent('onboarding_start', {
     user_id: userId,
     vertical,
@@ -61,11 +54,7 @@ export function trackOnboardingStart(
 /**
  * Usuario completa una tarea de onboarding
  */
-export function trackOnboardingTaskComplete(
-  taskId: string,
-  taskTitle: string,
-  progress: number
-) {
+export function trackOnboardingTaskComplete(taskId: string, taskTitle: string, progress: number) {
   trackEvent('onboarding_task_complete', {
     task_id: taskId,
     task_title: taskTitle,
@@ -76,11 +65,7 @@ export function trackOnboardingTaskComplete(
 /**
  * Usuario salta una tarea de onboarding
  */
-export function trackOnboardingTaskSkip(
-  taskId: string,
-  taskTitle: string,
-  progress: number
-) {
+export function trackOnboardingTaskSkip(taskId: string, taskTitle: string, progress: number) {
   trackEvent('onboarding_task_skip', {
     task_id: taskId,
     task_title: taskTitle,
@@ -133,10 +118,7 @@ export function trackChatbotOpen() {
 /**
  * Usuario envía un mensaje al chatbot
  */
-export function trackChatbotMessage(
-  messageLength: number,
-  hasResponse: boolean
-) {
+export function trackChatbotMessage(messageLength: number, hasResponse: boolean) {
   trackEvent('chatbot_message', {
     message_length: messageLength,
     has_response: hasResponse,
@@ -160,10 +142,7 @@ export function trackChatbotActionClick(actionLabel: string, actionRoute: string
 /**
  * Usuario recibe una notificación
  */
-export function trackNotificationReceived(
-  notificationType: string,
-  notificationTitle: string
-) {
+export function trackNotificationReceived(notificationType: string, notificationTitle: string) {
   trackEvent('notification_received', {
     notification_type: notificationType,
     notification_title: notificationTitle,
@@ -192,10 +171,7 @@ export function trackNotificationClick(
 /**
  * Usuario ve una celebración
  */
-export function trackCelebrationShown(
-  celebrationType: string,
-  celebrationTitle: string
-) {
+export function trackCelebrationShown(celebrationType: string, celebrationTitle: string) {
   trackEvent('celebration_shown', {
     celebration_type: celebrationType,
     celebration_title: celebrationTitle,
@@ -283,7 +259,7 @@ export function trackTimeOnPage(pageName: string) {
 /**
  * Envía un evento a Google Analytics 4 desde el servidor
  * Usa el Measurement Protocol v2
- * 
+ *
  * Requiere:
  * - NEXT_PUBLIC_GA_MEASUREMENT_ID (en .env)
  * - GA4_API_SECRET (en .env)

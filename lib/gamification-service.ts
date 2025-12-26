@@ -301,9 +301,7 @@ export async function addPoints(
 /**
  * Verifica y otorga badges automáticamente basados en logros
  */
-export async function checkAndAwardBadges(
-  tenantId: string
-): Promise<BadgeEarned[]> {
+export async function checkAndAwardBadges(tenantId: string): Promise<BadgeEarned[]> {
   const newBadges: BadgeEarned[] = [];
 
   // Obtener datos del inquilino
@@ -384,12 +382,7 @@ export async function checkAndAwardBadges(
       });
 
       // Agregar puntos bonus por conseguir el badge
-      await addPoints(
-        tenantId,
-        'badge_earned',
-        50,
-        `Conseguiste el badge: ${badgeDef.nombre}`
-      );
+      await addPoints(tenantId, 'badge_earned', 50, `Conseguiste el badge: ${badgeDef.nombre}`);
     }
   }
 
@@ -399,9 +392,7 @@ export async function checkAndAwardBadges(
 /**
  * Obtiene el catálogo de rewards disponibles
  */
-export async function getRewardCatalog(
-  companyId: string
-): Promise<RewardItem[]> {
+export async function getRewardCatalog(companyId: string): Promise<RewardItem[]> {
   // Por ahora retornar rewards predefinidos
   // En producción, esto vendría de la DB
   return DEFAULT_REWARDS.map((reward, index) => ({
@@ -468,9 +459,7 @@ function getNextLevel(
   nivelActual: number,
   experienciaActual: number
 ): { nivel: number; experienciaRequerida: number; experienciaFaltante: number } {
-  const nextLevelConfig = NIVEL_CONFIG.find(
-    (c) => c.nivel === nivelActual + 1
-  );
+  const nextLevelConfig = NIVEL_CONFIG.find((c) => c.nivel === nivelActual + 1);
 
   if (!nextLevelConfig) {
     return {
@@ -483,8 +472,7 @@ function getNextLevel(
   return {
     nivel: nextLevelConfig.nivel,
     experienciaRequerida: nextLevelConfig.experienciaRequerida,
-    experienciaFaltante:
-      nextLevelConfig.experienciaRequerida - experienciaActual,
+    experienciaFaltante: nextLevelConfig.experienciaRequerida - experienciaActual,
   };
 }
 
@@ -529,37 +517,18 @@ export async function calculateRanking(tenantId: string): Promise<{
 /**
  * Eventos automáticos de puntos
  */
-export async function onPaymentCompleted(
-  tenantId: string,
-  isOnTime: boolean,
-  isEarly: boolean
-) {
+export async function onPaymentCompleted(tenantId: string, isOnTime: boolean, isEarly: boolean) {
   if (isOnTime) {
-    await addPoints(
-      tenantId,
-      'pago_puntual',
-      100,
-      'Pago de renta puntual'
-    );
+    await addPoints(tenantId, 'pago_puntual', 100, 'Pago de renta puntual');
   }
 
   if (isEarly) {
-    await addPoints(
-      tenantId,
-      'pago_anticipado',
-      50,
-      'Pago anticipado (>5 días)'
-    );
+    await addPoints(tenantId, 'pago_anticipado', 50, 'Pago anticipado (>5 días)');
   }
 }
 
 export async function onCleaningCompleted(tenantId: string) {
-  await addPoints(
-    tenantId,
-    'limpieza',
-    25,
-    'Turno de limpieza completado'
-  );
+  await addPoints(tenantId, 'limpieza', 25, 'Turno de limpieza completado');
 }
 
 export async function onRecyclingDone(tenantId: string) {

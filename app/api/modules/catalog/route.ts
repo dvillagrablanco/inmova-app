@@ -16,13 +16,10 @@ export async function GET(req: NextRequest) {
     // Devolver catálogo completo de módulos
     return NextResponse.json({
       modulos: MODULOS_CATALOGO,
-      packs: SUBSCRIPTION_PACKS
+      packs: SUBSCRIPTION_PACKS,
     });
   } catch (error: any) {
     logger.error('Error al obtener catálogo de módulos:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener catálogo' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener catálogo' }, { status: 500 });
   }
 }

@@ -12,17 +12,14 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authTenantOptions);
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const tenantId = (session.user as any).id;
 
     // Buscar o crear el registro de onboarding
     let onboarding = await prisma.tenantOnboarding.findUnique({
-      where: { tenantId }
+      where: { tenantId },
     });
 
     if (!onboarding) {
@@ -30,21 +27,18 @@ export async function GET(request: NextRequest) {
       onboarding = await prisma.tenantOnboarding.create({
         data: {
           tenantId,
-          steps: []
-        }
+          steps: [],
+        },
       });
     }
 
     return NextResponse.json(onboarding);
   } catch (error: any) {
     logger.error('Error al obtener onboarding', {
-      error: error.message
+      error: error.message,
     });
-    
-    return NextResponse.json(
-      { error: 'Error al obtener el onboarding' },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ error: 'Error al obtener el onboarding' }, { status: 500 });
   }
 }
 
@@ -54,10 +48,7 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authTenantOptions);
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const tenantId = (session.user as any).id;
@@ -68,31 +59,28 @@ export async function POST(request: NextRequest) {
       where: { tenantId },
       update: {
         completed: body.completed || true,
-        completedAt: new Date()
+        completedAt: new Date(),
       },
       create: {
         tenantId,
         completed: body.completed || true,
         completedAt: new Date(),
-        steps: []
-      }
+        steps: [],
+      },
     });
 
     logger.info('Onboarding completado', {
       tenantId,
-      onboardingId: onboarding.id
+      onboardingId: onboarding.id,
     });
 
     return NextResponse.json(onboarding);
   } catch (error: any) {
     logger.error('Error al completar onboarding', {
-      error: error.message
+      error: error.message,
     });
-    
-    return NextResponse.json(
-      { error: 'Error al completar el onboarding' },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ error: 'Error al completar el onboarding' }, { status: 500 });
   }
 }
 
@@ -102,10 +90,7 @@ export async function PATCH(request: NextRequest) {
     const session = await getServerSession(authTenantOptions);
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const tenantId = (session.user as any).id;
@@ -113,34 +98,28 @@ export async function PATCH(request: NextRequest) {
     const { currentStep } = body;
 
     if (typeof currentStep !== 'number') {
-      return NextResponse.json(
-        { error: 'currentStep debe ser un número' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'currentStep debe ser un número' }, { status: 400 });
     }
 
     // Actualizar el paso actual
     const onboarding = await prisma.tenantOnboarding.upsert({
       where: { tenantId },
       update: {
-        currentStep
+        currentStep,
       },
       create: {
         tenantId,
         currentStep,
-        steps: []
-      }
+        steps: [],
+      },
     });
 
     return NextResponse.json(onboarding);
   } catch (error: any) {
     logger.error('Error al actualizar onboarding', {
-      error: error.message
+      error: error.message,
     });
-    
-    return NextResponse.json(
-      { error: 'Error al actualizar el onboarding' },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ error: 'Error al actualizar el onboarding' }, { status: 500 });
   }
 }

@@ -1,8 +1,8 @@
 /**
  * API ENDPOINT: Estadísticas del Sistema de Asignación
- * 
+ *
  * GET /api/providers/stats
- * 
+ *
  * Obtiene estadísticas generales del sistema de asignación de proveedores.
  */
 
@@ -29,7 +29,9 @@ export async function GET(req: NextRequest) {
       stats,
     });
   } catch (error: any) {
-    logError(new Error(error.message || 'Error obteniendo estadísticas'), { context: 'GET /api/providers/stats' });
+    logError(new Error(error.message || 'Error obteniendo estadísticas'), {
+      context: 'GET /api/providers/stats',
+    });
 
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });

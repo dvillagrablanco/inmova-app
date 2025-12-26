@@ -38,7 +38,7 @@ class RedisCacheService {
    */
   private async initialize(): Promise<void> {
     this.redisAvailable = await isRedisAvailable();
-    
+
     if (!this.redisAvailable) {
       logger.warn('⚠️  Redis not available - using in-memory cache fallback');
       this.startMemoryCleanup();
@@ -92,12 +92,12 @@ class RedisCacheService {
     if (this.redisAvailable && redis) {
       try {
         const value = await redis.get(fullKey);
-        
+
         if (value) {
           logger.info(`✅ Redis cache hit for key: ${key}`);
           return JSON.parse(value) as T;
         }
-        
+
         logger.info(`⚠️  Redis cache miss for key: ${key}`);
         return undefined;
       } catch (error) {
@@ -137,7 +137,7 @@ class RedisCacheService {
       try {
         const serialized = JSON.stringify(data);
         const ttlSeconds = Math.ceil(ttl / 1000);
-        
+
         await redis.setex(fullKey, ttlSeconds, serialized);
         logger.info(`✅ Redis cache set for key: ${key} (TTL: ${ttl}ms)`);
         return;
@@ -234,7 +234,9 @@ class RedisCacheService {
     }
 
     if (memInvalidated > 0) {
-      logger.info(`Memory cache invalidated ${memInvalidated} entries matching pattern: ${pattern}`);
+      logger.info(
+        `Memory cache invalidated ${memInvalidated} entries matching pattern: ${pattern}`
+      );
     }
 
     return invalidated + memInvalidated;
@@ -282,9 +284,9 @@ class RedisCacheService {
   /**
    * Obtiene estadísticas del caché
    */
-  async getStats(): Promise<{ 
-    redis: { available: boolean; size?: number }; 
-    memory: { size: number; keys: string[] } 
+  async getStats(): Promise<{
+    redis: { available: boolean; size?: number };
+    memory: { size: number; keys: string[] };
   }> {
     const stats = {
       redis: {

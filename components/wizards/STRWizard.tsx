@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useWizard } from '@/lib/hooks/useWizard';
@@ -8,14 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { 
-  Link as LinkIcon, 
-  Check, 
-  AlertCircle, 
-  Home,
-  TrendingUp,
-  Loader2
-} from 'lucide-react';
+import { Link as LinkIcon, Check, AlertCircle, Home, TrendingUp, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 
@@ -25,7 +18,7 @@ interface STRWizardProps {
 
 /**
  * STR WIZARD - Wizard de configuración STR en 4 pasos
- * 
+ *
  * Pasos:
  * 1. Selección de Canales (Airbnb, Booking, etc.)
  * 2. Conexión OAuth (simulado)
@@ -210,7 +203,8 @@ export function STRWizard({ onComplete }: STRWizardProps) {
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
               <p className="text-sm text-blue-900">
-                <strong>Tip:</strong> Puedes conectar múltiples canales para centralizar toda tu gestión STR.
+                <strong>Tip:</strong> Puedes conectar múltiples canales para centralizar toda tu
+                gestión STR.
               </p>
             </div>
           </div>
@@ -264,9 +258,7 @@ export function STRWizard({ onComplete }: STRWizardProps) {
                           )}
                         </Button>
                       )}
-                      {isConnected && (
-                        <Check className="h-5 w-5 text-green-600" />
-                      )}
+                      {isConnected && <Check className="h-5 w-5 text-green-600" />}
                     </CardContent>
                   </Card>
                 );
@@ -277,8 +269,8 @@ export function STRWizard({ onComplete }: STRWizardProps) {
               <div className="flex items-start gap-2">
                 <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
                 <p className="text-sm text-yellow-900">
-                  <strong>Nota:</strong> Esta es una demostración. En producción, se abrirá una ventana de OAuth
-                  real para autorizar el acceso.
+                  <strong>Nota:</strong> Esta es una demostración. En producción, se abrirá una
+                  ventana de OAuth real para autorizar el acceso.
                 </p>
               </div>
             </div>

@@ -18,11 +18,11 @@ export function useCopyToClipboard(): UseCopyToClipboardReturn {
       const success = await copyToClipboard(text);
       setIsCopied(success);
       setError(success ? null : new Error('Failed to copy'));
-      
+
       if (success) {
         setTimeout(() => setIsCopied(false), 2000);
       }
-      
+
       return success;
     } catch (err) {
       setError(err as Error);

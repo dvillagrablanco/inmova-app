@@ -121,23 +121,23 @@ export default function AcceptInvitationPage() {
   if (error && !invitation) {
     return (
       <AuthenticatedLayout>
-            <div className="max-w-7xl mx-auto">
-              <Card className="max-w-md w-full">
-                <CardContent className="pt-6">
-                  <div className="text-center">
-                    <div className="bg-red-100 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                      <AlertCircle className="h-8 w-8 text-red-600" />
-                    </div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Invitación No Válida</h2>
-                    <p className="text-gray-600 mb-6">{error}</p>
-                    <Link href="/">
-                      <Button>Volver al Inicio</Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </AuthenticatedLayout>
+        <div className="max-w-7xl mx-auto">
+          <Card className="max-w-md w-full">
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <div className="bg-red-100 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                  <AlertCircle className="h-8 w-8 text-red-600" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Invitación No Válida</h2>
+                <p className="text-gray-600 mb-6">{error}</p>
+                <Link href="/">
+                  <Button>Volver al Inicio</Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </AuthenticatedLayout>
     );
   }
 

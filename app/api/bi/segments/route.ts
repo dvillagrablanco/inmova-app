@@ -26,10 +26,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(segments);
   } catch (error) {
     logger.error('Error fetching segments:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener segmentos' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener segmentos' }, { status: 500 });
   }
 }
 
@@ -45,21 +42,19 @@ export async function POST(req: NextRequest) {
 
     // Si es una petición para generar segmentos automáticos
     if (body.action === 'generate') {
-      const behaviorSegments = await segmentTenantsByBehavior(
-        session?.user?.companyId
-      );
+      const behaviorSegments = await segmentTenantsByBehavior(session?.user?.companyId);
 
       // Crear o actualizar segmentos
       const segments: any[] = [];
       for (const [segmentName, tenants] of Object.entries(behaviorSegments)) {
-        const tenantIds = (tenants as any[]).map(t => t.id);
+        const tenantIds = (tenants as any[]).map((t) => t.id);
         const avgMetrics = {
           onTimeRate:
             (tenants as any[]).reduce((sum, t) => sum + t.onTimeRate, 0) /
-            (tenants as any[]).length || 0,
+              (tenants as any[]).length || 0,
           lateRate:
             (tenants as any[]).reduce((sum, t) => sum + t.lateRate, 0) /
-            (tenants as any[]).length || 0,
+              (tenants as any[]).length || 0,
         };
 
         const segment = await prisma.tenantSegment.upsert({
@@ -107,9 +102,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(segment, { status: 201 });
   } catch (error) {
     logger.error('Error creating segment:', error);
-    return NextResponse.json(
-      { error: 'Error al crear segmento' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear segmento' }, { status: 500 });
   }
 }

@@ -57,10 +57,7 @@ const MemoizedTableRow = memo(function MemoizedTableRow<T>({
     <TableRow
       key={id}
       onClick={() => onRowClick?.(item, index)}
-      className={cn(
-        onRowClick && 'cursor-pointer hover:bg-muted/50',
-        rowClassName
-      )}
+      className={cn(onRowClick && 'cursor-pointer hover:bg-muted/50', rowClassName)}
       tabIndex={onRowClick ? 0 : undefined}
       onKeyDown={
         onRowClick
@@ -107,11 +104,7 @@ export function DataTable<T extends { id?: string | number }>({
         <TableHeader>
           <TableRow>
             {columns.map((column) => (
-              <TableHead
-                key={column.key}
-                className={column.className}
-                scope="col"
-              >
+              <TableHead key={column.key} className={column.className} scope="col">
                 {column.header}
               </TableHead>
             ))}

@@ -83,7 +83,8 @@ export function ROICalculator() {
     const breakEvenMonths = totalInvestment / monthlyNetIncome;
 
     // Future Value con apreciación
-    const futureValue = data.purchasePrice * Math.pow(1 + (data.appreciationRate / 100), data.holdingPeriod);
+    const futureValue =
+      data.purchasePrice * Math.pow(1 + data.appreciationRate / 100, data.holdingPeriod);
 
     // Total Return después del período de tenencia
     const totalEquityGain = futureValue - data.purchasePrice;
@@ -106,7 +107,7 @@ export function ROICalculator() {
   };
 
   const updateData = (field: keyof ROIData, value: number) => {
-    setData(prev => ({ ...prev, [field]: value }));
+    setData((prev) => ({ ...prev, [field]: value }));
   };
 
   const getROIQuality = (roi: number): { label: string; color: string; icon: any } => {
@@ -125,9 +126,7 @@ export function ROICalculator() {
             <TrendingUp className="h-5 w-5" />
             Calculadora de ROI (Return on Investment)
           </CardTitle>
-          <CardDescription>
-            Analiza la rentabilidad de tu inversión inmobiliaria
-          </CardDescription>
+          <CardDescription>Analiza la rentabilidad de tu inversión inmobiliaria</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Inversión Inicial */}
@@ -371,9 +370,7 @@ export function ROICalculator() {
                     );
                   })()}
                 </div>
-                <div className="text-3xl font-bold text-indigo-600">
-                  {results.roi.toFixed(2)}%
-                </div>
+                <div className="text-3xl font-bold text-indigo-600">{results.roi.toFixed(2)}%</div>
                 <Progress value={Math.min(results.roi * 5, 100)} className="h-2 mt-2" />
               </div>
 
@@ -400,9 +397,7 @@ export function ROICalculator() {
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">Payback Period</div>
-                  <div className="text-lg font-bold">
-                    {results.paybackPeriod.toFixed(1)} años
-                  </div>
+                  <div className="text-lg font-bold">{results.paybackPeriod.toFixed(1)} años</div>
                 </div>
               </div>
             </CardContent>
@@ -480,17 +475,19 @@ export function ROICalculator() {
               <strong>ROI de {results.roi.toFixed(2)}%:</strong>{' '}
               {results.roi >= 15 && 'Excelente inversión con retornos muy por encima del mercado.'}
               {results.roi >= 10 && results.roi < 15 && 'Buena inversión con retornos sólidos.'}
-              {results.roi >= 5 && results.roi < 10 && 'Inversión aceptable, considera optimizar gastos.'}
+              {results.roi >= 5 &&
+                results.roi < 10 &&
+                'Inversión aceptable, considera optimizar gastos.'}
               {results.roi > 0 && results.roi < 5 && 'Retornos bajos, revisa tus números.'}
               {results.roi <= 0 && 'Esta inversión genera pérdidas, no es recomendable.'}
             </p>
             <p>
-              <strong>Break Even en {results.breakEvenMonths.toFixed(1)} meses:</strong>{' '}
-              Recuperarás tu inversión inicial en {(results.breakEvenMonths / 12).toFixed(1)} años.
+              <strong>Break Even en {results.breakEvenMonths.toFixed(1)} meses:</strong> Recuperarás
+              tu inversión inicial en {(results.breakEvenMonths / 12).toFixed(1)} años.
             </p>
             <p>
-              <strong>Cash Flow anual de €{results.annualNetIncome.toLocaleString()}:</strong>{' '}
-              Flujo de caja positivo mensual de €{(results.annualNetIncome / 12).toFixed(2)}.
+              <strong>Cash Flow anual de €{results.annualNetIncome.toLocaleString()}:</strong> Flujo
+              de caja positivo mensual de €{(results.annualNetIncome / 12).toFixed(2)}.
             </p>
           </CardContent>
         </Card>

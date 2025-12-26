@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
 /**
  * 🔔 NOTIFICATION CENTER
- * 
+ *
  * Centro de notificaciones in-app con:
  * - Badge con contador de no leídas
  * - Dropdown con lista de notificaciones
@@ -82,7 +82,7 @@ export default function NotificationCenter({ className = '' }: NotificationCente
       if (offset === 0) {
         setNotifications(data.notifications || []);
       } else {
-        setNotifications(prev => [...prev, ...(data.notifications || [])]);
+        setNotifications((prev) => [...prev, ...(data.notifications || [])]);
       }
 
       setUnreadCount(data.unreadCount || 0);
@@ -115,10 +115,10 @@ export default function NotificationCenter({ className = '' }: NotificationCente
       });
 
       // Update local state
-      setNotifications(prev =>
-        prev.map(n => (n.id === notificationId ? { ...n, isRead: true } : n))
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notificationId ? { ...n, isRead: true } : n))
       );
-      setUnreadCount(prev => Math.max(0, prev - 1));
+      setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (error) {
       console.error('Error marking notification as read:', error);
     }
@@ -134,7 +134,7 @@ export default function NotificationCenter({ className = '' }: NotificationCente
       });
 
       // Update local state
-      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
       setUnreadCount(0);
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
@@ -232,7 +232,7 @@ export default function NotificationCenter({ className = '' }: NotificationCente
                 </div>
               ) : (
                 <div className="divide-y divide-gray-100">
-                  {notifications.map(notification => (
+                  {notifications.map((notification) => (
                     <motion.div
                       key={notification.id}
                       initial={{ opacity: 0 }}

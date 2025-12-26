@@ -342,7 +342,7 @@ export async function getMonthlyFinancialSummary(companyId: string, month: Date)
       _sum: { monto: true },
       _count: true,
     }),
-    
+
     // Gastos del mes
     prisma.expense.aggregate({
       where: {
@@ -355,7 +355,7 @@ export async function getMonthlyFinancialSummary(companyId: string, month: Date)
       _sum: { monto: true },
       _count: true,
     }),
-    
+
     // Pagos pendientes
     prisma.payment.aggregate({
       where: {
@@ -415,7 +415,7 @@ export async function paginatedQuery<T>(
   options: PaginationOptions = {}
 ): Promise<PaginatedResult<T>> {
   const take = options.take || 20;
-  
+
   const data = await query({
     cursor: options.cursor ? { id: options.cursor } : undefined,
     take: take + 1, // Fetch one extra to check if there's more
@@ -423,9 +423,10 @@ export async function paginatedQuery<T>(
 
   const hasMore = data.length > take;
   const paginatedData = hasMore ? data.slice(0, -1) : data;
-  const nextCursor = hasMore && paginatedData.length > 0 
-    ? (paginatedData[paginatedData.length - 1] as any).id 
-    : undefined;
+  const nextCursor =
+    hasMore && paginatedData.length > 0
+      ? (paginatedData[paginatedData.length - 1] as any).id
+      : undefined;
 
   return {
     data: paginatedData,

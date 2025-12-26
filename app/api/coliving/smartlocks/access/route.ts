@@ -14,10 +14,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const tenantId = searchParams.get('tenantId');
     if (!tenantId) {
-      return NextResponse.json(
-        { error: 'tenantId requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'tenantId requerido' }, { status: 400 });
     }
     const result = await conciergeService.getTenantLockAccess(tenantId);
     if (!result.success) {
@@ -26,10 +23,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(result.accesos);
   } catch (error) {
     logger.error('Error en GET /api/coliving/smartlocks/access:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener accesos' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener accesos' }, { status: 500 });
   }
 }
 export async function POST(request: NextRequest) {
@@ -50,10 +44,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result.access, { status: 201 });
   } catch (error) {
     logger.error('Error en POST /api/coliving/smartlocks/access:', error);
-    return NextResponse.json(
-      { error: 'Error al crear acceso' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear acceso' }, { status: 500 });
   }
 }
 export async function DELETE(request: NextRequest) {
@@ -65,10 +56,7 @@ export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const accessId = searchParams.get('accessId');
     if (!accessId) {
-      return NextResponse.json(
-        { error: 'accessId requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'accessId requerido' }, { status: 400 });
     }
     const result = await conciergeService.revokeLockAccess(accessId);
     if (!result.success) {
@@ -77,9 +65,6 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json(result.access);
   } catch (error) {
     logger.error('Error en DELETE /api/coliving/smartlocks/access:', error);
-    return NextResponse.json(
-      { error: 'Error al revocar acceso' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al revocar acceso' }, { status: 500 });
   }
 }

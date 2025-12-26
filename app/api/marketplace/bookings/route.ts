@@ -16,17 +16,14 @@ export async function POST(request: NextRequest) {
     // TODO: Implementar creación real de reserva en base de datos
     logger.info(`Creating booking for service ${serviceId}`);
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       message: 'Reserva creada correctamente',
       bookingId: `bk_${Date.now()}`,
     });
   } catch (error) {
     logger.error('Error creating marketplace booking:', error);
-    return NextResponse.json(
-      { error: 'Error al crear reserva' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear reserva' }, { status: 500 });
   }
 }
 
@@ -62,9 +59,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(bookings);
   } catch (error) {
     logger.error('Error fetching bookings:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener reservas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener reservas' }, { status: 500 });
   }
 }

@@ -6,13 +6,10 @@ import { subMonths, startOfMonth, endOfMonth } from 'date-fns';
 import logger, { logError } from '@/lib/logger';
 
 // GET /api/admin/companies/[id]/stats - Estadísticas de uso de una empresa
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session || !session.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
@@ -33,10 +30,7 @@ export async function GET(
     });
 
     if (!company) {
-      return NextResponse.json(
-        { error: 'Empresa no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Empresa no encontrada' }, { status: 404 });
     }
 
     // Contar recursos
@@ -86,10 +80,10 @@ export async function GET(
     });
 
     const totalIngresosMes = pagosDelMes
-      .filter(p => p.estado === 'pagado')
+      .filter((p) => p.estado === 'pagado')
       .reduce((sum, p) => sum + p.monto, 0);
 
-    const pagosPendientesMes = pagosDelMes.filter(p => p.estado === 'pendiente').length;
+    const pagosPendientesMes = pagosDelMes.filter((p) => p.estado === 'pendiente').length;
 
     // Estadísticas de ocupación
     const unidadesOcupadas = await prisma.unit.count({
@@ -99,9 +93,8 @@ export async function GET(
       },
     });
 
-    const tasaOcupacion = totalUnidades > 0
-      ? Math.round((unidadesOcupadas / totalUnidades) * 100)
-      : 0;
+    const tasaOcupacion =
+      totalUnidades > 0 ? Math.round((unidadesOcupadas / totalUnidades) * 100) : 0;
 
     // Módulos activos
     const modulosActivos = await prisma.companyModule.count({
@@ -123,17 +116,23 @@ export async function GET(
       usuarios: {
         actual: totalUsuarios,
         maximo: company.maxUsuarios || 0,
-        porcentaje: company.maxUsuarios ? Math.round((totalUsuarios / company.maxUsuarios) * 100) : 0,
+        porcentaje: company.maxUsuarios
+          ? Math.round((totalUsuarios / company.maxUsuarios) * 100)
+          : 0,
       },
       propiedades: {
         actual: totalUnidades,
         maximo: company.maxPropiedades || 0,
-        porcentaje: company.maxPropiedades ? Math.round((totalUnidades / company.maxPropiedades) * 100) : 0,
+        porcentaje: company.maxPropiedades
+          ? Math.round((totalUnidades / company.maxPropiedades) * 100)
+          : 0,
       },
       edificios: {
         actual: totalEdificios,
         maximo: company.maxEdificios || 0,
-        porcentaje: company.maxEdificios ? Math.round((totalEdificios / company.maxEdificios) * 100) : 0,
+        porcentaje: company.maxEdificios
+          ? Math.round((totalEdificios / company.maxEdificios) * 100)
+          : 0,
       },
     };
 
@@ -167,10 +166,7 @@ export async function GET(
     });
   } catch (error) {
     logger.error('Error fetching company stats:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener estadísticas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener estadísticas' }, { status: 500 });
   }
 }
 

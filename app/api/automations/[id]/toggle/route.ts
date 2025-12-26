@@ -5,10 +5,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user?.companyId) {
@@ -23,10 +20,7 @@ export async function PATCH(
       where: { id, companyId },
     });
     if (!automation) {
-      return NextResponse.json(
-        { error: 'Automatización no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Automatización no encontrada' }, { status: 404 });
     }
     // Actualizar estado
     const updated = await prisma.automation.update({
@@ -36,9 +30,6 @@ export async function PATCH(
     return NextResponse.json(updated);
   } catch (error) {
     logger.error('Error toggling automation:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar automatización' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar automatización' }, { status: 500 });
   }
 }

@@ -90,7 +90,7 @@ export default function SocialMediaDashboard() {
   const [posts, setPosts] = useState<SocialPost[]>([]);
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [configured, setConfigured] = useState(false);
-  
+
   // Formulario de nueva publicación
   const [newPost, setNewPost] = useState({
     content: '',
@@ -107,20 +107,20 @@ export default function SocialMediaDashboard() {
   const loadData = async () => {
     try {
       setLoading(true);
-      
+
       // Cargar configuración y perfiles
       const configRes = await fetch('/api/pomelli/config');
       const configData = await configRes.json();
-      
+
       setConfigured(configData.configured);
       setProfiles(configData.profiles || []);
-      
+
       if (configData.configured) {
         // Cargar publicaciones
         const postsRes = await fetch('/api/pomelli/posts?limit=20');
         const postsData = await postsRes.json();
         setPosts(postsData.posts || []);
-        
+
         // Cargar analytics
         const analyticsRes = await fetch('/api/pomelli/analytics');
         const analyticsData = await analyticsRes.json();
@@ -140,9 +140,9 @@ export default function SocialMediaDashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ platform }),
       });
-      
+
       const data = await res.json();
-      
+
       if (data.authUrl) {
         // Abrir ventana de autorización
         window.location.href = data.authUrl;
@@ -155,7 +155,7 @@ export default function SocialMediaDashboard() {
   const createPost = async () => {
     try {
       setCreating(true);
-      
+
       const res = await fetch('/api/pomelli/posts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -164,7 +164,7 @@ export default function SocialMediaDashboard() {
           publishNow: !newPost.scheduledAt,
         }),
       });
-      
+
       if (res.ok) {
         setNewPost({
           content: '',
@@ -239,7 +239,7 @@ export default function SocialMediaDashboard() {
             Pomelli no está configurado. Por favor, configura tus credenciales de API primero.
           </AlertDescription>
         </Alert>
-        
+
         <Card className="mt-6">
           <CardHeader>
             <CardTitle>Configurar Pomelli</CardTitle>
@@ -271,9 +271,7 @@ export default function SocialMediaDashboard() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Gestión de Redes Sociales</h1>
-          <p className="text-gray-600 mt-1">
-            Gestiona LinkedIn, Instagram y X desde un solo lugar
-          </p>
+          <p className="text-gray-600 mt-1">Gestiona LinkedIn, Instagram y X desde un solo lugar</p>
         </div>
         <Button onClick={() => loadData()}>
           <BarChart3 className="h-4 w-4 mr-2" />
@@ -303,9 +301,7 @@ export default function SocialMediaDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Me Gusta</p>
-                  <p className="text-2xl font-bold">
-                    {analytics.totals.likes.toLocaleString()}
-                  </p>
+                  <p className="text-2xl font-bold">{analytics.totals.likes.toLocaleString()}</p>
                 </div>
                 <Heart className="h-8 w-8 text-red-600" />
               </div>
@@ -317,9 +313,7 @@ export default function SocialMediaDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Comentarios</p>
-                  <p className="text-2xl font-bold">
-                    {analytics.totals.comments.toLocaleString()}
-                  </p>
+                  <p className="text-2xl font-bold">{analytics.totals.comments.toLocaleString()}</p>
                 </div>
                 <MessageCircle className="h-8 w-8 text-green-600" />
               </div>
@@ -354,9 +348,7 @@ export default function SocialMediaDashboard() {
           <Card>
             <CardHeader>
               <CardTitle>Perfiles Conectados</CardTitle>
-              <CardDescription>
-                Conecta y gestiona tus perfiles de redes sociales
-              </CardDescription>
+              <CardDescription>Conecta y gestiona tus perfiles de redes sociales</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -365,27 +357,25 @@ export default function SocialMediaDashboard() {
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-4">
                       <Linkedin className="h-10 w-10 text-blue-600" />
-                      {profiles.some(p => p.platform === 'linkedin' && p.isConnected) ? (
+                      {profiles.some((p) => p.platform === 'linkedin' && p.isConnected) ? (
                         <CheckCircle className="h-5 w-5 text-green-600" />
                       ) : (
                         <XCircle className="h-5 w-5 text-gray-400" />
                       )}
                     </div>
                     <h3 className="font-semibold text-lg">LinkedIn</h3>
-                    {profiles.find(p => p.platform === 'linkedin') ? (
+                    {profiles.find((p) => p.platform === 'linkedin') ? (
                       <div className="mt-2 space-y-1">
                         <p className="text-sm text-gray-600">
-                          @{profiles.find(p => p.platform === 'linkedin')?.profileUsername}
+                          @{profiles.find((p) => p.platform === 'linkedin')?.profileUsername}
                         </p>
                         <p className="text-xs text-gray-500">
-                          {profiles.find(p => p.platform === 'linkedin')?.followersCount} seguidores
+                          {profiles.find((p) => p.platform === 'linkedin')?.followersCount}{' '}
+                          seguidores
                         </p>
                       </div>
                     ) : (
-                      <Button 
-                        className="mt-4 w-full" 
-                        onClick={() => connectPlatform('linkedin')}
-                      >
+                      <Button className="mt-4 w-full" onClick={() => connectPlatform('linkedin')}>
                         Conectar LinkedIn
                       </Button>
                     )}
@@ -397,27 +387,25 @@ export default function SocialMediaDashboard() {
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-4">
                       <Instagram className="h-10 w-10 text-pink-600" />
-                      {profiles.some(p => p.platform === 'instagram' && p.isConnected) ? (
+                      {profiles.some((p) => p.platform === 'instagram' && p.isConnected) ? (
                         <CheckCircle className="h-5 w-5 text-green-600" />
                       ) : (
                         <XCircle className="h-5 w-5 text-gray-400" />
                       )}
                     </div>
                     <h3 className="font-semibold text-lg">Instagram</h3>
-                    {profiles.find(p => p.platform === 'instagram') ? (
+                    {profiles.find((p) => p.platform === 'instagram') ? (
                       <div className="mt-2 space-y-1">
                         <p className="text-sm text-gray-600">
-                          @{profiles.find(p => p.platform === 'instagram')?.profileUsername}
+                          @{profiles.find((p) => p.platform === 'instagram')?.profileUsername}
                         </p>
                         <p className="text-xs text-gray-500">
-                          {profiles.find(p => p.platform === 'instagram')?.followersCount} seguidores
+                          {profiles.find((p) => p.platform === 'instagram')?.followersCount}{' '}
+                          seguidores
                         </p>
                       </div>
                     ) : (
-                      <Button 
-                        className="mt-4 w-full" 
-                        onClick={() => connectPlatform('instagram')}
-                      >
+                      <Button className="mt-4 w-full" onClick={() => connectPlatform('instagram')}>
                         Conectar Instagram
                       </Button>
                     )}
@@ -429,27 +417,24 @@ export default function SocialMediaDashboard() {
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-4">
                       <Twitter className="h-10 w-10" />
-                      {profiles.some(p => p.platform === 'x' && p.isConnected) ? (
+                      {profiles.some((p) => p.platform === 'x' && p.isConnected) ? (
                         <CheckCircle className="h-5 w-5 text-green-600" />
                       ) : (
                         <XCircle className="h-5 w-5 text-gray-400" />
                       )}
                     </div>
                     <h3 className="font-semibold text-lg">X (Twitter)</h3>
-                    {profiles.find(p => p.platform === 'x') ? (
+                    {profiles.find((p) => p.platform === 'x') ? (
                       <div className="mt-2 space-y-1">
                         <p className="text-sm text-gray-600">
-                          @{profiles.find(p => p.platform === 'x')?.profileUsername}
+                          @{profiles.find((p) => p.platform === 'x')?.profileUsername}
                         </p>
                         <p className="text-xs text-gray-500">
-                          {profiles.find(p => p.platform === 'x')?.followersCount} seguidores
+                          {profiles.find((p) => p.platform === 'x')?.followersCount} seguidores
                         </p>
                       </div>
                     ) : (
-                      <Button 
-                        className="mt-4 w-full" 
-                        onClick={() => connectPlatform('x')}
-                      >
+                      <Button className="mt-4 w-full" onClick={() => connectPlatform('x')}>
                         Conectar X
                       </Button>
                     )}
@@ -465,9 +450,7 @@ export default function SocialMediaDashboard() {
           <Card>
             <CardHeader>
               <CardTitle>Nueva Publicación</CardTitle>
-              <CardDescription>
-                Crea una publicación para múltiples redes sociales
-              </CardDescription>
+              <CardDescription>Crea una publicación para múltiples redes sociales</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -478,45 +461,45 @@ export default function SocialMediaDashboard() {
                   value={newPost.content}
                   onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  {newPost.content.length} caracteres
-                </p>
+                <p className="text-xs text-gray-500 mt-1">{newPost.content.length} caracteres</p>
               </div>
 
               <div>
                 <Label className="mb-3 block">Plataformas</Label>
                 <div className="space-y-2">
-                  {profiles.filter(p => p.isConnected).map((profile) => (
-                    <div key={profile.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={profile.platform}
-                        checked={newPost.platforms.includes(profile.platform)}
-                        onCheckedChange={(checked) => {
-                          if (checked) {
-                            setNewPost({
-                              ...newPost,
-                              platforms: [...newPost.platforms, profile.platform],
-                            });
-                          } else {
-                            setNewPost({
-                              ...newPost,
-                              platforms: newPost.platforms.filter(p => p !== profile.platform),
-                            });
-                          }
-                        }}
-                      />
-                      <label
-                        htmlFor={profile.platform}
-                        className="flex items-center space-x-2 cursor-pointer"
-                      >
-                        {getPlatformIcon(profile.platform)}
-                        <span className="capitalize">{profile.platform}</span>
-                        <span className="text-xs text-gray-500">
-                          (@{profile.profileUsername})
-                        </span>
-                      </label>
-                    </div>
-                  ))}
+                  {profiles
+                    .filter((p) => p.isConnected)
+                    .map((profile) => (
+                      <div key={profile.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={profile.platform}
+                          checked={newPost.platforms.includes(profile.platform)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setNewPost({
+                                ...newPost,
+                                platforms: [...newPost.platforms, profile.platform],
+                              });
+                            } else {
+                              setNewPost({
+                                ...newPost,
+                                platforms: newPost.platforms.filter((p) => p !== profile.platform),
+                              });
+                            }
+                          }}
+                        />
+                        <label
+                          htmlFor={profile.platform}
+                          className="flex items-center space-x-2 cursor-pointer"
+                        >
+                          {getPlatformIcon(profile.platform)}
+                          <span className="capitalize">{profile.platform}</span>
+                          <span className="text-xs text-gray-500">
+                            (@{profile.profileUsername})
+                          </span>
+                        </label>
+                      </div>
+                    ))}
                 </div>
               </div>
 
@@ -532,7 +515,9 @@ export default function SocialMediaDashboard() {
               <div className="flex space-x-2">
                 <Button
                   onClick={createPost}
-                  disabled={creating || newPost.content.length === 0 || newPost.platforms.length === 0}
+                  disabled={
+                    creating || newPost.content.length === 0 || newPost.platforms.length === 0
+                  }
                   className="flex-1"
                 >
                   {creating ? (
@@ -546,12 +531,14 @@ export default function SocialMediaDashboard() {
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => setNewPost({
-                    content: '',
-                    platforms: [],
-                    mediaUrls: [],
-                    scheduledAt: '',
-                  })}
+                  onClick={() =>
+                    setNewPost({
+                      content: '',
+                      platforms: [],
+                      mediaUrls: [],
+                      scheduledAt: '',
+                    })
+                  }
                 >
                   Cancelar
                 </Button>
@@ -565,9 +552,7 @@ export default function SocialMediaDashboard() {
           <Card>
             <CardHeader>
               <CardTitle>Historial de Publicaciones</CardTitle>
-              <CardDescription>
-                Todas tus publicaciones en redes sociales
-              </CardDescription>
+              <CardDescription>Todas tus publicaciones en redes sociales</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -582,9 +567,7 @@ export default function SocialMediaDashboard() {
                                 {platform}
                               </Badge>
                             ))}
-                            <Badge className={getStatusColor(post.status)}>
-                              {post.status}
-                            </Badge>
+                            <Badge className={getStatusColor(post.status)}>{post.status}</Badge>
                           </div>
                           <p className="text-sm text-gray-700 mb-3">
                             {post.content.substring(0, 200)}

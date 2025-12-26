@@ -176,7 +176,7 @@ export async function generateAutomaticNotifications(companyId?: string) {
     estado: { in: ['pendiente', 'en_progreso'] },
     prioridad: 'alta',
   };
-  
+
   if (companyId) {
     maintenanceWhere.unit = {
       building: {
@@ -234,11 +234,11 @@ export async function generateAutomaticNotifications(companyId?: string) {
       lte: thirtyDaysAgo,
     },
   };
-  
+
   // Filtrar por companyId a través de la relación building
   if (companyId) {
     unitWhere.building = {
-      companyId: companyId
+      companyId: companyId,
     };
   }
 
@@ -292,11 +292,11 @@ export async function generateAutomaticNotifications(companyId?: string) {
       gte: now,
     },
   };
-  
+
   // Filtrar por companyId a través de la relación building
   if (companyId) {
     scheduleWhere.building = {
-      companyId: companyId
+      companyId: companyId,
     };
   }
 

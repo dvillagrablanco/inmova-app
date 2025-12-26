@@ -1,13 +1,20 @@
 import logger, { logError } from '@/lib/logger';
 
-
 /**
  * Servicio de Automatización con IA
  * Procesa intenciones del usuario y proporciona asistencia inteligente
  */
 
 export interface UserIntent {
-  intent: 'create_building' | 'create_tenant' | 'create_contract' | 'help' | 'navigate' | 'report_issue' | 'configure' | 'other';
+  intent:
+    | 'create_building'
+    | 'create_tenant'
+    | 'create_contract'
+    | 'help'
+    | 'navigate'
+    | 'report_issue'
+    | 'configure'
+    | 'other';
   confidence: number;
   entities: Record<string, any>;
   suggestedAction?: {
@@ -213,13 +220,15 @@ export async function categorizeTicket(ticketData: {
 /**
  * Busca en la base de conocimientos usando IA
  */
-export async function searchKnowledgeBase(query: string): Promise<Array<{
-  id: string;
-  title: string;
-  excerpt: string;
-  relevance: number;
-  url: string;
-}>> {
+export async function searchKnowledgeBase(query: string): Promise<
+  Array<{
+    id: string;
+    title: string;
+    excerpt: string;
+    relevance: number;
+    url: string;
+  }>
+> {
   try {
     const response = await fetch('/api/support/knowledge-search', {
       method: 'POST',

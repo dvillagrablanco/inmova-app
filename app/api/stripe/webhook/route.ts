@@ -21,26 +21,16 @@ export async function POST(request: NextRequest) {
   const signature = headersList.get('stripe-signature');
 
   if (!signature) {
-    return NextResponse.json(
-      { error: 'No signature provided' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'No signature provided' }, { status: 400 });
   }
 
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(
-      body,
-      signature,
-      STRIPE_WEBHOOK_SECRET
-    );
+    event = stripe.webhooks.constructEvent(body, signature, STRIPE_WEBHOOK_SECRET);
   } catch (err: any) {
     logger.error('Webhook signature verification failed:', err.message);
-    return NextResponse.json(
-      { error: `Webhook Error: ${err.message}` },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
   }
 
   // Log webhook event
@@ -114,10 +104,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(
-      { error: 'Error processing webhook' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error processing webhook' }, { status: 500 });
   }
 }
 
@@ -147,9 +134,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
   const charge = charges.data[0];
   const stripeFee = charge?.balance_transaction
     ? formatAmountFromStripe(
-        (await stripe.balanceTransactions.retrieve(
-          charge.balance_transaction as string
-        )).fee
+        (await stripe.balanceTransactions.retrieve(charge.balance_transaction as string)).fee
       )
     : 0;
 
@@ -229,18 +214,14 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
       currentPeriodStart: new Date(subData.current_period_start * 1000),
       currentPeriodEnd: new Date(subData.current_period_end * 1000),
       cancelAtPeriodEnd: subData.cancel_at_period_end,
-      canceledAt: subData.canceled_at
-        ? new Date(subData.canceled_at * 1000)
-        : null,
+      canceledAt: subData.canceled_at ? new Date(subData.canceled_at * 1000) : null,
     },
     update: {
       status: subscription.status,
       currentPeriodStart: new Date(subData.current_period_start * 1000),
       currentPeriodEnd: new Date(subData.current_period_end * 1000),
       cancelAtPeriodEnd: subData.cancel_at_period_end,
-      canceledAt: subData.canceled_at
-        ? new Date(subData.canceled_at * 1000)
-        : null,
+      canceledAt: subData.canceled_at ? new Date(subData.canceled_at * 1000) : null,
     },
   });
 

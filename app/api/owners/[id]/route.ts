@@ -8,18 +8,12 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 // GET /api/owners/[id] - Obtener propietario específico
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const owner = await prisma.owner.findFirst({
@@ -56,10 +50,7 @@ export async function GET(
     });
 
     if (!owner) {
-      return NextResponse.json(
-        { error: 'Propietario no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Propietario no encontrado' }, { status: 404 });
     }
 
     // No exponer la contraseña
@@ -68,26 +59,17 @@ export async function GET(
     return NextResponse.json(ownerData);
   } catch (error) {
     logger.error('Error al obtener propietario:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener propietario' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener propietario' }, { status: 500 });
   }
 }
 
 // PUT /api/owners/[id] - Actualizar propietario
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Verificar que el usuario tenga permisos
@@ -106,10 +88,7 @@ export async function PUT(
     });
 
     if (!owner) {
-      return NextResponse.json(
-        { error: 'Propietario no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Propietario no encontrado' }, { status: 404 });
     }
 
     const body = await req.json();
@@ -134,10 +113,7 @@ export async function PUT(
       });
 
       if (existingOwner) {
-        return NextResponse.json(
-          { error: 'El email ya está en uso' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'El email ya está en uso' }, { status: 400 });
       }
     }
 
@@ -148,10 +124,7 @@ export async function PUT(
       });
 
       if (existingDni) {
-        return NextResponse.json(
-          { error: 'El DNI ya está en uso' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'El DNI ya está en uso' }, { status: 400 });
       }
     }
 
@@ -206,26 +179,17 @@ export async function PUT(
     });
   } catch (error) {
     logger.error('Error al actualizar propietario:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar propietario' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar propietario' }, { status: 500 });
   }
 }
 
 // DELETE /api/owners/[id] - Eliminar propietario
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Verificar que el usuario tenga permisos de administrador
@@ -244,10 +208,7 @@ export async function DELETE(
     });
 
     if (!owner) {
-      return NextResponse.json(
-        { error: 'Propietario no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Propietario no encontrado' }, { status: 404 });
     }
 
     // Eliminar propietario (cascade eliminará las relaciones)
@@ -263,9 +224,6 @@ export async function DELETE(
     });
   } catch (error) {
     logger.error('Error al eliminar propietario:', error);
-    return NextResponse.json(
-      { error: 'Error al eliminar propietario' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar propietario' }, { status: 500 });
   }
 }

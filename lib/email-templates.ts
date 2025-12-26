@@ -170,8 +170,10 @@ export const paymentReminderEmail = ({
   company: CompanyInfo;
 }) => {
   const urgencia = diasRestantes <= 1 ? 'alto' : diasRestantes <= 3 ? 'medio' : 'bajo';
-  const urgenciaColor = urgencia === 'alto' ? '#dc2626' : urgencia === 'medio' ? '#f59e0b' : '#3b82f6';
-  const urgenciaTexto = diasRestantes === 0 ? 'HOY' : diasRestantes === 1 ? 'MAÑANA' : `en ${diasRestantes} días`;
+  const urgenciaColor =
+    urgencia === 'alto' ? '#dc2626' : urgencia === 'medio' ? '#f59e0b' : '#3b82f6';
+  const urgenciaTexto =
+    diasRestantes === 0 ? 'HOY' : diasRestantes === 1 ? 'MAÑANA' : `en ${diasRestantes} días`;
 
   const content = `
     <div style="padding: 20px; background-color: ${urgenciaColor}; border-radius: 8px; margin-bottom: 30px;">
@@ -230,13 +232,17 @@ export const paymentReminderEmail = ({
       Por favor, realice el pago lo antes posible para evitar cargos adicionales.
     </p>
     
-    ${company.telefono || company.email ? `
+    ${
+      company.telefono || company.email
+        ? `
     <p style="color: #333333; font-size: 16px; line-height: 1.6;">
       Si ya realizó el pago o tiene alguna consulta, contáctenos:
       ${company.telefono ? `<br><strong>Teléfono:</strong> ${company.telefono}` : ''}
       ${company.email ? `<br><strong>Email:</strong> ${company.email}` : ''}
     </p>
-    ` : ''}
+    `
+        : ''
+    }
     
     <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-top: 30px;">
       Atentamente,<br>
@@ -320,13 +326,17 @@ export const contractExpirationEmail = ({
       Si desea renovar su contrato, por favor contáctenos lo antes posible para coordinar los detalles.
     </p>
     
-    ${company.telefono || company.email ? `
+    ${
+      company.telefono || company.email
+        ? `
     <p style="color: #333333; font-size: 16px; line-height: 1.6;">
       Puede comunicarse con nosotros a través de:
       ${company.telefono ? `<br><strong>Teléfono:</strong> ${company.telefono}` : ''}
       ${company.email ? `<br><strong>Email:</strong> ${company.email}` : ''}
     </p>
-    ` : ''}
+    `
+        : ''
+    }
     
     <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-top: 30px;">
       Atentamente,<br>
@@ -403,7 +413,9 @@ export const maintenanceScheduledEmail = ({
           ${descripcion}
         </td>
       </tr>
-      ${proveedor ? `
+      ${
+        proveedor
+          ? `
       <tr>
         <td style="padding: 15px; background-color: #f9f9f9; border: 1px solid #eeeeee;">
           <strong style="color: #000000;">Proveedor:</strong>
@@ -412,7 +424,9 @@ export const maintenanceScheduledEmail = ({
           ${proveedor}
         </td>
       </tr>
-      ` : ''}
+      `
+          : ''
+      }
       <tr>
         <td style="padding: 15px; background-color: #3b82f6; border: 1px solid #3b82f6;">
           <strong style="color: #ffffff;">Fecha Programada:</strong>
@@ -427,13 +441,17 @@ export const maintenanceScheduledEmail = ({
       Por favor, asegúrese de estar disponible en la fecha y hora indicadas, o de facilitar el acceso a la propiedad.
     </p>
     
-    ${company.telefono || company.email ? `
+    ${
+      company.telefono || company.email
+        ? `
     <p style="color: #333333; font-size: 16px; line-height: 1.6;">
       Si necesita reprogramar, contáctenos:
       ${company.telefono ? `<br><strong>Teléfono:</strong> ${company.telefono}` : ''}
       ${company.email ? `<br><strong>Email:</strong> ${company.email}` : ''}
     </p>
-    ` : ''}
+    `
+        : ''
+    }
     
     <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-top: 30px;">
       Atentamente,<br>

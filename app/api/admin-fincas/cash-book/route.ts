@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.companyId) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
@@ -22,33 +22,30 @@ export async function GET(request: NextRequest) {
     const categoria = searchParams.get('categoria');
     const fechaDesde = searchParams.get('fechaDesde');
     const fechaHasta = searchParams.get('fechaHasta');
-    
+
     if (!communityId) {
-      return NextResponse.json(
-        { error: 'communityId es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'communityId es requerido' }, { status: 400 });
     }
-    
+
     const where: any = {
       companyId: session.user.companyId,
       communityId,
     };
-    
+
     if (tipo) {
       where.tipo = tipo;
     }
-    
+
     if (categoria) {
       where.categoria = categoria;
     }
-    
+
     if (fechaDesde || fechaHasta) {
       where.fecha = {};
       if (fechaDesde) where.fecha.gte = new Date(fechaDesde);
       if (fechaHasta) where.fecha.lte = new Date(fechaHasta);
     }
-    
+
     const entries = await prisma.cashBookEntry.findMany({
       where,
       orderBy: {
@@ -65,7 +62,7 @@ export async function GET(request: NextRequest) {
         fecha: 'desc',
       },
     });
-    
+
     const saldoActual = lastEntry?.saldoActual || 0;
     return NextResponse.json({
       entries,
@@ -73,10 +70,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error fetching cash book entries:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener movimientos' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener movimientos' }, { status: 500 });
   }
 }
 
@@ -87,11 +81,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.companyId || !session?.user?.email) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
-    
+
     const body = await request.json();
     const {
       communityId,
@@ -106,15 +100,12 @@ export async function POST(request: NextRequest) {
       pagoId,
       documentoUrl,
     } = body;
-    
+
     // Validar campos requeridos
     if (!communityId || !tipo || !concepto || importe === undefined) {
-      return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
-    
+
     // Verificar que la comunidad existe y pertenece a la compañía
     const community = await prisma.communityManagement.findFirst({
       where: {
@@ -122,14 +113,11 @@ export async function POST(request: NextRequest) {
         companyId: session.user.companyId,
       },
     });
-    
+
     if (!community) {
-      return NextResponse.json(
-        { error: 'Comunidad no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Comunidad no encontrada' }, { status: 404 });
     }
-    
+
     // Obtener último saldo
     const lastEntry = await prisma.cashBookEntry.findFirst({
       where: {
@@ -140,9 +128,9 @@ export async function POST(request: NextRequest) {
         fecha: 'desc',
       },
     });
-    
+
     const saldoAnterior = lastEntry?.saldoActual || 0;
-    
+
     // Calcular nuevo saldo
     let saldoActual = saldoAnterior;
     if (tipo === 'ingreso') {
@@ -153,7 +141,7 @@ export async function POST(request: NextRequest) {
       // traspaso (no afecta el saldo)
       saldoActual = saldoAnterior;
     }
-    
+
     const entry = await prisma.cashBookEntry.create({
       data: {
         companyId: session.user.companyId,
@@ -173,13 +161,10 @@ export async function POST(request: NextRequest) {
         registradoPor: session.user.email,
       },
     });
-    
+
     return NextResponse.json(entry, { status: 201 });
   } catch (error) {
     logger.error('Error creating cash book entry:', error);
-    return NextResponse.json(
-      { error: 'Error al crear movimiento' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear movimiento' }, { status: 500 });
   }
 }

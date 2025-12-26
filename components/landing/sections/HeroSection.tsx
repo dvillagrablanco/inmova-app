@@ -46,9 +46,16 @@ export function HeroSection() {
 
             {/* Subheading */}
             <p className="text-xl sm:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              La única plataforma que combina <span className="font-semibold text-indigo-600">verticales de negocio inmobiliario</span> con 
-              <span className="font-semibold text-violet-600"> módulos transversales de IA, IoT y Blockchain</span>. 
-              Todo en un solo lugar.
+              La única plataforma que combina{' '}
+              <span className="font-semibold text-indigo-600">
+                verticales de negocio inmobiliario
+              </span>{' '}
+              con
+              <span className="font-semibold text-violet-600">
+                {' '}
+                módulos transversales de IA, IoT y Blockchain
+              </span>
+              . Todo en un solo lugar.
             </p>
 
             {/* CTA Buttons */}
@@ -110,9 +117,12 @@ export function HeroSection() {
                         '🛏️ Coliving / Habitaciones',
                         '💹 House Flipping',
                         '🏗️ Construcción',
-                        '💼 Servicios Profesionales'
+                        '💼 Servicios Profesionales',
                       ].map((vertical, idx) => (
-                        <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-indigo-50 transition-colors">
+                        <div
+                          key={idx}
+                          className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-indigo-50 transition-colors"
+                        >
                           <span className="text-lg">{vertical}</span>
                         </div>
                       ))}
@@ -137,9 +147,12 @@ export function HeroSection() {
                         '💰 Pricing IA',
                         '👓 Tours AR/VR',
                         '🏠 IoT Inteligente',
-                        '⛓️ Blockchain'
+                        '⛓️ Blockchain',
                       ].map((modulo, idx) => (
-                        <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-violet-50 transition-colors">
+                        <div
+                          key={idx}
+                          className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-violet-50 transition-colors"
+                        >
                           <span className="text-lg">{modulo}</span>
                         </div>
                       ))}

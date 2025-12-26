@@ -41,9 +41,7 @@ export function PermissionGuard({
         <Tooltip>
           <TooltipTrigger asChild>
             <div className="relative inline-block">
-              <div className="opacity-50 pointer-events-none">
-                {children}
-              </div>
+              <div className="opacity-50 pointer-events-none">{children}</div>
               <Lock className="h-3 w-3 absolute top-0 right-0 text-muted-foreground" />
             </div>
           </TooltipTrigger>

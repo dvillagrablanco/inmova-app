@@ -1,15 +1,11 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import {
-  createSupportTicket,
-  type TicketCategory
-} from '@/lib/intelligent-support-service';
+import { createSupportTicket, type TicketCategory } from '@/lib/intelligent-support-service';
 import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
-
 
 export async function GET(request: Request) {
   try {
@@ -23,7 +19,7 @@ export async function GET(request: Request) {
     const status = searchParams.get('status');
 
     const where: any = {
-      companyId: companyId || undefined
+      companyId: companyId || undefined,
     };
 
     if (status) {
@@ -35,22 +31,19 @@ export async function GET(request: Request) {
       include: {
         messages: {
           orderBy: {
-            createdAt: 'asc'
-          }
-        }
+            createdAt: 'asc',
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: 'desc',
+      },
     });
 
     return NextResponse.json({ tickets });
   } catch (error) {
     logger.error('Error fetching tickets:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener tickets' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener tickets' }, { status: 500 });
   }
 }
 
@@ -66,10 +59,7 @@ export async function POST(request: Request) {
     const { subject, description, category } = body;
 
     if (!subject || !description || !category) {
-      return NextResponse.json(
-        { error: 'Datos incompletos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Datos incompletos' }, { status: 400 });
     }
 
     const ticket = await createSupportTicket(
@@ -83,9 +73,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ ticket });
   } catch (error) {
     logger.error('Error creating ticket:', error);
-    return NextResponse.json(
-      { error: 'Error al crear ticket' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear ticket' }, { status: 500 });
   }
 }

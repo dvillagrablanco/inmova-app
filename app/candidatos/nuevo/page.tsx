@@ -127,213 +127,213 @@ export default function NuevoCandidatoPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="container mx-auto p-6 space-y-6">
-            {/* Botón Volver y Breadcrumbs */}
-            <div className="flex items-center gap-4 pt-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push('/candidatos')}
-                className="gap-2 shadow-sm"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Volver a Candidatos
-              </Button>
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/dashboard">
-                      <Home className="h-4 w-4" />
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/candidatos">Candidatos</BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>Nuevo Candidato</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
-            </div>
+      <div className="container mx-auto p-6 space-y-6">
+        {/* Botón Volver y Breadcrumbs */}
+        <div className="flex items-center gap-4 pt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push('/candidatos')}
+            className="gap-2 shadow-sm"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Volver a Candidatos
+          </Button>
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/dashboard">
+                  <Home className="h-4 w-4" />
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/candidatos">Candidatos</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Nuevo Candidato</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
 
-            {/* Header Section */}
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Nuevo Candidato</h1>
-              <p className="text-muted-foreground">
-                Registra un nuevo candidato interesado en alquilar
-              </p>
-            </div>
+        {/* Header Section */}
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Nuevo Candidato</h1>
+          <p className="text-muted-foreground">
+            Registra un nuevo candidato interesado en alquilar
+          </p>
+        </div>
 
-            {/* Formulario */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <UserPlus className="h-5 w-5" />
-                  Información del Candidato
-                </CardTitle>
-                <CardDescription>
-                  Completa los datos del candidato y la unidad de interés
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid gap-6 md:grid-cols-2">
-                    {/* Unidad de Interés */}
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="unitId">Unidad de Interés *</Label>
-                      <Select
-                        value={formData.unitId}
-                        onValueChange={(value) => setFormData({ ...formData, unitId: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona una unidad disponible" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {units.map((unit) => (
-                            <SelectItem key={unit.id} value={unit.id}>
-                              {unit.building.nombre} - Unidad {unit.numero}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+        {/* Formulario */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <UserPlus className="h-5 w-5" />
+              Información del Candidato
+            </CardTitle>
+            <CardDescription>
+              Completa los datos del candidato y la unidad de interés
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid gap-6 md:grid-cols-2">
+                {/* Unidad de Interés */}
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="unitId">Unidad de Interés *</Label>
+                  <Select
+                    value={formData.unitId}
+                    onValueChange={(value) => setFormData({ ...formData, unitId: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona una unidad disponible" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {units.map((unit) => (
+                        <SelectItem key={unit.id} value={unit.id}>
+                          {unit.building.nombre} - Unidad {unit.numero}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                    {/* Nombre */}
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="nombreCompleto">Nombre Completo *</Label>
-                      <Input
-                        id="nombreCompleto"
-                        name="nombreCompleto"
-                        value={formData.nombreCompleto}
-                        onChange={handleChange}
-                        required
-                        placeholder="María López Martínez"
-                      />
-                    </div>
+                {/* Nombre */}
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="nombreCompleto">Nombre Completo *</Label>
+                  <Input
+                    id="nombreCompleto"
+                    name="nombreCompleto"
+                    value={formData.nombreCompleto}
+                    onChange={handleChange}
+                    required
+                    placeholder="María López Martínez"
+                  />
+                </div>
 
-                    {/* DNI */}
-                    <div className="space-y-2">
-                      <Label htmlFor="dni">DNI/NIE *</Label>
-                      <Input
-                        id="dni"
-                        name="dni"
-                        value={formData.dni}
-                        onChange={handleChange}
-                        required
-                        placeholder="12345678A"
-                      />
-                    </div>
+                {/* DNI */}
+                <div className="space-y-2">
+                  <Label htmlFor="dni">DNI/NIE *</Label>
+                  <Input
+                    id="dni"
+                    name="dni"
+                    value={formData.dni}
+                    onChange={handleChange}
+                    required
+                    placeholder="12345678A"
+                  />
+                </div>
 
-                    {/* Email */}
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Correo Electrónico *</Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                        placeholder="maria.lopez@email.com"
-                      />
-                    </div>
+                {/* Email */}
+                <div className="space-y-2">
+                  <Label htmlFor="email">Correo Electrónico *</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    placeholder="maria.lopez@email.com"
+                  />
+                </div>
 
-                    {/* Teléfono */}
-                    <div className="space-y-2">
-                      <Label htmlFor="telefono">Teléfono *</Label>
-                      <Input
-                        id="telefono"
-                        name="telefono"
-                        value={formData.telefono}
-                        onChange={handleChange}
-                        required
-                        placeholder="+34 600 123 456"
-                      />
-                    </div>
+                {/* Teléfono */}
+                <div className="space-y-2">
+                  <Label htmlFor="telefono">Teléfono *</Label>
+                  <Input
+                    id="telefono"
+                    name="telefono"
+                    value={formData.telefono}
+                    onChange={handleChange}
+                    required
+                    placeholder="+34 600 123 456"
+                  />
+                </div>
 
-                    {/* Fecha de Nacimiento */}
-                    <div className="space-y-2">
-                      <Label htmlFor="fechaNacimiento">Fecha de Nacimiento</Label>
-                      <Input
-                        id="fechaNacimiento"
-                        name="fechaNacimiento"
-                        type="date"
-                        value={formData.fechaNacimiento}
-                        onChange={handleChange}
-                      />
-                    </div>
+                {/* Fecha de Nacimiento */}
+                <div className="space-y-2">
+                  <Label htmlFor="fechaNacimiento">Fecha de Nacimiento</Label>
+                  <Input
+                    id="fechaNacimiento"
+                    name="fechaNacimiento"
+                    type="date"
+                    value={formData.fechaNacimiento}
+                    onChange={handleChange}
+                  />
+                </div>
 
-                    {/* Profesión */}
-                    <div className="space-y-2">
-                      <Label htmlFor="profesion">Profesión</Label>
-                      <Input
-                        id="profesion"
-                        name="profesion"
-                        value={formData.profesion}
-                        onChange={handleChange}
-                        placeholder="Diseñador Gráfico"
-                      />
-                    </div>
+                {/* Profesión */}
+                <div className="space-y-2">
+                  <Label htmlFor="profesion">Profesión</Label>
+                  <Input
+                    id="profesion"
+                    name="profesion"
+                    value={formData.profesion}
+                    onChange={handleChange}
+                    placeholder="Diseñador Gráfico"
+                  />
+                </div>
 
-                    {/* Ingresos Mensuales */}
-                    <div className="space-y-2">
-                      <Label htmlFor="ingresosMensuales">Ingresos Mensuales (€) *</Label>
-                      <Input
-                        id="ingresosMensuales"
-                        name="ingresosMensuales"
-                        type="number"
-                        step="0.01"
-                        value={formData.ingresosMensuales}
-                        onChange={handleChange}
-                        required
-                        min="0"
-                      />
-                    </div>
+                {/* Ingresos Mensuales */}
+                <div className="space-y-2">
+                  <Label htmlFor="ingresosMensuales">Ingresos Mensuales (€) *</Label>
+                  <Input
+                    id="ingresosMensuales"
+                    name="ingresosMensuales"
+                    type="number"
+                    step="0.01"
+                    value={formData.ingresosMensuales}
+                    onChange={handleChange}
+                    required
+                    min="0"
+                  />
+                </div>
 
-                    {/* Notas */}
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="notas">Notas Adicionales</Label>
-                      <Textarea
-                        id="notas"
-                        name="notas"
-                        value={formData.notas}
-                        onChange={handleChange}
-                        placeholder="Cualquier información adicional relevante sobre el candidato"
-                        rows={4}
-                      />
-                    </div>
-                  </div>
+                {/* Notas */}
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="notas">Notas Adicionales</Label>
+                  <Textarea
+                    id="notas"
+                    name="notas"
+                    value={formData.notas}
+                    onChange={handleChange}
+                    placeholder="Cualquier información adicional relevante sobre el candidato"
+                    rows={4}
+                  />
+                </div>
+              </div>
 
-                  {/* Botones */}
-                  <div className="flex gap-3 pt-4">
-                    <Button type="submit" disabled={isLoading || !formData.unitId}>
-                      {isLoading ? (
-                        <>
-                          <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
-                          Guardando...
-                        </>
-                      ) : (
-                        <>
-                          <Save className="mr-2 h-4 w-4" />
-                          Registrar Candidato
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => router.push('/candidatos')}
-                      disabled={isLoading}
-                    >
-                      Cancelar
-                    </Button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
-        </AuthenticatedLayout>
+              {/* Botones */}
+              <div className="flex gap-3 pt-4">
+                <Button type="submit" disabled={isLoading || !formData.unitId}>
+                  {isLoading ? (
+                    <>
+                      <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
+                      Guardando...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Registrar Candidato
+                    </>
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => router.push('/candidatos')}
+                  disabled={isLoading}
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </AuthenticatedLayout>
   );
 }

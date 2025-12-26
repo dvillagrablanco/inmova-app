@@ -9,19 +9,17 @@ import logger from '@/lib/logger';
 /**
  * Predict tenant risk
  */
-export async function predictTenantRisk(
-  tenantData: {
-    creditScore?: number;
-    employmentStatus?: string;
-    rentalHistory?: any[];
-    income?: number;
-  }
-): Promise<AIPrediction> {
+export async function predictTenantRisk(tenantData: {
+  creditScore?: number;
+  employmentStatus?: string;
+  rentalHistory?: any[];
+  income?: number;
+}): Promise<AIPrediction> {
   try {
     logger.info('Predicting tenant risk');
 
     // TODO: Use ML model to predict tenant risk
-    
+
     await new Promise((resolve) => setTimeout(resolve, 200));
 
     return {
@@ -55,9 +53,9 @@ export async function predictOccupancy(
     logger.info('Predicting property occupancy', { futureMonths });
 
     // TODO: Use time series ML model to predict occupancy
-    
+
     return {
-      prediction: [0.85, 0.87, 0.90, 0.88, 0.85, 0.82], // Occupancy rates for next 6 months
+      prediction: [0.85, 0.87, 0.9, 0.88, 0.85, 0.82], // Occupancy rates for next 6 months
       confidence: 0.75,
       factors: [
         { name: 'Seasonal Trends', impact: 0.4, value: 'Favorable' },
@@ -84,7 +82,7 @@ export async function predictMaintenanceCosts(
     logger.info('Predicting maintenance costs', { propertyId, futureMonths });
 
     // TODO: Use ML model to predict maintenance costs
-    
+
     return {
       prediction: 2500, // Predicted total cost for period
       confidence: 0.68,
@@ -112,13 +110,15 @@ export async function predictRevenue(
     logger.info('Predicting revenue', { companyId, futureMonths });
 
     // TODO: Use ML model for revenue forecasting
-    
+
     return {
-      prediction: [50000, 52000, 54000, 53000, 55000, 57000, 58000, 56000, 59000, 61000, 60000, 62000],
+      prediction: [
+        50000, 52000, 54000, 53000, 55000, 57000, 58000, 56000, 59000, 61000, 60000, 62000,
+      ],
       confidence: 0.72,
       factors: [
         { name: 'Historical Growth', impact: 0.45, value: '8% YoY' },
-        { name: 'Market Conditions', impact: 0.30, value: 'Positive' },
+        { name: 'Market Conditions', impact: 0.3, value: 'Positive' },
         { name: 'Seasonality', impact: 0.25, value: 'Moderate' },
       ],
     };

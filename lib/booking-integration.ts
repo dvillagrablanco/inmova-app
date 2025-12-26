@@ -93,11 +93,12 @@ export class BookingClient {
     this.hotelId = config.hotelId;
     this.username = config.username;
     this.password = config.password;
-    
+
     // URLs según entorno
-    this.baseUrl = config.environment === 'production'
-      ? 'https://supply-xml.booking.com/hotels/xml'
-      : 'https://supply-xml.booking.com/hotels/xml/test';
+    this.baseUrl =
+      config.environment === 'production'
+        ? 'https://supply-xml.booking.com/hotels/xml'
+        : 'https://supply-xml.booking.com/hotels/xml/test';
   }
 
   /**
@@ -105,9 +106,9 @@ export class BookingClient {
    */
   private getAuthHeaders(): HeadersInit {
     const credentials = Buffer.from(`${this.username}:${this.password}`).toString('base64');
-    
+
     return {
-      'Authorization': `Basic ${credentials}`,
+      Authorization: `Basic ${credentials}`,
       'Content-Type': 'application/xml',
     };
   }
@@ -128,7 +129,7 @@ export class BookingClient {
       }
 
       const xmlResponse = await response.text();
-      
+
       // Parsear XML a JSON (simplificado, usar xml2js en producción)
       return this.parseXMLResponse(xmlResponse);
     } catch (error) {
@@ -146,7 +147,7 @@ export class BookingClient {
     try {
       // Extract relevant data from XML
       const data: any = {};
-      
+
       // Check for errors
       const errorMatch = xml.match(/<error>([^<]+)<\/error>/);
       if (errorMatch) {
@@ -155,7 +156,7 @@ export class BookingClient {
 
       // Extract success status
       data.success = xml.includes('<ok>') || xml.includes('<success>');
-      
+
       return data;
     } catch (error) {
       logger.error('Error parsing XML response:', error);
@@ -181,7 +182,7 @@ export class BookingClient {
       // Mapear respuesta a nuestro formato
       // Implementación simplificada
       logger.info(`Retrieved property info for hotel ${this.hotelId}`);
-      
+
       return null; // Placeholder
     } catch (error) {
       logger.error('Error getting Booking.com property:', error);
@@ -228,9 +229,10 @@ export class BookingClient {
   async updateAvailability(updates: AvailabilityUpdate[]): Promise<boolean> {
     try {
       // Construir XML para actualizar disponibilidad
-      const roomUpdates = updates.map(update => {
-        const dateStr = update.date.toISOString().split('T')[0];
-        return `
+      const roomUpdates = updates
+        .map((update) => {
+          const dateStr = update.date.toISOString().split('T')[0];
+          return `
     <room id="${update.roomId}">
       <date value="${dateStr}">
         <avail>${update.available}</avail>
@@ -239,7 +241,8 @@ export class BookingClient {
         ${update.maxStay ? `<max_stay>${update.maxStay}</max_stay>` : ''}
       </date>
     </room>`;
-      }).join('\n');
+        })
+        .join('\n');
 
       const xmlBody = `<?xml version="1.0" encoding="UTF-8"?>
 <request>
@@ -267,15 +270,17 @@ export class BookingClient {
    */
   async updateRates(updates: RateUpdate[]): Promise<boolean> {
     try {
-      const rateUpdates = updates.map(update => {
-        const dateStr = update.date.toISOString().split('T')[0];
-        return `
+      const rateUpdates = updates
+        .map((update) => {
+          const dateStr = update.date.toISOString().split('T')[0];
+          return `
     <room id="${update.roomId}">
       <date value="${dateStr}">
         <rate currency="${update.currency}">${update.rate.toFixed(2)}</rate>
       </date>
     </room>`;
-      }).join('\n');
+        })
+        .join('\n');
 
       const xmlBody = `<?xml version="1.0" encoding="UTF-8"?>
 <request>
@@ -371,8 +376,8 @@ export class BookingClient {
       const availUpdates: AvailabilityUpdate[] = [];
       const rateUpdates: RateUpdate[] = [];
 
-      rooms.forEach(room => {
-        dates.forEach(date => {
+      rooms.forEach((room) => {
+        dates.forEach((date) => {
           availUpdates.push({
             roomId: room.roomId,
             date: new Date(date),
@@ -408,12 +413,7 @@ export class BookingClient {
 
 export function isBookingConfigured(config?: BookingConfig | null): boolean {
   if (!config) return false;
-  return !!(
-    config.hotelId &&
-    config.username &&
-    config.password &&
-    config.enabled
-  );
+  return !!(config.hotelId && config.username && config.password && config.enabled);
 }
 
 export function getBookingClient(config?: BookingConfig): BookingClient | null {
@@ -429,11 +429,11 @@ export function getBookingClient(config?: BookingConfig): BookingClient | null {
  */
 export function mapPropertyType(inmovaType: string): string {
   const typeMap: Record<string, string> = {
-    'apartamento': 'apartment',
-    'casa': 'house',
-    'hotel': 'hotel',
-    'hostal': 'hostel',
-    'villa': 'villa',
+    apartamento: 'apartment',
+    casa: 'house',
+    hotel: 'hotel',
+    hostal: 'hostel',
+    villa: 'villa',
   };
   return typeMap[inmovaType.toLowerCase()] || 'apartment';
 }

@@ -4,7 +4,7 @@ import { PageHeader } from '@/components/ui/page-header';
 
 export const metadata: Metadata = {
   title: 'Reportes Programados | INMOVA',
-  description: 'Configura reportes automáticos y programados'
+  description: 'Configura reportes automáticos y programados',
 };
 
 export default function ScheduledReportsPage() {

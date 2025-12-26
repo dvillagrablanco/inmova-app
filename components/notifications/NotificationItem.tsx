@@ -41,10 +41,7 @@ interface NotificationItemProps {
   onRead: (notificationId: string) => void;
 }
 
-export default function NotificationItem({
-  notification,
-  onRead,
-}: NotificationItemProps) {
+export default function NotificationItem({ notification, onRead }: NotificationItemProps) {
   const router = useRouter();
   const [isMarking, setIsMarking] = useState(false);
 
@@ -53,12 +50,9 @@ export default function NotificationItem({
 
     try {
       setIsMarking(true);
-      const response = await fetch(
-        `/api/notifications/${notification.id}/read`,
-        {
-          method: 'PATCH',
-        }
-      );
+      const response = await fetch(`/api/notifications/${notification.id}/read`, {
+        method: 'PATCH',
+      });
 
       if (response.ok) {
         onRead(notification.id);

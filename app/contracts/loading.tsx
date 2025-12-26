@@ -1,9 +1,9 @@
 /**
  * Loading State para Contratos
- * 
+ *
  * Se muestra automáticamente mientras Next.js carga la página.
  * Proporciona feedback visual instantáneo al usuario.
- * 
+ *
  * @since Semana 2, Tarea 2.5
  */
 

@@ -1,6 +1,6 @@
 /**
  * SERVICIO DE SMS
- * 
+ *
  * Sistema de mensajería SMS con:
  * - Plantillas personalizables
  * - Programación automática
@@ -18,13 +18,14 @@ import logger, { logError } from '@/lib/logger';
 const twilioConfig = {
   accountSid: process.env.TWILIO_ACCOUNT_SID || '',
   authToken: process.env.TWILIO_AUTH_TOKEN || '',
-  fromNumber: process.env.TWILIO_FROM_NUMBER || ''
+  fromNumber: process.env.TWILIO_FROM_NUMBER || '',
 };
 
 // Cliente de Twilio
-const twilioClient = twilioConfig.accountSid && twilioConfig.authToken
-  ? twilio(twilioConfig.accountSid, twilioConfig.authToken)
-  : null;
+const twilioClient =
+  twilioConfig.accountSid && twilioConfig.authToken
+    ? twilio(twilioConfig.accountSid, twilioConfig.authToken)
+    : null;
 
 /**
  * Verifica si Twilio está configurado
@@ -51,29 +52,26 @@ export async function enviarSMS(
   datos: DatosSMS,
   enviadoPor: string
 ): Promise<any> {
-  
   // 1. Obtener datos del inquilino
   const tenant = await prisma.tenant.findUnique({
-    where: { id: datos.tenantId }
+    where: { id: datos.tenantId },
   });
-  
+
   if (!tenant) {
     throw new Error('Inquilino no encontrado');
   }
-  
+
   // 2. Procesar variables en el mensaje
   const mensajeProcesado = procesarVariables(datos.mensaje, tenant);
-  
+
   // 3. Determinar estado inicial
-  const estado: SMSEstado = datos.fechaProgramada 
-    ? 'programado' 
-    : 'enviado';
-  
+  const estado: SMSEstado = datos.fechaProgramada ? 'programado' : 'enviado';
+
   const fechaEnvio = datos.fechaProgramada ? null : new Date();
-  
+
   // 4. Simular coste (Twilio: ~0.08€ por SMS)
   const costeEstimado = calcularCoste(mensajeProcesado);
-  
+
   // 5. Crear log del SMS
   const smsLog = await prisma.sMSLog.create({
     data: {
@@ -93,25 +91,25 @@ export async function enviarSMS(
       exitoso: estado === 'enviado' ? true : null,
       relacionadoCon: datos.relacionadoCon,
       relacionadoId: datos.relacionadoId,
-      enviadoPor
-    }
+      enviadoPor,
+    },
   });
-  
+
   // 6. Si es envío inmediato, enviar SMS real
   if (estado === 'enviado') {
     try {
       const resultado = await enviarSMSReal(tenant.telefono, mensajeProcesado);
-      
+
       // Actualizar con datos reales del envío
       await prisma.sMSLog.update({
         where: { id: smsLog.id },
         data: {
           idExterno: resultado.sid,
           exitoso: true,
-          fechaEnvio: new Date(resultado.dateCreated)
-        }
+          fechaEnvio: new Date(resultado.dateCreated),
+        },
       });
-      
+
       logger.info(`📱 SMS enviado exitosamente a ${tenant.nombreCompleto} (${tenant.telefono})`);
       logger.info(`   SID: ${resultado.sid}`);
     } catch (error: any) {
@@ -121,31 +119,31 @@ export async function enviarSMS(
         data: {
           estado: 'fallido',
           exitoso: false,
-          mensajeError: error.message
-        }
+          mensajeError: error.message,
+        },
       });
-      
+
       logger.error(`❌ Error enviando SMS a ${tenant.nombreCompleto}:`, error.message);
     }
   }
-  
+
   // 7. Si usa template, actualizar estadísticas
   if (datos.templateId) {
     await prisma.sMSTemplate.update({
       where: { id: datos.templateId },
       data: {
         vecesUsada: { increment: 1 },
-        ultimoEnvio: new Date()
-      }
+        ultimoEnvio: new Date(),
+      },
     });
   }
-  
+
   return smsLog;
 }
 
 /**
  * PROCESA VARIABLES DINÁMICAS EN EL MENSAJE
- * 
+ *
  * Variables soportadas:
  * - {{nombre}} - Nombre del inquilino
  * - {{unidad}} - Número de unidad
@@ -155,12 +153,12 @@ export async function enviarSMS(
  */
 function procesarVariables(mensaje: string, tenant: any, extra?: any): string {
   let mensajeProcesado = mensaje;
-  
+
   // Variables del inquilino
   mensajeProcesado = mensajeProcesado.replace(/{{nombre}}/g, tenant.nombreCompleto);
   mensajeProcesado = mensajeProcesado.replace(/{{email}}/g, tenant.email);
   mensajeProcesado = mensajeProcesado.replace(/{{telefono}}/g, tenant.telefono);
-  
+
   // Variables extras (si se proporcionan)
   if (extra) {
     if (extra.unidad) {
@@ -172,7 +170,7 @@ function procesarVariables(mensaje: string, tenant: any, extra?: any): string {
     if (extra.monto) {
       const montoFormateado = new Intl.NumberFormat('es-ES', {
         style: 'currency',
-        currency: 'EUR'
+        currency: 'EUR',
       }).format(extra.monto);
       mensajeProcesado = mensajeProcesado.replace(/{{monto}}/g, montoFormateado);
     }
@@ -181,7 +179,7 @@ function procesarVariables(mensaje: string, tenant: any, extra?: any): string {
       mensajeProcesado = mensajeProcesado.replace(/{{fecha}}/g, fechaFormateada);
     }
   }
-  
+
   return mensajeProcesado;
 }
 
@@ -190,12 +188,12 @@ function procesarVariables(mensaje: string, tenant: any, extra?: any): string {
  */
 function calcularCoste(mensaje: string): number {
   const longitud = mensaje.length;
-  
+
   // Twilio pricing (aproximado):
   // 1 SMS (160 chars): €0.08
   // 2 SMS (320 chars): €0.16
   // 3 SMS (480 chars): €0.24
-  
+
   const numSMS = Math.ceil(longitud / 160);
   return numSMS * 0.08;
 }
@@ -225,10 +223,9 @@ export async function crearPlantilla(
   },
   creadoPor: string
 ) {
-  
   // Extraer variables del mensaje
   const variables = extraerVariables(datos.mensaje);
-  
+
   return await prisma.sMSTemplate.create({
     data: {
       companyId,
@@ -243,8 +240,8 @@ export async function crearPlantilla(
       anticipacionDias: datos.anticipacionDias,
       horaEnvio: datos.horaEnvio,
       vecesUsada: 0,
-      creadoPor
-    }
+      creadoPor,
+    },
   });
 }
 
@@ -255,23 +252,23 @@ function extraerVariables(mensaje: string): any[] {
   const regex = /{{(\w+)}}/g;
   const variables: any[] = [];
   const encontradas = new Set<string>();
-  
+
   let match;
   while ((match = regex.exec(mensaje)) !== null) {
     const variable = match[1];
     if (!encontradas.has(variable)) {
       encontradas.add(variable);
-      
+
       // Mapear variables a descripciones y ejemplos
       const info = obtenerInfoVariable(variable);
       variables.push({
         nombre: variable,
         descripcion: info.descripcion,
-        ejemplo: info.ejemplo
+        ejemplo: info.ejemplo,
       });
     }
   }
-  
+
   return variables;
 }
 
@@ -280,40 +277,42 @@ function extraerVariables(mensaje: string): any[] {
  */
 function obtenerInfoVariable(variable: string): { descripcion: string; ejemplo: string } {
   const infoVariables: { [key: string]: { descripcion: string; ejemplo: string } } = {
-    'nombre': {
+    nombre: {
       descripcion: 'Nombre completo del inquilino',
-      ejemplo: 'Juan Pérez'
+      ejemplo: 'Juan Pérez',
     },
-    'email': {
+    email: {
       descripcion: 'Email del inquilino',
-      ejemplo: 'juan.perez@email.com'
+      ejemplo: 'juan.perez@email.com',
     },
-    'telefono': {
+    telefono: {
       descripcion: 'Teléfono del inquilino',
-      ejemplo: '+34 600 123 456'
+      ejemplo: '+34 600 123 456',
     },
-    'unidad': {
+    unidad: {
       descripcion: 'Número de unidad',
-      ejemplo: '3A'
+      ejemplo: '3A',
     },
-    'edificio': {
+    edificio: {
       descripcion: 'Nombre del edificio',
-      ejemplo: 'Edificio Central'
+      ejemplo: 'Edificio Central',
     },
-    'monto': {
+    monto: {
       descripcion: 'Monto económico',
-      ejemplo: '850,00€'
+      ejemplo: '850,00€',
     },
-    'fecha': {
+    fecha: {
       descripcion: 'Fecha formateada',
-      ejemplo: '15/12/2024'
+      ejemplo: '15/12/2024',
+    },
+  };
+
+  return (
+    infoVariables[variable] || {
+      descripcion: 'Variable personalizada',
+      ejemplo: variable,
     }
-  };
-  
-  return infoVariables[variable] || {
-    descripcion: 'Variable personalizada',
-    ejemplo: variable
-  };
+  );
 }
 
 /**
@@ -323,68 +322,69 @@ export const PLANTILLAS_PREDEFINIDAS = [
   {
     nombre: 'Recordatorio de Pago',
     tipo: 'recordatorio_pago' as SMSTipo,
-    mensaje: 'Hola {{nombre}}, te recordamos que el pago de tu alquiler de {{monto}} vence el {{fecha}}. ¡Gracias!',
+    mensaje:
+      'Hola {{nombre}}, te recordamos que el pago de tu alquiler de {{monto}} vence el {{fecha}}. ¡Gracias!',
     descripcion: 'Recordatorio de pago de renta próximo a vencer',
     eventoTrigger: 'pago_vencimiento_3dias',
     anticipacionDias: 3,
-    horaEnvio: '10:00'
+    horaEnvio: '10:00',
   },
   {
     nombre: 'Confirmación de Visita',
     tipo: 'confirmacion_visita' as SMSTipo,
-    mensaje: 'Hola {{nombre}}, confirmamos tu visita a la unidad {{unidad}} en {{edificio}} el {{fecha}}. ¡Te esperamos!',
+    mensaje:
+      'Hola {{nombre}}, confirmamos tu visita a la unidad {{unidad}} en {{edificio}} el {{fecha}}. ¡Te esperamos!',
     descripcion: 'Confirmación de visita programada',
     eventoTrigger: 'visita_programada',
     anticipacionDias: 1,
-    horaEnvio: '12:00'
+    horaEnvio: '12:00',
   },
   {
     nombre: 'Mantenimiento Programado',
     tipo: 'mantenimiento' as SMSTipo,
-    mensaje: 'Hola {{nombre}}, te informamos que el {{fecha}} se realizará mantenimiento en tu unidad {{unidad}}. Gracias por tu colaboración.',
+    mensaje:
+      'Hola {{nombre}}, te informamos que el {{fecha}} se realizará mantenimiento en tu unidad {{unidad}}. Gracias por tu colaboración.',
     descripcion: 'Notificación de mantenimiento programado',
     eventoTrigger: 'mantenimiento_programado',
     anticipacionDias: 2,
-    horaEnvio: '09:00'
+    horaEnvio: '09:00',
   },
   {
     nombre: 'Bienvenida Nuevo Inquilino',
     tipo: 'bienvenida' as SMSTipo,
-    mensaje: '¡Bienvenido/a {{nombre}}! Nos alegra tenerte en {{edificio}}, unidad {{unidad}}. Cualquier duda, estamos a tu disposición.',
+    mensaje:
+      '¡Bienvenido/a {{nombre}}! Nos alegra tenerte en {{edificio}}, unidad {{unidad}}. Cualquier duda, estamos a tu disposición.',
     descripcion: 'Mensaje de bienvenida para nuevos inquilinos',
     eventoTrigger: 'contrato_firmado',
     anticipacionDias: 0,
-    horaEnvio: '10:00'
+    horaEnvio: '10:00',
   },
   {
     nombre: 'Alerta Urgente',
     tipo: 'alerta' as SMSTipo,
-    mensaje: 'ALERTA: {{nombre}}, necesitamos comunicarte algo urgente sobre tu unidad {{unidad}}. Por favor, contáctanos cuanto antes.',
+    mensaje:
+      'ALERTA: {{nombre}}, necesitamos comunicarte algo urgente sobre tu unidad {{unidad}}. Por favor, contáctanos cuanto antes.',
     descripcion: 'Alerta urgente para inquilinos',
     eventoTrigger: null,
     anticipacionDias: null,
-    horaEnvio: null
-  }
+    horaEnvio: null,
+  },
 ];
 
 /**
  * Instala las plantillas predefinidas
  */
-export async function instalarPlantillasPredefinidas(
-  companyId: string,
-  creadoPor: string
-) {
-  
+export async function instalarPlantillasPredefinidas(companyId: string, creadoPor: string) {
   const plantillasCreadas: any[] = [];
-  
+
   for (const plantilla of PLANTILLAS_PREDEFINIDAS) {
     const existe = await prisma.sMSTemplate.findFirst({
       where: {
         companyId,
-        nombre: plantilla.nombre
-      }
+        nombre: plantilla.nombre,
+      },
     });
-    
+
     if (!existe) {
       const creada = await crearPlantilla(
         companyId,
@@ -397,15 +397,15 @@ export async function instalarPlantillasPredefinidas(
           envioAutomatico: false, // Por defecto manual
           eventoTrigger: plantilla.eventoTrigger || undefined,
           anticipacionDias: plantilla.anticipacionDias || undefined,
-          horaEnvio: plantilla.horaEnvio || undefined
+          horaEnvio: plantilla.horaEnvio || undefined,
         },
         creadoPor
       );
-      
+
       plantillasCreadas.push(creada);
     }
   }
-  
+
   return plantillasCreadas;
 }
 
@@ -413,33 +413,32 @@ export async function instalarPlantillasPredefinidas(
  * PROCESA SMS PROGRAMADOS (ejecutar en cron job)
  */
 export async function procesarSMSProgramados() {
-  
   const ahora = new Date();
-  
+
   // Buscar SMS programados para enviar ahora
   const smsPendientes = await prisma.sMSLog.findMany({
     where: {
       estado: 'programado',
       fechaProgramada: {
-        lte: ahora
-      }
+        lte: ahora,
+      },
     },
     include: {
-      tenant: true
+      tenant: true,
     },
-    take: 50 // Procesar máx 50 por lote
+    take: 50, // Procesar máx 50 por lote
   });
-  
+
   const resultados = {
     exitosos: 0,
-    fallidos: 0
+    fallidos: 0,
   };
-  
+
   for (const sms of smsPendientes) {
     try {
       // Enviar SMS real con fallback a simulación
       const resultado = await enviarSMSConFallback(sms.telefono, sms.mensaje);
-      
+
       // Actualizar estado
       await prisma.sMSLog.update({
         where: { id: sms.id },
@@ -448,10 +447,10 @@ export async function procesarSMSProgramados() {
           fechaEnvio: new Date(),
           exitoso: resultado.exitoso,
           idExterno: resultado.sid || sms.idExterno,
-          mensajeError: resultado.error || null
-        }
+          mensajeError: resultado.error || null,
+        },
       });
-      
+
       if (resultado.exitoso) {
         resultados.exitosos++;
         logger.info(`✅ SMS enviado a ${sms.nombreDestinatario} (${sms.telefono})`);
@@ -459,23 +458,22 @@ export async function procesarSMSProgramados() {
         resultados.fallidos++;
         logger.error(`❌ Error enviando SMS a ${sms.nombreDestinatario}: ${resultado.error}`);
       }
-      
     } catch (error: any) {
       resultados.fallidos++;
       logger.error(`Error procesando SMS ${sms.id}:`, error.message);
-      
+
       // Marcar como fallido
       await prisma.sMSLog.update({
         where: { id: sms.id },
         data: {
           estado: 'fallido',
           exitoso: false,
-          mensajeError: error.message
-        }
+          mensajeError: error.message,
+        },
       });
     }
   }
-  
+
   return resultados;
 }
 
@@ -484,29 +482,34 @@ export async function procesarSMSProgramados() {
  */
 async function enviarSMSReal(telefono: string, mensaje: string): Promise<any> {
   if (!twilioClient || !isTwilioConfigured()) {
-    throw new Error('Twilio no está configurado. Por favor, configura TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN y TWILIO_FROM_NUMBER');
+    throw new Error(
+      'Twilio no está configurado. Por favor, configura TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN y TWILIO_FROM_NUMBER'
+    );
   }
-  
+
   // Normalizar número de teléfono (asegurarse que tenga código de país)
   let telefonoNormalizado = telefono.trim();
   if (!telefonoNormalizado.startsWith('+')) {
     // Si no tiene +, asumir España (+34)
     telefonoNormalizado = `+34${telefonoNormalizado.replace(/\s/g, '')}`;
   }
-  
+
   const message = await twilioClient.messages.create({
     body: mensaje,
     from: twilioConfig.fromNumber,
-    to: telefonoNormalizado
+    to: telefonoNormalizado,
   });
-  
+
   return message;
 }
 
 /**
  * Envía un SMS (con fallback a simulación si Twilio no está configurado)
  */
-async function enviarSMSConFallback(telefono: string, mensaje: string): Promise<{ exitoso: boolean; sid?: string; error?: string }> {
+async function enviarSMSConFallback(
+  telefono: string,
+  mensaje: string
+): Promise<{ exitoso: boolean; sid?: string; error?: string }> {
   if (isTwilioConfigured()) {
     try {
       const resultado = await enviarSMSReal(telefono, mensaje);
@@ -519,84 +522,79 @@ async function enviarSMSConFallback(telefono: string, mensaje: string): Promise<
     logger.info(`📱 SMS SIMULADO (Twilio no configurado) a ${telefono}`);
     logger.info(`   Mensaje: ${mensaje}`);
     const exitoso = Math.random() < 0.9; // 90% de éxito simulado
-    return { 
-      exitoso, 
+    return {
+      exitoso,
       sid: exitoso ? generarIdExterno() : undefined,
-      error: exitoso ? undefined : 'Error simulado'
+      error: exitoso ? undefined : 'Error simulado',
     };
   }
 }
 
 /**
  * GENERA SMS AUTOMÁTICOS BASADOS EN EVENTOS
- * 
+ *
  * Ejemplos de eventos:
  * - pago_vencimiento_3dias: 3 días antes del vencimiento de pago
  * - visita_programada: Cuando se programa una visita
  * - mantenimiento_programado: Cuando se programa mantenimiento
  */
 export async function generarSMSAutomaticos(evento: string, companyId: string) {
-  
   // Buscar plantillas activas para este evento
   const plantillas = await prisma.sMSTemplate.findMany({
     where: {
       companyId,
       activa: true,
       envioAutomatico: true,
-      eventoTrigger: evento
-    }
+      eventoTrigger: evento,
+    },
   });
-  
+
   if (plantillas.length === 0) {
     return [];
   }
-  
+
   const smsGenerados: any[] = [];
-  
+
   // Según el evento, buscar destinatarios
   if (evento === 'pago_vencimiento_3dias') {
     // Buscar pagos que vencen en 3 días
     const fechaLimite = new Date();
     fechaLimite.setDate(fechaLimite.getDate() + 3);
-    
+
     const pagos = await prisma.payment.findMany({
       where: {
         estado: 'pendiente',
         fechaVencimiento: {
           gte: new Date(),
-          lte: fechaLimite
-        }
+          lte: fechaLimite,
+        },
       },
       include: {
         contract: {
           include: {
             tenant: true,
             unit: {
-              include: { building: true }
-            }
-          }
-        }
+              include: { building: true },
+            },
+          },
+        },
       },
-      take: 100
+      take: 100,
     });
-    
+
     for (const pago of pagos) {
       for (const plantilla of plantillas) {
         // Crear SMS programado
         const fechaEnvio = new Date();
         fechaEnvio.setHours(parseInt(plantilla.horaEnvio?.split(':')[0] || '10'), 0, 0, 0);
-        
-        const mensaje = procesarVariables(
-          plantilla.mensaje,
-          pago.contract.tenant,
-          {
-            monto: pago.monto,
-            fecha: pago.fechaVencimiento,
-            unidad: pago.contract.unit.numero,
-            edificio: pago.contract.unit.building.nombre
-          }
-        );
-        
+
+        const mensaje = procesarVariables(plantilla.mensaje, pago.contract.tenant, {
+          monto: pago.monto,
+          fecha: pago.fechaVencimiento,
+          unidad: pago.contract.unit.numero,
+          edificio: pago.contract.unit.building.nombre,
+        });
+
         const sms = await prisma.sMSLog.create({
           data: {
             companyId,
@@ -613,14 +611,14 @@ export async function generarSMSAutomaticos(evento: string, companyId: string) {
             costeEstimado: calcularCoste(mensaje),
             relacionadoCon: 'payment',
             relacionadoId: pago.id,
-            enviadoPor: 'SISTEMA_AUTOMATICO'
-          }
+            enviadoPor: 'SISTEMA_AUTOMATICO',
+          },
         });
-        
+
         smsGenerados.push(sms);
       }
     }
   }
-  
+
   return smsGenerados;
 }

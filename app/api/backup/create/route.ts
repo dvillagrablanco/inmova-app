@@ -27,14 +27,14 @@ export async function POST(req: NextRequest) {
     const result = await createBackup({
       companyId,
       tipo,
-      inicioPor: session.user.id
+      inicioPor: session.user.id,
     });
 
     return NextResponse.json({
       success: true,
       backup: result.backup,
       registros: result.registros,
-      tamano: result.tamano
+      tamano: result.tamano,
     });
   } catch (error: any) {
     logger.error('Error creating backup:', error);

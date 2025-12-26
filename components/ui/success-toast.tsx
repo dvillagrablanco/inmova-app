@@ -13,11 +13,7 @@ interface SuccessToastProps {
   onClose?: () => void;
 }
 
-export function SuccessToast({
-  message,
-  duration = 3000,
-  onClose,
-}: SuccessToastProps) {
+export function SuccessToast({ message, duration = 3000, onClose }: SuccessToastProps) {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
@@ -46,10 +42,11 @@ export function SuccessToast({
         'max-w-md'
       )}
     >
-      <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0" aria-hidden="true" />
-      <p className="text-sm font-medium text-green-800 dark:text-green-100">
-        {message}
-      </p>
+      <CheckCircle2
+        className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0"
+        aria-hidden="true"
+      />
+      <p className="text-sm font-medium text-green-800 dark:text-green-100">{message}</p>
     </div>
   );
 }

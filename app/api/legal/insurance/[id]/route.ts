@@ -7,10 +7,7 @@ import logger, { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 // GET /api/legal/insurance/[id] - Obtener póliza específica
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -36,27 +33,18 @@ export async function GET(
     });
 
     if (!insurance) {
-      return NextResponse.json(
-        { error: 'Póliza no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Póliza no encontrada' }, { status: 404 });
     }
 
     return NextResponse.json(insurance);
   } catch (error) {
     logger.error('Error fetching insurance:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener póliza' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener póliza' }, { status: 500 });
   }
 }
 
 // PATCH /api/legal/insurance/[id] - Actualizar póliza
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -82,10 +70,7 @@ export async function PATCH(
     });
 
     if (!existingInsurance) {
-      return NextResponse.json(
-        { error: 'Póliza no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Póliza no encontrada' }, { status: 404 });
     }
 
     const updateData: any = {};
@@ -95,7 +80,8 @@ export async function PATCH(
     if (body.numeroPoliza !== undefined) updateData.numeroPoliza = body.numeroPoliza;
     if (body.aseguradora !== undefined) updateData.aseguradora = body.aseguradora;
     if (body.fechaInicio !== undefined) updateData.fechaInicio = new Date(body.fechaInicio);
-    if (body.fechaVencimiento !== undefined) updateData.fechaVencimiento = new Date(body.fechaVencimiento);
+    if (body.fechaVencimiento !== undefined)
+      updateData.fechaVencimiento = new Date(body.fechaVencimiento);
     if (body.primaAnual !== undefined) updateData.primaAnual = parseFloat(body.primaAnual);
     if (body.cobertura !== undefined) updateData.cobertura = body.cobertura;
     if (body.estado !== undefined) updateData.estado = body.estado;
@@ -114,18 +100,12 @@ export async function PATCH(
     return NextResponse.json(insurance);
   } catch (error) {
     logger.error('Error updating insurance:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar póliza' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar póliza' }, { status: 500 });
   }
 }
 
 // DELETE /api/legal/insurance/[id] - Eliminar póliza
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -149,10 +129,7 @@ export async function DELETE(
     });
 
     if (!existingInsurance) {
-      return NextResponse.json(
-        { error: 'Póliza no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Póliza no encontrada' }, { status: 404 });
     }
 
     await prisma.insurance.delete({
@@ -162,9 +139,6 @@ export async function DELETE(
     return NextResponse.json({ success: true, message: 'Póliza eliminada correctamente' });
   } catch (error) {
     logger.error('Error deleting insurance:', error);
-    return NextResponse.json(
-      { error: 'Error al eliminar póliza' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar póliza' }, { status: 500 });
   }
 }

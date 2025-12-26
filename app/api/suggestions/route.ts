@@ -6,7 +6,6 @@ import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-
 const createSuggestionSchema = z.object({
   titulo: z.string().min(3, 'El título debe tener al menos 3 caracteres'),
   descripcion: z.string().min(10, 'La descripción debe tener al menos 10 caracteres'),
@@ -22,7 +21,7 @@ export async function GET(request: NextRequest) {
   try {
     const user = await requireAuth();
     const { searchParams } = new URL(request.url);
-    
+
     // Solo super_admin puede ver todas las sugerencias
     if (user.role !== 'super_admin') {
       return NextResponse.json(
@@ -39,7 +38,7 @@ export async function GET(request: NextRequest) {
     const companyId = searchParams.get('companyId');
 
     const where: any = {};
-    
+
     if (estado) where.estado = estado;
     if (prioridad) where.prioridad = prioridad;
     if (categoria) where.categoria = categoria;
@@ -64,10 +63,7 @@ export async function GET(request: NextRequest) {
             },
           },
         },
-        orderBy: [
-          { prioridad: 'desc' },
-          { createdAt: 'desc' },
-        ],
+        orderBy: [{ prioridad: 'desc' }, { createdAt: 'desc' }],
         skip: (page - 1) * limit,
         take: limit,
       }),
@@ -97,7 +93,7 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth();
     const body = await request.json();
-    
+
     const validatedData = createSuggestionSchema.parse(body);
 
     const suggestion = await prisma.suggestion.create({
@@ -151,14 +147,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(suggestion, { status: 201 });
   } catch (error: any) {
     logger.error('Error al crear sugerencia:', error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Datos inválidos', details: error.errors },
         { status: 400 }
       );
     }
-    
+
     return NextResponse.json(
       { error: error.message || 'Error al crear sugerencia' },
       { status: 500 }

@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `${results.filter(r => r.success).length}/${results.length} clientes sincronizados con Holded`,
+      message: `${results.filter((r) => r.success).length}/${results.length} clientes sincronizados con Holded`,
       results,
     });
   } catch (error) {

@@ -67,9 +67,7 @@ export async function performBatchImageOCR(
 /**
  * Preprocess image for better OCR results
  */
-export async function preprocessImageForOCR(
-  imageBuffer: Buffer
-): Promise<Buffer> {
+export async function preprocessImageForOCR(imageBuffer: Buffer): Promise<Buffer> {
   try {
     logger.info('Preprocessing image for OCR');
 

@@ -1,6 +1,6 @@
 /**
  * Endpoints API para Tareas
- * 
+ *
  * Implementa operaciones CRUD con validación Zod, manejo de errores
  * y códigos de estado HTTP correctos.
  */
@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
   try {
     const user = await requireAuth();
     const { searchParams } = new URL(req.url);
-    
+
     const estado = searchParams.get('estado');
     const prioridad = searchParams.get('prioridad');
     const asignadoA = searchParams.get('asignadoA');
@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
     const offset = searchParams.get('offset');
 
     const where: any = { companyId: user.companyId };
-    
+
     if (estado) where.estado = estado;
     if (prioridad) where.prioridad = prioridad;
     if (asignadoA) where.asignadoA = asignadoA;
@@ -50,10 +50,7 @@ export async function GET(req: NextRequest) {
             select: { id: true, name: true, email: true },
           },
         },
-        orderBy: [
-          { prioridad: 'desc' },
-          { fechaLimite: 'asc' },
-        ],
+        orderBy: [{ prioridad: 'desc' }, { fechaLimite: 'asc' }],
         take,
         skip,
       }),
@@ -61,26 +58,28 @@ export async function GET(req: NextRequest) {
     ]);
 
     logger.info(`Tareas obtenidas: ${tasks.length} de ${total}`, { userId: user.id });
-    
-    return NextResponse.json({
-      data: tasks,
-      meta: {
-        total,
-        limit: take,
-        offset: skip,
+
+    return NextResponse.json(
+      {
+        data: tasks,
+        meta: {
+          total,
+          limit: take,
+          offset: skip,
+        },
       },
-    }, { status: 200 });
-    
+      { status: 200 }
+    );
   } catch (error: any) {
     logger.error('Error fetching tasks:', error);
-    
+
     if (error.message === 'No autenticado') {
       return NextResponse.json(
         { error: 'No autenticado', message: 'Debe iniciar sesión' },
         { status: 401 }
       );
     }
-    
+
     return NextResponse.json(
       { error: 'Error interno del servidor', message: 'Error al obtener tareas' },
       { status: 500 }
@@ -149,7 +148,6 @@ export async function POST(req: NextRequest) {
 
     logger.info(`Tarea creada: ${task.id}`, { userId: user.id, taskId: task.id });
     return NextResponse.json(task, { status: 201 });
-    
   } catch (error: any) {
     logger.error('Error creating task:', error);
 
@@ -165,12 +163,9 @@ export async function POST(req: NextRequest) {
     }
 
     if (error.message?.includes('permiso')) {
-      return NextResponse.json(
-        { error: 'Prohibido', message: error.message },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Prohibido', message: error.message }, { status: 403 });
     }
-    
+
     if (error.message === 'No autenticado') {
       return NextResponse.json(
         { error: 'No autenticado', message: 'Debe iniciar sesión' },

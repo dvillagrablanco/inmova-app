@@ -48,15 +48,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       total,
-      porEstado: Object.fromEntries(
-        porEstado.map((e) => [e.estado, e._count])
-      ),
-      porPrioridad: Object.fromEntries(
-        porPrioridad.map((p) => [p.prioridad, p._count])
-      ),
-      porCategoria: Object.fromEntries(
-        porCategoria.map((c) => [c.categoria, c._count])
-      ),
+      porEstado: Object.fromEntries(porEstado.map((e) => [e.estado, e._count])),
+      porPrioridad: Object.fromEntries(porPrioridad.map((p) => [p.prioridad, p._count])),
+      porCategoria: Object.fromEntries(porCategoria.map((c) => [c.categoria, c._count])),
       recientes,
     });
   } catch (error: any) {

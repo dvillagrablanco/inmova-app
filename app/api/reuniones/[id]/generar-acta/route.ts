@@ -9,24 +9,15 @@ import logger, { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 // POST /api/reuniones/[id]/generar-acta - Generar PDF del acta
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     if (!['administrador', 'gestor'].includes(session.user.role || '')) {
-      return NextResponse.json(
-        { error: 'No tienes permisos para generar actas' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'No tienes permisos para generar actas' }, { status: 403 });
     }
 
     const reunion = await prisma.communityMeeting.findFirst({
@@ -40,10 +31,7 @@ export async function POST(
     });
 
     if (!reunion) {
-      return NextResponse.json(
-        { error: 'Reunión no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Reunión no encontrada' }, { status: 404 });
     }
 
     // Generar contenido HTML del acta
@@ -120,22 +108,34 @@ export async function POST(
         </div>
 
         <h2>ORDEN DEL DÍA</h2>
-        ${ordenDia.map((item: any, index: number) => `
+        ${ordenDia
+          .map(
+            (item: any, index: number) => `
           <div class="orden-item">
             <strong>${index + 1}.</strong> ${item.titulo || item.texto || item}
             ${item.descripcion ? `<br><small>${item.descripcion}</small>` : ''}
           </div>
-        `).join('')}
+        `
+          )
+          .join('')}
 
-        ${acuerdos && acuerdos.length > 0 ? `
+        ${
+          acuerdos && acuerdos.length > 0
+            ? `
           <h2>ACUERDOS ADOPTADOS</h2>
-          ${acuerdos.map((acuerdo: any, index: number) => `
+          ${acuerdos
+            .map(
+              (acuerdo: any, index: number) => `
             <div class="acuerdo-item">
               <strong>${index + 1}.</strong> ${acuerdo.texto || acuerdo.titulo || acuerdo}
               ${acuerdo.resultado ? `<br><small>Resultado: ${acuerdo.resultado}</small>` : ''}
             </div>
-          `).join('')}
-        ` : ''}
+          `
+            )
+            .join('')}
+        `
+            : ''
+        }
 
         <div class="footer">
           <p>Acta generada el ${format(new Date(), "dd/MM/yyyy 'a las' HH:mm 'horas'", { locale: es })}</p>
@@ -167,9 +167,6 @@ export async function POST(
     });
   } catch (error) {
     logger.error('Error al generar acta:', error);
-    return NextResponse.json(
-      { error: 'Error al generar acta' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al generar acta' }, { status: 500 });
   }
 }

@@ -1,17 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import prisma from "@/lib/prisma";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import prisma from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user?.id) {
-      return NextResponse.json(
-        { error: "No autenticado" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const userId = session.user.id;
@@ -19,24 +16,24 @@ export async function GET(request: NextRequest) {
     // Obtener perfil ewoorker
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { companyId: true }
+      select: { companyId: true },
     });
 
     if (!user?.companyId) {
       return NextResponse.json({
         documentos: [],
-        semaforo: { verde: 0, amarillo: 0, rojo: 0 }
+        semaforo: { verde: 0, amarillo: 0, rojo: 0 },
       });
     }
 
     const perfil = await prisma.ewoorkerPerfilEmpresa.findUnique({
-      where: { companyId: user.companyId }
+      where: { companyId: user.companyId },
     });
 
     if (!perfil) {
       return NextResponse.json({
         documentos: [],
-        semaforo: { verde: 0, amarillo: 0, rojo: 0 }
+        semaforo: { verde: 0, amarillo: 0, rojo: 0 },
       });
     }
 
@@ -44,8 +41,8 @@ export async function GET(request: NextRequest) {
     const documentos = await prisma.ewoorkerDocumento.findMany({
       where: { perfilId: perfil.id },
       orderBy: [
-        { estado: "asc" }, // ROJO primero
-        { fechaCaducidad: "asc" }
+        { estado: 'asc' }, // ROJO primero
+        { fechaCaducidad: 'asc' },
       ],
       select: {
         id: true,
@@ -57,16 +54,16 @@ export async function GET(request: NextRequest) {
         confianzaOCR: true,
         numeroDocumento: true,
         requiereRevisionManual: true,
-        createdAt: true
-      }
+        createdAt: true,
+      },
     });
 
     // Calcular semáforo
     const semaforo = documentos.reduce(
       (acc, doc) => {
-        if (doc.estado === "VERDE") acc.verde++;
-        else if (doc.estado === "AMARILLO") acc.amarillo++;
-        else if (doc.estado === "ROJO") acc.rojo++;
+        if (doc.estado === 'VERDE') acc.verde++;
+        else if (doc.estado === 'AMARILLO') acc.amarillo++;
+        else if (doc.estado === 'ROJO') acc.rojo++;
         return acc;
       },
       { verde: 0, amarillo: 0, rojo: 0 }
@@ -79,15 +76,11 @@ export async function GET(request: NextRequest) {
         id: perfil.id,
         tipoEmpresa: perfil.tipoEmpresa,
         numeroREA: perfil.numeroREA,
-        estadoREA: perfil.estadoREA
-      }
+        estadoREA: perfil.estadoREA,
+      },
     });
-
   } catch (error) {
-    console.error("[EWOORKER_COMPLIANCE_DOCS]", error);
-    return NextResponse.json(
-      { error: "Error al obtener documentos" },
-      { status: 500 }
-    );
+    console.error('[EWOORKER_COMPLIANCE_DOCS]', error);
+    return NextResponse.json({ error: 'Error al obtener documentos' }, { status: 500 });
   }
 }

@@ -30,7 +30,7 @@ function createRedisClient(): Redis | null {
 
   try {
     const redisUrl = process.env.REDIS_URL;
-    
+
     // Configuración base
     const config: RedisConfig = {
       host: 'localhost',
@@ -48,10 +48,10 @@ function createRedisClient(): Redis | null {
     // Si es una URL completa de Redis Cloud o con formato redis://
     if (redisUrl.startsWith('redis://') || redisUrl.startsWith('rediss://')) {
       const url = new URL(redisUrl);
-      
+
       config.host = url.hostname;
       config.port = parseInt(url.port || '6379');
-      
+
       if (url.password) {
         config.password = url.password;
       }
@@ -68,7 +68,7 @@ function createRedisClient(): Redis | null {
       const [host, port] = redisUrl.split(':');
       config.host = host;
       config.port = parseInt(port || '6379');
-      
+
       if (process.env.REDIS_PASSWORD) {
         config.password = process.env.REDIS_PASSWORD;
       }
@@ -108,7 +108,7 @@ export const redis = createRedisClient();
  */
 export async function isRedisAvailable(): Promise<boolean> {
   if (!redis) return false;
-  
+
   try {
     await redis.ping();
     return true;
@@ -123,11 +123,11 @@ export async function isRedisAvailable(): Promise<boolean> {
  */
 export async function getRedisStats(): Promise<any> {
   if (!redis) return null;
-  
+
   try {
     const info = await redis.info('stats');
     const dbSize = await redis.dbsize();
-    
+
     return {
       connected: true,
       dbSize,

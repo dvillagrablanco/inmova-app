@@ -175,7 +175,7 @@ function EdificiosPageContent() {
   if (status === 'loading' || isLoading) {
     return (
       <AuthenticatedLayout>
-            <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto">
               <Skeleton className="h-8 w-48 mb-6" />
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Array.from({ length: 6 }).map((_, i) => (
@@ -204,7 +204,7 @@ function EdificiosPageContent() {
     <AuthenticatedLayout>
       <div className="max-w-7xl mx-auto space-y-6">
             {/* Botón Volver y Breadcrumbs */}
-            <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4">
               <Button
                 variant="outline"
                 size="sm"
@@ -230,7 +230,7 @@ function EdificiosPageContent() {
             </div>
 
             {/* Header Section */}
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div className="flex items-start gap-3">
                 <div>
                   <h1 className="text-3xl font-bold tracking-tight">Edificios</h1>
@@ -294,7 +294,7 @@ function EdificiosPageContent() {
             </Card>
 
             {/* Stats Summary */}
-            <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-3">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total Edificios</CardTitle>

@@ -28,10 +28,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(availability);
   } catch (error) {
     logger.error('Error al obtener disponibilidad:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener disponibilidad' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener disponibilidad' }, { status: 500 });
   }
 }
 
@@ -70,9 +67,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    logger.info(
-      `Disponibilidad registrada para proveedor ${auth.provider.nombre}: ${estado}`
-    );
+    logger.info(`Disponibilidad registrada para proveedor ${auth.provider.nombre}: ${estado}`);
 
     return NextResponse.json({
       success: true,
@@ -81,9 +76,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     logger.error('Error al registrar disponibilidad:', error);
-    return NextResponse.json(
-      { error: 'Error al registrar disponibilidad' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al registrar disponibilidad' }, { status: 500 });
   }
 }

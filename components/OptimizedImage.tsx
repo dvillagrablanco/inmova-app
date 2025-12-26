@@ -75,12 +75,13 @@ export function OptimizedImageWithAspectRatio({
   containerClassName,
   ...props
 }: OptimizedImageWithAspectRatioProps) {
-  const aspectRatioClass = {
-    square: 'aspect-square',
-    video: 'aspect-video',
-    portrait: 'aspect-[3/4]',
-    landscape: 'aspect-[4/3]',
-  }[aspectRatio] || aspectRatio;
+  const aspectRatioClass =
+    {
+      square: 'aspect-square',
+      video: 'aspect-video',
+      portrait: 'aspect-[3/4]',
+      landscape: 'aspect-[4/3]',
+    }[aspectRatio] || aspectRatio;
 
   return (
     <div className={cn('relative bg-muted', aspectRatioClass, containerClassName)}>

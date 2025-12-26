@@ -168,185 +168,183 @@ export default function SecurityAlertsPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto space-y-6">
-            <div className="flex justify-between items-center">
-              <div>
-                <h1 className="text-3xl font-bold">Alertas de Seguridad</h1>
-                <p className="text-muted-foreground mt-1">
-                  Monitoreo de eventos de seguridad y accesos sospechosos
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold">Alertas de Seguridad</h1>
+            <p className="text-muted-foreground mt-1">
+              Monitoreo de eventos de seguridad y accesos sospechosos
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Select value={severity} onValueChange={setSeverity}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Severidad" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas las severidades</SelectItem>
+                <SelectItem value="critical">Críticas</SelectItem>
+                <SelectItem value="high">Altas</SelectItem>
+                <SelectItem value="medium">Medias</SelectItem>
+                <SelectItem value="low">Bajas</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={period} onValueChange={setPeriod}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Período" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">Último día</SelectItem>
+                <SelectItem value="7">Últimos 7 días</SelectItem>
+                <SelectItem value="30">Últimos 30 días</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button onClick={fetchSecurityAlerts} disabled={refreshing} variant="outline">
+              <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+              Actualizar
+            </Button>
+          </div>
+        </div>
+
+        {/* Resumen de Alertas */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Críticas</CardTitle>
+              <AlertCircle className="h-4 w-4 text-red-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-500">
+                {securityData?.summary.critical || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">Requieren atención inmediata</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Altas</CardTitle>
+              <AlertTriangle className="h-4 w-4 text-orange-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-orange-500">
+                {securityData?.summary.high || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">Prioridad alta</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Medias</CardTitle>
+              <AlertCircle className="h-4 w-4 text-yellow-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-yellow-500">
+                {securityData?.summary.medium || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">Prioridad media</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Bajas</CardTitle>
+              <Info className="h-4 w-4 text-blue-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-500">
+                {securityData?.summary.low || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">Prioridad baja</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Lista de Alertas */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              Alertas Detectadas ({securityData?.alerts?.length || 0})
+            </CardTitle>
+            <CardDescription>
+              Últimas {period} días {severity !== 'all' && `- Severidad: ${severity}`}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {securityData?.alerts && securityData.alerts.length > 0 ? (
+              <div className="space-y-3">
+                {securityData.alerts.map((alert, index) => (
+                  <div
+                    key={index}
+                    className="flex items-start gap-4 p-4 border rounded-lg hover:bg-accent"
+                  >
+                    {getSeverityIcon(alert.severity)}
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-semibold">{getAlertTitle(alert)}</h4>
+                        <Badge variant={getSeverityVariant(alert.severity)}>
+                          {alert.severity.toUpperCase()}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{getAlertDescription(alert)}</p>
+                      {alert.data.company && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Empresa: {alert.data.company.name}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Shield className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+                <p className="text-lg font-semibold text-muted-foreground">
+                  No se detectaron alertas de seguridad
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  El sistema está funcionando con normalidad
                 </p>
               </div>
-              <div className="flex gap-2">
-                <Select value={severity} onValueChange={setSeverity}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Severidad" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas las severidades</SelectItem>
-                    <SelectItem value="critical">Críticas</SelectItem>
-                    <SelectItem value="high">Altas</SelectItem>
-                    <SelectItem value="medium">Medias</SelectItem>
-                    <SelectItem value="low">Bajas</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={period} onValueChange={setPeriod}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Período" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">Último día</SelectItem>
-                    <SelectItem value="7">Últimos 7 días</SelectItem>
-                    <SelectItem value="30">Últimos 30 días</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button onClick={fetchSecurityAlerts} disabled={refreshing} variant="outline">
-                  <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                  Actualizar
-                </Button>
-              </div>
-            </div>
-
-            {/* Resumen de Alertas */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Críticas</CardTitle>
-                  <AlertCircle className="h-4 w-4 text-red-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-red-500">
-                    {securityData?.summary.critical || 0}
-                  </div>
-                  <p className="text-xs text-muted-foreground">Requieren atención inmediata</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Altas</CardTitle>
-                  <AlertTriangle className="h-4 w-4 text-orange-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-orange-500">
-                    {securityData?.summary.high || 0}
-                  </div>
-                  <p className="text-xs text-muted-foreground">Prioridad alta</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Medias</CardTitle>
-                  <AlertCircle className="h-4 w-4 text-yellow-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-yellow-500">
-                    {securityData?.summary.medium || 0}
-                  </div>
-                  <p className="text-xs text-muted-foreground">Prioridad media</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Bajas</CardTitle>
-                  <Info className="h-4 w-4 text-blue-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-blue-500">
-                    {securityData?.summary.low || 0}
-                  </div>
-                  <p className="text-xs text-muted-foreground">Prioridad baja</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Lista de Alertas */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5" />
-                  Alertas Detectadas ({securityData?.alerts?.length || 0})
-                </CardTitle>
-                <CardDescription>
-                  Últimas {period} días {severity !== 'all' && `- Severidad: ${severity}`}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {securityData?.alerts && securityData.alerts.length > 0 ? (
-                  <div className="space-y-3">
-                    {securityData.alerts.map((alert, index) => (
-                      <div
-                        key={index}
-                        className="flex items-start gap-4 p-4 border rounded-lg hover:bg-accent"
-                      >
-                        {getSeverityIcon(alert.severity)}
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-semibold">{getAlertTitle(alert)}</h4>
-                            <Badge variant={getSeverityVariant(alert.severity)}>
-                              {alert.severity.toUpperCase()}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            {getAlertDescription(alert)}
-                          </p>
-                          {alert.data.company && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Empresa: {alert.data.company.name}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <Shield className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                    <p className="text-lg font-semibold text-muted-foreground">
-                      No se detectaron alertas de seguridad
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      El sistema está funcionando con normalidad
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Recomendaciones */}
-            {totalAlerts > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recomendaciones de Seguridad</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {(securityData?.summary?.critical || 0) > 0 && (
-                      <Alert variant="destructive">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertTitle>Alertas Críticas Detectadas</AlertTitle>
-                        <AlertDescription>
-                          Se recomienda revisar inmediatamente las alertas críticas y tomar medidas
-                          correctivas.
-                        </AlertDescription>
-                      </Alert>
-                    )}
-                    {(securityData?.summary?.high || 0) > 5 && (
-                      <Alert>
-                        <AlertTriangle className="h-4 w-4" />
-                        <AlertTitle>Múltiples Alertas de Alta Prioridad</AlertTitle>
-                        <AlertDescription>
-                          Considera implementar controles de seguridad adicionales o revisar las
-                          políticas de acceso.
-                        </AlertDescription>
-                      </Alert>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
             )}
-          </div>
-        </AuthenticatedLayout>
+          </CardContent>
+        </Card>
+
+        {/* Recomendaciones */}
+        {totalAlerts > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Recomendaciones de Seguridad</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {(securityData?.summary?.critical || 0) > 0 && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Alertas Críticas Detectadas</AlertTitle>
+                    <AlertDescription>
+                      Se recomienda revisar inmediatamente las alertas críticas y tomar medidas
+                      correctivas.
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {(securityData?.summary?.high || 0) > 5 && (
+                  <Alert>
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertTitle>Múltiples Alertas de Alta Prioridad</AlertTitle>
+                    <AlertDescription>
+                      Considera implementar controles de seguridad adicionales o revisar las
+                      políticas de acceso.
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </AuthenticatedLayout>
   );
 }

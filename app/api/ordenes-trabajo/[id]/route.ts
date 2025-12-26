@@ -7,10 +7,7 @@ import logger, { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 // PATCH /api/ordenes-trabajo/[id] - Actualizar orden de trabajo
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -47,7 +44,7 @@ export async function PATCH(
     } = body;
 
     const updateData: any = {};
-    
+
     // Campos básicos editables
     if (titulo !== undefined) updateData.titulo = titulo;
     if (descripcion !== undefined) updateData.descripcion = descripcion;
@@ -57,13 +54,13 @@ export async function PATCH(
     if (buildingId !== undefined) updateData.buildingId = buildingId;
     if (unitId !== undefined) updateData.unitId = unitId;
     if (notas !== undefined) updateData.notas = notas;
-    
+
     // Fechas
     if (fechaAsignacion) updateData.fechaAsignacion = new Date(fechaAsignacion);
     if (fechaEstimada) updateData.fechaEstimada = new Date(fechaEstimada);
     if (fechaInicio) updateData.fechaInicio = new Date(fechaInicio);
     if (fechaCompletado) updateData.fechaCompletado = new Date(fechaCompletado);
-    
+
     // Estado con lógica especial
     if (estado) {
       updateData.estado = estado;
@@ -72,13 +69,13 @@ export async function PATCH(
         updateData.fechaFirma = new Date();
       }
     }
-    
+
     // Costos
     if (presupuestoInicial !== undefined) updateData.presupuestoInicial = presupuestoInicial;
     if (costoTotal !== undefined) updateData.costoTotal = costoTotal;
     if (costoMateriales !== undefined) updateData.costoMateriales = costoMateriales;
     if (costoManoObra !== undefined) updateData.costoManoObra = costoManoObra;
-    
+
     // Otros campos
     if (fotosAntes) updateData.fotosAntes = fotosAntes;
     if (fotosDespues) updateData.fotosDespues = fotosDespues;
@@ -102,9 +99,6 @@ export async function PATCH(
     return NextResponse.json(orden);
   } catch (error) {
     logger.error('Error updating orden:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar orden de trabajo' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar orden de trabajo' }, { status: 500 });
   }
 }

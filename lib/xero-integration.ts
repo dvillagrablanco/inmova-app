@@ -118,7 +118,7 @@ export class XeroClient {
       const response = await fetch('https://identity.xero.com/connect/token', {
         method: 'POST',
         headers: {
-          'Authorization': `Basic ${credentials}`,
+          Authorization: `Basic ${credentials}`,
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({
@@ -153,9 +153,9 @@ export class XeroClient {
     }
 
     return {
-      'Authorization': `Bearer ${this.accessToken}`,
+      Authorization: `Bearer ${this.accessToken}`,
       'xero-tenant-id': this.tenantId,
-      'Accept': 'application/json',
+      Accept: 'application/json',
       'Content-Type': 'application/json',
     };
   }
@@ -238,22 +238,24 @@ export class XeroClient {
       const headers = await this.getAuthHeaders();
 
       const payload = {
-        Invoices: [{
-          Type: invoice.type,
-          Contact: invoice.contact,
-          Date: invoice.date.toISOString().split('T')[0],
-          DueDate: invoice.dueDate?.toISOString().split('T')[0],
-          LineItems: invoice.lineItems.map(item => ({
-            Description: item.description,
-            Quantity: item.quantity,
-            UnitAmount: item.unitAmount,
-            AccountCode: item.accountCode || '200', // Default sales account
-            TaxType: item.taxType || 'OUTPUT2', // Default tax type (EU VAT)
-          })),
-          Status: invoice.status || 'DRAFT',
-          Reference: invoice.reference,
-          CurrencyCode: invoice.currencyCode || 'EUR',
-        }],
+        Invoices: [
+          {
+            Type: invoice.type,
+            Contact: invoice.contact,
+            Date: invoice.date.toISOString().split('T')[0],
+            DueDate: invoice.dueDate?.toISOString().split('T')[0],
+            LineItems: invoice.lineItems.map((item) => ({
+              Description: item.description,
+              Quantity: item.quantity,
+              UnitAmount: item.unitAmount,
+              AccountCode: item.accountCode || '200', // Default sales account
+              TaxType: item.taxType || 'OUTPUT2', // Default tax type (EU VAT)
+            })),
+            Status: invoice.status || 'DRAFT',
+            Reference: invoice.reference,
+            CurrencyCode: invoice.currencyCode || 'EUR',
+          },
+        ],
       };
 
       const response = await fetch(`${this.baseUrl}/Invoices`, {
@@ -372,13 +374,15 @@ export class XeroClient {
       const headers = await this.getAuthHeaders();
 
       const payload = {
-        Payments: [{
-          Invoice: payment.invoice,
-          Account: payment.account,
-          Date: payment.date.toISOString().split('T')[0],
-          Amount: payment.amount,
-          Reference: payment.reference,
-        }],
+        Payments: [
+          {
+            Invoice: payment.invoice,
+            Account: payment.account,
+            Date: payment.date.toISOString().split('T')[0],
+            Amount: payment.amount,
+            Reference: payment.reference,
+          },
+        ],
       };
 
       const response = await fetch(`${this.baseUrl}/Payments`, {
@@ -416,13 +420,10 @@ export class XeroClient {
     try {
       const headers = await this.getAuthHeaders();
 
-      const response = await fetch(
-        `${this.baseUrl}/Accounts?where=Type=="BANK"`,
-        {
-          method: 'GET',
-          headers,
-        }
-      );
+      const response = await fetch(`${this.baseUrl}/Accounts?where=Type=="BANK"`, {
+        method: 'GET',
+        headers,
+      });
 
       if (!response.ok) {
         throw new Error(`Failed to get bank accounts: ${response.statusText}`);
@@ -451,7 +452,7 @@ export class XeroClient {
       const response = await fetch('https://api.xero.com/connections', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${this.accessToken}`,
+          Authorization: `Bearer ${this.accessToken}`,
           'Content-Type': 'application/json',
         },
       });
@@ -478,11 +479,7 @@ export class XeroClient {
 
 export function isXeroConfigured(config?: XeroConfig | null): boolean {
   if (!config) return false;
-  return !!(
-    config.clientId &&
-    config.clientSecret &&
-    config.enabled
-  );
+  return !!(config.clientId && config.clientSecret && config.enabled);
 }
 
 export function getXeroClient(config?: XeroConfig): XeroClient | null {
@@ -501,7 +498,8 @@ export function getXeroAuthUrl(clientId: string, redirectUri: string, state: str
     response_type: 'code',
     client_id: clientId,
     redirect_uri: redirectUri,
-    scope: 'openid profile email accounting.transactions accounting.contacts accounting.settings offline_access',
+    scope:
+      'openid profile email accounting.transactions accounting.contacts accounting.settings offline_access',
     state,
   });
 

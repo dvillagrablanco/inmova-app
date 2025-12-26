@@ -3,10 +3,9 @@ import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-
 /**
  * API endpoint para recibir métricas de Web Vitals
- * 
+ *
  * En producción, estas métricas se pueden enviar a:
  * - Google Analytics
  * - Datadog
@@ -18,15 +17,12 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
-    
+
     const { metric, value, rating, timestamp, url, userAgent } = data;
 
     // Validar datos
     if (!metric || value === undefined) {
-      return NextResponse.json(
-        { error: 'Datos inválidos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
     }
 
     // Log de la métrica
@@ -40,7 +36,7 @@ export async function POST(request: NextRequest) {
     // 1. Guardar en base de datos
     // 2. Enviar a servicio de analytics
     // 3. Enviar a sistema de monitoreo
-    
+
     // Ejemplo: Guardar en DB (descomentar cuando esté configurado)
     /*
     await prisma.webVital.create({
@@ -78,9 +74,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     logger.error('Error processing web vitals:', error);
-    return NextResponse.json(
-      { error: 'Error al procesar métricas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al procesar métricas' }, { status: 500 });
   }
 }
