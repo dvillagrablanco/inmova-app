@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import '@/styles/mobile-first.css';
 import '@/styles/sidebar-mobile.css';
+import '@/styles/onboarding-mobile.css';
 // import 'react-big-calendar/lib/css/react-big-calendar.css'; // Desactivado temporalmente - requiere paquete react-big-calendar
 import { Providers } from '@/components/providers';
 import { SkipLink } from '@/components/ui/skip-link';
