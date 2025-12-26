@@ -7,15 +7,39 @@ import { Badge } from '@/components/ui/badge';
 import { 
   TrendingUp, Users, DollarSign, Award, CheckCircle, ArrowRight,
   Building2, GraduationCap, Globe, Briefcase, FileText, BarChart3,
-  Zap, Star, Target, Rocket, Trophy, Shield
+  Zap, Star, Target, Rocket, Trophy, Shield, Landmark
 } from 'lucide-react';
 
 const partnerTypes = [
   {
+    icon: Building2,
+    title: 'Bancos',
+    description: 'Entidades bancarias, banca privada, hipotecas',
+    benefits: ['Acuerdo marco €50-200K/año', '10% revenue share', 'White-label + API'],
+    highlight: 'Premium',
+    color: 'emerald'
+  },
+  {
+    icon: Shield,
+    title: 'Aseguradoras',
+    description: 'Seguros de hogar, alquiler, impagos',
+    benefits: ['Acuerdo €30-100K/año', '12% revenue', 'Reduce siniestralidad 25%'],
+    highlight: 'Premium',
+    color: 'rose'
+  },
+  {
+    icon: Trophy,
+    title: 'Multifamily Offices',
+    description: 'Family offices, gestoras patrimoniales UHNW',
+    benefits: ['€2,000 por familia', '25% recurrente', 'Clientes premium'],
+    highlight: 'Premium',
+    color: 'amber'
+  },
+  {
     icon: Users,
     title: 'Autónomos Inmobiliarios',
     description: 'APIs, asesores y consultores inmobiliarios',
-    benefits: ['€150-1,000 por captación', '15% recurrente', '€220/mes pasivo con 10 clientes'],
+    benefits: ['€150-1,000 por captación', '15% recurrente', '€220/mes pasivo'],
     color: 'blue'
   },
   {
@@ -43,14 +67,14 @@ const partnerTypes = [
     icon: FileText,
     title: 'Asociaciones Profesionales',
     description: 'Colegios de APIs, AEGI, asociaciones',
-    benefits: ['30% descuento asociados', '€100 + 15% recurrente', '€1,560/mes potencial'],
+    benefits: ['30% descuento asociados', '€100 + 15% recurrente', '€1,560/mes'],
     color: 'orange'
   },
   {
     icon: Briefcase,
     title: 'Asesores Fiscales',
     description: 'Gestorías y asesores de inversores',
-    benefits: ['€100-700 captación', '12% recurrente', 'Bonus add-on ESG'],
+    benefits: ['€100-700 captación', '12% recurrente', 'Bonus ESG'],
     color: 'cyan'
   }
 ];
@@ -88,10 +112,10 @@ const tiers = [
 ];
 
 const stats = [
-  { label: 'Partners Activos', value: '250+', icon: Users },
-  { label: 'Clientes Referidos', value: '2,650', icon: Target },
-  { label: 'Comisiones Pagadas', value: '€1.2M', icon: DollarSign },
-  { label: 'ARR Partners', value: '€3.9M', icon: TrendingUp }
+  { label: 'Partners Activos', value: '298', icon: Users },
+  { label: 'Clientes Referidos', value: '18,050', icon: Target },
+  { label: 'Comisiones Pagadas', value: '€5.5M', icon: DollarSign },
+  { label: 'ARR Partners', value: '€33.1M', icon: TrendingUp }
 ];
 
 const testimonials = [
@@ -192,7 +216,14 @@ export default function PartnersPage() {
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {partnerTypes.map((type, idx) => (
-              <Card key={idx} className="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border-2">
+              <Card key={idx} className={`group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border-2 ${type.highlight ? 'border-amber-400 bg-gradient-to-br from-amber-50 to-orange-50' : ''}`}>
+                {type.highlight && (
+                  <div className="absolute -top-3 -right-3">
+                    <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 px-3 py-1 shadow-lg">
+                      {type.highlight}
+                    </Badge>
+                  </div>
+                )}
                 <CardHeader>
                   <div className={`p-3 bg-gradient-to-br from-${type.color}-500 to-${type.color}-600 rounded-xl w-fit mb-3 group-hover:scale-110 transition-transform`}>
                     <type.icon className="h-6 w-6 text-white" />
