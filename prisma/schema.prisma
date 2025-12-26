@@ -1360,6 +1360,12 @@ model Company {
   onboardingProgress    OnboardingProgress[]
   onboardingTasks       OnboardingTask[]
   
+  // 📱 POMELLI SOCIAL MEDIA INTEGRATION
+  pomelliConfig         PomelliConfig?
+  socialProfiles        SocialProfile[]
+  socialPosts           SocialPost[]
+  socialAnalytics       SocialAnalytics[]
+  
   @@map("company")
 }
 
@@ -12711,4 +12717,167 @@ model UserCelebration {
   @@index([shown])
   @@index([createdAt])
   @@map("user_celebrations")
+}
+// ============================================================================
+// POMELLI SOCIAL MEDIA INTEGRATION
+// ============================================================================
+
+model PomelliConfig {
+  id          String   @id @default(cuid())
+  companyId   String   @unique
+  
+  // Credenciales API
+  apiKey      String
+  apiSecret   String   // Encriptado
+  webhookUrl  String?
+  
+  // Estado
+  enabled     Boolean  @default(true)
+  lastSyncAt  DateTime?
+  
+  // Metadata
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  profiles    SocialProfile[]
+  posts       SocialPost[]
+  
+  @@index([companyId])
+  @@map("pomelli_configs")
+}
+
+model SocialProfile {
+  id               String   @id @default(cuid())
+  companyId        String
+  pomelliConfigId  String
+  
+  // Identificación del perfil
+  platform         String   // linkedin, instagram, x, facebook
+  profileId        String   // ID en Pomelli
+  profileName      String
+  profileUsername  String   // @username
+  profileUrl       String?
+  profileImageUrl  String?
+  
+  // Tokens de acceso (encriptados)
+  accessToken      String?  @db.Text
+  refreshToken     String?  @db.Text
+  tokenExpiresAt   DateTime?
+  
+  // Estado
+  isActive         Boolean  @default(true)
+  isConnected      Boolean  @default(true)
+  lastSyncAt       DateTime?
+  
+  // Estadísticas
+  followersCount   Int      @default(0)
+  followingCount   Int      @default(0)
+  postsCount       Int      @default(0)
+  
+  // Metadata adicional
+  metadata         Json?
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  company          Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  pomelliConfig    PomelliConfig  @relation(fields: [pomelliConfigId], references: [id], onDelete: Cascade)
+  posts            SocialPost[]   @relation("PostProfiles")
+  
+  @@unique([companyId, platform])
+  @@index([companyId])
+  @@index([platform])
+  @@index([isActive])
+  @@map("social_profiles")
+}
+
+model SocialPost {
+  id              String   @id @default(cuid())
+  companyId       String
+  pomelliConfigId String
+  userId          String   // Creador del post
+  
+  // Contenido
+  content         String   @db.Text
+  contentType     String   // text, image, video, carousel, story
+  mediaUrls       String[] @default([])
+  
+  // Plataformas
+  platforms       String[] @default([]) // linkedin, instagram, x
+  
+  // Estado
+  status          String   // draft, scheduled, published, failed, archived
+  
+  // Programación
+  scheduledAt     DateTime?
+  publishedAt     DateTime?
+  
+  // ID en Pomelli
+  pomelliPostId   String?
+  
+  // Analytics
+  impressions     Int      @default(0)
+  reach           Int      @default(0)
+  likes           Int      @default(0)
+  comments        Int      @default(0)
+  shares          Int      @default(0)
+  clicks          Int      @default(0)
+  engagementRate  Float    @default(0)
+  
+  // Error handling
+  errorMessage    String?  @db.Text
+  retryCount      Int      @default(0)
+  maxRetries      Int      @default(3)
+  lastAttemptAt   DateTime?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  company         Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  pomelliConfig   PomelliConfig  @relation(fields: [pomelliConfigId], references: [id], onDelete: Cascade)
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profiles        SocialProfile[] @relation("PostProfiles")
+  
+  @@index([companyId])
+  @@index([userId])
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([publishedAt])
+  @@map("social_posts")
+}
+
+model SocialAnalytics {
+  id            String   @id @default(cuid())
+  companyId     String
+  platform      String   // linkedin, instagram, x
+  
+  // Periodo
+  date          DateTime
+  periodType    String   // daily, weekly, monthly
+  
+  // Métricas
+  impressions   Int      @default(0)
+  reach         Int      @default(0)
+  likes         Int      @default(0)
+  comments      Int      @default(0)
+  shares        Int      @default(0)
+  clicks        Int      @default(0)
+  followers     Int      @default(0)
+  engagement    Float    @default(0)
+  
+  // Métricas calculadas
+  growthRate    Float    @default(0)
+  bestPostTime  String?  // Mejor hora para publicar
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  @@unique([companyId, platform, date, periodType])
+  @@index([companyId])
+  @@index([platform])
+  @@index([date])
+  @@map("social_analytics")
 }
