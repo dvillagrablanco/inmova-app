@@ -313,6 +313,87 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
       { key: 'clientSecret', label: 'Client Secret', type: 'password', required: true },
     ],
   },
+
+  // ========== CHANNEL MANAGERS (Nuevos) ==========
+  {
+    id: 'expedia',
+    name: 'Expedia',
+    category: 'channel_manager',
+    description: 'EPS - Expedia Partner Solutions API',
+    logo: '/integrations/expedia.svg',
+    status: 'active',
+    credentialFields: [
+      { key: 'partnerId', label: 'Partner ID', type: 'text', required: true },
+      { key: 'apiKey', label: 'API Key', type: 'text', required: true },
+      { key: 'apiSecret', label: 'API Secret', type: 'password', required: true },
+      { key: 'environment', label: 'Entorno', type: 'select', required: true, options: [
+        { value: 'test', label: 'Test' },
+        { value: 'production', label: 'Production' },
+      ]},
+    ],
+  },
+  {
+    id: 'vrbo',
+    name: 'VRBO / HomeAway',
+    category: 'channel_manager',
+    description: 'Alquileres vacacionales (Expedia Group)',
+    logo: '/integrations/vrbo.svg',
+    status: 'active',
+    credentialFields: [
+      { key: 'clientId', label: 'Client ID', type: 'text', required: true },
+      { key: 'clientSecret', label: 'Client Secret', type: 'password', required: true },
+      { key: 'partnerId', label: 'Partner ID', type: 'text', required: true },
+      { key: 'environment', label: 'Entorno', type: 'select', required: true, options: [
+        { value: 'sandbox', label: 'Sandbox' },
+        { value: 'production', label: 'Production' },
+      ]},
+    ],
+  },
+
+  // ========== REDES SOCIALES (Nuevo) ==========
+  {
+    id: 'facebook',
+    name: 'Facebook Business',
+    category: 'social_media',
+    description: 'Gestión de páginas de Facebook',
+    logo: '/integrations/facebook.svg',
+    status: 'active',
+    credentialFields: [
+      { key: 'appId', label: 'App ID', type: 'text', required: true },
+      { key: 'appSecret', label: 'App Secret', type: 'password', required: true },
+      { key: 'pageId', label: 'Page ID', type: 'text', required: false, helpText: 'ID de tu página de Facebook' },
+    ],
+  },
+
+  // ========== CONTABILIDAD (Nuevos) ==========
+  {
+    id: 'quickbooks',
+    name: 'QuickBooks',
+    category: 'accounting',
+    description: 'Contabilidad y facturación (Intuit)',
+    logo: '/integrations/quickbooks.svg',
+    status: 'active',
+    credentialFields: [
+      { key: 'clientId', label: 'Client ID', type: 'text', required: true },
+      { key: 'clientSecret', label: 'Client Secret', type: 'password', required: true },
+      { key: 'environment', label: 'Entorno', type: 'select', required: true, options: [
+        { value: 'sandbox', label: 'Sandbox' },
+        { value: 'production', label: 'Production' },
+      ]},
+    ],
+  },
+  {
+    id: 'xero',
+    name: 'Xero',
+    category: 'accounting',
+    description: 'Contabilidad cloud (UK, AU, NZ)',
+    logo: '/integrations/xero.svg',
+    status: 'active',
+    credentialFields: [
+      { key: 'clientId', label: 'Client ID', type: 'text', required: true },
+      { key: 'clientSecret', label: 'Client Secret', type: 'password', required: true },
+    ],
+  },
 ];
 
 // ============================================================================
