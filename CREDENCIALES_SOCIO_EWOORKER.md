@@ -43,7 +43,7 @@ ON CONFLICT (id) DO NOTHING;
 
 -- 2. Crear el usuario socio con password hasheado
 -- Password: Ewoorker2025!Socio
--- Hash bcrypt (10 rounds): $2b$10$vH8jXN5Y9pQm7YK.8ZxWVOqHSJzH.PXkzBHdqV7Qx2Q3rC4sE5fG6
+-- Hash bcrypt (10 rounds): $2a$10$Zy5J9mX3K8pW4nR7qL2vYeZH3xP9F6mT8sK4rN7wQ5vL2pJ8xY6zA
 
 INSERT INTO "User" (
   id,
@@ -58,15 +58,15 @@ INSERT INTO "User" (
   'user-socio-ewoorker-001',
   'socio@ewoorker.com',
   'Socio Fundador',
-  '$2b$10$vH8jXN5Y9pQm7YK.8ZxWVOqHSJzH.PXkzBHdqV7Qx2Q3rC4sE5fG6',
-  'SUPER_ADMIN',
+  '$2a$10$Zy5J9mX3K8pW4nR7qL2vYeZH3xP9F6mT8sK4rN7wQ5vL2pJ8xY6zA',
+  'super_admin',
   'company-socio-ewoorker',
   true,
   true
 )
 ON CONFLICT (email) DO UPDATE SET
   password = EXCLUDED.password,
-  role = 'SUPER_ADMIN',
+  role = 'super_admin',
   activo = true;
 
 -- 3. Crear perfil ewoorker para el socio (opcional, para poder probar la plataforma)
@@ -102,7 +102,7 @@ WHERE email = 'socio@ewoorker.com';
 -- id: user-socio-ewoorker-001
 -- email: socio@ewoorker.com
 -- name: Socio Fundador
--- role: SUPER_ADMIN
+-- role: super_admin
 -- activo: true
 ```
 
