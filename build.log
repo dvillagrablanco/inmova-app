@@ -1,44 +1,192 @@
+
+> build
+> next build
+
   ▲ Next.js 14.2.28
-  - Environments: .env
+  - Environments: .env.production
   - Experiments (use with caution):
     · outputFileTracingRoot
 
    Creating an optimized production build ...
- ✓ Compiled successfully
-   Skipping linting
-   Checking validity of types ...
 
+> Build error occurred
+Error: Page config in /workspace/app/api/rent-roll/upload/route.ts is deprecated. Replace `export const config=…` with the following:
+Visit https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config for more information.
+    at getPageStaticInfo (/workspace/node_modules/next/dist/build/analysis/get-page-static-info.js:427:27)
+    at async getStaticInfoIncludingLayouts (/workspace/node_modules/next/dist/build/entries.js:108:28)
+    at async /workspace/node_modules/next/dist/build/entries.js:410:32
+    at async Promise.all (index 542)
+    at async Promise.all (index 0)
+    at async createEntrypoints (/workspace/node_modules/next/dist/build/entries.js:550:5)
+    at async Span.traceAsyncFn (/workspace/node_modules/next/dist/trace/trace.js:154:20)
+    at async webpackBuildImpl (/workspace/node_modules/next/dist/build/webpack-build/impl.js:104:25)
+    at async /workspace/node_modules/next/dist/build/index.js:1006:111
+    at async Span.traceAsyncFn (/workspace/node_modules/next/dist/trace/trace.js:154:20)
 
-===== TS errors =====
+> build
+> next build
 
-[Test Mode] ./lib/proactive-detection-service.ts:441:9
-Type error: Type '{ userId: string; tipo: "alerta_sistema"; titulo: string; mensaje: string; leida: false; }' is not assignable to type '(Without<NotificationCreateInput, NotificationUncheckedCreateInput> & NotificationUncheckedCreateInput) | (Without<...> & NotificationCreateInput)'.
-  Type '{ userId: string; tipo: "alerta_sistema"; titulo: string; mensaje: string; leida: false; }' is not assignable to type 'Without<NotificationCreateInput, NotificationUncheckedCreateInput> & NotificationUncheckedCreateInput'.
-    Property 'companyId' is missing in type '{ userId: string; tipo: "alerta_sistema"; titulo: string; mensaje: string; leida: false; }' but required in type 'NotificationUncheckedCreateInput'.
+  ▲ Next.js 14.2.28
+  - Environments: .env.production
+  - Experiments (use with caution):
+    · outputFileTracingRoot
 
-[0m [90m 439 |[39m     [36mfor[39m ([36mconst[39m issue [36mof[39m criticalIssues) {[0m
-[0m [90m 440 |[39m       [36mawait[39m prisma[33m.[39mnotification[33m.[39mcreate({[0m
-[0m[31m[1m>[22m[39m[90m 441 |[39m         data[33m:[39m {[0m
-[0m [90m     |[39m         [31m[1m^[22m[39m[0m
-[0m [90m 442 |[39m           userId[33m:[39m user[33m.[39mid[33m,[39m[0m
-[0m [90m 443 |[39m           tipo[33m:[39m [32m'alerta_sistema'[39m[33m,[39m[0m
-[0m [90m 444 |[39m           titulo[33m:[39m issue[33m.[39mtitle[33m,[39m[0m
-
-===== TS errors =====
-
-
+   Creating an optimized production build ...
 Failed to compile.
 
-./lib/proactive-detection-service.ts:441:9
-Type error: Type '{ userId: string; tipo: "alerta_sistema"; titulo: string; mensaje: string; leida: false; }' is not assignable to type '(Without<NotificationCreateInput, NotificationUncheckedCreateInput> & NotificationUncheckedCreateInput) | (Without<...> & NotificationCreateInput)'.
-  Type '{ userId: string; tipo: "alerta_sistema"; titulo: string; mensaje: string; leida: false; }' is not assignable to type 'Without<NotificationCreateInput, NotificationUncheckedCreateInput> & NotificationUncheckedCreateInput'.
-    Property 'companyId' is missing in type '{ userId: string; tipo: "alerta_sistema"; titulo: string; mensaje: string; leida: false; }' but required in type 'NotificationUncheckedCreateInput'.
+./app/admin/planes/page.tsx
+Error: 
+  [31mx[0m Unexpected token `AuthenticatedLayout`. Expected jsx identifier
+     ,-[[36;1;4m/workspace/app/admin/planes/page.tsx[0m:225:1]
+ [2m225[0m |   }
+ [2m226[0m | 
+ [2m227[0m |   return (
+ [2m228[0m |     <AuthenticatedLayout>
+     : [31;1m     ^^^^^^^^^^^^^^^^^^^[0m
+ [2m229[0m |           <div className="max-w-7xl mx-auto">
+ [2m230[0m |             {/* Header */}
+ [2m231[0m |             <div className="mb-4">
+     `----
 
-[0m [90m 439 |[39m     [36mfor[39m ([36mconst[39m issue [36mof[39m criticalIssues) {[0m
-[0m [90m 440 |[39m       [36mawait[39m prisma[33m.[39mnotification[33m.[39mcreate({[0m
-[0m[31m[1m>[22m[39m[90m 441 |[39m         data[33m:[39m {[0m
-[0m [90m     |[39m         [31m[1m^[22m[39m[0m
-[0m [90m 442 |[39m           userId[33m:[39m user[33m.[39mid[33m,[39m[0m
-[0m [90m 443 |[39m           tipo[33m:[39m [32m'alerta_sistema'[39m[33m,[39m[0m
-[0m [90m 444 |[39m           titulo[33m:[39m issue[33m.[39mtitle[33m,[39m[0m
-Next.js build worker exited with code: 1 and signal: null
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./app/admin/planes/page.tsx
+
+./app/admin/reportes-programados/page.tsx
+Error: 
+  [31mx[0m Unexpected token `AuthenticatedLayout`. Expected jsx identifier
+     ,-[[36;1;4m/workspace/app/admin/reportes-programados/page.tsx[0m:416:1]
+ [2m416[0m |   }
+ [2m417[0m | 
+ [2m418[0m |   return (
+ [2m419[0m |     <AuthenticatedLayout>
+     : [31;1m     ^^^^^^^^^^^^^^^^^^^[0m
+ [2m420[0m |           <div className="max-w-7xl mx-auto space-y-6">
+ [2m421[0m |             {/* Header */}
+ [2m422[0m |             <div className="flex items-center justify-between">
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./app/admin/reportes-programados/page.tsx
+
+./app/api/cron/onboarding-automation/route.ts
+Error: 
+  [31mx[0m Expression expected
+    ,-[[36;1;4m/workspace/app/api/cron/onboarding-automation/route.ts[0m:11:1]
+ [2m11[0m |  * {
+ [2m12[0m |  *   "crons": [{
+ [2m13[0m |  *     "path": "/api/cron/onboarding-automation",
+ [2m14[0m |  *     "schedule": "0 */6 * * *"  // Cada 6 horas
+    : [31;1m                            ^[0m
+ [2m15[0m |  *   }]
+ [2m16[0m |  * }
+ [2m17[0m |  */
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./app/api/cron/onboarding-automation/route.ts
+
+./app/api/esg/decarbonization-plans/route.ts
+Module not found: Can't resolve '@/lib/auth'
+
+https://nextjs.org/docs/messages/module-not-found
+
+./app/api/esg/metrics/route.ts
+Module not found: Can't resolve '@/lib/auth'
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+> Build failed because of webpack errors
+
+> build
+> next build
+
+  ▲ Next.js 14.2.28
+  - Environments: .env.production
+  - Experiments (use with caution):
+    · outputFileTracingRoot
+
+   Creating an optimized production build ...
+Failed to compile.
+
+./app/admin/planes/page.tsx
+Error: 
+  [31mx[0m Unexpected token `AuthenticatedLayout`. Expected jsx identifier
+     ,-[[36;1;4m/workspace/app/admin/planes/page.tsx[0m:225:1]
+ [2m225[0m |   }
+ [2m226[0m | 
+ [2m227[0m |   return (
+ [2m228[0m |     <AuthenticatedLayout>
+     : [31;1m     ^^^^^^^^^^^^^^^^^^^[0m
+ [2m229[0m |           <div className="max-w-7xl mx-auto">
+ [2m230[0m |             {/* Header */}
+ [2m231[0m |             <div className="mb-4">
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./app/admin/planes/page.tsx
+
+./app/admin/reportes-programados/page.tsx
+Error: 
+  [31mx[0m Unexpected token `AuthenticatedLayout`. Expected jsx identifier
+     ,-[[36;1;4m/workspace/app/admin/reportes-programados/page.tsx[0m:416:1]
+ [2m416[0m |   }
+ [2m417[0m | 
+ [2m418[0m |   return (
+ [2m419[0m |     <AuthenticatedLayout>
+     : [31;1m     ^^^^^^^^^^^^^^^^^^^[0m
+ [2m420[0m |           <div className="max-w-7xl mx-auto space-y-6">
+ [2m421[0m |             {/* Header */}
+ [2m422[0m |             <div className="flex items-center justify-between">
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./app/admin/reportes-programados/page.tsx
+
+./app/api/cron/onboarding-automation/route.ts
+Error: 
+  [31mx[0m Expression expected
+    ,-[[36;1;4m/workspace/app/api/cron/onboarding-automation/route.ts[0m:11:1]
+ [2m11[0m |  * {
+ [2m12[0m |  *   "crons": [{
+ [2m13[0m |  *     "path": "/api/cron/onboarding-automation",
+ [2m14[0m |  *     "schedule": "0 */6 * * *"  // Cada 6 horas
+    : [31;1m                            ^[0m
+ [2m15[0m |  *   }]
+ [2m16[0m |  * }
+ [2m17[0m |  */
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./app/api/cron/onboarding-automation/route.ts
+
+./app/api/esg/decarbonization-plans/route.ts
+Module not found: Can't resolve '@/lib/auth'
+
+https://nextjs.org/docs/messages/module-not-found
+
+./app/api/esg/metrics/route.ts
+Module not found: Can't resolve '@/lib/auth'
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+> Build failed because of webpack errors

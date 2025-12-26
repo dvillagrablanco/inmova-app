@@ -11,10 +11,11 @@
  * {
  *   "crons": [{
  *     "path": "/api/cron/onboarding-automation",
- *     "schedule": "0 */6 * * *"  // Cada 6 horas
+ *     "schedule": "0 */6 * * *"
  *   }]
  * }
  */
+// Ejecuta cada 6 horas
 
 import { NextRequest, NextResponse } from 'next/server';
 import { processOnboardingReminders } from '@/lib/onboarding-email-automation';

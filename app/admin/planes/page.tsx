@@ -520,6 +520,6 @@ export default function PlanesPage() {
         variant="destructive"
         loading={isDeleting}
       />
-    </div>
+    </AuthenticatedLayout>
   );
 }
