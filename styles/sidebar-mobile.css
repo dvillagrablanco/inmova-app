@@ -1,5 +1,20 @@
 /* Estilos específicos para el sidebar en móvil */
 
+/* Desktop - sidebar siempre visible */
+@media (min-width: 1024px) {
+  [data-mobile-sidebar] {
+    transform: translateX(0) !important;
+  }
+
+  [data-mobile-overlay] {
+    display: none !important;
+  }
+
+  button[aria-label*='menú'] {
+    display: none !important;
+  }
+}
+
 /* Asegurar que el sidebar sea scrolleable en móviles */
 @media (max-width: 1023px) {
   /* Prevenir scroll del body cuando el sidebar está abierto */

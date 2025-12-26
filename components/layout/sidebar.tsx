@@ -69,6 +69,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import logger, { logError } from '@/lib/logger';
 import { safeLocalStorage } from '@/lib/safe-storage';
+import { toggleMobileMenu, closeMobileMenu } from '@/lib/mobile-menu';
 
 // Mapeo de rutas a códigos de módulos para sistema modular
 const ROUTE_TO_MODULE: Record<string, string> = {
@@ -987,6 +988,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
           href={item.href}
           prefetch={true}
           onClick={() => {
+            closeMobileMenu();
             setIsMobileMenuOpen(false);
             onNavigate?.();
           }}
@@ -1025,7 +1027,10 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     <>
       {/* Mobile menu button - Fixed en la parte superior izquierda */}
       <button
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        onClick={() => {
+          toggleMobileMenu();
+          setIsMobileMenuOpen(!isMobileMenuOpen);
+        }}
         className="lg:hidden fixed top-3 left-3 z-[100] p-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-xl shadow-2xl hover:shadow-indigo-600/90 active:scale-95 transition-all duration-200 border-2 border-white/30 backdrop-blur-md touch-manipulation"
         style={{ backgroundColor: 'rgba(79, 70, 229, 0.95)', minWidth: '52px', minHeight: '52px' }}
         aria-label={isMobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
@@ -1038,26 +1043,29 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
       </button>
 
       {/* Overlay for mobile - Cubre toda la pantalla excepto el botón */}
-      {isMobileMenuOpen && (
-        <div
-          className="lg:hidden fixed inset-0 bg-black/70 z-[80] backdrop-blur-sm sidebar-overlay"
-          onClick={() => setIsMobileMenuOpen(false)}
-          aria-hidden="true"
-        />
-      )}
+      <div
+        data-mobile-overlay
+        className="lg:hidden fixed inset-0 bg-black/70 z-[80] backdrop-blur-sm sidebar-overlay"
+        style={{ display: 'none' }}
+        onClick={() => {
+          closeMobileMenu();
+          setIsMobileMenuOpen(false);
+        }}
+        aria-hidden="true"
+      />
 
       {/* Sidebar - Optimizado para móviles */}
       <aside
-        className={cn(
-          'fixed top-0 left-0 z-[90] h-screen w-[85vw] max-w-[320px] sm:w-64 bg-black text-white transition-transform duration-300 ease-in-out overflow-hidden',
-          isMobileMenuOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'
-        )}
-        aria-label="Navegación principal"
+        data-mobile-sidebar
+        className="fixed top-0 left-0 z-[90] h-screen w-[85vw] max-w-[320px] sm:w-64 lg:w-64 bg-black text-white overflow-hidden lg:translate-x-0"
         style={{
+          transform: 'translateX(-100%)',
+          transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           maxHeight: '100vh',
           touchAction: 'pan-y',
           WebkitOverflowScrolling: 'touch',
         }}
+        aria-label="Navegación principal"
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
