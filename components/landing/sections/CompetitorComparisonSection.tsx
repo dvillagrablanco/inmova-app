@@ -7,34 +7,38 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
 const comparisonFeatures = [
-  { feature: 'Alquiler Tradicional', inmova: true, competitorA: true, competitorB: true, competitorC: true },
-  { feature: 'Alquiler por Habitaciones (Coliving)', inmova: true, competitorA: false, competitorB: false, competitorC: false },
-  { feature: 'STR / Short Term Rental', inmova: true, competitorA: true, competitorB: false, competitorC: true },
-  { feature: 'House Flipping', inmova: true, competitorA: false, competitorB: false, competitorC: false },
-  { feature: 'Construcción (9 fases)', inmova: true, competitorA: false, competitorB: false, competitorC: false },
-  { feature: 'Servicios Profesionales', inmova: true, competitorA: false, competitorB: false, competitorC: false },
-  { feature: 'Portal Inquilinos PWA', inmova: true, competitorA: true, competitorB: false, competitorC: true },
-  { feature: 'Portal Propietarios PWA', inmova: true, competitorA: false, competitorB: false, competitorC: true },
-  { feature: 'Portal Proveedores', inmova: true, competitorA: false, competitorB: false, competitorC: false },
-  { feature: 'Asistente IA GPT-4', inmova: true, competitorA: false, competitorB: false, competitorC: false },
-  { feature: 'Blockchain & NFTs', inmova: true, competitorA: false, competitorB: false, competitorC: false },
-  { feature: 'Mantenimiento Predictivo IA', inmova: true, competitorA: false, competitorB: false, competitorC: false },
-  { feature: 'Firma Digital Integrada', inmova: true, competitorA: true, competitorB: false, competitorC: false },
-  { feature: 'Open Banking', inmova: true, competitorA: false, competitorB: false, competitorC: false },
-  { feature: 'ESG & Sostenibilidad', inmova: true, competitorA: false, competitorB: false, competitorC: false },
-  { feature: 'Economía Circular', inmova: true, competitorA: false, competitorB: false, competitorC: false },
-  { feature: 'Channel Manager STR', inmova: true, competitorA: true, competitorB: false, competitorC: true },
-  { feature: 'Integración Stripe', inmova: true, competitorA: false, competitorB: true, competitorC: true },
-  { feature: 'CRM Inmobiliario', inmova: true, competitorA: true, competitorB: false, competitorC: true },
-  { feature: 'Business Intelligence', inmova: true, competitorA: true, competitorB: false, competitorC: false },
-  { feature: 'Multi-Vertical (7 modelos)', inmova: true, competitorA: false, competitorB: false, competitorC: false },
+  // VERTICALES DE NEGOCIO
+  { feature: '🏢 Alquiler Tradicional', inmova: true, competitorA: true, competitorB: true, competitorC: true, category: 'vertical' },
+  { feature: '🏖️ STR / Vacacional', inmova: true, competitorA: true, competitorB: false, competitorC: true, category: 'vertical' },
+  { feature: '🛏️ Coliving / Habitaciones', inmova: true, competitorA: false, competitorB: false, competitorC: false, category: 'vertical' },
+  { feature: '💹 House Flipping', inmova: true, competitorA: false, competitorB: false, competitorC: false, category: 'vertical' },
+  { feature: '🏗️ Construcción', inmova: true, competitorA: false, competitorB: false, competitorC: false, category: 'vertical' },
+  { feature: '💼 Servicios Profesionales B2B', inmova: true, competitorA: false, competitorB: false, competitorC: false, category: 'vertical' },
+  
+  // MÓDULOS TRANSVERSALES
+  { feature: '🌱 ESG & Sostenibilidad', inmova: true, competitorA: false, competitorB: false, competitorC: false, category: 'transversal' },
+  { feature: '🛍️ Marketplace B2C', inmova: true, competitorA: false, competitorB: false, competitorC: false, category: 'transversal' },
+  { feature: '💰 Pricing Dinámico IA', inmova: true, competitorA: false, competitorB: false, competitorC: true, category: 'transversal' },
+  { feature: '👓 Tours Virtuales AR/VR', inmova: true, competitorA: false, competitorB: false, competitorC: false, category: 'transversal' },
+  { feature: '🏠 IoT & Smart Buildings', inmova: true, competitorA: false, competitorB: false, competitorC: false, category: 'transversal' },
+  { feature: '⛓️ Blockchain & Tokenización', inmova: true, competitorA: false, competitorB: false, competitorC: false, category: 'transversal' },
+  
+  // FUNCIONALIDADES CORE
+  { feature: 'Portal Inquilinos PWA', inmova: true, competitorA: true, competitorB: false, competitorC: true, category: 'core' },
+  { feature: 'Portal Propietarios PWA', inmova: true, competitorA: false, competitorB: false, competitorC: true, category: 'core' },
+  { feature: 'Asistente IA GPT-4', inmova: true, competitorA: false, competitorB: false, competitorC: false, category: 'core' },
+  { feature: 'Channel Manager Multi-OTA', inmova: true, competitorA: true, competitorB: false, competitorC: true, category: 'core' },
+  { feature: 'Firma Digital Integrada', inmova: true, competitorA: true, competitorB: false, competitorC: false, category: 'core' },
+  { feature: 'Open Banking', inmova: true, competitorA: false, competitorB: false, competitorC: false, category: 'core' },
+  { feature: 'CRM Inmobiliario', inmova: true, competitorA: true, competitorB: false, competitorC: true, category: 'core' },
+  { feature: 'Business Intelligence', inmova: true, competitorA: true, competitorB: false, competitorC: false, category: 'core' },
 ];
 
 const pricing = [
-  { name: 'INMOVA', price: '€60/mes', modules: 88, color: 'indigo', subtitle: 'Plan Pro' },
-  { name: 'Homming', price: '€119/mes', modules: 15, color: 'red', subtitle: 'Advanced' },
-  { name: 'Competidor B', price: '€129/mes', modules: 18, color: 'gray', subtitle: 'Estándar' },
-  { name: 'Competidor C', price: '€179/mes', modules: 35, color: 'gray', subtitle: 'Premium' },
+  { name: 'INMOVA', price: '€49/mes', modules: '6 verticales + 6 módulos', color: 'indigo', subtitle: 'Plan Basic' },
+  { name: 'Homming', price: '€120/mes', modules: '1 vertical', color: 'red', subtitle: 'Advanced' },
+  { name: 'Rentger', price: '€100/mes', modules: '1 vertical', color: 'gray', subtitle: 'Estándar' },
+  { name: 'Guesty', price: '$150/mes', modules: '1 vertical (Solo STR)', color: 'gray', subtitle: 'Premium' },
 ];
 
 export function CompetitorComparisonSection() {
@@ -51,7 +55,7 @@ export function CompetitorComparisonSection() {
             ¿Por Qué Elegir INMOVA?
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Comparamos funcionalidad por funcionalidad para que veas claramente por qué somos la opción más completa del mercado
+            Somos la única plataforma que combina <strong>6 verticales + 6 módulos transversales</strong>. Ningún competidor tiene esta arquitectura.
           </p>
         </div>
 
@@ -76,7 +80,7 @@ export function CompetitorComparisonSection() {
                 )}
                 {item.color === 'red' && (
                   <Badge className="mb-2 bg-red-100 text-red-700 border-red-200">
-                    58% más caro
+                    145% más caro
                   </Badge>
                 )}
                 <CardTitle className={`text-xl ${
@@ -90,7 +94,7 @@ export function CompetitorComparisonSection() {
                 }`}>
                   {item.price}
                 </p>
-                <p className="text-sm text-gray-500 mt-1">{item.modules} módulos</p>
+                <p className="text-sm text-gray-500 mt-1">{item.modules}</p>
                 {item.color === 'red' && (
                   <Link href="/comparativa/homming" className="mt-3 inline-block">
                     <Button variant="outline" size="sm" className="text-xs">
