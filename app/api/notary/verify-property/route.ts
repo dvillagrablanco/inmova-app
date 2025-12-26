@@ -12,17 +12,17 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { propertyId, cadastralReference, province } = body;
+    const { unitId, cadastralReference, province } = body;
 
-    if (!propertyId || !cadastralReference || !province) {
+    if (!unitId || !cadastralReference || !province) {
       return NextResponse.json(
-        { error: 'propertyId, cadastralReference y province son requeridos' },
+        { error: 'unitId, cadastralReference y province son requeridos' },
         { status: 400 }
       );
     }
 
     const verification = await NotaryIntegrationService.verifyProperty(
-      propertyId,
+      unitId,
       cadastralReference,
       province
     );

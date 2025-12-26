@@ -297,7 +297,7 @@ export class RentRollOCRService {
    */
   static async saveRentRoll(
     userId: string,
-    propertyId: string | undefined,
+    unitId: string | undefined,
     parsedData: ParsedRentRoll,
     originalFileName: string
   ) {
@@ -306,7 +306,7 @@ export class RentRollOCRService {
     return await prisma.rentRoll.create({
       data: {
         userId,
-        propertyId,
+        unitId,
         fileName: originalFileName,
         buildingName: parsedData.buildingName,
         address: parsedData.address,

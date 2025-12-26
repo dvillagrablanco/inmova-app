@@ -71,11 +71,11 @@ export class RealEstateIntegrations {
   static async importFromIdealista(propertyUrl: string): Promise<PropertyData> {
     try {
       // Extraer ID de la URL
-      const propertyId = this.extractIdealistaId(propertyUrl);
+      const unitId = this.extractIdealistaId(propertyUrl);
       
       // Opción 1: API oficial (requiere cuenta premium)
       if (this.IDEALISTA_API_KEY) {
-        return await this.fetchFromIdealistaAPI(propertyId);
+        return await this.fetchFromIdealistaAPI(unitId);
       }
       
       // Opción 2: Web scraping (alternativa sin API)
@@ -91,10 +91,10 @@ export class RealEstateIntegrations {
    */
   static async importFromPisos(propertyUrl: string): Promise<PropertyData> {
     try {
-      const propertyId = this.extractPisosId(propertyUrl);
+      const unitId = this.extractPisosId(propertyUrl);
       
       if (this.PISOS_API_KEY) {
-        return await this.fetchFromPisosAPI(propertyId);
+        return await this.fetchFromPisosAPI(unitId);
       }
       
       return await this.scrapePisos(propertyUrl);
@@ -351,11 +351,11 @@ export class RealEstateIntegrations {
   /**
    * API oficial de Idealista
    */
-  private static async fetchFromIdealistaAPI(propertyId: string): Promise<PropertyData> {
+  private static async fetchFromIdealistaAPI(unitId: string): Promise<PropertyData> {
     const axios = require('axios');
 
     const response = await axios.get(
-      `${this.IDEALISTA_API_URL}/properties/${propertyId}`,
+      `${this.IDEALISTA_API_URL}/properties/${unitId}`,
       {
         headers: {
           'Authorization': `Bearer ${this.IDEALISTA_API_KEY}`,
@@ -367,7 +367,7 @@ export class RealEstateIntegrations {
     const data = response.data;
     
     return {
-      externalId: propertyId,
+      externalId: unitId,
       portal: 'idealista',
       url: data.url,
       title: data.title,
@@ -403,7 +403,7 @@ export class RealEstateIntegrations {
   /**
    * API de Pisos.com
    */
-  private static async fetchFromPisosAPI(propertyId: string): Promise<PropertyData> {
+  private static async fetchFromPisosAPI(unitId: string): Promise<PropertyData> {
     // Similar a Idealista
     throw new Error('API de Pisos.com no implementada');
   }
@@ -453,7 +453,7 @@ export class RealEstateIntegrations {
         userId,
         {
           assetType: this.mapAssetType(propertyData.propertyType),
-          propertyId: property.id,
+          unitId: property.id,
           purchasePrice: propertyData.price,
           monthlyRent: estimatedRent,
           // ... otros valores por defecto

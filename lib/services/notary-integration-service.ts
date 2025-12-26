@@ -37,7 +37,7 @@ export interface NotaryDocument {
 }
 
 export interface PropertyVerification {
-  propertyId: string;
+  unitId: string;
   verificationDate: Date;
   status: 'verified' | 'pending' | 'issues_found' | 'not_verified';
   checks: {

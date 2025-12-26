@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const file = formData.get('file') as File;
-    const propertyId = formData.get('propertyId') as string | null;
+    const unitId = formData.get('unitId') as string | null;
 
     if (!file) {
       return NextResponse.json({ error: 'Archivo requerido' }, { status: 400 });
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     // Guardar rent roll en base de datos
     const rentRoll = await RentRollOCRService.saveRentRoll(
       session.user.id,
-      propertyId,
+      unitId,
       parsedData,
       file.name
     );

@@ -3,7 +3,7 @@ import { InvestmentAnalysis, RentRoll } from '@prisma/client';
 
 export interface InvestmentAnalysisData {
   assetType: 'piso' | 'local' | 'garaje' | 'trastero' | 'edificio';
-  propertyId?: string;
+  unitId?: string;
   purchasePrice: number;
   notaryAndRegistry: number;
   transferTax: number;
