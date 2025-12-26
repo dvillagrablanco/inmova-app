@@ -66,10 +66,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(enrichedInspections);
   } catch (error) {
     logger.error('Error al obtener inspecciones:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener inspecciones' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener inspecciones' }, { status: 500 });
   }
 }
 
@@ -110,9 +107,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(inspection, { status: 201 });
   } catch (error) {
     logger.error('Error al crear inspección:', error);
-    return NextResponse.json(
-      { error: 'Error al crear inspección' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear inspección' }, { status: 500 });
   }
 }

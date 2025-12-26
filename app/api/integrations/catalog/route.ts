@@ -17,10 +17,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -36,9 +33,9 @@ export async function GET(request: NextRequest) {
 
     // Agrupar por categoría
     const groupedByCategory: Record<string, any[]> = {};
-    
-    Object.keys(INTEGRATION_CATEGORIES).forEach(cat => {
-      groupedByCategory[cat] = providers.filter(p => p.category === cat);
+
+    Object.keys(INTEGRATION_CATEGORIES).forEach((cat) => {
+      groupedByCategory[cat] = providers.filter((p) => p.category === cat);
     });
 
     return NextResponse.json({
@@ -50,9 +47,6 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -10,10 +10,7 @@ export const dynamic = 'force-dynamic';
  * GET /api/str/listings/[id]
  * Obtiene un listing por ID
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user) {
@@ -50,10 +47,7 @@ export async function GET(
     });
 
     if (!listing || listing.companyId !== companyId) {
-      return NextResponse.json(
-        { error: 'Listing no encontrado' },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: 'Listing no encontrado' }, { status: 404 });
     }
 
     return NextResponse.json(listing);
@@ -64,7 +58,7 @@ export async function GET(
         error: 'Error al obtener listing',
         details: (error as Error).message,
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -73,10 +67,7 @@ export async function GET(
  * PUT /api/str/listings/[id]
  * Actualiza un listing
  */
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user) {
@@ -93,10 +84,7 @@ export async function PUT(
     });
 
     if (!existing || existing.companyId !== companyId) {
-      return NextResponse.json(
-        { error: 'Listing no encontrado' },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: 'Listing no encontrado' }, { status: 404 });
     }
 
     // Actualizar listing
@@ -113,7 +101,7 @@ export async function PUT(
         error: 'Error al actualizar listing',
         details: (error as Error).message,
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -122,10 +110,7 @@ export async function PUT(
  * DELETE /api/str/listings/[id]
  * Elimina un listing
  */
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user) {
@@ -141,10 +126,7 @@ export async function DELETE(
     });
 
     if (!existing || existing.companyId !== companyId) {
-      return NextResponse.json(
-        { error: 'Listing no encontrado' },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: 'Listing no encontrado' }, { status: 404 });
     }
 
     // Eliminar listing (cascade eliminará relacionados)
@@ -160,7 +142,7 @@ export async function DELETE(
         error: 'Error al eliminar listing',
         details: (error as Error).message,
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

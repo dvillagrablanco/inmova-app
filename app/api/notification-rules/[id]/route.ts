@@ -9,10 +9,7 @@ export const dynamic = 'force-dynamic';
  * GET /api/notification-rules/[id]
  * Obtiene una regla de notificación específica
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await requireAuth();
 
@@ -27,10 +24,7 @@ export async function GET(
     });
 
     if (!rule) {
-      return NextResponse.json(
-        { error: 'Regla no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Regla no encontrada' }, { status: 404 });
     }
 
     return NextResponse.json(rule);
@@ -39,10 +33,7 @@ export async function GET(
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
-    return NextResponse.json(
-      { error: 'Error al obtener regla de notificación' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener regla de notificación' }, { status: 500 });
   }
 }
 
@@ -50,10 +41,7 @@ export async function GET(
  * PUT /api/notification-rules/[id]
  * Actualiza una regla de notificación
  */
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await requireAuth();
     const body = await request.json();
@@ -67,10 +55,7 @@ export async function PUT(
     });
 
     if (!existingRule) {
-      return NextResponse.json(
-        { error: 'Regla no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Regla no encontrada' }, { status: 404 });
     }
 
     const rule = await prisma.notificationRule.update({
@@ -116,10 +101,7 @@ export async function PUT(
  * DELETE /api/notification-rules/[id]
  * Elimina una regla de notificación
  */
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await requireAuth();
 
@@ -132,10 +114,7 @@ export async function DELETE(
     });
 
     if (!existingRule) {
-      return NextResponse.json(
-        { error: 'Regla no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Regla no encontrada' }, { status: 404 });
     }
 
     await prisma.notificationRule.delete({
@@ -152,9 +131,6 @@ export async function DELETE(
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
-    return NextResponse.json(
-      { error: 'Error al eliminar regla de notificación' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar regla de notificación' }, { status: 500 });
   }
 }

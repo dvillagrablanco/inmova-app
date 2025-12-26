@@ -10,7 +10,6 @@ import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-
 /**
  * @swagger
  * /api/compliance/inspections:
@@ -77,9 +76,7 @@ export async function POST(req: NextRequest) {
       resultado: body.resultado,
       deficienciasEncontradas: body.deficienciasEncontradas || [],
       recomendaciones: body.recomendaciones || [],
-      proximaInspeccion: body.proximaInspeccion
-        ? new Date(body.proximaInspeccion)
-        : undefined,
+      proximaInspeccion: body.proximaInspeccion ? new Date(body.proximaInspeccion) : undefined,
     };
 
     const inspection = await registerBuildingInspection(params);

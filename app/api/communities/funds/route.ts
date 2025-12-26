@@ -10,7 +10,6 @@ import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-
 /**
  * @swagger
  * /api/communities/funds:
@@ -80,19 +79,11 @@ export async function POST(req: NextRequest) {
 
     if (body.action === 'movement') {
       // Añadir movimiento
-      const fund = await addFundMovement(
-        body.fundId,
-        body.tipo,
-        body.monto,
-        body.concepto
-      );
+      const fund = await addFundMovement(body.fundId, body.tipo, body.monto, body.concepto);
       return NextResponse.json(fund);
     }
 
-    return NextResponse.json(
-      { error: 'Acción no válida' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Acción no válida' }, { status: 400 });
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message || 'Error al procesar fondos' },

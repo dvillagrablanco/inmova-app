@@ -11,10 +11,7 @@ export const dynamic = 'force-dynamic';
  * POST /api/digital-signature/[id]/reminder
  * Envía recordatorios a firmantes pendientes
  */
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -34,17 +31,14 @@ export async function POST(
       include: {
         firmantes: {
           where: {
-            estado: 'pendiente'
-          }
-        }
-      }
+            estado: 'pendiente',
+          },
+        },
+      },
     });
 
     if (!documento) {
-      return NextResponse.json(
-        { error: 'Documento no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Documento no encontrado' }, { status: 404 });
     }
 
     if (documento.companyId !== session.user.companyId) {
@@ -58,18 +52,17 @@ export async function POST(
       recordatoriosEnviados.push(firmante.email);
     }
 
-    logger.info(`📧 Recordatorios enviados para documento ${params.id}: ${recordatoriosEnviados.join(', ')}`);
+    logger.info(
+      `📧 Recordatorios enviados para documento ${params.id}: ${recordatoriosEnviados.join(', ')}`
+    );
 
     return NextResponse.json({
       success: true,
       message: `Recordatorios enviados a ${recordatoriosEnviados.length} firmante(s)`,
-      recipients: recordatoriosEnviados
+      recipients: recordatoriosEnviados,
     });
   } catch (error) {
     logger.error('Error enviando recordatorios:', error);
-    return NextResponse.json(
-      { error: 'Error enviando recordatorios' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error enviando recordatorios' }, { status: 500 });
   }
 }

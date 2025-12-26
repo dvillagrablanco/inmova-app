@@ -7,10 +7,7 @@ import logger, { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 // POST /api/galerias/[id]/items - Agregar item a galería
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -56,9 +53,6 @@ export async function POST(
     return NextResponse.json(item, { status: 201 });
   } catch (error) {
     logger.error('Error creating gallery item:', error);
-    return NextResponse.json(
-      { error: 'Error al agregar item a galería' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al agregar item a galería' }, { status: 500 });
   }
 }

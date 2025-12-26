@@ -14,10 +14,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const companyId = searchParams.get('companyId');
     if (!companyId) {
-      return NextResponse.json(
-        { error: 'companyId requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'companyId requerido' }, { status: 400 });
     }
     const result = await socialService.getGroupsByCompany(companyId);
     if (!result.success) {
@@ -26,10 +23,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(result.groups);
   } catch (error) {
     logger.error('Error en GET /api/coliving/groups:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener grupos' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener grupos' }, { status: 500 });
   }
 }
 export async function POST(request: NextRequest) {
@@ -46,9 +40,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result.group, { status: 201 });
   } catch (error) {
     logger.error('Error en POST /api/coliving/groups:', error);
-    return NextResponse.json(
-      { error: 'Error al crear grupo' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear grupo' }, { status: 500 });
   }
 }

@@ -193,191 +193,191 @@ export default function AprobacionesPage() {
 
   return (
     <AuthenticatedLayout>
-          {/* Header con Breadcrumbs */}
-          <div className="mb-6 space-y-4">
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/dashboard" className="flex items-center gap-2">
-                    <Home className="h-4 w-4" />
-                    Inicio
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Aprobaciones</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
+      {/* Header con Breadcrumbs */}
+      <div className="mb-6 space-y-4">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/dashboard" className="flex items-center gap-2">
+                <Home className="h-4 w-4" />
+                Inicio
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Aprobaciones</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight">Historial de Aprobaciones</h1>
-                <p className="text-muted-foreground mt-2">
-                  Gestiona y revisa solicitudes de aprobación
-                </p>
-              </div>
-              <BackButton href="/dashboard" label="Volver al Dashboard" variant="outline" />
-            </div>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Historial de Aprobaciones</h1>
+            <p className="text-muted-foreground mt-2">
+              Gestiona y revisa solicitudes de aprobación
+            </p>
           </div>
+          <BackButton href="/dashboard" label="Volver al Dashboard" variant="outline" />
+        </div>
+      </div>
 
-          {/* Tabs para filtrar por estado */}
-          <Tabs
-            value={selectedTab}
-            onValueChange={(value) => setSelectedTab(value)}
-            className="space-y-4"
-          >
-            <TabsList>
-              <TabsTrigger value="pendiente">Pendientes</TabsTrigger>
-              <TabsTrigger value="aprobado">Aprobadas</TabsTrigger>
-              <TabsTrigger value="rechazado">Rechazadas</TabsTrigger>
-            </TabsList>
+      {/* Tabs para filtrar por estado */}
+      <Tabs
+        value={selectedTab}
+        onValueChange={(value) => setSelectedTab(value)}
+        className="space-y-4"
+      >
+        <TabsList>
+          <TabsTrigger value="pendiente">Pendientes</TabsTrigger>
+          <TabsTrigger value="aprobado">Aprobadas</TabsTrigger>
+          <TabsTrigger value="rechazado">Rechazadas</TabsTrigger>
+        </TabsList>
 
-            <TabsContent value={selectedTab} className="space-y-4">
-              {approvals.length === 0 ? (
-                <Card>
-                  <CardContent className="flex flex-col items-center justify-center py-12">
-                    <CheckCircle2 className="h-12 w-12 text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">
-                      No hay solicitudes{' '}
-                      {selectedTab === 'pendiente'
-                        ? 'pendientes'
-                        : selectedTab === 'aprobado'
-                          ? 'aprobadas'
-                          : 'rechazadas'}
-                    </p>
-                  </CardContent>
-                </Card>
-              ) : (
-                approvals.map((approval) => (
-                  <Card key={approval.id}>
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <CardTitle className="text-lg">{getDescription(approval)}</CardTitle>
-                            <Badge variant="secondary">{getTipoLabel(approval.tipo)}</Badge>
-                            {getEstadoBadge(approval.estado)}
-                          </div>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <Euro className="h-4 w-4" />
-                              {approval.monto?.toFixed(2) || '0.00'} €
-                            </div>
+        <TabsContent value={selectedTab} className="space-y-4">
+          {approvals.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <CheckCircle2 className="h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">
+                  No hay solicitudes{' '}
+                  {selectedTab === 'pendiente'
+                    ? 'pendientes'
+                    : selectedTab === 'aprobado'
+                      ? 'aprobadas'
+                      : 'rechazadas'}
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            approvals.map((approval) => (
+              <Card key={approval.id}>
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CardTitle className="text-lg">{getDescription(approval)}</CardTitle>
+                        <Badge variant="secondary">{getTipoLabel(approval.tipo)}</Badge>
+                        {getEstadoBadge(approval.estado)}
+                      </div>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Euro className="h-4 w-4" />
+                          {approval.monto?.toFixed(2) || '0.00'} €
+                        </div>
+                        <span>•</span>
+                        <span>
+                          Solicitado el{' '}
+                          {format(new Date(approval.fechaSolicitud), 'dd MMM yyyy', {
+                            locale: es,
+                          })}
+                        </span>
+                        {approval.fechaRevision && (
+                          <>
                             <span>•</span>
                             <span>
-                              Solicitado el{' '}
-                              {format(new Date(approval.fechaSolicitud), 'dd MMM yyyy', {
+                              Revisado el{' '}
+                              {format(new Date(approval.fechaRevision), 'dd MMM yyyy', {
                                 locale: es,
                               })}
                             </span>
-                            {approval.fechaRevision && (
-                              <>
-                                <span>•</span>
-                                <span>
-                                  Revisado el{' '}
-                                  {format(new Date(approval.fechaRevision), 'dd MMM yyyy', {
-                                    locale: es,
-                                  })}
-                                </span>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                        {approval.estado === 'pendiente' && (
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              onClick={() => handleApprove(approval.id)}
-                              disabled={isProcessing}
-                            >
-                              <CheckCircle2 className="h-4 w-4 mr-1" />
-                              Aprobar
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => {
-                                setSelectedApproval(approval);
-                                setShowRejectDialog(true);
-                              }}
-                              disabled={isProcessing}
-                            >
-                              <XCircle className="h-4 w-4 mr-1" />
-                              Rechazar
-                            </Button>
-                          </div>
+                          </>
                         )}
                       </div>
-                    </CardHeader>
-                    {(approval.motivo || approval.comentarioRechazo) && (
-                      <CardContent>
-                        {approval.motivo && (
-                          <div className="mb-2">
-                            <p className="text-sm font-medium mb-1">Motivo de la solicitud:</p>
-                            <p className="text-sm text-muted-foreground">{approval.motivo}</p>
-                          </div>
-                        )}
-                        {approval.comentarioRechazo && (
-                          <div className="p-3 bg-destructive/10 rounded-md">
-                            <p className="text-sm font-medium text-destructive mb-1">
-                              Motivo del rechazo:
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {approval.comentarioRechazo}
-                            </p>
-                          </div>
-                        )}
-                      </CardContent>
+                    </div>
+                    {approval.estado === 'pendiente' && (
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleApprove(approval.id)}
+                          disabled={isProcessing}
+                        >
+                          <CheckCircle2 className="h-4 w-4 mr-1" />
+                          Aprobar
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => {
+                            setSelectedApproval(approval);
+                            setShowRejectDialog(true);
+                          }}
+                          disabled={isProcessing}
+                        >
+                          <XCircle className="h-4 w-4 mr-1" />
+                          Rechazar
+                        </Button>
+                      </div>
                     )}
-                  </Card>
-                ))
-              )}
-            </TabsContent>
-          </Tabs>
+                  </div>
+                </CardHeader>
+                {(approval.motivo || approval.comentarioRechazo) && (
+                  <CardContent>
+                    {approval.motivo && (
+                      <div className="mb-2">
+                        <p className="text-sm font-medium mb-1">Motivo de la solicitud:</p>
+                        <p className="text-sm text-muted-foreground">{approval.motivo}</p>
+                      </div>
+                    )}
+                    {approval.comentarioRechazo && (
+                      <div className="p-3 bg-destructive/10 rounded-md">
+                        <p className="text-sm font-medium text-destructive mb-1">
+                          Motivo del rechazo:
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {approval.comentarioRechazo}
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
+                )}
+              </Card>
+            ))
+          )}
+        </TabsContent>
+      </Tabs>
 
-          {/* Dialog para rechazar */}
-          <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Rechazar Solicitud</DialogTitle>
-                <DialogDescription>
-                  ¿Estás seguro de rechazar esta solicitud? Por favor, proporciona un motivo.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="comentario">Motivo del rechazo</Label>
-                  <Textarea
-                    id="comentario"
-                    value={comentarioRechazo}
-                    onChange={(e) => setComentarioRechazo(e.target.value)}
-                    placeholder="Explica por qué se rechaza esta solicitud..."
-                    rows={4}
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setShowRejectDialog(false);
-                    setComentarioRechazo('');
-                    setSelectedApproval(null);
-                  }}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={handleReject}
-                  disabled={isProcessing || !comentarioRechazo.trim()}
-                >
-                  Rechazar Solicitud
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </AuthenticatedLayout>
+      {/* Dialog para rechazar */}
+      <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Rechazar Solicitud</DialogTitle>
+            <DialogDescription>
+              ¿Estás seguro de rechazar esta solicitud? Por favor, proporciona un motivo.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="comentario">Motivo del rechazo</Label>
+              <Textarea
+                id="comentario"
+                value={comentarioRechazo}
+                onChange={(e) => setComentarioRechazo(e.target.value)}
+                placeholder="Explica por qué se rechaza esta solicitud..."
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowRejectDialog(false);
+                setComentarioRechazo('');
+                setSelectedApproval(null);
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleReject}
+              disabled={isProcessing || !comentarioRechazo.trim()}
+            >
+              Rechazar Solicitud
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </AuthenticatedLayout>
   );
 }

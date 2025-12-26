@@ -1,12 +1,12 @@
 /**
  * Configuración centralizada de precios y planes de suscripción INMOVA
  * Estrategia de Precios 2026 - ARQUITECTURA ACTUALIZADA
- * 
+ *
  * NUEVA ARQUITECTURA:
  * - 6 VERTICALES de negocio (modelos específicos)
  * - 6 MÓDULOS TRANSVERSALES (add-ons que amplifican valor)
  * - Pricing modular: vertical base + módulos opcionales
- * 
+ *
  * IMPORTANTE: Esta configuración debe estar sincronizada con:
  * - Stripe Price IDs (cuando se creen los productos en Stripe)
  * - Base de datos (tabla subscription_plans)
@@ -28,28 +28,28 @@ export interface PricingPlan {
   name: string;
   tier: 'basic' | 'professional' | 'business' | 'enterprise';
   description: string;
-  
+
   // Precios
   monthlyPrice: number;
   annualPrice: number;
   annualSavings: number; // En euros
-  
+
   // Límites
   maxProperties: number | 'unlimited';
   maxUsers: number | 'unlimited';
   maxVerticals: number | 'all';
-  
+
   // Características
   features: PricingFeature[];
-  
+
   // Destacados
   popular?: boolean;
   newFeature?: string;
-  
+
   // IDs de Stripe (a configurar después de crear en Stripe)
   stripePriceIdMonthly?: string;
   stripePriceIdAnnual?: string;
-  
+
   // Metadata
   cta: string;
   targetAudience: string[];
@@ -92,15 +92,15 @@ export const PRICING_PLANS: Record<string, PricingPlan> = {
     name: 'Basic',
     tier: 'basic',
     description: 'Perfecto para inversores particulares que quieren dejar Excel',
-    
+
     monthlyPrice: 49,
     annualPrice: 490,
     annualSavings: 98,
-    
+
     maxProperties: 20,
     maxUsers: 1,
     maxVerticals: 1,
-    
+
     features: [
       { text: '✅ 1 Vertical de Negocio (a elegir)', included: true, highlight: true },
       { text: 'Hasta 20 propiedades', included: true },
@@ -112,32 +112,32 @@ export const PRICING_PLANS: Record<string, PricingPlan> = {
       { text: 'Construcción avanzada', included: false },
       { text: 'Soporte email 48h', included: true },
     ],
-    
+
     cta: 'Ideal para inversores particulares y flippers',
     targetAudience: ['Inversor Particular', 'Flipper', 'Landlord'],
-    killerFeature: 'Más barato que Homming (€120) y con Flipping incluido'
+    killerFeature: 'Más barato que Homming (€120) y con Flipping incluido',
   },
-  
+
   professional: {
     id: 'professional',
     name: 'Professional',
     tier: 'professional',
     description: 'Para agencias y gestoras que necesitan múltiples verticales',
-    
+
     monthlyPrice: 149,
     annualPrice: 1490,
     annualSavings: 298,
-    
+
     maxProperties: 100,
     maxUsers: 5,
     maxVerticals: 2,
-    
+
     features: [
       { text: '✅ 2 Verticales de Negocio (combina modelos)', included: true, highlight: true },
       { text: 'Hasta 100 propiedades', included: true },
-      { 
-        text: '⭐ Funciones avanzadas por vertical', 
-        included: true, 
+      {
+        text: '⭐ Funciones avanzadas por vertical',
+        included: true,
         highlight: true,
       },
       { text: '5 usuarios incluidos', included: true },
@@ -148,32 +148,37 @@ export const PRICING_PLANS: Record<string, PricingPlan> = {
       { text: 'Marca Blanca: Colores + Dominio', included: true },
       { text: 'Soporte chat prioritario', included: true },
     ],
-    
+
     popular: true,
     newFeature: '2 Verticales + 1 Módulo Gratis',
     cta: 'Perfecto para agencias y gestoras profesionales',
     targetAudience: ['Agencia', 'Gestora', 'Coliving Manager'],
-    killerFeature: 'Multi-vertical: Combina Alquiler + STR o Flipping + Construcción'
+    killerFeature: 'Multi-vertical: Combina Alquiler + STR o Flipping + Construcción',
   },
-  
+
   business: {
     id: 'business',
     name: 'Business',
     tier: 'business',
     description: 'Todo incluido para gestoras consolidadas y promotoras',
-    
+
     monthlyPrice: 349,
     annualPrice: 3490,
     annualSavings: 698,
-    
+
     maxProperties: 'unlimited',
     maxUsers: 15,
     maxVerticals: 'all',
-    
+
     features: [
       { text: '✅ TODOS los 6 Verticales incluidos', included: true, highlight: true },
       { text: '✅ Propiedades ilimitadas', included: true, highlight: true },
-      { text: '✅ 3 Módulos Transversales incluidos', included: true, highlight: true, badge: 'VALOR €180/MES' },
+      {
+        text: '✅ 3 Módulos Transversales incluidos',
+        included: true,
+        highlight: true,
+        badge: 'VALOR €180/MES',
+      },
       { text: '15 usuarios incluidos', included: true },
       { text: 'AI Assistant GPT-4 Advanced (entrenable)', included: true },
       { text: 'Construcción: Obra Nueva completa', included: true },
@@ -182,27 +187,27 @@ export const PRICING_PLANS: Record<string, PricingPlan> = {
       { text: 'Gestor de Cuenta Dedicado', included: true },
       { text: 'Soporte prioritario 24/7', included: true },
     ],
-    
+
     newFeature: 'Todos los Verticales + 3 Módulos Gratis',
     cta: 'Para promotoras y gestoras consolidadas',
     targetAudience: ['Gestora Consolidada', 'Promotora', 'Multi-vertical'],
-    killerFeature: '6 verticales + 3 módulos transversales incluidos (€180 gratis/mes)'
+    killerFeature: '6 verticales + 3 módulos transversales incluidos (€180 gratis/mes)',
   },
-  
+
   enterprise: {
     id: 'enterprise',
     name: 'Enterprise+',
     tier: 'enterprise',
     description: 'Custom - SOCIMIs y Grandes Promotoras',
-    
+
     monthlyPrice: 0, // Custom
     annualPrice: 0, // Custom
     annualSavings: 0,
-    
+
     maxProperties: 'unlimited',
     maxUsers: 'unlimited',
     maxVerticals: 'all',
-    
+
     features: [
       { text: 'Todos los módulos + desarrollos custom', included: true },
       { text: 'Propiedades y usuarios ilimitados', included: true },
@@ -213,11 +218,11 @@ export const PRICING_PLANS: Record<string, PricingPlan> = {
       { text: 'Soporte 24/7 + Account Manager', included: true },
       { text: 'Auditoría y cumplimiento normativo', included: true },
     ],
-    
+
     cta: 'SOCIMIs y grandes corporaciones',
     targetAudience: ['SOCIMI', 'Gran Promotora', 'Ex-cliente Prinex/IESA'],
-    killerFeature: 'Migración garantizada + SLA 99.9% + Tokenización'
-  }
+    killerFeature: 'Migración garantizada + SLA 99.9% + Tokenización',
+  },
 };
 
 /**
@@ -272,7 +277,7 @@ export const ADD_ONS: Record<string, AddOn> = {
     monthlyPrice: 0, // Basado en comisiones
     availableFor: ['business'],
     includedIn: ['enterprise'],
-  }
+  },
 };
 
 /**
@@ -293,9 +298,9 @@ export const PROMO_CAMPAIGNS: Record<string, PromoCampaign> = {
     validFrom: new Date('2025-01-01'),
     validUntil: new Date('2025-06-30'),
     targetAudience: 'Inversores/Flippers',
-    message: 'Deja de perder dinero en tus reformas. Controla tu ROI en tiempo real.'
+    message: 'Deja de perder dinero en tus reformas. Controla tu ROI en tiempo real.',
   },
-  
+
   roompro: {
     id: 'roompro',
     code: 'ROOMPRO',
@@ -308,9 +313,9 @@ export const PROMO_CAMPAIGNS: Record<string, PromoCampaign> = {
     validFrom: new Date('2025-01-01'),
     validUntil: new Date('2025-06-30'),
     targetAudience: 'Gestores de Habitaciones/Coliving',
-    message: '¿Harto de calcular facturas de luz a mano? INMOVA lo hace solo.'
+    message: '¿Harto de calcular facturas de luz a mano? INMOVA lo hace solo.',
   },
-  
+
   switch2025: {
     id: 'switch2025',
     code: 'SWITCH2025',
@@ -323,8 +328,9 @@ export const PROMO_CAMPAIGNS: Record<string, PromoCampaign> = {
     validFrom: new Date('2025-01-01'),
     validUntil: new Date('2025-12-31'),
     targetAudience: 'Agencias usando Homming/Rentger',
-    message: 'Trae tu última factura. Te damos INMOVA al mismo precio durante 1 año con el plan superior gratis.'
-  }
+    message:
+      'Trae tu última factura. Te damos INMOVA al mismo precio durante 1 año con el plan superior gratis.',
+  },
 };
 
 /**
@@ -334,7 +340,10 @@ export const PROMO_CAMPAIGNS: Record<string, PromoCampaign> = {
 /**
  * Calcula el precio con descuento anual
  */
-export function calculateAnnualPrice(monthlyPrice: number): { annualPrice: number; savings: number } {
+export function calculateAnnualPrice(monthlyPrice: number): {
+  annualPrice: number;
+  savings: number;
+} {
   const annualPrice = monthlyPrice * 10; // 12 meses - 2 gratis = 10 meses
   const savings = monthlyPrice * 2;
   return { annualPrice, savings };
@@ -366,26 +375,27 @@ export function isAddOnIncluded(addOnId: string, planId: string): boolean {
  * Calcula el precio total con add-ons
  */
 export function calculateTotalPrice(
-  planId: string, 
+  planId: string,
   interval: PricingInterval,
   addOnIds: string[] = []
 ): number {
   const plan = getPlanById(planId);
   if (!plan) return 0;
-  
+
   const basePrice = interval === 'annual' ? plan.annualPrice : plan.monthlyPrice;
-  
+
   const addOnsPrice = addOnIds.reduce((total, addOnId) => {
     const addOn = ADD_ONS[addOnId];
     if (!addOn || isAddOnIncluded(addOnId, planId)) return total;
-    
-    const addOnPrice = interval === 'annual' 
-      ? addOn.monthlyPrice * 10 // 2 meses gratis también
-      : addOn.monthlyPrice;
-    
+
+    const addOnPrice =
+      interval === 'annual'
+        ? addOn.monthlyPrice * 10 // 2 meses gratis también
+        : addOn.monthlyPrice;
+
     return total + addOnPrice;
   }, 0);
-  
+
   return basePrice + addOnsPrice;
 }
 
@@ -398,21 +408,21 @@ export function applyPromoCoupon(
   months: number = 1
 ): { finalPrice: number; discount: number; campaign: PromoCampaign | null } {
   const campaign = PROMO_CAMPAIGNS[campaignId];
-  
+
   if (!campaign) {
     return { finalPrice: price, discount: 0, campaign: null };
   }
-  
+
   let discount = 0;
-  
+
   if (campaign.discountType === 'percentage') {
-    discount = (price * campaign.discountValue / 100) * Math.min(months, campaign.duration);
+    discount = ((price * campaign.discountValue) / 100) * Math.min(months, campaign.duration);
   } else {
     discount = campaign.discountValue * Math.min(months, campaign.duration);
   }
-  
+
   const finalPrice = Math.max(0, price - discount);
-  
+
   return { finalPrice, discount, campaign };
 }
 

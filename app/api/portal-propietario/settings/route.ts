@@ -13,10 +13,7 @@ export async function GET(request: NextRequest) {
   try {
     const ownerId = request.headers.get('x-owner-id');
     if (!ownerId) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const owner = await prisma.owner.findUnique({
@@ -37,19 +34,13 @@ export async function GET(request: NextRequest) {
     });
 
     if (!owner) {
-      return NextResponse.json(
-        { error: 'Propietario no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Propietario no encontrado' }, { status: 404 });
     }
 
     return NextResponse.json(owner);
   } catch (error: any) {
     logger.error('Error al obtener configuración del propietario:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener configuración' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener configuración' }, { status: 500 });
   }
 }
 
@@ -61,10 +52,7 @@ export async function PUT(request: NextRequest) {
   try {
     const ownerId = request.headers.get('x-owner-id');
     if (!ownerId) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -89,18 +77,12 @@ export async function PUT(request: NextRequest) {
       });
 
       if (!owner) {
-        return NextResponse.json(
-          { error: 'Propietario no encontrado' },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: 'Propietario no encontrado' }, { status: 404 });
       }
 
       const isValidPassword = await bcrypt.compare(currentPassword, owner.password);
       if (!isValidPassword) {
-        return NextResponse.json(
-          { error: 'Contraseña actual incorrecta' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Contraseña actual incorrecta' }, { status: 400 });
       }
 
       const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -149,9 +131,6 @@ export async function PUT(request: NextRequest) {
     });
   } catch (error: any) {
     logger.error('Error al actualizar configuración del propietario:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar configuración' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar configuración' }, { status: 500 });
   }
 }

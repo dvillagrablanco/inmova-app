@@ -15,7 +15,7 @@ export async function GET() {
 
     // El resto de los datos se mantienen sin caché por ahora (son menos críticos)
     // En el futuro se pueden optimizar también
-    
+
     return NextResponse.json(cachedData);
   } catch (error: any) {
     logger.error('Error fetching dashboard data:', error);

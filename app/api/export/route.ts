@@ -16,14 +16,14 @@ export const dynamic = 'force-dynamic';
 
 /**
  * Endpoint de Exportación CSV Mejorado
- * 
+ *
  * Mejoras aplicadas (Semana 2, Tarea 2.6):
  * - Filtrado obligatorio por companyId (seguridad)
  * - Límite de 10,000 filas (performance)
  * - Formato UTF-8 con BOM (compatibilidad Excel)
  * - Helpers reutilizables
  * - Error handling robusto
- * 
+ *
  * GET /api/export?type=buildings|units|tenants|contracts|payments|expenses
  */
 export async function GET(request: Request) {
@@ -201,10 +201,7 @@ export async function GET(request: Request) {
 
     // Validar que hay datos
     if (data.length === 0) {
-      return NextResponse.json(
-        { error: 'No hay datos para exportar' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'No hay datos para exportar' }, { status: 404 });
     }
 
     // Convertir a CSV con formato optimizado
@@ -229,10 +226,7 @@ export async function GET(request: Request) {
 
     // Manejar errores específicos de Prisma
     if (error.code === 'P2025') {
-      return NextResponse.json(
-        { error: 'No se encontraron datos' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'No se encontraron datos' }, { status: 404 });
     }
 
     return NextResponse.json(

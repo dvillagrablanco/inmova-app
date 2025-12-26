@@ -23,7 +23,8 @@ export async function GET(request: NextRequest) {
           rating: 4.8,
           reviews: 156,
         },
-        description: 'Servicio de limpieza profesional para propiedades vacacionales con entrega en 2 horas',
+        description:
+          'Servicio de limpieza profesional para propiedades vacacionales con entrega en 2 horas',
         price: 45,
         priceType: 'fixed',
         image: '/images/services/cleaning.jpg',
@@ -125,9 +126,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(services);
   } catch (error) {
     logger.error('Error fetching marketplace services:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener servicios' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener servicios' }, { status: 500 });
   }
 }

@@ -33,10 +33,12 @@ class ToastManager {
       description: options?.description,
       duration: options?.duration || 4000,
       icon: <CheckCircle2 className="h-5 w-5" />,
-      action: options?.action ? {
-        label: options.action.label,
-        onClick: options.action.onClick,
-      } : undefined,
+      action: options?.action
+        ? {
+            label: options.action.label,
+            onClick: options.action.onClick,
+          }
+        : undefined,
     });
   }
 
@@ -45,10 +47,12 @@ class ToastManager {
       description: options?.description,
       duration: options?.duration || 5000,
       icon: <XCircle className="h-5 w-5" />,
-      action: options?.action ? {
-        label: options.action.label,
-        onClick: options.action.onClick,
-      } : undefined,
+      action: options?.action
+        ? {
+            label: options.action.label,
+            onClick: options.action.onClick,
+          }
+        : undefined,
     });
   }
 
@@ -57,10 +61,12 @@ class ToastManager {
       description: options?.description,
       duration: options?.duration || 4500,
       icon: <AlertTriangle className="h-5 w-5" />,
-      action: options?.action ? {
-        label: options.action.label,
-        onClick: options.action.onClick,
-      } : undefined,
+      action: options?.action
+        ? {
+            label: options.action.label,
+            onClick: options.action.onClick,
+          }
+        : undefined,
     });
   }
 
@@ -69,10 +75,12 @@ class ToastManager {
       description: options?.description,
       duration: options?.duration || 4000,
       icon: <Info className="h-5 w-5" />,
-      action: options?.action ? {
-        label: options.action.label,
-        onClick: options.action.onClick,
-      } : undefined,
+      action: options?.action
+        ? {
+            label: options.action.label,
+            onClick: options.action.onClick,
+          }
+        : undefined,
     });
   }
 
@@ -83,11 +91,14 @@ class ToastManager {
     });
   }
 
-  promise<T>(promise: Promise<T>, messages: {
-    loading: string;
-    success: string | ((data: T) => string);
-    error: string | ((error: any) => string);
-  }) {
+  promise<T>(
+    promise: Promise<T>,
+    messages: {
+      loading: string;
+      success: string | ((data: T) => string);
+      error: string | ((error: any) => string);
+    }
+  ) {
     return toast.promise(promise, messages);
   }
 

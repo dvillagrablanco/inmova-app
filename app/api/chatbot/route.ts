@@ -19,10 +19,7 @@ export async function POST(request: NextRequest) {
     // 1. Verificar autenticación
     const session = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const user = session.user as any;
@@ -32,10 +29,7 @@ export async function POST(request: NextRequest) {
     const { message, includeHistory = false } = body;
 
     if (!message || typeof message !== 'string') {
-      return NextResponse.json(
-        { error: 'Message is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
     // 3. Obtener contexto del usuario
@@ -55,11 +49,7 @@ export async function POST(request: NextRequest) {
     };
 
     // 4. Generar respuesta del chatbot
-    const botResponse = await generateChatbotResponse(
-      context,
-      message,
-      conversationHistory
-    );
+    const botResponse = await generateChatbotResponse(context, message, conversationHistory);
 
     // 5. Guardar la interacción en BD
     await saveChatbotInteraction(user.id, message, botResponse, {
@@ -80,9 +70,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('[API /chatbot] Error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -8,44 +8,31 @@ export const dynamic = 'force-dynamic';
 
 /**
  * POST /api/open-banking/bankinter/payment
- * 
+ *
  * Inicia un pago SEPA a través de Bankinter
  */
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId || !session.user.id) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     if (!isBankinterConfigured()) {
       return NextResponse.json(
         {
-          error: 'Integración con Bankinter no configurada'
+          error: 'Integración con Bankinter no configurada',
         },
         { status: 503 }
       );
     }
 
     const body = await request.json();
-    const {
-      debtorIban,
-      creditorIban,
-      creditorName,
-      amount,
-      currency,
-      concept
-    } = body;
+    const { debtorIban, creditorIban, creditorName, amount, currency, concept } = body;
 
     // Validar campos requeridos
     if (!debtorIban || !creditorIban || !creditorName || !amount) {
-      return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
 
     // Obtener IP del usuario
@@ -60,17 +47,17 @@ export async function POST(request: NextRequest) {
       {
         instructedAmount: {
           currency: currency || 'EUR',
-          amount: amount.toFixed(2)
+          amount: amount.toFixed(2),
         },
         debtorAccount: {
           iban: debtorIban,
-          currency: currency || 'EUR'
+          currency: currency || 'EUR',
         },
         creditorAccount: {
-          iban: creditorIban
+          iban: creditorIban,
         },
         creditorName,
-        remittanceInformationUnstructured: concept
+        remittanceInformationUnstructured: concept,
       }
     );
 
@@ -80,14 +67,14 @@ export async function POST(request: NextRequest) {
       success: true,
       paymentId: result.paymentId,
       authUrl: result.scaRedirectUrl,
-      message: 'Pago iniciado. Redirigir al usuario a authUrl para autenticar.'
+      message: 'Pago iniciado. Redirigir al usuario a authUrl para autenticar.',
     });
   } catch (error: any) {
     logger.error('Error iniciando pago:', error);
     return NextResponse.json(
       {
         error: 'Error al iniciar pago',
-        details: error.message
+        details: error.message,
       },
       { status: 500 }
     );

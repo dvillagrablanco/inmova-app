@@ -3,7 +3,11 @@ import { prisma } from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger, { logError } from '@/lib/logger';
-import { invalidateContractsCache, invalidateUnitsCache, invalidateDashboardCache } from '@/lib/api-cache-helpers';
+import {
+  invalidateContractsCache,
+  invalidateUnitsCache,
+  invalidateDashboardCache,
+} from '@/lib/api-cache-helpers';
 
 export const dynamic = 'force-dynamic';
 

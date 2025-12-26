@@ -2,12 +2,13 @@ import { Redis } from '@upstash/redis';
 import logger, { logError } from '@/lib/logger';
 
 // Initialize Redis client
-const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
-  ? new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN,
-    })
-  : null;
+const redis =
+  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+    ? new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL,
+        token: process.env.UPSTASH_REDIS_REST_TOKEN,
+      })
+    : null;
 
 export interface RateLimitConfig {
   maxRequests: number;
@@ -63,10 +64,12 @@ export class RateLimiter {
 
       if (count >= this.config.maxRequests) {
         // Get the oldest entry to calculate reset time
-        const oldest = await redis!.zrange(key, 0, 0, { withScores: true }) as Array<{ score: number; member: string }>;
-        const resetTime = oldest.length > 0 
-          ? oldest[0].score + this.config.windowMs
-          : now + this.config.windowMs;
+        const oldest = (await redis!.zrange(key, 0, 0, { withScores: true })) as Array<{
+          score: number;
+          member: string;
+        }>;
+        const resetTime =
+          oldest.length > 0 ? oldest[0].score + this.config.windowMs : now + this.config.windowMs;
 
         return {
           success: false,
@@ -79,7 +82,7 @@ export class RateLimiter {
 
       // Add current request
       await redis!.zadd(key, { score: now, member: `${now}-${Math.random()}` });
-      
+
       // Set expiration
       await redis!.expire(key, Math.ceil(this.config.windowMs / 1000));
 
@@ -197,15 +200,15 @@ export function getRateLimitIdentifier(request: Request): string {
   // Try to get IP from headers (works with proxies)
   const forwarded = request.headers.get('x-forwarded-for');
   const realIp = request.headers.get('x-real-ip');
-  
+
   if (forwarded) {
     return forwarded.split(',')[0].trim();
   }
-  
+
   if (realIp) {
     return realIp;
   }
-  
+
   // Fallback to a generic identifier
   return 'unknown';
 }
@@ -213,17 +216,14 @@ export function getRateLimitIdentifier(request: Request): string {
 /**
  * Apply rate limit headers to response
  */
-export function applyRateLimitHeaders(
-  headers: Headers,
-  result: RateLimitResult
-): Headers {
+export function applyRateLimitHeaders(headers: Headers, result: RateLimitResult): Headers {
   headers.set('X-RateLimit-Limit', result.limit.toString());
   headers.set('X-RateLimit-Remaining', result.remaining.toString());
   headers.set('X-RateLimit-Reset', result.reset.toString());
-  
+
   if (!result.success) {
     headers.set('Retry-After', Math.ceil((result.reset * 1000 - Date.now()) / 1000).toString());
   }
-  
+
   return headers;
 }

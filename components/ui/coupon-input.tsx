@@ -30,7 +30,7 @@ export function CouponInput({
   tenantId,
   contractId,
   onCouponApplied,
-  onCouponRemoved
+  onCouponRemoved,
 }: CouponInputProps) {
   const [couponCode, setCouponCode] = useState('');
   const [validating, setValidating] = useState(false);
@@ -54,8 +54,8 @@ export function CouponInput({
           monto: amount,
           userId,
           tenantId,
-          contractId
-        })
+          contractId,
+        }),
       });
 
       const data = await response.json();
@@ -68,7 +68,7 @@ export function CouponInput({
           tipo: data.tipo,
           valor: data.valor,
           descuento: data.descuento,
-          montoFinal: data.montoFinal
+          montoFinal: data.montoFinal,
         });
       } else {
         toast.error(data.message || 'Cupón inválido');
@@ -105,17 +105,23 @@ export function CouponInput({
                   </code>
                   <Badge variant="outline" className="flex items-center gap-1">
                     {appliedCoupon.tipo === 'PERCENTAGE' ? (
-                      <><Percent className="h-3 w-3" /> {appliedCoupon.valor}%</>
+                      <>
+                        <Percent className="h-3 w-3" /> {appliedCoupon.valor}%
+                      </>
                     ) : (
-                      <><Euro className="h-3 w-3" /> {appliedCoupon.valor}€</>
+                      <>
+                        <Euro className="h-3 w-3" /> {appliedCoupon.valor}€
+                      </>
                     )}
                   </Badge>
                 </div>
                 <div className="text-sm text-green-700">
-                  Descuento: <span className="font-semibold">{appliedCoupon.descuento.toFixed(2)}€</span>
+                  Descuento:{' '}
+                  <span className="font-semibold">{appliedCoupon.descuento.toFixed(2)}€</span>
                 </div>
                 <div className="text-sm font-bold text-green-900">
-                  Total a pagar: <span className="text-lg">{appliedCoupon.montoFinal.toFixed(2)}€</span>
+                  Total a pagar:{' '}
+                  <span className="text-lg">{appliedCoupon.montoFinal.toFixed(2)}€</span>
                 </div>
               </div>
             </div>
@@ -164,7 +170,9 @@ export function CouponInput({
               className="gradient-primary shadow-primary"
             >
               {validating ? (
-                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Validando...</>
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Validando...
+                </>
               ) : (
                 'Aplicar'
               )}

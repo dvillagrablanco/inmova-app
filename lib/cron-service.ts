@@ -1,6 +1,6 @@
 /**
  * STR Cron Service - Sincronización Automática
- * 
+ *
  * Este servicio gestiona trabajos programados para:
  * 1. Sincronización de calendarios iCal desde canales externos
  * 2. Actualización de precios dinámicos
@@ -71,9 +71,7 @@ export interface SyncJobResult {
  * Sincroniza todos los calendarios iCal activos
  * Se ejecuta cada 4 horas por defecto
  */
-export async function syncAllICalFeeds(
-  companyId?: string
-): Promise<SyncJobResult> {
+export async function syncAllICalFeeds(companyId?: string): Promise<SyncJobResult> {
   const startTime = Date.now();
   const errors: string[] = [];
   let itemsProcessed = 0;
@@ -83,7 +81,7 @@ export async function syncAllICalFeeds(
     const whereClause: any = {
       activo: true,
       url: { not: null },
-      estadoSync: 'conectado'
+      estadoSync: 'conectado',
     };
 
     if (companyId) {
@@ -93,8 +91,8 @@ export async function syncAllICalFeeds(
     const channels = await prisma.sTRChannelSync.findMany({
       where: whereClause,
       include: {
-        listing: true
-      }
+        listing: true,
+      },
     });
 
     console.log(`[CRON] Sincronizando ${channels.length} calendarios iCal...`);
@@ -104,10 +102,12 @@ export async function syncAllICalFeeds(
       try {
         if (channel.url) {
           const result = await syncICalFeed(channel.id, channel.url);
-          
+
           if (result.success) {
             itemsProcessed += result.eventsProcessed;
-            console.log(`  ✅ ${channel.canal} (${channel.listing.titulo}): ${result.eventsProcessed} eventos`);
+            console.log(
+              `  ✅ ${channel.canal} (${channel.listing.titulo}): ${result.eventsProcessed} eventos`
+            );
           } else {
             errors.push(`${channel.canal}: ${result.errors?.join(', ')}`);
             console.error(`  ❌ ${channel.canal}: Error`);
@@ -127,7 +127,7 @@ export async function syncAllICalFeeds(
       success: errors.length === 0,
       itemsProcessed,
       errors,
-      duration
+      duration,
     };
   } catch (error) {
     const duration = Date.now() - startTime;
@@ -136,7 +136,7 @@ export async function syncAllICalFeeds(
       success: false,
       itemsProcessed,
       errors: [`Error general: ${error}`],
-      duration
+      duration,
     };
   }
 }
@@ -149,9 +149,7 @@ export async function syncAllICalFeeds(
  * Envía actualizaciones de disponibilidad a todos los canales
  * Se ejecuta después de cambios en bookings
  */
-export async function syncAvailabilityToChannels(
-  companyId?: string
-): Promise<SyncJobResult> {
+export async function syncAvailabilityToChannels(companyId?: string): Promise<SyncJobResult> {
   const startTime = Date.now();
   const errors: string[] = [];
   let itemsProcessed = 0;
@@ -163,7 +161,7 @@ export async function syncAvailabilityToChannels(
     }
 
     const listings = await prisma.sTRListing.findMany({
-      where: whereClause
+      where: whereClause,
     });
 
     console.log(`[CRON] Sincronizando disponibilidad de ${listings.length} listings...`);
@@ -174,7 +172,7 @@ export async function syncAvailabilityToChannels(
     for (const listing of listings) {
       try {
         const result = await syncToChannels(listing.id, today, futureDate);
-        
+
         if (result.success) {
           itemsProcessed += result.channelsSynced.length;
           console.log(`  ✅ ${listing.titulo}: ${result.channelsSynced.join(', ')}`);
@@ -196,7 +194,7 @@ export async function syncAvailabilityToChannels(
       success: errors.length === 0,
       itemsProcessed,
       errors,
-      duration
+      duration,
     };
   } catch (error) {
     const duration = Date.now() - startTime;
@@ -205,7 +203,7 @@ export async function syncAvailabilityToChannels(
       success: false,
       itemsProcessed,
       errors: [`Error general: ${error}`],
-      duration
+      duration,
     };
   }
 }
@@ -218,9 +216,7 @@ export async function syncAvailabilityToChannels(
  * Crea tareas de limpieza para bookings que terminan hoy o mañana
  * Se ejecuta diariamente a las 6:00 AM
  */
-export async function autoCreateCleaningTasks(
-  companyId?: string
-): Promise<SyncJobResult> {
+export async function autoCreateCleaningTasks(companyId?: string): Promise<SyncJobResult> {
   const startTime = Date.now();
   const errors: string[] = [];
   let itemsProcessed = 0;
@@ -232,9 +228,9 @@ export async function autoCreateCleaningTasks(
     const whereClause: any = {
       checkOutDate: {
         gte: today,
-        lte: tomorrow
+        lte: tomorrow,
       },
-      estado: { in: ['CONFIRMADA', 'EN_PROGRESO'] }
+      estado: { in: ['CONFIRMADA', 'EN_PROGRESO'] },
     };
 
     if (companyId) {
@@ -244,8 +240,8 @@ export async function autoCreateCleaningTasks(
     const bookings = await prisma.sTRBooking.findMany({
       where: whereClause,
       include: {
-        listing: true
-      }
+        listing: true,
+      },
     });
 
     console.log(`[CRON] Creando tareas de limpieza para ${bookings.length} checkouts...`);
@@ -255,7 +251,9 @@ export async function autoCreateCleaningTasks(
         // STUB: En producción, aquí se crearía la tarea de limpieza
         await createCleaningTaskFromBooking(booking.id);
         itemsProcessed++;
-        console.log(`  ✅ Tarea creada para ${booking.listing.titulo} (checkout ${booking.checkOutDate.toLocaleDateString()})`);
+        console.log(
+          `  ✅ Tarea creada para ${booking.listing.titulo} (checkout ${booking.checkOutDate.toLocaleDateString()})`
+        );
       } catch (error) {
         const errorMsg = `Error creando tarea para booking ${booking.id}: ${error}`;
         errors.push(errorMsg);
@@ -270,7 +268,7 @@ export async function autoCreateCleaningTasks(
       success: errors.length === 0,
       itemsProcessed,
       errors,
-      duration
+      duration,
     };
   } catch (error) {
     const duration = Date.now() - startTime;
@@ -279,7 +277,7 @@ export async function autoCreateCleaningTasks(
       success: false,
       itemsProcessed,
       errors: [`Error general: ${error}`],
-      duration
+      duration,
     };
   }
 }
@@ -292,9 +290,7 @@ export async function autoCreateCleaningTasks(
  * Envía solicitudes de reseña a huéspedes 2 días después del checkout
  * Se ejecuta diariamente a las 10:00 AM
  */
-export async function sendAutomaticReviewRequests(
-  companyId?: string
-): Promise<SyncJobResult> {
+export async function sendAutomaticReviewRequests(companyId?: string): Promise<SyncJobResult> {
   const startTime = Date.now();
   const errors: string[] = [];
   let itemsProcessed = 0;
@@ -305,9 +301,9 @@ export async function sendAutomaticReviewRequests(
     const whereClause: any = {
       checkOutDate: {
         gte: startOfDay(targetDate),
-        lte: endOfDay(targetDate)
+        lte: endOfDay(targetDate),
       },
-      estado: 'COMPLETADA'
+      estado: 'COMPLETADA',
     };
 
     if (companyId) {
@@ -317,8 +313,8 @@ export async function sendAutomaticReviewRequests(
     const bookings = await prisma.sTRBooking.findMany({
       where: whereClause,
       include: {
-        listing: true
-      }
+        listing: true,
+      },
     });
 
     console.log(`[CRON] Enviando solicitudes de reseña a ${bookings.length} huéspedes...`);
@@ -326,7 +322,7 @@ export async function sendAutomaticReviewRequests(
     for (const booking of bookings) {
       try {
         const result = await sendReviewRequest(booking.id, 2);
-        
+
         if (result.sent) {
           itemsProcessed++;
           console.log(`  ✅ Solicitud enviada a ${booking.guestEmail}`);
@@ -347,7 +343,7 @@ export async function sendAutomaticReviewRequests(
       success: errors.length === 0,
       itemsProcessed,
       errors,
-      duration
+      duration,
     };
   } catch (error) {
     const duration = Date.now() - startTime;
@@ -356,7 +352,7 @@ export async function sendAutomaticReviewRequests(
       success: false,
       itemsProcessed,
       errors: [`Error general: ${error}`],
-      duration
+      duration,
     };
   }
 }
@@ -369,9 +365,7 @@ export async function sendAutomaticReviewRequests(
  * Verifica licencias turísticas próximas a caducar
  * Se ejecuta diariamente a las 9:00 AM
  */
-export async function checkLegalCompliance(
-  companyId?: string
-): Promise<SyncJobResult> {
+export async function checkLegalCompliance(companyId?: string): Promise<SyncJobResult> {
   const startTime = Date.now();
   const errors: string[] = [];
   let itemsProcessed = 0;
@@ -383,7 +377,7 @@ export async function checkLegalCompliance(
     }
 
     const listings = await prisma.sTRListing.findMany({
-      where: whereClause
+      where: whereClause,
     });
 
     console.log(`[CRON] Verificando cumplimiento legal de ${listings.length} listings...`);
@@ -391,12 +385,12 @@ export async function checkLegalCompliance(
     for (const listing of listings) {
       try {
         const validation = await validateTouristLicense(listing.id);
-        
+
         if (!validation.valid || validation.warnings.length > 0) {
           itemsProcessed++;
           console.log(`  ⚠️  ${listing.titulo}:`);
-          validation.warnings.forEach(w => console.log(`      - ${w}`));
-          
+          validation.warnings.forEach((w) => console.log(`      - ${w}`));
+
           // En producción, aquí se enviaría un email de alerta
           // await sendComplianceAlert(listing, validation);
         } else {
@@ -416,7 +410,7 @@ export async function checkLegalCompliance(
       success: errors.length === 0,
       itemsProcessed,
       errors,
-      duration
+      duration,
     };
   } catch (error) {
     const duration = Date.now() - startTime;
@@ -425,7 +419,7 @@ export async function checkLegalCompliance(
       success: false,
       itemsProcessed,
       errors: [`Error general: ${error}`],
-      duration
+      duration,
     };
   }
 }
@@ -440,63 +434,60 @@ export const cronJobs: CronJobConfig[] = [
     name: 'Sincronizar Calendarios iCal',
     enabled: true,
     schedule: '0 */4 * * *', // Cada 4 horas
-    status: 'idle'
+    status: 'idle',
   },
   {
     id: 'sync-availability',
     name: 'Sincronizar Disponibilidad a Canales',
     enabled: true,
     schedule: '0 */6 * * *', // Cada 6 horas
-    status: 'idle'
+    status: 'idle',
   },
   {
     id: 'create-cleaning-tasks',
     name: 'Crear Tareas de Limpieza Automáticas',
     enabled: true,
     schedule: '0 6 * * *', // Diariamente a las 6:00 AM
-    status: 'idle'
+    status: 'idle',
   },
   {
     id: 'send-review-requests',
     name: 'Enviar Solicitudes de Reseñas',
     enabled: true,
     schedule: '0 10 * * *', // Diariamente a las 10:00 AM
-    status: 'idle'
+    status: 'idle',
   },
   {
     id: 'check-legal-compliance',
     name: 'Verificar Cumplimiento Legal',
     enabled: true,
     schedule: '0 9 * * *', // Diariamente a las 9:00 AM
-    status: 'idle'
-  }
+    status: 'idle',
+  },
 ];
 
 /**
  * Ejecuta un trabajo cron específico
  */
-export async function executeCronJob(
-  jobId: string,
-  companyId?: string
-): Promise<SyncJobResult> {
+export async function executeCronJob(jobId: string, companyId?: string): Promise<SyncJobResult> {
   console.log(`[CRON] Ejecutando trabajo: ${jobId}`);
 
   switch (jobId) {
     case 'sync-ical-feeds':
       return syncAllICalFeeds(companyId);
-    
+
     case 'sync-availability':
       return syncAvailabilityToChannels(companyId);
-    
+
     case 'create-cleaning-tasks':
       return autoCreateCleaningTasks(companyId);
-    
+
     case 'send-review-requests':
       return sendAutomaticReviewRequests(companyId);
-    
+
     case 'check-legal-compliance':
       return checkLegalCompliance(companyId);
-    
+
     default:
       throw new Error(`Trabajo cron no reconocido: ${jobId}`);
   }
@@ -519,7 +510,7 @@ export async function executeAllCronJobs(
           success: false,
           itemsProcessed: 0,
           errors: [`Error ejecutando ${job.name}: ${error}`],
-          duration: 0
+          duration: 0,
         };
       }
     }

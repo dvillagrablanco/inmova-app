@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
 /**
  * 🎉 CELEBRATION MODAL
- * 
+ *
  * Modal de celebración con efecto confetti para mostrar cuando el usuario
  * completa un hito importante (onboarding, primera propiedad, etc.)
- * 
+ *
  * Características:
  * - Efecto confetti animado usando canvas-confetti
  * - Animaciones con Framer Motion
@@ -45,7 +45,7 @@ export default function CelebrationModal({
       // Importar dinámicamente canvas-confetti
       import('canvas-confetti').then((confetti) => {
         const myConfetti = confetti.default;
-        
+
         // Configurar canvas
         if (canvasRef.current) {
           myConfetti.create(canvasRef.current, {

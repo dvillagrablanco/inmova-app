@@ -15,17 +15,13 @@ export default function Loading() {
             <Loader2 className="h-20 w-20 text-blue-600 animate-spin" />
           </div>
         </div>
-        
+
         {/* Loading text */}
         <div className="space-y-2">
-          <h2 className="text-2xl font-semibold text-gray-900">
-            Cargando...
-          </h2>
-          <p className="text-gray-600">
-            Por favor espera un momento
-          </p>
+          <h2 className="text-2xl font-semibold text-gray-900">Cargando...</h2>
+          <p className="text-gray-600">Por favor espera un momento</p>
         </div>
-        
+
         {/* Loading bar */}
         <div className="w-64 mx-auto">
           <div className="h-1 bg-gray-200 rounded-full overflow-hidden">

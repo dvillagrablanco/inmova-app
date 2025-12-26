@@ -6,10 +6,7 @@ import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -46,10 +43,7 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -81,11 +75,13 @@ export async function PUT(
     if (unitId !== undefined) updateData.unitId = unitId;
     if (frecuencia !== undefined) updateData.frecuencia = frecuencia;
     if (proximaFecha !== undefined) updateData.proximaFecha = new Date(proximaFecha);
-    if (ultimaFecha !== undefined) updateData.ultimaFecha = ultimaFecha ? new Date(ultimaFecha) : null;
+    if (ultimaFecha !== undefined)
+      updateData.ultimaFecha = ultimaFecha ? new Date(ultimaFecha) : null;
     if (diasAnticipacion !== undefined) updateData.diasAnticipacion = parseInt(diasAnticipacion);
     if (activo !== undefined) updateData.activo = activo;
     if (providerId !== undefined) updateData.providerId = providerId;
-    if (costoEstimado !== undefined) updateData.costoEstimado = costoEstimado ? parseFloat(costoEstimado) : null;
+    if (costoEstimado !== undefined)
+      updateData.costoEstimado = costoEstimado ? parseFloat(costoEstimado) : null;
     if (notas !== undefined) updateData.notas = notas;
 
     const schedule = await prisma.maintenanceSchedule.update({
@@ -112,10 +108,7 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {

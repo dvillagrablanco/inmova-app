@@ -136,8 +136,7 @@ export default function ComisionesPage() {
         const month = fecha.getMonth() + 1;
 
         const yearMatch = yearFilter ? year === parseInt(yearFilter) : true;
-        const monthMatch =
-          monthFilter !== 'all' ? month === parseInt(monthFilter) : true;
+        const monthMatch = monthFilter !== 'all' ? month === parseInt(monthFilter) : true;
 
         return yearMatch && monthMatch;
       });
@@ -172,10 +171,10 @@ export default function ComisionesPage() {
   if (status === 'loading' || loading) {
     return (
       <AuthenticatedLayout>
-            <div className="max-w-7xl mx-auto">
-              <LoadingState message="Cargando comisiones..." />
-            </div>
-          </AuthenticatedLayout>
+        <div className="max-w-7xl mx-auto">
+          <LoadingState message="Cargando comisiones..." />
+        </div>
+      </AuthenticatedLayout>
     );
   }
 
@@ -193,7 +192,7 @@ export default function ComisionesPage() {
               </Link>
               <div>
                 <h1 className="text-2xl font-bold gradient-text">Mis Comisiones</h1>
-                  <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   Historial de comisiones y pagos
                 </p>
               </div>
@@ -218,7 +217,7 @@ export default function ComisionesPage() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">{totalComisiones.toFixed(2)}€</div>
-                <p className="text-xs text-muted-foreground mt-2">
+              <p className="text-xs text-muted-foreground mt-2">
                 {filteredComisiones.length} comisiones
               </p>
             </CardContent>
@@ -247,9 +246,7 @@ export default function ComisionesPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-white">
-                {totalPagadas.toFixed(2)}€
-              </div>
+              <div className="text-3xl font-bold text-white">{totalPagadas.toFixed(2)}€</div>
               <p className="text-xs text-white/80 mt-2">Cobradas</p>
             </CardContent>
           </Card>
@@ -337,7 +334,7 @@ export default function ComisionesPage() {
               <div className="text-center text-muted-foreground">
                 <DollarSign className="h-16 w-16 mx-auto mb-4 opacity-50" />
                 <p className="text-lg font-medium mb-2">No se encontraron comisiones</p>
-                  <p className="text-sm">
+                <p className="text-sm">
                   {estadoFilter !== 'all' || monthFilter !== 'all'
                     ? 'Intenta ajustar los filtros'
                     : 'Aún no tienes comisiones registradas'}
@@ -354,12 +351,8 @@ export default function ComisionesPage() {
                     <div className="flex-1 space-y-3">
                       {/* Cabecera */}
                       <div className="flex items-center gap-3">
-                        <h3 className="text-lg font-semibold">
-                          {comision.monto.toFixed(2)}€
-                        </h3>
-                        <Badge className={getBadgeColor(comision.estado)}>
-                          {comision.estado}
-                        </Badge>
+                        <h3 className="text-lg font-semibold">{comision.monto.toFixed(2)}€</h3>
+                        <Badge className={getBadgeColor(comision.estado)}>{comision.estado}</Badge>
                       </div>
 
                       {/* Detalles */}
@@ -386,9 +379,7 @@ export default function ComisionesPage() {
                         )}
 
                         {comision.detalles && (
-                          <p className="text-sm text-muted-foreground mt-2">
-                            {comision.detalles}
-                          </p>
+                          <p className="text-sm text-muted-foreground mt-2">{comision.detalles}</p>
                         )}
                       </div>
                     </div>

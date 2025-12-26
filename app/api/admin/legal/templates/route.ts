@@ -9,36 +9,27 @@ export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
     const templates = await prisma.legalTemplate.findMany({
       where: {
-        companyId: session?.user?.companyId
+        companyId: session?.user?.companyId,
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: 'desc',
+      },
     });
     return NextResponse.json(templates);
   } catch (error) {
     logger.error('Error al obtener plantillas:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener plantillas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener plantillas' }, { status: 500 });
   }
 }
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !['super_admin', 'administrador'].includes(session.user.role)) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
     const body = await req.json();
     const {
@@ -49,13 +40,10 @@ export async function POST(req: NextRequest) {
       variables,
       jurisdiccion,
       aplicableA,
-      activo
+      activo,
     } = body;
     if (!nombre || !categoria || !contenido) {
-      return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
     const template = await prisma.legalTemplate.create({
       data: {
@@ -68,15 +56,12 @@ export async function POST(req: NextRequest) {
         jurisdiccion: jurisdiccion || null,
         aplicableA: Array.isArray(aplicableA) ? aplicableA : [],
         activo: activo !== false,
-        ultimaRevision: new Date()
-      }
+        ultimaRevision: new Date(),
+      },
     });
     return NextResponse.json(template, { status: 201 });
   } catch (error) {
     logger.error('Error al crear plantilla:', error);
-    return NextResponse.json(
-      { error: 'Error al crear plantilla' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear plantilla' }, { status: 500 });
   }
 }

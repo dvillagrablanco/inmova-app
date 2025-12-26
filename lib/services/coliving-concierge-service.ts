@@ -447,11 +447,7 @@ export async function revokeLockAccess(accessId: string) {
   }
 }
 
-export async function recordLockAccess(
-  accessId: string,
-  success: boolean,
-  metodo: string
-) {
+export async function recordLockAccess(accessId: string, success: boolean, metodo: string) {
   try {
     const access = await prisma.smartLockAccess.findUnique({
       where: { id: accessId },
@@ -478,10 +474,7 @@ export async function recordLockAccess(
     });
 
     // Verificar si se alcanzó el límite de usos
-    if (
-      access.usosPermitidos &&
-      updatedAccess.usosRealizados >= access.usosPermitidos
-    ) {
+    if (access.usosPermitidos && updatedAccess.usosRealizados >= access.usosPermitidos) {
       await prisma.smartLockAccess.update({
         where: { id: accessId },
         data: { activo: false },

@@ -28,15 +28,15 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20');
 
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
+      where: { id: session.user.id },
     });
 
     // Solo super-admins pueden ver todas las facturas
     const isSuperAdmin = user?.role === 'super_admin';
-    
+
     // Construir filtros
     const where: any = {};
-    
+
     if (!isSuperAdmin) {
       // Los usuarios normales solo ven facturas de su empresa
       where.companyId = user?.companyId;
@@ -61,14 +61,14 @@ export async function GET(request: NextRequest) {
               id: true,
               nombre: true,
               email: true,
-            }
+            },
           },
           subscriptionPlan: {
             select: {
               id: true,
               nombre: true,
               tier: true,
-            }
+            },
           },
         },
         orderBy: {
@@ -87,7 +87,7 @@ export async function GET(request: NextRequest) {
         page,
         limit,
         totalPages: Math.ceil(total / limit),
-      }
+      },
     });
   } catch (error: any) {
     logger.error('Error al obtener facturas:', error);
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
+      where: { id: session.user.id },
     });
 
     // Solo super-admins pueden crear facturas manualmente
@@ -128,10 +128,7 @@ export async function POST(request: NextRequest) {
     const { companyId, periodo, subscriptionPlanId, conceptos, descuento, notas } = body;
 
     if (!companyId || !periodo || !conceptos || conceptos.length === 0) {
-      return NextResponse.json(
-        { error: 'Datos incompletos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Datos incompletos' }, { status: 400 });
     }
 
     const invoice = await createB2BInvoice({

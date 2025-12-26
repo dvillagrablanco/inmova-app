@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     const tipo = searchParams.get('tipo');
 
     const where: any = {
-      companyId: session?.user?.companyId
+      companyId: session?.user?.companyId,
     };
 
     if (estado) where.estado = estado as any;
@@ -35,21 +35,18 @@ export async function GET(request: NextRequest) {
       where,
       include: {
         tenant: true,
-        template: true
+        template: true,
       },
       orderBy: {
-        createdAt: 'desc'
+        createdAt: 'desc',
       },
-      take: 100
+      take: 100,
     });
 
     return NextResponse.json(smsLogs);
   } catch (error: any) {
     logger.error('Error al obtener logs de SMS:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener logs de SMS' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener logs de SMS' }, { status: 500 });
   }
 }
 
@@ -65,15 +62,8 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const {
-      tenantId,
-      templateId,
-      tipo,
-      mensaje,
-      fechaProgramada,
-      relacionadoCon,
-      relacionadoId
-    } = body;
+    const { tenantId, templateId, tipo, mensaje, fechaProgramada, relacionadoCon, relacionadoId } =
+      body;
 
     // Validaciones
     if (!tenantId || !tipo || !mensaje) {
@@ -93,18 +83,14 @@ export async function POST(request: NextRequest) {
         mensaje,
         fechaProgramada: fechaProgramada ? new Date(fechaProgramada) : undefined,
         relacionadoCon,
-        relacionadoId
+        relacionadoId,
       },
       session.user.id
     );
 
     return NextResponse.json(smsLog, { status: 201 });
-    
   } catch (error: any) {
     logger.error('Error al enviar SMS:', error);
-    return NextResponse.json(
-      { error: error.message || 'Error al enviar SMS' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Error al enviar SMS' }, { status: 500 });
   }
 }

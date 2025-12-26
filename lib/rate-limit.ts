@@ -1,6 +1,6 @@
 /**
  * Sistema de Rate Limiting con soporte para Redis (producción) o Memoria (desarrollo)
- * 
+ *
  * En producción, se recomienda usar Redis para compartir límites entre múltiples instancias
  */
 
@@ -41,10 +41,7 @@ if (typeof window === 'undefined') {
 /**
  * Verifica si una request excede el rate limit
  */
-export function checkRateLimit(
-  identifier: string,
-  config: RateLimitConfig
-): RateLimitResult {
+export function checkRateLimit(identifier: string, config: RateLimitConfig): RateLimitResult {
   const now = Date.now();
   const record = memoryStore.get(identifier);
 
@@ -155,7 +152,7 @@ export const RATE_LIMIT_CONFIGS = {
 
 /**
  * Ejemplo de uso en una API route:
- * 
+ *
  * export const POST = withRateLimit(
  *   async (req: NextRequest) => {
  *     // Tu lógica aquí

@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
@@ -22,10 +22,7 @@ export async function POST(request: NextRequest) {
     const { companyId } = body;
 
     if (!companyId) {
-      return NextResponse.json(
-        { error: 'El ID de la empresa es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'El ID de la empresa es requerido' }, { status: 400 });
     }
 
     // Verificar que el usuario tiene acceso a esta empresa
@@ -49,10 +46,7 @@ export async function POST(request: NextRequest) {
       });
 
       if (!access || !access.activo) {
-        return NextResponse.json(
-          { error: 'No tienes acceso a esta empresa' },
-          { status: 403 }
-        );
+        return NextResponse.json({ error: 'No tienes acceso a esta empresa' }, { status: 403 });
       }
 
       // Actualizar lastAccess
@@ -81,9 +75,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error switching company:', error);
-    return NextResponse.json(
-      { error: 'Error al cambiar de empresa' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al cambiar de empresa' }, { status: 500 });
   }
 }

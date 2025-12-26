@@ -8,7 +8,7 @@ import { logger } from './logger';
 // Inicializar Sentry solo si DSN está configurado
 export function initSentry() {
   const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
-  
+
   if (!dsn) {
     logger.warn('Sentry DSN no configurado. Error tracking deshabilitado.');
     return;
@@ -16,23 +16,23 @@ export function initSentry() {
 
   Sentry.init({
     dsn,
-    
+
     // Configuración del entorno
     environment: process.env.NODE_ENV || 'development',
-    
+
     // Performance Monitoring
     tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
-    
+
     // Session Replay (disponible en @sentry/nextjs v8+)
     replaysSessionSampleRate: 0.1,
     replaysOnErrorSampleRate: 1.0,
-    
+
     // Configuración de errores
     beforeSend(event, hint) {
       // Filtrar errores no críticos
       if (event.exception) {
         const error = hint.originalException;
-        
+
         // Ignorar errores de red temporales
         if (error && typeof error === 'object' && 'message' in error) {
           const message = String(error.message).toLowerCase();
@@ -41,10 +41,10 @@ export function initSentry() {
           }
         }
       }
-      
+
       return event;
     },
-    
+
     // Configuración de breadcrumbs
     beforeBreadcrumb(breadcrumb) {
       // Filtrar breadcrumbs de consola en producción
@@ -54,7 +54,7 @@ export function initSentry() {
       return breadcrumb;
     },
   });
-  
+
   logger.info('Sentry inicializado correctamente');
 }
 
@@ -65,12 +65,16 @@ export function captureException(error: Error, context?: Record<string, any>) {
       custom: context,
     },
   });
-  
+
   logger.error('Error capturado en Sentry', { error, context });
 }
 
 // Función helper para capturar mensajes
-export function captureMessage(message: string, level: Sentry.SeverityLevel = 'info', context?: Record<string, any>) {
+export function captureMessage(
+  message: string,
+  level: Sentry.SeverityLevel = 'info',
+  context?: Record<string, any>
+) {
   Sentry.captureMessage(message, {
     level,
     contexts: {
@@ -80,7 +84,12 @@ export function captureMessage(message: string, level: Sentry.SeverityLevel = 'i
 }
 
 // Establecer contexto de usuario
-export function setUserContext(user: { id: string; email?: string; role?: string; companyId?: string }) {
+export function setUserContext(user: {
+  id: string;
+  email?: string;
+  role?: string;
+  companyId?: string;
+}) {
   Sentry.setUser({
     id: user.id,
     email: user.email,

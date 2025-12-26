@@ -37,14 +37,14 @@ export async function calcularPrediccionMorosidad(
         include: {
           payments: {
             orderBy: { fechaVencimiento: 'desc' },
-            take: 24 // Últimos 24 meses
+            take: 24, // Últimos 24 meses
           },
           unit: {
-            include: { building: true }
-          }
-        }
-      }
-    }
+            include: { building: true },
+          },
+        },
+      },
+    },
   });
 
   if (!tenant || tenant.contracts.length === 0) {
@@ -59,16 +59,12 @@ export async function calcularPrediccionMorosidad(
   // Variables de historial de pagos
   const pagosATiempo = payments.filter(
     (p) =>
-      p.estado === 'pagado' &&
-      p.fechaPago &&
-      new Date(p.fechaPago) <= new Date(p.fechaVencimiento)
+      p.estado === 'pagado' && p.fechaPago && new Date(p.fechaPago) <= new Date(p.fechaVencimiento)
   ).length;
 
   const pagosAtrasados = payments.filter(
     (p) =>
-      p.estado === 'pagado' &&
-      p.fechaPago &&
-      new Date(p.fechaPago) > new Date(p.fechaVencimiento)
+      p.estado === 'pagado' && p.fechaPago && new Date(p.fechaPago) > new Date(p.fechaVencimiento)
   ).length;
 
   const pagosPendientes = payments.filter((p) => p.estado === 'pendiente').length;
@@ -77,18 +73,13 @@ export async function calcularPrediccionMorosidad(
   // Cálculo de días promedio de retraso
   const pagosConRetraso = payments.filter(
     (p) =>
-      p.estado === 'pagado' &&
-      p.fechaPago &&
-      new Date(p.fechaPago) > new Date(p.fechaVencimiento)
+      p.estado === 'pagado' && p.fechaPago && new Date(p.fechaPago) > new Date(p.fechaVencimiento)
   );
 
   let diasPromedioRetraso: number | null = null;
   if (pagosConRetraso.length > 0) {
     const totalDiasRetraso = pagosConRetraso.reduce((sum, p) => {
-      const retraso = differenceInDays(
-        new Date(p.fechaPago!),
-        new Date(p.fechaVencimiento)
-      );
+      const retraso = differenceInDays(new Date(p.fechaPago!), new Date(p.fechaVencimiento));
       return sum + Math.max(0, retraso);
     }, 0);
     diasPromedioRetraso = totalDiasRetraso / pagosConRetraso.length;
@@ -108,10 +99,14 @@ export async function calcularPrediccionMorosidad(
   const ultimos3Pagos = payments.slice(0, 3);
   const anteriores3Pagos = payments.slice(3, 6);
   const pagosAtrasadosUltimos3 = ultimos3Pagos.filter(
-    (p) => p.estado === 'atrasado' || (p.fechaPago && new Date(p.fechaPago) > new Date(p.fechaVencimiento))
+    (p) =>
+      p.estado === 'atrasado' ||
+      (p.fechaPago && new Date(p.fechaPago) > new Date(p.fechaVencimiento))
   ).length;
   const pagosAtrasadosAnteriores3 = anteriores3Pagos.filter(
-    (p) => p.estado === 'atrasado' || (p.fechaPago && new Date(p.fechaPago) > new Date(p.fechaVencimiento))
+    (p) =>
+      p.estado === 'atrasado' ||
+      (p.fechaPago && new Date(p.fechaPago) > new Date(p.fechaVencimiento))
   ).length;
 
   const tendenciaNegativa = pagosAtrasadosUltimos3 > pagosAtrasadosAnteriores3;
@@ -124,14 +119,14 @@ export async function calcularPrediccionMorosidad(
   const totalPagos = pagosATiempo + pagosAtrasados;
   if (totalPagos > 0) {
     const porcentajePuntual = (pagosATiempo / totalPagos) * 100;
-    const ajusteHistorial = ((porcentajePuntual - 100) * 3.5); // Máximo -350 puntos
+    const ajusteHistorial = (porcentajePuntual - 100) * 3.5; // Máximo -350 puntos
     scoring += ajusteHistorial;
 
     if (porcentajePuntual < 80) {
       factoresRiesgo.push({
         factor: 'Historial de pagos',
         peso: 35,
-        descripcion: `Solo ${porcentajePuntual.toFixed(0)}% de pagos a tiempo`
+        descripcion: `Solo ${porcentajePuntual.toFixed(0)}% de pagos a tiempo`,
       });
     }
   }
@@ -143,7 +138,7 @@ export async function calcularPrediccionMorosidad(
     factoresRiesgo.push({
       factor: 'Retrasos frecuentes',
       peso: 15,
-      descripcion: `Promedio de ${diasPromedioRetraso.toFixed(0)} días de retraso`
+      descripcion: `Promedio de ${diasPromedioRetraso.toFixed(0)} días de retraso`,
     });
   }
 
@@ -155,7 +150,7 @@ export async function calcularPrediccionMorosidad(
       factoresRiesgo.push({
         factor: 'Relación ingreso/renta baja',
         peso: 25,
-        descripcion: `Ratio de ${ratioIngresoRenta.toFixed(2)} (recomendado: >3)`
+        descripcion: `Ratio de ${ratioIngresoRenta.toFixed(2)} (recomendado: >3)`,
       });
     }
   } else {
@@ -164,7 +159,7 @@ export async function calcularPrediccionMorosidad(
     factoresRiesgo.push({
       factor: 'Sin datos de ingresos',
       peso: 10,
-      descripcion: 'No se han proporcionado datos de ingresos mensuales'
+      descripcion: 'No se han proporcionado datos de ingresos mensuales',
     });
   }
 
@@ -177,7 +172,7 @@ export async function calcularPrediccionMorosidad(
       factoresRiesgo.push({
         factor: 'Deuda acumulada',
         peso: 15,
-        descripcion: `${mesesPendientes.toFixed(1)} meses de renta pendientes`
+        descripcion: `${mesesPendientes.toFixed(1)} meses de renta pendientes`,
       });
     }
   }
@@ -188,17 +183,17 @@ export async function calcularPrediccionMorosidad(
     factoresRiesgo.push({
       factor: 'Tendencia negativa',
       peso: 10,
-      descripcion: 'Empeoramiento en los últimos 3 meses'
+      descripcion: 'Empeoramiento en los últimos 3 meses',
     });
   }
 
   // Factor 6: Pagos atrasados actuales
   if (pagosAtrasadosActuales > 0) {
-    scoring -= (pagosAtrasadosActuales * 75);
+    scoring -= pagosAtrasadosActuales * 75;
     factoresRiesgo.push({
       factor: 'Pagos atrasados actuales',
       peso: 20,
-      descripcion: `${pagosAtrasadosActuales} pago(s) actualmente atrasado(s)`
+      descripcion: `${pagosAtrasadosActuales} pago(s) actualmente atrasado(s)`,
     });
   }
 
@@ -207,7 +202,7 @@ export async function calcularPrediccionMorosidad(
 
   // 4. CALCULAR PROBABILIDAD DE IMPAGO (0-100)
   // Función sigmoide invertida para convertir scoring a probabilidad
-  const probabilidadBase = 100 - (scoring / 10);
+  const probabilidadBase = 100 - scoring / 10;
   const probabilidadImpago = Math.max(0, Math.min(100, probabilidadBase));
 
   // 5. DETERMINAR NIVEL DE RIESGO
@@ -237,48 +232,48 @@ export async function calcularPrediccionMorosidad(
     accionPrioritaria = 'Contactar inmediatamente al inquilino y ofrecer plan de pago';
     recomendaciones.push({
       prioridad: 'URGENTE',
-      accion: 'Contactar al inquilino para discutir situación financiera'
+      accion: 'Contactar al inquilino para discutir situación financiera',
     });
     recomendaciones.push({
       prioridad: 'ALTA',
-      accion: 'Proponer plan de pago estructurado para deuda acumulada'
+      accion: 'Proponer plan de pago estructurado para deuda acumulada',
     });
     recomendaciones.push({
       prioridad: 'ALTA',
-      accion: 'Revisar garantías y documentación legal del contrato'
+      accion: 'Revisar garantías y documentación legal del contrato',
     });
   } else if (nivelRiesgo === 'medio') {
     accionPrioritaria = 'Monitorear pagos y enviar recordatorios proactivos';
     recomendaciones.push({
       prioridad: 'MEDIA',
-      accion: 'Establecer recordatorios automáticos 3 días antes del vencimiento'
+      accion: 'Establecer recordatorios automáticos 3 días antes del vencimiento',
     });
     recomendaciones.push({
       prioridad: 'MEDIA',
-      accion: 'Ofrecer domiciliación bancaria para facilitar pagos'
+      accion: 'Ofrecer domiciliación bancaria para facilitar pagos',
     });
   } else {
     recomendaciones.push({
       prioridad: 'BAJA',
-      accion: 'Continuar con seguimiento rutinario'
+      accion: 'Continuar con seguimiento rutinario',
     });
     recomendaciones.push({
       prioridad: 'BAJA',
-      accion: 'Reconocer buen historial de pagos'
+      accion: 'Reconocer buen historial de pagos',
     });
   }
 
   if (ratioIngresoRenta && ratioIngresoRenta < 2.5) {
     recomendaciones.push({
       prioridad: 'MEDIA',
-      accion: 'Solicitar actualización de datos de ingresos del inquilino'
+      accion: 'Solicitar actualización de datos de ingresos del inquilino',
     });
   }
 
   if (diasPromedioRetraso && diasPromedioRetraso > 10) {
     recomendaciones.push({
       prioridad: 'ALTA',
-      accion: 'Investigar causas de retrasos recurrentes'
+      accion: 'Investigar causas de retrasos recurrentes',
     });
   }
 
@@ -296,7 +291,7 @@ export async function calcularPrediccionMorosidad(
     pagosAtrasados,
     diasPromedioRetraso: diasPromedioRetraso ? parseFloat(diasPromedioRetraso.toFixed(1)) : null,
     montoPendiente,
-    ratioIngresoRenta: ratioIngresoRenta ? parseFloat(ratioIngresoRenta.toFixed(2)) : null
+    ratioIngresoRenta: ratioIngresoRenta ? parseFloat(ratioIngresoRenta.toFixed(2)) : null,
   };
 }
 
@@ -322,7 +317,7 @@ export async function registrarEventoMorosidad(
       diasRetraso,
       montoAfectado,
       accionTomada,
-      notas
-    }
+      notas,
+    },
   });
 }

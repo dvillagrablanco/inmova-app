@@ -15,32 +15,29 @@ export async function GET(request: NextRequest) {
 
     const projects = await prisma.professionalProject.findMany({
       where: {
-        companyId: session.user.companyId
+        companyId: session.user.companyId,
       },
       include: {
         deliverables: {
           orderBy: {
-            fechaLimite: 'asc'
-          }
+            fechaLimite: 'asc',
+          },
         },
         meetings: {
           orderBy: {
-            fecha: 'desc'
-          }
-        }
+            fecha: 'desc',
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: 'desc',
+      },
     });
 
     return NextResponse.json(projects);
   } catch (error) {
     logger.error('Error fetching professional projects:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch projects' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch projects' }, { status: 500 });
   }
 }
 
@@ -52,20 +49,17 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await request.json();
-    
+
     const project = await prisma.professionalProject.create({
       data: {
         ...data,
-        companyId: session.user.companyId
-      }
+        companyId: session.user.companyId,
+      },
     });
 
     return NextResponse.json(project, { status: 201 });
   } catch (error) {
     logger.error('Error creating professional project:', error);
-    return NextResponse.json(
-      { error: 'Failed to create project' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create project' }, { status: 500 });
   }
 }

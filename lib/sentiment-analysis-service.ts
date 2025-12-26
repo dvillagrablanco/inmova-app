@@ -1,9 +1,9 @@
 /**
  * SERVICIO DE ANÁLISIS DE SENTIMIENTO
- * 
+ *
  * Utiliza la API de LLM de Abacus.AI para analizar el sentimiento
  * de los mensajes de los usuarios en el chatbot de soporte.
- * 
+ *
  * Características:
  * - Análisis de sentimiento (positivo, neutral, negativo)
  * - Detección de urgencia
@@ -161,7 +161,11 @@ function validateAndNormalizeAnalysis(analysis: SentimentAnalysis): void {
   }
 
   // Validar confidence
-  if (typeof analysis.confidence !== 'number' || analysis.confidence < 0 || analysis.confidence > 1) {
+  if (
+    typeof analysis.confidence !== 'number' ||
+    analysis.confidence < 0 ||
+    analysis.confidence > 1
+  ) {
     analysis.confidence = 0.7;
   }
 

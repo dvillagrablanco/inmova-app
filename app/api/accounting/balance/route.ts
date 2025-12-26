@@ -31,9 +31,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(balance);
   } catch (error) {
     logger.error('Error fetching balance:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener balance' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener balance' }, { status: 500 });
   }
 }

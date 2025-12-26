@@ -21,7 +21,7 @@ export function useMemoryLeakDetector(componentName: string) {
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
       console.log(`[Memory] Component mounted: ${componentName}`);
-      
+
       return () => {
         console.log(`[Memory] Component unmounted: ${componentName}`);
       };
@@ -147,10 +147,7 @@ export function useDebounce<T>(value: T, delay: number): T {
 /**
  * Throttle function para limitar frecuencia de llamadas
  */
-export function useThrottle<T extends (...args: any[]) => any>(
-  callback: T,
-  delay: number
-): T {
+export function useThrottle<T extends (...args: any[]) => any>(callback: T, delay: number): T {
   const lastRun = useRef(Date.now());
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -207,9 +204,7 @@ export function usePreventMultipleCalls() {
  */
 
 // Helper para seleccionar solo campos necesarios
-export function createSelectFields<T extends Record<string, boolean>>(
-  fields: T
-): T {
+export function createSelectFields<T extends Record<string, boolean>>(fields: T): T {
   return fields;
 }
 
@@ -278,9 +273,7 @@ export const COMMON_SELECTS = {
 /**
  * Helper para incluir relaciones sin N+1
  */
-export function includeWithSelect<T extends Record<string, any>>(
-  includes: T
-): T {
+export function includeWithSelect<T extends Record<string, any>>(includes: T): T {
   return includes;
 }
 
@@ -359,9 +352,7 @@ export function useMemoryMonitor() {
       const totalMB = (memory.totalJSHeapSize / 1048576).toFixed(2);
       const limitMB = (memory.jsHeapSizeLimit / 1048576).toFixed(2);
 
-      console.log(
-        `[Memory] Used: ${usedMB}MB / Total: ${totalMB}MB / Limit: ${limitMB}MB`
-      );
+      console.log(`[Memory] Used: ${usedMB}MB / Total: ${totalMB}MB / Limit: ${limitMB}MB`);
     }, 10000); // Cada 10 segundos
 
     return () => clearInterval(interval);

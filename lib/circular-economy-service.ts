@@ -185,9 +185,7 @@ export async function recordRecyclingMetrics(data: {
   puntosOtorgados?: number;
 }) {
   const tasaReciclaje =
-    data.residuosGenerados > 0
-      ? (data.residuosReciclados / data.residuosGenerados) * 100
-      : 0;
+    data.residuosGenerados > 0 ? (data.residuosReciclados / data.residuosGenerados) * 100 : 0;
 
   // Cálculo simplificado de ahorros de CO2
   // Aproximadamente 0.5 kg CO2 ahorrado por kg reciclado
@@ -252,14 +250,11 @@ export async function getCircularEconomyStats(companyId: string) {
   const totalReciclado = metrics.reduce((sum, m) => sum + m.residuosReciclados, 0);
   const totalCO2Ahorrado = metrics.reduce((sum, m) => sum + (m.ahorrosCO2 || 0), 0);
   const tasaReciclajePromedio =
-    metrics.length > 0
-      ? metrics.reduce((sum, m) => sum + m.tasaReciclaje, 0) / metrics.length
-      : 0;
+    metrics.length > 0 ? metrics.reduce((sum, m) => sum + m.tasaReciclaje, 0) / metrics.length : 0;
 
   return {
     itemsCirculares: marketplace?.items.length || 0,
-    itemsIntercambiados:
-      marketplace?.items.filter((i) => i.transaccionCompletada).length || 0,
+    itemsIntercambiados: marketplace?.items.filter((i) => i.transaccionCompletada).length || 0,
     jardinesUrbanos: gardens,
     totalReciclado,
     totalCO2Ahorrado,

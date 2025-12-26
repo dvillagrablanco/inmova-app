@@ -1,12 +1,12 @@
 /**
  * Servicio de Integración con Bankinter (Open Banking PSD2)
- * 
+ *
  * Este servicio implementa la integración completa con Bankinter a través de
  * la plataforma Redsys PSD2, soportando:
  * - AIS (Account Information Service)
  * - PIS (Payment Initiation Service)
  * - COF (Confirmation of Funds)
- * 
+ *
  * @requires Certificados eIDAS (QWAC y QSealC)
  * @requires Licencia TPP del regulador
  * @requires Registro en Redsys PSD2 Platform
@@ -25,34 +25,37 @@ import { v4 as uuidv4 } from 'uuid';
 
 const REDSYS_CONFIG = {
   // URLs según entorno (sandbox o producción)
-  apiUrl: process.env.REDSYS_API_URL || 'https://apis-i.redsys.es:20443/psd2/xs2a/api-entrada-xs2a/services',
-  oauthUrl: process.env.REDSYS_OAUTH_URL || 'https://apis-i.redsys.es:20443/psd2/xs2a/api-oauth-xs2a',
+  apiUrl:
+    process.env.REDSYS_API_URL ||
+    'https://apis-i.redsys.es:20443/psd2/xs2a/api-entrada-xs2a/services',
+  oauthUrl:
+    process.env.REDSYS_OAUTH_URL || 'https://apis-i.redsys.es:20443/psd2/xs2a/api-oauth-xs2a',
   bankinterCode: process.env.REDSYS_BANKINTER_CODE || 'bankinter',
-  
+
   // Credenciales OAuth
   clientId: process.env.REDSYS_CLIENT_ID,
   clientSecret: process.env.REDSYS_CLIENT_SECRET,
-  
+
   // Rutas de certificados eIDAS
   certificates: {
     qwac: {
       cert: process.env.REDSYS_CERTIFICATE_PATH,
-      key: process.env.REDSYS_CERTIFICATE_KEY_PATH
+      key: process.env.REDSYS_CERTIFICATE_KEY_PATH,
     },
     qseal: {
       cert: process.env.REDSYS_SEAL_CERTIFICATE_PATH,
-      key: process.env.REDSYS_SEAL_KEY_PATH
-    }
+      key: process.env.REDSYS_SEAL_KEY_PATH,
+    },
   },
-  
+
   // URLs de callback
   redirectUri: process.env.NEXT_PUBLIC_APP_URL + '/api/open-banking/callback',
-  
+
   // Configuración de timeouts
   timeout: 30000, // 30 segundos
-  
+
   // Versión de la API
-  apiVersion: '1.1'
+  apiVersion: '1.1',
 };
 
 // ============================================================================
@@ -155,11 +158,11 @@ export class BankinterIntegrationService {
       'REDSYS_CLIENT_ID',
       'REDSYS_CLIENT_SECRET',
       'REDSYS_CERTIFICATE_PATH',
-      'REDSYS_CERTIFICATE_KEY_PATH'
+      'REDSYS_CERTIFICATE_KEY_PATH',
     ];
 
-    const missing = requiredVars.filter(varName => !process.env[varName]);
-    
+    const missing = requiredVars.filter((varName) => !process.env[varName]);
+
     if (missing.length > 0) {
       logger.warn(`⚠️ Bankinter Integration: Faltan variables de entorno: ${missing.join(', ')}`);
       logger.warn('🔧 El servicio funcionará en MODO DEMO');
@@ -168,11 +171,19 @@ export class BankinterIntegrationService {
 
     // Verificar que los archivos de certificados existan
     try {
-      if (REDSYS_CONFIG.certificates.qwac.cert && !fs.existsSync(REDSYS_CONFIG.certificates.qwac.cert)) {
-        logger.warn(`⚠️ Certificado QWAC no encontrado en: ${REDSYS_CONFIG.certificates.qwac.cert}`);
+      if (
+        REDSYS_CONFIG.certificates.qwac.cert &&
+        !fs.existsSync(REDSYS_CONFIG.certificates.qwac.cert)
+      ) {
+        logger.warn(
+          `⚠️ Certificado QWAC no encontrado en: ${REDSYS_CONFIG.certificates.qwac.cert}`
+        );
         return false;
       }
-      if (REDSYS_CONFIG.certificates.qwac.key && !fs.existsSync(REDSYS_CONFIG.certificates.qwac.key)) {
+      if (
+        REDSYS_CONFIG.certificates.qwac.key &&
+        !fs.existsSync(REDSYS_CONFIG.certificates.qwac.key)
+      ) {
         logger.warn(`⚠️ Clave QWAC no encontrada en: ${REDSYS_CONFIG.certificates.qwac.key}`);
         return false;
       }
@@ -195,8 +206,8 @@ export class BankinterIntegrationService {
         timeout: REDSYS_CONFIG.timeout,
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
+          Accept: 'application/json',
+        },
       });
     }
 
@@ -209,7 +220,7 @@ export class BankinterIntegrationService {
       const httpsAgent = new https.Agent({
         cert,
         key,
-        rejectUnauthorized: true // Verificar certificados del servidor
+        rejectUnauthorized: true, // Verificar certificados del servidor
       });
 
       return axios.create({
@@ -217,10 +228,10 @@ export class BankinterIntegrationService {
         timeout: REDSYS_CONFIG.timeout,
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          Accept: 'application/json',
           'X-Request-ID': uuidv4(),
-          'PSU-IP-Address': '127.0.0.1' // Se actualizará con la IP real del usuario
-        }
+          'PSU-IP-Address': '127.0.0.1', // Se actualizará con la IP real del usuario
+        },
       });
     } catch (error) {
       logError(error as Error, { context: 'BankinterIntegrationService.createAxiosInstance' });
@@ -235,7 +246,7 @@ export class BankinterIntegrationService {
     return {
       'X-Request-ID': uuidv4(),
       'PSU-IP-Address': psuIpAddress || '127.0.0.1',
-      'TPP-Redirect-URI': REDSYS_CONFIG.redirectUri
+      'TPP-Redirect-URI': REDSYS_CONFIG.redirectUri,
     };
   }
 
@@ -259,12 +270,12 @@ export class BankinterIntegrationService {
           grant_type: 'client_credentials',
           client_id: REDSYS_CONFIG.clientId!,
           client_secret: REDSYS_CONFIG.clientSecret!,
-          scope: 'AIS PIS COF'
+          scope: 'AIS PIS COF',
         }),
         {
           headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          }
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
         }
       );
 
@@ -293,7 +304,7 @@ export class BankinterIntegrationService {
       logger.info('🔧 MODO DEMO: Creando consentimiento simulado');
       return {
         consentId: 'DEMO_CONSENT_' + Date.now(),
-        scaRedirectUrl: '/api/open-banking/demo-callback'
+        scaRedirectUrl: '/api/open-banking/demo-callback',
       };
     }
 
@@ -304,11 +315,11 @@ export class BankinterIntegrationService {
 
       const consentRequest: ConsentRequest = {
         access: {
-          allPsd2: 'allAccounts'
+          allPsd2: 'allAccounts',
         },
         recurringIndicator: true,
         validUntil: validUntil.toISOString().split('T')[0],
-        frequencyPerDay: 4
+        frequencyPerDay: 4,
       };
 
       const response = await this.axiosInstance.post(
@@ -317,8 +328,8 @@ export class BankinterIntegrationService {
         {
           headers: {
             ...this.getCommonHeaders(psuIpAddress),
-            'Authorization': `Bearer ${accessToken}`
-          }
+            Authorization: `Bearer ${accessToken}`,
+          },
         }
       );
 
@@ -337,15 +348,15 @@ export class BankinterIntegrationService {
           estado: 'pendiente_autorizacion' as any,
           consentId,
           consentValidUntil: validUntil,
-          ultimaSync: new Date()
-        }
+          ultimaSync: new Date(),
+        },
       });
 
       logger.info(`✅ Consentimiento AIS creado: ${consentId}`);
 
       return {
         consentId,
-        scaRedirectUrl
+        scaRedirectUrl,
       };
     } catch (error) {
       logError(error as Error, { context: 'BankinterIntegrationService.createAISConsent' });
@@ -369,9 +380,9 @@ export class BankinterIntegrationService {
         {
           headers: {
             ...this.getCommonHeaders(),
-            'Authorization': `Bearer ${accessToken}`,
-            'Consent-ID': consentId
-          }
+            Authorization: `Bearer ${accessToken}`,
+            'Consent-ID': consentId,
+          },
         }
       );
 
@@ -397,8 +408,8 @@ export class BankinterIntegrationService {
           product: 'Cuenta Nómina',
           cashAccountType: 'CACC',
           status: 'enabled',
-          ownerName: 'Demo User'
-        }
+          ownerName: 'Demo User',
+        },
       ];
     }
 
@@ -410,9 +421,9 @@ export class BankinterIntegrationService {
         {
           headers: {
             ...this.getCommonHeaders(),
-            'Authorization': `Bearer ${accessToken}`,
-            'Consent-ID': consentId
-          }
+            Authorization: `Bearer ${accessToken}`,
+            'Consent-ID': consentId,
+          },
         }
       );
 
@@ -431,8 +442,8 @@ export class BankinterIntegrationService {
       return [
         {
           balanceAmount: { currency: 'EUR', amount: '5000.00' },
-          balanceType: 'interimAvailable'
-        }
+          balanceType: 'interimAvailable',
+        },
       ];
     }
 
@@ -444,9 +455,9 @@ export class BankinterIntegrationService {
         {
           headers: {
             ...this.getCommonHeaders(),
-            'Authorization': `Bearer ${accessToken}`,
-            'Consent-ID': consentId
-          }
+            Authorization: `Bearer ${accessToken}`,
+            'Consent-ID': consentId,
+          },
         }
       );
 
@@ -484,9 +495,9 @@ export class BankinterIntegrationService {
           params,
           headers: {
             ...this.getCommonHeaders(),
-            'Authorization': `Bearer ${accessToken}`,
-            'Consent-ID': consentId
-          }
+            Authorization: `Bearer ${accessToken}`,
+            'Consent-ID': consentId,
+          },
         }
       );
 
@@ -514,7 +525,7 @@ export class BankinterIntegrationService {
       logger.info('🔧 MODO DEMO: Iniciando pago simulado');
       return {
         paymentId: 'DEMO_PAYMENT_' + Date.now(),
-        scaRedirectUrl: '/api/open-banking/demo-callback'
+        scaRedirectUrl: '/api/open-banking/demo-callback',
       };
     }
 
@@ -527,8 +538,8 @@ export class BankinterIntegrationService {
         {
           headers: {
             ...this.getCommonHeaders(psuIpAddress),
-            'Authorization': `Bearer ${accessToken}`
-          }
+            Authorization: `Bearer ${accessToken}`,
+          },
         }
       );
 
@@ -539,7 +550,7 @@ export class BankinterIntegrationService {
 
       return {
         paymentId,
-        scaRedirectUrl
+        scaRedirectUrl,
       };
     } catch (error) {
       logError(error as Error, { context: 'BankinterIntegrationService.initiatePayment' });
@@ -563,8 +574,8 @@ export class BankinterIntegrationService {
         {
           headers: {
             ...this.getCommonHeaders(),
-            'Authorization': `Bearer ${accessToken}`
-          }
+            Authorization: `Bearer ${accessToken}`,
+          },
         }
       );
 
@@ -596,7 +607,7 @@ export class BankinterIntegrationService {
 
       return {
         consentId,
-        authUrl: scaRedirectUrl
+        authUrl: scaRedirectUrl,
       };
     } catch (error) {
       logError(error as Error, { context: 'BankinterIntegrationService.conectarCuentaBankinter' });
@@ -614,7 +625,7 @@ export class BankinterIntegrationService {
     try {
       // Obtener la conexión
       const connection = await prisma.bankConnection.findUnique({
-        where: { id: connectionId }
+        where: { id: connectionId },
       });
 
       if (!connection || !connection.consentId) {
@@ -629,7 +640,7 @@ export class BankinterIntegrationService {
 
       // Obtener cuentas
       const accounts = await this.getAccounts(connection.consentId);
-      
+
       if (accounts.length === 0) {
         return { transacciones: [], total: 0 };
       }
@@ -654,8 +665,8 @@ export class BankinterIntegrationService {
           // Evitar duplicados
           const existente = await prisma.bankTransaction.findFirst({
             where: {
-              proveedorTxId: transaction.transactionId
-            }
+              proveedorTxId: transaction.transactionId,
+            },
           });
 
           if (!existente && connection.companyId) {
@@ -669,14 +680,15 @@ export class BankinterIntegrationService {
                 descripcion: transaction.remittanceInformationUnstructured || '',
                 monto: parseFloat(transaction.transactionAmount.amount),
                 moneda: transaction.transactionAmount.currency,
-                tipoTransaccion: parseFloat(transaction.transactionAmount.amount) > 0 ? 'ingreso' : 'gasto',
+                tipoTransaccion:
+                  parseFloat(transaction.transactionAmount.amount) > 0 ? 'ingreso' : 'gasto',
                 creditorName: transaction.creditorName,
                 creditorIban: transaction.creditorAccount?.iban,
                 debtorName: transaction.debtorName,
                 debtorIban: transaction.debtorAccount?.iban,
                 rawData: transaction as any,
-                estado: 'pendiente_revision'
-              }
+                estado: 'pendiente_revision',
+              },
             });
           }
 
@@ -687,17 +699,19 @@ export class BankinterIntegrationService {
       // Actualizar última sincronización
       await prisma.bankConnection.update({
         where: { id: connectionId },
-        data: { ultimaSync: new Date() }
+        data: { ultimaSync: new Date() },
       });
 
       logger.info(`✅ ${allTransactions.length} transacciones sincronizadas de Bankinter`);
 
       return {
         transacciones: allTransactions,
-        total: allTransactions.length
+        total: allTransactions.length,
       };
     } catch (error) {
-      logError(error as Error, { context: 'BankinterIntegrationService.sincronizarTransaccionesBankinter' });
+      logError(error as Error, {
+        context: 'BankinterIntegrationService.sincronizarTransaccionesBankinter',
+      });
       throw error;
     }
   }
@@ -705,10 +719,7 @@ export class BankinterIntegrationService {
   /**
    * Verifica ingresos de un inquilino usando su cuenta de Bankinter
    */
-  async verificarIngresosBankinter(
-    tenantId: string,
-    mesesAnalisis: number = 3
-  ): Promise<any> {
+  async verificarIngresosBankinter(tenantId: string, mesesAnalisis: number = 3): Promise<any> {
     try {
       // Obtener la conexión bancaria del inquilino
       const tenant = await prisma.tenant.findUnique({
@@ -717,11 +728,11 @@ export class BankinterIntegrationService {
           bankConnections: {
             where: {
               proveedor: 'bankinter_redsys',
-              estado: 'conectado'
+              estado: 'conectado',
             },
-            take: 1
-          }
-        }
+            take: 1,
+          },
+        },
       });
 
       if (!tenant || tenant.bankConnections.length === 0) {
@@ -740,15 +751,15 @@ export class BankinterIntegrationService {
           connectionId: connection.id,
           tipoTransaccion: 'ingreso',
           fecha: {
-            gte: new Date(Date.now() - diasAnalisis * 24 * 60 * 60 * 1000)
-          }
+            gte: new Date(Date.now() - diasAnalisis * 24 * 60 * 60 * 1000),
+          },
         },
-        orderBy: { fecha: 'desc' }
+        orderBy: { fecha: 'desc' },
       });
 
       // Analizar ingresos
       const ingresosPorMes: { [key: string]: number } = {};
-      transactions.forEach(tx => {
+      transactions.forEach((tx) => {
         const mes = `${tx.fecha.getFullYear()}-${String(tx.fecha.getMonth() + 1).padStart(2, '0')}`;
         ingresosPorMes[mes] = (ingresosPorMes[mes] || 0) + tx.monto;
       });
@@ -760,18 +771,21 @@ export class BankinterIntegrationService {
 
       // Calcular estabilidad (coeficiente de variación invertido)
       const desviacion = Math.sqrt(
-        ingresos.reduce((sum, val) => sum + Math.pow(val - ingresosPromedio, 2), 0) / ingresos.length
+        ingresos.reduce((sum, val) => sum + Math.pow(val - ingresosPromedio, 2), 0) /
+          ingresos.length
       );
       const coefVariacion = (desviacion / ingresosPromedio) * 100;
       const estabilidad = Math.max(0, Math.min(100, 100 - coefVariacion));
 
       // Identificar fuentes de ingresos
-      const fuentesIngresos = [...new Set(
-        transactions
-          .filter(tx => tx.debtorName)
-          .map(tx => tx.debtorName!)
-          .slice(0, 5)
-      )];
+      const fuentesIngresos = [
+        ...new Set(
+          transactions
+            .filter((tx) => tx.debtorName)
+            .map((tx) => tx.debtorName!)
+            .slice(0, 5)
+        ),
+      ];
 
       const informe = {
         tenantId,
@@ -784,14 +798,18 @@ export class BankinterIntegrationService {
         totalTransacciones: transactions.length,
         recomendacion: this.generarRecomendacionIngresos(ingresosPromedio, estabilidad),
         verificado: true,
-        proveedor: 'bankinter'
+        proveedor: 'bankinter',
       };
 
-      logger.info(`✅ Ingresos verificados para tenant ${tenantId}: €${ingresosPromedio.toFixed(2)}/mes`);
+      logger.info(
+        `✅ Ingresos verificados para tenant ${tenantId}: €${ingresosPromedio.toFixed(2)}/mes`
+      );
 
       return informe;
     } catch (error) {
-      logError(error as Error, { context: 'BankinterIntegrationService.verificarIngresosBankinter' });
+      logError(error as Error, {
+        context: 'BankinterIntegrationService.verificarIngresosBankinter',
+      });
       throw error;
     }
   }
@@ -809,8 +827,8 @@ export class BankinterIntegrationService {
         where: {
           companyId,
           proveedor: 'bankinter_redsys',
-          estado: 'conectado'
-        }
+          estado: 'conectado',
+        },
       });
 
       if (connections.length === 0) {
@@ -831,23 +849,23 @@ export class BankinterIntegrationService {
           contract: {
             unit: {
               building: {
-                companyId
-              }
-            }
+                companyId,
+              },
+            },
           },
           estado: 'pendiente',
           fechaVencimiento: {
-            gte: fechaInicio
-          }
+            gte: fechaInicio,
+          },
         },
         include: {
           contract: {
             include: {
               tenant: true,
-              unit: true
-            }
-          }
-        }
+              unit: true,
+            },
+          },
+        },
       });
 
       let conciliados = 0;
@@ -855,27 +873,27 @@ export class BankinterIntegrationService {
       // Intentar conciliar cada pago con transacciones
       for (const pago of pagosPendientes) {
         const tenant = pago.contract.tenant;
-        
+
         // Buscar transacción que coincida
         const transaccion = await prisma.bankTransaction.findFirst({
           where: {
             connection: {
-              companyId
+              companyId,
             },
             monto: {
               gte: pago.monto * 0.99, // Tolerancia del 1%
-              lte: pago.monto * 1.01
+              lte: pago.monto * 1.01,
             },
             fecha: {
               gte: new Date(pago.fechaVencimiento.getTime() - 5 * 24 * 60 * 60 * 1000), // 5 días antes
-              lte: new Date(pago.fechaVencimiento.getTime() + 10 * 24 * 60 * 60 * 1000) // 10 días después
+              lte: new Date(pago.fechaVencimiento.getTime() + 10 * 24 * 60 * 60 * 1000), // 10 días después
             },
             OR: [
               { creditorName: { contains: tenant.nombreCompleto, mode: 'insensitive' } },
               { debtorName: { contains: tenant.nombreCompleto, mode: 'insensitive' } },
-              { descripcion: { contains: pago.periodo || '', mode: 'insensitive' } }
-            ]
-          }
+              { descripcion: { contains: pago.periodo || '', mode: 'insensitive' } },
+            ],
+          },
         });
 
         if (transaccion) {
@@ -885,8 +903,8 @@ export class BankinterIntegrationService {
             data: {
               estado: 'pagado',
               fechaPago: transaccion.fecha,
-              metodoPago: 'transferencia_bancaria'
-            }
+              metodoPago: 'transferencia_bancaria',
+            },
           });
 
           // También actualizar el estado de la transacción
@@ -894,18 +912,20 @@ export class BankinterIntegrationService {
             where: { id: transaccion.id },
             data: {
               estado: 'conciliado',
-              paymentId: pago.id
-            }
+              paymentId: pago.id,
+            },
           });
 
           conciliados++;
-          logger.info(`✅ Pago conciliado: ${pago.id} con transacción ${transaccion.proveedorTxId}`);
+          logger.info(
+            `✅ Pago conciliado: ${pago.id} con transacción ${transaccion.proveedorTxId}`
+          );
         }
       }
 
       return {
         conciliados,
-        total: pagosPendientes.length
+        total: pagosPendientes.length,
       };
     } catch (error) {
       logError(error as Error, { context: 'BankinterIntegrationService.conciliarPagosBankinter' });

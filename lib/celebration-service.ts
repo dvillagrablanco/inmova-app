@@ -1,7 +1,7 @@
 /**
  * CELEBRATION SERVICE
  * Servicio para gestionar celebraciones de logros del usuario
- * 
+ *
  * Funcionalidades:
  * - Crear celebraciones cuando se completan hitos
  * - Obtener celebraciones pendientes
@@ -87,10 +87,7 @@ export async function getPendingCelebrations(userId: string) {
 /**
  * Marca una celebración como mostrada
  */
-export async function markCelebrationAsShown(
-  celebrationId: string,
-  userId: string
-) {
+export async function markCelebrationAsShown(celebrationId: string, userId: string) {
   try {
     const celebration = await prisma.userCelebration.update({
       where: {
@@ -117,10 +114,7 @@ export async function markCelebrationAsShown(
 /**
  * Celebración por completar el onboarding
  */
-export async function celebrateOnboardingCompleted(
-  userId: string,
-  companyId: string
-) {
+export async function celebrateOnboardingCompleted(userId: string, companyId: string) {
   return createCelebration({
     userId,
     companyId,
@@ -159,10 +153,7 @@ export async function celebrateFirstBuilding(
 /**
  * Celebración por crear la primera unidad
  */
-export async function celebrateFirstUnit(
-  userId: string,
-  companyId: string
-) {
+export async function celebrateFirstUnit(userId: string, companyId: string) {
   return createCelebration({
     userId,
     companyId,
@@ -180,10 +171,7 @@ export async function celebrateFirstUnit(
 /**
  * Celebración por crear el primer contrato
  */
-export async function celebrateFirstContract(
-  userId: string,
-  companyId: string
-) {
+export async function celebrateFirstContract(userId: string, companyId: string) {
   return createCelebration({
     userId,
     companyId,
@@ -201,10 +189,7 @@ export async function celebrateFirstContract(
 /**
  * Celebración por llegar a 10 propiedades
  */
-export async function celebrateMilestone10Properties(
-  userId: string,
-  companyId: string
-) {
+export async function celebrateMilestone10Properties(userId: string, companyId: string) {
   return createCelebration({
     userId,
     companyId,
@@ -222,10 +207,7 @@ export async function celebrateMilestone10Properties(
 /**
  * Celebración por ser usuario avanzado
  */
-export async function celebratePowerUser(
-  userId: string,
-  companyId: string
-) {
+export async function celebratePowerUser(userId: string, companyId: string) {
   return createCelebration({
     userId,
     companyId,

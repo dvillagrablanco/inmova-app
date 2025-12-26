@@ -7,7 +7,7 @@ import { routePreloader } from '@/lib/route-preloader-manager';
 /**
  * RoutePreloaderProvider - Provider que activa la precarga automática
  * basada en el rol del usuario autenticado
- * 
+ *
  * Debe envolverse en el layout principal de la aplicación
  */
 export function RoutePreloaderProvider({ children }: { children: React.ReactNode }) {
@@ -22,7 +22,7 @@ export function RoutePreloaderProvider({ children }: { children: React.ReactNode
 
     if (session?.user) {
       const role = session.user.role;
-      
+
       // Mapear roles de la aplicación a roles de precarga
       if (role === 'super_admin' || role === 'administrador') {
         userRole = 'admin';

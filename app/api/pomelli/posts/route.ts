@@ -9,17 +9,18 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/prisma';
 import { logger } from '@/lib/logger';
-import { getPomelliService, type SocialPlatform, type ContentType } from '@/lib/pomelli-integration';
+import {
+  getPomelliService,
+  type SocialPlatform,
+  type ContentType,
+} from '@/lib/pomelli-integration';
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -28,10 +29,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Usuario no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
     const searchParams = request.nextUrl.searchParams;
@@ -97,22 +95,16 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error getting posts:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener publicaciones' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener publicaciones' }, { status: 500 });
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -121,27 +113,14 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Usuario no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
     const body = await request.json();
-    const {
-      content,
-      contentType,
-      platforms,
-      mediaUrls,
-      scheduledAt,
-      publishNow,
-    } = body;
+    const { content, contentType, platforms, mediaUrls, scheduledAt, publishNow } = body;
 
     if (!content || content.trim().length === 0) {
-      return NextResponse.json(
-        { error: 'El contenido es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'El contenido es requerido' }, { status: 400 });
     }
 
     if (!platforms || platforms.length === 0) {
@@ -176,15 +155,12 @@ export async function POST(request: NextRequest) {
     });
 
     if (!config) {
-      return NextResponse.json(
-        { error: 'Pomelli no está configurado' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Pomelli no está configurado' }, { status: 400 });
     }
 
     // Obtener servicio de Pomelli
     const pomelliService = getPomelliService();
-    
+
     if (!pomelliService) {
       return NextResponse.json(
         { error: 'Error al inicializar servicio de Pomelli' },
@@ -197,7 +173,7 @@ export async function POST(request: NextRequest) {
       companyId: user.companyId,
       platforms: platforms as SocialPlatform[],
       content,
-      contentType: contentType as ContentType || 'text',
+      contentType: (contentType as ContentType) || 'text',
       mediaUrls: mediaUrls || [],
       scheduledAt: scheduledAt ? new Date(scheduledAt) : undefined,
       createdBy: session.user.id,
@@ -215,7 +191,7 @@ export async function POST(request: NextRequest) {
         contentType: contentType || 'text',
         mediaUrls: mediaUrls || [],
         platforms,
-        status: publishNow ? 'published' : (scheduledAt ? 'scheduled' : 'draft'),
+        status: publishNow ? 'published' : scheduledAt ? 'scheduled' : 'draft',
         scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
         publishedAt: publishNow ? new Date() : null,
         pomelliPostId: socialPost.pomelliPostId,
@@ -245,9 +221,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error creating post:', error);
-    return NextResponse.json(
-      { error: 'Error al crear publicación' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear publicación' }, { status: 500 });
   }
 }

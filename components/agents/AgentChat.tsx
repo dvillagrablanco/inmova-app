@@ -1,6 +1,6 @@
 /**
  * Componente de Chat con Agentes IA
- * 
+ *
  * Interfaz de usuario para interactuar con el sistema de agentes especializados
  */
 
@@ -30,7 +30,7 @@ interface AgentChatProps {
 export default function AgentChat({
   preferredAgent,
   onAgentChange,
-  className = ''
+  className = '',
 }: AgentChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -38,7 +38,7 @@ export default function AgentChat({
   const [conversationId] = useState(`conv_${Date.now()}`);
   const [currentAgent, setCurrentAgent] = useState<AgentType | undefined>(preferredAgent);
   const [error, setError] = useState<string | null>(null);
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -53,10 +53,10 @@ export default function AgentChat({
       id: `msg_${Date.now()}`,
       role: 'user',
       content: inputValue,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInputValue('');
     setIsLoading(true);
     setError(null);
@@ -70,8 +70,8 @@ export default function AgentChat({
         body: JSON.stringify({
           message: inputValue,
           conversationId,
-          preferredAgent: currentAgent
-        })
+          preferredAgent: currentAgent,
+        }),
       });
 
       if (!response.ok) {
@@ -92,17 +92,16 @@ export default function AgentChat({
         timestamp: new Date(),
         actions: data.actions,
         suggestions: data.suggestions,
-        toolsUsed: data.toolsUsed
+        toolsUsed: data.toolsUsed,
       };
 
-      setMessages(prev => [...prev, assistantMessage]);
-      
+      setMessages((prev) => [...prev, assistantMessage]);
+
       // Actualizar agente actual si cambió
       if (data.agentType !== currentAgent) {
         setCurrentAgent(data.agentType);
         onAgentChange?.(data.agentType);
       }
-
     } catch (err: any) {
       setError(err.message);
       console.error('Error sending message:', err);
@@ -135,7 +134,7 @@ export default function AgentChat({
       financial_analysis: 'Análisis Financiero',
       legal_compliance: 'Legal y Cumplimiento',
       maintenance_preventive: 'Mantenimiento Preventivo',
-      general: 'Asistente General'
+      general: 'Asistente General',
     };
     return agentType ? names[agentType] : 'Asistente IA';
   };
@@ -148,7 +147,7 @@ export default function AgentChat({
       financial_analysis: 'bg-purple-500',
       legal_compliance: 'bg-red-500',
       maintenance_preventive: 'bg-yellow-500',
-      general: 'bg-gray-500'
+      general: 'bg-gray-500',
     };
     return agentType ? colors[agentType] : 'bg-gray-500';
   };
@@ -158,7 +157,9 @@ export default function AgentChat({
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-t-lg">
         <div className="flex items-center space-x-3">
-          <div className={`w-10 h-10 rounded-full ${getAgentColor(currentAgent)} flex items-center justify-center`}>
+          <div
+            className={`w-10 h-10 rounded-full ${getAgentColor(currentAgent)} flex items-center justify-center`}
+          >
             <Bot className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -178,7 +179,10 @@ export default function AgentChat({
           <div className="text-center text-gray-500 py-12">
             <Bot className="w-16 h-16 mx-auto mb-4 text-gray-300" />
             <p className="text-lg font-medium mb-2">¿En qué puedo ayudarte hoy?</p>
-            <p className="text-sm">Pregúntame sobre mantenimiento, contratos, pagos, análisis financiero o asuntos legales.</p>
+            <p className="text-sm">
+              Pregúntame sobre mantenimiento, contratos, pagos, análisis financiero o asuntos
+              legales.
+            </p>
           </div>
         )}
 
@@ -194,9 +198,7 @@ export default function AgentChat({
             >
               <div
                 className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                  message.role === 'user'
-                    ? 'bg-gray-200'
-                    : getAgentColor(message.agentType)
+                  message.role === 'user' ? 'bg-gray-200' : getAgentColor(message.agentType)
                 }`}
               >
                 {message.role === 'user' ? (
@@ -205,13 +207,11 @@ export default function AgentChat({
                   <Bot className="w-5 h-5 text-white" />
                 )}
               </div>
-              
+
               <div className="flex flex-col space-y-2">
                 <div
                   className={`rounded-lg px-4 py-2 ${
-                    message.role === 'user'
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-100 text-gray-900'
+                    message.role === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-900'
                   }`}
                 >
                   <p className="whitespace-pre-wrap">{message.content}</p>
@@ -242,12 +242,8 @@ export default function AgentChat({
                       >
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-sm font-medium text-gray-900">
-                              {suggestion.title}
-                            </p>
-                            <p className="text-xs text-gray-600 mt-1">
-                              {suggestion.description}
-                            </p>
+                            <p className="text-sm font-medium text-gray-900">{suggestion.title}</p>
+                            <p className="text-xs text-gray-600 mt-1">{suggestion.description}</p>
                           </div>
                           {suggestion.actionable && (
                             <ArrowRight className="w-5 h-5 text-blue-500 group-hover:translate-x-1 transition-transform" />

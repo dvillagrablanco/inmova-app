@@ -20,7 +20,7 @@ export function createLazyComponent<P extends object>(
 
 // Lazy Components para Modales y Diálogos
 export const LazyConfirmDialog = dynamic(
-  () => import('@/components/ui/confirm-dialog').then(mod => ({ default: mod.ConfirmDialog })),
+  () => import('@/components/ui/confirm-dialog').then((mod) => ({ default: mod.ConfirmDialog })),
   {
     loading: () => <LoadingState message="Cargando diálogo..." />,
     ssr: false,

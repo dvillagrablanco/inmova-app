@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true, companyId: true }
+      select: { id: true, companyId: true },
     });
 
     if (!user?.companyId) {
@@ -30,18 +30,18 @@ export async function GET(request: NextRequest) {
       where: {
         unit: {
           building: {
-            companyId: user.companyId
-          }
+            companyId: user.companyId,
+          },
         },
         ...(type === 'contract' && { id: { not: undefined } }),
         ...(query && {
           OR: [
             { tenant: { nombreCompleto: { contains: query, mode: 'insensitive' } } },
-            { unit: { numero: { contains: query, mode: 'insensitive' } } }
-          ]
+            { unit: { numero: { contains: query, mode: 'insensitive' } } },
+          ],
         }),
         ...(dateFrom && { createdAt: { gte: new Date(dateFrom) } }),
-        ...(dateTo && { createdAt: { lte: new Date(dateTo) } })
+        ...(dateTo && { createdAt: { lte: new Date(dateTo) } }),
       },
       select: {
         id: true,
@@ -52,11 +52,11 @@ export async function GET(request: NextRequest) {
         unit: {
           select: {
             numero: true,
-            building: { select: { nombre: true } }
-          }
-        }
+            building: { select: { nombre: true } },
+          },
+        },
       },
-      take: 50
+      take: 50,
     });
 
     // Buscar documentos en otras entidades si es necesario
@@ -69,16 +69,13 @@ export async function GET(request: NextRequest) {
       date: c.createdAt,
       metadata: {
         fechaInicio: c.fechaInicio,
-        fechaFin: c.fechaFin
-      }
+        fechaFin: c.fechaFin,
+      },
     }));
 
     return NextResponse.json({ results, total: results.length });
   } catch (error) {
     console.error('Error en búsqueda de documentos:', error);
-    return NextResponse.json(
-      { error: 'Error al buscar documentos' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al buscar documentos' }, { status: 500 });
   }
 }

@@ -2,7 +2,7 @@
  * ONBOARDING CHATBOT SERVICE
  * Servicio de chatbot IA inteligente para asistir en el onboarding
  * Utiliza las APIs de LLM de Abacus.AI (GPT-4)
- * 
+ *
  * Funcionalidades:
  * - Responde preguntas sobre INMOVA
  * - Guía al usuario en el proceso de onboarding
@@ -154,8 +154,7 @@ export async function sendChatMessage(
     if (userContext?.vertical) {
       const verticalKey = userContext.vertical.toLowerCase().replace(/\s+/g, '_');
       const verticalPrompt =
-        SYSTEM_PROMPTS[verticalKey as keyof typeof SYSTEM_PROMPTS] ||
-        SYSTEM_PROMPTS.generic;
+        SYSTEM_PROMPTS[verticalKey as keyof typeof SYSTEM_PROMPTS] || SYSTEM_PROMPTS.generic;
       systemPrompt += `\n\n${verticalPrompt}`;
     }
 
@@ -176,11 +175,11 @@ export async function sendChatMessage(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`,
+        Authorization: `Bearer ${process.env.ABACUSAI_API_KEY}`,
       },
       body: JSON.stringify({
         model: 'gpt-4o-mini', // Modelo rápido y económico para chatbot
-        messages: messages.map(m => ({
+        messages: messages.map((m) => ({
           role: m.role,
           content: m.content,
         })),
@@ -289,10 +288,7 @@ function extractSuggestedActions(
 /**
  * Obtiene un mensaje de bienvenida personalizado
  */
-export function getWelcomeMessage(params: {
-  userName?: string;
-  vertical?: string;
-}): string {
+export function getWelcomeMessage(params: { userName?: string; vertical?: string }): string {
   const { userName, vertical } = params;
 
   let message = '¡Hola';
@@ -301,7 +297,8 @@ export function getWelcomeMessage(params: {
   }
   message += '! 👋\n\n';
 
-  message += 'Soy el asistente virtual de INMOVA. Estoy aquí para ayudarte durante tu onboarding y responder cualquier duda que tengas. 🚀\n\n';
+  message +=
+    'Soy el asistente virtual de INMOVA. Estoy aquí para ayudarte durante tu onboarding y responder cualquier duda que tengas. 🚀\n\n';
 
   if (vertical) {
     message += `Veo que gestionas **${vertical}**. Puedo ayudarte con configuraciones específicas para tu negocio.\n\n`;

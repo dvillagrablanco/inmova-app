@@ -197,348 +197,330 @@ export default function ModulosAdminPage() {
   if (status === 'loading' || loading) {
     return (
       <AuthenticatedLayout>
-            <div className="flex items-center justify-center h-96">
-              <RefreshCw className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          </AuthenticatedLayout>
+        <div className="flex items-center justify-center h-96">
+          <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </AuthenticatedLayout>
     );
   }
 
   return (
     <AuthenticatedLayout>
-          {/* Header */}
-          <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/">
-                      <Home className="h-4 w-4" />
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/admin/configuracion">Administración</BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>Gestión de Módulos</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
-              <h1 className="text-3xl font-bold mt-2">Gestión de Módulos</h1>
-              <p className="text-muted-foreground mt-1">
-                Activa o desactiva módulos según las necesidades de tu empresa
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push('/admin/configuracion')}
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Volver
-              </Button>
-              <Button size="sm" onClick={loadData}>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refrescar
-              </Button>
-            </div>
-          </div>
+      {/* Header */}
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/">
+                  <Home className="h-4 w-4" />
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/admin/configuracion">Administración</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Gestión de Módulos</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          <h1 className="text-3xl font-bold mt-2">Gestión de Módulos</h1>
+          <p className="text-muted-foreground mt-1">
+            Activa o desactiva módulos según las necesidades de tu empresa
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => router.push('/admin/configuracion')}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Volver
+          </Button>
+          <Button size="sm" onClick={loadData}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refrescar
+          </Button>
+        </div>
+      </div>
 
-          {/* Plan Actual */}
-          {currentPlan && (
-            <Card className="mb-6 border-2 border-primary/20 bg-gradient-to-r from-indigo-50 to-purple-50">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Star className="h-5 w-5 text-yellow-500" />
-                      <CardTitle className="text-2xl">Plan Actual</CardTitle>
-                    </div>
-                    <CardDescription>
-                      Información de tu suscripción y opciones de mejora
-                    </CardDescription>
-                  </div>
-                  <Badge
-                    className={`text-lg px-4 py-2 ${
-                      currentPlan.tier === 'basico'
-                        ? 'bg-blue-500'
-                        : currentPlan.tier === 'profesional'
-                          ? 'bg-purple-500'
-                          : currentPlan.tier === 'empresarial'
-                            ? 'bg-orange-500'
-                            : 'bg-gradient-to-r from-orange-500 to-red-500'
-                    }`}
-                  >
-                    {currentPlan.nombre}
-                  </Badge>
+      {/* Plan Actual */}
+      {currentPlan && (
+        <Card className="mb-6 border-2 border-primary/20 bg-gradient-to-r from-indigo-50 to-purple-50">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Star className="h-5 w-5 text-yellow-500" />
+                  <CardTitle className="text-2xl">Plan Actual</CardTitle>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">Precio Mensual</p>
-                    <p className="text-3xl font-bold text-primary">€{currentPlan.precioMensual}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">Usuarios Máximos</p>
-                    <p className="text-2xl font-semibold">
-                      {currentPlan.maxUsuarios === -1 ? 'Ilimitados' : currentPlan.maxUsuarios}
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">Propiedades Máximas</p>
-                    <p className="text-2xl font-semibold">
-                      {currentPlan.maxPropiedades === -1
-                        ? 'Ilimitadas'
-                        : currentPlan.maxPropiedades}
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">Módulos Incluidos</p>
-                    <p className="text-2xl font-semibold">{currentPlan.modulosIncluidos.length}</p>
-                  </div>
-                </div>
-                <div className="mt-6 flex flex-wrap gap-3">
-                  {currentPlan.tier !== 'premium' && currentPlan.tier !== 'empresarial' && (
-                    <Button
-                      size="lg"
-                      className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
-                      onClick={() => router.push('/admin/clientes')}
-                    >
-                      <TrendingUp className="h-4 w-4 mr-2" />
-                      Mejorar Plan (Upgrade)
-                    </Button>
-                  )}
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    onClick={() => router.push('/admin/clientes')}
-                  >
-                    <Package className="h-4 w-4 mr-2" />
-                    Cambiar Plan
-                  </Button>
-                  <Button size="lg" variant="outline" onClick={() => router.push('/contacto')}>
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    Contactar Soporte
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {!currentPlan && (
-            <Card className="mb-6 border-2 border-orange-200 bg-orange-50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-orange-800">
-                  <AlertCircle className="h-5 w-5" />
-                  Sin Plan de Suscripción
-                </CardTitle>
-                <CardDescription className="text-orange-700">
-                  No tienes un plan de suscripción asignado. Contacta con el administrador para
-                  configurar tu plan.
+                <CardDescription>
+                  Información de tu suscripción y opciones de mejora
                 </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button
-                  onClick={() => router.push('/admin/clientes')}
-                  className="bg-orange-500 hover:bg-orange-600"
-                >
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  Contactar Administrador
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
-          <Tabs defaultValue="modulos" className="space-y-6">
-            <TabsList>
-              <TabsTrigger value="modulos">Módulos Disponibles</TabsTrigger>
-              <TabsTrigger value="packs">Packs de Suscripción</TabsTrigger>
-            </TabsList>
-
-            {/* Tab de Módulos */}
-            <TabsContent value="modulos" className="space-y-6">
-              {Object.entries(CATEGORIAS).map(([key, cat]) => {
-                const modulosCategoria = getModulosByCategoria(key);
-                if (modulosCategoria.length === 0) return null;
-
-                const CatIcon = cat.icono;
-
-                return (
-                  <Card key={key}>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <CatIcon className="h-5 w-5" />
-                        {cat.nombre}
-                        <Badge variant="outline" className="ml-2">
-                          {modulosCategoria.length} módulos
-                        </Badge>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        {modulosCategoria.map((modulo) => {
-                          const activo = isModuleActive(modulo.codigo);
-                          const isDisabled = modulo.esCore || updating === modulo.codigo;
-
-                          return (
-                            <div
-                              key={modulo.codigo}
-                              className={`p-4 border rounded-lg transition-all ${
-                                activo
-                                  ? 'bg-green-50 border-green-200'
-                                  : 'bg-gray-50 border-gray-200'
-                              }`}
-                            >
-                              <div className="flex items-start justify-between gap-4">
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 mb-2 flex-wrap">
-                                    <h4 className="font-semibold">{modulo.nombre}</h4>
-                                    {modulo.esCore && (
-                                      <Badge variant="secondary" className="text-xs">
-                                        <CheckCircle className="h-3 w-3 mr-1" />
-                                        Esencial
-                                      </Badge>
-                                    )}
-                                    {activo && !modulo.esCore && (
-                                      <Badge variant="default" className="text-xs bg-green-600">
-                                        <CheckCircle className="h-3 w-3 mr-1" />
-                                        Activo
-                                      </Badge>
-                                    )}
-                                  </div>
-                                  <p className="text-sm text-muted-foreground mb-3">
-                                    {modulo.descripcion}
-                                  </p>
-                                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                                    <code className="bg-gray-100 px-2 py-1 rounded">
-                                      {modulo.ruta}
-                                    </code>
-                                    {modulo.requiereModulos.length > 0 && (
-                                      <div className="flex items-center gap-1">
-                                        <AlertCircle className="h-3 w-3" />
-                                        <span>Requiere: {modulo.requiereModulos.join(', ')}</span>
-                                      </div>
-                                    )}
-                                  </div>
-                                  <div className="mt-2">
-                                    <Badge variant="outline" className="text-xs">
-                                      Disponible en: {modulo.tiersIncluido.join(', ')}
-                                    </Badge>
-                                  </div>
-                                </div>
-                                <div className="flex flex-col items-center gap-2 flex-shrink-0">
-                                  <Switch
-                                    checked={activo}
-                                    disabled={isDisabled}
-                                    onCheckedChange={(checked) =>
-                                      toggleModule(modulo.codigo, checked)
-                                    }
-                                    className="data-[state=checked]:bg-green-600"
-                                  />
-                                  <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">
-                                    {activo ? 'Activo' : 'Inactivo'}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </TabsContent>
-
-            {/* Tab de Packs */}
-            <TabsContent value="packs" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {packs.map((pack) => (
-                  <Card key={pack.tier} className="relative overflow-hidden">
-                    <div
-                      className={`h-2 ${
-                        pack.tier === 'basico'
-                          ? 'bg-blue-500'
-                          : pack.tier === 'profesional'
-                            ? 'bg-purple-500'
-                            : 'bg-gradient-to-r from-orange-500 to-red-500'
-                      }`}
-                    />
-                    <CardHeader>
-                      <CardTitle className="text-xl">{pack.nombre}</CardTitle>
-                      <CardDescription>{pack.descripcion}</CardDescription>
-                      <div className="mt-4">
-                        <span className="text-3xl font-bold">€{pack.precioMensual}</span>
-                        <span className="text-muted-foreground">/mes</span>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">Usuarios:</span>
-                          <span className="font-semibold">
-                            {pack.maxUsuarios === -1 ? 'Ilimitados' : `Hasta ${pack.maxUsuarios}`}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">Propiedades:</span>
-                          <span className="font-semibold">
-                            {pack.maxPropiedades === -1
-                              ? 'Ilimitadas'
-                              : `Hasta ${pack.maxPropiedades}`}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">Módulos:</span>
-                          <span className="font-semibold">{pack.modulosIncluidos.length}</span>
-                        </div>
-                      </div>
-
-                      <div className="border-t pt-4">
-                        <h4 className="text-sm font-semibold mb-2">Características:</h4>
-                        <ul className="space-y-1">
-                          {pack.caracteristicas.slice(0, 6).map((feat, index) => (
-                            <li key={index} className="flex items-start gap-2 text-sm">
-                              <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
-                              <span className="text-muted-foreground">{feat}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
               </div>
+              <Badge
+                className={`text-lg px-4 py-2 ${
+                  currentPlan.tier === 'basico'
+                    ? 'bg-blue-500'
+                    : currentPlan.tier === 'profesional'
+                      ? 'bg-purple-500'
+                      : currentPlan.tier === 'empresarial'
+                        ? 'bg-orange-500'
+                        : 'bg-gradient-to-r from-orange-500 to-red-500'
+                }`}
+              >
+                {currentPlan.nombre}
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">Precio Mensual</p>
+                <p className="text-3xl font-bold text-primary">€{currentPlan.precioMensual}</p>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">Usuarios Máximos</p>
+                <p className="text-2xl font-semibold">
+                  {currentPlan.maxUsuarios === -1 ? 'Ilimitados' : currentPlan.maxUsuarios}
+                </p>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">Propiedades Máximas</p>
+                <p className="text-2xl font-semibold">
+                  {currentPlan.maxPropiedades === -1 ? 'Ilimitadas' : currentPlan.maxPropiedades}
+                </p>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">Módulos Incluidos</p>
+                <p className="text-2xl font-semibold">{currentPlan.modulosIncluidos.length}</p>
+              </div>
+            </div>
+            <div className="mt-6 flex flex-wrap gap-3">
+              {currentPlan.tier !== 'premium' && currentPlan.tier !== 'empresarial' && (
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+                  onClick={() => router.push('/admin/clientes')}
+                >
+                  <TrendingUp className="h-4 w-4 mr-2" />
+                  Mejorar Plan (Upgrade)
+                </Button>
+              )}
+              <Button size="lg" variant="outline" onClick={() => router.push('/admin/clientes')}>
+                <Package className="h-4 w-4 mr-2" />
+                Cambiar Plan
+              </Button>
+              <Button size="lg" variant="outline" onClick={() => router.push('/contacto')}>
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Contactar Soporte
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-              <Card className="bg-blue-50 border-blue-200">
+      {!currentPlan && (
+        <Card className="mb-6 border-2 border-orange-200 bg-orange-50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-orange-800">
+              <AlertCircle className="h-5 w-5" />
+              Sin Plan de Suscripción
+            </CardTitle>
+            <CardDescription className="text-orange-700">
+              No tienes un plan de suscripción asignado. Contacta con el administrador para
+              configurar tu plan.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              onClick={() => router.push('/admin/clientes')}
+              className="bg-orange-500 hover:bg-orange-600"
+            >
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Contactar Administrador
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      <Tabs defaultValue="modulos" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="modulos">Módulos Disponibles</TabsTrigger>
+          <TabsTrigger value="packs">Packs de Suscripción</TabsTrigger>
+        </TabsList>
+
+        {/* Tab de Módulos */}
+        <TabsContent value="modulos" className="space-y-6">
+          {Object.entries(CATEGORIAS).map(([key, cat]) => {
+            const modulosCategoria = getModulosByCategoria(key);
+            if (modulosCategoria.length === 0) return null;
+
+            const CatIcon = cat.icono;
+
+            return (
+              <Card key={key}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <AlertCircle className="h-5 w-5 text-blue-600" />
-                    Información sobre Packs
+                    <CatIcon className="h-5 w-5" />
+                    {cat.nombre}
+                    <Badge variant="outline" className="ml-2">
+                      {modulosCategoria.length} módulos
+                    </Badge>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2 text-sm text-muted-foreground">
-                  <p>
-                    • Los <strong>módulos esenciales</strong> (Core) están siempre activos en todos
-                    los planes.
-                  </p>
-                  <p>
-                    • Puedes activar/desactivar módulos individualmente según las necesidades de tu
-                    empresa.
-                  </p>
-                  <p>• Los módulos desactivados no aparecerán en el menú de navegación.</p>
-                  <p>
-                    • Algunos módulos tienen <strong>prerequisitos</strong> que deben estar activos
-                    para funcionar correctamente.
-                  </p>
+                <CardContent>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {modulosCategoria.map((modulo) => {
+                      const activo = isModuleActive(modulo.codigo);
+                      const isDisabled = modulo.esCore || updating === modulo.codigo;
+
+                      return (
+                        <div
+                          key={modulo.codigo}
+                          className={`p-4 border rounded-lg transition-all ${
+                            activo ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                <h4 className="font-semibold">{modulo.nombre}</h4>
+                                {modulo.esCore && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    <CheckCircle className="h-3 w-3 mr-1" />
+                                    Esencial
+                                  </Badge>
+                                )}
+                                {activo && !modulo.esCore && (
+                                  <Badge variant="default" className="text-xs bg-green-600">
+                                    <CheckCircle className="h-3 w-3 mr-1" />
+                                    Activo
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="text-sm text-muted-foreground mb-3">
+                                {modulo.descripcion}
+                              </p>
+                              <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                                <code className="bg-gray-100 px-2 py-1 rounded">{modulo.ruta}</code>
+                                {modulo.requiereModulos.length > 0 && (
+                                  <div className="flex items-center gap-1">
+                                    <AlertCircle className="h-3 w-3" />
+                                    <span>Requiere: {modulo.requiereModulos.join(', ')}</span>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="mt-2">
+                                <Badge variant="outline" className="text-xs">
+                                  Disponible en: {modulo.tiersIncluido.join(', ')}
+                                </Badge>
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-center gap-2 flex-shrink-0">
+                              <Switch
+                                checked={activo}
+                                disabled={isDisabled}
+                                onCheckedChange={(checked) => toggleModule(modulo.codigo, checked)}
+                                className="data-[state=checked]:bg-green-600"
+                              />
+                              <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">
+                                {activo ? 'Activo' : 'Inactivo'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </CardContent>
               </Card>
-            </TabsContent>
-          </Tabs>
-        </AuthenticatedLayout>
+            );
+          })}
+        </TabsContent>
+
+        {/* Tab de Packs */}
+        <TabsContent value="packs" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {packs.map((pack) => (
+              <Card key={pack.tier} className="relative overflow-hidden">
+                <div
+                  className={`h-2 ${
+                    pack.tier === 'basico'
+                      ? 'bg-blue-500'
+                      : pack.tier === 'profesional'
+                        ? 'bg-purple-500'
+                        : 'bg-gradient-to-r from-orange-500 to-red-500'
+                  }`}
+                />
+                <CardHeader>
+                  <CardTitle className="text-xl">{pack.nombre}</CardTitle>
+                  <CardDescription>{pack.descripcion}</CardDescription>
+                  <div className="mt-4">
+                    <span className="text-3xl font-bold">€{pack.precioMensual}</span>
+                    <span className="text-muted-foreground">/mes</span>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Usuarios:</span>
+                      <span className="font-semibold">
+                        {pack.maxUsuarios === -1 ? 'Ilimitados' : `Hasta ${pack.maxUsuarios}`}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Propiedades:</span>
+                      <span className="font-semibold">
+                        {pack.maxPropiedades === -1 ? 'Ilimitadas' : `Hasta ${pack.maxPropiedades}`}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Módulos:</span>
+                      <span className="font-semibold">{pack.modulosIncluidos.length}</span>
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-4">
+                    <h4 className="text-sm font-semibold mb-2">Características:</h4>
+                    <ul className="space-y-1">
+                      {pack.caracteristicas.slice(0, 6).map((feat, index) => (
+                        <li key={index} className="flex items-start gap-2 text-sm">
+                          <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
+                          <span className="text-muted-foreground">{feat}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <Card className="bg-blue-50 border-blue-200">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <AlertCircle className="h-5 w-5 text-blue-600" />
+                Información sobre Packs
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm text-muted-foreground">
+              <p>
+                • Los <strong>módulos esenciales</strong> (Core) están siempre activos en todos los
+                planes.
+              </p>
+              <p>
+                • Puedes activar/desactivar módulos individualmente según las necesidades de tu
+                empresa.
+              </p>
+              <p>• Los módulos desactivados no aparecerán en el menú de navegación.</p>
+              <p>
+                • Algunos módulos tienen <strong>prerequisitos</strong> que deben estar activos para
+                funcionar correctamente.
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </AuthenticatedLayout>
   );
 }

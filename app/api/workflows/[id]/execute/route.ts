@@ -9,10 +9,7 @@ export const dynamic = 'force-dynamic';
 /**
  * POST /api/workflows/[id]/execute - Ejecuta un workflow manualmente
  */
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -38,17 +35,11 @@ export async function POST(
     });
 
     if (!workflow) {
-      return NextResponse.json(
-        { error: 'Workflow no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Workflow no encontrado' }, { status: 404 });
     }
 
     if (!workflow.isActive) {
-      return NextResponse.json(
-        { error: 'El workflow no está activo' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'El workflow no está activo' }, { status: 400 });
     }
 
     // Crear registro de ejecución
@@ -111,10 +102,7 @@ export async function POST(
     }
   } catch (error) {
     logError(error as Error, { context: 'POST /api/workflows/[id]/execute' });
-    return NextResponse.json(
-      { error: 'Error al ejecutar workflow' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al ejecutar workflow' }, { status: 500 });
   }
 }
 

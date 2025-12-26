@@ -2,16 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { calculateLeadScoring, calculateProbabilidadCierre, determinarTemperatura } from '@/lib/crm-service';
+import {
+  calculateLeadScoring,
+  calculateProbabilidadCierre,
+  determinarTemperatura,
+} from '@/lib/crm-service';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
 // GET - Obtener un lead específico
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -72,18 +73,12 @@ export async function GET(
     return NextResponse.json(lead);
   } catch (error) {
     logger.error('Error fetching lead:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener lead' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener lead' }, { status: 500 });
   }
 }
 
 // PUT - Actualizar un lead
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -113,13 +108,15 @@ export async function PUT(
     }
 
     // Recalcular scoring si cambian datos relevantes
-    const nuevaPuntuacion = body.presupuestoMensual || body.urgencia || body.verticalesInteres
-      ? calculateLeadScoring(body)
-      : existingLead.puntuacion;
+    const nuevaPuntuacion =
+      body.presupuestoMensual || body.urgencia || body.verticalesInteres
+        ? calculateLeadScoring(body)
+        : existingLead.puntuacion;
 
-    const nuevaProbabilidad = body.presupuestoMensual || body.urgencia
-      ? calculateProbabilidadCierre(body)
-      : existingLead.probabilidadCierre;
+    const nuevaProbabilidad =
+      body.presupuestoMensual || body.urgencia
+        ? calculateProbabilidadCierre(body)
+        : existingLead.probabilidadCierre;
 
     const nuevaTemperatura = determinarTemperatura(nuevaPuntuacion);
 
@@ -170,18 +167,12 @@ export async function PUT(
     return NextResponse.json(lead);
   } catch (error) {
     logger.error('Error updating lead:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar lead' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar lead' }, { status: 500 });
   }
 }
 
 // DELETE - Eliminar un lead
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -215,9 +206,6 @@ export async function DELETE(
     return NextResponse.json({ message: 'Lead eliminado correctamente' });
   } catch (error) {
     logger.error('Error deleting lead:', error);
-    return NextResponse.json(
-      { error: 'Error al eliminar lead' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar lead' }, { status: 500 });
   }
 }

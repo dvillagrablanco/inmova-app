@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
@@ -7,18 +7,13 @@ import bcrypt from 'bcryptjs';
 import logger from '@/lib/logger';
 import crypto from 'crypto';
 
-
-
 // Generar token de recuperación
 export async function POST(req: NextRequest) {
   try {
     const { email } = await req.json();
 
     if (!email) {
-      return NextResponse.json(
-        { error: 'Email es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email es requerido' }, { status: 400 });
     }
 
     // Buscar usuario super admin
@@ -29,7 +24,7 @@ export async function POST(req: NextRequest) {
     if (!user || user.role !== 'super_admin') {
       // Por seguridad, no revelamos si el email existe o no
       return NextResponse.json({
-        message: 'Si el email existe, se enviará un enlace de recuperación'
+        message: 'Si el email existe, se enviará un enlace de recuperación',
       });
     }
 
@@ -57,10 +52,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     logger.error('Error al generar token de recuperación:', error);
-    return NextResponse.json(
-      { error: 'Error al procesar la solicitud' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al procesar la solicitud' }, { status: 500 });
   }
 }
 
@@ -95,10 +87,7 @@ export async function PUT(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Token inválido o expirado' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Token inválido o expirado' }, { status: 400 });
     }
 
     // Hash de la nueva contraseña
@@ -121,9 +110,6 @@ export async function PUT(req: NextRequest) {
     });
   } catch (error) {
     logger.error('Error al restablecer contraseña:', error);
-    return NextResponse.json(
-      { error: 'Error al procesar la solicitud' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al procesar la solicitud' }, { status: 500 });
   }
 }

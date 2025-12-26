@@ -8,7 +8,15 @@ import { addDays, addMonths, startOfMonth, endOfMonth } from 'date-fns';
 import logger, { logError } from '@/lib/logger';
 
 // Types for Calendar Events
-type CalendarEventType = 'pago' | 'vencimiento' | 'visita' | 'mantenimiento' | 'inspeccion' | 'reunion' | 'recordatorio' | 'otro';
+type CalendarEventType =
+  | 'pago'
+  | 'vencimiento'
+  | 'visita'
+  | 'mantenimiento'
+  | 'inspeccion'
+  | 'reunion'
+  | 'recordatorio'
+  | 'otro';
 type CalendarEventPriority = 'baja' | 'media' | 'alta' | 'critica';
 
 export interface EventoCalendario {
@@ -76,28 +84,28 @@ async function sincronizarEventosPagos(companyId: string, inicio: Date, fin: Dat
       contract: {
         unit: {
           building: {
-            companyId
-          }
-        }
+            companyId,
+          },
+        },
       },
       estado: 'pendiente',
       fechaVencimiento: {
         gte: inicio,
-        lte: fin
-      }
+        lte: fin,
+      },
     },
     include: {
       contract: {
         include: {
           unit: {
             include: {
-              building: true
-            }
+              building: true,
+            },
           },
-          tenant: true
-        }
-      }
-    }
+          tenant: true,
+        },
+      },
+    },
   });
 
   for (const payment of payments) {
@@ -106,8 +114,8 @@ async function sincronizarEventosPagos(companyId: string, inicio: Date, fin: Dat
       where: {
         companyId,
         paymentId: payment.id,
-        tipo: 'pago'
-      }
+        tipo: 'pago',
+      },
     });
 
     if (!existingEvent) {
@@ -115,13 +123,14 @@ async function sincronizarEventosPagos(companyId: string, inicio: Date, fin: Dat
         (payment.fechaVencimiento.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
       );
 
-      const prioridad: CalendarEventPriority = diasHastaVencimiento < 0 
-        ? 'critica' 
-        : diasHastaVencimiento <= 3 
-        ? 'alta' 
-        : diasHastaVencimiento <= 7 
-        ? 'media' 
-        : 'baja';
+      const prioridad: CalendarEventPriority =
+        diasHastaVencimiento < 0
+          ? 'critica'
+          : diasHastaVencimiento <= 3
+            ? 'alta'
+            : diasHastaVencimiento <= 7
+              ? 'media'
+              : 'baja';
 
       await prisma.calendarEvent.create({
         data: {
@@ -133,7 +142,12 @@ async function sincronizarEventosPagos(companyId: string, inicio: Date, fin: Dat
           fechaInicio: payment.fechaVencimiento,
           todoElDia: true,
           ubicacion: `${payment.contract.unit.building.nombre} - Unidad ${payment.contract.unit.numero}`,
-          color: diasHastaVencimiento < 0 ? '#dc2626' : diasHastaVencimiento <= 3 ? '#f59e0b' : '#10b981',
+          color:
+            diasHastaVencimiento < 0
+              ? '#dc2626'
+              : diasHastaVencimiento <= 3
+                ? '#f59e0b'
+                : '#10b981',
           buildingId: payment.contract.unit.buildingId,
           unitId: payment.contract.unitId,
           tenantId: payment.contract.tenantId,
@@ -141,8 +155,8 @@ async function sincronizarEventosPagos(companyId: string, inicio: Date, fin: Dat
           paymentId: payment.id,
           recordatorioActivo: true,
           recordatorioMinutos: 1440, // 24 horas antes
-          creadoPor: 'sistema'
-        }
+          creadoPor: 'sistema',
+        },
       });
     }
   }
@@ -158,23 +172,23 @@ async function sincronizarEventosVencimientoContratos(companyId: string, inicio:
     where: {
       unit: {
         building: {
-          companyId
-        }
+          companyId,
+        },
       },
       estado: 'activo',
       fechaFin: {
         gte: inicio,
-        lte: fin
-      }
+        lte: fin,
+      },
     },
     include: {
       unit: {
         include: {
-          building: true
-        }
+          building: true,
+        },
       },
-      tenant: true
-    }
+      tenant: true,
+    },
   });
 
   for (const contract of contracts) {
@@ -182,8 +196,8 @@ async function sincronizarEventosVencimientoContratos(companyId: string, inicio:
       where: {
         companyId,
         contractId: contract.id,
-        tipo: 'vencimiento'
-      }
+        tipo: 'vencimiento',
+      },
     });
 
     if (!existingEvent) {
@@ -191,11 +205,8 @@ async function sincronizarEventosVencimientoContratos(companyId: string, inicio:
         (contract.fechaFin.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
       );
 
-      const prioridad: CalendarEventPriority = diasHastaVencimiento <= 30 
-        ? 'alta' 
-        : diasHastaVencimiento <= 60 
-        ? 'media' 
-        : 'baja';
+      const prioridad: CalendarEventPriority =
+        diasHastaVencimiento <= 30 ? 'alta' : diasHastaVencimiento <= 60 ? 'media' : 'baja';
 
       await prisma.calendarEvent.create({
         data: {
@@ -214,8 +225,8 @@ async function sincronizarEventosVencimientoContratos(companyId: string, inicio:
           contractId: contract.id,
           recordatorioActivo: true,
           recordatorioMinutos: 10080, // 7 días antes
-          creadoPor: 'sistema'
-        }
+          creadoPor: 'sistema',
+        },
       });
     }
   }
@@ -229,25 +240,25 @@ async function sincronizarEventosMantenimiento(companyId: string, inicio: Date, 
     where: {
       unit: {
         building: {
-          companyId
-        }
+          companyId,
+        },
       },
       estado: {
-        in: ['pendiente', 'en_progreso']
+        in: ['pendiente', 'en_progreso'],
       },
       fechaProgramada: {
         gte: inicio,
-        lte: fin
-      }
+        lte: fin,
+      },
     },
     include: {
       unit: {
         include: {
-          building: true
-        }
+          building: true,
+        },
       },
-      provider: true
-    }
+      provider: true,
+    },
   });
 
   for (const maintenance of maintenanceRequests) {
@@ -257,23 +268,23 @@ async function sincronizarEventosMantenimiento(companyId: string, inicio: Date, 
       where: {
         companyId,
         maintenanceRequestId: maintenance.id,
-        tipo: 'mantenimiento'
-      }
+        tipo: 'mantenimiento',
+      },
     });
 
     if (!existingEvent) {
       const prioridadMap: Record<string, CalendarEventPriority> = {
-        'urgente': 'critica',
-        'alta': 'alta',
-        'media': 'media',
-        'baja': 'baja'
+        urgente: 'critica',
+        alta: 'alta',
+        media: 'media',
+        baja: 'baja',
       };
 
       const colorMap: Record<string, string> = {
-        'urgente': '#dc2626',
-        'alta': '#f59e0b',
-        'media': '#3b82f6',
-        'baja': '#10b981'
+        urgente: '#dc2626',
+        alta: '#f59e0b',
+        media: '#3b82f6',
+        baja: '#10b981',
       };
 
       await prisma.calendarEvent.create({
@@ -293,8 +304,8 @@ async function sincronizarEventosMantenimiento(companyId: string, inicio: Date, 
           maintenanceRequestId: maintenance.id,
           recordatorioActivo: true,
           recordatorioMinutos: 1440, // 24 horas antes
-          creadoPor: 'sistema'
-        }
+          creadoPor: 'sistema',
+        },
       });
     }
   }
@@ -309,26 +320,26 @@ async function sincronizarEventosVisitas(companyId: string, inicio: Date, fin: D
       candidate: {
         unit: {
           building: {
-            companyId
-          }
-        }
+            companyId,
+          },
+        },
       },
       fechaVisita: {
         gte: inicio,
-        lte: fin
-      }
+        lte: fin,
+      },
     },
     include: {
       candidate: {
         include: {
           unit: {
             include: {
-              building: true
-            }
-          }
-        }
-      }
-    }
+              building: true,
+            },
+          },
+        },
+      },
+    },
   });
 
   for (const visit of visits) {
@@ -336,8 +347,8 @@ async function sincronizarEventosVisitas(companyId: string, inicio: Date, fin: D
       where: {
         companyId,
         visitId: visit.id,
-        tipo: 'visita'
-      }
+        tipo: 'visita',
+      },
     });
 
     if (!existingEvent) {
@@ -358,8 +369,8 @@ async function sincronizarEventosVisitas(companyId: string, inicio: Date, fin: D
           visitId: visit.id,
           recordatorioActivo: true,
           recordatorioMinutos: 180, // 3 horas antes
-          creadoPor: 'sistema'
-        }
+          creadoPor: 'sistema',
+        },
       });
     }
   }
@@ -375,9 +386,9 @@ async function sincronizarEventosInspecciones(companyId: string, inicio: Date, f
       estado: 'programada',
       fechaProgramada: {
         gte: inicio,
-        lte: fin
-      }
-    }
+        lte: fin,
+      },
+    },
   });
 
   for (const inspection of inspections) {
@@ -385,8 +396,8 @@ async function sincronizarEventosInspecciones(companyId: string, inicio: Date, f
       where: {
         companyId,
         inspectionId: inspection.id,
-        tipo: 'inspeccion'
-      }
+        tipo: 'inspeccion',
+      },
     });
 
     if (!existingEvent) {
@@ -394,7 +405,9 @@ async function sincronizarEventosInspecciones(companyId: string, inicio: Date, f
         data: {
           companyId,
           titulo: `Inspección: ${inspection.tipo}`,
-          descripcion: inspection.descripcion || `Inspección de tipo ${inspection.tipo}\nInspector: ${inspection.inspector}`,
+          descripcion:
+            inspection.descripcion ||
+            `Inspección de tipo ${inspection.tipo}\nInspector: ${inspection.inspector}`,
           tipo: 'inspeccion',
           prioridad: 'media',
           fechaInicio: inspection.fechaProgramada,
@@ -405,8 +418,8 @@ async function sincronizarEventosInspecciones(companyId: string, inicio: Date, f
           inspectionId: inspection.id,
           recordatorioActivo: true,
           recordatorioMinutos: 1440, // 24 horas antes
-          creadoPor: 'sistema'
-        }
+          creadoPor: 'sistema',
+        },
       });
     }
   }
@@ -430,9 +443,9 @@ export async function obtenerEventosCalendario(
     companyId,
     fechaInicio: {
       gte: fechaInicio,
-      lte: fechaFin
+      lte: fechaFin,
     },
-    cancelado: false
+    cancelado: false,
   };
 
   if (filtros?.tipo && filtros.tipo.length > 0) {
@@ -461,11 +474,11 @@ export async function obtenerEventosCalendario(
       payment: true,
       maintenanceRequest: true,
       visit: true,
-      inspection: true
+      inspection: true,
     },
     orderBy: {
-      fechaInicio: 'asc'
-    }
+      fechaInicio: 'asc',
+    },
   });
 
   return events;
@@ -484,17 +497,17 @@ export async function limpiarEventosAntiguos(companyId: string, mesesAtras: numb
         {
           completado: true,
           fechaInicio: {
-            lt: fechaLimite
-          }
+            lt: fechaLimite,
+          },
         },
         {
           cancelado: true,
           fechaInicio: {
-            lt: fechaLimite
-          }
-        }
-      ]
-    }
+            lt: fechaLimite,
+          },
+        },
+      ],
+    },
   });
 
   return result;

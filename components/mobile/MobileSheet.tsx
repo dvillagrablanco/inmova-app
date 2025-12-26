@@ -13,13 +13,7 @@ interface MobileSheetProps {
   className?: string;
 }
 
-export function MobileSheet({
-  isOpen,
-  onClose,
-  title,
-  children,
-  className
-}: MobileSheetProps) {
+export function MobileSheet({ isOpen, onClose, title, children, className }: MobileSheetProps) {
   // Prevenir scroll del body cuando el sheet está abierto
   useEffect(() => {
     if (isOpen) {
@@ -35,22 +29,10 @@ export function MobileSheet({
   return (
     <>
       {/* Overlay */}
-      <div
-        className={cn(
-          'mobile-sheet-overlay',
-          isOpen && 'open'
-        )}
-        onClick={onClose}
-      />
+      <div className={cn('mobile-sheet-overlay', isOpen && 'open')} onClick={onClose} />
 
       {/* Sheet */}
-      <div
-        className={cn(
-          'mobile-sheet',
-          isOpen && 'open',
-          className
-        )}
-      >
+      <div className={cn('mobile-sheet', isOpen && 'open', className)}>
         {/* Handle para indicar que es arrastrable */}
         <div className="mobile-sheet-handle" />
 
@@ -58,21 +40,14 @@ export function MobileSheet({
         {title && (
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">{title}</h3>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="h-8 w-8"
-            >
+            <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">
               <X className="h-4 w-4" />
             </Button>
           </div>
         )}
 
         {/* Contenido */}
-        <div className="max-h-[70vh] overflow-y-auto">
-          {children}
-        </div>
+        <div className="max-h-[70vh] overflow-y-auto">{children}</div>
       </div>
     </>
   );

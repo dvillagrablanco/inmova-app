@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     const marketData = Array.from({ length: period }, (_, i) => {
       const date = new Date();
       date.setDate(date.getDate() - (period - i - 1));
-      
+
       return {
         date: date.toISOString().split('T')[0],
         myPrice: 85 + Math.random() * 30,
@@ -30,9 +30,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(marketData);
   } catch (error) {
     logger.error('Error fetching market data:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener datos de mercado' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener datos de mercado' }, { status: 500 });
   }
 }

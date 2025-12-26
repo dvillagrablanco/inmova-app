@@ -25,10 +25,7 @@ export async function POST(request: Request) {
     switch (type) {
       case 'gasto':
         if (!entityId) {
-          return NextResponse.json(
-            { error: 'Se requiere entityId para gastos' },
-            { status: 400 }
-          );
+          return NextResponse.json({ error: 'Se requiere entityId para gastos' }, { status: 400 });
         }
         approval = await requestExpenseApproval(user.companyId as string, entityId, user.id);
         break;
@@ -40,20 +37,13 @@ export async function POST(request: Request) {
             { status: 400 }
           );
         }
-        approval = await requestMaintenanceApproval(
-          user.companyId as string,
-          entityId,
-          user.id
-        );
+        approval = await requestMaintenanceApproval(user.companyId as string, entityId, user.id);
         break;
 
       default:
         // Crear solicitud genérica
         if (!title || !description) {
-          return NextResponse.json(
-            { error: 'Se requieren title y description' },
-            { status: 400 }
-          );
+          return NextResponse.json({ error: 'Se requieren title y description' }, { status: 400 });
         }
         approval = await createApprovalRequest({
           companyId: user.companyId as string,

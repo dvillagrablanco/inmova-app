@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { ReactNode, useState } from 'react';
 import { Filter, X, ChevronDown, ChevronUp } from 'lucide-react';
@@ -74,11 +74,7 @@ export function MobileFilterPanel({
       <div className={cn('lg:hidden', className)}>
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
-            <Button
-              variant="outline"
-              className="w-full sm:w-auto relative"
-              size="default"
-            >
+            <Button variant="outline" className="w-full sm:w-auto relative" size="default">
               <Filter className="mr-2 h-4 w-4" />
               {title}
               {activeFilterCount > 0 && (
@@ -96,17 +92,10 @@ export function MobileFilterPanel({
               <div className="flex items-center justify-between">
                 <div>
                   <SheetTitle>{title}</SheetTitle>
-                  <SheetDescription className="text-sm mt-1">
-                    {description}
-                  </SheetDescription>
+                  <SheetDescription className="text-sm mt-1">{description}</SheetDescription>
                 </div>
                 {activeFilterCount > 0 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleClearAll}
-                    className="text-sm"
-                  >
+                  <Button variant="ghost" size="sm" onClick={handleClearAll} className="text-sm">
                     Limpiar todo
                   </Button>
                 )}

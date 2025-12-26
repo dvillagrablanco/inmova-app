@@ -19,25 +19,22 @@ async function processPreventiveMaintenance() {
   const schedules = await prisma.maintenanceSchedule.findMany({
     where: {
       activo: true,
-      AND: [
-        { proximaFecha: { lte: next7Days } },
-        { proximaFecha: { gte: today } }
-      ]
+      AND: [{ proximaFecha: { lte: next7Days } }, { proximaFecha: { gte: today } }],
     },
     include: {
       building: {
         include: {
-          company: true
-        }
-      }
-    }
+          company: true,
+        },
+      },
+    },
   });
 
   const results = {
     total: schedules.length,
     notificadas: 0,
     errores: 0,
-    detalles: [] as any[]
+    detalles: [] as any[],
   };
 
   for (const schedule of schedules) {
@@ -73,8 +70,8 @@ async function processPreventiveMaintenance() {
           tipo: prioridad === 'alto' ? 'mantenimiento_urgente' : 'mantenimiento_preventivo',
           prioridad,
           entityType: 'MaintenanceSchedule',
-          entityId: schedule.id
-        }
+          entityId: schedule.id,
+        },
       });
 
       // Enviar email al contacto del edificio o administradores
@@ -136,7 +133,7 @@ async function processPreventiveMaintenance() {
                   </div>
                 </body>
               </html>
-            `
+            `,
           });
           results.notificadas++;
         } catch (emailError) {
@@ -151,15 +148,14 @@ async function processPreventiveMaintenance() {
         edificio: schedule.building.nombre,
         diasRestantes,
         prioridad,
-        notificada: true
+        notificada: true,
       });
-
     } catch (error) {
       logger.error(`Error al procesar mantenimiento preventivo ${schedule.id}:`, error);
       results.errores++;
       results.detalles.push({
         id: schedule.id,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
     }
   }
@@ -181,21 +177,18 @@ export async function GET(request: NextRequest) {
 
     if (cronSecret) {
       if (!authHeader || authHeader !== `Bearer ${cronSecret}`) {
-        return NextResponse.json(
-          { error: 'No autorizado' },
-          { status: 401 }
-        );
+        return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
       }
     }
 
     logger.info('Iniciando procesamiento de mantenimiento preventivo...');
     const results = await processPreventiveMaintenance();
-    
+
     return NextResponse.json({
       success: true,
       message: 'Mantenimiento preventivo procesado correctamente',
       timestamp: new Date().toISOString(),
-      results
+      results,
     });
   } catch (error: any) {
     logger.error('Error al procesar mantenimiento preventivo:', error);

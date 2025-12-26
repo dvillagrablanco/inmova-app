@@ -19,28 +19,25 @@ export async function GET(req: NextRequest) {
     // Obtener módulos activados de la empresa
     const companyModules = await prisma.companyModule.findMany({
       where: { companyId },
-      orderBy: { moduloCodigo: 'asc' }
+      orderBy: { moduloCodigo: 'asc' },
     });
 
     // Enriquecer con información del catálogo
-    const enrichedModules = companyModules.map(cm => {
-      const definition = MODULOS_CATALOGO.find(m => m.codigo === cm.moduloCodigo);
+    const enrichedModules = companyModules.map((cm) => {
+      const definition = MODULOS_CATALOGO.find((m) => m.codigo === cm.moduloCodigo);
       return {
         ...cm,
         nombre: definition?.nombre || cm.moduloCodigo,
         descripcion: definition?.descripcion || '',
         categoria: definition?.categoria || 'otro',
         icono: definition?.icono || 'Package',
-        esCore: definition?.esCore || false
+        esCore: definition?.esCore || false,
       };
     });
 
     return NextResponse.json({ modules: enrichedModules });
   } catch (error: any) {
     logger.error('Error al obtener módulos de empresa:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener módulos' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener módulos' }, { status: 500 });
   }
 }

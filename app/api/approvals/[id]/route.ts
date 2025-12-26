@@ -10,10 +10,7 @@ export const dynamic = 'force-dynamic';
  * PUT /api/approvals/[id]
  * Aprueba o rechaza una solicitud de aprobación
  */
-export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
     const user = await requireAuth();
 
@@ -30,10 +27,7 @@ export async function PUT(
     const { accion, comentarioRechazo } = body; // accion: 'aprobar' | 'rechazar'
 
     if (!accion || !['aprobar', 'rechazar'].includes(accion)) {
-      return NextResponse.json(
-        { error: 'Acción inválida' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Acción inválida' }, { status: 400 });
     }
 
     // Obtener la solicitud de aprobación
@@ -63,10 +57,7 @@ export async function PUT(
     });
 
     if (!approval) {
-      return NextResponse.json(
-        { error: 'Solicitud de aprobación no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Solicitud de aprobación no encontrada' }, { status: 404 });
     }
 
     // Verificar que pertenece a la empresa del usuario
@@ -133,10 +124,7 @@ export async function PUT(
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
-    return NextResponse.json(
-      { error: 'Error al procesar aprobación' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al procesar aprobación' }, { status: 500 });
   }
 }
 
@@ -144,10 +132,7 @@ export async function PUT(
  * DELETE /api/approvals/[id]
  * Cancela una solicitud de aprobación (solo el solicitante)
  */
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
     const user = await requireAuth();
     const { id } = params;
@@ -157,10 +142,7 @@ export async function DELETE(
     });
 
     if (!approval) {
-      return NextResponse.json(
-        { error: 'Solicitud de aprobación no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Solicitud de aprobación no encontrada' }, { status: 404 });
     }
 
     // Solo el solicitante o un administrador pueden cancelar
@@ -208,9 +190,6 @@ export async function DELETE(
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
-    return NextResponse.json(
-      { error: 'Error al cancelar aprobación' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al cancelar aprobación' }, { status: 500 });
   }
 }

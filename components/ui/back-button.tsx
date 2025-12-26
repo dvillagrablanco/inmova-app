@@ -35,15 +35,15 @@ interface BackButtonProps {
 /**
  * Componente de botón de navegación "Atrás"
  * Proporciona una forma consistente de volver a la página anterior
- * 
+ *
  * Ejemplos de uso:
  * ```tsx
  * // Botón básico que vuelve a la página anterior
  * <BackButton />
- * 
+ *
  * // Botón con ruta personalizada
  * <BackButton href="/edificios" label="Volver a Edificios" />
- * 
+ *
  * // Botón solo icono
  * <BackButton iconOnly variant="ghost" />
  * ```
@@ -54,7 +54,7 @@ export function BackButton({
   variant = 'outline',
   size = 'default',
   className,
-  iconOnly = false
+  iconOnly = false,
 }: BackButtonProps) {
   const router = useRouter();
 
@@ -71,17 +71,10 @@ export function BackButton({
       variant={variant}
       size={iconOnly ? 'icon' : size}
       onClick={handleClick}
-      className={cn(
-        'gap-2',
-        iconOnly && 'h-9 w-9',
-        className
-      )}
+      className={cn('gap-2', iconOnly && 'h-9 w-9', className)}
       aria-label={iconOnly ? label : undefined}
     >
-      <ArrowLeft className={cn(
-        'h-4 w-4',
-        !iconOnly && 'flex-shrink-0'
-      )} />
+      <ArrowLeft className={cn('h-4 w-4', !iconOnly && 'flex-shrink-0')} />
       {!iconOnly && <span>{label}</span>}
     </Button>
   );

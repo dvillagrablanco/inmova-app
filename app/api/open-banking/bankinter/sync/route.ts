@@ -9,23 +9,20 @@ export const dynamic = 'force-dynamic';
 
 /**
  * POST /api/open-banking/bankinter/sync
- * 
+ *
  * Sincroniza transacciones de una conexión de Bankinter
  */
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     if (!isBankinterConfigured()) {
       return NextResponse.json(
         {
-          error: 'Integración con Bankinter no configurada'
+          error: 'Integración con Bankinter no configurada',
         },
         { status: 503 }
       );
@@ -34,25 +31,19 @@ export async function POST(request: NextRequest) {
     const { connectionId, diasAtras } = await request.json();
 
     if (!connectionId) {
-      return NextResponse.json(
-        { error: 'connectionId requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'connectionId requerido' }, { status: 400 });
     }
 
     // Verificar que la conexión pertenece a la compañía del usuario
     const connection = await prisma.bankConnection.findFirst({
       where: {
         id: connectionId,
-        companyId: session.user.companyId
-      }
+        companyId: session.user.companyId,
+      },
     });
 
     if (!connection) {
-      return NextResponse.json(
-        { error: 'Conexión no encontrada o sin acceso' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Conexión no encontrada o sin acceso' }, { status: 404 });
     }
 
     // Sincronizar transacciones
@@ -67,14 +58,14 @@ export async function POST(request: NextRequest) {
       success: true,
       total: resultado.total,
       transacciones: resultado.transacciones,
-      message: `${resultado.total} transacciones sincronizadas`
+      message: `${resultado.total} transacciones sincronizadas`,
     });
   } catch (error: any) {
     logger.error('Error sincronizando transacciones:', error);
     return NextResponse.json(
       {
         error: 'Error al sincronizar transacciones',
-        details: error.message
+        details: error.message,
       },
       { status: 500 }
     );

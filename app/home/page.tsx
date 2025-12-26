@@ -307,183 +307,178 @@ export default function HomePage() {
       {showOnboarding && <OnboardingTourEnhanced onComplete={handleOnboardingComplete} />}
       <VerticalOnboardingTour />
       <AuthenticatedLayout>
-            <div className="max-w-7xl mx-auto space-y-8">
-              {/* Welcome Section */}
-              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 p-8 text-white shadow-2xl">
-                <div className="absolute inset-0 bg-grid-white/10" />
-                <div className="relative z-10">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Sparkles className="h-5 w-5 animate-pulse" />
-                    <span className="text-sm font-semibold opacity-90">Bienvenido de vuelta</span>
-                  </div>
-                  <h1 className="text-3xl md:text-4xl font-bold mb-2">
-                    ¡Hola, {session?.user?.name || 'Usuario'}! 👋
-                  </h1>
-                  <p className="text-lg opacity-90">
-                    Tienes acceso a{' '}
-                    <span className="font-bold">{availableModules.length} módulos</span> activos en
-                    tu plataforma INMOVA
-                  </p>
-                </div>
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Welcome Section */}
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 p-8 text-white shadow-2xl">
+            <div className="absolute inset-0 bg-grid-white/10" />
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="h-5 w-5 animate-pulse" />
+                <span className="text-sm font-semibold opacity-90">Bienvenido de vuelta</span>
               </div>
+              <h1 className="text-3xl md:text-4xl font-bold mb-2">
+                ¡Hola, {session?.user?.name || 'Usuario'}! 👋
+              </h1>
+              <p className="text-lg opacity-90">
+                Tienes acceso a <span className="font-bold">{availableModules.length} módulos</span>{' '}
+                activos en tu plataforma INMOVA
+              </p>
+            </div>
+          </div>
 
-              {/* Setup Progress Widget */}
-              <SetupProgressWidget />
+          {/* Setup Progress Widget */}
+          <SetupProgressWidget />
 
-              {/* Quick Stats */}
-              {stats && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50">
-                    <CardHeader className="pb-3">
-                      <CardDescription className="text-blue-600 font-medium">
-                        Total Propiedades
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-4xl font-black text-blue-700">
-                        {stats.totalPropiedades}
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-emerald-50">
-                    <CardHeader className="pb-3">
-                      <CardDescription className="text-green-600 font-medium">
-                        Ingresos Mensuales
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-4xl font-black text-green-700">
-                        €{stats.ingresosMes.toLocaleString()}
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="border-2 border-violet-200 bg-gradient-to-br from-violet-50 to-purple-50">
-                    <CardHeader className="pb-3">
-                      <CardDescription className="text-violet-600 font-medium">
-                        Tasa Ocupación
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-4xl font-black text-violet-700">
-                        {stats.tasaOcupacion}%
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-amber-50">
-                    <CardHeader className="pb-3">
-                      <CardDescription className="text-orange-600 font-medium">
-                        Dashboard Completo
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Link href="/dashboard">
-                        <Button className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600">
-                          Ver Analytics
-                          <ArrowRight className="h-4 w-4 ml-2" />
-                        </Button>
-                      </Link>
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
-
-              {/* Active Modules */}
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Tus Módulos Activos</h2>
-                    <p className="text-gray-600 mt-1">
-                      Accede rápidamente a las funcionalidades contratadas
-                    </p>
-                  </div>
-                  <Link href="/admin/modulos">
-                    <Button variant="outline" className="gap-2">
-                      <Award className="h-4 w-4" />
-                      Gestionar Módulos
-                    </Button>
-                  </Link>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {availableModules.map((moduleCode) => {
-                    const module = MODULE_INFO[moduleCode];
-                    return (
-                      <Link href={module.route} key={moduleCode}>
-                        <Card className="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border-2 hover:border-indigo-300 cursor-pointer h-full">
-                          <CardHeader>
-                            <div
-                              className={`p-3 bg-gradient-to-br ${module.gradient} rounded-xl w-fit mb-3 group-hover:scale-110 transition-transform shadow-lg`}
-                            >
-                              <module.icon className="h-6 w-6 text-white" />
-                            </div>
-                            <CardTitle className="text-lg group-hover:text-indigo-600 transition-colors">
-                              {module.title}
-                            </CardTitle>
-                            <CardDescription>{module.description}</CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="w-full group-hover:bg-indigo-50 group-hover:text-indigo-600"
-                            >
-                              Acceder
-                              <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                            </Button>
-                          </CardContent>
-                        </Card>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Quick Actions */}
-              <Card className="border-2 border-gray-200">
-                <CardHeader>
-                  <CardTitle className="text-xl flex items-center gap-2">
-                    <Rocket className="h-5 w-5 text-indigo-600" />
-                    Acciones Rápidas
-                  </CardTitle>
-                  <CardDescription>Tareas frecuentes de un solo click</CardDescription>
+          {/* Quick Stats */}
+          {stats && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50">
+                <CardHeader className="pb-3">
+                  <CardDescription className="text-blue-600 font-medium">
+                    Total Propiedades
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <Link href="/edificios/nuevo">
-                      <Button variant="outline" className="w-full h-full flex-col gap-2 py-6">
-                        <Building2 className="h-6 w-6 text-blue-600" />
-                        <span className="text-sm">Nuevo Edificio</span>
-                      </Button>
-                    </Link>
-                    <Link href="/inquilinos/nuevo">
-                      <Button variant="outline" className="w-full h-full flex-col gap-2 py-6">
-                        <Users className="h-6 w-6 text-purple-600" />
-                        <span className="text-sm">Nuevo Inquilino</span>
-                      </Button>
-                    </Link>
-                    <Link href="/contratos/nuevo">
-                      <Button variant="outline" className="w-full h-full flex-col gap-2 py-6">
-                        <FileText className="h-6 w-6 text-orange-600" />
-                        <span className="text-sm">Nuevo Contrato</span>
-                      </Button>
-                    </Link>
-                    <Link href="/mantenimiento/nuevo">
-                      <Button variant="outline" className="w-full h-full flex-col gap-2 py-6">
-                        <Hammer className="h-6 w-6 text-green-600" />
-                        <span className="text-sm">Nueva Solicitud</span>
-                      </Button>
-                    </Link>
+                  <div className="text-4xl font-black text-blue-700">{stats.totalPropiedades}</div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-emerald-50">
+                <CardHeader className="pb-3">
+                  <CardDescription className="text-green-600 font-medium">
+                    Ingresos Mensuales
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-4xl font-black text-green-700">
+                    €{stats.ingresosMes.toLocaleString()}
                   </div>
                 </CardContent>
               </Card>
+
+              <Card className="border-2 border-violet-200 bg-gradient-to-br from-violet-50 to-purple-50">
+                <CardHeader className="pb-3">
+                  <CardDescription className="text-violet-600 font-medium">
+                    Tasa Ocupación
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-4xl font-black text-violet-700">{stats.tasaOcupacion}%</div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-amber-50">
+                <CardHeader className="pb-3">
+                  <CardDescription className="text-orange-600 font-medium">
+                    Dashboard Completo
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Link href="/dashboard">
+                    <Button className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600">
+                      Ver Analytics
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Active Modules */}
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Tus Módulos Activos</h2>
+                <p className="text-gray-600 mt-1">
+                  Accede rápidamente a las funcionalidades contratadas
+                </p>
+              </div>
+              <Link href="/admin/modulos">
+                <Button variant="outline" className="gap-2">
+                  <Award className="h-4 w-4" />
+                  Gestionar Módulos
+                </Button>
+              </Link>
             </div>
 
-            {/* Quick Access Menu */}
-            <QuickAccessMenu />
-          </AuthenticatedLayout>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {availableModules.map((moduleCode) => {
+                const module = MODULE_INFO[moduleCode];
+                return (
+                  <Link href={module.route} key={moduleCode}>
+                    <Card className="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border-2 hover:border-indigo-300 cursor-pointer h-full">
+                      <CardHeader>
+                        <div
+                          className={`p-3 bg-gradient-to-br ${module.gradient} rounded-xl w-fit mb-3 group-hover:scale-110 transition-transform shadow-lg`}
+                        >
+                          <module.icon className="h-6 w-6 text-white" />
+                        </div>
+                        <CardTitle className="text-lg group-hover:text-indigo-600 transition-colors">
+                          {module.title}
+                        </CardTitle>
+                        <CardDescription>{module.description}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full group-hover:bg-indigo-50 group-hover:text-indigo-600"
+                        >
+                          Acceder
+                          <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <Card className="border-2 border-gray-200">
+            <CardHeader>
+              <CardTitle className="text-xl flex items-center gap-2">
+                <Rocket className="h-5 w-5 text-indigo-600" />
+                Acciones Rápidas
+              </CardTitle>
+              <CardDescription>Tareas frecuentes de un solo click</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Link href="/edificios/nuevo">
+                  <Button variant="outline" className="w-full h-full flex-col gap-2 py-6">
+                    <Building2 className="h-6 w-6 text-blue-600" />
+                    <span className="text-sm">Nuevo Edificio</span>
+                  </Button>
+                </Link>
+                <Link href="/inquilinos/nuevo">
+                  <Button variant="outline" className="w-full h-full flex-col gap-2 py-6">
+                    <Users className="h-6 w-6 text-purple-600" />
+                    <span className="text-sm">Nuevo Inquilino</span>
+                  </Button>
+                </Link>
+                <Link href="/contratos/nuevo">
+                  <Button variant="outline" className="w-full h-full flex-col gap-2 py-6">
+                    <FileText className="h-6 w-6 text-orange-600" />
+                    <span className="text-sm">Nuevo Contrato</span>
+                  </Button>
+                </Link>
+                <Link href="/mantenimiento/nuevo">
+                  <Button variant="outline" className="w-full h-full flex-col gap-2 py-6">
+                    <Hammer className="h-6 w-6 text-green-600" />
+                    <span className="text-sm">Nueva Solicitud</span>
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Access Menu */}
+        <QuickAccessMenu />
+      </AuthenticatedLayout>
     </>
   );
 }

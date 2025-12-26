@@ -8,19 +8,19 @@ export const dynamic = 'force-dynamic';
 
 /**
  * Portal Inquilino - Dashboard Optimizado
- * 
+ *
  * Optimizaciones aplicadas (Semana 2, Tarea 2.4):
  * - Queries en paralelo con Promise.all
  * - Select específico en lugar de includes profundos
  * - Agregaciones en base de datos en lugar de en memoria
  * - Paginación en pagos
- * 
+ *
  * Mejora: De ~1400ms a ~210ms (-85%)
  */
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authTenantOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
@@ -28,13 +28,7 @@ export async function GET(request: Request) {
     const tenantId = (session.user as any).id;
 
     // Ejecutar todas las queries en paralelo para reducir tiempo total
-    const [
-      tenant,
-      contracts,
-      payments,
-      maintenanceRequests,
-      paymentStats,
-    ] = await Promise.all([
+    const [tenant, contracts, payments, maintenanceRequests, paymentStats] = await Promise.all([
       // Datos del inquilino
       prisma.tenant.findUnique({
         where: { id: tenantId },
@@ -46,7 +40,7 @@ export async function GET(request: Request) {
           dni: true,
         },
       }),
-      
+
       // Contratos activos con select específico
       prisma.contract.findMany({
         where: {
@@ -78,7 +72,7 @@ export async function GET(request: Request) {
           fechaInicio: 'desc',
         },
       }),
-      
+
       // Pagos recientes con select específico
       prisma.payment.findMany({
         where: {
@@ -115,7 +109,7 @@ export async function GET(request: Request) {
         },
         take: 10,
       }),
-      
+
       // Solicitudes de mantenimiento
       prisma.maintenanceRequest.findMany({
         where: {
@@ -142,7 +136,7 @@ export async function GET(request: Request) {
         },
         take: 5,
       }),
-      
+
       // Estadísticas de pagos calculadas en DB
       Promise.all([
         prisma.payment.aggregate({
@@ -186,9 +180,6 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     logger.error('Error al obtener dashboard:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener dashboard' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener dashboard' }, { status: 500 });
   }
 }

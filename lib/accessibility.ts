@@ -13,10 +13,10 @@
 export function getContrastRatio(color1: string, color2: string): number {
   const lum1 = getRelativeLuminance(color1);
   const lum2 = getRelativeLuminance(color2);
-  
+
   const lighter = Math.max(lum1, lum2);
   const darker = Math.min(lum1, lum2);
-  
+
   return (lighter + 0.05) / (darker + 0.05);
 }
 
@@ -26,12 +26,12 @@ export function getContrastRatio(color1: string, color2: string): number {
 function getRelativeLuminance(color: string): number {
   const rgb = hexToRgb(color);
   if (!rgb) return 0;
-  
-  const [r, g, b] = [rgb.r, rgb.g, rgb.b].map(val => {
+
+  const [r, g, b] = [rgb.r, rgb.g, rgb.b].map((val) => {
     val = val / 255;
     return val <= 0.03928 ? val / 12.92 : Math.pow((val + 0.055) / 1.055, 2.4);
   });
-  
+
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
@@ -59,7 +59,7 @@ export function isWCAGCompliant(
   isLargeText: boolean = false
 ): boolean {
   const ratio = getContrastRatio(foreground, background);
-  
+
   if (level === 'AA') {
     return isLargeText ? ratio >= 3 : ratio >= 4.5;
   } else {
@@ -91,7 +91,7 @@ export function createAriaAttributes({
   disabled?: boolean;
 }) {
   const id = generateAccessibleId();
-  
+
   return {
     id,
     'aria-label': label,
@@ -168,16 +168,16 @@ export function announceToScreenReader(
   priority: 'polite' | 'assertive' = 'polite'
 ) {
   if (typeof document === 'undefined') return;
-  
+
   const announcement = document.createElement('div');
   announcement.setAttribute('role', 'status');
   announcement.setAttribute('aria-live', priority);
   announcement.setAttribute('aria-atomic', 'true');
   announcement.className = 'sr-only';
   announcement.textContent = message;
-  
+
   document.body.appendChild(announcement);
-  
+
   setTimeout(() => {
     document.body.removeChild(announcement);
   }, 1000);
@@ -197,10 +197,10 @@ export function formatAccessibleCurrency(
     style: 'currency',
     currency,
   });
-  
+
   const display = formatter.format(amount);
   const ariaLabel = `${amount.toFixed(2)} ${currency === 'EUR' ? 'euros' : currency}`;
-  
+
   return { display, ariaLabel };
 }
 
@@ -216,14 +216,14 @@ export function formatAccessibleDate(date: Date): {
     month: 'long',
     year: 'numeric',
   }).format(date);
-  
+
   const ariaLabel = new Intl.DateTimeFormat('es-ES', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
     year: 'numeric',
   }).format(date);
-  
+
   return { display, ariaLabel };
 }
 
@@ -262,13 +262,13 @@ export function createFocusTrap(container: HTMLElement) {
   const focusableElements = container.querySelectorAll(
     'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
   );
-  
+
   const firstElement = focusableElements[0] as HTMLElement;
   const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
-  
+
   const handleTab = (e: KeyboardEvent) => {
     if (e.key !== 'Tab') return;
-    
+
     if (e.shiftKey) {
       if (document.activeElement === firstElement) {
         lastElement.focus();
@@ -281,9 +281,9 @@ export function createFocusTrap(container: HTMLElement) {
       }
     }
   };
-  
+
   container.addEventListener('keydown', handleTab);
-  
+
   return () => {
     container.removeEventListener('keydown', handleTab);
   };

@@ -9,10 +9,10 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
-import { 
-  generateFinancialReport, 
+import {
+  generateFinancialReport,
   getBillingStats,
-  getCompanyInvoiceHistory 
+  getCompanyInvoiceHistory,
 } from '@/lib/b2b-billing-service';
 
 export const dynamic = 'force-dynamic';
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
+      where: { id: session.user.id },
     });
 
     // Solo super-admins pueden ver reportes financieros
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
+      where: { id: session.user.id },
     });
 
     // Solo super-admins pueden generar reportes
@@ -89,10 +89,7 @@ export async function POST(request: NextRequest) {
     const { periodo, tipoReporte = 'mensual' } = body;
 
     if (!periodo) {
-      return NextResponse.json(
-        { error: 'Período requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Período requerido' }, { status: 400 });
     }
 
     const report = await generateFinancialReport(periodo, tipoReporte);

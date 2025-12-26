@@ -21,9 +21,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(stats);
   } catch (error) {
     logger.error('Error fetching marketplace stats:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener estadísticas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener estadísticas' }, { status: 500 });
   }
 }

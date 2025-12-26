@@ -7,18 +7,24 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
-  Ticket, 
-  Send, 
-  Bot, 
-  CheckCircle, 
-  AlertCircle, 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Ticket,
+  Send,
+  Bot,
+  CheckCircle,
+  AlertCircle,
   Clock,
   Sparkles,
   FileText,
   Zap,
-  MessageSquare
+  MessageSquare,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -40,7 +46,7 @@ export default function AutomatedTicketSystem() {
     subject: '',
     description: '',
     category: '',
-    priority: 'medium'
+    priority: 'medium',
   });
   const [aiSuggestions, setAiSuggestions] = useState<TicketSuggestion | null>(null);
 
@@ -59,18 +65,18 @@ export default function AutomatedTicketSystem() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           subject: ticketData.subject,
-          description: ticketData.description
-        })
+          description: ticketData.description,
+        }),
       });
 
       if (!response.ok) throw new Error('Error al analizar');
 
       const data = await response.json();
       setAiSuggestions(data.suggestions);
-      setTicketData(prev => ({
+      setTicketData((prev) => ({
         ...prev,
         category: data.category,
-        priority: data.priority
+        priority: data.priority,
       }));
       setStep('suggestions');
 
@@ -92,7 +98,7 @@ export default function AutomatedTicketSystem() {
       const response = await fetch('/api/support/tickets', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(ticketData)
+        body: JSON.stringify(ticketData),
       });
 
       if (!response.ok) throw new Error('Error al crear ticket');
@@ -100,7 +106,7 @@ export default function AutomatedTicketSystem() {
       const data = await response.json();
       setStep('created');
       toast.success('Ticket creado exitosamente');
-      
+
       // Resetear después de 3 segundos
       setTimeout(() => {
         setIsOpen(false);
@@ -109,7 +115,7 @@ export default function AutomatedTicketSystem() {
           subject: '',
           description: '',
           category: '',
-          priority: 'medium'
+          priority: 'medium',
         });
         setAiSuggestions(null);
       }, 3000);
@@ -128,7 +134,7 @@ export default function AutomatedTicketSystem() {
         subject: '',
         description: '',
         category: '',
-        priority: 'medium'
+        priority: 'medium',
       });
       setAiSuggestions(null);
     }, 1500);
@@ -161,7 +167,8 @@ export default function AutomatedTicketSystem() {
             <div className="bg-blue-50 p-3 rounded-lg">
               <p className="text-sm text-blue-800">
                 <Sparkles className="h-4 w-4 inline mr-1" />
-                Nuestra IA analizará tu problema y buscará soluciones automáticas antes de crear el ticket.
+                Nuestra IA analizará tu problema y buscará soluciones automáticas antes de crear el
+                ticket.
               </p>
             </div>
             <Button
@@ -180,7 +187,7 @@ export default function AutomatedTicketSystem() {
           <div className="text-center py-8 space-y-4">
             <motion.div
               animate={{ rotate: 360 }}
-              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
               className="inline-block"
             >
               <Bot className="h-16 w-16 text-primary" />
@@ -227,13 +234,14 @@ export default function AutomatedTicketSystem() {
           <div className="space-y-4">
             {/* Información detectada */}
             <div className="flex gap-2">
-              <Badge variant="outline">
-                Categoría: {ticketData.category}
-              </Badge>
-              <Badge
-                variant={ticketData.priority === 'high' ? 'destructive' : 'secondary'}
-              >
-                Prioridad: {ticketData.priority === 'high' ? 'Alta' : ticketData.priority === 'medium' ? 'Media' : 'Baja'}
+              <Badge variant="outline">Categoría: {ticketData.category}</Badge>
+              <Badge variant={ticketData.priority === 'high' ? 'destructive' : 'secondary'}>
+                Prioridad:{' '}
+                {ticketData.priority === 'high'
+                  ? 'Alta'
+                  : ticketData.priority === 'medium'
+                    ? 'Media'
+                    : 'Baja'}
               </Badge>
               <Badge variant="default">
                 Confianza: {Math.round((aiSuggestions?.confidence || 0) * 100)}%
@@ -295,11 +303,7 @@ export default function AutomatedTicketSystem() {
                   ? '¿La solución automática no funciona? Crea un ticket para soporte humano.'
                   : 'No encontramos una solución automática. Crearé un ticket para nuestro equipo de soporte.'}
               </p>
-              <Button
-                onClick={handleCreateTicket}
-                variant="outline"
-                className="w-full"
-              >
+              <Button onClick={handleCreateTicket} variant="outline" className="w-full">
                 <Ticket className="mr-2 h-4 w-4" />
                 Crear Ticket de Soporte
               </Button>
@@ -369,16 +373,10 @@ export default function AutomatedTicketSystem() {
               Nuestro sistema IA buscará soluciones automáticas antes de crear un ticket
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            {renderStep()}
-          </CardContent>
+          <CardContent>{renderStep()}</CardContent>
           {step === 'form' && (
             <div className="px-6 pb-6">
-              <Button
-                variant="ghost"
-                onClick={() => setIsOpen(false)}
-                className="w-full"
-              >
+              <Button variant="ghost" onClick={() => setIsOpen(false)} className="w-full">
                 Cancelar
               </Button>
             </div>

@@ -26,18 +26,18 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { 
-  Building2, 
-  Users, 
-  TrendingUp, 
-  Plus, 
-  Download, 
-  CheckSquare, 
+import {
+  Building2,
+  Users,
+  TrendingUp,
+  Plus,
+  Download,
+  CheckSquare,
   Square,
   Trash2,
   ToggleLeft,
   ToggleRight,
-  CreditCard
+  CreditCard,
 } from 'lucide-react';
 
 import { BackButton } from '@/components/ui/back-button';
@@ -96,7 +96,7 @@ export default function ClientesAdminPage() {
     null
   );
   const [isDeleting, setIsDeleting] = useState(false);
-  
+
   // Bulk operations state
   const [showBulkPlanDialog, setShowBulkPlanDialog] = useState(false);
   const [bulkPlanId, setBulkPlanId] = useState('');
@@ -378,324 +378,311 @@ export default function ClientesAdminPage() {
   return (
     <ErrorBoundary>
       <AuthenticatedLayout>
-            <div className="max-w-7xl mx-auto space-y-6">
-              {/* Header */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <BackButton />
-                  <h1 className="text-3xl font-bold text-gray-900 mt-2">Gestión de Clientes</h1>
-                  <p className="text-gray-600 mt-1">
-                    Administra todas las empresas y sus suscripciones
-                  </p>
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <BackButton />
+              <h1 className="text-3xl font-bold text-gray-900 mt-2">Gestión de Clientes</h1>
+              <p className="text-gray-600 mt-1">
+                Administra todas las empresas y sus suscripciones
+              </p>
+            </div>
+            <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+              <DialogTrigger asChild>
+                <Button className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  Nueva Empresa
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Crear Nueva Empresa</DialogTitle>
+                  <DialogDescription>
+                    Complete los datos de la nueva empresa cliente
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="nombre">Nombre de la Empresa *</Label>
+                      <Input
+                        id="nombre"
+                        value={newCompany.nombre}
+                        onChange={(e) => setNewCompany({ ...newCompany, nombre: e.target.value })}
+                        placeholder="Ej: Gestora Inmobiliaria SA"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="emailContacto">Email de Contacto *</Label>
+                      <Input
+                        id="emailContacto"
+                        type="email"
+                        value={newCompany.emailContacto}
+                        onChange={(e) =>
+                          setNewCompany({ ...newCompany, emailContacto: e.target.value })
+                        }
+                        placeholder="contacto@empresa.com"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="contactoPrincipal">Contacto Principal</Label>
+                      <Input
+                        id="contactoPrincipal"
+                        value={newCompany.contactoPrincipal}
+                        onChange={(e) =>
+                          setNewCompany({ ...newCompany, contactoPrincipal: e.target.value })
+                        }
+                        placeholder="Juan Pérez"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="telefonoContacto">Teléfono</Label>
+                      <Input
+                        id="telefonoContacto"
+                        value={newCompany.telefonoContacto}
+                        onChange={(e) =>
+                          setNewCompany({ ...newCompany, telefonoContacto: e.target.value })
+                        }
+                        placeholder="+34 600 123 456"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="subscriptionPlanId">Plan de Suscripción *</Label>
+                    <Select
+                      value={newCompany.subscriptionPlanId}
+                      onValueChange={(value) =>
+                        setNewCompany({ ...newCompany, subscriptionPlanId: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar plan" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {plans.map((plan) => (
+                          <SelectItem key={plan.id} value={plan.id}>
+                            {plan.nombre} - €{plan.precioMensual}/mes
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="dominioPersonalizado">Dominio Personalizado</Label>
+                    <Input
+                      id="dominioPersonalizado"
+                      value={newCompany.dominioPersonalizado}
+                      onChange={(e) =>
+                        setNewCompany({ ...newCompany, dominioPersonalizado: e.target.value })
+                      }
+                      placeholder="miempresa.inmova.app"
+                    />
+                  </div>
                 </div>
-                <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-                  <DialogTrigger asChild>
-                    <Button className="gap-2">
-                      <Plus className="h-4 w-4" />
-                      Nueva Empresa
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowCreateDialog(false)}
+                    disabled={creating}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button onClick={handleCreateCompany} disabled={creating}>
+                    {creating ? 'Creando...' : 'Crear Empresa'}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          {/* Stats Cards */}
+          <div className="grid md:grid-cols-3 gap-6">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">Total Clientes</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-3">
+                  <Building2 className="h-8 w-8 text-indigo-600" />
+                  <div>
+                    <div className="text-3xl font-bold">{companies.length}</div>
+                    <p className="text-xs text-gray-500">Empresas registradas</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">
+                  Clientes Activos
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-3">
+                  <Users className="h-8 w-8 text-green-600" />
+                  <div>
+                    <div className="text-3xl font-bold">
+                      {companies.filter((c) => c.activo).length}
+                    </div>
+                    <p className="text-xs text-gray-500">Con suscripción activa</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">
+                  Total Propiedades
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-3">
+                  <TrendingUp className="h-8 w-8 text-purple-600" />
+                  <div>
+                    <div className="text-3xl font-bold">
+                      {companies.reduce((sum, c) => sum + (c._count?.buildings || 0), 0)}
+                    </div>
+                    <p className="text-xs text-gray-500">Inmuebles gestionados</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Filters */}
+          <FilterBar
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            statusFilter={statusFilter}
+            onStatusFilterChange={setStatusFilter}
+            planFilter={planFilter}
+            onPlanFilterChange={setPlanFilter}
+            categoryFilter={categoryFilter}
+            onCategoryFilterChange={setCategoryFilter}
+            plans={plans}
+            onRefresh={fetchCompanies}
+          />
+
+          {/* Bulk Actions Bar */}
+          {filteredCompanies.length > 0 && (
+            <Card>
+              <CardContent className="py-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Button variant="outline" size="sm" onClick={handleSelectAll} className="gap-2">
+                      {selectedCompanies.size === filteredCompanies.length ? (
+                        <CheckSquare className="h-4 w-4" />
+                      ) : (
+                        <Square className="h-4 w-4" />
+                      )}
+                      Seleccionar Todo
                     </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle>Crear Nueva Empresa</DialogTitle>
-                      <DialogDescription>
-                        Complete los datos de la nueva empresa cliente
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="nombre">Nombre de la Empresa *</Label>
-                          <Input
-                            id="nombre"
-                            value={newCompany.nombre}
-                            onChange={(e) =>
-                              setNewCompany({ ...newCompany, nombre: e.target.value })
-                            }
-                            placeholder="Ej: Gestora Inmobiliaria SA"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="emailContacto">Email de Contacto *</Label>
-                          <Input
-                            id="emailContacto"
-                            type="email"
-                            value={newCompany.emailContacto}
-                            onChange={(e) =>
-                              setNewCompany({ ...newCompany, emailContacto: e.target.value })
-                            }
-                            placeholder="contacto@empresa.com"
-                          />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="contactoPrincipal">Contacto Principal</Label>
-                          <Input
-                            id="contactoPrincipal"
-                            value={newCompany.contactoPrincipal}
-                            onChange={(e) =>
-                              setNewCompany({ ...newCompany, contactoPrincipal: e.target.value })
-                            }
-                            placeholder="Juan Pérez"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="telefonoContacto">Teléfono</Label>
-                          <Input
-                            id="telefonoContacto"
-                            value={newCompany.telefonoContacto}
-                            onChange={(e) =>
-                              setNewCompany({ ...newCompany, telefonoContacto: e.target.value })
-                            }
-                            placeholder="+34 600 123 456"
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="subscriptionPlanId">Plan de Suscripción *</Label>
-                        <Select
-                          value={newCompany.subscriptionPlanId}
-                          onValueChange={(value) =>
-                            setNewCompany({ ...newCompany, subscriptionPlanId: value })
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar plan" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {plans.map((plan) => (
-                              <SelectItem key={plan.id} value={plan.id}>
-                                {plan.nombre} - €{plan.precioMensual}/mes
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="dominioPersonalizado">Dominio Personalizado</Label>
-                        <Input
-                          id="dominioPersonalizado"
-                          value={newCompany.dominioPersonalizado}
-                          onChange={(e) =>
-                            setNewCompany({ ...newCompany, dominioPersonalizado: e.target.value })
-                          }
-                          placeholder="miempresa.inmova.app"
-                        />
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button
-                        variant="outline"
-                        onClick={() => setShowCreateDialog(false)}
-                        disabled={creating}
-                      >
-                        Cancelar
-                      </Button>
-                      <Button onClick={handleCreateCompany} disabled={creating}>
-                        {creating ? 'Creando...' : 'Crear Empresa'}
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </div>
 
-              {/* Stats Cards */}
-              <div className="grid md:grid-cols-3 gap-6">
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium text-gray-600">
-                      Total Clientes
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-3">
-                      <Building2 className="h-8 w-8 text-indigo-600" />
-                      <div>
-                        <div className="text-3xl font-bold">{companies.length}</div>
-                        <p className="text-xs text-gray-500">Empresas registradas</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium text-gray-600">
-                      Clientes Activos
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-3">
-                      <Users className="h-8 w-8 text-green-600" />
-                      <div>
-                        <div className="text-3xl font-bold">
-                          {companies.filter((c) => c.activo).length}
-                        </div>
-                        <p className="text-xs text-gray-500">Con suscripción activa</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium text-gray-600">
-                      Total Propiedades
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-3">
-                      <TrendingUp className="h-8 w-8 text-purple-600" />
-                      <div>
-                        <div className="text-3xl font-bold">
-                          {companies.reduce((sum, c) => sum + (c._count?.buildings || 0), 0)}
-                        </div>
-                        <p className="text-xs text-gray-500">Inmuebles gestionados</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+                    {selectedCompanies.size > 0 && (
+                      <>
+                        <span className="text-sm text-gray-600">
+                          {selectedCompanies.size} seleccionada
+                          {selectedCompanies.size !== 1 ? 's' : ''}
+                        </span>
 
-              {/* Filters */}
-              <FilterBar
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                statusFilter={statusFilter}
-                onStatusFilterChange={setStatusFilter}
-                planFilter={planFilter}
-                onPlanFilterChange={setPlanFilter}
-                categoryFilter={categoryFilter}
-                onCategoryFilterChange={setCategoryFilter}
-                plans={plans}
-                onRefresh={fetchCompanies}
-              />
+                        <div className="h-6 w-px bg-gray-300" />
 
-              {/* Bulk Actions Bar */}
-              {filteredCompanies.length > 0 && (
-                <Card>
-                  <CardContent className="py-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={handleSelectAll}
+                          onClick={handleBulkActivate}
+                          disabled={isBulkProcessing}
                           className="gap-2"
                         >
-                          {selectedCompanies.size === filteredCompanies.length ? (
-                            <CheckSquare className="h-4 w-4" />
-                          ) : (
-                            <Square className="h-4 w-4" />
-                          )}
-                          Seleccionar Todo
+                          <ToggleRight className="h-4 w-4 text-green-600" />
+                          Activar
                         </Button>
-                        
-                        {selectedCompanies.size > 0 && (
-                          <>
-                            <span className="text-sm text-gray-600">
-                              {selectedCompanies.size} seleccionada{selectedCompanies.size !== 1 ? 's' : ''}
-                            </span>
-                            
-                            <div className="h-6 w-px bg-gray-300" />
-                            
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={handleBulkActivate}
-                              disabled={isBulkProcessing}
-                              className="gap-2"
-                            >
-                              <ToggleRight className="h-4 w-4 text-green-600" />
-                              Activar
-                            </Button>
-                            
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={handleBulkDeactivate}
-                              disabled={isBulkProcessing}
-                              className="gap-2"
-                            >
-                              <ToggleLeft className="h-4 w-4 text-gray-600" />
-                              Desactivar
-                            </Button>
-                            
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setShowBulkPlanDialog(true)}
-                              disabled={isBulkProcessing}
-                              className="gap-2"
-                            >
-                              <CreditCard className="h-4 w-4" />
-                              Cambiar Plan
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                      
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleExportCSV}
-                        className="gap-2"
-                      >
-                        <Download className="h-4 w-4" />
-                        Exportar CSV
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
 
-              {/* Companies Grid */}
-              {loading ? (
-                <LoadingState message="Cargando clientes..." />
-              ) : filteredCompanies.length === 0 ? (
-                <Card>
-                  <CardContent className="py-12 text-center">
-                    <Building2 className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      No se encontraron clientes
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      {searchQuery || statusFilter !== 'all' || planFilter !== 'all'
-                        ? 'Intenta ajustar los filtros de búsqueda'
-                        : 'Comienza creando tu primera empresa cliente'}
-                    </p>
-                    {!searchQuery && statusFilter === 'all' && planFilter === 'all' && (
-                      <Button onClick={() => setShowCreateDialog(true)}>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Crear Primera Empresa
-                      </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleBulkDeactivate}
+                          disabled={isBulkProcessing}
+                          className="gap-2"
+                        >
+                          <ToggleLeft className="h-4 w-4 text-gray-600" />
+                          Desactivar
+                        </Button>
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowBulkPlanDialog(true)}
+                          disabled={isBulkProcessing}
+                          className="gap-2"
+                        >
+                          <CreditCard className="h-4 w-4" />
+                          Cambiar Plan
+                        </Button>
+                      </>
                     )}
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredCompanies.map((company) => (
-                    <CompanyCard
-                      key={company.id}
-                      company={company}
-                      isSelected={selectedCompanies.has(company.id)}
-                      onSelect={handleSelectCompany}
-                      onView={(c) => router.push(`/admin/clientes/${c.id}`)}
-                      onEdit={(c) => router.push(`/admin/clientes/${c.id}/editar`)}
-                      onDelete={(c) => {
-                        setDeletingCompany({ id: c.id, nombre: c.nombre });
-                        setShowDeleteDialog(true);
-                      }}
-                      onChangePlan={(c) => {
-                        setSelectedCompanyForPlanChange(c);
-                        setShowChangePlanDialog(true);
-                      }}
-                      onLoginAs={handleLoginAsCompany}
-                    />
-                  ))}
+                  </div>
+
+                  <Button variant="outline" size="sm" onClick={handleExportCSV} className="gap-2">
+                    <Download className="h-4 w-4" />
+                    Exportar CSV
+                  </Button>
                 </div>
-              )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Companies Grid */}
+          {loading ? (
+            <LoadingState message="Cargando clientes..." />
+          ) : filteredCompanies.length === 0 ? (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <Building2 className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  No se encontraron clientes
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  {searchQuery || statusFilter !== 'all' || planFilter !== 'all'
+                    ? 'Intenta ajustar los filtros de búsqueda'
+                    : 'Comienza creando tu primera empresa cliente'}
+                </p>
+                {!searchQuery && statusFilter === 'all' && planFilter === 'all' && (
+                  <Button onClick={() => setShowCreateDialog(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Crear Primera Empresa
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredCompanies.map((company) => (
+                <CompanyCard
+                  key={company.id}
+                  company={company}
+                  isSelected={selectedCompanies.has(company.id)}
+                  onSelect={handleSelectCompany}
+                  onView={(c) => router.push(`/admin/clientes/${c.id}`)}
+                  onEdit={(c) => router.push(`/admin/clientes/${c.id}/editar`)}
+                  onDelete={(c) => {
+                    setDeletingCompany({ id: c.id, nombre: c.nombre });
+                    setShowDeleteDialog(true);
+                  }}
+                  onChangePlan={(c) => {
+                    setSelectedCompanyForPlanChange(c);
+                    setShowChangePlanDialog(true);
+                  }}
+                  onLoginAs={handleLoginAsCompany}
+                />
+              ))}
             </div>
-          </AuthenticatedLayout>
+          )}
+        </div>
+      </AuthenticatedLayout>
 
       {/* Delete Dialog */}
       <ConfirmDialog
@@ -762,10 +749,7 @@ export default function ClientesAdminPage() {
             >
               Cancelar
             </Button>
-            <Button
-              onClick={handleBulkChangePlan}
-              disabled={isBulkProcessing || !bulkPlanId}
-            >
+            <Button onClick={handleBulkChangePlan} disabled={isBulkProcessing || !bulkPlanId}>
               {isBulkProcessing ? 'Procesando...' : 'Cambiar Plan'}
             </Button>
           </DialogFooter>

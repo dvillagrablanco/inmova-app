@@ -4,10 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/prisma';
 
 // GET - Obtener mensajes entre dos usuarios
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { userId: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { userId: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -16,7 +13,7 @@ export async function GET(
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true, companyId: true }
+      select: { id: true, companyId: true },
     });
 
     if (!user?.companyId) {
@@ -29,9 +26,9 @@ export async function GET(
     const otherUser = await prisma.user.findFirst({
       where: {
         id: otherUserId,
-        companyId: user.companyId
+        companyId: user.companyId,
       },
-      select: { id: true, name: true, email: true }
+      select: { id: true, name: true, email: true },
     });
 
     if (!otherUser) {
@@ -45,8 +42,8 @@ export async function GET(
         tipo: 'info', // Mensajes de chat
         OR: [
           { userId: user.id, entityId: otherUserId },
-          { userId: otherUserId, entityId: user.id }
-        ]
+          { userId: otherUserId, entityId: user.id },
+        ],
       },
       orderBy: { createdAt: 'asc' },
       select: {
@@ -55,8 +52,8 @@ export async function GET(
         mensaje: true,
         leida: true,
         userId: true,
-        createdAt: true
-      }
+        createdAt: true,
+      },
     });
 
     // Marcar como leídos los mensajes recibidos
@@ -66,32 +63,26 @@ export async function GET(
         tipo: 'info',
         userId: user.id,
         entityId: otherUserId,
-        leida: false
+        leida: false,
       },
-      data: { leida: true }
+      data: { leida: true },
     });
 
     return NextResponse.json({
-      messages: messages.map(m => ({
+      messages: messages.map((m) => ({
         ...m,
-        isSent: m.userId === otherUserId // Si el userId es el otro usuario, es mensaje enviado por él
+        isSent: m.userId === otherUserId, // Si el userId es el otro usuario, es mensaje enviado por él
       })),
-      otherUser
+      otherUser,
     });
   } catch (error) {
     console.error('Error al obtener mensajes:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener mensajes' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener mensajes' }, { status: 500 });
   }
 }
 
 // POST - Enviar mensaje
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { userId: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { userId: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -100,7 +91,7 @@ export async function POST(
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true, companyId: true, name: true }
+      select: { id: true, companyId: true, name: true },
     });
 
     if (!user?.companyId) {
@@ -120,8 +111,8 @@ export async function POST(
     const recipient = await prisma.user.findFirst({
       where: {
         id: recipientId,
-        companyId: user.companyId
-      }
+        companyId: user.companyId,
+      },
     });
 
     if (!recipient) {
@@ -137,16 +128,13 @@ export async function POST(
         mensaje: message,
         userId: recipientId, // El destinatario
         entityId: user.id, // El remitente
-        leida: false
-      }
+        leida: false,
+      },
     });
 
     return NextResponse.json({ message: newMessage }, { status: 201 });
   } catch (error) {
     console.error('Error al enviar mensaje:', error);
-    return NextResponse.json(
-      { error: 'Error al enviar mensaje' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al enviar mensaje' }, { status: 500 });
   }
 }

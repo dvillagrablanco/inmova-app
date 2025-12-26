@@ -42,20 +42,18 @@ export async function generateSuggestions(
 /**
  * Get property pricing suggestions
  */
-export async function suggestPropertyPricing(
-  propertyData: {
-    location: string;
-    size: number;
-    bedrooms: number;
-    bathrooms: number;
-    features?: string[];
-  }
-): Promise<AISuggestion> {
+export async function suggestPropertyPricing(propertyData: {
+  location: string;
+  size: number;
+  bedrooms: number;
+  bathrooms: number;
+  features?: string[];
+}): Promise<AISuggestion> {
   try {
     logger.info('Generating property pricing suggestion');
 
     // TODO: Use ML model to suggest optimal pricing
-    
+
     return {
       id: 'price_sug_1',
       type: 'pricing',
@@ -85,7 +83,7 @@ export async function suggestMaintenance(
     logger.info('Generating maintenance suggestions', { propertyId });
 
     // TODO: Analyze maintenance patterns and predict future needs
-    
+
     return [];
   } catch (error: any) {
     logger.error('Error suggesting maintenance:', error);

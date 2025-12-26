@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,14 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { 
-  Check, 
-  X, 
-  AlertCircle, 
-  Download, 
-  CheckCircle2,
-  Circle
-} from 'lucide-react';
+import { Check, X, AlertCircle, Download, CheckCircle2, Circle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ChecklistItem {
@@ -134,7 +127,7 @@ const QA_CHECKLIST: ChecklistCategory[] = [
 
 /**
  * QA CHECKLIST DASHBOARD
- * 
+ *
  * Dashboard interactivo para tracking de QA
  */
 export default function QAChecklistPage() {
@@ -154,15 +147,15 @@ export default function QAChecklistPage() {
   const completedItems = checkedItems.size;
   const progress = (completedItems / totalItems) * 100;
 
-  const criticalItems = QA_CHECKLIST.flatMap(cat => 
-    cat.items.filter(item => item.priority === 'critical')
+  const criticalItems = QA_CHECKLIST.flatMap((cat) =>
+    cat.items.filter((item) => item.priority === 'critical')
   );
-  const completedCritical = criticalItems.filter(item => checkedItems.has(item.id)).length;
+  const completedCritical = criticalItems.filter((item) => checkedItems.has(item.id)).length;
 
   const exportChecklist = () => {
-    const data = QA_CHECKLIST.map(cat => ({
+    const data = QA_CHECKLIST.map((cat) => ({
       category: cat.title,
-      items: cat.items.map(item => ({
+      items: cat.items.map((item) => ({
         label: item.label,
         priority: item.priority,
         completed: checkedItems.has(item.id),
@@ -210,10 +203,7 @@ export default function QAChecklistPage() {
             <div className="text-3xl font-bold">
               {completedCritical}/{criticalItems.length}
             </div>
-            <Progress 
-              value={(completedCritical / criticalItems.length) * 100} 
-              className="mt-2"
-            />
+            <Progress value={(completedCritical / criticalItems.length) * 100} className="mt-2" />
             <p className="text-xs text-muted-foreground mt-2">
               {criticalItems.length - completedCritical} items críticos pendientes
             </p>
@@ -261,7 +251,7 @@ export default function QAChecklistPage() {
       {/* Checklist Categories */}
       <div className="space-y-6">
         {QA_CHECKLIST.map((category) => {
-          const categoryCompleted = category.items.filter(item => 
+          const categoryCompleted = category.items.filter((item) =>
             checkedItems.has(item.id)
           ).length;
           const categoryProgress = (categoryCompleted / category.items.length) * 100;
@@ -284,7 +274,7 @@ export default function QAChecklistPage() {
                 <div className="space-y-3">
                   {category.items.map((item) => {
                     const isChecked = checkedItems.has(item.id);
-                    
+
                     return (
                       <div
                         key={item.id}
@@ -299,10 +289,7 @@ export default function QAChecklistPage() {
                           checked={isChecked}
                           onCheckedChange={() => toggleItem(item.id)}
                         />
-                        <label
-                          htmlFor={item.id}
-                          className="flex-1 text-sm cursor-pointer"
-                        >
+                        <label htmlFor={item.id} className="flex-1 text-sm cursor-pointer">
                           {item.label}
                         </label>
                         <Badge
@@ -315,9 +302,7 @@ export default function QAChecklistPage() {
                         >
                           {item.priority}
                         </Badge>
-                        {isChecked && (
-                          <Check className="h-5 w-5 text-green-600" />
-                        )}
+                        {isChecked && <Check className="h-5 w-5 text-green-600" />}
                       </div>
                     );
                   })}

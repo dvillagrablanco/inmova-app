@@ -24,10 +24,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.companyId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Verificar que la integración pertenece a la empresa
@@ -39,16 +36,15 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     });
 
     if (!integration) {
-      return NextResponse.json(
-        { error: 'Integration not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Integration not found' }, { status: 404 });
     }
 
     // Ejecutar test
     const result = await IntegrationManager.testIntegration(params.integrationId);
 
-    logger.info(`Integration test ${result.success ? 'passed' : 'failed'} for ${params.integrationId}`);
+    logger.info(
+      `Integration test ${result.success ? 'passed' : 'failed'} for ${params.integrationId}`
+    );
 
     return NextResponse.json({
       success: result.success,

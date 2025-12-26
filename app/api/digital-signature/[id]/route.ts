@@ -11,10 +11,7 @@ export const dynamic = 'force-dynamic';
  * GET /api/digital-signature/[id]
  * Obtiene el estado detallado de un documento de firma
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -31,10 +28,7 @@ export async function GET(
     return NextResponse.json(result);
   } catch (error) {
     logger.error('Error obteniendo estado de documento:', error);
-    return NextResponse.json(
-      { error: 'Error obteniendo estado del documento' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error obteniendo estado del documento' }, { status: 500 });
   }
 }
 
@@ -42,10 +36,7 @@ export async function GET(
  * PATCH /api/digital-signature/[id]
  * Actualiza un documento de firma digital
  */
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -71,10 +62,7 @@ export async function PATCH(
     });
 
     if (!existingDoc) {
-      return NextResponse.json(
-        { error: 'Documento no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Documento no encontrado' }, { status: 404 });
     }
 
     const updateData: any = {};
@@ -84,7 +72,8 @@ export async function PATCH(
     if (body.descripcion !== undefined) updateData.descripcion = body.descripcion;
     if (body.tipoDocumento !== undefined) updateData.tipoDocumento = body.tipoDocumento;
     if (body.estado !== undefined) updateData.estado = body.estado;
-    if (body.fechaExpiracion !== undefined) updateData.fechaExpiracion = body.fechaExpiracion ? new Date(body.fechaExpiracion) : null;
+    if (body.fechaExpiracion !== undefined)
+      updateData.fechaExpiracion = body.fechaExpiracion ? new Date(body.fechaExpiracion) : null;
     if (body.mensaje !== undefined) updateData.mensaje = body.mensaje;
 
     const documento = await prisma.documentoFirma.update({
@@ -97,21 +86,18 @@ export async function PATCH(
           include: {
             unit: {
               include: {
-                building: true
-              }
-            }
-          }
-        }
+                building: true,
+              },
+            },
+          },
+        },
       },
     });
 
     return NextResponse.json(documento);
   } catch (error) {
     logger.error('Error actualizando documento:', error);
-    return NextResponse.json(
-      { error: 'Error actualizando documento' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error actualizando documento' }, { status: 500 });
   }
 }
 
@@ -119,10 +105,7 @@ export async function PATCH(
  * DELETE /api/digital-signature/[id]
  * Elimina un documento de firma digital
  */
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -146,10 +129,7 @@ export async function DELETE(
     });
 
     if (!existingDoc) {
-      return NextResponse.json(
-        { error: 'Documento no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Documento no encontrado' }, { status: 404 });
     }
 
     // No permitir eliminar documentos completados o en proceso de firma
@@ -167,9 +147,6 @@ export async function DELETE(
     return NextResponse.json({ success: true, message: 'Documento eliminado correctamente' });
   } catch (error) {
     logger.error('Error eliminando documento:', error);
-    return NextResponse.json(
-      { error: 'Error eliminando documento' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error eliminando documento' }, { status: 500 });
   }
 }

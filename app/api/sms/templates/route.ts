@@ -7,21 +7,17 @@ import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id || !session?.user?.companyId) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const plantillas = await prisma.sMSTemplate.findMany({
       where: { companyId: session.user.companyId },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
 
     return NextResponse.json({ plantillas });
@@ -37,26 +33,19 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id || !session?.user?.companyId) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const data = await request.json();
 
-    const plantilla = await crearPlantilla(
-      session.user.companyId,
-      data,
-      session.user.id
-    );
+    const plantilla = await crearPlantilla(session.user.companyId, data, session.user.id);
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       plantilla,
-      message: 'Plantilla creada exitosamente' 
+      message: 'Plantilla creada exitosamente',
     });
   } catch (error: any) {
     logger.error('Error creating SMS template:', error);

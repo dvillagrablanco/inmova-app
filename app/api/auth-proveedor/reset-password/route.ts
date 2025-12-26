@@ -32,26 +32,17 @@ export async function POST(req: NextRequest) {
     });
 
     if (!resetToken) {
-      return NextResponse.json(
-        { error: 'Token inválido o expirado' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Token inválido o expirado' }, { status: 400 });
     }
 
     // Verificar si el token ya fue usado
     if (resetToken.used) {
-      return NextResponse.json(
-        { error: 'Este enlace ya fue utilizado' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Este enlace ya fue utilizado' }, { status: 400 });
     }
 
     // Verificar si el token expió
     if (new Date() > resetToken.expiresAt) {
-      return NextResponse.json(
-        { error: 'Este enlace ha expirado' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Este enlace ha expirado' }, { status: 400 });
     }
 
     // Hash de la nueva contraseña
@@ -72,9 +63,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    logger.info(
-      `Contraseña restablecida para proveedor: ${resetToken.provider.email}`
-    );
+    logger.info(`Contraseña restablecida para proveedor: ${resetToken.provider.email}`);
 
     return NextResponse.json({
       success: true,
@@ -82,9 +71,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     logger.error('Error al restablecer contraseña:', error);
-    return NextResponse.json(
-      { error: 'Error al restablecer contraseña' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al restablecer contraseña' }, { status: 500 });
   }
 }

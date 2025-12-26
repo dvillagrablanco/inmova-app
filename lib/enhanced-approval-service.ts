@@ -148,11 +148,8 @@ interface ApprovalRequest {
 /**
  * Determina los niveles de aprobación requeridos según el tipo y monto
  */
-export function getRequiredApprovalLevels(
-  type: ApprovalType,
-  amount?: number
-): ApprovalLevel[] {
-  const applicableRules = DEFAULT_APPROVAL_RULES.filter(rule => {
+export function getRequiredApprovalLevels(type: ApprovalType, amount?: number): ApprovalLevel[] {
+  const applicableRules = DEFAULT_APPROVAL_RULES.filter((rule) => {
     if (rule.type !== type) return false;
     if (amount === undefined) return true;
     if (rule.minAmount !== undefined && amount < rule.minAmount) return false;
@@ -167,8 +164,8 @@ export function getRequiredApprovalLevels(
 
   // Obtener todos los niveles requeridos
   const levels = new Set<ApprovalLevel>();
-  applicableRules.forEach(rule => {
-    rule.requiredLevels.forEach(level => levels.add(level));
+  applicableRules.forEach((rule) => {
+    rule.requiredLevels.forEach((level) => levels.add(level));
   });
 
   return Array.from(levels);
@@ -177,9 +174,7 @@ export function getRequiredApprovalLevels(
 /**
  * Crea una solicitud de aprobación
  */
-export async function createApprovalRequest(
-  request: ApprovalRequest
-): Promise<any> {
+export async function createApprovalRequest(request: ApprovalRequest): Promise<any> {
   const requiredLevels = getRequiredApprovalLevels(request.type, request.amount);
 
   // Crear solicitud de aprobación en la base de datos
@@ -263,11 +258,7 @@ async function notifyApprovers(
 /**
  * Genera HTML para email de aprobación
  */
-function generateApprovalEmailHTML(
-  title: string,
-  description: string,
-  approvalId: string
-): string {
+function generateApprovalEmailHTML(title: string, description: string, approvalId: string): string {
   return `
     <!DOCTYPE html>
     <html>
@@ -451,12 +442,12 @@ export async function getApprovalStats(companyId: string): Promise<any> {
   });
 
   const total = approvals.length;
-  const pending = approvals.filter(a => a.estado === 'pendiente').length;
-  const approved = approvals.filter(a => a.estado === 'aprobado').length;
-  const rejected = approvals.filter(a => a.estado === 'rechazado').length;
+  const pending = approvals.filter((a) => a.estado === 'pendiente').length;
+  const approved = approvals.filter((a) => a.estado === 'aprobado').length;
+  const rejected = approvals.filter((a) => a.estado === 'rechazado').length;
 
   const byType: { [key: string]: number } = {};
-  approvals.forEach(a => {
+  approvals.forEach((a) => {
     byType[a.tipo] = (byType[a.tipo] || 0) + 1;
   });
 
@@ -496,7 +487,8 @@ export async function requestExpenseApproval(
   }
 
   const amount = parseFloat(expense.monto.toString());
-  const location = expense.building?.nombre ||
+  const location =
+    expense.building?.nombre ||
     `${expense.unit?.building?.nombre} - ${expense.unit?.numero}` ||
     'Sin ubicación';
 

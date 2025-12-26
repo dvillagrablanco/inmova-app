@@ -1,7 +1,7 @@
 /**
  * API: /api/celebrations/[id]/shown
  * Marcar una celebración como mostrada
- * 
+ *
  * PATCH: Marcar como mostrada
  */
 
@@ -20,18 +20,12 @@ interface RouteContext {
  * PATCH /api/celebrations/[id]/shown
  * Marca una celebración como mostrada
  */
-export async function PATCH(
-  request: NextRequest,
-  context: RouteContext
-) {
+export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const { id } = context.params;
@@ -50,9 +44,6 @@ export async function PATCH(
     });
   } catch (error) {
     console.error('[API] Error in PATCH /api/celebrations/[id]/shown:', error);
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }

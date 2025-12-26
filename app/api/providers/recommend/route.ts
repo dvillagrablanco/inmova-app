@@ -1,8 +1,8 @@
 /**
  * API ENDPOINT: Recomendaciones Inteligentes de Proveedores
- * 
+ *
  * POST /api/providers/recommend
- * 
+ *
  * Obtiene recomendaciones de proveedores basadas en múltiples criterios
  * usando el sistema de asignación inteligente.
  */
@@ -90,7 +90,9 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error: any) {
-    logError(new Error(error.message || 'Error obteniendo recomendaciones de proveedores'), { context: 'GET /api/providers/recommend' });
+    logError(new Error(error.message || 'Error obteniendo recomendaciones de proveedores'), {
+      context: 'GET /api/providers/recommend',
+    });
 
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });

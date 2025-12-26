@@ -47,7 +47,12 @@ export class IntegrationError extends Error {
 // =============================================================================
 
 export class StripeError extends IntegrationError {
-  constructor(message: string, statusCode: number = 500, retryable: boolean = false, context?: Record<string, any>) {
+  constructor(
+    message: string,
+    statusCode: number = 500,
+    retryable: boolean = false,
+    context?: Record<string, any>
+  ) {
     super(message, 'Stripe', statusCode, retryable, context);
     this.name = 'StripeError';
   }
@@ -86,7 +91,12 @@ export class StripeServerError extends StripeError {
 // =============================================================================
 
 export class ZucchettiError extends IntegrationError {
-  constructor(message: string, statusCode: number = 500, retryable: boolean = false, context?: Record<string, any>) {
+  constructor(
+    message: string,
+    statusCode: number = 500,
+    retryable: boolean = false,
+    context?: Record<string, any>
+  ) {
     super(message, 'Zucchetti', statusCode, retryable, context);
     this.name = 'ZucchettiError';
   }
@@ -125,14 +135,22 @@ export class ZucchettiServerError extends ZucchettiError {
 // =============================================================================
 
 export class ContaSimpleError extends IntegrationError {
-  constructor(message: string, statusCode: number = 500, retryable: boolean = false, context?: Record<string, any>) {
+  constructor(
+    message: string,
+    statusCode: number = 500,
+    retryable: boolean = false,
+    context?: Record<string, any>
+  ) {
     super(message, 'ContaSimple', statusCode, retryable, context);
     this.name = 'ContaSimpleError';
   }
 }
 
 export class ContaSimpleAuthError extends ContaSimpleError {
-  constructor(message: string = 'ContaSimple authentication failed', context?: Record<string, any>) {
+  constructor(
+    message: string = 'ContaSimple authentication failed',
+    context?: Record<string, any>
+  ) {
     super(message, 401, false, context);
     this.name = 'ContaSimpleAuthError';
   }

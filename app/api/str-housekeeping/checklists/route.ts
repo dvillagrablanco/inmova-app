@@ -34,10 +34,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(checklists);
   } catch (error) {
     console.error('Error al obtener checklists:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener checklists' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener checklists' }, { status: 500 });
   }
 }
 
@@ -53,10 +50,7 @@ export async function POST(req: NextRequest) {
     const { nombre, descripcion, tipo, items, tiempoEstimado } = body;
 
     if (!nombre || !items || items.length === 0) {
-      return NextResponse.json(
-        { error: 'Nombre e items son requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Nombre e items son requeridos' }, { status: 400 });
     }
 
     const checklist = await prisma.sTRHousekeepingChecklist.create({
@@ -74,9 +68,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(checklist, { status: 201 });
   } catch (error) {
     console.error('Error al crear checklist:', error);
-    return NextResponse.json(
-      { error: 'Error al crear checklist' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear checklist' }, { status: 500 });
   }
 }

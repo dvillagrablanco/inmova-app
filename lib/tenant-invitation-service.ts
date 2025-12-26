@@ -25,7 +25,7 @@ export async function createTenantInvitation(
   // Verificar que el inquilino existe
   const tenant = await prisma.tenant.findUnique({
     where: { id: tenantId },
-    include: { company: true }
+    include: { company: true },
   });
 
   if (!tenant) {
@@ -37,8 +37,8 @@ export async function createTenantInvitation(
     where: {
       tenantId,
       status: 'pendiente',
-      expiresAt: { gt: new Date() }
-    }
+      expiresAt: { gt: new Date() },
+    },
   });
 
   if (existingInvitation) {
@@ -48,10 +48,10 @@ export async function createTenantInvitation(
   // Generar código único
   let invitationCode = generateInvitationCode();
   let isUnique = false;
-  
+
   while (!isUnique) {
     const existing = await prisma.tenantInvitation.findUnique({
-      where: { invitationCode }
+      where: { invitationCode },
     });
     if (!existing) {
       isUnique = true;
@@ -68,12 +68,12 @@ export async function createTenantInvitation(
       email: tenant.email,
       invitationCode,
       expiresAt: addDays(new Date(), expirationDays),
-      createdBy
+      createdBy,
     },
     include: {
       tenant: true,
-      company: true
-    }
+      company: true,
+    },
   });
 
   return invitation;
@@ -87,8 +87,8 @@ export async function validateInvitationCode(code: string) {
     where: { invitationCode: code },
     include: {
       tenant: true,
-      company: true
-    }
+      company: true,
+    },
   });
 
   if (!invitation) {
@@ -102,7 +102,7 @@ export async function validateInvitationCode(code: string) {
   if (new Date() > invitation.expiresAt) {
     await prisma.tenantInvitation.update({
       where: { id: invitation.id },
-      data: { status: 'expirada' }
+      data: { status: 'expirada' },
     });
     return { valid: false, error: 'El código de invitación ha expirado' };
   }
@@ -113,12 +113,9 @@ export async function validateInvitationCode(code: string) {
 /**
  * Acepta una invitación y configura la contraseña del inquilino
  */
-export async function acceptInvitation(
-  code: string,
-  password: string
-) {
+export async function acceptInvitation(code: string, password: string) {
   const validation = await validateInvitationCode(code);
-  
+
   if (!validation.valid || !validation.invitation) {
     throw new Error(validation.error);
   }
@@ -131,7 +128,7 @@ export async function acceptInvitation(
   // Actualizar el inquilino con la contraseña
   const updatedTenant = await prisma.tenant.update({
     where: { id: invitation.tenantId },
-    data: { password: hashedPassword }
+    data: { password: hashedPassword },
   });
 
   // Marcar la invitación como aceptada
@@ -139,8 +136,8 @@ export async function acceptInvitation(
     where: { id: invitation.id },
     data: {
       status: 'aceptada',
-      acceptedAt: new Date()
-    }
+      acceptedAt: new Date(),
+    },
   });
 
   return updatedTenant;
@@ -152,7 +149,7 @@ export async function acceptInvitation(
 export async function createPasswordResetToken(email: string) {
   // Buscar el inquilino por email
   const tenant = await prisma.tenant.findUnique({
-    where: { email }
+    where: { email },
   });
 
   if (!tenant) {
@@ -162,19 +159,19 @@ export async function createPasswordResetToken(email: string) {
 
   // Generar token único
   const token = `${tenant.id}-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
-  
+
   // Crear el token en la base de datos
   const resetToken = await prisma.passwordResetToken.create({
     data: {
       tenantId: tenant.id,
       token,
-      expiresAt: addDays(new Date(), 1) // 24 horas
-    }
+      expiresAt: addDays(new Date(), 1), // 24 horas
+    },
   });
 
   return {
     token: resetToken.token,
-    tenant
+    tenant,
   };
 }
 
@@ -184,7 +181,7 @@ export async function createPasswordResetToken(email: string) {
 export async function validateResetToken(token: string) {
   const resetToken = await prisma.passwordResetToken.findUnique({
     where: { token },
-    include: { tenant: true }
+    include: { tenant: true },
   });
 
   if (!resetToken) {
@@ -205,12 +202,9 @@ export async function validateResetToken(token: string) {
 /**
  * Restablece la contraseña usando un token válido
  */
-export async function resetPassword(
-  token: string,
-  newPassword: string
-) {
+export async function resetPassword(token: string, newPassword: string) {
   const validation = await validateResetToken(token);
-  
+
   if (!validation.valid || !validation.resetToken) {
     throw new Error(validation.error);
   }
@@ -223,7 +217,7 @@ export async function resetPassword(
   // Actualizar la contraseña del inquilino
   await prisma.tenant.update({
     where: { id: resetToken.tenantId },
-    data: { password: hashedPassword }
+    data: { password: hashedPassword },
   });
 
   // Marcar el token como usado
@@ -231,8 +225,8 @@ export async function resetPassword(
     where: { id: resetToken.id },
     data: {
       used: true,
-      usedAt: new Date()
-    }
+      usedAt: new Date(),
+    },
   });
 
   return true;

@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.companyId) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
         estado: { in: ['emitida', 'vencida'] },
       },
     });
-    
+
     // Ingresos este mes
     const ingresosMes = await prisma.communityInvoice.aggregate({
       where: {
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
         totalFactura: true,
       },
     });
-    
+
     // Ingresos mes anterior
     const ingresosMesAnterior = await prisma.communityInvoice.aggregate({
       where: {
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
         totalFactura: true,
       },
     });
-    
+
     // Saldo total de todas las comunidades
     const communities = await prisma.communityManagement.findMany({
       where: {
@@ -81,12 +81,12 @@ export async function GET(request: NextRequest) {
         },
       },
     });
-    
+
     const saldoTotal = communities.reduce((sum, community) => {
       const lastEntry = community.movimientosCaja[0];
       return sum + (lastEntry?.saldoActual || 0);
     }, 0);
-    
+
     // Facturas vencidas
     const vencidas = await prisma.communityInvoice.count({
       where: {
@@ -94,19 +94,19 @@ export async function GET(request: NextRequest) {
         estado: 'vencida',
       },
     });
-    
+
     // Informes pendientes (trimestre actual)
     const currentQuarter = Math.ceil((now.getMonth() + 1) / 3);
     const currentYear = now.getFullYear();
     const periodoActual = `${currentYear}-Q${currentQuarter}`;
-    
+
     const informesPendientes = await prisma.communityReport.count({
       where: {
         companyId,
         periodo: periodoActual,
       },
     });
-    
+
     const informesGenerados = totalCommunities - informesPendientes;
     return NextResponse.json({
       kpis: {
@@ -122,9 +122,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error fetching dashboard data:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener datos del dashboard' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener datos del dashboard' }, { status: 500 });
   }
 }

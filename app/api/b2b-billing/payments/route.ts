@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
+      where: { id: session.user.id },
     });
 
     // Solo super-admins pueden registrar pagos
@@ -30,21 +30,11 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { 
-      invoiceId, 
-      monto, 
-      metodoPago, 
-      referencia,
-      stripePaymentId,
-      stripeChargeId,
-      stripeFee,
-    } = body;
+    const { invoiceId, monto, metodoPago, referencia, stripePaymentId, stripeChargeId, stripeFee } =
+      body;
 
     if (!invoiceId || !monto || !metodoPago) {
-      return NextResponse.json(
-        { error: 'Datos incompletos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Datos incompletos' }, { status: 400 });
     }
 
     const result = await registerInvoicePayment(invoiceId, {
@@ -79,13 +69,13 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20');
 
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
+      where: { id: session.user.id },
     });
 
     const isSuperAdmin = user?.role === 'super_admin';
-    
+
     const where: any = {};
-    
+
     if (!isSuperAdmin) {
       where.companyId = user?.companyId;
     } else if (companyId) {
@@ -100,7 +90,7 @@ export async function GET(request: NextRequest) {
             select: {
               id: true,
               nombre: true,
-            }
+            },
           },
         },
         orderBy: {
@@ -119,7 +109,7 @@ export async function GET(request: NextRequest) {
         page,
         limit,
         totalPages: Math.ceil(total / limit),
-      }
+      },
     });
   } catch (error: any) {
     logger.error('Error al obtener pagos:', error);

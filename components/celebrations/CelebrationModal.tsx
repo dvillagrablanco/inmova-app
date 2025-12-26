@@ -173,10 +173,7 @@ export default function CelebrationModal({
                         delay: Math.random() * 2,
                       }}
                     >
-                      <Sparkles
-                        className="text-white/30"
-                        size={8 + Math.random() * 12}
-                      />
+                      <Sparkles className="text-white/30" size={8 + Math.random() * 12} />
                     </motion.div>
                   ))}
                 </div>

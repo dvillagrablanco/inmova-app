@@ -74,10 +74,7 @@ interface UnidadesClientPageProps {
   session: any;
 }
 
-export default function UnidadesClientPage({
-  initialUnits,
-  session,
-}: UnidadesClientPageProps) {
+export default function UnidadesClientPage({ initialUnits, session }: UnidadesClientPageProps) {
   const router = useRouter();
   const { canCreate } = usePermissions();
   const [filteredUnits, setFilteredUnits] = useState<Unit[]>(initialUnits);
@@ -279,9 +276,7 @@ export default function UnidadesClientPage({
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Unidades</h1>
-              <p className="text-muted-foreground mt-2">
-                Gestiona todas las unidades de alquiler
-              </p>
+              <p className="text-muted-foreground mt-2">Gestiona todas las unidades de alquiler</p>
             </div>
             {canCreate && (
               <Button onClick={() => router.push('/unidades/nueva')}>
@@ -326,16 +321,12 @@ export default function UnidadesClientPage({
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Ingresos Potenciales
-                </CardTitle>
+                <CardTitle className="text-sm font-medium">Ingresos Potenciales</CardTitle>
                 <Maximize className="h-4 w-4 text-purple-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {formatCurrency(
-                    initialUnits.reduce((sum, u) => sum + u.rentaMensual, 0)
-                  )}
+                  {formatCurrency(initialUnits.reduce((sum, u) => sum + u.rentaMensual, 0))}
                 </div>
               </CardContent>
             </Card>
@@ -378,10 +369,7 @@ export default function UnidadesClientPage({
                       <SelectItem value="estudio">Estudio</SelectItem>
                     </SelectContent>
                   </Select>
-                  <ViewModeToggle
-                    value={viewMode}
-                    onChange={handleViewModeChange}
-                  />
+                  <ViewModeToggle value={viewMode} onChange={handleViewModeChange} />
                 </div>
 
                 {activeFilters.length > 0 && (
@@ -415,14 +403,14 @@ export default function UnidadesClientPage({
                       },
                     ]
                   : canCreate
-                  ? [
-                      {
-                        label: 'Crear Unidad',
-                        onClick: () => router.push('/unidades/nueva'),
-                        variant: 'default' as const,
-                      },
-                    ]
-                  : undefined
+                    ? [
+                        {
+                          label: 'Crear Unidad',
+                          onClick: () => router.push('/unidades/nueva'),
+                          variant: 'default' as const,
+                        },
+                      ]
+                    : undefined
               }
             />
           ) : viewMode === 'grid' ? (
@@ -436,12 +424,8 @@ export default function UnidadesClientPage({
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="space-y-1">
-                        <CardTitle className="text-lg">
-                          Unidad {unit.numero}
-                        </CardTitle>
-                        <p className="text-sm text-muted-foreground">
-                          {unit.building.nombre}
-                        </p>
+                        <CardTitle className="text-lg">Unidad {unit.numero}</CardTitle>
+                        <p className="text-sm text-muted-foreground">{unit.building.nombre}</p>
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
@@ -482,12 +466,8 @@ export default function UnidadesClientPage({
                   <CardContent>
                     <div className="space-y-3">
                       <div className="flex gap-2">
-                        <Badge variant={getEstadoBadgeVariant(unit.estado)}>
-                          {unit.estado}
-                        </Badge>
-                        <Badge variant={getTipoBadgeVariant(unit.tipo)}>
-                          {unit.tipo}
-                        </Badge>
+                        <Badge variant={getEstadoBadgeVariant(unit.estado)}>{unit.estado}</Badge>
+                        <Badge variant={getTipoBadgeVariant(unit.tipo)}>{unit.tipo}</Badge>
                       </div>
 
                       <div className="grid grid-cols-2 gap-2 text-sm">
@@ -509,9 +489,7 @@ export default function UnidadesClientPage({
                         )}
                         <div>
                           <p className="text-muted-foreground">Renta</p>
-                          <p className="font-medium">
-                            {formatCurrency(unit.rentaMensual)}
-                          </p>
+                          <p className="font-medium">{formatCurrency(unit.rentaMensual)}</p>
                         </div>
                       </div>
 
@@ -543,13 +521,9 @@ export default function UnidadesClientPage({
                             <Badge variant={getEstadoBadgeVariant(unit.estado)}>
                               {unit.estado}
                             </Badge>
-                            <Badge variant={getTipoBadgeVariant(unit.tipo)}>
-                              {unit.tipo}
-                            </Badge>
+                            <Badge variant={getTipoBadgeVariant(unit.tipo)}>{unit.tipo}</Badge>
                           </div>
-                          <p className="text-sm text-muted-foreground">
-                            {unit.building.nombre}
-                          </p>
+                          <p className="text-sm text-muted-foreground">{unit.building.nombre}</p>
                           {unit.tenant && (
                             <p className="text-sm text-muted-foreground">
                               Inquilino: {unit.tenant.nombreCompleto}
@@ -560,9 +534,7 @@ export default function UnidadesClientPage({
                       <div className="flex items-center gap-4">
                         <div className="text-right hidden sm:block">
                           <p className="text-sm text-muted-foreground">Renta mensual</p>
-                          <p className="font-medium">
-                            {formatCurrency(unit.rentaMensual)}
-                          </p>
+                          <p className="font-medium">{formatCurrency(unit.rentaMensual)}</p>
                         </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>

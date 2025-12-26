@@ -15,7 +15,10 @@ interface InfoCardProps {
   className?: string;
 }
 
-const variantConfig: Record<InfoCardVariant, { bgColor: string; iconColor: string; icon: ReactNode }> = {
+const variantConfig: Record<
+  InfoCardVariant,
+  { bgColor: string; iconColor: string; icon: ReactNode }
+> = {
   info: {
     bgColor: 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800',
     iconColor: 'text-blue-600 dark:text-blue-400',
@@ -38,13 +41,7 @@ const variantConfig: Record<InfoCardVariant, { bgColor: string; iconColor: strin
   },
 };
 
-export function InfoCard({
-  variant = 'info',
-  title,
-  children,
-  icon,
-  className,
-}: InfoCardProps) {
+export function InfoCard({ variant = 'info', title, children, icon, className }: InfoCardProps) {
   const config = variantConfig[variant];
   const displayIcon = icon || config.icon;
 
@@ -52,15 +49,9 @@ export function InfoCard({
     <Card className={cn(config.bgColor, 'border', className)}>
       <CardContent className="pt-6">
         <div className="flex gap-3">
-          <div className={cn('flex-shrink-0', config.iconColor)}>
-            {displayIcon}
-          </div>
+          <div className={cn('flex-shrink-0', config.iconColor)}>{displayIcon}</div>
           <div className="flex-1 space-y-1">
-            {title && (
-              <h4 className={cn('font-semibold text-sm', config.iconColor)}>
-                {title}
-              </h4>
-            )}
+            {title && <h4 className={cn('font-semibold text-sm', config.iconColor)}>{title}</h4>}
             <div className="text-sm text-muted-foreground">{children}</div>
           </div>
         </div>

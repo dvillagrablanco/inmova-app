@@ -22,20 +22,13 @@ export async function POST(request: NextRequest) {
     } = data;
     // Validaciones básicas
     if (!nombre || !razonSocial || !cif || !email || !password) {
-      return NextResponse.json(
-        { error: 'Faltan campos obligatorios' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Faltan campos obligatorios' }, { status: 400 });
     }
     // Verificar si ya existe el Partner
     const existingPartner = await prisma.partner.findFirst({
       where: {
-        OR: [
-          { email },
-          { cif },
-          { contactoEmail }
-        ]
-      }
+        OR: [{ email }, { cif }, { contactoEmail }],
+      },
     });
     if (existingPartner) {
       return NextResponse.json(
@@ -64,10 +57,13 @@ export async function POST(request: NextRequest) {
     });
     // No devolver el password
     const { password: _, ...partnerWithoutPassword } = partner;
-    return NextResponse.json({
-      message: 'Partner registrado correctamente. Pendiente de aprobación.',
-      partner: partnerWithoutPassword,
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        message: 'Partner registrado correctamente. Pendiente de aprobación.',
+        partner: partnerWithoutPassword,
+      },
+      { status: 201 }
+    );
   } catch (error: any) {
     logger.error('Error registrando Partner:', error);
     return NextResponse.json(

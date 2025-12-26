@@ -114,9 +114,6 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     logger.error('Error al obtener estadísticas:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener estadísticas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener estadísticas' }, { status: 500 });
   }
 }

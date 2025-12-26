@@ -6,19 +6,12 @@ import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id || !session?.user?.companyId) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const { id } = params;
@@ -28,15 +21,12 @@ export async function PUT(
     const plantilla = await prisma.sMSTemplate.findFirst({
       where: {
         id,
-        companyId: session.user.companyId
-      }
+        companyId: session.user.companyId,
+      },
     });
 
     if (!plantilla) {
-      return NextResponse.json(
-        { error: 'Plantilla no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Plantilla no encontrada' }, { status: 404 });
     }
 
     const updated = await prisma.sMSTemplate.update({
@@ -50,14 +40,14 @@ export async function PUT(
         envioAutomatico: data.envioAutomatico,
         eventoTrigger: data.eventoTrigger,
         anticipacionDias: data.anticipacionDias,
-        horaEnvio: data.horaEnvio
-      }
+        horaEnvio: data.horaEnvio,
+      },
     });
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       plantilla: updated,
-      message: 'Plantilla actualizada exitosamente' 
+      message: 'Plantilla actualizada exitosamente',
     });
   } catch (error: any) {
     logger.error('Error updating SMS template:', error);
@@ -68,18 +58,12 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id || !session?.user?.companyId) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const { id } = params;
@@ -88,24 +72,21 @@ export async function DELETE(
     const plantilla = await prisma.sMSTemplate.findFirst({
       where: {
         id,
-        companyId: session.user.companyId
-      }
+        companyId: session.user.companyId,
+      },
     });
 
     if (!plantilla) {
-      return NextResponse.json(
-        { error: 'Plantilla no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Plantilla no encontrada' }, { status: 404 });
     }
 
     await prisma.sMSTemplate.delete({
-      where: { id }
+      where: { id },
     });
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
-      message: 'Plantilla eliminada exitosamente' 
+      message: 'Plantilla eliminada exitosamente',
     });
   } catch (error: any) {
     logger.error('Error deleting SMS template:', error);

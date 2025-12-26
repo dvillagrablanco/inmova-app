@@ -4,12 +4,18 @@ import { useState } from 'react';
 import { Wizard, WizardStep } from '@/components/ui/wizard';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { 
+import {
   Home,
   Users,
   DollarSign,
@@ -19,7 +25,7 @@ import {
   AlertCircle,
   Plus,
   X,
-  PieChart
+  PieChart,
 } from 'lucide-react';
 import { validateRequiredFields } from '@/lib/wizard-utils';
 import { toast } from 'sonner';
@@ -58,16 +64,16 @@ interface RoomRentalFormData {
   propertyName: string;
   address: string;
   totalRooms: number;
-  
+
   // Rooms
   rooms: Room[];
-  
+
   // Utilities
   utilities: Utility[];
-  
+
   // Common Areas
   commonAreas: string[];
-  
+
   // Rules
   quietHours: string;
   cleaningSchedule: 'daily' | 'weekly' | 'biweekly';
@@ -102,7 +108,7 @@ export function RoomRentalWizard({ propertyId, onComplete, onCancel }: RoomRenta
   const calculateProration = (rooms: Room[], utility: Utility) => {
     if (!utility.prorate || rooms.length === 0) return {};
 
-    const occupiedRooms = rooms.filter(r => r.tenant);
+    const occupiedRooms = rooms.filter((r) => r.tenant);
     if (occupiedRooms.length === 0) return {};
 
     let distribution: Record<string, number> = {};
@@ -110,7 +116,7 @@ export function RoomRentalWizard({ propertyId, onComplete, onCancel }: RoomRenta
     switch (utility.method) {
       case 'equal':
         const equalAmount = utility.amount / occupiedRooms.length;
-        occupiedRooms.forEach(room => {
+        occupiedRooms.forEach((room) => {
           distribution[room.id] = equalAmount;
         });
         break;
@@ -118,14 +124,14 @@ export function RoomRentalWizard({ propertyId, onComplete, onCancel }: RoomRenta
       case 'byPerson':
         // Assuming 1 person per room for simplicity
         const perPersonAmount = utility.amount / occupiedRooms.length;
-        occupiedRooms.forEach(room => {
+        occupiedRooms.forEach((room) => {
           distribution[room.id] = perPersonAmount;
         });
         break;
 
       case 'bySize':
         const totalSize = occupiedRooms.reduce((sum, r) => sum + r.size, 0);
-        occupiedRooms.forEach(room => {
+        occupiedRooms.forEach((room) => {
           distribution[room.id] = (room.size / totalSize) * utility.amount;
         });
         break;
@@ -199,7 +205,8 @@ export function RoomRentalWizard({ propertyId, onComplete, onCancel }: RoomRenta
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              El sistema te ayudará a configurar cada habitación y prorratear gastos automáticamente.
+              El sistema te ayudará a configurar cada habitación y prorratear gastos
+              automáticamente.
             </AlertDescription>
           </Alert>
         </div>
@@ -607,13 +614,18 @@ export function RoomRentalWizard({ propertyId, onComplete, onCancel }: RoomRenta
                 <div>
                   <span className="text-muted-foreground">Ingreso base total:</span>{' '}
                   <span className="font-medium">
-                    €{data.rooms?.reduce((sum: number, r: Room) => sum + r.basePrice, 0).toFixed(2)}/mes
+                    €{data.rooms?.reduce((sum: number, r: Room) => sum + r.basePrice, 0).toFixed(2)}
+                    /mes
                   </span>
                 </div>
                 <div>
                   <span className="text-muted-foreground">Gastos totales:</span>{' '}
                   <span className="font-medium">
-                    €{data.utilities?.reduce((sum: number, u: Utility) => sum + u.amount, 0).toFixed(2)}/mes
+                    €
+                    {data.utilities
+                      ?.reduce((sum: number, u: Utility) => sum + u.amount, 0)
+                      .toFixed(2)}
+                    /mes
                   </span>
                 </div>
               </div>
@@ -662,7 +674,7 @@ export function RoomRentalWizard({ propertyId, onComplete, onCancel }: RoomRenta
 
       const result = await response.json();
       toast.success('¡Propiedad co-living creada con éxito!');
-      
+
       if (onComplete) {
         onComplete(result);
       } else {

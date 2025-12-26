@@ -269,7 +269,8 @@ export default function OpenBankingPage() {
   const transaccionesConciliadas = transacciones.filter((t) => t.conciliado).length;
 
   return (
-    <AuthenticatedLayout>
+    <>
+      <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto">
             <div className="mb-6">
               <Button
@@ -678,6 +679,6 @@ export default function OpenBankingPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

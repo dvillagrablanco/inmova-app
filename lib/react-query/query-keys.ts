@@ -62,7 +62,8 @@ export const queryKeys = {
     list: (filters: string) => [...queryKeys.maintenance.lists(), { filters }] as const,
     details: () => [...queryKeys.maintenance.all, 'detail'] as const,
     detail: (id: string) => [...queryKeys.maintenance.details(), id] as const,
-    byBuilding: (buildingId: string) => [...queryKeys.maintenance.all, 'building', buildingId] as const,
+    byBuilding: (buildingId: string) =>
+      [...queryKeys.maintenance.all, 'building', buildingId] as const,
     byUnit: (unitId: string) => [...queryKeys.maintenance.all, 'unit', unitId] as const,
   },
 
@@ -87,7 +88,8 @@ export const queryKeys = {
     all: ['documents'] as const,
     lists: () => [...queryKeys.documents.all, 'list'] as const,
     list: (filters: string) => [...queryKeys.documents.lists(), { filters }] as const,
-    byBuilding: (buildingId: string) => [...queryKeys.documents.all, 'building', buildingId] as const,
+    byBuilding: (buildingId: string) =>
+      [...queryKeys.documents.all, 'building', buildingId] as const,
     byUnit: (unitId: string) => [...queryKeys.documents.all, 'unit', unitId] as const,
   },
 

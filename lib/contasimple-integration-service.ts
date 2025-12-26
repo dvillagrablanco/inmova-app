@@ -1,19 +1,19 @@
 // @ts-nocheck
 /**
  * CONTASIMPLE INTEGRATION SERVICE - ACTIVO
- * 
+ *
  * Servicio de integración con ContaSimple
  * Software de facturación y contabilidad líder para pymes en España
- * 
+ *
  * ==============================================================================
  * ESTADO: ACTIVO Y FUNCIONAL
  * Credenciales configuradas y listas para usar
  * ==============================================================================
- * 
+ *
  * DOCUMENTACIÓN OFICIAL:
  * - API Documentation: https://api.contasimple.com/swagger
  * - Documentación de API v2: https://api.contasimple.com/api/v2
- * 
+ *
  * MÉTODO DE AUTENTICACIÓN:
  * ContaSimple usa un sistema OAuth2 adaptado con claves de autorización
  * 1. POST /oauth/token con key y grant_type
@@ -141,15 +141,11 @@ export class ContaSimpleIntegrationService {
       formData.append('grant_type', 'authentication_key');
       formData.append('key', this.config.authKey);
 
-      const response = await axios.post(
-        `${this.config.apiUrl}/oauth/token`,
-        formData.toString(),
-        {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-        }
-      );
+      const response = await axios.post(`${this.config.apiUrl}/oauth/token`, formData.toString(), {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
 
       this.tokens = {
         access_token: response.data.access_token,
@@ -159,12 +155,15 @@ export class ContaSimpleIntegrationService {
       };
 
       // Establecer la fecha de expiración del token
-      this.tokenExpiry = new Date(Date.now() + (this.tokens.expires_in * 1000));
+      this.tokenExpiry = new Date(Date.now() + this.tokens.expires_in * 1000);
 
       logger.info('✅ ContaSimple: Autenticación exitosa');
       return this.tokens;
     } catch (error: any) {
-      logger.error('❌ Error al autenticar con ContaSimple:', error.response?.data || error.message);
+      logger.error(
+        '❌ Error al autenticar con ContaSimple:',
+        error.response?.data || error.message
+      );
       throw new Error('Error al autenticar con ContaSimple');
     }
   }
@@ -177,7 +176,7 @@ export class ContaSimpleIntegrationService {
       return false;
     }
     // Renovar el token 5 minutos antes de que expire
-    return this.tokenExpiry.getTime() > Date.now() + (5 * 60 * 1000);
+    return this.tokenExpiry.getTime() > Date.now() + 5 * 60 * 1000;
   }
 
   /**
@@ -206,7 +205,10 @@ export class ContaSimpleIntegrationService {
       logger.info('✅ ContaSimple: Cliente creado:', response.data.id);
       return response.data;
     } catch (error: any) {
-      logger.error('❌ Error al crear cliente en ContaSimple:', error.response?.data || error.message);
+      logger.error(
+        '❌ Error al crear cliente en ContaSimple:',
+        error.response?.data || error.message
+      );
       throw new Error('Error al crear cliente en ContaSimple');
     }
   }
@@ -221,12 +223,18 @@ export class ContaSimpleIntegrationService {
       });
       return response.data;
     } catch (error: any) {
-      logger.error('❌ Error al obtener cliente de ContaSimple:', error.response?.data || error.message);
+      logger.error(
+        '❌ Error al obtener cliente de ContaSimple:',
+        error.response?.data || error.message
+      );
       throw new Error('Error al obtener cliente de ContaSimple');
     }
   }
 
-  async updateCustomer(customerId: string, customer: Partial<ContaSimpleCustomer>): Promise<ContaSimpleCustomer> {
+  async updateCustomer(
+    customerId: string,
+    customer: Partial<ContaSimpleCustomer>
+  ): Promise<ContaSimpleCustomer> {
     const token = await this.ensureValidToken();
     try {
       const response = await this.axiosInstance.put(`/customers/${customerId}`, customer, {
@@ -238,7 +246,10 @@ export class ContaSimpleIntegrationService {
       logger.info('✅ ContaSimple: Cliente actualizado:', customerId);
       return response.data;
     } catch (error: any) {
-      logger.error('❌ Error al actualizar cliente en ContaSimple:', error.response?.data || error.message);
+      logger.error(
+        '❌ Error al actualizar cliente en ContaSimple:',
+        error.response?.data || error.message
+      );
       throw new Error('Error al actualizar cliente en ContaSimple');
     }
   }
@@ -259,7 +270,10 @@ export class ContaSimpleIntegrationService {
       logger.info('✅ ContaSimple: Factura creada:', response.data.number);
       return response.data;
     } catch (error: any) {
-      logger.error('❌ Error al crear factura en ContaSimple:', error.response?.data || error.message);
+      logger.error(
+        '❌ Error al crear factura en ContaSimple:',
+        error.response?.data || error.message
+      );
       throw new Error('Error al crear factura en ContaSimple');
     }
   }
@@ -274,7 +288,10 @@ export class ContaSimpleIntegrationService {
       });
       return response.data;
     } catch (error: any) {
-      logger.error('❌ Error al obtener factura de ContaSimple:', error.response?.data || error.message);
+      logger.error(
+        '❌ Error al obtener factura de ContaSimple:',
+        error.response?.data || error.message
+      );
       throw new Error('Error al obtener factura de ContaSimple');
     }
   }
@@ -295,7 +312,10 @@ export class ContaSimpleIntegrationService {
       logger.info('✅ ContaSimple: Factura enviada a', recipientEmail);
       return response.status === 200;
     } catch (error: any) {
-      logger.error('❌ Error al enviar factura de ContaSimple:', error.response?.data || error.message);
+      logger.error(
+        '❌ Error al enviar factura de ContaSimple:',
+        error.response?.data || error.message
+      );
       throw new Error('Error al enviar factura de ContaSimple');
     }
   }
@@ -315,7 +335,10 @@ export class ContaSimpleIntegrationService {
       logger.info('✅ ContaSimple: Factura cancelada:', invoiceId);
       return response.status === 200;
     } catch (error: any) {
-      logger.error('❌ Error al cancelar factura de ContaSimple:', error.response?.data || error.message);
+      logger.error(
+        '❌ Error al cancelar factura de ContaSimple:',
+        error.response?.data || error.message
+      );
       throw new Error('Error al cancelar factura de ContaSimple');
     }
   }
@@ -336,7 +359,10 @@ export class ContaSimpleIntegrationService {
       logger.info('✅ ContaSimple: Pago registrado:', response.data.amount);
       return response.data;
     } catch (error: any) {
-      logger.error('❌ Error al registrar pago en ContaSimple:', error.response?.data || error.message);
+      logger.error(
+        '❌ Error al registrar pago en ContaSimple:',
+        error.response?.data || error.message
+      );
       throw new Error('Error al registrar pago en ContaSimple');
     }
   }
@@ -357,12 +383,19 @@ export class ContaSimpleIntegrationService {
       logger.info('✅ ContaSimple: Gasto registrado:', response.data.amount);
       return response.data;
     } catch (error: any) {
-      logger.error('❌ Error al crear gasto en ContaSimple:', error.response?.data || error.message);
+      logger.error(
+        '❌ Error al crear gasto en ContaSimple:',
+        error.response?.data || error.message
+      );
       throw new Error('Error al crear gasto en ContaSimple');
     }
   }
 
-  async getExpenses(filters?: { startDate?: Date; endDate?: Date; category?: string }): Promise<ContaSimpleExpense[]> {
+  async getExpenses(filters?: {
+    startDate?: Date;
+    endDate?: Date;
+    category?: string;
+  }): Promise<ContaSimpleExpense[]> {
     const token = await this.ensureValidToken();
     try {
       const params = new URLSearchParams();
@@ -377,7 +410,10 @@ export class ContaSimpleIntegrationService {
       });
       return response.data;
     } catch (error: any) {
-      logger.error('❌ Error al obtener gastos de ContaSimple:', error.response?.data || error.message);
+      logger.error(
+        '❌ Error al obtener gastos de ContaSimple:',
+        error.response?.data || error.message
+      );
       throw new Error('Error al obtener gastos de ContaSimple');
     }
   }
@@ -396,13 +432,15 @@ export class ContaSimpleIntegrationService {
       email: tenant.email,
       phone: tenant.telefono,
       customerType: 'individual',
-      address: tenant.direccionActual ? {
-        street: tenant.direccionActual,
-        city: '',
-        postalCode: '',
-        province: '',
-        country: 'España',
-      } : undefined,
+      address: tenant.direccionActual
+        ? {
+            street: tenant.direccionActual,
+            city: '',
+            postalCode: '',
+            province: '',
+            country: 'España',
+          }
+        : undefined,
     };
     return await this.createCustomer(customer);
   }
@@ -446,9 +484,14 @@ export class ContaSimpleIntegrationService {
       invoiceId,
       date: payment.fechaPago || new Date(),
       amount: payment.monto,
-      method: payment.metodoPago === 'transferencia' ? 'transfer' : 
-              payment.metodoPago === 'tarjeta' ? 'card' : 
-              payment.metodoPago === 'efectivo' ? 'cash' : 'transfer',
+      method:
+        payment.metodoPago === 'transferencia'
+          ? 'transfer'
+          : payment.metodoPago === 'tarjeta'
+            ? 'card'
+            : payment.metodoPago === 'efectivo'
+              ? 'cash'
+              : 'transfer',
       reference: payment.referencia,
     };
     return await this.registerPayment(contaSimplePayment);
@@ -477,21 +520,22 @@ export class ContaSimpleIntegrationService {
       if (!this.config.apiKey || !this.config.companyId) {
         return {
           success: false,
-          message: 'ContaSimple no está configurado. Por favor, añade las credenciales en las variables de entorno.'
+          message:
+            'ContaSimple no está configurado. Por favor, añade las credenciales en las variables de entorno.',
         };
       }
 
       // Intentar obtener información de la empresa
       const response = await this.client.get('/company');
-      
+
       return {
         success: true,
-        message: `Conectado exitosamente a ContaSimple (${response.data.name || 'Cuenta activa'})`
+        message: `Conectado exitosamente a ContaSimple (${response.data.name || 'Cuenta activa'})`,
       };
     } catch (error: any) {
       return {
         success: false,
-        message: `Error de conexión: ${error.response?.data?.message || error.message}`
+        message: `Error de conexión: ${error.response?.data?.message || error.message}`,
       };
     }
   }
@@ -502,7 +546,6 @@ export class ContaSimpleIntegrationService {
   isConfigured(): boolean {
     return !!(this.config.apiKey && this.config.companyId);
   }
-
 }
 
 /**
@@ -513,10 +556,7 @@ export class ContaSimpleIntegrationService {
  * Verifica si las credenciales de ContaSimple están configuradas
  */
 export function isContaSimpleConfigured(): boolean {
-  return !!(
-    process.env.CONTASIMPLE_AUTH_KEY &&
-    process.env.CONTASIMPLE_API_URL
-  );
+  return !!(process.env.CONTASIMPLE_AUTH_KEY && process.env.CONTASIMPLE_API_URL);
 }
 
 /**
@@ -533,42 +573,42 @@ export function getContaSimpleService(): ContaSimpleIntegrationService {
 
 /**
  * DOCUMENTACIÓN DE USO BÁSICO:
- * 
+ *
  * // 1. Configurar credenciales en .env
  * CONTASIMPLE_AUTH_KEY=tu_clave_de_autorizacion
  * CONTASIMPLE_API_URL=https://api.contasimple.com/api/v2
- * 
+ *
  * // 2. Importar el servicio
  * import { getContaSimpleService } from '@/lib/contasimple-integration-service';
- * 
+ *
  * // 3. Obtener instancia del servicio
  * const contaSimple = getContaSimpleService();
- * 
+ *
  * // 4. Autenticarse (opcional, se hace automáticamente)
  * await contaSimple.authenticate();
- * 
+ *
  * // 5. Usar la API - Sincronizar datos de INMOVA
- * 
+ *
  * // Sincronizar inquilino como cliente
  * const customer = await contaSimple.syncTenantToCustomer(tenant);
- * 
+ *
  * // Crear factura desde contrato
  * const invoice = await contaSimple.createInvoiceFromContract(contract, customer.id);
- * 
+ *
  * // Registrar pago
  * const payment = await contaSimple.syncPaymentToContaSimple(paymentData, invoice.id);
- * 
+ *
  * // Registrar gasto
  * const expense = await contaSimple.syncExpenseToContaSimple(expenseData);
- * 
+ *
  * // 6. Operaciones directas con la API
- * 
+ *
  * // Obtener cliente
  * const customerDetails = await contaSimple.getCustomer(customerId);
- * 
+ *
  * // Enviar factura por email
  * await contaSimple.sendInvoice(invoiceId, 'cliente@email.com');
- * 
+ *
  * // Obtener gastos filtrados
  * const expenses = await contaSimple.getExpenses({
  *   startDate: new Date('2024-01-01'),

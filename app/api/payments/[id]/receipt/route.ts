@@ -13,10 +13,7 @@ import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -59,11 +56,14 @@ export async function GET(
     }
 
     // Verificar que el usuario tenga acceso al recibo
-    const userEmail = session?.user?.email
+    const userEmail = session?.user?.email;
     const tenantEmail = payment.contract.tenant.email;
 
     // Si es el inquilino o un usuario del sistema de la misma compañía
-    if (userEmail !== tenantEmail && session?.user?.companyId !== payment.contract.unit.building.company.id) {
+    if (
+      userEmail !== tenantEmail &&
+      session?.user?.companyId !== payment.contract.unit.building.company.id
+    ) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
 
@@ -148,9 +148,6 @@ export async function GET(
     });
   } catch (error) {
     logger.error('Error generando recibo:', error);
-    return NextResponse.json(
-      { error: 'Error al generar recibo' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al generar recibo' }, { status: 500 });
   }
 }

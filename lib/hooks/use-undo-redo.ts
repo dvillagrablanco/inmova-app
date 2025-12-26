@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useCallback, useRef } from 'react';
 
@@ -10,10 +10,7 @@ interface UseUndoRedoOptions<T> {
 /**
  * Hook for managing undo/redo functionality
  */
-export function useUndoRedo<T>({
-  initialState,
-  maxHistory = 50,
-}: UseUndoRedoOptions<T>) {
+export function useUndoRedo<T>({ initialState, maxHistory = 50 }: UseUndoRedoOptions<T>) {
   const [history, setHistory] = useState<T[]>([initialState]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const isUndoRedoRef = useRef(false);
@@ -36,10 +33,10 @@ export function useUndoRedo<T>({
 
         // Remove any future history
         const newHistory = prev.slice(0, currentIndex + 1);
-        
+
         // Add new state
         newHistory.push(nextState);
-        
+
         // Limit history size
         if (newHistory.length > maxHistory) {
           newHistory.shift();
@@ -47,7 +44,7 @@ export function useUndoRedo<T>({
         } else {
           setCurrentIndex(newHistory.length - 1);
         }
-        
+
         return newHistory;
       });
     },

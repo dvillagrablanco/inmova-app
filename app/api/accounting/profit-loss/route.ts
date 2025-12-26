@@ -11,10 +11,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.companyId) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const searchParams = request.nextUrl.searchParams;
@@ -25,11 +22,7 @@ export async function GET(request: NextRequest) {
     const fechaInicio = startOfMonth(new Date(year, month - 1));
     const fechaFin = endOfMonth(new Date(year, month - 1));
 
-    const profitLoss = await getProfitLossStatement(
-      session.user.companyId,
-      fechaInicio,
-      fechaFin
-    );
+    const profitLoss = await getProfitLossStatement(session.user.companyId, fechaInicio, fechaFin);
 
     return NextResponse.json({
       success: true,

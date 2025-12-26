@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     }
 
     const isConfigured = isSageConfigured();
-    
+
     return NextResponse.json({
       integrated: isConfigured,
       mode: isConfigured ? 'production' : 'demo',
@@ -24,15 +24,12 @@ export async function GET(req: NextRequest) {
         'Facturación automática',
         'Registro de pagos',
         'Control de gastos',
-        'Integración bancaria'
+        'Integración bancaria',
       ],
-      status: isConfigured ? 'active' : 'demo'
+      status: isConfigured ? 'active' : 'demo',
     });
   } catch (error) {
     logger.error('Error checking Sage status:', error);
-    return NextResponse.json(
-      { error: 'Error al verificar estado de Sage' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al verificar estado de Sage' }, { status: 500 });
   }
 }

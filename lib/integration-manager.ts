@@ -23,7 +23,7 @@ export function encryptCredentials(credentials: any): string {
     const iv = crypto.randomBytes(16);
     const key = crypto.scryptSync(ENCRYPTION_KEY, 'salt', 32);
     const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
-    
+
     const encrypted = Buffer.concat([
       cipher.update(JSON.stringify(credentials), 'utf8'),
       cipher.final(),
@@ -46,11 +46,8 @@ export function decryptCredentials(encryptedData: string): any {
     const encrypted = Buffer.from(encryptedHex, 'hex');
     const key = crypto.scryptSync(ENCRYPTION_KEY, 'salt', 32);
     const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
-    
-    const decrypted = Buffer.concat([
-      decipher.update(encrypted),
-      decipher.final(),
-    ]);
+
+    const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
 
     return JSON.parse(decrypted.toString('utf8'));
   } catch (error) {
@@ -139,10 +136,16 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
     credentialFields: [
       { key: 'clientId', label: 'Client ID', type: 'text', required: true },
       { key: 'clientSecret', label: 'Client Secret', type: 'password', required: true },
-      { key: 'environment', label: 'Entorno', type: 'select', required: true, options: [
-        { value: 'sandbox', label: 'Sandbox (Pruebas)' },
-        { value: 'production', label: 'Production' },
-      ]},
+      {
+        key: 'environment',
+        label: 'Entorno',
+        type: 'select',
+        required: true,
+        options: [
+          { value: 'sandbox', label: 'Sandbox (Pruebas)' },
+          { value: 'production', label: 'Production' },
+        ],
+      },
     ],
   },
   {
@@ -168,16 +171,28 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
     credentialFields: [
       { key: 'merchantId', label: 'Merchant ID', type: 'text', required: true },
       { key: 'secretKey', label: 'Secret Key', type: 'password', required: true },
-      { key: 'bankProvider', label: 'Banco', type: 'select', required: true, options: [
-        { value: 'redsys', label: 'Redsys' },
-        { value: 'santander', label: 'Santander' },
-        { value: 'bbva', label: 'BBVA' },
-        { value: 'caixabank', label: 'CaixaBank' },
-      ]},
-      { key: 'environment', label: 'Entorno', type: 'select', required: true, options: [
-        { value: 'sandbox', label: 'Sandbox' },
-        { value: 'production', label: 'Production' },
-      ]},
+      {
+        key: 'bankProvider',
+        label: 'Banco',
+        type: 'select',
+        required: true,
+        options: [
+          { value: 'redsys', label: 'Redsys' },
+          { value: 'santander', label: 'Santander' },
+          { value: 'bbva', label: 'BBVA' },
+          { value: 'caixabank', label: 'CaixaBank' },
+        ],
+      },
+      {
+        key: 'environment',
+        label: 'Entorno',
+        type: 'select',
+        required: true,
+        options: [
+          { value: 'sandbox', label: 'Sandbox' },
+          { value: 'production', label: 'Production' },
+        ],
+      },
     ],
   },
   {
@@ -189,22 +204,44 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
     website: 'https://gocardless.com',
     status: 'active',
     credentialFields: [
-      { key: 'accessToken', label: 'Access Token', type: 'password', required: true, helpText: 'Token de API de GoCardless' },
-      { key: 'environment', label: 'Entorno', type: 'select', required: true, options: [
-        { value: 'sandbox', label: 'Sandbox (Pruebas)' },
-        { value: 'live', label: 'Live (Producción)' },
-      ]},
+      {
+        key: 'accessToken',
+        label: 'Access Token',
+        type: 'password',
+        required: true,
+        helpText: 'Token de API de GoCardless',
+      },
+      {
+        key: 'environment',
+        label: 'Entorno',
+        type: 'select',
+        required: true,
+        options: [
+          { value: 'sandbox', label: 'Sandbox (Pruebas)' },
+          { value: 'live', label: 'Live (Producción)' },
+        ],
+      },
     ],
     settingsFields: [
-      { key: 'webhookSecret', label: 'Webhook Secret', type: 'text', helpText: 'Para verificar webhooks' },
-      { key: 'defaultScheme', label: 'Esquema por defecto', type: 'select', options: [
-        { value: 'sepa_core', label: 'SEPA Core (Europa)' },
-        { value: 'bacs', label: 'BACS (UK)' },
-        { value: 'ach', label: 'ACH (USA)' },
-        { value: 'autogiro', label: 'Autogiro (Suecia)' },
-        { value: 'becs', label: 'BECS (Australia)' },
-        { value: 'pad', label: 'PAD (Canadá)' },
-      ]},
+      {
+        key: 'webhookSecret',
+        label: 'Webhook Secret',
+        type: 'text',
+        helpText: 'Para verificar webhooks',
+      },
+      {
+        key: 'defaultScheme',
+        label: 'Esquema por defecto',
+        type: 'select',
+        options: [
+          { value: 'sepa_core', label: 'SEPA Core (Europa)' },
+          { value: 'bacs', label: 'BACS (UK)' },
+          { value: 'ach', label: 'ACH (USA)' },
+          { value: 'autogiro', label: 'Autogiro (Suecia)' },
+          { value: 'becs', label: 'BECS (Australia)' },
+          { value: 'pad', label: 'PAD (Canadá)' },
+        ],
+      },
     ],
   },
 
@@ -220,8 +257,20 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
     credentialFields: [
       { key: 'accountSid', label: 'Account SID', type: 'text', required: true },
       { key: 'authToken', label: 'Auth Token', type: 'password', required: true },
-      { key: 'phoneNumber', label: 'Número de Teléfono', type: 'text', required: true, placeholder: '+34612345678' },
-      { key: 'whatsappNumber', label: 'Número WhatsApp', type: 'text', required: false, placeholder: '+34612345678' },
+      {
+        key: 'phoneNumber',
+        label: 'Número de Teléfono',
+        type: 'text',
+        required: true,
+        placeholder: '+34612345678',
+      },
+      {
+        key: 'whatsappNumber',
+        label: 'Número WhatsApp',
+        type: 'text',
+        required: false,
+        placeholder: '+34612345678',
+      },
     ],
   },
   {
@@ -231,9 +280,7 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
     description: 'Email transaccional y marketing',
     logo: '/integrations/sendgrid.svg',
     status: 'active',
-    credentialFields: [
-      { key: 'apiKey', label: 'API Key', type: 'password', required: true },
-    ],
+    credentialFields: [{ key: 'apiKey', label: 'API Key', type: 'password', required: true }],
   },
 
   // ========== CHANNEL MANAGERS ==========
@@ -264,10 +311,16 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
       { key: 'hotelId', label: 'Hotel ID', type: 'text', required: true },
       { key: 'username', label: 'Username', type: 'text', required: true },
       { key: 'password', label: 'Password', type: 'password', required: true },
-      { key: 'environment', label: 'Entorno', type: 'select', required: true, options: [
-        { value: 'test', label: 'Test' },
-        { value: 'production', label: 'Production' },
-      ]},
+      {
+        key: 'environment',
+        label: 'Entorno',
+        type: 'select',
+        required: true,
+        options: [
+          { value: 'test', label: 'Test' },
+          { value: 'production', label: 'Production' },
+        ],
+      },
     ],
   },
 
@@ -291,9 +344,7 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
     description: 'ERP y facturación online',
     logo: '/integrations/holded.svg',
     status: 'active',
-    credentialFields: [
-      { key: 'apiKey', label: 'API Key', type: 'password', required: true },
-    ],
+    credentialFields: [{ key: 'apiKey', label: 'API Key', type: 'password', required: true }],
   },
 
   // ========== REDES SOCIALES ==========
@@ -353,10 +404,16 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
       { key: 'partnerId', label: 'Partner ID', type: 'text', required: true },
       { key: 'apiKey', label: 'API Key', type: 'text', required: true },
       { key: 'apiSecret', label: 'API Secret', type: 'password', required: true },
-      { key: 'environment', label: 'Entorno', type: 'select', required: true, options: [
-        { value: 'test', label: 'Test' },
-        { value: 'production', label: 'Production' },
-      ]},
+      {
+        key: 'environment',
+        label: 'Entorno',
+        type: 'select',
+        required: true,
+        options: [
+          { value: 'test', label: 'Test' },
+          { value: 'production', label: 'Production' },
+        ],
+      },
     ],
   },
   {
@@ -370,10 +427,16 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
       { key: 'clientId', label: 'Client ID', type: 'text', required: true },
       { key: 'clientSecret', label: 'Client Secret', type: 'password', required: true },
       { key: 'partnerId', label: 'Partner ID', type: 'text', required: true },
-      { key: 'environment', label: 'Entorno', type: 'select', required: true, options: [
-        { value: 'sandbox', label: 'Sandbox' },
-        { value: 'production', label: 'Production' },
-      ]},
+      {
+        key: 'environment',
+        label: 'Entorno',
+        type: 'select',
+        required: true,
+        options: [
+          { value: 'sandbox', label: 'Sandbox' },
+          { value: 'production', label: 'Production' },
+        ],
+      },
     ],
   },
 
@@ -388,7 +451,13 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
     credentialFields: [
       { key: 'appId', label: 'App ID', type: 'text', required: true },
       { key: 'appSecret', label: 'App Secret', type: 'password', required: true },
-      { key: 'pageId', label: 'Page ID', type: 'text', required: false, helpText: 'ID de tu página de Facebook' },
+      {
+        key: 'pageId',
+        label: 'Page ID',
+        type: 'text',
+        required: false,
+        helpText: 'ID de tu página de Facebook',
+      },
     ],
   },
 
@@ -403,10 +472,16 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
     credentialFields: [
       { key: 'clientId', label: 'Client ID', type: 'text', required: true },
       { key: 'clientSecret', label: 'Client Secret', type: 'password', required: true },
-      { key: 'environment', label: 'Entorno', type: 'select', required: true, options: [
-        { value: 'sandbox', label: 'Sandbox' },
-        { value: 'production', label: 'Production' },
-      ]},
+      {
+        key: 'environment',
+        label: 'Entorno',
+        type: 'select',
+        required: true,
+        options: [
+          { value: 'sandbox', label: 'Sandbox' },
+          { value: 'production', label: 'Production' },
+        ],
+      },
     ],
   },
   {
@@ -439,14 +514,14 @@ export class IntegrationManager {
    * Obtener provider específico
    */
   static getProvider(providerId: string): IntegrationProvider | undefined {
-    return INTEGRATION_PROVIDERS.find(p => p.id === providerId);
+    return INTEGRATION_PROVIDERS.find((p) => p.id === providerId);
   }
 
   /**
    * Obtener integraciones por categoría
    */
   static getProvidersByCategory(category: IntegrationCategory): IntegrationProvider[] {
-    return INTEGRATION_PROVIDERS.filter(p => p.category === category);
+    return INTEGRATION_PROVIDERS.filter((p) => p.category === category);
   }
 
   /**
@@ -459,9 +534,9 @@ export class IntegrationManager {
         orderBy: { createdAt: 'desc' },
       });
 
-      return configs.map(config => {
+      return configs.map((config) => {
         const provider = this.getProvider(config.provider);
-        
+
         return {
           id: config.id,
           provider: config.provider,
@@ -494,7 +569,7 @@ export class IntegrationManager {
   }) {
     try {
       const provider = this.getProvider(params.provider);
-      
+
       if (!provider) {
         throw new Error(`Unknown provider: ${params.provider}`);
       }
@@ -590,7 +665,7 @@ export class IntegrationManager {
 
       // Ejecutar test según el provider
       // Aquí implementarías la lógica específica de cada integración
-      
+
       const testResult = {
         success: true,
         message: 'Connection successful',
@@ -619,7 +694,7 @@ export class IntegrationManager {
       return testResult;
     } catch (error) {
       logger.error('Error testing integration:', error);
-      
+
       return {
         success: false,
         message: error instanceof Error ? error.message : 'Test failed',

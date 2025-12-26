@@ -1,6 +1,6 @@
 /**
  * Endpoints API para operaciones específicas de Tareas
- * 
+ *
  * Implementa operaciones GET, PUT y DELETE con validación Zod
  */
 
@@ -17,10 +17,7 @@ export const dynamic = 'force-dynamic';
  * GET /api/tasks/[id]
  * Obtiene una tarea específica con sus relaciones
  */
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await requireAuth();
 
@@ -53,17 +50,16 @@ export async function GET(
 
     logger.info(`Tarea obtenida: ${task.id}`, { userId: user.id });
     return NextResponse.json(task, { status: 200 });
-    
   } catch (error: any) {
     logger.error('Error fetching task:', error);
-    
+
     if (error.message === 'No autenticado') {
       return NextResponse.json(
         { error: 'No autenticado', message: 'Debe iniciar sesión' },
         { status: 401 }
       );
     }
-    
+
     return NextResponse.json(
       { error: 'Error interno del servidor', message: 'Error al obtener tarea' },
       { status: 500 }
@@ -75,10 +71,7 @@ export async function GET(
  * PUT /api/tasks/[id]
  * Actualiza una tarea existente con validación Zod
  */
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await requirePermission('update');
     const body = await req.json();
@@ -145,7 +138,6 @@ export async function PUT(
 
     logger.info(`Tarea actualizada: ${task.id}`, { userId: user.id, taskId: task.id });
     return NextResponse.json(task, { status: 200 });
-    
   } catch (error: any) {
     logger.error('Error updating task:', error);
 
@@ -161,12 +153,9 @@ export async function PUT(
     }
 
     if (error.message?.includes('permiso')) {
-      return NextResponse.json(
-        { error: 'Prohibido', message: error.message },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Prohibido', message: error.message }, { status: 403 });
     }
-    
+
     if (error.message === 'No autenticado') {
       return NextResponse.json(
         { error: 'No autenticado', message: 'Debe iniciar sesión' },
@@ -185,10 +174,7 @@ export async function PUT(
  * DELETE /api/tasks/[id]
  * Elimina una tarea existente
  */
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await requirePermission('delete');
 
@@ -217,21 +203,14 @@ export async function DELETE(
     });
 
     logger.info(`Tarea eliminada: ${params.id}`, { userId: user.id, taskId: params.id });
-    return NextResponse.json(
-      { message: 'Tarea eliminada exitosamente' },
-      { status: 200 }
-    );
-    
+    return NextResponse.json({ message: 'Tarea eliminada exitosamente' }, { status: 200 });
   } catch (error: any) {
     logger.error('Error deleting task:', error);
 
     if (error.message?.includes('permiso')) {
-      return NextResponse.json(
-        { error: 'Prohibido', message: error.message },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Prohibido', message: error.message }, { status: 403 });
     }
-    
+
     if (error.message === 'No autenticado') {
       return NextResponse.json(
         { error: 'No autenticado', message: 'Debe iniciar sesión' },

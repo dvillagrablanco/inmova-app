@@ -15,10 +15,7 @@ export const dynamic = 'force-dynamic';
  * GET /api/str/channels/[listingId]/status
  * Obtiene el estado de todas las conexiones de un listing
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { listingId: string } },
-) {
+export async function GET(request: NextRequest, { params }: { params: { listingId: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user) {
@@ -34,10 +31,7 @@ export async function GET(
     });
 
     if (!listing || listing.companyId !== companyId) {
-      return NextResponse.json(
-        { error: 'Listing no encontrado' },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: 'Listing no encontrado' }, { status: 404 });
     }
 
     // Obtener estado de todos los canales soportados
@@ -52,7 +46,7 @@ export async function GET(
           status,
           config,
         };
-      }),
+      })
     );
 
     return NextResponse.json({
@@ -68,7 +62,7 @@ export async function GET(
         error: 'Error al obtener estado de canales',
         details: (error as Error).message,
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

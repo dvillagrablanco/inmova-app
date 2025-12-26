@@ -12,18 +12,12 @@ import { prisma } from '@/lib/prisma';
 import { logger } from '@/lib/logger';
 import { getPomelliService } from '@/lib/pomelli-integration';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { postId: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { postId: string } }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -32,10 +26,7 @@ export async function GET(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Usuario no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
     const post = await prisma.socialPost.findUnique({
@@ -64,10 +55,7 @@ export async function GET(
     });
 
     if (!post) {
-      return NextResponse.json(
-        { error: 'Publicación no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Publicación no encontrada' }, { status: 404 });
     }
 
     // Si tiene analytics en Pomelli, actualizarlos
@@ -76,7 +64,7 @@ export async function GET(
         const pomelliService = getPomelliService();
         if (pomelliService) {
           const analytics = await pomelliService['client'].getPostAnalytics(post.pomelliPostId);
-          
+
           // Actualizar analytics en DB
           await prisma.socialPost.update({
             where: { id: post.id },
@@ -102,25 +90,16 @@ export async function GET(
     return NextResponse.json({ post });
   } catch (error) {
     logger.error('Error getting post:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener publicación' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener publicación' }, { status: 500 });
   }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { postId: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: { postId: string } }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -129,10 +108,7 @@ export async function PATCH(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Usuario no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
     const post = await prisma.socialPost.findUnique({
@@ -143,10 +119,7 @@ export async function PATCH(
     });
 
     if (!post) {
-      return NextResponse.json(
-        { error: 'Publicación no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Publicación no encontrada' }, { status: 404 });
     }
 
     // Solo se pueden editar posts en draft o scheduled
@@ -202,25 +175,16 @@ export async function PATCH(
     });
   } catch (error) {
     logger.error('Error updating post:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar publicación' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar publicación' }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { postId: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { postId: string } }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -229,10 +193,7 @@ export async function DELETE(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Usuario no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
     const post = await prisma.socialPost.findUnique({
@@ -243,10 +204,7 @@ export async function DELETE(
     });
 
     if (!post) {
-      return NextResponse.json(
-        { error: 'Publicación no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Publicación no encontrada' }, { status: 404 });
     }
 
     // Eliminar de Pomelli si existe
@@ -274,9 +232,6 @@ export async function DELETE(
     });
   } catch (error) {
     logger.error('Error deleting post:', error);
-    return NextResponse.json(
-      { error: 'Error al eliminar publicación' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar publicación' }, { status: 500 });
   }
 }

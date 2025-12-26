@@ -1,7 +1,7 @@
 /**
  * API Endpoint: Regenerar códigos de respaldo
  * POST /api/auth/mfa/regenerate-codes
- * 
+ *
  * Genera nuevos códigos de respaldo (requiere verificación MFA)
  */
 
@@ -13,7 +13,10 @@ import logger from '@/lib/logger';
 import { z } from 'zod';
 
 const regenerateSchema = z.object({
-  code: z.string().length(6).regex(/^\d{6}$/, 'Código debe ser 6 dígitos'),
+  code: z
+    .string()
+    .length(6)
+    .regex(/^\d{6}$/, 'Código debe ser 6 dígitos'),
 });
 
 export const dynamic = 'force-dynamic';
@@ -23,10 +26,7 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user?.id) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const body = await req.json();

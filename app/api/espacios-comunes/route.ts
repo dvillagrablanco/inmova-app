@@ -48,10 +48,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(espacios);
   } catch (error) {
     logger.error('Error fetching espacios comunes:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener espacios comunes' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener espacios comunes' }, { status: 500 });
   }
 }
 
@@ -87,10 +84,7 @@ export async function POST(request: NextRequest) {
 
     // Validaciones
     if (!buildingId || !nombre || !tipo) {
-      return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
 
     const espacio = await prisma.commonSpace.create({
@@ -123,9 +117,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(espacio, { status: 201 });
   } catch (error) {
     logger.error('Error creating espacio común:', error);
-    return NextResponse.json(
-      { error: 'Error al crear espacio común' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear espacio común' }, { status: 500 });
   }
 }

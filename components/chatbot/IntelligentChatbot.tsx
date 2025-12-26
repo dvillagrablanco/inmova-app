@@ -10,19 +10,19 @@ import { useSession } from 'next-auth/react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  MessageCircle, 
-  X, 
-  Send, 
-  Bot, 
-  User, 
-  Loader2, 
+import {
+  MessageCircle,
+  X,
+  Send,
+  Bot,
+  User,
+  Loader2,
   Phone,
   Mail,
   ExternalLink,
   Sparkles,
   Minimize2,
-  Maximize2
+  Maximize2,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -43,9 +43,9 @@ interface ChatbotProps {
   accentColor?: string;
 }
 
-export function IntelligentChatbot({ 
+export function IntelligentChatbot({
   position = 'bottom-right',
-  accentColor = '#667eea'
+  accentColor = '#667eea',
 }: ChatbotProps) {
   const { data: session } = useSession() || {};
   const [isOpen, setIsOpen] = useState(false);
@@ -76,33 +76,33 @@ export function IntelligentChatbot({
         id: 'welcome',
         role: 'assistant',
         content: `¡Hola${session?.user?.name ? `, ${session.user.name.split(' ')[0]}` : ''}! 👋\n\nSoy el asistente virtual de INMOVA. ¿En qué puedo ayudarte hoy?`,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
       setMessages([welcomeMessage]);
     }
   }, [isOpen, messages.length, session]);
 
   const quickActions = [
-    { 
-      label: 'Crear primera propiedad', 
-      icon: '🏢', 
-      prompt: '¿Cómo creo mi primera propiedad?' 
+    {
+      label: 'Crear primera propiedad',
+      icon: '🏢',
+      prompt: '¿Cómo creo mi primera propiedad?',
     },
-    { 
-      label: 'Importar datos', 
-      icon: '📂', 
-      prompt: '¿Cómo importo mis datos existentes?' 
+    {
+      label: 'Importar datos',
+      icon: '📂',
+      prompt: '¿Cómo importo mis datos existentes?',
     },
-    { 
-      label: 'Configurar pagos', 
-      icon: '💳', 
-      prompt: '¿Cómo configuro los pagos con Stripe?' 
+    {
+      label: 'Configurar pagos',
+      icon: '💳',
+      prompt: '¿Cómo configuro los pagos con Stripe?',
     },
-    { 
-      label: 'Ver tutoriales', 
-      icon: '🎥', 
-      prompt: '¿Dónde encuentro tutoriales?' 
-    }
+    {
+      label: 'Ver tutoriales',
+      icon: '🎥',
+      prompt: '¿Dónde encuentro tutoriales?',
+    },
   ];
 
   const handleSend = async () => {
@@ -112,10 +112,10 @@ export function IntelligentChatbot({
       id: Date.now().toString(),
       role: 'user',
       content: inputValue,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInputValue('');
     setIsLoading(true);
     setShowQuickActions(false);
@@ -127,16 +127,16 @@ export function IntelligentChatbot({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: inputValue,
-          history: messages.map(m => ({
+          history: messages.map((m) => ({
             role: m.role,
-            content: m.content
+            content: m.content,
           })),
           context: {
             userId: session?.user?.id,
             userRole: session?.user?.role,
-            currentPath: window.location.pathname
-          }
-        })
+            currentPath: window.location.pathname,
+          },
+        }),
       });
 
       if (!response.ok) throw new Error('Error en respuesta del chatbot');
@@ -148,34 +148,36 @@ export function IntelligentChatbot({
         role: 'assistant',
         content: data.message,
         timestamp: new Date(),
-        actions: data.suggestedActions
+        actions: data.suggestedActions,
       };
 
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, assistantMessage]);
 
       // Si necesita escalar a humano
       if (data.escalateToHuman) {
         const escalationMessage: Message = {
           id: (Date.now() + 2).toString(),
           role: 'system',
-          content: '📞 Para este tema, es mejor que hables directamente con nuestro equipo. ¿Quieres que te contactemos?',
+          content:
+            '📞 Para este tema, es mejor que hables directamente con nuestro equipo. ¿Quieres que te contactemos?',
           timestamp: new Date(),
           actions: [
             { label: 'Sí, contáctenme', action: 'function', value: 'requestCallback' },
-            { label: 'Enviar email', action: 'link', value: 'mailto:soporte@inmova.app' }
-          ]
+            { label: 'Enviar email', action: 'link', value: 'mailto:soporte@inmova.app' },
+          ],
         };
-        setMessages(prev => [...prev, escalationMessage]);
+        setMessages((prev) => [...prev, escalationMessage]);
       }
     } catch (error) {
       console.error('[CHATBOT] Error:', error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'system',
-        content: 'Lo siento, hubo un error. ¿Podrías intentar de nuevo o contactar a soporte@inmova.app?',
-        timestamp: new Date()
+        content:
+          'Lo siento, hubo un error. ¿Podrías intentar de nuevo o contactar a soporte@inmova.app?',
+        timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -202,7 +204,7 @@ export function IntelligentChatbot({
 
   const positionClasses = {
     'bottom-right': 'bottom-4 right-4',
-    'bottom-left': 'bottom-4 left-4'
+    'bottom-left': 'bottom-4 left-4',
   };
 
   return (
@@ -224,7 +226,7 @@ export function IntelligentChatbot({
             >
               <MessageCircle className="h-6 w-6 text-white" />
             </Button>
-            
+
             {/* Badge de notificación */}
             <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
               <Sparkles className="h-3 w-3" />
@@ -242,12 +244,15 @@ export function IntelligentChatbot({
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             className={`fixed ${positionClasses[position]} z-50`}
           >
-            <Card className="w-[380px] shadow-2xl" style={{ 
-              height: isMinimized ? '60px' : '600px',
-              maxHeight: 'calc(100vh - 32px)'
-            }}>
+            <Card
+              className="w-[380px] shadow-2xl"
+              style={{
+                height: isMinimized ? '60px' : '600px',
+                maxHeight: 'calc(100vh - 32px)',
+              }}
+            >
               {/* Header */}
-              <div 
+              <div
                 className="flex items-center justify-between border-b px-4 py-3"
                 style={{ backgroundColor: accentColor }}
               >
@@ -270,7 +275,11 @@ export function IntelligentChatbot({
                     className="h-8 w-8 text-white hover:bg-white/20"
                     onClick={() => setIsMinimized(!isMinimized)}
                   >
-                    {isMinimized ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
+                    {isMinimized ? (
+                      <Maximize2 className="h-4 w-4" />
+                    ) : (
+                      <Minimize2 className="h-4 w-4" />
+                    )}
                   </Button>
                   <Button
                     variant="ghost"
@@ -303,8 +312,8 @@ export function IntelligentChatbot({
                               message.role === 'user'
                                 ? 'bg-gray-200'
                                 : message.role === 'system'
-                                ? 'bg-amber-100'
-                                : 'bg-gradient-to-br from-indigo-500 to-purple-600'
+                                  ? 'bg-amber-100'
+                                  : 'bg-gradient-to-br from-indigo-500 to-purple-600'
                             }`}
                           >
                             {message.role === 'user' ? (
@@ -321,8 +330,8 @@ export function IntelligentChatbot({
                                 message.role === 'user'
                                   ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white'
                                   : message.role === 'system'
-                                  ? 'bg-amber-50 text-amber-900 border border-amber-200'
-                                  : 'bg-gray-100 text-gray-900'
+                                    ? 'bg-amber-50 text-amber-900 border border-amber-200'
+                                    : 'bg-gray-100 text-gray-900'
                               }`}
                             >
                               <p className="text-sm whitespace-pre-wrap">{message.content}</p>
@@ -340,16 +349,18 @@ export function IntelligentChatbot({
                                     onClick={() => handleAction(action)}
                                   >
                                     {action.label}
-                                    {action.action === 'link' && <ExternalLink className="ml-1 h-3 w-3" />}
+                                    {action.action === 'link' && (
+                                      <ExternalLink className="ml-1 h-3 w-3" />
+                                    )}
                                   </Button>
                                 ))}
                               </div>
                             )}
 
                             <p className="mt-1 text-xs text-gray-500">
-                              {message.timestamp.toLocaleTimeString('es-ES', { 
-                                hour: '2-digit', 
-                                minute: '2-digit' 
+                              {message.timestamp.toLocaleTimeString('es-ES', {
+                                hour: '2-digit',
+                                minute: '2-digit',
                               })}
                             </p>
                           </div>
@@ -418,7 +429,13 @@ export function IntelligentChatbot({
                       </Button>
                     </div>
                     <p className="mt-2 text-xs text-gray-500 text-center">
-                      Powered by GPT-4 • <a href="mailto:soporte@inmova.app" className="text-indigo-600 hover:underline">soporte@inmova.app</a>
+                      Powered by GPT-4 •{' '}
+                      <a
+                        href="mailto:soporte@inmova.app"
+                        className="text-indigo-600 hover:underline"
+                      >
+                        soporte@inmova.app
+                      </a>
                     </p>
                   </div>
                 </>

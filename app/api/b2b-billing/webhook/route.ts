@@ -30,7 +30,10 @@ export async function POST(request: NextRequest) {
     const stripe = getStripe();
     if (!stripe) {
       return NextResponse.json(
-        { error: 'Stripe no está configurado. Configure STRIPE_SECRET_KEY en las variables de entorno.' },
+        {
+          error:
+            'Stripe no está configurado. Configure STRIPE_SECRET_KEY en las variables de entorno.',
+        },
         { status: 503 }
       );
     }
@@ -39,10 +42,7 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get('stripe-signature');
 
     if (!signature) {
-      return NextResponse.json(
-        { error: 'Signature missing' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Signature missing' }, { status: 400 });
     }
 
     let event: Stripe.Event;
@@ -51,10 +51,7 @@ export async function POST(request: NextRequest) {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
     } catch (err: any) {
       logger.error('Webhook signature verification failed:', err.message);
-      return NextResponse.json(
-        { error: 'Webhook signature verification failed' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 400 });
     }
 
     // Manejar diferentes tipos de eventos
@@ -126,7 +123,7 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
   const fullPaymentIntent = await stripe.paymentIntents.retrieve(paymentIntent.id, {
     expand: ['latest_charge'],
   });
-  
+
   charge = fullPaymentIntent.latest_charge as Stripe.Charge | null;
 
   if (charge?.balance_transaction) {
@@ -160,7 +157,7 @@ async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
 
   // Aquí podríamos enviar notificaciones, actualizar estado, etc.
   logger.info('Payment failed for invoice:', invoiceId);
-  
+
   // Registrar el intento fallido
   await prisma.b2BPaymentHistory.create({
     data: {
@@ -171,7 +168,7 @@ async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
       stripePaymentId: paymentIntent.id,
       estado: 'fallido',
       notas: `Pago fallido: ${paymentIntent.last_payment_error?.message || 'Error desconocido'}`,
-    }
+    },
   });
 }
 
@@ -181,9 +178,9 @@ async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
 async function handleStripeInvoiceSuccess(stripeInvoice: Stripe.Invoice) {
   // Si usamos Stripe Billing para suscripciones recurrentes
   // Este handler sincronizaría las facturas de Stripe con nuestro sistema
-  
+
   const customerId = stripeInvoice.customer as string;
-  
+
   // Buscar empresa por Stripe Customer ID
   const company = await prisma.company.findFirst({
     where: { stripeCustomerId: customerId },
@@ -207,7 +204,7 @@ async function handleStripeInvoiceSuccess(stripeInvoice: Stripe.Invoice) {
         estado: 'PAGADA',
         fechaPago: new Date(),
         stripePdfUrl: stripeInvoice.invoice_pdf || undefined,
-      }
+      },
     });
   }
 

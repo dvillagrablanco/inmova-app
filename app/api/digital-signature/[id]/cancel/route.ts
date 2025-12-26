@@ -11,10 +11,7 @@ export const dynamic = 'force-dynamic';
  * POST /api/digital-signature/[id]/cancel
  * Cancela una solicitud de firma digital
  */
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -33,14 +30,11 @@ export async function POST(
     const { motivo = 'Cancelado por el usuario' } = body;
 
     const documento = await prisma.documentoFirma.findUnique({
-      where: { id: params.id }
+      where: { id: params.id },
     });
 
     if (!documento) {
-      return NextResponse.json(
-        { error: 'Documento no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Documento no encontrado' }, { status: 404 });
     }
 
     if (documento.companyId !== session.user.companyId) {
@@ -62,9 +56,6 @@ export async function POST(
     return NextResponse.json(result);
   } catch (error) {
     logger.error('Error cancelando solicitud de firma:', error);
-    return NextResponse.json(
-      { error: 'Error cancelando solicitud de firma' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error cancelando solicitud de firma' }, { status: 500 });
   }
 }

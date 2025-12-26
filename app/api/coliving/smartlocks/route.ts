@@ -14,10 +14,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const buildingId = searchParams.get('buildingId');
     if (!buildingId) {
-      return NextResponse.json(
-        { error: 'buildingId requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'buildingId requerido' }, { status: 400 });
     }
     const result = await conciergeService.getSmartLocksByBuilding(buildingId);
     if (!result.success) {
@@ -26,10 +23,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(result.locks);
   } catch (error) {
     logger.error('Error en GET /api/coliving/smartlocks:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener SmartLocks' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener SmartLocks' }, { status: 500 });
   }
 }
 export async function POST(request: NextRequest) {
@@ -46,9 +40,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result.lock, { status: 201 });
   } catch (error) {
     logger.error('Error en POST /api/coliving/smartlocks:', error);
-    return NextResponse.json(
-      { error: 'Error al registrar SmartLock' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al registrar SmartLock' }, { status: 500 });
   }
 }

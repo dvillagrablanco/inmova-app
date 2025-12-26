@@ -1,28 +1,28 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Sidebar } from '@/components/layout/sidebar'
-import { Header } from '@/components/layout/header'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ResponsiveContainer } from '@/components/ui/responsive-container'
-import { 
-  CheckCircle, 
-  AlertCircle, 
-  Eye, 
-  Keyboard, 
-  Smartphone, 
-  Monitor, 
+import { useState } from 'react';
+import { Sidebar } from '@/components/layout/sidebar';
+import { Header } from '@/components/layout/header';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ResponsiveContainer } from '@/components/ui/responsive-container';
+import {
+  CheckCircle,
+  AlertCircle,
+  Eye,
+  Keyboard,
+  Smartphone,
+  Monitor,
   Loader2,
   FileQuestion,
   ShieldAlert,
   Palette,
   Focus,
   Code2,
-  BookOpen
-} from 'lucide-react'
+  BookOpen,
+} from 'lucide-react';
 
 const principiosUX = [
   {
@@ -35,7 +35,7 @@ const principiosUX = [
       'Breakpoints: 768px (tablet), 1024px (desktop)',
       'Grid system: 1 columna (mobile) → 2-3 columnas (desktop)',
       'Touch-friendly: Botones de 44px mínimo',
-      'Contenido flexible y adaptable'
+      'Contenido flexible y adaptable',
     ],
     ejemplo: `// ResponsiveContainer component
 <ResponsiveContainer maxWidth="xl" padding="md">
@@ -43,7 +43,7 @@ const principiosUX = [
     {/* Contenido responsive */}
   </div>
 </ResponsiveContainer>`,
-    color: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+    color: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
   },
   {
     id: 'loading',
@@ -55,7 +55,7 @@ const principiosUX = [
       'Skeletons para contenido estructurado',
       'Progress bars para procesos largos',
       'Mensajes descriptivos de carga',
-      'Feedback visual inmediato'
+      'Feedback visual inmediato',
     ],
     ejemplo: `// LoadingState component
 <LoadingState 
@@ -68,7 +68,7 @@ const principiosUX = [
   <LoadingSpinner size="sm" className="mr-2" />
   Guardando...
 </Button>`,
-    color: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300'
+    color: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
   },
   {
     id: 'empty',
@@ -80,7 +80,7 @@ const principiosUX = [
       'Ilustración o icono representativo',
       'CTA (Call to Action) primario',
       'Sugerencias de próximos pasos',
-      'Contexto sobre por qué está vacío'
+      'Contexto sobre por qué está vacío',
     ],
     ejemplo: `// EmptyState component
 <EmptyState
@@ -95,7 +95,7 @@ const principiosUX = [
     }
   ]}
 />`,
-    color: 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300'
+    color: 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300',
   },
   {
     id: 'errors',
@@ -107,7 +107,7 @@ const principiosUX = [
       'Lenguaje claro y no técnico',
       'Sugerencias de solución',
       'Opción de reintentar',
-      'Iconos y colores semánticos'
+      'Iconos y colores semánticos',
     ],
     ejemplo: `// ErrorMessage component
 <ErrorMessage
@@ -124,7 +124,7 @@ const principiosUX = [
   value={email}
   onChange={handleChange}
 />`,
-    color: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
+    color: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
   },
   {
     id: 'confirmations',
@@ -136,7 +136,7 @@ const principiosUX = [
       'Descripción clara de consecuencias',
       'Botón primario = acción segura',
       'Botón destructivo claramente marcado',
-      'Opción de cancelar siempre visible'
+      'Opción de cancelar siempre visible',
     ],
     ejemplo: `// ConfirmDialog component
 <ConfirmDialog
@@ -149,7 +149,7 @@ const principiosUX = [
   confirmText="Eliminar"
   cancelText="Cancelar"
 />`,
-    color: 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300'
+    color: 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300',
   },
   {
     id: 'accessibility',
@@ -161,7 +161,7 @@ const principiosUX = [
       'Labels en todos los inputs',
       'Alt text en todas las imágenes',
       'ARIA roles y labels',
-      'Skip links para navegación'
+      'Skip links para navegación',
     ],
     ejemplo: `// Accessible form field
 <AccessibleFormField
@@ -178,7 +178,7 @@ const principiosUX = [
 <a href="#main-content" className="skip-link">
   Saltar al contenido principal
 </a>`,
-    color: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+    color: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
   },
   {
     id: 'contrast',
@@ -190,7 +190,7 @@ const principiosUX = [
       'Ratio mínimo 3:1 para texto grande',
       'Ratio mínimo 3:1 para componentes UI',
       'Modo oscuro con contraste adecuado',
-      'Colores semánticos consistentes'
+      'Colores semánticos consistentes',
     ],
     ejemplo: `/* Estilos con buen contraste */
 .text-primary {
@@ -208,7 +208,7 @@ const principiosUX = [
   background: hsl(222, 47%, 35%);
   color: white;
 }`,
-    color: 'bg-pink-100 text-pink-700 dark:bg-pink-900 dark:text-pink-300'
+    color: 'bg-pink-100 text-pink-700 dark:bg-pink-900 dark:text-pink-300',
   },
   {
     id: 'focus',
@@ -220,7 +220,7 @@ const principiosUX = [
       'Anillo de 4px para mejor visibilidad',
       'Color con contraste suficiente',
       'Offset de 4px para claridad',
-      'Estados hover y focus diferenciados'
+      'Estados hover y focus diferenciados',
     ],
     ejemplo: `/* Focus indicators globales */
 button:focus-visible,
@@ -238,74 +238,70 @@ input[aria-invalid="true"]:focus {
          ring-2 
          ring-red-500/20;
 }`,
-    color: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300'
-  }
-]
+    color: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300',
+  },
+];
 
 const componentesDisponibles = [
   {
     nombre: 'AccessibleFormField',
     descripcion: 'Campo de formulario con accesibilidad completa',
     props: ['label', 'error', 'hint', 'icon', 'required', 'showRequiredIndicator'],
-    ruta: '/components/ui/accessible-form-field.tsx'
+    ruta: '/components/ui/accessible-form-field.tsx',
   },
   {
     nombre: 'AccessibleSelectField',
     descripcion: 'Select dropdown accesible con opciones',
     props: ['label', 'value', 'options', 'error', 'hint', 'required', 'onValueChange'],
-    ruta: '/components/ui/accessible-select-field.tsx'
+    ruta: '/components/ui/accessible-select-field.tsx',
   },
   {
     nombre: 'ErrorMessage',
     descripcion: 'Mensajes de error user-friendly',
     props: ['title', 'message', 'severity', 'onRetry', 'onDismiss'],
-    ruta: '/components/ui/error-message.tsx'
+    ruta: '/components/ui/error-message.tsx',
   },
   {
     nombre: 'ResponsiveContainer',
     descripcion: 'Contenedor responsive con padding adaptable',
     props: ['maxWidth', 'padding', 'children', 'className'],
-    ruta: '/components/ui/responsive-container.tsx'
+    ruta: '/components/ui/responsive-container.tsx',
   },
   {
     nombre: 'LoadingState',
     descripcion: 'Estado de carga con spinner y mensaje',
     props: ['message', 'size', 'fullScreen', 'className'],
-    ruta: '/components/ui/loading-state.tsx'
+    ruta: '/components/ui/loading-state.tsx',
   },
   {
     nombre: 'EmptyState',
     descripcion: 'Estado vacío con icono y CTAs',
     props: ['icon', 'title', 'description', 'actions', 'className'],
-    ruta: '/components/ui/empty-state.tsx'
+    ruta: '/components/ui/empty-state.tsx',
   },
   {
     nombre: 'ConfirmDialog',
     descripcion: 'Diálogo de confirmación para acciones destructivas',
     props: ['open', 'onOpenChange', 'onConfirm', 'title', 'description', 'variant'],
-    ruta: '/components/ui/confirm-dialog.tsx'
-  }
-]
+    ruta: '/components/ui/confirm-dialog.tsx',
+  },
+];
 
 export default function GuiaUXPage() {
-  const [principioActivo, setPrincipioActivo] = useState(principiosUX[0].id)
-  
+  const [principioActivo, setPrincipioActivo] = useState(principiosUX[0].id);
+
   return (
     <div className="flex h-screen overflow-hidden bg-gradient-bg">
       <a href="#main-content" className="skip-link">
         Saltar al contenido principal
       </a>
-      
+
       <Sidebar />
-      
+
       <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
         <Header />
-        
-        <main 
-          id="main-content" 
-          className="flex-1 overflow-y-auto"
-          tabIndex={-1}
-        >
+
+        <main id="main-content" className="flex-1 overflow-y-auto" tabIndex={-1}>
           <ResponsiveContainer maxWidth="2xl" padding="lg">
             {/* Header */}
             <div className="mb-8">
@@ -314,9 +310,10 @@ export default function GuiaUXPage() {
                 Guía de UX/UI
               </h1>
               <p className="mt-3 text-lg text-gray-600 dark:text-gray-400">
-                Documentación completa de todos los principios de accesibilidad, responsive design y mejores prácticas implementadas en la aplicación.
+                Documentación completa de todos los principios de accesibilidad, responsive design y
+                mejores prácticas implementadas en la aplicación.
               </p>
-              
+
               <div className="mt-4 flex flex-wrap gap-2">
                 <Badge className="bg-green-100 text-green-700 border-green-300">
                   <CheckCircle className="h-3 w-3 mr-1" aria-hidden="true" />
@@ -332,7 +329,7 @@ export default function GuiaUXPage() {
                 </Badge>
               </div>
             </div>
-            
+
             {/* Tabs */}
             <Tabs defaultValue="principios" className="space-y-6">
               <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -349,91 +346,104 @@ export default function GuiaUXPage() {
                   Ejemplo Vivo
                 </TabsTrigger>
               </TabsList>
-              
+
               {/* Principios Tab */}
               <TabsContent value="principios" className="space-y-6">
                 <Card>
                   <CardHeader>
                     <CardTitle>8 Principios Fundamentales</CardTitle>
                     <CardDescription>
-                      Estos principios garantizan una experiencia de usuario excelente para todos los usuarios, independientemente de sus capacidades o dispositivos.
+                      Estos principios garantizan una experiencia de usuario excelente para todos
+                      los usuarios, independientemente de sus capacidades o dispositivos.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                       {principiosUX.map((principio) => {
-                        const Icon = principio.icono
+                        const Icon = principio.icono;
                         return (
                           <button
                             key={principio.id}
                             onClick={() => setPrincipioActivo(principio.id)}
                             className={`
                               p-4 rounded-lg border-2 transition-all text-left
-                              ${principioActivo === principio.id 
-                                ? 'border-primary bg-primary/10 shadow-md' 
-                                : 'border-gray-200 dark:border-gray-700 hover:border-primary/50'
+                              ${
+                                principioActivo === principio.id
+                                  ? 'border-primary bg-primary/10 shadow-md'
+                                  : 'border-gray-200 dark:border-gray-700 hover:border-primary/50'
                               }
                             `}
                             aria-pressed={principioActivo === principio.id}
                             aria-label={`Ver detalles de ${principio.titulo}`}
                           >
-                            <div className={`inline-flex items-center justify-center w-10 h-10 rounded-full mb-2 ${principio.color}`}>
+                            <div
+                              className={`inline-flex items-center justify-center w-10 h-10 rounded-full mb-2 ${principio.color}`}
+                            >
                               <Icon className="h-5 w-5" aria-hidden="true" />
                             </div>
                             <h3 className="font-semibold text-sm">{principio.titulo}</h3>
                           </button>
-                        )
+                        );
                       })}
                     </div>
-                    
-                    {principiosUX.filter(p => p.id === principioActivo).map((principio) => {
-                      const Icon = principio.icono
-                      return (
-                        <Card key={principio.id} className="border-2 border-primary">
-                          <CardHeader>
-                            <div className="flex items-center gap-3">
-                              <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full ${principio.color}`}>
-                                <Icon className="h-6 w-6" aria-hidden="true" />
+
+                    {principiosUX
+                      .filter((p) => p.id === principioActivo)
+                      .map((principio) => {
+                        const Icon = principio.icono;
+                        return (
+                          <Card key={principio.id} className="border-2 border-primary">
+                            <CardHeader>
+                              <div className="flex items-center gap-3">
+                                <div
+                                  className={`inline-flex items-center justify-center w-12 h-12 rounded-full ${principio.color}`}
+                                >
+                                  <Icon className="h-6 w-6" aria-hidden="true" />
+                                </div>
+                                <div>
+                                  <CardTitle className="text-xl">{principio.titulo}</CardTitle>
+                                  <CardDescription className="text-base">
+                                    {principio.descripcion}
+                                  </CardDescription>
+                                </div>
                               </div>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
                               <div>
-                                <CardTitle className="text-xl">{principio.titulo}</CardTitle>
-                                <CardDescription className="text-base">
-                                  {principio.descripcion}
-                                </CardDescription>
+                                <h4 className="font-semibold mb-3 text-gray-900 dark:text-gray-100">
+                                  Características Implementadas:
+                                </h4>
+                                <ul className="space-y-2">
+                                  {principio.detalles.map((detalle, idx) => (
+                                    <li key={idx} className="flex items-start gap-2">
+                                      <CheckCircle
+                                        className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5"
+                                        aria-hidden="true"
+                                      />
+                                      <span className="text-gray-700 dark:text-gray-300">
+                                        {detalle}
+                                      </span>
+                                    </li>
+                                  ))}
+                                </ul>
                               </div>
-                            </div>
-                          </CardHeader>
-                          <CardContent className="space-y-4">
-                            <div>
-                              <h4 className="font-semibold mb-3 text-gray-900 dark:text-gray-100">
-                                Características Implementadas:
-                              </h4>
-                              <ul className="space-y-2">
-                                {principio.detalles.map((detalle, idx) => (
-                                  <li key={idx} className="flex items-start gap-2">
-                                    <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
-                                    <span className="text-gray-700 dark:text-gray-300">{detalle}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                            
-                            <div>
-                              <h4 className="font-semibold mb-2 text-gray-900 dark:text-gray-100">
-                                Ejemplo de Código:
-                              </h4>
-                              <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm">
-                                <code>{principio.ejemplo}</code>
-                              </pre>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      )
-                    })}
+
+                              <div>
+                                <h4 className="font-semibold mb-2 text-gray-900 dark:text-gray-100">
+                                  Ejemplo de Código:
+                                </h4>
+                                <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm">
+                                  <code>{principio.ejemplo}</code>
+                                </pre>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
                   </CardContent>
                 </Card>
               </TabsContent>
-              
+
               {/* Componentes Tab */}
               <TabsContent value="componentes" className="space-y-6">
                 <Card>
@@ -457,7 +467,10 @@ export default function GuiaUXPage() {
                                   {componente.descripcion}
                                 </CardDescription>
                               </div>
-                              <Code2 className="h-5 w-5 text-primary flex-shrink-0" aria-hidden="true" />
+                              <Code2
+                                className="h-5 w-5 text-primary flex-shrink-0"
+                                aria-hidden="true"
+                              />
                             </div>
                           </CardHeader>
                           <CardContent>
@@ -468,7 +481,11 @@ export default function GuiaUXPage() {
                                 </h5>
                                 <div className="flex flex-wrap gap-1">
                                   {componente.props.map((prop, propIdx) => (
-                                    <Badge key={propIdx} variant="outline" className="text-xs font-mono">
+                                    <Badge
+                                      key={propIdx}
+                                      variant="outline"
+                                      className="text-xs font-mono"
+                                    >
                                       {prop}
                                     </Badge>
                                   ))}
@@ -487,14 +504,15 @@ export default function GuiaUXPage() {
                   </CardContent>
                 </Card>
               </TabsContent>
-              
+
               {/* Ejemplo Tab */}
               <TabsContent value="ejemplo" className="space-y-6">
                 <Card>
                   <CardHeader>
                     <CardTitle>Ejemplo en Vivo</CardTitle>
                     <CardDescription>
-                      Visita la página de ejemplo para ver todos estos principios implementados en una interfaz funcional.
+                      Visita la página de ejemplo para ver todos estos principios implementados en
+                      una interfaz funcional.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -534,7 +552,7 @@ export default function GuiaUXPage() {
                         </a>
                       </Button>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <Card>
                         <CardHeader>
@@ -547,7 +565,7 @@ export default function GuiaUXPage() {
                           </p>
                         </CardContent>
                       </Card>
-                      
+
                       <Card>
                         <CardHeader>
                           <Monitor className="h-8 w-8 text-purple-600 mb-2" aria-hidden="true" />
@@ -559,7 +577,7 @@ export default function GuiaUXPage() {
                           </p>
                         </CardContent>
                       </Card>
-                      
+
                       <Card>
                         <CardHeader>
                           <Monitor className="h-8 w-8 text-green-600 mb-2" aria-hidden="true" />
@@ -580,5 +598,5 @@ export default function GuiaUXPage() {
         </main>
       </div>
     </div>
-  )
+  );
 }

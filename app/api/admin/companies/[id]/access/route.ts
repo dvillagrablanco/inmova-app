@@ -11,13 +11,10 @@ export const dynamic = 'force-dynamic';
  * Obtiene la lista de usuarios con acceso a una empresa
  * Solo para super_admin
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user || session.user.role !== 'super_admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
@@ -61,7 +58,7 @@ export async function GET(
 
     // Combinar ambos resultados
     const allAccess = [
-      ...primaryUsers.map(user => ({
+      ...primaryUsers.map((user) => ({
         userId: user.id,
         user,
         roleInCompany: user.role,
@@ -70,7 +67,7 @@ export async function GET(
         grantedAt: null,
         lastAccess: null,
       })),
-      ...userAccess.map(access => ({
+      ...userAccess.map((access) => ({
         userId: access.userId,
         user: access.user,
         roleInCompany: access.roleInCompany,
@@ -87,10 +84,7 @@ export async function GET(
     });
   } catch (error) {
     logger.error('Error fetching company access:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener los accesos' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener los accesos' }, { status: 500 });
   }
 }
 
@@ -99,13 +93,10 @@ export async function GET(
  * Otorga acceso a un usuario a una empresa
  * Solo para super_admin
  */
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user || session.user.role !== 'super_admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
@@ -115,10 +106,7 @@ export async function POST(
     const { userId, roleInCompany } = body;
 
     if (!userId) {
-      return NextResponse.json(
-        { error: 'El ID de usuario es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'El ID de usuario es requerido' }, { status: 400 });
     }
 
     // Verificar que el usuario existe
@@ -127,10 +115,7 @@ export async function POST(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Usuario no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
 
     // Verificar que la empresa existe
@@ -139,10 +124,7 @@ export async function POST(
     });
 
     if (!company) {
-      return NextResponse.json(
-        { error: 'Empresa no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Empresa no encontrada' }, { status: 404 });
     }
 
     // Crear o actualizar el acceso
@@ -173,10 +155,7 @@ export async function POST(
     });
   } catch (error) {
     logger.error('Error granting company access:', error);
-    return NextResponse.json(
-      { error: 'Error al otorgar el acceso' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al otorgar el acceso' }, { status: 500 });
   }
 }
 
@@ -185,13 +164,10 @@ export async function POST(
  * Revoca el acceso de un usuario a una empresa
  * Solo para super_admin
  */
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user || session.user.role !== 'super_admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
@@ -201,10 +177,7 @@ export async function DELETE(
     const userId = searchParams.get('userId');
 
     if (!userId) {
-      return NextResponse.json(
-        { error: 'El ID de usuario es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'El ID de usuario es requerido' }, { status: 400 });
     }
 
     // No permitir revocar acceso a la empresa principal del usuario
@@ -239,9 +212,6 @@ export async function DELETE(
     });
   } catch (error) {
     logger.error('Error revoking company access:', error);
-    return NextResponse.json(
-      { error: 'Error al revocar el acceso' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al revocar el acceso' }, { status: 500 });
   }
 }

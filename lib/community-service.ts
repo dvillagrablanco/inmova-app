@@ -76,11 +76,7 @@ export async function likePost(postId: string, tenantId: string) {
 /**
  * Agrega un comentario a un post
  */
-export async function addComment(data: {
-  postId: string;
-  authorId?: string;
-  contenido: string;
-}) {
+export async function addComment(data: { postId: string; authorId?: string; contenido: string }) {
   const comment = await prisma.socialComment.create({
     data: {
       postId: data.postId,
@@ -323,10 +319,7 @@ export async function confirmAttendance(eventId: string, tenantId: string) {
     throw new Error('Ya confirmaste tu asistencia');
   }
 
-  if (
-    event.capacidadMaxima &&
-    event.asistentesLista >= event.capacidadMaxima
-  ) {
+  if (event.capacidadMaxima && event.asistentesLista >= event.capacidadMaxima) {
     throw new Error('Evento lleno');
   }
 

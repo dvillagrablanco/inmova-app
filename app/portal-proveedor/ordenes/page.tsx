@@ -216,196 +216,194 @@ export default function ProveedorOrdenesPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto">
-            <div className="max-w-7xl mx-auto">
-              <Button
-                variant="ghost"
-                onClick={() => router.push('/portal-proveedor/dashboard')}
-                className="mb-4 gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Volver al Dashboard
-              </Button>
+      <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto">
+          <Button
+            variant="ghost"
+            onClick={() => router.push('/portal-proveedor/dashboard')}
+            className="mb-4 gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Volver al Dashboard
+          </Button>
 
-              <div className="flex items-center justify-between mb-6">
-                <h1 className="text-3xl font-bold">Mis Órdenes de Trabajo</h1>
-                <Select value={filterEstado} onValueChange={setFilterEstado}>
-                  <SelectTrigger className="w-[200px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="todas">Todas</SelectItem>
-                    <SelectItem value="pendiente">Pendientes</SelectItem>
-                    <SelectItem value="asignada">Asignadas</SelectItem>
-                    <SelectItem value="aceptada">Aceptadas</SelectItem>
-                    <SelectItem value="en_progreso">En Progreso</SelectItem>
-                    <SelectItem value="completada">Completadas</SelectItem>
-                    <SelectItem value="rechazada">Rechazadas</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-3xl font-bold">Mis Órdenes de Trabajo</h1>
+            <Select value={filterEstado} onValueChange={setFilterEstado}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todas">Todas</SelectItem>
+                <SelectItem value="pendiente">Pendientes</SelectItem>
+                <SelectItem value="asignada">Asignadas</SelectItem>
+                <SelectItem value="aceptada">Aceptadas</SelectItem>
+                <SelectItem value="en_progreso">En Progreso</SelectItem>
+                <SelectItem value="completada">Completadas</SelectItem>
+                <SelectItem value="rechazada">Rechazadas</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-              <div className="grid gap-4">
-                {ordenesFiltradas.length === 0 ? (
-                  <Card>
-                    <CardContent className="py-12 text-center text-muted-foreground">
-                      No hay órdenes
-                    </CardContent>
-                  </Card>
-                ) : (
-                  ordenesFiltradas.map((orden) => (
-                    <Card key={orden.id}>
-                      <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <CardTitle className="text-lg">{orden.titulo}</CardTitle>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {orden.descripcion}
-                            </p>
-                          </div>
-                          {getEstadoBadge(orden.estado)}
+          <div className="grid gap-4">
+            {ordenesFiltradas.length === 0 ? (
+              <Card>
+                <CardContent className="py-12 text-center text-muted-foreground">
+                  No hay órdenes
+                </CardContent>
+              </Card>
+            ) : (
+              ordenesFiltradas.map((orden) => (
+                <Card key={orden.id}>
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="text-lg">{orden.titulo}</CardTitle>
+                        <p className="text-sm text-muted-foreground mt-1">{orden.descripcion}</p>
+                      </div>
+                      {getEstadoBadge(orden.estado)}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
+                      <div>
+                        <span className="text-muted-foreground">Edificio:</span>
+                        <p className="font-medium">{orden.building?.nombre}</p>
+                      </div>
+                      {orden.unit && (
+                        <div>
+                          <span className="text-muted-foreground">Unidad:</span>
+                          <p className="font-medium">{orden.unit.numero}</p>
                         </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
-                          <div>
-                            <span className="text-muted-foreground">Edificio:</span>
-                            <p className="font-medium">{orden.building?.nombre}</p>
-                          </div>
-                          {orden.unit && (
-                            <div>
-                              <span className="text-muted-foreground">Unidad:</span>
-                              <p className="font-medium">{orden.unit.numero}</p>
-                            </div>
-                          )}
-                          <div>
-                            <span className="text-muted-foreground">Fecha:</span>
-                            <p className="font-medium">
-                              {format(new Date(orden.createdAt), 'dd/MM/yyyy', { locale: es })}
-                            </p>
-                          </div>
-                          {orden.costoTotal && (
-                            <div>
-                              <span className="text-muted-foreground">Costo:</span>
-                              <p className="font-medium">€{orden.costoTotal}</p>
-                            </div>
-                          )}
+                      )}
+                      <div>
+                        <span className="text-muted-foreground">Fecha:</span>
+                        <p className="font-medium">
+                          {format(new Date(orden.createdAt), 'dd/MM/yyyy', { locale: es })}
+                        </p>
+                      </div>
+                      {orden.costoTotal && (
+                        <div>
+                          <span className="text-muted-foreground">Costo:</span>
+                          <p className="font-medium">€{orden.costoTotal}</p>
                         </div>
-                        <div className="flex gap-2 flex-wrap">
-                          {(orden.estado === 'pendiente' || orden.estado === 'asignada') && (
-                            <>
-                              <Button
-                                onClick={() => handleAceptar(orden.id)}
-                                size="sm"
-                                disabled={processingAction === orden.id}
-                              >
-                                {processingAction === orden.id ? (
-                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                ) : (
-                                  <CheckCircle className="h-4 w-4 mr-2" />
-                                )}
-                                Aceptar
-                              </Button>
-                              <Button
-                                onClick={() => handleRechazarClick(orden.id)}
-                                size="sm"
-                                variant="destructive"
-                                disabled={processingAction === orden.id}
-                              >
-                                {processingAction === orden.id ? (
-                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                ) : (
-                                  <XCircle className="h-4 w-4 mr-2" />
-                                )}
-                                Rechazar
-                              </Button>
-                            </>
+                      )}
+                    </div>
+                    <div className="flex gap-2 flex-wrap">
+                      {(orden.estado === 'pendiente' || orden.estado === 'asignada') && (
+                        <>
+                          <Button
+                            onClick={() => handleAceptar(orden.id)}
+                            size="sm"
+                            disabled={processingAction === orden.id}
+                          >
+                            {processingAction === orden.id ? (
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            ) : (
+                              <CheckCircle className="h-4 w-4 mr-2" />
+                            )}
+                            Aceptar
+                          </Button>
+                          <Button
+                            onClick={() => handleRechazarClick(orden.id)}
+                            size="sm"
+                            variant="destructive"
+                            disabled={processingAction === orden.id}
+                          >
+                            {processingAction === orden.id ? (
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            ) : (
+                              <XCircle className="h-4 w-4 mr-2" />
+                            )}
+                            Rechazar
+                          </Button>
+                        </>
+                      )}
+                      {orden.estado === 'aceptada' && (
+                        <Button
+                          onClick={() => handleIniciar(orden.id)}
+                          size="sm"
+                          disabled={processingAction === orden.id}
+                        >
+                          {processingAction === orden.id ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          ) : (
+                            <Play className="h-4 w-4 mr-2" />
                           )}
-                          {orden.estado === 'aceptada' && (
-                            <Button
-                              onClick={() => handleIniciar(orden.id)}
-                              size="sm"
-                              disabled={processingAction === orden.id}
-                            >
-                              {processingAction === orden.id ? (
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                              ) : (
-                                <Play className="h-4 w-4 mr-2" />
-                              )}
-                              Iniciar Trabajo
-                            </Button>
+                          Iniciar Trabajo
+                        </Button>
+                      )}
+                      {orden.estado === 'en_progreso' && (
+                        <Button
+                          onClick={() => handleCompletar(orden.id)}
+                          size="sm"
+                          disabled={processingAction === orden.id}
+                        >
+                          {processingAction === orden.id ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          ) : (
+                            <CheckCircle className="h-4 w-4 mr-2" />
                           )}
-                          {orden.estado === 'en_progreso' && (
-                            <Button
-                              onClick={() => handleCompletar(orden.id)}
-                              size="sm"
-                              disabled={processingAction === orden.id}
-                            >
-                              {processingAction === orden.id ? (
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                              ) : (
-                                <CheckCircle className="h-4 w-4 mr-2" />
-                              )}
-                              Completar
-                            </Button>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
-                )}
+                          Completar
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Di\u00e1logo para rechazar orden */}
+        <Dialog open={rechazarDialogOpen} onOpenChange={setRechazarDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Rechazar Orden de Trabajo</DialogTitle>
+              <DialogDescription>
+                Por favor, indica el motivo por el cual rechazas esta orden.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="motivo">Motivo del rechazo *</Label>
+                <Textarea
+                  id="motivo"
+                  placeholder="Explica por qu\u00e9 no puedes realizar este trabajo..."
+                  value={motivoRechazo}
+                  onChange={(e) => setMotivoRechazo(e.target.value)}
+                  rows={4}
+                />
               </div>
             </div>
-
-            {/* Di\u00e1logo para rechazar orden */}
-            <Dialog open={rechazarDialogOpen} onOpenChange={setRechazarDialogOpen}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Rechazar Orden de Trabajo</DialogTitle>
-                  <DialogDescription>
-                    Por favor, indica el motivo por el cual rechazas esta orden.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="motivo">Motivo del rechazo *</Label>
-                    <Textarea
-                      id="motivo"
-                      placeholder="Explica por qu\u00e9 no puedes realizar este trabajo..."
-                      value={motivoRechazo}
-                      onChange={(e) => setMotivoRechazo(e.target.value)}
-                      rows={4}
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setRechazarDialogOpen(false);
-                      setMotivoRechazo('');
-                    }}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    onClick={handleRechazarConfirm}
-                    disabled={!motivoRechazo.trim() || processingAction !== null}
-                  >
-                    {processingAction ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Rechazando...
-                      </>
-                    ) : (
-                      'Confirmar Rechazo'
-                    )}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-        </AuthenticatedLayout>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setRechazarDialogOpen(false);
+                  setMotivoRechazo('');
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleRechazarConfirm}
+                disabled={!motivoRechazo.trim() || processingAction !== null}
+              >
+                {processingAction ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Rechazando...
+                  </>
+                ) : (
+                  'Confirmar Rechazo'
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </AuthenticatedLayout>
   );
 }

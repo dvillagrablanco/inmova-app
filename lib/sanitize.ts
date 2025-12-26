@@ -13,10 +13,7 @@ export interface SanitizeOptions {
 /**
  * Sanitiza contenido HTML para prevenir XSS
  */
-export function sanitizeHtml(
-  dirty: string,
-  options?: SanitizeOptions
-): string {
+export function sanitizeHtml(dirty: string, options?: SanitizeOptions): string {
   if (!dirty) return '';
 
   const config: any = {};
@@ -36,10 +33,12 @@ export function sanitizeHtml(
  * Sanitiza texto plano (elimina todas las etiquetas HTML)
  */
 export function sanitizePlainText(text: string): string {
-  return String(DOMPurify.sanitize(text, {
-    ALLOWED_TAGS: [],
-    ALLOWED_ATTR: [],
-  }));
+  return String(
+    DOMPurify.sanitize(text, {
+      ALLOWED_TAGS: [],
+      ALLOWED_ATTR: [],
+    })
+  );
 }
 
 /**

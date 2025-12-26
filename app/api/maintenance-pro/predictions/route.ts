@@ -26,10 +26,7 @@ export async function GET(request: NextRequest) {
 
     const predictions = await prisma.maintenanceFailurePrediction.findMany({
       where,
-      orderBy: [
-        { probabilidadFalla: 'desc' },
-        { fechaObjetivo: 'asc' },
-      ],
+      orderBy: [{ probabilidadFalla: 'desc' }, { fechaObjetivo: 'asc' }],
       take: 20,
     });
 

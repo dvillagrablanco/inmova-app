@@ -4,10 +4,23 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Building2, Home, Hotel, Hammer, Briefcase, TrendingUp,
-  Leaf, ShoppingCart, DollarSign, Camera, Wifi, Link2,
-  Sparkles, ArrowRight, Zap, CheckCircle
+import {
+  Building2,
+  Home,
+  Hotel,
+  Hammer,
+  Briefcase,
+  TrendingUp,
+  Leaf,
+  ShoppingCart,
+  DollarSign,
+  Camera,
+  Wifi,
+  Link2,
+  Sparkles,
+  ArrowRight,
+  Zap,
+  CheckCircle,
 } from 'lucide-react';
 
 const verticales = [
@@ -17,15 +30,20 @@ const verticales = [
     desc: 'Gestión completa de alquileres residenciales de largo plazo',
     features: ['Contratos', 'Pagos recurrentes', 'Garantías', 'Portal inquilino'],
     gradient: 'from-blue-500 to-cyan-500',
-    color: 'blue'
+    color: 'blue',
   },
   {
     icon: Hotel,
     title: 'STR (Vacacional)',
     desc: 'Gestión profesional de alquileres vacacionales y corta estancia',
-    features: ['Multi-canal (Airbnb, Booking)', 'Reviews centralizadas', 'Auto check-in', 'Limpieza'],
+    features: [
+      'Multi-canal (Airbnb, Booking)',
+      'Reviews centralizadas',
+      'Auto check-in',
+      'Limpieza',
+    ],
     gradient: 'from-orange-500 to-amber-500',
-    color: 'orange'
+    color: 'orange',
   },
   {
     icon: Home,
@@ -33,7 +51,7 @@ const verticales = [
     desc: 'Gestión individual de habitaciones con espacios compartidos',
     features: ['Por habitación', 'Espacios comunes', 'Prorrateo suministros', 'Normas convivencia'],
     gradient: 'from-purple-500 to-pink-500',
-    color: 'purple'
+    color: 'purple',
   },
   {
     icon: TrendingUp,
@@ -41,7 +59,7 @@ const verticales = [
     desc: 'Compra-reforma-venta con control total de ROI',
     features: ['Calculadora ROI/TIR', 'Timeline Gantt', 'Comparador propiedades', 'Presupuestos'],
     gradient: 'from-green-500 to-emerald-500',
-    color: 'green'
+    color: 'green',
   },
   {
     icon: Hammer,
@@ -49,7 +67,7 @@ const verticales = [
     desc: 'Gestión completa de obra nueva y promoción inmobiliaria',
     features: ['Permisos y licencias', 'Fases de obra', 'Control de calidad', 'Subcontratistas'],
     gradient: 'from-yellow-500 to-orange-500',
-    color: 'yellow'
+    color: 'yellow',
   },
   {
     icon: Briefcase,
@@ -57,7 +75,7 @@ const verticales = [
     desc: 'Property management B2B para gestoras y agencias',
     features: ['CRM clientes', 'Facturación automática', 'Multi-cartera', 'Reporting'],
     gradient: 'from-indigo-500 to-violet-500',
-    color: 'indigo'
+    color: 'indigo',
   },
 ];
 
@@ -69,7 +87,7 @@ const modulosTransversales = [
     benefits: ['Huella de carbono', 'Reportes CSRD', 'Certificaciones'],
     price: '+€50/mes',
     gradient: 'from-green-500 to-teal-500',
-    usedBy: 'Todos los verticales'
+    usedBy: 'Todos los verticales',
   },
   {
     icon: ShoppingCart,
@@ -78,7 +96,7 @@ const modulosTransversales = [
     benefits: ['Comisión 12%', 'Proveedores verificados', 'Nuevo canal ingresos'],
     price: 'Comisión',
     gradient: 'from-blue-500 to-indigo-500',
-    usedBy: 'Alquiler, STR, Coliving'
+    usedBy: 'Alquiler, STR, Coliving',
   },
   {
     icon: DollarSign,
@@ -87,7 +105,7 @@ const modulosTransversales = [
     benefits: ['+15-30% ingresos', 'Análisis competencia', 'Auto-ajuste'],
     price: '+€30/mes',
     gradient: 'from-purple-500 to-pink-500',
-    usedBy: 'STR, Coliving'
+    usedBy: 'STR, Coliving',
   },
   {
     icon: Camera,
@@ -96,7 +114,7 @@ const modulosTransversales = [
     benefits: ['+40% conversión', 'Home staging virtual', 'Multi-plataforma'],
     price: '+€30/mes',
     gradient: 'from-pink-500 to-rose-500',
-    usedBy: 'Todos los verticales'
+    usedBy: 'Todos los verticales',
   },
   {
     icon: Wifi,
@@ -105,7 +123,7 @@ const modulosTransversales = [
     benefits: ['Termostatos', 'Cerraduras', 'Sensores', '-25% costes'],
     price: '+€100/mes',
     gradient: 'from-cyan-500 to-blue-500',
-    usedBy: 'Alquiler, STR, Coliving'
+    usedBy: 'Alquiler, STR, Coliving',
   },
   {
     icon: Link2,
@@ -114,7 +132,7 @@ const modulosTransversales = [
     benefits: ['Tokeniza propiedades', 'Smart contracts', 'Nuevos inversores'],
     price: 'Comisión',
     gradient: 'from-violet-500 to-purple-500',
-    usedBy: 'Inversión multi-vertical'
+    usedBy: 'Inversión multi-vertical',
   },
 ];
 
@@ -133,19 +151,24 @@ export function FeaturesSection() {
               6 Verticales de Negocio Inmobiliario
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Elige tu vertical y gestiona todo desde una sola plataforma. Puedes activar múltiples verticales según tu plan.
+              Elige tu vertical y gestiona todo desde una sola plataforma. Puedes activar múltiples
+              verticales según tu plan.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {verticales.map((vertical, i) => (
-              <Card 
-                key={i} 
+              <Card
+                key={i}
                 className="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border-2 hover:border-indigo-400 relative overflow-hidden"
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${vertical.gradient} opacity-0 group-hover:opacity-5 transition-opacity`} />
+                <div
+                  className={`absolute inset-0 bg-gradient-to-br ${vertical.gradient} opacity-0 group-hover:opacity-5 transition-opacity`}
+                />
                 <CardHeader>
-                  <div className={`p-3 bg-gradient-to-br ${vertical.gradient} rounded-xl w-fit mb-3 group-hover:scale-110 transition-transform`}>
+                  <div
+                    className={`p-3 bg-gradient-to-br ${vertical.gradient} rounded-xl w-fit mb-3 group-hover:scale-110 transition-transform`}
+                  >
                     <vertical.icon className="h-6 w-6 text-white" />
                   </div>
                   <CardTitle className="text-xl group-hover:text-indigo-600 transition-colors">
@@ -157,7 +180,9 @@ export function FeaturesSection() {
                   <div className="space-y-2">
                     {vertical.features.map((feature, idx) => (
                       <div key={idx} className="flex items-center gap-2 text-sm">
-                        <CheckCircle className={`h-4 w-4 text-${vertical.color}-600 flex-shrink-0`} />
+                        <CheckCircle
+                          className={`h-4 w-4 text-${vertical.color}-600 flex-shrink-0`}
+                        />
                         <span className="text-gray-700">{feature}</span>
                       </div>
                     ))}
@@ -175,7 +200,9 @@ export function FeaturesSection() {
                 </div>
                 <div>
                   <h3 className="font-bold text-lg text-gray-900">Arquitectura Modular</h3>
-                  <p className="text-gray-600">Activa solo los verticales que necesites. Añade más cuando crezcas.</p>
+                  <p className="text-gray-600">
+                    Activa solo los verticales que necesites. Añade más cuando crezcas.
+                  </p>
                 </div>
               </div>
               <Link href="/register">
@@ -190,7 +217,10 @@ export function FeaturesSection() {
       </section>
 
       {/* Módulos Transversales Section */}
-      <section id="modulos" className="py-24 px-4 bg-gradient-to-br from-slate-50 via-violet-50 to-indigo-50">
+      <section
+        id="modulos"
+        className="py-24 px-4 bg-gradient-to-br from-slate-50 via-violet-50 to-indigo-50"
+      >
         <div className="container mx-auto">
           <div className="text-center mb-16">
             <Badge className="mb-4 bg-gradient-to-r from-violet-100 to-pink-100 text-violet-700 border-violet-200 px-4 py-2">
@@ -201,24 +231,29 @@ export function FeaturesSection() {
               6 Módulos Transversales de Última Generación
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Add-ons opcionales que amplifican el valor de tus verticales. Añade IA, IoT, Blockchain y más.
+              Add-ons opcionales que amplifican el valor de tus verticales. Añade IA, IoT,
+              Blockchain y más.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {modulosTransversales.map((modulo, i) => (
-              <Card 
-                key={i} 
+              <Card
+                key={i}
                 className="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border-2 hover:border-violet-400 relative overflow-hidden"
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${modulo.gradient} opacity-0 group-hover:opacity-5 transition-opacity`} />
+                <div
+                  className={`absolute inset-0 bg-gradient-to-br ${modulo.gradient} opacity-0 group-hover:opacity-5 transition-opacity`}
+                />
                 <div className="absolute top-4 right-4">
                   <Badge className="bg-gradient-to-r from-violet-500 to-pink-500 text-white border-0 text-xs">
                     {modulo.price}
                   </Badge>
                 </div>
                 <CardHeader>
-                  <div className={`p-3 bg-gradient-to-br ${modulo.gradient} rounded-xl w-fit mb-3 group-hover:scale-110 transition-transform`}>
+                  <div
+                    className={`p-3 bg-gradient-to-br ${modulo.gradient} rounded-xl w-fit mb-3 group-hover:scale-110 transition-transform`}
+                  >
                     <modulo.icon className="h-6 w-6 text-white" />
                   </div>
                   <CardTitle className="text-xl group-hover:text-violet-600 transition-colors">
@@ -273,7 +308,8 @@ export function FeaturesSection() {
         <div className="container mx-auto text-center text-white">
           <h3 className="text-3xl font-bold mb-4">La Arquitectura que Ningún Competidor Tiene</h3>
           <p className="text-xl mb-8 max-w-3xl mx-auto opacity-90">
-            6 verticales completos + 6 módulos transversales únicos = La plataforma PropTech más completa de España
+            6 verticales completos + 6 módulos transversales únicos = La plataforma PropTech más
+            completa de España
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/register">
@@ -283,7 +319,11 @@ export function FeaturesSection() {
               </Button>
             </Link>
             <Link href="#pricing">
-              <Button size="lg" variant="outline" className="px-8 py-6 border-white text-white hover:bg-white/10">
+              <Button
+                size="lg"
+                variant="outline"
+                className="px-8 py-6 border-white text-white hover:bg-white/10"
+              >
                 Ver Planes y Precios
               </Button>
             </Link>

@@ -22,12 +22,9 @@ export async function GET(request: NextRequest) {
   try {
     // Verificar autenticación
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Verificar disponibilidad de BullMQ
@@ -64,9 +61,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(response);
   } catch (error: any) {
     logger.error('Error getting queue stats:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener estadísticas de colas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener estadísticas de colas' }, { status: 500 });
   }
 }

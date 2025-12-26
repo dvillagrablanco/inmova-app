@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Dialog, DialogContent } from './dialog';
@@ -30,13 +30,55 @@ export function GlobalSearchEnhanced({ searchData = [] }: GlobalSearchEnhancedPr
 
   // Default search items (can be replaced with dynamic data)
   const defaultItems: SearchItem[] = [
-    { id: '1', title: 'Dashboard', category: 'Navigation', url: '/dashboard', icon: <Home className="h-4 w-4" /> },
-    { id: '2', title: 'Edificios', category: 'Navigation', url: '/edificios', icon: <Building className="h-4 w-4" /> },
-    { id: '3', title: 'Unidades', category: 'Navigation', url: '/unidades', icon: <Package className="h-4 w-4" /> },
-    { id: '4', title: 'Inquilinos', category: 'Navigation', url: '/inquilinos', icon: <Users className="h-4 w-4" /> },
-    { id: '5', title: 'Contratos', category: 'Navigation', url: '/contratos', icon: <FileText className="h-4 w-4" /> },
-    { id: '6', title: 'Pagos', category: 'Navigation', url: '/pagos', icon: <CreditCard className="h-4 w-4" /> },
-    { id: '7', title: 'Mantenimiento', category: 'Navigation', url: '/mantenimiento', icon: <Wrench className="h-4 w-4" /> },
+    {
+      id: '1',
+      title: 'Dashboard',
+      category: 'Navigation',
+      url: '/dashboard',
+      icon: <Home className="h-4 w-4" />,
+    },
+    {
+      id: '2',
+      title: 'Edificios',
+      category: 'Navigation',
+      url: '/edificios',
+      icon: <Building className="h-4 w-4" />,
+    },
+    {
+      id: '3',
+      title: 'Unidades',
+      category: 'Navigation',
+      url: '/unidades',
+      icon: <Package className="h-4 w-4" />,
+    },
+    {
+      id: '4',
+      title: 'Inquilinos',
+      category: 'Navigation',
+      url: '/inquilinos',
+      icon: <Users className="h-4 w-4" />,
+    },
+    {
+      id: '5',
+      title: 'Contratos',
+      category: 'Navigation',
+      url: '/contratos',
+      icon: <FileText className="h-4 w-4" />,
+    },
+    {
+      id: '6',
+      title: 'Pagos',
+      category: 'Navigation',
+      url: '/pagos',
+      icon: <CreditCard className="h-4 w-4" />,
+    },
+    {
+      id: '7',
+      title: 'Mantenimiento',
+      category: 'Navigation',
+      url: '/mantenimiento',
+      icon: <Wrench className="h-4 w-4" />,
+    },
   ];
 
   const items = searchData.length > 0 ? searchData : defaultItems;
@@ -152,14 +194,10 @@ export function GlobalSearchEnhanced({ searchData = [] }: GlobalSearchEnhancedPr
                             className="w-full flex items-center gap-3 px-2 py-2 rounded-md hover:bg-accent transition-colors text-left"
                           >
                             {item.icon && (
-                              <div className="flex-shrink-0 text-muted-foreground">
-                                {item.icon}
-                              </div>
+                              <div className="flex-shrink-0 text-muted-foreground">{item.icon}</div>
                             )}
                             <div className="flex-1 min-w-0">
-                              <div className="font-medium text-sm truncate">
-                                {item.title}
-                              </div>
+                              <div className="font-medium text-sm truncate">{item.title}</div>
                               {item.description && (
                                 <div className="text-xs text-muted-foreground truncate">
                                   {item.description}

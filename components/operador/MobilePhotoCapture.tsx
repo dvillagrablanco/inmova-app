@@ -77,14 +77,11 @@ export default function MobilePhotoCapture({
       }
 
       // Asociar fotos a la orden de trabajo
-      const associateRes = await fetch(
-        `/api/operador/work-orders/${workOrderId}/photos`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ photoUrls: uploadedUrls }),
-        }
-      );
+      const associateRes = await fetch(`/api/operador/work-orders/${workOrderId}/photos`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photoUrls: uploadedUrls }),
+      });
 
       if (!associateRes.ok) {
         throw new Error('Error al asociar fotos a la orden');
@@ -150,12 +147,7 @@ export default function MobilePhotoCapture({
             {photos.map((photo, index) => (
               <div key={index} className="relative aspect-square group">
                 <div className="relative w-full h-full rounded-lg overflow-hidden bg-muted">
-                  <Image
-                    src={photo}
-                    alt={`Foto ${index + 1}`}
-                    fill
-                    className="object-cover"
-                  />
+                  <Image src={photo} alt={`Foto ${index + 1}`} fill className="object-cover" />
                 </div>
                 <Button
                   size="icon"
@@ -172,11 +164,7 @@ export default function MobilePhotoCapture({
 
         {/* Botón de subida */}
         {photos.length > 0 && (
-          <Button
-            className="w-full"
-            onClick={handleUpload}
-            disabled={uploading}
-          >
+          <Button className="w-full" onClick={handleUpload} disabled={uploading}>
             {uploading ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />

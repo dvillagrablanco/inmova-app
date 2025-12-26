@@ -34,7 +34,11 @@ export class ExportService {
     options: ExportOptions
   ): Promise<void> {
     try {
-      const filename = this.generateFilename(options.filename, options.format, options.includeTimestamp);
+      const filename = this.generateFilename(
+        options.filename,
+        options.format,
+        options.includeTimestamp
+      );
 
       switch (options.format) {
         case 'csv':
@@ -50,7 +54,11 @@ export class ExportService {
           throw new Error(`Formato no soportado: ${options.format}`);
       }
 
-      logger.info('Exportación completada', { filename, format: options.format, records: data.length });
+      logger.info('Exportación completada', {
+        filename,
+        format: options.format,
+        records: data.length,
+      });
     } catch (error) {
       logger.error('Error en exportación', error);
       throw error;
@@ -80,7 +88,7 @@ export class ExportService {
     customHeaders?: Record<string, string>
   ): Promise<void> {
     const processedData = this.processData(data, customHeaders);
-    
+
     // Crear workbook
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(processedData);
@@ -102,10 +110,12 @@ export class ExportService {
     ws['!cols'] = colWidths;
 
     XLSX.utils.book_append_sheet(wb, ws, sheetName);
-    
+
     // Generar y descargar archivo
     const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const blob = new Blob([excelBuffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
     this.downloadBlob(blob, filename);
   }
 
@@ -120,15 +130,12 @@ export class ExportService {
   /**
    * Procesar datos aplicando headers personalizados
    */
-  private static processData(
-    data: any[],
-    customHeaders?: Record<string, string>
-  ): any[] {
+  private static processData(data: any[], customHeaders?: Record<string, string>): any[] {
     if (!customHeaders || data.length === 0) return data;
 
-    return data.map(item => {
+    return data.map((item) => {
       const processed: Record<string, any> = {};
-      Object.keys(item).forEach(key => {
+      Object.keys(item).forEach((key) => {
         const newKey = customHeaders[key] || key;
         processed[newKey] = item[key];
       });
@@ -146,11 +153,11 @@ export class ExportService {
     const csvRows = [];
 
     // Añadir headers
-    csvRows.push(headers.map(h => this.escapeCSVValue(h)).join(','));
+    csvRows.push(headers.map((h) => this.escapeCSVValue(h)).join(','));
 
     // Añadir filas
     for (const row of data) {
-      const values = headers.map(header => {
+      const values = headers.map((header) => {
         const value = row[header];
         return this.escapeCSVValue(this.formatValue(value));
       });
@@ -190,11 +197,8 @@ export class ExportService {
     if (data.length === 0) return [];
 
     const keys = Object.keys(data[0]);
-    return keys.map(key => {
-      const maxLength = Math.max(
-        key.length,
-        ...data.map(row => String(row[key] || '').length)
-      );
+    return keys.map((key) => {
+      const maxLength = Math.max(key.length, ...data.map((row) => String(row[key] || '').length));
       return { wch: Math.min(maxLength + 2, 50) }; // Máximo 50 caracteres
     });
   }
@@ -244,9 +248,9 @@ export class ExportService {
     options: Omit<ExportOptions, 'customHeaders'>
   ): Promise<void> {
     // Transformar datos según columnas
-    const transformedData = data.map(item => {
+    const transformedData = data.map((item) => {
       const row: Record<string, any> = {};
-      columns.forEach(col => {
+      columns.forEach((col) => {
         const value = item[col.key];
         row[col.label] = col.format ? col.format(value) : value;
       });
@@ -270,21 +274,24 @@ export class ExportService {
       for (const sheet of sheets) {
         const processedData = this.processData(sheet.data, sheet.customHeaders);
         const ws = XLSX.utils.json_to_sheet(processedData);
-        
+
         // Auto-ajustar anchos
         ws['!cols'] = this.calculateColumnWidths(processedData);
-        
+
         XLSX.utils.book_append_sheet(wb, ws, sheet.name);
       }
 
       const finalFilename = this.generateFilename(filename, 'xlsx', includeTimestamp);
       const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-      const blob = new Blob([excelBuffer], { 
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      const blob = new Blob([excelBuffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       });
       this.downloadBlob(blob, finalFilename);
 
-      logger.info('Exportación multi-hoja completada', { filename: finalFilename, sheets: sheets.length });
+      logger.info('Exportación multi-hoja completada', {
+        filename: finalFilename,
+        sheets: sheets.length,
+      });
     } catch (error) {
       logger.error('Error en exportación multi-hoja', error);
       throw error;
@@ -296,10 +303,7 @@ export class ExportService {
  * Hook para usar el servicio de exportación en componentes React
  */
 export function useExport() {
-  const exportData = async <T extends Record<string, any>>(
-    data: T[],
-    options: ExportOptions
-  ) => {
+  const exportData = async <T extends Record<string, any>>(data: T[], options: ExportOptions) => {
     try {
       await ExportService.exportData(data, options);
       return { success: true };

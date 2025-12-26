@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     // Calcular reservas del mes actual
     const currentMonthStart = startOfMonth(new Date());
     const currentMonthEnd = endOfMonth(new Date());
-    
+
     const currentMonthBookings = await prisma.sTRBooking.findMany({
       where: {
         listing: { companyId },
@@ -49,11 +49,18 @@ export async function GET(request: NextRequest) {
       },
     });
     // Calcular ingresos
-    const monthlyRevenue = currentMonthBookings.reduce((sum: number, b: any) => sum + (b.precioTotal || 0), 0);
-    const lastMonthRevenue = lastMonthBookings.reduce((sum: number, b: any) => sum + (b.precioTotal || 0), 0);
-    const revenueGrowth = lastMonthRevenue > 0 
-      ? Math.round(((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100)
-      : 0;
+    const monthlyRevenue = currentMonthBookings.reduce(
+      (sum: number, b: any) => sum + (b.precioTotal || 0),
+      0
+    );
+    const lastMonthRevenue = lastMonthBookings.reduce(
+      (sum: number, b: any) => sum + (b.precioTotal || 0),
+      0
+    );
+    const revenueGrowth =
+      lastMonthRevenue > 0
+        ? Math.round(((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100)
+        : 0;
     // Calcular reservas totales
     const allBookings = await prisma.sTRBooking.findMany({
       where: { listing: { companyId } },
@@ -62,21 +69,34 @@ export async function GET(request: NextRequest) {
     const totalBookings = allBookings.length;
     // Calcular ocupación (simplificado - asumimos que cada reserva es 1 día)
     const totalPossibleDays = listings.length * 30; // 30 días por propiedad
-    const occupiedDays = currentMonthBookings.reduce((sum: number, b: any) => sum + (b.numNoches || 1), 0);
-    const occupancyRate = totalPossibleDays > 0 
-      ? Math.round((occupiedDays / totalPossibleDays) * 100)
-      : 0;
+    const occupiedDays = currentMonthBookings.reduce(
+      (sum: number, b: any) => sum + (b.numNoches || 1),
+      0
+    );
+    const occupancyRate =
+      totalPossibleDays > 0 ? Math.round((occupiedDays / totalPossibleDays) * 100) : 0;
     // Calcular tarifa promedio
-    const avgNightlyRate = totalBookings > 0
-      ? Math.round(totalRevenue / allBookings.reduce((sum: number, b: any) => sum + (b.numNoches || 1), 0))
-      : 0;
+    const avgNightlyRate =
+      totalBookings > 0
+        ? Math.round(
+            totalRevenue / allBookings.reduce((sum: number, b: any) => sum + (b.numNoches || 1), 0)
+          )
+        : 0;
     // Calcular valoración media
     const reviews = listings.flatMap((l: any) => l.reviews);
-    const avgRating = reviews.length > 0
-      ? Math.round((reviews.reduce((sum: number, r: any) => sum + (r.puntuacion || 0), 0) / reviews.length) * 10) / 10
-      : 0;
+    const avgRating =
+      reviews.length > 0
+        ? Math.round(
+            (reviews.reduce((sum: number, r: any) => sum + (r.puntuacion || 0), 0) /
+              reviews.length) *
+              10
+          ) / 10
+        : 0;
     // Determinar tendencia de ocupación
-    const lastMonthOccupiedDays = lastMonthBookings.reduce((sum: number, b: any) => sum + (b.numNoches || 1), 0);
+    const lastMonthOccupiedDays = lastMonthBookings.reduce(
+      (sum: number, b: any) => sum + (b.numNoches || 1),
+      0
+    );
     const occupancyTrend = occupiedDays >= lastMonthOccupiedDays ? 'up' : 'down';
     const metrics = {
       totalListings,

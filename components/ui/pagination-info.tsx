@@ -1,14 +1,20 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface PaginationInfoProps {
-  currentPage: number
-  totalPages: number
-  totalItems: number
-  itemsPerPage: number
-  onPageChange: (page: number) => void
-  onItemsPerPageChange?: (items: number) => void
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
+  onPageChange: (page: number) => void;
+  onItemsPerPageChange?: (items: number) => void;
 }
 
 export function PaginationInfo({
@@ -17,16 +23,20 @@ export function PaginationInfo({
   totalItems,
   itemsPerPage,
   onPageChange,
-  onItemsPerPageChange
+  onItemsPerPageChange,
 }: PaginationInfoProps) {
-  const startIndex = (currentPage - 1) * itemsPerPage + 1
-  const endIndex = Math.min(currentPage * itemsPerPage, totalItems)
+  const startIndex = (currentPage - 1) * itemsPerPage + 1;
+  const endIndex = Math.min(currentPage * itemsPerPage, totalItems);
 
   return (
     <div className="flex items-center justify-between px-2 py-4">
       <div className="flex items-center gap-4">
         <p className="text-sm text-gray-600">
-          Mostrando <strong>{startIndex}-{endIndex}</strong> de <strong>{totalItems}</strong> resultados
+          Mostrando{' '}
+          <strong>
+            {startIndex}-{endIndex}
+          </strong>{' '}
+          de <strong>{totalItems}</strong> resultados
         </p>
         {onItemsPerPageChange && (
           <div className="flex items-center gap-2">
@@ -48,7 +58,7 @@ export function PaginationInfo({
           </div>
         )}
       </div>
-      
+
       <div className="flex items-center gap-2">
         <Button
           variant="outline"
@@ -59,7 +69,7 @@ export function PaginationInfo({
           <ChevronLeft className="h-4 w-4" />
           Anterior
         </Button>
-        
+
         <div className="flex items-center gap-1">
           {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
             let pageNum: number;
@@ -72,7 +82,7 @@ export function PaginationInfo({
             } else {
               pageNum = currentPage - 2 + i;
             }
-            
+
             return (
               <Button
                 key={pageNum}
@@ -86,7 +96,7 @@ export function PaginationInfo({
             );
           })}
         </div>
-        
+
         <Button
           variant="outline"
           size="sm"
@@ -98,5 +108,5 @@ export function PaginationInfo({
         </Button>
       </div>
     </div>
-  )
+  );
 }

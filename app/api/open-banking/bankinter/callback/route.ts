@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 
 /**
  * GET /api/open-banking/bankinter/callback
- * 
+ *
  * Callback después de la autenticación con Bankinter
  * El usuario es redirigido aquí después de autenticarse con Bankinter Móvil
  */
@@ -29,22 +29,16 @@ export async function GET(request: NextRequest) {
     }
 
     if (!consentId) {
-      return NextResponse.json(
-        { error: 'consentId requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'consentId requerido' }, { status: 400 });
     }
 
     // Buscar la conexión con este consentId
     const connection = await prisma.bankConnection.findFirst({
-      where: { consentId }
+      where: { consentId },
     });
 
     if (!connection) {
-      return NextResponse.json(
-        { error: 'Conexión no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Conexión no encontrada' }, { status: 404 });
     }
 
     // Verificar el estado del consentimiento
@@ -56,40 +50,32 @@ export async function GET(request: NextRequest) {
         await prisma.bankConnection.update({
           where: { id: connection.id },
           data: {
-            estado: 'conectado'
-          }
+            estado: 'conectado',
+          },
         });
 
         logger.info(`✅ Conexión Bankinter autorizada: ${consentId}`);
 
         // Redirigir al dashboard con éxito
-        return NextResponse.redirect(
-          new URL('/open-banking?success=true', request.url)
-        );
+        return NextResponse.redirect(new URL('/open-banking?success=true', request.url));
       } else {
         // Consentimiento no válido
         await prisma.bankConnection.update({
           where: { id: connection.id },
           data: {
             estado: 'error',
-            errorDetalle: `Consentimiento en estado: ${consentStatus}`
-          }
+            errorDetalle: `Consentimiento en estado: ${consentStatus}`,
+          },
         });
 
-        return NextResponse.redirect(
-          new URL('/open-banking?error=consent_invalid', request.url)
-        );
+        return NextResponse.redirect(new URL('/open-banking?error=consent_invalid', request.url));
       }
     } catch (error: any) {
       logger.error('Error verificando consentimiento:', error);
-      return NextResponse.redirect(
-        new URL('/open-banking?error=verification_failed', request.url)
-      );
+      return NextResponse.redirect(new URL('/open-banking?error=verification_failed', request.url));
     }
   } catch (error: any) {
     logger.error('Error en callback de Bankinter:', error);
-    return NextResponse.redirect(
-      new URL('/open-banking?error=callback_error', request.url)
-    );
+    return NextResponse.redirect(new URL('/open-banking?error=callback_error', request.url));
   }
 }

@@ -9,7 +9,6 @@ import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-
 /**
  * @swagger
  * /api/treasury/forecast:
@@ -32,10 +31,7 @@ export async function GET(req: NextRequest) {
     const companyId = searchParams.get('companyId');
 
     if (!companyId) {
-      return NextResponse.json(
-        { error: 'companyId es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'companyId es requerido' }, { status: 400 });
     }
 
     const forecasts = await prisma.cashFlowForecast.findMany({

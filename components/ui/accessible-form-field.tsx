@@ -1,15 +1,15 @@
-import { InputHTMLAttributes, forwardRef, ReactNode } from 'react'
-import { Input } from './input'
-import { Label } from './label'
-import { cn } from '@/lib/utils'
-import { AlertCircle } from 'lucide-react'
+import { InputHTMLAttributes, forwardRef, ReactNode } from 'react';
+import { Input } from './input';
+import { Label } from './label';
+import { cn } from '@/lib/utils';
+import { AlertCircle } from 'lucide-react';
 
 export interface AccessibleFormFieldProps extends InputHTMLAttributes<HTMLInputElement> {
-  label: string
-  error?: string
-  hint?: string
-  icon?: ReactNode
-  showRequiredIndicator?: boolean
+  label: string;
+  error?: string;
+  hint?: string;
+  icon?: ReactNode;
+  showRequiredIndicator?: boolean;
 }
 
 /**
@@ -22,16 +22,16 @@ export interface AccessibleFormFieldProps extends InputHTMLAttributes<HTMLInputE
  */
 export const AccessibleFormField = forwardRef<HTMLInputElement, AccessibleFormFieldProps>(
   ({ label, error, hint, icon, showRequiredIndicator, className, id, required, ...props }, ref) => {
-    const fieldId = id || `field-${label.toLowerCase().replace(/\s+/g, '-')}`
-    const errorId = `${fieldId}-error`
-    const hintId = `${fieldId}-hint`
-    
-    const hasError = Boolean(error)
-    const isRequired = required || showRequiredIndicator
+    const fieldId = id || `field-${label.toLowerCase().replace(/\s+/g, '-')}`;
+    const errorId = `${fieldId}-error`;
+    const hintId = `${fieldId}-hint`;
+
+    const hasError = Boolean(error);
+    const isRequired = required || showRequiredIndicator;
 
     return (
       <div className="space-y-2">
-        <Label 
+        <Label
           htmlFor={fieldId}
           className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1"
         >
@@ -42,33 +42,25 @@ export const AccessibleFormField = forwardRef<HTMLInputElement, AccessibleFormFi
             </span>
           )}
         </Label>
-        
+
         {hint && !error && (
-          <p 
-            id={hintId} 
-            className="text-sm text-gray-500 dark:text-gray-400"
-          >
+          <p id={hintId} className="text-sm text-gray-500 dark:text-gray-400">
             {hint}
           </p>
         )}
-        
+
         <div className="relative">
           {icon && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-              {icon}
-            </div>
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">{icon}</div>
           )}
-          
+
           <Input
             ref={ref}
             id={fieldId}
             required={required}
             aria-required={required}
             aria-invalid={hasError}
-            aria-describedby={cn(
-              hint && !error ? hintId : undefined,
-              error ? errorId : undefined
-            )}
+            aria-describedby={cn(hint && !error ? hintId : undefined, error ? errorId : undefined)}
             className={cn(
               icon && 'pl-10',
               hasError && 'border-red-500 focus:ring-red-500',
@@ -79,16 +71,16 @@ export const AccessibleFormField = forwardRef<HTMLInputElement, AccessibleFormFi
             )}
             {...props}
           />
-          
+
           {hasError && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2 text-red-500">
               <AlertCircle className="h-5 w-5" aria-hidden="true" />
             </div>
           )}
         </div>
-        
+
         {error && (
-          <p 
+          <p
             id={errorId}
             role="alert"
             aria-live="assertive"
@@ -99,8 +91,8 @@ export const AccessibleFormField = forwardRef<HTMLInputElement, AccessibleFormFi
           </p>
         )}
       </div>
-    )
+    );
   }
-)
+);
 
-AccessibleFormField.displayName = 'AccessibleFormField'
+AccessibleFormField.displayName = 'AccessibleFormField';

@@ -94,9 +94,9 @@ export function usePullToRefresh({
     (e: TouchEvent) => {
       if (!enabled || !isPulling.current || window.scrollY > 0) return;
       currentY.current = e.touches[0].clientY;
-      
+
       const pullDistance = currentY.current - startY.current;
-      
+
       if (pullDistance > 0 && pullDistance < threshold * 2) {
         // Prevenir scroll mientras se hace pull
         e.preventDefault();

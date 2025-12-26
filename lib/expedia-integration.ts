@@ -90,10 +90,11 @@ export class ExpediaClient {
     this.partnerId = config.partnerId;
     this.apiKey = config.apiKey;
     this.apiSecret = config.apiSecret;
-    
-    this.baseUrl = config.environment === 'production'
-      ? 'https://services.expediapartnercentral.com/properties/v1'
-      : 'https://test-services.expediapartnercentral.com/properties/v1';
+
+    this.baseUrl =
+      config.environment === 'production'
+        ? 'https://services.expediapartnercentral.com/properties/v1'
+        : 'https://test-services.expediapartnercentral.com/properties/v1';
   }
 
   /**
@@ -101,11 +102,11 @@ export class ExpediaClient {
    */
   private getAuthHeaders(): HeadersInit {
     const credentials = Buffer.from(`${this.apiKey}:${this.apiSecret}`).toString('base64');
-    
+
     return {
-      'Authorization': `Basic ${credentials}`,
+      Authorization: `Basic ${credentials}`,
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      Accept: 'application/json',
       'Partner-Id': this.partnerId,
     };
   }
@@ -125,7 +126,7 @@ export class ExpediaClient {
       }
 
       const data = await response.json();
-      
+
       logger.info(`Retrieved ${data.properties?.length || 0} Expedia properties`);
 
       return (data.properties || []).map((prop: any) => this.mapProperty(prop));
@@ -202,7 +203,7 @@ export class ExpediaClient {
   }): Promise<ExpediaReservation[]> {
     try {
       const queryParams = new URLSearchParams();
-      
+
       if (params?.startDate) {
         queryParams.append('checkInStart', params.startDate.toISOString().split('T')[0]);
       }
@@ -213,13 +214,10 @@ export class ExpediaClient {
         queryParams.append('propertyId', params.propertyId);
       }
 
-      const response = await fetch(
-        `${this.baseUrl}/reservations?${queryParams}`,
-        {
-          method: 'GET',
-          headers: this.getAuthHeaders(),
-        }
-      );
+      const response = await fetch(`${this.baseUrl}/reservations?${queryParams}`, {
+        method: 'GET',
+        headers: this.getAuthHeaders(),
+      });
 
       if (!response.ok) {
         throw new Error(`Failed to get reservations: ${response.statusText}`);
@@ -268,10 +266,10 @@ export class ExpediaClient {
    */
   private mapReservationStatus(status: string): ExpediaReservation['status'] {
     const statusMap: Record<string, ExpediaReservation['status']> = {
-      'CONFIRMED': 'confirmed',
-      'CANCELLED': 'cancelled',
-      'MODIFIED': 'modified',
-      'COMPLETED': 'completed',
+      CONFIRMED: 'confirmed',
+      CANCELLED: 'cancelled',
+      MODIFIED: 'modified',
+      COMPLETED: 'completed',
     };
     return statusMap[status] || 'confirmed';
   }
@@ -282,19 +280,22 @@ export class ExpediaClient {
   async updateAvailabilityAndRates(updates: RatePlan[]): Promise<boolean> {
     try {
       // Agrupar por propiedad
-      const byProperty = updates.reduce((acc, update) => {
-        if (!acc[update.roomId]) {
-          acc[update.roomId] = [];
-        }
-        acc[update.roomId].push(update);
-        return acc;
-      }, {} as Record<string, RatePlan[]>);
+      const byProperty = updates.reduce(
+        (acc, update) => {
+          if (!acc[update.roomId]) {
+            acc[update.roomId] = [];
+          }
+          acc[update.roomId].push(update);
+          return acc;
+        },
+        {} as Record<string, RatePlan[]>
+      );
 
       // Enviar actualizaciones
       for (const [roomId, plans] of Object.entries(byProperty)) {
         const payload = {
           roomId,
-          ratePlans: plans.map(plan => ({
+          ratePlans: plans.map((plan) => ({
             date: plan.date.toISOString().split('T')[0],
             rate: plan.rate,
             available: plan.available,
@@ -307,14 +308,11 @@ export class ExpediaClient {
           })),
         };
 
-        const response = await fetch(
-          `${this.baseUrl}/properties/availability-rates`,
-          {
-            method: 'POST',
-            headers: this.getAuthHeaders(),
-            body: JSON.stringify(payload),
-          }
-        );
+        const response = await fetch(`${this.baseUrl}/properties/availability-rates`, {
+          method: 'POST',
+          headers: this.getAuthHeaders(),
+          body: JSON.stringify(payload),
+        });
 
         if (!response.ok) {
           logger.error(`Failed to update AR for room ${roomId}`);
@@ -335,13 +333,10 @@ export class ExpediaClient {
    */
   async confirmReservation(reservationId: string): Promise<boolean> {
     try {
-      const response = await fetch(
-        `${this.baseUrl}/reservations/${reservationId}/confirm`,
-        {
-          method: 'POST',
-          headers: this.getAuthHeaders(),
-        }
-      );
+      const response = await fetch(`${this.baseUrl}/reservations/${reservationId}/confirm`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+      });
 
       if (!response.ok) {
         throw new Error(`Failed to confirm reservation: ${response.statusText}`);
@@ -360,16 +355,13 @@ export class ExpediaClient {
    */
   async cancelReservation(reservationId: string, reason?: string): Promise<boolean> {
     try {
-      const response = await fetch(
-        `${this.baseUrl}/reservations/${reservationId}/cancel`,
-        {
-          method: 'POST',
-          headers: this.getAuthHeaders(),
-          body: JSON.stringify({
-            cancellationReason: reason || 'Property request',
-          }),
-        }
-      );
+      const response = await fetch(`${this.baseUrl}/reservations/${reservationId}/cancel`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({
+          cancellationReason: reason || 'Property request',
+        }),
+      });
 
       if (!response.ok) {
         throw new Error(`Failed to cancel reservation: ${response.statusText}`);
@@ -407,8 +399,8 @@ export class ExpediaClient {
 
       // Crear rate plans
       const ratePlans: RatePlan[] = [];
-      rooms.forEach(room => {
-        dates.forEach(date => {
+      rooms.forEach((room) => {
+        dates.forEach((date) => {
           ratePlans.push({
             roomId: room.roomId,
             date: new Date(date),
@@ -437,12 +429,7 @@ export class ExpediaClient {
 
 export function isExpediaConfigured(config?: ExpediaConfig | null): boolean {
   if (!config) return false;
-  return !!(
-    config.partnerId &&
-    config.apiKey &&
-    config.apiSecret &&
-    config.enabled
-  );
+  return !!(config.partnerId && config.apiKey && config.apiSecret && config.enabled);
 }
 
 export function getExpediaClient(config?: ExpediaConfig): ExpediaClient | null {
@@ -458,12 +445,12 @@ export function getExpediaClient(config?: ExpediaConfig): ExpediaClient | null {
  */
 export function mapPropertyType(inmovaType: string): string {
   const typeMap: Record<string, string> = {
-    'apartamento': 'apartment',
-    'casa': 'house',
-    'hotel': 'hotel',
-    'hostal': 'hostel',
-    'villa': 'villa',
-    'bed_and_breakfast': 'bed_and_breakfast',
+    apartamento: 'apartment',
+    casa: 'house',
+    hotel: 'hotel',
+    hostal: 'hostel',
+    villa: 'villa',
+    bed_and_breakfast: 'bed_and_breakfast',
   };
   return typeMap[inmovaType.toLowerCase()] || 'apartment';
 }

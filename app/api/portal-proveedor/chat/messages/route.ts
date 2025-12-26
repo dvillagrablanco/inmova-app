@@ -13,20 +13,14 @@ export async function GET(request: NextRequest) {
     const providerId = request.headers.get('x-provider-id');
 
     if (!providerId) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
     const conversationId = searchParams.get('conversacionId');
 
     if (!conversationId) {
-      return NextResponse.json(
-        { error: 'Falta conversacionId' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Falta conversacionId' }, { status: 400 });
     }
 
     // Verificar que la conversación pertenece al proveedor
@@ -35,10 +29,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!conversation) {
-      return NextResponse.json(
-        { error: 'Conversación no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Conversación no encontrada' }, { status: 404 });
     }
 
     if (conversation.providerId !== providerId) {
@@ -84,10 +75,7 @@ export async function GET(request: NextRequest) {
     logError(error instanceof Error ? error : new Error(String(error)), {
       context: 'GET /api/portal-proveedor/chat/messages',
     });
-    return NextResponse.json(
-      { error: 'Error al obtener mensajes' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener mensajes' }, { status: 500 });
   }
 }
 
@@ -100,10 +88,7 @@ export async function POST(request: NextRequest) {
     const providerId = request.headers.get('x-provider-id');
 
     if (!providerId) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Verificar que el proveedor existe
@@ -113,10 +98,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!provider) {
-      return NextResponse.json(
-        { error: 'Proveedor no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Proveedor no encontrado' }, { status: 404 });
     }
 
     const body = await request.json();
@@ -124,10 +106,7 @@ export async function POST(request: NextRequest) {
 
     // Validar campos requeridos
     if (!conversacionId || !contenido) {
-      return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
 
     // Verificar que la conversación existe y pertenece al proveedor
@@ -136,10 +115,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!conversation) {
-      return NextResponse.json(
-        { error: 'Conversación no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Conversación no encontrada' }, { status: 404 });
     }
 
     if (conversation.providerId !== providerId) {
@@ -183,9 +159,6 @@ export async function POST(request: NextRequest) {
     logError(error instanceof Error ? error : new Error(String(error)), {
       context: 'POST /api/portal-proveedor/chat/messages',
     });
-    return NextResponse.json(
-      { error: 'Error al enviar mensaje' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al enviar mensaje' }, { status: 500 });
   }
 }

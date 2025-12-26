@@ -79,110 +79,104 @@ export default function InformesPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold">Informes Trimestrales/Anuales</h1>
-                <p className="text-muted-foreground mt-1">
-                  {reports.length}{' '}
-                  {reports.length === 1 ? 'informe generado' : 'informes generados'}
-                </p>
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Informes Trimestrales/Anuales</h1>
+            <p className="text-muted-foreground mt-1">
+              {reports.length} {reports.length === 1 ? 'informe generado' : 'informes generados'}
+            </p>
+          </div>
+          <Button>
+            <Plus className="h-4 w-4 mr-2" />
+            Generar Informe
+          </Button>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Informes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {reports.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <FileText className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No hay informes generados</h3>
+                <p className="text-muted-foreground mb-4">Comienza generando tu primer informe</p>
               </div>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Generar Informe
-              </Button>
-            </div>
+            ) : (
+              <div className="space-y-4">
+                {reports.map((report) => (
+                  <Card key={report.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="pt-6">
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-2 flex-1">
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-lg font-semibold">
+                              {report.community.nombreComunidad}
+                            </h3>
+                            <Badge variant={tipoBadgeVariant(report.tipo)} className="capitalize">
+                              {report.tipo}
+                            </Badge>
+                          </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Informes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {reports.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12">
-                    <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">No hay informes generados</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Comienza generando tu primer informe
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {reports.map((report) => (
-                      <Card key={report.id} className="hover:shadow-md transition-shadow">
-                        <CardContent className="pt-6">
-                          <div className="flex items-start justify-between">
-                            <div className="space-y-2 flex-1">
-                              <div className="flex items-center gap-2">
-                                <h3 className="text-lg font-semibold">
-                                  {report.community.nombreComunidad}
-                                </h3>
-                                <Badge
-                                  variant={tipoBadgeVariant(report.tipo)}
-                                  className="capitalize"
-                                >
-                                  {report.tipo}
-                                </Badge>
-                              </div>
+                          <p className="text-sm text-muted-foreground">
+                            Período: {report.periodo} (
+                            {format(new Date(report.fechaInicio), 'dd/MM/yyyy', { locale: es })} -{' '}
+                            {format(new Date(report.fechaFin), 'dd/MM/yyyy', { locale: es })})
+                          </p>
 
-                              <p className="text-sm text-muted-foreground">
-                                Período: {report.periodo} (
-                                {format(new Date(report.fechaInicio), 'dd/MM/yyyy', { locale: es })}{' '}
-                                - {format(new Date(report.fechaFin), 'dd/MM/yyyy', { locale: es })})
-                              </p>
-
-                              <div className="grid grid-cols-3 gap-4 pt-3">
-                                <div>
-                                  <p className="text-sm text-muted-foreground">Ingresos</p>
-                                  <p className="text-lg font-semibold text-green-600">
-                                    {new Intl.NumberFormat('es-ES', {
-                                      style: 'currency',
-                                      currency: 'EUR',
-                                    }).format(report.totalIngresos)}
-                                  </p>
-                                </div>
-                                <div>
-                                  <p className="text-sm text-muted-foreground">Gastos</p>
-                                  <p className="text-lg font-semibold text-red-600">
-                                    {new Intl.NumberFormat('es-ES', {
-                                      style: 'currency',
-                                      currency: 'EUR',
-                                    }).format(report.totalGastos)}
-                                  </p>
-                                </div>
-                                <div>
-                                  <p className="text-sm text-muted-foreground">Saldo Final</p>
-                                  <p className="text-lg font-semibold">
-                                    {new Intl.NumberFormat('es-ES', {
-                                      style: 'currency',
-                                      currency: 'EUR',
-                                    }).format(report.saldoFinal)}
-                                  </p>
-                                </div>
-                              </div>
-
-                              <p className="text-xs text-muted-foreground pt-2">
-                                Generado el{' '}
-                                {format(new Date(report.generadoEn), 'dd/MM/yyyy HH:mm', {
-                                  locale: es,
-                                })}
+                          <div className="grid grid-cols-3 gap-4 pt-3">
+                            <div>
+                              <p className="text-sm text-muted-foreground">Ingresos</p>
+                              <p className="text-lg font-semibold text-green-600">
+                                {new Intl.NumberFormat('es-ES', {
+                                  style: 'currency',
+                                  currency: 'EUR',
+                                }).format(report.totalIngresos)}
                               </p>
                             </div>
-
-                            <Button variant="outline" size="sm">
-                              <Download className="h-4 w-4 mr-2" />
-                              Descargar
-                            </Button>
+                            <div>
+                              <p className="text-sm text-muted-foreground">Gastos</p>
+                              <p className="text-lg font-semibold text-red-600">
+                                {new Intl.NumberFormat('es-ES', {
+                                  style: 'currency',
+                                  currency: 'EUR',
+                                }).format(report.totalGastos)}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-muted-foreground">Saldo Final</p>
+                              <p className="text-lg font-semibold">
+                                {new Intl.NumberFormat('es-ES', {
+                                  style: 'currency',
+                                  currency: 'EUR',
+                                }).format(report.saldoFinal)}
+                              </p>
+                            </div>
                           </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </AuthenticatedLayout>
+
+                          <p className="text-xs text-muted-foreground pt-2">
+                            Generado el{' '}
+                            {format(new Date(report.generadoEn), 'dd/MM/yyyy HH:mm', {
+                              locale: es,
+                            })}
+                          </p>
+                        </div>
+
+                        <Button variant="outline" size="sm">
+                          <Download className="h-4 w-4 mr-2" />
+                          Descargar
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </AuthenticatedLayout>
   );
 }

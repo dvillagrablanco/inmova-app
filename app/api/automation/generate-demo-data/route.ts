@@ -27,7 +27,7 @@ const DEMO_DATA = {
       latitud: 40.4168,
       longitud: -3.7038,
       imagenes: [],
-      etiquetas: ['residencial', 'premium', 'piscina']
+      etiquetas: ['residencial', 'premium', 'piscina'],
     },
     {
       nombre: 'Edificio Comercial Centro',
@@ -47,7 +47,7 @@ const DEMO_DATA = {
       latitud: 41.3851,
       longitud: 2.1734,
       imagenes: [],
-      etiquetas: ['comercial', 'céntrico']
+      etiquetas: ['comercial', 'céntrico'],
     },
     {
       nombre: 'Coliving Urban Life',
@@ -67,8 +67,8 @@ const DEMO_DATA = {
       latitud: 40.4381,
       longitud: -3.6897,
       imagenes: [],
-      etiquetas: ['coliving', 'moderno', 'jóvenes']
-    }
+      etiquetas: ['coliving', 'moderno', 'jóvenes'],
+    },
   ],
   unidades: [
     // Torre Vista
@@ -83,7 +83,7 @@ const DEMO_DATA = {
       estado: 'disponible' as const,
       amueblado: true,
       tieneBalcon: true,
-      descripcion: 'Apartamento luminoso con vistas al parque'
+      descripcion: 'Apartamento luminoso con vistas al parque',
     },
     {
       numero: '2A',
@@ -96,7 +96,7 @@ const DEMO_DATA = {
       estado: 'ocupada' as const,
       amueblado: false,
       tieneBalcon: true,
-      descripcion: 'Amplio apartamento de 3 dormitorios'
+      descripcion: 'Amplio apartamento de 3 dormitorios',
     },
     {
       numero: '3A',
@@ -109,7 +109,7 @@ const DEMO_DATA = {
       estado: 'disponible' as const,
       amueblado: true,
       tieneBalcon: false,
-      descripcion: 'Apartamento acogedor, ideal para parejas'
+      descripcion: 'Apartamento acogedor, ideal para parejas',
     },
     // Comercial Centro
     {
@@ -123,7 +123,7 @@ const DEMO_DATA = {
       estado: 'disponible' as const,
       amueblado: false,
       tieneBalcon: false,
-      descripcion: 'Local comercial en zona prime'
+      descripcion: 'Local comercial en zona prime',
     },
     {
       numero: 'Oficina 201',
@@ -136,7 +136,7 @@ const DEMO_DATA = {
       estado: 'ocupada' as const,
       amueblado: true,
       tieneBalcon: false,
-      descripcion: 'Oficina equipada lista para usar'
+      descripcion: 'Oficina equipada lista para usar',
     },
     // Coliving
     {
@@ -150,7 +150,7 @@ const DEMO_DATA = {
       estado: 'disponible' as const,
       amueblado: true,
       tieneBalcon: false,
-      descripcion: 'Habitación individual en coliving'
+      descripcion: 'Habitación individual en coliving',
     },
     {
       numero: 'Hab 102',
@@ -163,8 +163,8 @@ const DEMO_DATA = {
       estado: 'ocupada' as const,
       amueblado: true,
       tieneBalcon: false,
-      descripcion: 'Habitación con baño privado'
-    }
+      descripcion: 'Habitación con baño privado',
+    },
   ],
   inquilinos: [
     {
@@ -175,7 +175,7 @@ const DEMO_DATA = {
       fechaNacimiento: new Date('1990-05-15'),
       nacionalidad: 'Española',
       ingresosMensuales: 3500,
-      scoring: 850
+      scoring: 850,
     },
     {
       nombreCompleto: 'María Martínez López',
@@ -185,7 +185,7 @@ const DEMO_DATA = {
       fechaNacimiento: new Date('1988-08-22'),
       nacionalidad: 'Española',
       ingresosMensuales: 4200,
-      scoring: 920
+      scoring: 920,
     },
     {
       nombreCompleto: 'Carlos Rodríguez Sánchez',
@@ -195,7 +195,7 @@ const DEMO_DATA = {
       fechaNacimiento: new Date('1995-03-10'),
       nacionalidad: 'Española',
       ingresosMensuales: 2800,
-      scoring: 780
+      scoring: 780,
     },
     {
       nombreCompleto: 'Laura Fernández Gómez',
@@ -205,9 +205,9 @@ const DEMO_DATA = {
       fechaNacimiento: new Date('1992-11-30'),
       nacionalidad: 'Española',
       ingresosMensuales: 2500,
-      scoring: 820
-    }
-  ]
+      scoring: 820,
+    },
+  ],
 };
 
 export async function POST(request: NextRequest) {
@@ -218,18 +218,21 @@ export async function POST(request: NextRequest) {
     }
 
     const companyId = session?.user?.companyId;
-    const userId = session?.user?.id
+    const userId = session?.user?.id;
 
     // Verificar que no existan ya datos demo
     const existingBuildings = await prisma.building.count({
-      where: { companyId }
+      where: { companyId },
     });
 
     if (existingBuildings > 0) {
-      return NextResponse.json({ 
-        error: 'Ya existen edificios. Los datos demo solo se pueden generar en cuentas nuevas.',
-        hasData: true
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Ya existen edificios. Los datos demo solo se pueden generar en cuentas nuevas.',
+          hasData: true,
+        },
+        { status: 400 }
+      );
     }
 
     // Crear edificios
@@ -238,8 +241,8 @@ export async function POST(request: NextRequest) {
       const building = await prisma.building.create({
         data: {
           ...edificio,
-          companyId
-        }
+          companyId,
+        },
       });
       createdBuildings.push(building);
     }
@@ -248,20 +251,20 @@ export async function POST(request: NextRequest) {
     const unidadesPorEdificio = [
       DEMO_DATA.unidades.slice(0, 3), // Torre Vista
       DEMO_DATA.unidades.slice(3, 5), // Comercial Centro
-      DEMO_DATA.unidades.slice(5, 7)  // Coliving
+      DEMO_DATA.unidades.slice(5, 7), // Coliving
     ];
 
     const createdUnits = [];
     for (let i = 0; i < createdBuildings.length; i++) {
       const building = createdBuildings[i];
       const unidades = unidadesPorEdificio[i];
-      
+
       for (const unidad of unidades) {
         const unit = await prisma.unit.create({
           data: {
             ...unidad,
-            buildingId: building.id
-          }
+            buildingId: building.id,
+          },
         });
         createdUnits.push(unit);
       }
@@ -273,18 +276,18 @@ export async function POST(request: NextRequest) {
       const tenant = await prisma.tenant.create({
         data: {
           ...inquilino,
-          companyId
-        }
+          companyId,
+        },
       });
       createdTenants.push(tenant);
     }
 
     // Asignar algunos inquilinos a unidades (solo las ocupadas)
-    const unidadesOcupadas = createdUnits.filter(u => u.estado === 'ocupada');
+    const unidadesOcupadas = createdUnits.filter((u) => u.estado === 'ocupada');
     for (let i = 0; i < Math.min(unidadesOcupadas.length, createdTenants.length); i++) {
       const unit = unidadesOcupadas[i];
       const tenant = createdTenants[i];
-      
+
       // Crear contrato
       await prisma.contract.create({
         data: {
@@ -299,8 +302,8 @@ export async function POST(request: NextRequest) {
           estado: 'activo',
           tipo: 'residencial',
           gastosIncluidos: [],
-          gastosExcluidos: ['agua', 'luz', 'gas']
-        }
+          gastosExcluidos: ['agua', 'luz', 'gas'],
+        },
       });
     }
 
@@ -312,16 +315,19 @@ export async function POST(request: NextRequest) {
         edificios: createdBuildings.length,
         unidades: createdUnits.length,
         inquilinos: createdTenants.length,
-        contratos: unidadesOcupadas.length
+        contratos: unidadesOcupadas.length,
       },
       message: `¡Datos demo generados exitosamente! 
-${createdBuildings.length} edificios, ${createdUnits.length} unidades, ${createdTenants.length} inquilinos y ${unidadesOcupadas.length} contratos creados.`
+${createdBuildings.length} edificios, ${createdUnits.length} unidades, ${createdTenants.length} inquilinos y ${unidadesOcupadas.length} contratos creados.`,
     });
   } catch (error) {
     logger.error('Error generating demo data:', error);
-    return NextResponse.json({ 
-      error: 'Error al generar datos demo',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Error al generar datos demo',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
   }
 }

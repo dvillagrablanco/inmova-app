@@ -18,10 +18,7 @@ export async function GET(request: NextRequest) {
     const maintenanceRequestId = searchParams.get('maintenanceRequestId');
 
     if (!maintenanceRequestId) {
-      return NextResponse.json(
-        { error: 'maintenanceRequestId requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'maintenanceRequestId requerido' }, { status: 400 });
     }
 
     const diagnostics = await prisma.maintenanceDiagnostic.findMany({
@@ -53,10 +50,7 @@ export async function POST(request: NextRequest) {
     const { maintenanceRequestId, equipoSistema, sintomas } = await request.json();
 
     if (!maintenanceRequestId || !equipoSistema || !sintomas) {
-      return NextResponse.json(
-        { error: 'Datos incompletos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Datos incompletos' }, { status: 400 });
     }
 
     const diagnostic = await generateDiagnostic(

@@ -270,471 +270,461 @@ export default function IncidenciasPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto">
-            {/* Breadcrumbs */}
-            <div className="mb-6">
-              <Button variant="ghost" onClick={() => router.push('/dashboard')} className="mb-4">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Volver al Dashboard
-              </Button>
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/dashboard">
-                      <Home className="w-4 h-4" />
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>Incidencias Vecinales</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
-            </div>
+      <div className="max-w-7xl mx-auto">
+        {/* Breadcrumbs */}
+        <div className="mb-6">
+          <Button variant="ghost" onClick={() => router.push('/dashboard')} className="mb-4">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Volver al Dashboard
+          </Button>
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/dashboard">
+                  <Home className="w-4 h-4" />
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Incidencias Vecinales</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
 
-            {/* Header */}
-            <div className="mb-6 flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold mb-2">Incidencias Vecinales</h1>
-                <p className="text-gray-600">Gestiona reportes y problemas de la comunidad</p>
-              </div>
-              {canCreate && (
-                <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-                  <DialogTrigger asChild>
-                    <Button className="gradient-primary hover:opacity-90 shadow-primary">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Nueva Incidencia
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
-                    <DialogHeader>
-                      <DialogTitle>Nueva Incidencia</DialogTitle>
-                      <DialogDescription>
-                        Reporta un problema o situación en la comunidad
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      <div>
-                        <Label>Edificio *</Label>
-                        <Select
-                          value={formData.buildingId}
-                          onValueChange={(value) =>
-                            setFormData((prev) => ({ ...prev, buildingId: value }))
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona edificio" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {buildings.map((b) => (
-                              <SelectItem key={b.id} value={b.id}>
-                                {b.nombre}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label>Título *</Label>
-                        <Input
-                          value={formData.titulo}
-                          onChange={(e) =>
-                            setFormData((prev) => ({ ...prev, titulo: e.target.value }))
-                          }
-                          placeholder="Ej: Fuga de agua en planta 3"
-                        />
-                      </div>
-                      <div>
-                        <Label>Descripción *</Label>
-                        <Textarea
-                          value={formData.descripcion}
-                          onChange={(e) =>
-                            setFormData((prev) => ({ ...prev, descripcion: e.target.value }))
-                          }
-                          rows={3}
-                          placeholder="Describe la situación..."
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label>Tipo</Label>
-                          <Select
-                            value={formData.tipo}
-                            onValueChange={(value) =>
-                              setFormData((prev) => ({ ...prev, tipo: value }))
-                            }
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="ruido">Ruido</SelectItem>
-                              <SelectItem value="averia_comun">Avería Común</SelectItem>
-                              <SelectItem value="limpieza">Limpieza</SelectItem>
-                              <SelectItem value="seguridad">Seguridad</SelectItem>
-                              <SelectItem value="convivencia">Convivencia</SelectItem>
-                              <SelectItem value="mascota">Mascota</SelectItem>
-                              <SelectItem value="parking">Parking</SelectItem>
-                              <SelectItem value="otro">Otro</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div>
-                          <Label>Prioridad</Label>
-                          <Select
-                            value={formData.prioridad}
-                            onValueChange={(value) =>
-                              setFormData((prev) => ({ ...prev, prioridad: value }))
-                            }
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="baja">Baja</SelectItem>
-                              <SelectItem value="media">Media</SelectItem>
-                              <SelectItem value="alta">Alta</SelectItem>
-                              <SelectItem value="urgente">Urgente</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      <div>
-                        <Label>Ubicación Específica</Label>
-                        <Input
-                          value={formData.ubicacion}
-                          onChange={(e) =>
-                            setFormData((prev) => ({ ...prev, ubicacion: e.target.value }))
-                          }
-                          placeholder="Ej: Planta 3, Parking B"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex justify-end gap-2">
-                      <Button variant="outline" onClick={() => setOpenDialog(false)}>
-                        Cancelar
-                      </Button>
-                      <Button
-                        onClick={handleCreate}
-                        disabled={!formData.buildingId || !formData.titulo || !formData.descripcion}
-                        className="gradient-primary hover:opacity-90 shadow-primary"
-                      >
-                        Crear Incidencia
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              )}
-
-              {/* Dialog de Edición */}
-              <Dialog
-                open={openEditDialog}
-                onOpenChange={(open) => {
-                  setOpenEditDialog(open);
-                  if (!open) {
-                    setEditingIncidencia(null);
-                    setFormData({
-                      buildingId: '',
-                      titulo: '',
-                      descripcion: '',
-                      tipo: 'otro',
-                      prioridad: 'media',
-                      ubicacion: '',
-                    });
-                  }
-                }}
-              >
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>Editar Incidencia</DialogTitle>
-                    <DialogDescription>Modifica los detalles de la incidencia</DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
+        {/* Header */}
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Incidencias Vecinales</h1>
+            <p className="text-gray-600">Gestiona reportes y problemas de la comunidad</p>
+          </div>
+          {canCreate && (
+            <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+              <DialogTrigger asChild>
+                <Button className="gradient-primary hover:opacity-90 shadow-primary">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nueva Incidencia
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Nueva Incidencia</DialogTitle>
+                  <DialogDescription>
+                    Reporta un problema o situación en la comunidad
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div>
+                    <Label>Edificio *</Label>
+                    <Select
+                      value={formData.buildingId}
+                      onValueChange={(value) =>
+                        setFormData((prev) => ({ ...prev, buildingId: value }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona edificio" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {buildings.map((b) => (
+                          <SelectItem key={b.id} value={b.id}>
+                            {b.nombre}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Título *</Label>
+                    <Input
+                      value={formData.titulo}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, titulo: e.target.value }))}
+                      placeholder="Ej: Fuga de agua en planta 3"
+                    />
+                  </div>
+                  <div>
+                    <Label>Descripción *</Label>
+                    <Textarea
+                      value={formData.descripcion}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, descripcion: e.target.value }))
+                      }
+                      rows={3}
+                      placeholder="Describe la situación..."
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label>Edificio *</Label>
+                      <Label>Tipo</Label>
                       <Select
-                        value={formData.buildingId}
-                        onValueChange={(value) =>
-                          setFormData((prev) => ({ ...prev, buildingId: value }))
-                        }
+                        value={formData.tipo}
+                        onValueChange={(value) => setFormData((prev) => ({ ...prev, tipo: value }))}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecciona edificio" />
+                          <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {buildings.map((b) => (
-                            <SelectItem key={b.id} value={b.id}>
-                              {b.nombre}
-                            </SelectItem>
-                          ))}
+                          <SelectItem value="ruido">Ruido</SelectItem>
+                          <SelectItem value="averia_comun">Avería Común</SelectItem>
+                          <SelectItem value="limpieza">Limpieza</SelectItem>
+                          <SelectItem value="seguridad">Seguridad</SelectItem>
+                          <SelectItem value="convivencia">Convivencia</SelectItem>
+                          <SelectItem value="mascota">Mascota</SelectItem>
+                          <SelectItem value="parking">Parking</SelectItem>
+                          <SelectItem value="otro">Otro</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div>
-                      <Label>Título *</Label>
-                      <Input
-                        value={formData.titulo}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, titulo: e.target.value }))
+                      <Label>Prioridad</Label>
+                      <Select
+                        value={formData.prioridad}
+                        onValueChange={(value) =>
+                          setFormData((prev) => ({ ...prev, prioridad: value }))
                         }
-                        placeholder="Ej: Fuga de agua en planta 3"
-                      />
-                    </div>
-                    <div>
-                      <Label>Descripción *</Label>
-                      <Textarea
-                        value={formData.descripcion}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, descripcion: e.target.value }))
-                        }
-                        rows={3}
-                        placeholder="Describe la situación..."
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label>Tipo</Label>
-                        <Select
-                          value={formData.tipo}
-                          onValueChange={(value) =>
-                            setFormData((prev) => ({ ...prev, tipo: value }))
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="ruido">Ruido</SelectItem>
-                            <SelectItem value="averia_comun">Avería Común</SelectItem>
-                            <SelectItem value="limpieza">Limpieza</SelectItem>
-                            <SelectItem value="seguridad">Seguridad</SelectItem>
-                            <SelectItem value="convivencia">Convivencia</SelectItem>
-                            <SelectItem value="mascota">Mascota</SelectItem>
-                            <SelectItem value="parking">Parking</SelectItem>
-                            <SelectItem value="otro">Otro</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label>Prioridad</Label>
-                        <Select
-                          value={formData.prioridad}
-                          onValueChange={(value) =>
-                            setFormData((prev) => ({ ...prev, prioridad: value }))
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="baja">Baja</SelectItem>
-                            <SelectItem value="media">Media</SelectItem>
-                            <SelectItem value="alta">Alta</SelectItem>
-                            <SelectItem value="urgente">Urgente</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <div>
-                      <Label>Ubicación Específica</Label>
-                      <Input
-                        value={formData.ubicacion}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, ubicacion: e.target.value }))
-                        }
-                        placeholder="Ej: Planta 3, Parking B"
-                      />
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="baja">Baja</SelectItem>
+                          <SelectItem value="media">Media</SelectItem>
+                          <SelectItem value="alta">Alta</SelectItem>
+                          <SelectItem value="urgente">Urgente</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
-                  <div className="flex justify-end gap-2">
-                    <Button variant="outline" onClick={() => setOpenEditDialog(false)}>
-                      Cancelar
-                    </Button>
-                    <Button
-                      onClick={handleUpdate}
-                      disabled={!formData.buildingId || !formData.titulo || !formData.descripcion}
-                      className="gradient-primary hover:opacity-90 shadow-primary"
-                    >
-                      Actualizar Incidencia
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </div>
-
-            {/* KPIs */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total</CardTitle>
-                  <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{totalIncidencias}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Abiertas</CardTitle>
-                  <AlertCircle className="h-4 w-4 text-red-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{abiertas}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">En Proceso</CardTitle>
-                  <Clock className="h-4 w-4 text-orange-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{enProceso}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Resueltas</CardTitle>
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{resueltas}</div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Filters */}
-            <Card className="mb-6">
-              <CardContent className="pt-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <div>
+                    <Label>Ubicación Específica</Label>
                     <Input
-                      placeholder="Buscar incidencias..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
+                      value={formData.ubicacion}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, ubicacion: e.target.value }))
+                      }
+                      placeholder="Ej: Planta 3, Parking B"
                     />
                   </div>
-                  <Select value={filterEstado} onValueChange={setFilterEstado}>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setOpenDialog(false)}>
+                    Cancelar
+                  </Button>
+                  <Button
+                    onClick={handleCreate}
+                    disabled={!formData.buildingId || !formData.titulo || !formData.descripcion}
+                    className="gradient-primary hover:opacity-90 shadow-primary"
+                  >
+                    Crear Incidencia
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
+
+          {/* Dialog de Edición */}
+          <Dialog
+            open={openEditDialog}
+            onOpenChange={(open) => {
+              setOpenEditDialog(open);
+              if (!open) {
+                setEditingIncidencia(null);
+                setFormData({
+                  buildingId: '',
+                  titulo: '',
+                  descripcion: '',
+                  tipo: 'otro',
+                  prioridad: 'media',
+                  ubicacion: '',
+                });
+              }
+            }}
+          >
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Editar Incidencia</DialogTitle>
+                <DialogDescription>Modifica los detalles de la incidencia</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div>
+                  <Label>Edificio *</Label>
+                  <Select
+                    value={formData.buildingId}
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({ ...prev, buildingId: value }))
+                    }
+                  >
                     <SelectTrigger>
-                      <SelectValue placeholder="Estado" />
+                      <SelectValue placeholder="Selecciona edificio" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="todas">Todos los estados</SelectItem>
-                      <SelectItem value="abierta">Abierta</SelectItem>
-                      <SelectItem value="en_proceso">En Proceso</SelectItem>
-                      <SelectItem value="resuelta">Resuelta</SelectItem>
-                      <SelectItem value="cerrada">Cerrada</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={filterPrioridad} onValueChange={setFilterPrioridad}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Prioridad" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="todas">Todas las prioridades</SelectItem>
-                      <SelectItem value="baja">Baja</SelectItem>
-                      <SelectItem value="media">Media</SelectItem>
-                      <SelectItem value="alta">Alta</SelectItem>
-                      <SelectItem value="urgente">Urgente</SelectItem>
+                      {buildings.map((b) => (
+                        <SelectItem key={b.id} value={b.id}>
+                          {b.nombre}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
+                <div>
+                  <Label>Título *</Label>
+                  <Input
+                    value={formData.titulo}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, titulo: e.target.value }))}
+                    placeholder="Ej: Fuga de agua en planta 3"
+                  />
+                </div>
+                <div>
+                  <Label>Descripción *</Label>
+                  <Textarea
+                    value={formData.descripcion}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, descripcion: e.target.value }))
+                    }
+                    rows={3}
+                    placeholder="Describe la situación..."
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Tipo</Label>
+                    <Select
+                      value={formData.tipo}
+                      onValueChange={(value) => setFormData((prev) => ({ ...prev, tipo: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ruido">Ruido</SelectItem>
+                        <SelectItem value="averia_comun">Avería Común</SelectItem>
+                        <SelectItem value="limpieza">Limpieza</SelectItem>
+                        <SelectItem value="seguridad">Seguridad</SelectItem>
+                        <SelectItem value="convivencia">Convivencia</SelectItem>
+                        <SelectItem value="mascota">Mascota</SelectItem>
+                        <SelectItem value="parking">Parking</SelectItem>
+                        <SelectItem value="otro">Otro</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Prioridad</Label>
+                    <Select
+                      value={formData.prioridad}
+                      onValueChange={(value) =>
+                        setFormData((prev) => ({ ...prev, prioridad: value }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="baja">Baja</SelectItem>
+                        <SelectItem value="media">Media</SelectItem>
+                        <SelectItem value="alta">Alta</SelectItem>
+                        <SelectItem value="urgente">Urgente</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div>
+                  <Label>Ubicación Específica</Label>
+                  <Input
+                    value={formData.ubicacion}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, ubicacion: e.target.value }))
+                    }
+                    placeholder="Ej: Planta 3, Parking B"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setOpenEditDialog(false)}>
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleUpdate}
+                  disabled={!formData.buildingId || !formData.titulo || !formData.descripcion}
+                  className="gradient-primary hover:opacity-90 shadow-primary"
+                >
+                  Actualizar Incidencia
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        {/* KPIs */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total</CardTitle>
+              <MessageSquare className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalIncidencias}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Abiertas</CardTitle>
+              <AlertCircle className="h-4 w-4 text-red-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{abiertas}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">En Proceso</CardTitle>
+              <Clock className="h-4 w-4 text-orange-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{enProceso}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Resueltas</CardTitle>
+              <CheckCircle className="h-4 w-4 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{resueltas}</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Filters */}
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Buscar incidencias..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Select value={filterEstado} onValueChange={setFilterEstado}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todas">Todos los estados</SelectItem>
+                  <SelectItem value="abierta">Abierta</SelectItem>
+                  <SelectItem value="en_proceso">En Proceso</SelectItem>
+                  <SelectItem value="resuelta">Resuelta</SelectItem>
+                  <SelectItem value="cerrada">Cerrada</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={filterPrioridad} onValueChange={setFilterPrioridad}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Prioridad" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todas">Todas las prioridades</SelectItem>
+                  <SelectItem value="baja">Baja</SelectItem>
+                  <SelectItem value="media">Media</SelectItem>
+                  <SelectItem value="alta">Alta</SelectItem>
+                  <SelectItem value="urgente">Urgente</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Lista de Incidencias */}
+        <div className="space-y-4">
+          {filteredIncidencias.length === 0 ? (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <p className="text-gray-500">No hay incidencias para mostrar</p>
               </CardContent>
             </Card>
-
-            {/* Lista de Incidencias */}
-            <div className="space-y-4">
-              {filteredIncidencias.length === 0 ? (
-                <Card>
-                  <CardContent className="py-12 text-center">
-                    <p className="text-gray-500">No hay incidencias para mostrar</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                filteredIncidencias.map((inc) => (
-                  <Card key={inc.id} className="hover:shadow-lg transition-shadow">
-                    <CardContent className="pt-6">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            {inc.prioridad === 'urgente' && (
-                              <AlertTriangle className="w-5 h-5 text-red-500" />
-                            )}
-                            {inc.prioridad === 'alta' && (
-                              <AlertCircle className="w-5 h-5 text-orange-500" />
-                            )}
-                            <h3 className="text-lg font-semibold">{inc.titulo}</h3>
-                          </div>
-                          <p className="text-gray-600 mb-3">{inc.descripcion}</p>
-                          <div className="flex flex-wrap items-center gap-3 text-sm">
-                            <Badge variant="outline">{inc.building.nombre}</Badge>
-                            {inc.unit && <Badge variant="outline">Unidad {inc.unit.numero}</Badge>}
-                            {inc.ubicacion && (
-                              <span className="text-gray-500">· {inc.ubicacion}</span>
-                            )}
-                            <Badge
-                              className="capitalize"
-                              variant={
-                                inc.estado === 'abierta'
-                                  ? 'destructive'
-                                  : inc.estado === 'en_proceso'
-                                    ? 'default'
-                                    : 'secondary'
-                              }
-                            >
-                              {inc.estado.replace('_', ' ')}
-                            </Badge>
-                            <Badge
-                              className="capitalize"
-                              variant={
-                                inc.prioridad === 'urgente' || inc.prioridad === 'alta'
-                                  ? 'destructive'
-                                  : 'outline'
-                              }
-                            >
-                              {inc.prioridad}
-                            </Badge>
-                          </div>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {inc.estado === 'abierta' && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleUpdateEstado(inc.id, 'en_proceso')}
-                            >
-                              Iniciar
-                            </Button>
-                          )}
-                          {inc.estado === 'en_proceso' && (
-                            <Button
-                              size="sm"
-                              onClick={() => handleUpdateEstado(inc.id, 'resuelta')}
-                              className="bg-green-600 hover:bg-green-700"
-                            >
-                              Resolver
-                            </Button>
-                          )}
-                          <Button size="sm" variant="outline" onClick={() => handleEdit(inc)}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDelete(inc.id)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+          ) : (
+            filteredIncidencias.map((inc) => (
+              <Card key={inc.id} className="hover:shadow-lg transition-shadow">
+                <CardContent className="pt-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        {inc.prioridad === 'urgente' && (
+                          <AlertTriangle className="w-5 h-5 text-red-500" />
+                        )}
+                        {inc.prioridad === 'alta' && (
+                          <AlertCircle className="w-5 h-5 text-orange-500" />
+                        )}
+                        <h3 className="text-lg font-semibold">{inc.titulo}</h3>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
-          </div>
-        </AuthenticatedLayout>
+                      <p className="text-gray-600 mb-3">{inc.descripcion}</p>
+                      <div className="flex flex-wrap items-center gap-3 text-sm">
+                        <Badge variant="outline">{inc.building.nombre}</Badge>
+                        {inc.unit && <Badge variant="outline">Unidad {inc.unit.numero}</Badge>}
+                        {inc.ubicacion && <span className="text-gray-500">· {inc.ubicacion}</span>}
+                        <Badge
+                          className="capitalize"
+                          variant={
+                            inc.estado === 'abierta'
+                              ? 'destructive'
+                              : inc.estado === 'en_proceso'
+                                ? 'default'
+                                : 'secondary'
+                          }
+                        >
+                          {inc.estado.replace('_', ' ')}
+                        </Badge>
+                        <Badge
+                          className="capitalize"
+                          variant={
+                            inc.prioridad === 'urgente' || inc.prioridad === 'alta'
+                              ? 'destructive'
+                              : 'outline'
+                          }
+                        >
+                          {inc.prioridad}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {inc.estado === 'abierta' && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleUpdateEstado(inc.id, 'en_proceso')}
+                        >
+                          Iniciar
+                        </Button>
+                      )}
+                      {inc.estado === 'en_proceso' && (
+                        <Button
+                          size="sm"
+                          onClick={() => handleUpdateEstado(inc.id, 'resuelta')}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          Resolver
+                        </Button>
+                      )}
+                      <Button size="sm" variant="outline" onClick={() => handleEdit(inc)}>
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleDelete(inc.id)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
+      </div>
+    </AuthenticatedLayout>
   );
 }

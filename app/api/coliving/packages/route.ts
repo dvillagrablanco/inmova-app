@@ -15,10 +15,7 @@ export async function GET(request: NextRequest) {
     const tenantId = searchParams.get('tenantId');
     const buildingId = searchParams.get('buildingId');
     if (!tenantId && !buildingId) {
-      return NextResponse.json(
-        { error: 'tenantId o buildingId requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'tenantId o buildingId requerido' }, { status: 400 });
     }
     let result;
     if (tenantId) {
@@ -35,10 +32,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(result.packages);
   } catch (error) {
     logger.error('Error en GET /api/coliving/packages:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener paquetes' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener paquetes' }, { status: 500 });
   }
 }
 export async function POST(request: NextRequest) {
@@ -55,9 +49,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result.package, { status: 201 });
   } catch (error) {
     logger.error('Error en POST /api/coliving/packages:', error);
-    return NextResponse.json(
-      { error: 'Error al registrar paquete' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al registrar paquete' }, { status: 500 });
   }
 }

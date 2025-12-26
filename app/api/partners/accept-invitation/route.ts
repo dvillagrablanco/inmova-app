@@ -10,10 +10,7 @@ export async function POST(request: NextRequest) {
   try {
     const { token, userData } = await request.json();
     if (!token) {
-      return NextResponse.json(
-        { error: 'Token es obligatorio' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Token es obligatorio' }, { status: 400 });
     }
     // Buscar la invitación
     const invitation = await prisma.partnerInvitation.findUnique({
@@ -23,10 +20,7 @@ export async function POST(request: NextRequest) {
       },
     });
     if (!invitation) {
-      return NextResponse.json(
-        { error: 'Invitación no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Invitación no encontrada' }, { status: 404 });
     }
     // Verificar estado
     if (invitation.estado !== 'PENDING') {
@@ -41,10 +35,7 @@ export async function POST(request: NextRequest) {
         where: { id: invitation.id },
         data: { estado: 'EXPIRED' },
       });
-      return NextResponse.json(
-        { error: 'Esta invitación ha expirado' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Esta invitación ha expirado' }, { status: 400 });
     }
     // Crear la empresa (Company)
     const { nombre, email, password, telefono, direccion } = userData;
@@ -59,10 +50,7 @@ export async function POST(request: NextRequest) {
       where: { email },
     });
     if (existingUser) {
-      return NextResponse.json(
-        { error: 'Ya existe un usuario con este email' },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: 'Ya existe un usuario con este email' }, { status: 409 });
     }
     // Hash de la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -79,8 +67,8 @@ export async function POST(request: NextRequest) {
         notasAdmin: `Cliente referido por Partner: ${invitation.partner.nombre}`,
         // Heredar personalización del Partner si existe
         logoUrl: invitation.partner.logo || undefined,
-        colorPrimario: invitation.partner.coloresPrimarios 
-          ? (invitation.partner.coloresPrimarios as any).primary 
+        colorPrimario: invitation.partner.coloresPrimarios
+          ? (invitation.partner.coloresPrimarios as any).primary
           : undefined,
       },
     });
@@ -113,19 +101,22 @@ export async function POST(request: NextRequest) {
         aceptadoFecha: new Date(),
       },
     });
-    return NextResponse.json({
-      message: 'Cuenta creada exitosamente',
-      company: {
-        id: company.id,
-        nombre: company.nombre,
-        email: company.email,
+    return NextResponse.json(
+      {
+        message: 'Cuenta creada exitosamente',
+        company: {
+          id: company.id,
+          nombre: company.nombre,
+          email: company.email,
+        },
+        user: {
+          id: user.id,
+          nombre: user.name,
+          email: user.email,
+        },
       },
-      user: {
-        id: user.id,
-        nombre: user.name,
-        email: user.email,
-      },
-    }, { status: 201 });
+      { status: 201 }
+    );
   } catch (error: any) {
     logger.error('Error aceptando invitación:', error);
     return NextResponse.json(

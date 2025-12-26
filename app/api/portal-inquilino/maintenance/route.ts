@@ -40,10 +40,7 @@ export async function POST(request: Request) {
     });
 
     if (!tenant || tenant.units.length === 0) {
-      return NextResponse.json(
-        { error: 'No se encontró unidad asociada' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No se encontró unidad asociada' }, { status: 400 });
     }
 
     const unitId = tenant.units[0].id;
@@ -62,9 +59,6 @@ export async function POST(request: Request) {
     return NextResponse.json(maintenanceRequest);
   } catch (error) {
     logger.error('Error al crear solicitud de mantenimiento:', error);
-    return NextResponse.json(
-      { error: 'Error al crear solicitud' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear solicitud' }, { status: 500 });
   }
 }

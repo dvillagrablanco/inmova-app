@@ -126,9 +126,7 @@ export async function processDNI(imageFile: File | string): Promise<{
 /**
  * Procesa un contrato o documento legal
  */
-export async function processContract(
-  imageFile: File | string
-): Promise<OCRResult> {
+export async function processContract(imageFile: File | string): Promise<OCRResult> {
   return await processImageOCR(imageFile, 'spa');
 }
 
@@ -172,7 +170,7 @@ export async function processPDF(fileBuffer: Buffer): Promise<OCRResult> {
 
   try {
     const pdfData = await (pdfParse as any)(fileBuffer);
-    
+
     // Extraer líneas del texto
     const lines = pdfData.text
       .split('\n')
@@ -180,7 +178,7 @@ export async function processPDF(fileBuffer: Buffer): Promise<OCRResult> {
       .map((line: string) => ({
         text: line,
         confidence: 100, // PDF text extraction is 100% confident as it's native text
-        bbox: { x0: 0, y0: 0, x1: 0, y1: 0 }
+        bbox: { x0: 0, y0: 0, x1: 0, y1: 0 },
       }));
 
     return {
@@ -190,7 +188,7 @@ export async function processPDF(fileBuffer: Buffer): Promise<OCRResult> {
       language: 'spa',
       processingTime: Date.now() - startTime,
       fileType: 'pdf',
-      pageCount: pdfData.numpages
+      pageCount: pdfData.numpages,
     };
   } catch (error) {
     logError(error instanceof Error ? error : new Error('Error al procesar PDF'));
@@ -215,7 +213,7 @@ export async function processDOC(fileBuffer: Buffer): Promise<OCRResult> {
       .map((line: string) => ({
         text: line,
         confidence: 100, // DOC text extraction is 100% confident as it's native text
-        bbox: { x0: 0, y0: 0, x1: 0, y1: 0 }
+        bbox: { x0: 0, y0: 0, x1: 0, y1: 0 },
       }));
 
     return {
@@ -225,7 +223,7 @@ export async function processDOC(fileBuffer: Buffer): Promise<OCRResult> {
       language: 'spa',
       processingTime: Date.now() - startTime,
       fileType: 'docx',
-      pageCount: 1
+      pageCount: 1,
     };
   } catch (error) {
     logError(error instanceof Error ? error : new Error('Error al procesar DOC/DOCX'));
@@ -237,10 +235,7 @@ export async function processDOC(fileBuffer: Buffer): Promise<OCRResult> {
  * Función universal para procesar cualquier tipo de archivo
  * (imagen, PDF, DOC, DOCX)
  */
-export async function processDocument(
-  file: File | Buffer,
-  fileType?: string
-): Promise<OCRResult> {
+export async function processDocument(file: File | Buffer, fileType?: string): Promise<OCRResult> {
   // Determinar el tipo de archivo
   let type: string;
   if (file instanceof File) {
@@ -284,7 +279,7 @@ export function isFileTypeSupported(fileType: string): boolean {
     'image/tiff',
     'application/pdf',
     'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   ];
 
   return supportedTypes.includes(fileType);

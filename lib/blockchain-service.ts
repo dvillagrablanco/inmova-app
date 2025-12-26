@@ -261,10 +261,7 @@ export async function getTokenStats(tokenId: string) {
     throw new Error('Token no encontrado');
   }
 
-  const totalInvertido = token.holders.reduce(
-    (sum, h) => sum + h.valorInvertido,
-    0
-  );
+  const totalInvertido = token.holders.reduce((sum, h) => sum + h.valorInvertido, 0);
   const rentasDistribuidas = token.rentaDistribuida;
   const roi = totalInvertido > 0 ? (rentasDistribuidas / totalInvertido) * 100 : 0;
 

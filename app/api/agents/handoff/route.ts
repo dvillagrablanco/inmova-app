@@ -17,19 +17,11 @@ export async function POST(request: NextRequest) {
     // Verificar autenticación
     const session = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const body = await request.json();
-    const {
-      conversationId,
-      fromAgent,
-      toAgent,
-      reason
-    } = body;
+    const { conversationId, fromAgent, toAgent, reason } = body;
 
     // Validar parámetros
     if (!conversationId || !fromAgent || !toAgent) {
@@ -46,7 +38,7 @@ export async function POST(request: NextRequest) {
       userName: session.user.name || 'Usuario',
       userEmail: session.user.email || '',
       companyId: (session.user as any).companyId || '',
-      role: session.user.role
+      role: session.user.role,
     };
 
     logger.info(`🔄 [Agents API] Handoff request: ${fromAgent} -> ${toAgent}`);
@@ -64,24 +56,25 @@ export async function POST(request: NextRequest) {
       success: true,
       response: response.message,
       newAgent: toAgent,
-      conversationId
+      conversationId,
     });
-
   } catch (error: any) {
     logger.error('[Agents API] Handoff error:', error);
-    
+
     return NextResponse.json(
       {
         success: false,
         error: 'Error realizando transferencia',
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined,
       },
       { status: 500 }
     );
   }
 }
 
-function mapUserType(role: string | undefined): 'tenant' | 'landlord' | 'admin' | 'provider' | 'operador' | 'gestor' {
+function mapUserType(
+  role: string | undefined
+): 'tenant' | 'landlord' | 'admin' | 'provider' | 'operador' | 'gestor' {
   switch (role) {
     case 'super_admin':
     case 'administrador':

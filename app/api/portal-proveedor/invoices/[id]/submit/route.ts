@@ -6,10 +6,7 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 // POST /api/portal-proveedor/invoices/[id]/submit - Enviar factura (cambiar de borrador a enviada)
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const auth = await requireProviderAuth(req);
     if (!auth.authenticated || !auth.provider) {
@@ -24,10 +21,7 @@ export async function POST(
     });
 
     if (!invoice) {
-      return NextResponse.json(
-        { error: 'Factura no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Factura no encontrada' }, { status: 404 });
     }
 
     if (invoice.providerId !== auth.provider.id) {
@@ -49,9 +43,7 @@ export async function POST(
       data: { estado: 'enviada' },
     });
 
-    logger.info(
-      `Factura ${invoice.numeroFactura} enviada por proveedor ${auth.provider.nombre}`
-    );
+    logger.info(`Factura ${invoice.numeroFactura} enviada por proveedor ${auth.provider.nombre}`);
 
     // TODO: Enviar notificación al gestor/administrador
 
@@ -62,9 +54,6 @@ export async function POST(
     });
   } catch (error) {
     logger.error('Error al enviar factura:', error);
-    return NextResponse.json(
-      { error: 'Error al enviar factura' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al enviar factura' }, { status: 500 });
   }
 }

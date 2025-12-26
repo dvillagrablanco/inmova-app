@@ -87,12 +87,42 @@ const DEMO_UNIT_STATUSES = ['disponible', 'ocupada'];
 
 // Datos de ejemplo para inquilinos
 const DEMO_TENANTS = [
-  { nombre: 'Carlos', apellidos: 'García Martínez', email: 'carlos.garcia@example.com', telefono: '+34612345678' },
-  { nombre: 'María', apellidos: 'López Fernández', email: 'maria.lopez@example.com', telefono: '+34623456789' },
-  { nombre: 'Juan', apellidos: 'Rodríguez Sánchez', email: 'juan.rodriguez@example.com', telefono: '+34634567890' },
-  { nombre: 'Ana', apellidos: 'Martínez Pérez', email: 'ana.martinez@example.com', telefono: '+34645678901' },
-  { nombre: 'Pedro', apellidos: 'Sánchez Gómez', email: 'pedro.sanchez@example.com', telefono: '+34656789012' },
-  { nombre: 'Laura', apellidos: 'González Díaz', email: 'laura.gonzalez@example.com', telefono: '+34667890123' },
+  {
+    nombre: 'Carlos',
+    apellidos: 'García Martínez',
+    email: 'carlos.garcia@example.com',
+    telefono: '+34612345678',
+  },
+  {
+    nombre: 'María',
+    apellidos: 'López Fernández',
+    email: 'maria.lopez@example.com',
+    telefono: '+34623456789',
+  },
+  {
+    nombre: 'Juan',
+    apellidos: 'Rodríguez Sánchez',
+    email: 'juan.rodriguez@example.com',
+    telefono: '+34634567890',
+  },
+  {
+    nombre: 'Ana',
+    apellidos: 'Martínez Pérez',
+    email: 'ana.martinez@example.com',
+    telefono: '+34645678901',
+  },
+  {
+    nombre: 'Pedro',
+    apellidos: 'Sánchez Gómez',
+    email: 'pedro.sanchez@example.com',
+    telefono: '+34656789012',
+  },
+  {
+    nombre: 'Laura',
+    apellidos: 'González Díaz',
+    email: 'laura.gonzalez@example.com',
+    telefono: '+34667890123',
+  },
 ];
 
 /**
@@ -159,7 +189,9 @@ export async function generateDemoData(
               habitaciones: Math.floor(Math.random() * 3) + 1,
               banos: Math.floor(Math.random() * 2) + 1,
               rentaMensual: Math.floor(Math.random() * 500) + 500,
-              estado: DEMO_UNIT_STATUSES[Math.floor(Math.random() * DEMO_UNIT_STATUSES.length)] as any,
+              estado: DEMO_UNIT_STATUSES[
+                Math.floor(Math.random() * DEMO_UNIT_STATUSES.length)
+              ] as any,
             },
           });
           generatedData.units.push(unit);
@@ -178,7 +210,11 @@ export async function generateDemoData(
             email: `demo_${Date.now()}_${i}_${tenantData.email}`,
             telefono: tenantData.telefono,
             dni: `12345678${String.fromCharCode(65 + i)}`,
-            fechaNacimiento: new Date(1990 + Math.floor(Math.random() * 20), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28)),
+            fechaNacimiento: new Date(
+              1990 + Math.floor(Math.random() * 20),
+              Math.floor(Math.random() * 12),
+              Math.floor(Math.random() * 28)
+            ),
             nacionalidad: 'Española',
             estadoCivil: 'soltero',
             situacionLaboral: 'empleado',
@@ -189,8 +225,17 @@ export async function generateDemoData(
     }
 
     // 4. Generar contratos (vinculando inquilinos con unidades)
-    if (config.contracts && config.contracts > 0 && generatedData.units.length > 0 && generatedData.tenants.length > 0) {
-      for (let i = 0; i < Math.min(config.contracts, generatedData.tenants.length, generatedData.units.length); i++) {
+    if (
+      config.contracts &&
+      config.contracts > 0 &&
+      generatedData.units.length > 0 &&
+      generatedData.tenants.length > 0
+    ) {
+      for (
+        let i = 0;
+        i < Math.min(config.contracts, generatedData.tenants.length, generatedData.units.length);
+        i++
+      ) {
         const unit = generatedData.units[i];
         const tenant = generatedData.tenants[i];
 

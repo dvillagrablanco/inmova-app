@@ -16,7 +16,7 @@ import {
   getFirstContractTemplate,
 } from './email-templates/onboarding-templates';
 
-export type EmailType = 
+export type EmailType =
   | 'welcome'
   | 'onboarding_reminder'
   | 'task_completed'

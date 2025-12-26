@@ -100,14 +100,11 @@ export function captureError(
   };
 
   // Loguear localmente
-  logger.error(
-    `[${trackedError.severity.toUpperCase()}] ${trackedError.message}`,
-    {
-      errorId: trackedError.id,
-      ...context,
-      stack: errorObj.stack,
-    }
-  );
+  logger.error(`[${trackedError.severity.toUpperCase()}] ${trackedError.message}`, {
+    errorId: trackedError.id,
+    ...context,
+    stack: errorObj.stack,
+  });
 
   // Almacenar en memoria (con límite)
   errorLog.push(trackedError);
@@ -128,7 +125,7 @@ export function captureError(
 
   // Si es crítico en producción, enviar notificación
   if (environment === 'production' && trackedError.severity === 'critical') {
-    sendCriticalErrorNotification(trackedError).catch(err =>
+    sendCriticalErrorNotification(trackedError).catch((err) =>
       console.error('Failed to send critical error notification:', err)
     );
   }
@@ -143,38 +140,33 @@ export function captureError(
 async function sendCriticalErrorNotification(error: TrackedError): Promise<void> {
   // TODO: Implementar notificaciones (email, Slack, etc.)
   // Por ahora solo loguear
-  logger.error(
-    `⚠️ CRITICAL ERROR NOTIFICATION: ${error.message}`,
-    {
-      errorId: error.id,
-      context: error.context,
-    }
-  );
+  logger.error(`⚠️ CRITICAL ERROR NOTIFICATION: ${error.message}`, {
+    errorId: error.id,
+    context: error.context,
+  });
 }
 
 /**
  * Obtiene el historial de errores
  */
-export function getErrorLog(
-  filters?: {
-    severity?: TrackedError['severity'];
-    startTime?: number;
-    endTime?: number;
-    limit?: number;
-  }
-): TrackedError[] {
+export function getErrorLog(filters?: {
+  severity?: TrackedError['severity'];
+  startTime?: number;
+  endTime?: number;
+  limit?: number;
+}): TrackedError[] {
   let filtered = [...errorLog];
 
   if (filters?.severity) {
-    filtered = filtered.filter(e => e.severity === filters.severity);
+    filtered = filtered.filter((e) => e.severity === filters.severity);
   }
 
   if (filters?.startTime) {
-    filtered = filtered.filter(e => e.timestamp >= filters.startTime!);
+    filtered = filtered.filter((e) => e.timestamp >= filters.startTime!);
   }
 
   if (filters?.endTime) {
-    filtered = filtered.filter(e => e.timestamp <= filters.endTime!);
+    filtered = filtered.filter((e) => e.timestamp <= filters.endTime!);
   }
 
   // Ordenar por timestamp descendente (más recientes primero)
@@ -235,7 +227,7 @@ export function initializeErrorTracking(): void {
 
   if (sentryDsn && !(window as any).Sentry) {
     import('@sentry/nextjs')
-      .then(Sentry => {
+      .then((Sentry) => {
         Sentry.init({
           dsn: sentryDsn,
           environment: process.env.NODE_ENV,
@@ -253,7 +245,7 @@ export function initializeErrorTracking(): void {
         (window as any).Sentry = Sentry;
         logger.info('Sentry initialized successfully');
       })
-      .catch(err => {
+      .catch((err) => {
         logger.error('Failed to initialize Sentry:', err);
       });
   }

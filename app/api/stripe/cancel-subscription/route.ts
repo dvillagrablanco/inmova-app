@@ -25,10 +25,7 @@ export async function POST(request: NextRequest) {
     const { subscriptionId, cancelImmediately } = await request.json();
 
     if (!subscriptionId) {
-      return NextResponse.json(
-        { error: 'ID de suscripción requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'ID de suscripción requerido' }, { status: 400 });
     }
 
     // Get subscription from database
@@ -37,25 +34,17 @@ export async function POST(request: NextRequest) {
     });
 
     if (!dbSubscription) {
-      return NextResponse.json(
-        { error: 'Suscripción no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Suscripción no encontrada' }, { status: 404 });
     }
 
     // Cancel subscription in Stripe
     let stripeSubscription;
     if (cancelImmediately) {
-      stripeSubscription = await stripe.subscriptions.cancel(
-        dbSubscription.stripeSubscriptionId
-      );
+      stripeSubscription = await stripe.subscriptions.cancel(dbSubscription.stripeSubscriptionId);
     } else {
-      stripeSubscription = await stripe.subscriptions.update(
-        dbSubscription.stripeSubscriptionId,
-        {
-          cancel_at_period_end: true,
-        }
-      );
+      stripeSubscription = await stripe.subscriptions.update(dbSubscription.stripeSubscriptionId, {
+        cancel_at_period_end: true,
+      });
     }
 
     // Update database

@@ -1,9 +1,9 @@
 /**
  * Loading Spinner Component
- * 
+ *
  * Spinner consistente y reutilizable para toda la aplicación.
  * Soporta diferentes tamaños y puede mostrar texto opcional.
- * 
+ *
  * @module loading-spinner
  * @since Semana 2, Tarea 2.5
  */
@@ -38,15 +38,15 @@ const textSizeClasses = {
 
 /**
  * Componente de spinner de carga
- * 
+ *
  * @example
  * ```tsx
  * // Spinner simple
  * <LoadingSpinner />
- * 
+ *
  * // Spinner con texto
  * <LoadingSpinner size="lg" text="Cargando contratos..." />
- * 
+ *
  * // Spinner de pantalla completa
  * <LoadingSpinner fullscreen text="Procesando..." />
  * ```
@@ -73,11 +73,7 @@ export function LoadingSpinner({
     return (
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm">
         {spinner}
-        {text && (
-          <p className={cn('mt-4 text-muted-foreground', textSizeClasses[size])}>
-            {text}
-          </p>
-        )}
+        {text && <p className={cn('mt-4 text-muted-foreground', textSizeClasses[size])}>{text}</p>}
       </div>
     );
   }
@@ -86,9 +82,7 @@ export function LoadingSpinner({
     return (
       <div className="flex flex-col items-center justify-center gap-3">
         {spinner}
-        <p className={cn('text-muted-foreground', textSizeClasses[size])}>
-          {text}
-        </p>
+        <p className={cn('text-muted-foreground', textSizeClasses[size])}>{text}</p>
       </div>
     );
   }
@@ -99,7 +93,10 @@ export function LoadingSpinner({
 /**
  * Variante inline del spinner (sin margen)
  */
-export function InlineSpinner({ size = 'sm', className }: Omit<LoadingSpinnerProps, 'text' | 'fullscreen'>) {
+export function InlineSpinner({
+  size = 'sm',
+  className,
+}: Omit<LoadingSpinnerProps, 'text' | 'fullscreen'>) {
   return (
     <div
       className={cn(

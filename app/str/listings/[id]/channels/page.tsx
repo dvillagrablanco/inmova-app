@@ -4,13 +4,7 @@ import { useEffect, useState } from 'react';
 import logger from '@/lib/logger';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -111,9 +105,7 @@ export default function ChannelsPage() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState<Record<string, boolean>>({});
   const [connectDialogOpen, setConnectDialogOpen] = useState(false);
-  const [selectedChannel, setSelectedChannel] = useState<ChannelStatus | null>(
-    null,
-  );
+  const [selectedChannel, setSelectedChannel] = useState<ChannelStatus | null>(null);
   const [credentials, setCredentials] = useState<Record<string, string>>({});
 
   // Cargar datos del listing y canales
@@ -133,9 +125,7 @@ export default function ChannelsPage() {
       setListing(listingData);
 
       // Cargar estado de canales
-      const channelsRes = await fetch(
-        `/api/str/channels/${listingId}/status`,
-      );
+      const channelsRes = await fetch(`/api/str/channels/${listingId}/status`);
       if (!channelsRes.ok) throw new Error('Error al cargar canales');
       const channelsData = await channelsRes.json();
       setChannels(channelsData.channels || []);
@@ -184,7 +174,7 @@ export default function ChannelsPage() {
   const handleDisconnectChannel = async (channel: ChannelStatus) => {
     if (
       !confirm(
-        `¿Estás seguro de desconectar ${channel.name}? Se dejará de sincronizar automáticamente.`,
+        `¿Estás seguro de desconectar ${channel.name}? Se dejará de sincronizar automáticamente.`
       )
     ) {
       return;
@@ -213,10 +203,7 @@ export default function ChannelsPage() {
     }
   };
 
-  const handleSyncChannel = async (
-    channel: ChannelStatus,
-    syncType: string,
-  ) => {
+  const handleSyncChannel = async (channel: ChannelStatus, syncType: string) => {
     const syncKey = `${channel.channel}_${syncType}`;
     try {
       setSyncing({ ...syncing, [syncKey]: true });
@@ -236,9 +223,7 @@ export default function ChannelsPage() {
       }
 
       const result = await res.json();
-      toast.success(
-        `${channel.name}: ${result.result.syncedItems} elementos sincronizados`,
-      );
+      toast.success(`${channel.name}: ${result.result.syncedItems} elementos sincronizados`);
       loadData();
     } catch (error) {
       logger.error('Error sincronizando:', error);
@@ -292,12 +277,12 @@ export default function ChannelsPage() {
   if (loading) {
     return (
       <AuthenticatedLayout>
-            <div className="max-w-7xl mx-auto">
-              <div className="flex items-center justify-center py-12">
-                <RefreshCw className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            </div>
-          </AuthenticatedLayout>
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-center py-12">
+            <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        </div>
+      </AuthenticatedLayout>
     );
   }
 
@@ -329,9 +314,7 @@ export default function ChannelsPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">{listing.titulo}</h1>
-              <p className="text-muted-foreground">
-              Gestiona las integraciones con canales externos
-            </p>
+            <p className="text-muted-foreground">Gestiona las integraciones con canales externos</p>
           </div>
           <Button onClick={loadData}>
             <RefreshCw className="mr-2 h-4 w-4" />
@@ -351,18 +334,17 @@ export default function ChannelsPage() {
         <CardContent>
           <div className="space-y-2 text-sm text-muted-foreground">
             <p>
-              <strong>Modo Demo:</strong> Este sistema simula las integraciones
-              con canales externos. Para activar integraciones reales, necesitas
-              configurar las credenciales API de cada plataforma.
+              <strong>Modo Demo:</strong> Este sistema simula las integraciones con canales
+              externos. Para activar integraciones reales, necesitas configurar las credenciales API
+              de cada plataforma.
             </p>
             <p>
-              <strong>Sincronización automática:</strong> Una vez conectado, el
-              sistema sincronizará automáticamente calendario, precios y reservas
-              cada 24 horas.
+              <strong>Sincronización automática:</strong> Una vez conectado, el sistema sincronizará
+              automáticamente calendario, precios y reservas cada 24 horas.
             </p>
             <p>
-              <strong>Sincronización manual:</strong> Puedes sincronizar
-              manualmente en cualquier momento usando los botones de acción.
+              <strong>Sincronización manual:</strong> Puedes sincronizar manualmente en cualquier
+              momento usando los botones de acción.
             </p>
           </div>
         </CardContent>
@@ -377,9 +359,7 @@ export default function ChannelsPage() {
           return (
             <Card
               key={channel.channel}
-              className={`${
-                isConnected ? 'border-green-200 bg-green-50/50' : ''
-              } ${
+              className={`${isConnected ? 'border-green-200 bg-green-50/50' : ''} ${
                 hasErrors ? 'border-red-200 bg-red-50/50' : ''
               } transition-all hover:shadow-md`}
             >
@@ -394,9 +374,7 @@ export default function ChannelsPage() {
                       {CHANNEL_ICONS[channel.channel] || '📋'}
                     </div>
                     <div>
-                      <CardTitle className="text-xl">
-                        {channel.name}
-                      </CardTitle>
+                      <CardTitle className="text-xl">{channel.name}</CardTitle>
                       <CardDescription>
                         {channel.status.externalId
                           ? `ID: ${channel.status.externalId}`
@@ -416,7 +394,7 @@ export default function ChannelsPage() {
                 {/* Estado */}
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Estado</span>
-                    {getStatusBadge(channel.status.status)}
+                  {getStatusBadge(channel.status.status)}
                 </div>
 
                 {isConnected && (
@@ -426,14 +404,12 @@ export default function ChannelsPage() {
                     {/* Última sincronización */}
                     {channel.status.lastSync && (
                       <div className="text-sm">
-                        <span className="font-medium">  Última sincronización:</span>
-                          <br />
+                        <span className="font-medium"> Última sincronización:</span>
+                        <br />
                         <span className="text-muted-foreground">
-                          {format(
-                            new Date(channel.status.lastSync),
-                            "d 'de' MMMM 'a las' HH:mm",
-                            { locale: es },
-                          )}
+                          {format(new Date(channel.status.lastSync), "d 'de' MMMM 'a las' HH:mm", {
+                            locale: es,
+                          })}
                         </span>
                       </div>
                     )}
@@ -441,16 +417,12 @@ export default function ChannelsPage() {
                     {/* Próxima sincronización */}
                     {channel.status.nextSync && (
                       <div className="text-sm">
-                        <span className="font-medium">
-                          Próxima sincronización:
-                        </span>
+                        <span className="font-medium">Próxima sincronización:</span>
                         <br />
                         <span className="text-muted-foreground">
-                          {format(
-                            new Date(channel.status.nextSync),
-                            "d 'de' MMMM 'a las' HH:mm",
-                            { locale: es },
-                          )}
+                          {format(new Date(channel.status.nextSync), "d 'de' MMMM 'a las' HH:mm", {
+                            locale: es,
+                          })}
                         </span>
                       </div>
                     )}
@@ -467,30 +439,22 @@ export default function ChannelsPage() {
 
                     {/* Acciones de sincronización */}
                     <div className="space-y-2">
-                      <p className="text-sm font-medium">
-                        Sincronización manual
-                      </p>
+                      <p className="text-sm font-medium">Sincronización manual</p>
                       <div className="grid grid-cols-3 gap-2">
                         {channel.config.supportedFeatures.calendar && (
                           <Button
                             size="sm"
                             variant="outline"
                             className="w-full"
-                            onClick={() =>
-                              handleSyncChannel(channel, 'calendar')
-                            }
-                            disabled={
-                              syncing[`${channel.channel}_calendar`] || false
-                            }
+                            onClick={() => handleSyncChannel(channel, 'calendar')}
+                            disabled={syncing[`${channel.channel}_calendar`] || false}
                           >
                             {syncing[`${channel.channel}_calendar`] ? (
                               <RefreshCw className="h-4 w-4 animate-spin" />
                             ) : (
                               <Calendar className="mr-1 h-4 w-4" />
                             )}
-                            <span className="hidden sm:inline">
-                              Calendario
-                            </span>
+                            <span className="hidden sm:inline">Calendario</span>
                           </Button>
                         )}
 
@@ -499,12 +463,8 @@ export default function ChannelsPage() {
                             size="sm"
                             variant="outline"
                             className="w-full"
-                            onClick={() =>
-                              handleSyncChannel(channel, 'prices')
-                            }
-                            disabled={
-                              syncing[`${channel.channel}_prices`] || false
-                            }
+                            onClick={() => handleSyncChannel(channel, 'prices')}
+                            disabled={syncing[`${channel.channel}_prices`] || false}
                           >
                             {syncing[`${channel.channel}_prices`] ? (
                               <RefreshCw className="h-4 w-4 animate-spin" />
@@ -520,12 +480,8 @@ export default function ChannelsPage() {
                             size="sm"
                             variant="outline"
                             className="w-full"
-                            onClick={() =>
-                              handleSyncChannel(channel, 'bookings')
-                            }
-                            disabled={
-                              syncing[`${channel.channel}_bookings`] || false
-                            }
+                            onClick={() => handleSyncChannel(channel, 'bookings')}
+                            disabled={syncing[`${channel.channel}_bookings`] || false}
                           >
                             {syncing[`${channel.channel}_bookings`] ? (
                               <RefreshCw className="h-4 w-4 animate-spin" />
@@ -601,29 +557,25 @@ export default function ChannelsPage() {
             {/* En modo DEMO, mostramos campos genéricos */}
             <div className="space-y-2">
               <Label htmlFor="apiKey">API Key / Token</Label>
-                <Input
+              <Input
                 id="apiKey"
                 placeholder="Ingresa tu API key"
                 value={credentials.apiKey || ''}
-                onChange={(e) =>
-                  setCredentials({ ...credentials, apiKey: e.target.value })
-                }
+                onChange={(e) => setCredentials({ ...credentials, apiKey: e.target.value })}
               />
               <p className="text-xs text-muted-foreground">
-                <strong>Modo Demo:</strong> Puedes ingresar cualquier valor para
-                probar la funcionalidad
+                <strong>Modo Demo:</strong> Puedes ingresar cualquier valor para probar la
+                funcionalidad
               </p>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="listingId">ID de Propiedad/Listing</Label>
-                <Input
+              <Input
                 id="listingId"
                 placeholder="Ej: 12345678"
                 value={credentials.listingId || ''}
-                onChange={(e) =>
-                  setCredentials({ ...credentials, listingId: e.target.value })
-                }
+                onChange={(e) => setCredentials({ ...credentials, listingId: e.target.value })}
               />
             </div>
 
@@ -632,28 +584,26 @@ export default function ChannelsPage() {
               <>
                 <Separator />
                 <div className="space-y-3">
-                  <p className="text-sm font-medium">
-                    Opciones de sincronización
-                  </p>
+                  <p className="text-sm font-medium">Opciones de sincronización</p>
 
                   {selectedChannel?.config.supportedFeatures.calendar && (
                     <div className="flex items-center justify-between">
                       <Label htmlFor="syncCalendar">Sincronizar calendario</Label>
-                        <Switch id="syncCalendar" defaultChecked />
+                      <Switch id="syncCalendar" defaultChecked />
                     </div>
                   )}
 
                   {selectedChannel?.config.supportedFeatures.pricing && (
                     <div className="flex items-center justify-between">
                       <Label htmlFor="syncPrices">Sincronizar precios</Label>
-                        <Switch id="syncPrices" defaultChecked />
+                      <Switch id="syncPrices" defaultChecked />
                     </div>
                   )}
 
                   {selectedChannel?.config.supportedFeatures.bookings && (
                     <div className="flex items-center justify-between">
                       <Label htmlFor="syncBookings">Importar reservas</Label>
-                        <Switch id="syncBookings" defaultChecked />
+                      <Switch id="syncBookings" defaultChecked />
                     </div>
                   )}
                 </div>
@@ -662,16 +612,11 @@ export default function ChannelsPage() {
           </div>
 
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setConnectDialogOpen(false)}
-            >
+            <Button variant="outline" onClick={() => setConnectDialogOpen(false)}>
               Cancelar
             </Button>
             <Button onClick={handleSaveConnection}>
-              {selectedChannel?.status.connected
-                ? 'Guardar cambios'
-                : 'Conectar'}
+              {selectedChannel?.status.connected ? 'Guardar cambios' : 'Conectar'}
             </Button>
           </DialogFooter>
         </DialogContent>

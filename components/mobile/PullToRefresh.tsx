@@ -10,11 +10,7 @@ interface PullToRefreshProps {
   className?: string;
 }
 
-export function PullToRefresh({
-  onRefresh,
-  children,
-  className
-}: PullToRefreshProps) {
+export function PullToRefresh({ onRefresh, children, className }: PullToRefreshProps) {
   const [isPulling, setIsPulling] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
@@ -74,23 +70,17 @@ export function PullToRefresh({
     >
       {/* Indicador de pull to refresh */}
       <div
-        className={cn(
-          'pull-to-refresh-indicator',
-          (isPulling || isRefreshing) && 'active'
-        )}
+        className={cn('pull-to-refresh-indicator', (isPulling || isRefreshing) && 'active')}
         style={{
           top: isPulling ? `${pullDistance - 60}px` : '-60px',
-          transition: isPulling ? 'none' : 'top 0.3s ease'
+          transition: isPulling ? 'none' : 'top 0.3s ease',
         }}
       >
         <RefreshCw
-          className={cn(
-            'h-6 w-6 text-primary',
-            isRefreshing && 'animate-spin'
-          )}
+          className={cn('h-6 w-6 text-primary', isRefreshing && 'animate-spin')}
           style={{
             transform: `rotate(${pullDistance * 3}deg)`,
-            transition: isRefreshing ? 'none' : 'transform 0.2s ease'
+            transition: isRefreshing ? 'none' : 'transform 0.2s ease',
           }}
         />
       </div>
@@ -99,7 +89,7 @@ export function PullToRefresh({
       <div
         style={{
           transform: `translateY(${isPulling ? pullDistance : 0}px)`,
-          transition: isPulling ? 'none' : 'transform 0.3s ease'
+          transition: isPulling ? 'none' : 'transform 0.3s ease',
         }}
       >
         {children}

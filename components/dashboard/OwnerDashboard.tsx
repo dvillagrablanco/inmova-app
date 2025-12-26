@@ -11,7 +11,7 @@ import {
   AlertCircle,
   Clock,
   Users,
-  CheckCircle
+  CheckCircle,
 } from 'lucide-react';
 import {
   BarChart,
@@ -26,7 +26,7 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer
+  ResponsiveContainer,
 } from 'recharts';
 import { formatCurrency } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -202,9 +202,7 @@ export function OwnerDashboard() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />
-                <Tooltip
-                  formatter={(value: number) => formatCurrency(value)}
-                />
+                <Tooltip formatter={(value: number) => formatCurrency(value)} />
                 <Legend />
                 <Line
                   type="monotone"
@@ -285,14 +283,8 @@ export function OwnerDashboard() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />
-                <Tooltip
-                  formatter={(value: number) => formatCurrency(value)}
-                />
-                <Bar
-                  dataKey="profit"
-                  fill="#10b981"
-                  name="Ganancia Neta"
-                />
+                <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                <Bar dataKey="profit" fill="#10b981" name="Ganancia Neta" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -322,9 +314,7 @@ export function OwnerDashboard() {
                     <div className="flex-1">
                       <p className="font-medium text-sm">{exp.property}</p>
                       <p className="text-xs text-muted-foreground">{exp.tenant}</p>
-                      <p className="text-xs text-orange-600 mt-1">
-                        Vence en {exp.daysLeft} días
-                      </p>
+                      <p className="text-xs text-orange-600 mt-1">Vence en {exp.daysLeft} días</p>
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-muted-foreground">
@@ -382,8 +372,8 @@ export function OwnerDashboard() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-red-700">
-              Tienes {kpis.urgentMaintenance} solicitudes de mantenimiento urgente pendientes.
-              Es importante atenderlas lo antes posible.
+              Tienes {kpis.urgentMaintenance} solicitudes de mantenimiento urgente pendientes. Es
+              importante atenderlas lo antes posible.
             </p>
           </CardContent>
         </Card>

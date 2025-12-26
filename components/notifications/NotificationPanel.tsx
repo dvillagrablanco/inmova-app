@@ -67,9 +67,7 @@ export default function NotificationPanel({
 
       if (response.ok) {
         // Actualizar todas las notificaciones a read: true
-        setNotifications((prev) =>
-          prev.map((n) => ({ ...n, read: true }))
-        );
+        setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
         onMarkAllRead();
       }
     } catch (error) {
@@ -82,9 +80,7 @@ export default function NotificationPanel({
   function handleNotificationRead(notificationId: string) {
     // Actualizar la notificación a read: true en el estado local
     setNotifications((prev) =>
-      prev.map((n) =>
-        n.id === notificationId ? { ...n, read: true } : n
-      )
+      prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
     );
     onNotificationRead();
   }
@@ -105,9 +101,7 @@ export default function NotificationPanel({
         <div>
           <h3 className="text-white font-semibold text-lg">Notificaciones</h3>
           {hasUnread && (
-            <p className="text-indigo-100 text-xs">
-              {unreadNotifications.length} sin leer
-            </p>
+            <p className="text-indigo-100 text-xs">{unreadNotifications.length} sin leer</p>
           )}
         </div>
 
@@ -151,9 +145,7 @@ export default function NotificationPanel({
               <Bell className="w-8 h-8 text-gray-400" />
             </div>
             <p className="text-gray-600 font-medium">No hay notificaciones</p>
-            <p className="text-gray-400 text-sm mt-1">
-              Te notificaremos cuando haya novedades
-            </p>
+            <p className="text-gray-400 text-sm mt-1">Te notificaremos cuando haya novedades</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-100">

@@ -27,7 +27,10 @@ export interface PaymentReminderConfig {
 }
 
 export class ContractRenewalService {
-  async processUpcomingExpirations(_companyId: string, _config?: ContractRenewalConfig): Promise<{
+  async processUpcomingExpirations(
+    _companyId: string,
+    _config?: ContractRenewalConfig
+  ): Promise<{
     notified: number;
     renewed: number;
     errors: string[];
@@ -36,33 +39,39 @@ export class ContractRenewalService {
     return {
       notified: 0,
       renewed: 0,
-      errors: []
+      errors: [],
     };
   }
 }
 
 export class IncidentEscalationService {
-  async processEscalations(_companyId: string, _config?: IncidentEscalationConfig): Promise<{
+  async processEscalations(
+    _companyId: string,
+    _config?: IncidentEscalationConfig
+  ): Promise<{
     escalated: number;
     errors: string[];
   }> {
     logger.info('IncidentEscalationService: Stub implementation');
     return {
       escalated: 0,
-      errors: []
+      errors: [],
     };
   }
 }
 
 export class PaymentReminderService {
-  async processReminders(_companyId: string, _config?: PaymentReminderConfig): Promise<{
+  async processReminders(
+    _companyId: string,
+    _config?: PaymentReminderConfig
+  ): Promise<{
     sent: number;
     errors: string[];
   }> {
     logger.info('PaymentReminderService: Stub implementation');
     return {
       sent: 0,
-      errors: []
+      errors: [],
     };
   }
 }

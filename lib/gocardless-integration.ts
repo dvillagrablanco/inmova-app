@@ -45,7 +45,14 @@ export interface GCBankAccount {
 export interface GCMandate {
   id?: string;
   reference: string;
-  status?: 'pending_customer_approval' | 'pending_submission' | 'submitted' | 'active' | 'failed' | 'cancelled' | 'expired';
+  status?:
+    | 'pending_customer_approval'
+    | 'pending_submission'
+    | 'submitted'
+    | 'active'
+    | 'failed'
+    | 'cancelled'
+    | 'expired';
   scheme: 'bacs' | 'sepa_core' | 'ach' | 'autogiro' | 'becs' | 'pad' | 'betalingsservice';
   nextPossibleChargeDate?: string;
   paymentsRequireApproval?: boolean;
@@ -61,7 +68,16 @@ export interface GCPayment {
   description: string;
   chargeDate?: string; // YYYY-MM-DD
   reference?: string;
-  status?: 'pending_customer_approval' | 'pending_submission' | 'submitted' | 'confirmed' | 'paid_out' | 'cancelled' | 'customer_approval_denied' | 'failed' | 'charged_back';
+  status?:
+    | 'pending_customer_approval'
+    | 'pending_submission'
+    | 'submitted'
+    | 'confirmed'
+    | 'paid_out'
+    | 'cancelled'
+    | 'customer_approval_denied'
+    | 'failed'
+    | 'charged_back';
   amountRefunded?: number;
   metadata?: Record<string, string>;
   mandateId: string;
@@ -78,7 +94,13 @@ export interface GCSubscription {
   month?: number; // Para yearly (1-12)
   startDate?: string; // YYYY-MM-DD
   endDate?: string; // YYYY-MM-DD
-  status?: 'pending_customer_approval' | 'customer_approval_denied' | 'active' | 'finished' | 'cancelled' | 'paused';
+  status?:
+    | 'pending_customer_approval'
+    | 'customer_approval_denied'
+    | 'active'
+    | 'finished'
+    | 'cancelled'
+    | 'paused';
   metadata?: Record<string, string>;
   mandateId: string;
 }
@@ -103,9 +125,10 @@ export class GoCardlessClient {
 
   constructor(config: GoCardlessConfig) {
     this.accessToken = config.accessToken;
-    this.baseUrl = config.environment === 'live'
-      ? 'https://api.gocardless.com'
-      : 'https://api-sandbox.gocardless.com';
+    this.baseUrl =
+      config.environment === 'live'
+        ? 'https://api.gocardless.com'
+        : 'https://api-sandbox.gocardless.com';
   }
 
   /**
@@ -113,10 +136,10 @@ export class GoCardlessClient {
    */
   private getAuthHeaders(): HeadersInit {
     return {
-      'Authorization': `Bearer ${this.accessToken}`,
+      Authorization: `Bearer ${this.accessToken}`,
       'GoCardless-Version': this.version,
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      Accept: 'application/json',
     };
   }
 
@@ -147,7 +170,9 @@ export class GoCardlessClient {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(`GoCardless create customer failed: ${error.error?.message || response.statusText}`);
+        throw new Error(
+          `GoCardless create customer failed: ${error.error?.message || response.statusText}`
+        );
       }
 
       const data = await response.json();
@@ -191,13 +216,10 @@ export class GoCardlessClient {
    */
   async listCustomers(limit: number = 50): Promise<GCCustomer[]> {
     try {
-      const response = await fetch(
-        `${this.baseUrl}/customers?limit=${limit}`,
-        {
-          method: 'GET',
-          headers: this.getAuthHeaders(),
-        }
-      );
+      const response = await fetch(`${this.baseUrl}/customers?limit=${limit}`, {
+        method: 'GET',
+        headers: this.getAuthHeaders(),
+      });
 
       if (!response.ok) {
         throw new Error(`Failed to list customers: ${response.statusText}`);
@@ -280,7 +302,9 @@ export class GoCardlessClient {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(`Failed to create bank account: ${error.error?.message || response.statusText}`);
+        throw new Error(
+          `Failed to create bank account: ${error.error?.message || response.statusText}`
+        );
       }
 
       const data = await response.json();
@@ -525,7 +549,9 @@ export class GoCardlessClient {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(`Failed to create subscription: ${error.error?.message || response.statusText}`);
+        throw new Error(
+          `Failed to create subscription: ${error.error?.message || response.statusText}`
+        );
       }
 
       const data = await response.json();
@@ -548,11 +574,14 @@ export class GoCardlessClient {
    */
   async cancelSubscription(subscriptionId: string): Promise<boolean> {
     try {
-      const response = await fetch(`${this.baseUrl}/subscriptions/${subscriptionId}/actions/cancel`, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify({ data: {} }),
-      });
+      const response = await fetch(
+        `${this.baseUrl}/subscriptions/${subscriptionId}/actions/cancel`,
+        {
+          method: 'POST',
+          headers: this.getAuthHeaders(),
+          body: JSON.stringify({ data: {} }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Failed to cancel subscription: ${response.statusText}`);
@@ -633,10 +662,7 @@ export class GoCardlessClient {
 
 export function isGoCardlessConfigured(config?: GoCardlessConfig | null): boolean {
   if (!config) return false;
-  return !!(
-    config.accessToken &&
-    config.enabled
-  );
+  return !!(config.accessToken && config.enabled);
 }
 
 export function getGoCardlessClient(config?: GoCardlessConfig): GoCardlessClient | null {
@@ -653,29 +679,43 @@ export function getGoCardlessClient(config?: GoCardlessConfig): GoCardlessClient
 export function getSupportedScheme(countryCode: string): GCMandate['scheme'] | null {
   const schemeMap: Record<string, GCMandate['scheme']> = {
     // SEPA (Eurozona)
-    'AT': 'sepa_core', 'BE': 'sepa_core', 'CY': 'sepa_core', 'EE': 'sepa_core',
-    'FI': 'sepa_core', 'FR': 'sepa_core', 'DE': 'sepa_core', 'GR': 'sepa_core',
-    'IE': 'sepa_core', 'IT': 'sepa_core', 'LV': 'sepa_core', 'LT': 'sepa_core',
-    'LU': 'sepa_core', 'MT': 'sepa_core', 'NL': 'sepa_core', 'PT': 'sepa_core',
-    'SK': 'sepa_core', 'SI': 'sepa_core', 'ES': 'sepa_core',
-    
+    AT: 'sepa_core',
+    BE: 'sepa_core',
+    CY: 'sepa_core',
+    EE: 'sepa_core',
+    FI: 'sepa_core',
+    FR: 'sepa_core',
+    DE: 'sepa_core',
+    GR: 'sepa_core',
+    IE: 'sepa_core',
+    IT: 'sepa_core',
+    LV: 'sepa_core',
+    LT: 'sepa_core',
+    LU: 'sepa_core',
+    MT: 'sepa_core',
+    NL: 'sepa_core',
+    PT: 'sepa_core',
+    SK: 'sepa_core',
+    SI: 'sepa_core',
+    ES: 'sepa_core',
+
     // BACS (UK)
-    'GB': 'bacs',
-    
+    GB: 'bacs',
+
     // ACH (USA)
-    'US': 'ach',
-    
+    US: 'ach',
+
     // Autogiro (Suecia)
-    'SE': 'autogiro',
-    
+    SE: 'autogiro',
+
     // BECS (Australia)
-    'AU': 'becs',
-    
+    AU: 'becs',
+
     // PAD (Canadá)
-    'CA': 'pad',
-    
+    CA: 'pad',
+
     // Betalingsservice (Dinamarca)
-    'DK': 'betalingsservice',
+    DK: 'betalingsservice',
   };
 
   return schemeMap[countryCode] || null;

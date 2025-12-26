@@ -38,10 +38,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(galerias);
   } catch (error) {
     logger.error('Error fetching galerias:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener galerías' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener galerías' }, { status: 500 });
   }
 }
 
@@ -78,9 +75,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(galeria, { status: 201 });
   } catch (error) {
     logger.error('Error creating galeria:', error);
-    return NextResponse.json(
-      { error: 'Error al crear galería' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear galería' }, { status: 500 });
   }
 }

@@ -1,15 +1,10 @@
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
-import { HelpCircle } from 'lucide-react'
-import { ReactNode } from 'react'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { HelpCircle } from 'lucide-react';
+import { ReactNode } from 'react';
 
 interface InfoTooltipProps {
-  content: string | ReactNode
-  maxWidth?: string
+  content: string | ReactNode;
+  maxWidth?: string;
 }
 
 export function InfoTooltip({ content, maxWidth = 'max-w-xs' }: InfoTooltipProps) {
@@ -26,5 +21,5 @@ export function InfoTooltip({ content, maxWidth = 'max-w-xs' }: InfoTooltipProps
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-  )
+  );
 }

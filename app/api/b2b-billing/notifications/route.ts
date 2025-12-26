@@ -7,10 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { 
-  sendPaymentReminders, 
-  markOverdueInvoices 
-} from '@/lib/b2b-billing-service';
+import { sendPaymentReminders, markOverdueInvoices } from '@/lib/b2b-billing-service';
 import { sendEmail } from '@/lib/email-config';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -29,7 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
+      where: { id: session.user.id },
     });
 
     // Solo super-admins pueden ejecutar notificaciones
@@ -44,18 +41,18 @@ export async function POST(request: NextRequest) {
       case 'mark-overdue':
         // Marcar facturas vencidas
         const overdueCount = await markOverdueInvoices();
-        return NextResponse.json({ 
-          success: true, 
+        return NextResponse.json({
+          success: true,
           count: overdueCount,
-          message: `${overdueCount} facturas marcadas como vencidas` 
+          message: `${overdueCount} facturas marcadas como vencidas`,
         });
 
       case 'send-reminders':
         // Enviar recordatorios automáticos
         const reminders = await sendPaymentReminders();
-        const sentCount = reminders.filter(r => r.sent).length;
-        return NextResponse.json({ 
-          success: true, 
+        const sentCount = reminders.filter((r) => r.sent).length;
+        return NextResponse.json({
+          success: true,
           sent: sentCount,
           failed: reminders.length - sentCount,
           details: reminders,
@@ -64,10 +61,7 @@ export async function POST(request: NextRequest) {
       case 'send-single-reminder':
         // Enviar recordatorio manual para una factura específica
         if (!invoiceId) {
-          return NextResponse.json(
-            { error: 'Invoice ID requerido' },
-            { status: 400 }
-          );
+          return NextResponse.json({ error: 'Invoice ID requerido' }, { status: 400 });
         }
         const result = await sendInvoiceReminder(invoiceId, customMessage);
         return NextResponse.json(result);
@@ -78,10 +72,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(summaryResults);
 
       default:
-        return NextResponse.json(
-          { error: 'Acción no válida' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Acción no válida' }, { status: 400 });
     }
   } catch (error: any) {
     logger.error('Error en notificaciones:', error);
@@ -101,7 +92,7 @@ async function sendInvoiceReminder(invoiceId: string, customMessage?: string) {
     include: {
       company: true,
       subscriptionPlan: true,
-    }
+    },
   });
 
   if (!invoice) {
@@ -114,7 +105,7 @@ async function sendInvoiceReminder(invoiceId: string, customMessage?: string) {
 
   // Preparar email
   const emailSubject = `Recordatorio: Factura ${invoice.numeroFactura} pendiente de pago`;
-  
+
   const emailBody = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #333;">Recordatorio de Factura Pendiente</h2>
@@ -189,7 +180,7 @@ async function sendInvoiceReminder(invoiceId: string, customMessage?: string) {
       data: {
         recordatoriosEnviados: invoice.recordatoriosEnviados + 1,
         ultimoRecordatorio: new Date(),
-      }
+      },
     });
 
     return {
@@ -216,7 +207,7 @@ async function sendMonthlySummaries() {
     },
     include: {
       subscriptionPlan: true,
-    }
+    },
   });
 
   const results = {
@@ -232,7 +223,7 @@ async function sendMonthlySummaries() {
         where: {
           companyId: company.id,
           periodo: currentMonth,
-        }
+        },
       });
 
       if (invoices.length === 0) {
@@ -240,11 +231,11 @@ async function sendMonthlySummaries() {
       }
 
       const totalFacturado = invoices.reduce((sum, inv) => sum + inv.total, 0);
-      const facturasPagadas = invoices.filter(inv => inv.estado === 'PAGADA').length;
-      const facturasPendientes = invoices.filter(inv => inv.estado === 'PENDIENTE').length;
+      const facturasPagadas = invoices.filter((inv) => inv.estado === 'PAGADA').length;
+      const facturasPendientes = invoices.filter((inv) => inv.estado === 'PENDIENTE').length;
 
       const emailSubject = `Resumen mensual de facturación - ${format(new Date(), 'MMMM yyyy', { locale: es })}`;
-      
+
       const emailBody = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #333;">Resumen Mensual de Facturación</h2>
@@ -268,12 +259,16 @@ async function sendMonthlySummaries() {
             </ul>
           </div>
           
-          ${company.subscriptionPlan ? `
+          ${
+            company.subscriptionPlan
+              ? `
             <div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 20px 0;">
               <h4 style="margin-top: 0;">Plan Actual</h4>
               <p><strong>${company.subscriptionPlan.nombre}</strong> - €${company.subscriptionPlan.precioMensual}/mes</p>
             </div>
-          ` : ''}
+          `
+              : ''
+          }
           
           <div style="text-align: center; margin: 30px 0;">
             <a href="${process.env.NEXTAUTH_URL}/facturacion" 

@@ -1,17 +1,17 @@
 // @ts-nocheck
 /**
  * Alegra Integration Service
- * 
+ *
  * Servicio de integración con Alegra
  * Software de contabilidad y facturación en la nube
  * Líder en Colombia y Latinoamérica
- * 
+ *
  * Características:
  * - Gestión de contactos
  * - Facturación electrónica
  * - Registro de pagos
  * - Compras y gastos
- * 
+ *
  * Documentación API: https://developer.alegra.com/docs/
  */
 
@@ -19,7 +19,7 @@ import axios, { AxiosInstance } from 'axios';
 import { prisma } from './db';
 
 interface AlegraConfig {
-  username: string;  // API username (email)
+  username: string; // API username (email)
   apiToken: string;
   apiUrl: string;
 }
@@ -27,13 +27,13 @@ interface AlegraConfig {
 interface AlegraContact {
   id?: string;
   name: string;
-  idNumber: string;  // Número de identificación
+  idNumber: string; // Número de identificación
   phonePrimary?: string;
   email?: string;
   address?: {
     address: string;
     city?: string;
-    department?: string;  // Estado/Provincia
+    department?: string; // Estado/Provincia
   };
   type?: 'client' | 'provider';
 }
@@ -42,7 +42,7 @@ interface AlegraInvoice {
   id?: string;
   date: string;
   dueDate: string;
-  client: number;  // ID del cliente
+  client: number; // ID del cliente
   currency: string;
   items: Array<{
     name: string;
@@ -56,7 +56,7 @@ interface AlegraInvoice {
   }>;
   observations?: string;
   stamp?: {
-    generateStamp: boolean;  // Generar factura electrónica
+    generateStamp: boolean; // Generar factura electrónica
   };
 }
 
@@ -75,8 +75,8 @@ interface AlegraPayment {
 interface AlegraExpense {
   id?: string;
   date: string;
-  contact?: number;  // ID del proveedor
-  category?: number;  // ID de la categoría
+  contact?: number; // ID del proveedor
+  category?: number; // ID de la categoría
   description: string;
   price: number;
   tax?: Array<{
@@ -95,7 +95,7 @@ class AlegraIntegrationService {
     this.config = {
       username: process.env.ALEGRA_USERNAME || '',
       apiToken: process.env.ALEGRA_API_TOKEN || '',
-      apiUrl: 'https://api.alegra.com/api/v1'
+      apiUrl: 'https://api.alegra.com/api/v1',
     };
 
     // Alegra usa Basic Auth
@@ -104,10 +104,10 @@ class AlegraIntegrationService {
     this.client = axios.create({
       baseURL: this.config.apiUrl,
       headers: {
-        'Authorization': `Basic ${auth}`,
+        Authorization: `Basic ${auth}`,
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
+        Accept: 'application/json',
+      },
     });
   }
 
@@ -132,7 +132,7 @@ class AlegraIntegrationService {
       phonePrimary: contact.phonePrimary,
       email: contact.email,
       address: contact.address,
-      type: [contact.type || 'client']
+      type: [contact.type || 'client'],
     });
 
     return response.data;
@@ -159,7 +159,7 @@ class AlegraIntegrationService {
     }
 
     const response = await this.client.get('/contacts', {
-      params: { identification: idNumber }
+      params: { identification: idNumber },
     });
 
     return response.data?.[0] || null;
@@ -189,10 +189,10 @@ class AlegraIntegrationService {
       date: invoice.date,
       dueDate: invoice.dueDate,
       client: invoice.client,
-      currency: invoice.currency || 'COP',  // Peso colombiano por defecto
+      currency: invoice.currency || 'COP', // Peso colombiano por defecto
       items: invoice.items,
       observations: invoice.observations,
-      stamp: invoice.stamp || { generateStamp: false }
+      stamp: invoice.stamp || { generateStamp: false },
     });
 
     return response.data;
@@ -223,7 +223,7 @@ class AlegraIntegrationService {
       bankAccount: payment.bankAccount,
       invoices: payment.invoices,
       paymentMethod: payment.paymentMethod || 'cash',
-      observations: payment.observations
+      observations: payment.observations,
     });
 
     return response.data;
@@ -241,14 +241,16 @@ class AlegraIntegrationService {
       date: expense.date,
       contact: expense.contact,
       category: expense.category,
-      items: [{
-        name: expense.description,
-        price: expense.price,
-        quantity: 1,
-        tax: expense.tax
-      }],
+      items: [
+        {
+          name: expense.description,
+          price: expense.price,
+          quantity: 1,
+          tax: expense.tax,
+        },
+      ],
       paymentMethod: expense.paymentMethod,
-      bankAccount: expense.bankAccount
+      bankAccount: expense.bankAccount,
     });
 
     return response.data;
@@ -260,7 +262,7 @@ class AlegraIntegrationService {
   async syncTenantToContact(tenantId: string, companyId: string): Promise<any> {
     const tenant = await prisma.tenant.findUnique({
       where: { id: tenantId },
-      include: { units: { include: { building: true } } }
+      include: { units: { include: { building: true } } },
     });
 
     if (!tenant || tenant.companyId !== companyId) {
@@ -284,9 +286,9 @@ class AlegraIntegrationService {
       address: {
         address: firstUnit?.building?.direccion || '',
         city: 'Madrid',
-        department: 'Madrid'
+        department: 'Madrid',
       },
-      type: 'client'
+      type: 'client',
     };
 
     return await this.createContact(contact);
@@ -300,8 +302,8 @@ class AlegraIntegrationService {
       where: { id: contractId },
       include: {
         tenant: true,
-        unit: { include: { building: true } }
-      }
+        unit: { include: { building: true } },
+      },
     });
 
     if (!contract || contract.tenant.companyId !== companyId) {
@@ -316,20 +318,20 @@ class AlegraIntegrationService {
       date: new Date().toISOString().split('T')[0],
       dueDate: new Date(new Date().setDate(contract.diaPago || 5)).toISOString().split('T')[0],
       client: parseInt(contact.id),
-      currency: 'COP',  // Configurable según el país
+      currency: 'COP', // Configurable según el país
       items: [
         {
           name: `Renta mensual - ${contract.unit?.numero}`,
           description: `Alquiler de ${contract.unit?.numero} en ${contract.unit?.building?.nombre}`,
           price: contract.rentaMensual,
           quantity: 1,
-          tax: [{ id: 1, percentage: 0 }]  // Sin IVA para alquileres residenciales
-        }
+          tax: [{ id: 1, percentage: 0 }], // Sin IVA para alquileres residenciales
+        },
       ],
       observations: `Contrato ID: ${contractId}\nPeríodo: ${contract.fechaInicio.toLocaleDateString('es-ES')} - ${contract.fechaFin.toLocaleDateString('es-ES')}`,
       stamp: {
-        generateStamp: false  // Cambiar a true para facturación electrónica
-      }
+        generateStamp: false, // Cambiar a true para facturación electrónica
+      },
     };
 
     if (contract.deposito) {
@@ -338,7 +340,7 @@ class AlegraIntegrationService {
         description: 'Depósito reembolsable al finalizar el contrato',
         price: contract.deposito,
         quantity: 1,
-        tax: [{ id: 1, percentage: 0 }]
+        tax: [{ id: 1, percentage: 0 }],
       });
     }
 
@@ -355,10 +357,10 @@ class AlegraIntegrationService {
         contract: {
           include: {
             tenant: true,
-            unit: { include: { building: true } }
-          }
-        }
-      }
+            unit: { include: { building: true } },
+          },
+        },
+      },
     });
 
     if (!payment || payment.contract.tenant.companyId !== companyId) {
@@ -366,13 +368,18 @@ class AlegraIntegrationService {
     }
 
     const alegraPayment: AlegraPayment = {
-      date: payment.fechaPago?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
-      invoices: payment.alegraInvoiceId ? [{
-        id: parseInt(payment.alegraInvoiceId),
-        amount: payment.monto
-      }] : [],
+      date:
+        payment.fechaPago?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
+      invoices: payment.alegraInvoiceId
+        ? [
+            {
+              id: parseInt(payment.alegraInvoiceId),
+              amount: payment.monto,
+            },
+          ]
+        : [],
       paymentMethod: this.mapPaymentMethod(payment.metodoPago),
-      observations: `Pago INMOVA - Ref: ${payment.concepto}`
+      observations: `Pago INMOVA - Ref: ${payment.concepto}`,
     };
 
     return await this.registerPayment(alegraPayment);
@@ -386,8 +393,8 @@ class AlegraIntegrationService {
       where: { id: expenseId },
       include: {
         building: true,
-        provider: true
-      }
+        provider: true,
+      },
     });
 
     if (!expense || expense.companyId !== companyId) {
@@ -397,14 +404,16 @@ class AlegraIntegrationService {
     // Si hay proveedor, sincronizarlo como contacto tipo 'provider'
     let contactId: number | undefined;
     if (expense.provider) {
-      const providerContact = await this.findContactByIdNumber(expense.provider.cif || expense.provider.id);
+      const providerContact = await this.findContactByIdNumber(
+        expense.provider.cif || expense.provider.id
+      );
       if (!providerContact) {
         const newContact = await this.createContact({
           name: expense.provider.nombre,
           idNumber: expense.provider.cif || expense.provider.id,
           phonePrimary: expense.provider.telefono,
           email: expense.provider.email,
-          type: 'provider'
+          type: 'provider',
         });
         contactId = parseInt(newContact.id);
       } else {
@@ -417,8 +426,8 @@ class AlegraIntegrationService {
       contact: contactId,
       description: expense.descripcion,
       price: expense.monto,
-      tax: [{ id: 1, percentage: 19 }],  // IVA colombiano estándar (ajustar según país)
-      paymentMethod: 'cash'
+      tax: [{ id: 1, percentage: 19 }], // IVA colombiano estándar (ajustar según país)
+      paymentMethod: 'cash',
     };
 
     return await this.createExpense(alegraExpense);
@@ -429,10 +438,10 @@ class AlegraIntegrationService {
    */
   private mapPaymentMethod(method: string | null): string {
     const mapping: { [key: string]: string } = {
-      'transferencia': 'bank-transfer',
-      'tarjeta': 'credit-card',
-      'efectivo': 'cash',
-      'domiciliacion': 'debit'
+      transferencia: 'bank-transfer',
+      tarjeta: 'credit-card',
+      efectivo: 'cash',
+      domiciliacion: 'debit',
     };
 
     return mapping[method?.toLowerCase() || 'efectivo'] || 'cash';
@@ -446,7 +455,8 @@ class AlegraIntegrationService {
       if (!this.isConfigured()) {
         return {
           success: false,
-          message: 'Alegra no configurado. Por favor, añade ALEGRA_USERNAME y ALEGRA_API_TOKEN en las variables de entorno.'
+          message:
+            'Alegra no configurado. Por favor, añade ALEGRA_USERNAME y ALEGRA_API_TOKEN en las variables de entorno.',
         };
       }
 
@@ -455,12 +465,12 @@ class AlegraIntegrationService {
 
       return {
         success: true,
-        message: `Conectado exitosamente a Alegra (${response.data.name || 'Cuenta activa'})`
+        message: `Conectado exitosamente a Alegra (${response.data.name || 'Cuenta activa'})`,
       };
     } catch (error: any) {
       return {
         success: false,
-        message: `Error de conexión: ${error.response?.data?.message || error.message}`
+        message: `Error de conexión: ${error.response?.data?.message || error.message}`,
       };
     }
   }

@@ -52,8 +52,8 @@ export function PushNotificationManager() {
       const registration = await navigator.serviceWorker.ready;
 
       // Usar VAPID public key por defecto (en producción, obtenerlo del servidor)
-      const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || 
-        'BEl62iUYgUivxIkv69yViEuiBIa-Ib37J8xYdLMPL4c';
+      const publicKey =
+        process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || 'BEl62iUYgUivxIkv69yViEuiBIa-Ib37J8xYdLMPL4c';
 
       // Crear suscripción
       const subscription = await registration.pushManager.subscribe({
@@ -118,9 +118,7 @@ export function PushNotificationManager() {
             <BellOff className="h-5 w-5" />
             Notificaciones Push
           </CardTitle>
-          <CardDescription>
-            Tu navegador no soporta notificaciones push
-          </CardDescription>
+          <CardDescription>Tu navegador no soporta notificaciones push</CardDescription>
         </CardHeader>
       </Card>
     );
@@ -157,11 +155,7 @@ export function PushNotificationManager() {
           </div>
           <div>
             {isSubscribed ? (
-              <Button
-                variant="outline"
-                onClick={unsubscribeFromPush}
-                disabled={isLoading}
-              >
+              <Button variant="outline" onClick={unsubscribeFromPush} disabled={isLoading}>
                 <BellOff className="h-4 w-4 mr-2" />
                 Desactivar
               </Button>

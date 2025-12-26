@@ -262,246 +262,244 @@ export default function AutomatizacionPage() {
   if (loading) {
     return (
       <AuthenticatedLayout>
-            <div className="flex items-center justify-center h-full">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-            </div>
-          </AuthenticatedLayout>
+        <div className="flex items-center justify-center h-full">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        </div>
+      </AuthenticatedLayout>
     );
   }
 
   return (
-    <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
-                  Automatizaciones Inteligentes
-                </h1>
-                <p className="text-gray-600 mt-1">
-                  Crea y gestiona flujos automatizados para tu negocio
-                </p>
-              </div>
-              <Button onClick={() => setShowCreateDialog(true)} className="gradient-primary">
-                <Plus className="h-4 w-4 mr-2" />
-                Nueva Automatización
-              </Button>
+    <>
+      <AuthenticatedLayout>
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                Automatizaciones Inteligentes
+              </h1>
+              <p className="text-gray-600 mt-1">
+                Crea y gestiona flujos automatizados para tu negocio
+              </p>
             </div>
+            <Button onClick={() => setShowCreateDialog(true)} className="gradient-primary">
+              <Plus className="h-4 w-4 mr-2" />
+              Nueva Automatización
+            </Button>
+          </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Automatizaciones</CardTitle>
-                  <Zap className="h-4 w-4 text-indigo-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{automations.length}</div>
-                </CardContent>
-              </Card>
+          {/* Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Automatizaciones</CardTitle>
+                <Zap className="h-4 w-4 text-indigo-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{automations.length}</div>
+              </CardContent>
+            </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Activas</CardTitle>
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {automations.filter((a) => a.activa).length}
-                  </div>
-                </CardContent>
-              </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Activas</CardTitle>
+                <CheckCircle className="h-4 w-4 text-green-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {automations.filter((a) => a.activa).length}
+                </div>
+              </CardContent>
+            </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Ejecuciones</CardTitle>
-                  <Activity className="h-4 w-4 text-blue-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {automations.reduce((sum, a) => sum + (a.vecesEjecutada || 0), 0)}
-                  </div>
-                </CardContent>
-              </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Ejecuciones</CardTitle>
+                <Activity className="h-4 w-4 text-blue-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {automations.reduce((sum, a) => sum + (a.vecesEjecutada || 0), 0)}
+                </div>
+              </CardContent>
+            </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Plantillas</CardTitle>
-                  <FileText className="h-4 w-4 text-yellow-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{templates.length}</div>
-                </CardContent>
-              </Card>
-            </div>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Plantillas</CardTitle>
+                <FileText className="h-4 w-4 text-yellow-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{templates.length}</div>
+              </CardContent>
+            </Card>
+          </div>
 
-            {/* Tabs */}
-            <Tabs defaultValue="automations" className="space-y-4">
-              <TabsList>
-                <TabsTrigger value="automations">Mis Automatizaciones</TabsTrigger>
-                <TabsTrigger value="templates">Plantillas</TabsTrigger>
-              </TabsList>
+          {/* Tabs */}
+          <Tabs defaultValue="automations" className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="automations">Mis Automatizaciones</TabsTrigger>
+              <TabsTrigger value="templates">Plantillas</TabsTrigger>
+            </TabsList>
 
-              {/* Automations Tab */}
-              <TabsContent value="automations" className="space-y-4">
-                {automations.length === 0 ? (
-                  <Card>
-                    <CardContent className="flex flex-col items-center justify-center py-12">
-                      <Zap className="h-12 w-12 text-gray-400 mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">No hay automatizaciones</h3>
-                      <p className="text-gray-500 mb-4">
-                        Crea tu primera automatización para empezar
-                      </p>
-                      <Button onClick={() => setShowCreateDialog(true)}>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Nueva Automatización
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="grid grid-cols-1 gap-4">
-                    {automations.map((automation) => {
-                      const TypeIcon = getIconForType(automation.tipo);
-                      return (
-                        <Card key={automation.id}>
-                          <CardHeader>
-                            <div className="flex items-start justify-between">
-                              <div className="flex items-start gap-3">
-                                <div className="p-2 bg-indigo-100 rounded-lg">
-                                  <TypeIcon className="h-5 w-5 text-indigo-600" />
-                                </div>
-                                <div>
-                                  <CardTitle className="text-lg">{automation.nombre}</CardTitle>
-                                  <CardDescription>{automation.descripcion}</CardDescription>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Badge variant={automation.activa ? 'default' : 'secondary'}>
-                                  {automation.activa ? 'Activa' : 'Inactiva'}
-                                </Badge>
-                                <Badge variant="outline">{automation.tipo}</Badge>
-                              </div>
-                            </div>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                              <div>
-                                <div className="text-sm text-gray-600">Tipo de Disparador</div>
-                                <div className="font-semibold">{automation.triggerType}</div>
-                              </div>
-                              <div>
-                                <div className="text-sm text-gray-600">Ejecuciones</div>
-                                <div className="font-semibold">{automation.vecesEjecutada}</div>
-                              </div>
-                              <div>
-                                <div className="text-sm text-gray-600">Última Ejecución</div>
-                                <div className="font-semibold">
-                                  {automation.ultimaEjecucion
-                                    ? format(
-                                        new Date(automation.ultimaEjecucion),
-                                        'dd/MM/yyyy HH:mm',
-                                        { locale: es }
-                                      )
-                                    : 'Nunca'}
-                                </div>
-                              </div>
-                              <div>
-                                <div className="text-sm text-gray-600">Prioridad</div>
-                                <Badge
-                                  variant={
-                                    automation.prioridad === 'alta' ? 'destructive' : 'outline'
-                                  }
-                                >
-                                  {automation.prioridad}
-                                </Badge>
-                              </div>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => toggleAutomation(automation.id, automation.activa)}
-                              >
-                                {automation.activa ? (
-                                  <Pause className="h-4 w-4 mr-1" />
-                                ) : (
-                                  <Play className="h-4 w-4 mr-1" />
-                                )}
-                                {automation.activa ? 'Desactivar' : 'Activar'}
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  setSelectedAutomation(automation.id);
-                                  loadExecutions(automation.id);
-                                }}
-                              >
-                                <Eye className="h-4 w-4 mr-1" />
-                                Ver Historial
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => deleteAutomation(automation.id)}
-                                className="text-red-600 hover:bg-red-50"
-                              >
-                                <Trash className="h-4 w-4 mr-1" />
-                                Eliminar
-                              </Button>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                )}
-              </TabsContent>
-
-              {/* Templates Tab */}
-              <TabsContent value="templates" className="space-y-4">
-                {templates.length === 0 ? (
-                  <Card>
-                    <CardContent className="flex flex-col items-center justify-center py-12">
-                      <FileText className="h-12 w-12 text-gray-400 mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">No hay plantillas disponibles</h3>
-                      <p className="text-gray-500">
-                        Las plantillas estarán disponibles próximamente
-                      </p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {templates.map((template) => (
-                      <Card key={template.id} className="hover:shadow-lg transition-shadow">
+            {/* Automations Tab */}
+            <TabsContent value="automations" className="space-y-4">
+              {automations.length === 0 ? (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <Zap className="h-12 w-12 text-gray-400 mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No hay automatizaciones</h3>
+                    <p className="text-gray-500 mb-4">
+                      Crea tu primera automatización para empezar
+                    </p>
+                    <Button onClick={() => setShowCreateDialog(true)}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Nueva Automatización
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 gap-4">
+                  {automations.map((automation) => {
+                    const TypeIcon = getIconForType(automation.tipo);
+                    return (
+                      <Card key={automation.id}>
                         <CardHeader>
-                          <div className="flex items-center gap-2 mb-2">
-                            {template.popular && (
-                              <Badge variant="default" className="bg-yellow-500">
-                                Popular
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-start gap-3">
+                              <div className="p-2 bg-indigo-100 rounded-lg">
+                                <TypeIcon className="h-5 w-5 text-indigo-600" />
+                              </div>
+                              <div>
+                                <CardTitle className="text-lg">{automation.nombre}</CardTitle>
+                                <CardDescription>{automation.descripcion}</CardDescription>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant={automation.activa ? 'default' : 'secondary'}>
+                                {automation.activa ? 'Activa' : 'Inactiva'}
                               </Badge>
-                            )}
-                            <Badge variant="outline">{template.categoria}</Badge>
+                              <Badge variant="outline">{automation.tipo}</Badge>
+                            </div>
                           </div>
-                          <CardTitle className="text-base">{template.nombre}</CardTitle>
-                          <CardDescription className="text-sm">
-                            {template.descripcion}
-                          </CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <Button size="sm" className="w-full">
-                            Usar Plantilla
-                          </Button>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                            <div>
+                              <div className="text-sm text-gray-600">Tipo de Disparador</div>
+                              <div className="font-semibold">{automation.triggerType}</div>
+                            </div>
+                            <div>
+                              <div className="text-sm text-gray-600">Ejecuciones</div>
+                              <div className="font-semibold">{automation.vecesEjecutada}</div>
+                            </div>
+                            <div>
+                              <div className="text-sm text-gray-600">Última Ejecución</div>
+                              <div className="font-semibold">
+                                {automation.ultimaEjecucion
+                                  ? format(
+                                      new Date(automation.ultimaEjecucion),
+                                      'dd/MM/yyyy HH:mm',
+                                      { locale: es }
+                                    )
+                                  : 'Nunca'}
+                              </div>
+                            </div>
+                            <div>
+                              <div className="text-sm text-gray-600">Prioridad</div>
+                              <Badge
+                                variant={
+                                  automation.prioridad === 'alta' ? 'destructive' : 'outline'
+                                }
+                              >
+                                {automation.prioridad}
+                              </Badge>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => toggleAutomation(automation.id, automation.activa)}
+                            >
+                              {automation.activa ? (
+                                <Pause className="h-4 w-4 mr-1" />
+                              ) : (
+                                <Play className="h-4 w-4 mr-1" />
+                              )}
+                              {automation.activa ? 'Desactivar' : 'Activar'}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedAutomation(automation.id);
+                                loadExecutions(automation.id);
+                              }}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              Ver Historial
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => deleteAutomation(automation.id)}
+                              className="text-red-600 hover:bg-red-50"
+                            >
+                              <Trash className="h-4 w-4 mr-1" />
+                              Eliminar
+                            </Button>
+                          </div>
                         </CardContent>
                       </Card>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
-          </div>
-        </main>
-      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </TabsContent>
+
+            {/* Templates Tab */}
+            <TabsContent value="templates" className="space-y-4">
+              {templates.length === 0 ? (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <FileText className="h-12 w-12 text-gray-400 mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No hay plantillas disponibles</h3>
+                    <p className="text-gray-500">Las plantillas estarán disponibles próximamente</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {templates.map((template) => (
+                    <Card key={template.id} className="hover:shadow-lg transition-shadow">
+                      <CardHeader>
+                        <div className="flex items-center gap-2 mb-2">
+                          {template.popular && (
+                            <Badge variant="default" className="bg-yellow-500">
+                              Popular
+                            </Badge>
+                          )}
+                          <Badge variant="outline">{template.categoria}</Badge>
+                        </div>
+                        <CardTitle className="text-base">{template.nombre}</CardTitle>
+                        <CardDescription className="text-sm">
+                          {template.descripcion}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <Button size="sm" className="w-full">
+                          Usar Plantilla
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        </div>
+      </AuthenticatedLayout>
 
       {/* Create Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
@@ -650,6 +648,6 @@ export default function AutomatizacionPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

@@ -1,7 +1,7 @@
 /**
  * API Endpoint: Configurar MFA (paso 1)
  * POST /api/auth/mfa/setup
- * 
+ *
  * Genera secret TOTP, QR code y backup codes para configurar MFA
  */
 
@@ -18,10 +18,7 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user?.id) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const userId = session.user.id;

@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { calculateLeadScoring, calculateProbabilidadCierre, determinarTemperatura } from '@/lib/crm-service';
+import {
+  calculateLeadScoring,
+  calculateProbabilidadCierre,
+  determinarTemperatura,
+} from '@/lib/crm-service';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -12,10 +16,7 @@ export async function POST(req: NextRequest) {
 
     // Validaciones básicas
     if (!body.email) {
-      return NextResponse.json(
-        { error: 'Email es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email es requerido' }, { status: 400 });
     }
 
     // Buscar o crear compañía demo para leads públicos
@@ -70,8 +71,12 @@ export async function POST(req: NextRequest) {
           cargo: body.cargo || existingLead.cargo,
           paginaOrigen: body.paginaOrigen || existingLead.paginaOrigen,
           verticalesInteres: body.verticalesInteres || existingLead.verticalesInteres,
-          presupuestoMensual: body.presupuestoMensual ? parseFloat(body.presupuestoMensual) : existingLead.presupuestoMensual,
-          numeroUnidades: body.numeroUnidades ? parseInt(body.numeroUnidades) : existingLead.numeroUnidades,
+          presupuestoMensual: body.presupuestoMensual
+            ? parseFloat(body.presupuestoMensual)
+            : existingLead.presupuestoMensual,
+          numeroUnidades: body.numeroUnidades
+            ? parseInt(body.numeroUnidades)
+            : existingLead.numeroUnidades,
           conversacionId: body.conversacionId || existingLead.conversacionId,
           mensajeInicial: body.mensajeInicial || existingLead.mensajeInicial,
           preguntasFrecuentes: body.preguntasFrecuentes || existingLead.preguntasFrecuentes,
@@ -124,15 +129,21 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      lead,
-      message: 'Lead capturado correctamente',
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        lead,
+        message: 'Lead capturado correctamente',
+      },
+      { status: 201 }
+    );
   } catch (error) {
     logger.error('Error capturing lead:', error);
     return NextResponse.json(
-      { error: 'Error al capturar lead', details: error instanceof Error ? error.message : 'Unknown error' },
+      {
+        error: 'Error al capturar lead',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }

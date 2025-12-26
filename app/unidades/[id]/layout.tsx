@@ -112,7 +112,14 @@ export default async function UnidadDetailLayout({ params, children }: Props) {
 
     return (
       <>
-        <StructuredDataScript data={[propertySchema, organizationSchema, breadcrumbSchema] as unknown as Record<string, unknown>[]} />
+        <StructuredDataScript
+          data={
+            [propertySchema, organizationSchema, breadcrumbSchema] as unknown as Record<
+              string,
+              unknown
+            >[]
+          }
+        />
         {children}
       </>
     );

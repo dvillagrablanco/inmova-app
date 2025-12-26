@@ -7,17 +7,11 @@ import logger, { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 // POST /api/votaciones/[id]/votar - Registrar voto de inquilino
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const { opcionSeleccionada, comentario } = await req.json();
@@ -43,35 +37,23 @@ export async function POST(
     });
 
     if (!votacion) {
-      return NextResponse.json(
-        { error: 'Votación no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Votación no encontrada' }, { status: 404 });
     }
 
     if (votacion.estado !== 'activa') {
-      return NextResponse.json(
-        { error: 'Esta votación no está activa' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Esta votación no está activa' }, { status: 400 });
     }
 
     // Verificar que no haya votado anteriormente
     const votoExistente = votacion.votos.find((v) => v.tenantId === tenant.id);
     if (votoExistente) {
-      return NextResponse.json(
-        { error: 'Ya has votado en esta votación' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Ya has votado en esta votación' }, { status: 400 });
     }
 
     // Verificar que la opción seleccionada es válida
     const opciones = votacion.opciones as string[];
     if (!opciones.includes(opcionSeleccionada)) {
-      return NextResponse.json(
-        { error: 'Opción seleccionada no válida' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Opción seleccionada no válida' }, { status: 400 });
     }
 
     // Registrar el voto
@@ -99,17 +81,14 @@ export async function POST(
       });
 
       const resultados = opciones.map((opcion) => {
-        const votos = todosVotos.filter(
-          (v) => v.opcionSeleccionada === opcion
-        ).length;
+        const votos = todosVotos.filter((v) => v.opcionSeleccionada === opcion).length;
         return { opcion, votos };
       });
 
       const opcionGanadora =
         resultados.length > 0
-          ? resultados.reduce((prev, current) =>
-              prev.votos > current.votos ? prev : current
-            ).opcion
+          ? resultados.reduce((prev, current) => (prev.votos > current.votos ? prev : current))
+              .opcion
           : null;
 
       await prisma.communityVote.update({
@@ -130,9 +109,6 @@ export async function POST(
     });
   } catch (error) {
     logger.error('Error al registrar voto:', error);
-    return NextResponse.json(
-      { error: 'Error al registrar voto' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al registrar voto' }, { status: 500 });
   }
 }

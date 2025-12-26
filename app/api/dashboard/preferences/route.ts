@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
 
     let preference = await prisma.userDashboardPreference.findUnique({
       where: { userId },
-      include: { widgets: true }
+      include: { widgets: true },
     });
 
     // Si no existe, crear preferencias por defecto
@@ -30,9 +30,9 @@ export async function GET(req: NextRequest) {
           layout: 'grid',
           theme: 'light',
           defaultView: 'overview',
-          activeWidgets: ['kpi-payments', 'kpi-contracts', 'kpi-maintenance', 'chart-occupancy']
+          activeWidgets: ['kpi-payments', 'kpi-contracts', 'kpi-maintenance', 'chart-occupancy'],
         },
-        include: { widgets: true }
+        include: { widgets: true },
       });
     }
 
@@ -65,15 +65,15 @@ export async function PATCH(req: NextRequest) {
         defaultView,
         activeWidgets,
         widgetPositions,
-        defaultFilters
+        defaultFilters,
       },
       create: {
         userId,
         layout: layout || 'grid',
         theme: theme || 'light',
         defaultView: defaultView || 'overview',
-        activeWidgets: activeWidgets || []
-      }
+        activeWidgets: activeWidgets || [],
+      },
     });
 
     return NextResponse.json(preference);

@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { 
-  Building2, 
-  FileCheck, 
-  Briefcase, 
-  TrendingUp, 
-  Users, 
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import {
+  Building2,
+  FileCheck,
+  Briefcase,
+  TrendingUp,
+  Users,
   AlertTriangle,
   CheckCircle2,
   Clock,
-  Euro
-} from "lucide-react";
+  Euro,
+} from 'lucide-react';
 
 export default function EwoorkerDashboard() {
   const { data: session, status } = useSession();
@@ -24,13 +24,13 @@ export default function EwoorkerDashboard() {
     contratosVigentes: 0,
     documentosVencer: 0,
     facturacionMes: 0,
-    calificacionMedia: 0
+    calificacionMedia: 0,
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login");
+    if (status === 'unauthenticated') {
+      router.push('/login');
     }
   }, [status, router]);
 
@@ -42,19 +42,19 @@ export default function EwoorkerDashboard() {
 
   const fetchDashboardStats = async () => {
     try {
-      const res = await fetch("/api/ewoorker/dashboard/stats");
+      const res = await fetch('/api/ewoorker/dashboard/stats');
       if (res.ok) {
         const data = await res.json();
         setStats(data);
       }
     } catch (error) {
-      console.error("Error fetching stats:", error);
+      console.error('Error fetching stats:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  if (status === "loading" || loading) {
+  if (status === 'loading' || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
@@ -93,42 +93,42 @@ export default function EwoorkerDashboard() {
             title="Obras Activas"
             value={stats.obrasActivas}
             color="blue"
-            onClick={() => router.push("/ewoorker/obras")}
+            onClick={() => router.push('/ewoorker/obras')}
           />
           <StatCard
             icon={<FileCheck className="h-6 w-6" />}
             title="Ofertas Pendientes"
             value={stats.ofertasPendientes}
             color="purple"
-            onClick={() => router.push("/ewoorker/ofertas")}
+            onClick={() => router.push('/ewoorker/ofertas')}
           />
           <StatCard
             icon={<CheckCircle2 className="h-6 w-6" />}
             title="Contratos Vigentes"
             value={stats.contratosVigentes}
             color="green"
-            onClick={() => router.push("/ewoorker/contratos")}
+            onClick={() => router.push('/ewoorker/contratos')}
           />
           <StatCard
             icon={<AlertTriangle className="h-6 w-6" />}
             title="Docs a Vencer"
             value={stats.documentosVencer}
-            color={stats.documentosVencer > 0 ? "red" : "green"}
-            onClick={() => router.push("/ewoorker/compliance")}
+            color={stats.documentosVencer > 0 ? 'red' : 'green'}
+            onClick={() => router.push('/ewoorker/compliance')}
           />
           <StatCard
             icon={<Euro className="h-6 w-6" />}
             title="Facturación Mes"
             value={`€${stats.facturacionMes.toLocaleString()}`}
             color="orange"
-            onClick={() => router.push("/ewoorker/pagos")}
+            onClick={() => router.push('/ewoorker/pagos')}
           />
           <StatCard
             icon={<TrendingUp className="h-6 w-6" />}
             title="Calificación"
             value={`${stats.calificacionMedia.toFixed(1)}/5.0`}
             color="yellow"
-            onClick={() => router.push("/ewoorker/perfil")}
+            onClick={() => router.push('/ewoorker/perfil')}
           />
         </div>
 
@@ -185,7 +185,7 @@ export default function EwoorkerDashboard() {
                 </p>
               </div>
               <button
-                onClick={() => router.push("/ewoorker/compliance")}
+                onClick={() => router.push('/ewoorker/compliance')}
                 className="ml-auto bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
               >
                 Ver Documentos
@@ -201,12 +201,12 @@ export default function EwoorkerDashboard() {
 // Componente de tarjeta de estadística
 function StatCard({ icon, title, value, color, onClick }: any) {
   const colorClasses: Record<string, string> = {
-    blue: "bg-blue-500",
-    purple: "bg-purple-500",
-    green: "bg-green-500",
-    red: "bg-red-500",
-    orange: "bg-orange-500",
-    yellow: "bg-yellow-500"
+    blue: 'bg-blue-500',
+    purple: 'bg-purple-500',
+    green: 'bg-green-500',
+    red: 'bg-red-500',
+    orange: 'bg-orange-500',
+    yellow: 'bg-yellow-500',
   };
 
   return (
@@ -215,9 +215,7 @@ function StatCard({ icon, title, value, color, onClick }: any) {
       className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer"
     >
       <div className="flex items-center justify-between">
-        <div className={`${colorClasses[color]} text-white p-3 rounded-lg`}>
-          {icon}
-        </div>
+        <div className={`${colorClasses[color]} text-white p-3 rounded-lg`}>{icon}</div>
         <div className="text-right">
           <p className="text-gray-600 text-sm font-medium">{title}</p>
           <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
@@ -232,10 +230,10 @@ function ModuleCard({ icon, title, description, color, href }: any) {
   const router = useRouter();
 
   const colorClasses: Record<string, string> = {
-    blue: "from-blue-500 to-blue-600",
-    purple: "from-purple-500 to-purple-600",
-    green: "from-green-500 to-green-600",
-    orange: "from-orange-500 to-orange-600"
+    blue: 'from-blue-500 to-blue-600',
+    purple: 'from-purple-500 to-purple-600',
+    green: 'from-green-500 to-green-600',
+    orange: 'from-orange-500 to-orange-600',
   };
 
   return (

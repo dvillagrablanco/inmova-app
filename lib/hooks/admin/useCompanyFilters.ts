@@ -16,32 +16,33 @@ export function useCompanyFilters(companies: CompanyData[]) {
     // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(company =>
-        company.nombre.toLowerCase().includes(query) ||
-        company.emailContacto?.toLowerCase().includes(query) ||
-        company.contactoPrincipal?.toLowerCase().includes(query)
+      filtered = filtered.filter(
+        (company) =>
+          company.nombre.toLowerCase().includes(query) ||
+          company.emailContacto?.toLowerCase().includes(query) ||
+          company.contactoPrincipal?.toLowerCase().includes(query)
       );
     }
 
     // Status filter
     if (statusFilter !== 'all') {
       if (statusFilter === 'activo') {
-        filtered = filtered.filter(c => c.activo);
+        filtered = filtered.filter((c) => c.activo);
       } else if (statusFilter === 'inactivo') {
-        filtered = filtered.filter(c => !c.activo);
+        filtered = filtered.filter((c) => !c.activo);
       } else {
-        filtered = filtered.filter(c => c.estadoCliente === statusFilter);
+        filtered = filtered.filter((c) => c.estadoCliente === statusFilter);
       }
     }
 
     // Plan filter
     if (planFilter !== 'all') {
-      filtered = filtered.filter(c => c.subscriptionPlan?.id === planFilter);
+      filtered = filtered.filter((c) => c.subscriptionPlan?.id === planFilter);
     }
 
     // Category filter
     if (categoryFilter !== 'all') {
-      filtered = filtered.filter(c => c.category === categoryFilter);
+      filtered = filtered.filter((c) => c.category === categoryFilter);
     }
 
     // Sorting

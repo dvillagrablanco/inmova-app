@@ -3,7 +3,12 @@ import { format, subMonths } from 'date-fns';
 
 // Definiciones de tipos inline (reemplaza imports de @prisma/client)
 type EnergyType = 'electricidad' | 'agua' | 'gas' | 'calefaccion' | 'otro';
-type AlertType = 'consumo_alto' | 'consumo_bajo' | 'incremento_repentino' | 'fuga_posible' | 'anomalia_patron';
+type AlertType =
+  | 'consumo_alto'
+  | 'consumo_bajo'
+  | 'incremento_repentino'
+  | 'fuga_posible'
+  | 'anomalia_patron';
 
 /**
  * PAQUETE 13: GESTIÓN DE ENERGÍA - SERVICE LAYER
@@ -38,10 +43,7 @@ export async function calculateAverageConsumption(
 }
 
 // Detectar consumo anormal
-export async function detectAbnormalConsumption(
-  companyId: string,
-  readingId: string
-) {
+export async function detectAbnormalConsumption(companyId: string, readingId: string) {
   const reading = await prisma.energyReading.findUnique({
     where: { id: readingId },
     include: { building: true, unit: true },
@@ -97,10 +99,7 @@ export async function detectAbnormalConsumption(
 }
 
 // Calcular eficiencia energética
-export async function calculateEnergyEfficiency(
-  companyId: string,
-  buildingId?: string
-) {
+export async function calculateEnergyEfficiency(companyId: string, buildingId?: string) {
   const readings = await prisma.energyReading.findMany({
     where: {
       companyId,
@@ -119,18 +118,16 @@ export async function calculateEnergyEfficiency(
     };
   }
 
-  const avgConsumption =
-    readings.reduce((sum, r) => sum + r.consumo, 0) / readings.length;
+  const avgConsumption = readings.reduce((sum, r) => sum + r.consumo, 0) / readings.length;
   const avgCost =
-    readings.filter(r => r.costo).reduce((sum, r) => sum + (r.costo || 0), 0) /
-    readings.filter(r => r.costo).length;
+    readings.filter((r) => r.costo).reduce((sum, r) => sum + (r.costo || 0), 0) /
+    readings.filter((r) => r.costo).length;
 
   // Score simple basado en consumo (menor es mejor)
   // Normalizado a 0-100 donde 100 es el más eficiente
-  const maxConsumption = Math.max(...readings.map(r => r.consumo));
-  const eficienciaScore = maxConsumption > 0
-    ? parseFloat(((1 - avgConsumption / maxConsumption) * 100).toFixed(2))
-    : 0;
+  const maxConsumption = Math.max(...readings.map((r) => r.consumo));
+  const eficienciaScore =
+    maxConsumption > 0 ? parseFloat(((1 - avgConsumption / maxConsumption) * 100).toFixed(2)) : 0;
 
   // Recomendaciones básicas
   const recomendaciones = [];
@@ -190,10 +187,7 @@ export async function getConsumptionTrends(
 }
 
 // Calcular facturación a inquilinos
-export async function calculateTenantBilling(
-  companyId: string,
-  periodo: string
-) {
+export async function calculateTenantBilling(companyId: string, periodo: string) {
   const readings = await prisma.energyReading.findMany({
     where: {
       companyId,
@@ -211,7 +205,7 @@ export async function calculateTenantBilling(
 
   const billingByTenant: Record<string, any> = {};
 
-  readings.forEach(reading => {
+  readings.forEach((reading) => {
     if (!reading.unit?.tenant) return;
 
     const tenantId = reading.unit.tenant.id;
@@ -234,7 +228,7 @@ export async function calculateTenantBilling(
     billingByTenant[tenantId].costoTotal += reading.costo || 0;
   });
 
-  return Object.values(billingByTenant).map(billing => ({
+  return Object.values(billingByTenant).map((billing) => ({
     ...billing,
     costoTotal: parseFloat(billing.costoTotal.toFixed(2)),
   }));
@@ -246,26 +240,23 @@ export async function getEnergyStats(companyId: string) {
   const currentPeriod = format(now, 'yyyy-MM');
   const lastPeriod = format(subMonths(now, 1), 'yyyy-MM');
 
-  const [currentReadings, lastReadings, totalAlerts, unresolvedAlerts] =
-    await Promise.all([
-      prisma.energyReading.findMany({
-        where: { companyId, periodo: currentPeriod },
-      }),
-      prisma.energyReading.findMany({
-        where: { companyId, periodo: lastPeriod },
-      }),
-      prisma.energyAlert.count({ where: { companyId } }),
-      prisma.energyAlert.count({ where: { companyId, resuelta: false } }),
-    ]);
+  const [currentReadings, lastReadings, totalAlerts, unresolvedAlerts] = await Promise.all([
+    prisma.energyReading.findMany({
+      where: { companyId, periodo: currentPeriod },
+    }),
+    prisma.energyReading.findMany({
+      where: { companyId, periodo: lastPeriod },
+    }),
+    prisma.energyAlert.count({ where: { companyId } }),
+    prisma.energyAlert.count({ where: { companyId, resuelta: false } }),
+  ]);
 
   const currentConsumption = currentReadings.reduce((sum, r) => sum + r.consumo, 0);
   const lastConsumption = lastReadings.reduce((sum, r) => sum + r.consumo, 0);
   const currentCost = currentReadings.reduce((sum, r) => sum + (r.costo || 0), 0);
 
   const consumptionVariation =
-    lastConsumption > 0
-      ? ((currentConsumption - lastConsumption) / lastConsumption) * 100
-      : 0;
+    lastConsumption > 0 ? ((currentConsumption - lastConsumption) / lastConsumption) * 100 : 0;
 
   return {
     currentPeriod,

@@ -1,12 +1,12 @@
-import { forwardRef, ButtonHTMLAttributes } from 'react'
-import { Loader2, LucideIcon } from 'lucide-react'
-import { Button, ButtonProps } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { forwardRef, ButtonHTMLAttributes } from 'react';
+import { Loader2, LucideIcon } from 'lucide-react';
+import { Button, ButtonProps } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface ButtonWithLoadingProps extends ButtonProps {
-  isLoading?: boolean
-  loadingText?: string
-  icon?: LucideIcon
+  isLoading?: boolean;
+  loadingText?: string;
+  icon?: LucideIcon;
 }
 
 export const ButtonWithLoading = forwardRef<HTMLButtonElement, ButtonWithLoadingProps>(
@@ -30,8 +30,8 @@ export const ButtonWithLoading = forwardRef<HTMLButtonElement, ButtonWithLoading
           </>
         )}
       </Button>
-    )
+    );
   }
-)
+);
 
-ButtonWithLoading.displayName = 'ButtonWithLoading'
+ButtonWithLoading.displayName = 'ButtonWithLoading';

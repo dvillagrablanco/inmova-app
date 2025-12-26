@@ -13,18 +13,12 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Solo super_admin puede acceder
     if (session.user.role !== 'super_admin') {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
 
     const now = new Date();
@@ -127,10 +121,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const monthlyRevenue = paymentsThisMonth.reduce(
-      (sum, payment) => sum + payment.monto,
-      0
-    );
+    const monthlyRevenue = paymentsThisMonth.reduce((sum, payment) => sum + payment.monto, 0);
 
     // Ingresos del mes pasado
     const paymentsLastMonth = await prisma.payment.findMany({
@@ -146,15 +137,11 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const lastMonthRevenue = paymentsLastMonth.reduce(
-      (sum, payment) => sum + payment.monto,
-      0
-    );
+    const lastMonthRevenue = paymentsLastMonth.reduce((sum, payment) => sum + payment.monto, 0);
 
     // Crecimiento de ingresos
-    const revenueGrowth = lastMonthRevenue > 0
-      ? ((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100
-      : 0;
+    const revenueGrowth =
+      lastMonthRevenue > 0 ? ((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 : 0;
 
     // MRR (Monthly Recurring Revenue) - Basado en planes de suscripción
     const companiesWithPlans = await prisma.company.findMany({
@@ -241,9 +228,8 @@ export async function GET(request: NextRequest) {
     }
 
     // ===== MÉTRICAS DE CONVERSIÓN =====
-    const trialToActiveRate = trialCompanies > 0
-      ? (activeCompanies / (activeCompanies + trialCompanies)) * 100
-      : 0;
+    const trialToActiveRate =
+      trialCompanies > 0 ? (activeCompanies / (activeCompanies + trialCompanies)) * 100 : 0;
 
     // Planes de suscripción más populares
     const subscriptionStats = await prisma.company.groupBy({
@@ -391,9 +377,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error fetching admin dashboard stats:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener estadísticas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener estadísticas' }, { status: 500 });
   }
 }

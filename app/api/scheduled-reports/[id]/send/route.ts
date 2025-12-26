@@ -11,10 +11,7 @@ export const dynamic = 'force-dynamic';
  * POST /api/scheduled-reports/[id]/send
  * Envía un reporte programado inmediatamente
  */
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -35,10 +32,7 @@ export async function POST(
     });
 
     if (!report) {
-      return NextResponse.json(
-        { error: 'Reporte no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Reporte no encontrado' }, { status: 404 });
     }
 
     // Verificar que el reporte pertenece a la empresa del usuario
@@ -49,7 +43,7 @@ export async function POST(
     // Enviar el reporte
     try {
       await sendScheduledReport(id);
-      
+
       // Actualizar la fecha de último envío
       await prisma.scheduledReport.update({
         where: { id },
@@ -71,9 +65,6 @@ export async function POST(
     }
   } catch (error) {
     logger.error('Error en endpoint send:', error);
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }

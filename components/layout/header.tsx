@@ -79,8 +79,8 @@ export function Header() {
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 className="flex items-center gap-2 pl-2 pr-3 h-10"
                 aria-label={`Menú de usuario: ${userName}`}
               >
@@ -89,7 +89,10 @@ export function Header() {
                 </div>
                 <div className="hidden md:flex flex-col items-start">
                   <span className="text-sm font-medium leading-tight">{userName}</span>
-                  <Badge variant={roleBadge.variant} className="text-[9px] h-3.5 px-1.5 leading-none">
+                  <Badge
+                    variant={roleBadge.variant}
+                    className="text-[9px] h-3.5 px-1.5 leading-none"
+                  >
                     {roleBadge.label}
                   </Badge>
                 </div>

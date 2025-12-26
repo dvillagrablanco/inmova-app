@@ -7,10 +7,7 @@ import logger, { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 // GET /api/marketplace/reviews/[id] - Obtener reseña específica
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -34,27 +31,18 @@ export async function GET(
     });
 
     if (!review) {
-      return NextResponse.json(
-        { error: 'Reseña no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Reseña no encontrada' }, { status: 404 });
     }
 
     return NextResponse.json(review);
   } catch (error) {
     logger.error('Error fetching review:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener reseña' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener reseña' }, { status: 500 });
   }
 }
 
 // PATCH /api/marketplace/reviews/[id] - Actualizar reseña
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -72,10 +60,7 @@ export async function PATCH(
     });
 
     if (!existingReview) {
-      return NextResponse.json(
-        { error: 'Reseña no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Reseña no encontrada' }, { status: 404 });
     }
 
     const updateData: any = {};
@@ -91,10 +76,14 @@ export async function PATCH(
       }
       updateData.calificacion = rating;
     }
-    if (body.puntualidad !== undefined) updateData.puntualidad = body.puntualidad ? parseInt(body.puntualidad) : null;
-    if (body.calidad !== undefined) updateData.calidad = body.calidad ? parseInt(body.calidad) : null;
-    if (body.comunicacion !== undefined) updateData.comunicacion = body.comunicacion ? parseInt(body.comunicacion) : null;
-    if (body.precioJusto !== undefined) updateData.precioJusto = body.precioJusto ? parseInt(body.precioJusto) : null;
+    if (body.puntualidad !== undefined)
+      updateData.puntualidad = body.puntualidad ? parseInt(body.puntualidad) : null;
+    if (body.calidad !== undefined)
+      updateData.calidad = body.calidad ? parseInt(body.calidad) : null;
+    if (body.comunicacion !== undefined)
+      updateData.comunicacion = body.comunicacion ? parseInt(body.comunicacion) : null;
+    if (body.precioJusto !== undefined)
+      updateData.precioJusto = body.precioJusto ? parseInt(body.precioJusto) : null;
     if (body.comentario !== undefined) updateData.comentario = body.comentario;
     if (body.recomendaria !== undefined) updateData.recomendaria = body.recomendaria;
 
@@ -115,18 +104,12 @@ export async function PATCH(
     return NextResponse.json(review);
   } catch (error) {
     logger.error('Error updating review:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar reseña' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar reseña' }, { status: 500 });
   }
 }
 
 // DELETE /api/marketplace/reviews/[id] - Eliminar reseña
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -142,10 +125,7 @@ export async function DELETE(
     });
 
     if (!existingReview) {
-      return NextResponse.json(
-        { error: 'Reseña no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Reseña no encontrada' }, { status: 404 });
     }
 
     await prisma.serviceReview.delete({
@@ -155,9 +135,6 @@ export async function DELETE(
     return NextResponse.json({ success: true, message: 'Reseña eliminada correctamente' });
   } catch (error) {
     logger.error('Error deleting review:', error);
-    return NextResponse.json(
-      { error: 'Error al eliminar reseña' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar reseña' }, { status: 500 });
   }
 }

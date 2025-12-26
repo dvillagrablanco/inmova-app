@@ -1,9 +1,9 @@
 /**
  * Prisma Query Optimizer & Logger
- * 
+ *
  * Middleware que monitorea queries de Prisma y genera alertas
  * para queries lentas o ineficientes.
- * 
+ *
  * @module prisma-query-optimizer
  * @since Semana 2, Tarea 2.4
  */
@@ -41,13 +41,13 @@ class QueryOptimizer {
   middleware(): Prisma.Middleware {
     return async (params, next) => {
       const start = Date.now();
-      
+
       try {
         const result = await next(params);
         const duration = Date.now() - start;
-        
+
         this.totalQueries++;
-        
+
         // Log query
         const queryLog: QueryLog = {
           model: params.model || 'unknown',
@@ -56,21 +56,21 @@ class QueryOptimizer {
           params: this.sanitizeParams(params),
           timestamp: new Date().toISOString(),
         };
-        
+
         // Detectar queries lentas
         if (duration > SLOW_QUERY_THRESHOLD_MS) {
           this.slowQueryCount++;
           this.handleSlowQuery(queryLog);
         }
-        
+
         // Detectar patrones problemáticos
         this.detectProblematicPatterns(queryLog);
-        
+
         // Guardar en memoria (para stats)
         if (this.queryLogs.length < 1000) {
           this.queryLogs.push(queryLog);
         }
-        
+
         return result;
       } catch (error) {
         const duration = Date.now() - start;
@@ -90,7 +90,7 @@ class QueryOptimizer {
    */
   private handleSlowQuery(queryLog: QueryLog) {
     const severity = queryLog.duration > VERY_SLOW_QUERY_THRESHOLD_MS ? 'ERROR' : 'WARN';
-    
+
     logger.warn(`⚠️  SLOW QUERY DETECTED [${severity}]`, {
       model: queryLog.model,
       action: queryLog.action,
@@ -98,7 +98,7 @@ class QueryOptimizer {
       threshold: `${SLOW_QUERY_THRESHOLD_MS}ms`,
       params: queryLog.params,
     });
-    
+
     // Generar recomendaciones
     const recommendations = this.generateRecommendations(queryLog);
     if (recommendations.length > 0) {
@@ -111,16 +111,12 @@ class QueryOptimizer {
    */
   private detectProblematicPatterns(queryLog: QueryLog) {
     const warnings: string[] = [];
-    
+
     // findMany sin límite
-    if (
-      queryLog.action === 'findMany' &&
-      !queryLog.params.take &&
-      !queryLog.params.cursor
-    ) {
+    if (queryLog.action === 'findMany' && !queryLog.params.take && !queryLog.params.cursor) {
       warnings.push('⚠️ findMany sin `take` - puede retornar miles de registros');
     }
-    
+
     // Includes anidados profundos
     if (queryLog.params.include) {
       const depth = this.calculateIncludeDepth(queryLog.params.include);
@@ -128,12 +124,12 @@ class QueryOptimizer {
         warnings.push(`⚠️ Include anidado ${depth} niveles - considerar usar select`);
       }
     }
-    
+
     // Usar include en lugar de select
     if (queryLog.params.include && !queryLog.params.select) {
       warnings.push('💡 Considerar usar `select` en lugar de `include` para reducir payload');
     }
-    
+
     if (warnings.length > 0) {
       logger.debug(`Patrones detectados en ${queryLog.model}.${queryLog.action}:`, warnings);
     }
@@ -144,34 +140,34 @@ class QueryOptimizer {
    */
   private generateRecommendations(queryLog: QueryLog): string[] {
     const recommendations: string[] = [];
-    
+
     // Paginación
     if (queryLog.action === 'findMany' && !queryLog.params.take) {
       recommendations.push('Agregar paginación: `take: 50, skip: (page - 1) * 50`');
     }
-    
+
     // Índices
     if (queryLog.duration > 1000 && queryLog.params.where) {
       recommendations.push(
         'Verificar índices en columnas de filtrado: ' +
-        Object.keys(queryLog.params.where).join(', ')
+          Object.keys(queryLog.params.where).join(', ')
       );
     }
-    
+
     // Agregaciones
     if (queryLog.action === 'findMany' && queryLog.duration > 800) {
       recommendations.push(
         'Si estás haciendo cálculos en memoria, considerar usar `aggregate` o `groupBy`'
       );
     }
-    
+
     // Select vs Include
     if (queryLog.params.include) {
       recommendations.push(
         'Usar `select` con campos específicos para reducir -70% de datos transferidos'
       );
     }
-    
+
     return recommendations;
   }
 
@@ -180,7 +176,7 @@ class QueryOptimizer {
    */
   private calculateIncludeDepth(include: any, depth = 1): number {
     if (!include || typeof include !== 'object') return depth;
-    
+
     let maxDepth = depth;
     for (const key in include) {
       if (include[key] && typeof include[key] === 'object' && include[key].include) {
@@ -188,7 +184,7 @@ class QueryOptimizer {
         maxDepth = Math.max(maxDepth, nestedDepth);
       }
     }
-    
+
     return maxDepth;
   }
 
@@ -197,17 +193,17 @@ class QueryOptimizer {
    */
   private sanitizeParams(params: any): any {
     const sanitized = { ...params };
-    
+
     // Eliminar campos sensibles
     const sensitiveFields = ['password', 'token', 'secret', 'apiKey'];
-    
+
     const sanitizeObject = (obj: any): any => {
       if (!obj || typeof obj !== 'object') return obj;
-      
+
       const result: any = Array.isArray(obj) ? [] : {};
-      
+
       for (const key in obj) {
-        if (sensitiveFields.some(field => key.toLowerCase().includes(field))) {
+        if (sensitiveFields.some((field) => key.toLowerCase().includes(field))) {
           result[key] = '[REDACTED]';
         } else if (typeof obj[key] === 'object') {
           result[key] = sanitizeObject(obj[key]);
@@ -215,10 +211,10 @@ class QueryOptimizer {
           result[key] = obj[key];
         }
       }
-      
+
       return result;
     };
-    
+
     return sanitizeObject(sanitized);
   }
 
@@ -226,22 +222,22 @@ class QueryOptimizer {
    * Obtiene estadísticas de queries
    */
   getStats() {
-    const avgDuration = this.queryLogs.length > 0
-      ? this.queryLogs.reduce((sum, q) => sum + q.duration, 0) / this.queryLogs.length
-      : 0;
-    
-    const slowestQueries = [...this.queryLogs]
-      .sort((a, b) => b.duration - a.duration)
-      .slice(0, 10);
-    
+    const avgDuration =
+      this.queryLogs.length > 0
+        ? this.queryLogs.reduce((sum, q) => sum + q.duration, 0) / this.queryLogs.length
+        : 0;
+
+    const slowestQueries = [...this.queryLogs].sort((a, b) => b.duration - a.duration).slice(0, 10);
+
     return {
       totalQueries: this.totalQueries,
       slowQueries: this.slowQueryCount,
-      slowQueryPercentage: this.totalQueries > 0
-        ? ((this.slowQueryCount / this.totalQueries) * 100).toFixed(2) + '%'
-        : '0%',
+      slowQueryPercentage:
+        this.totalQueries > 0
+          ? ((this.slowQueryCount / this.totalQueries) * 100).toFixed(2) + '%'
+          : '0%',
       avgDuration: Math.round(avgDuration) + 'ms',
-      slowestQueries: slowestQueries.map(q => ({
+      slowestQueries: slowestQueries.map((q) => ({
         model: q.model,
         action: q.action,
         duration: q.duration + 'ms',

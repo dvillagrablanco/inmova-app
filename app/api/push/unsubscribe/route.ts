@@ -18,10 +18,7 @@ export async function POST(request: NextRequest) {
     const { endpoint } = await request.json();
 
     if (!endpoint) {
-      return NextResponse.json(
-        { error: 'Endpoint requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Endpoint requerido' }, { status: 400 });
     }
 
     await unsubscribePushNotification(session.user.id, endpoint);
@@ -34,9 +31,6 @@ export async function POST(request: NextRequest) {
     logError(error as Error, {
       context: 'POST /api/push/unsubscribe',
     });
-    return NextResponse.json(
-      { error: 'Error al eliminar suscripción' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar suscripción' }, { status: 500 });
   }
 }

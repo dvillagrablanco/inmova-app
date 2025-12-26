@@ -2,7 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Card } from '@/components/ui/card';
@@ -51,8 +57,8 @@ export function TenantOnboarding({ tenantId, tenantName }: TenantOnboardingProps
           </div>
           <h3 className="text-xl font-semibold">Hola {tenantName} 👋</h3>
           <p className="text-muted-foreground">
-            Este es tu portal personal donde podrás gestionar todo lo relacionado con tu
-            vivienda de forma fácil y rápida.
+            Este es tu portal personal donde podrás gestionar todo lo relacionado con tu vivienda de
+            forma fácil y rápida.
           </p>
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left">
             <p className="text-sm text-blue-800">
@@ -124,8 +130,7 @@ export function TenantOnboarding({ tenantId, tenantName }: TenantOnboardingProps
           </ul>
           <Card className="p-3 bg-gray-50 border-gray-200">
             <p className="text-xs text-gray-600">
-              Accede a Pagos desde el menú con el ícono{' '}
-              <CreditCard className="inline w-4 h-4" />
+              Accede a Pagos desde el menú con el ícono <CreditCard className="inline w-4 h-4" />
             </p>
           </Card>
         </div>
@@ -181,8 +186,8 @@ export function TenantOnboarding({ tenantId, tenantName }: TenantOnboardingProps
           <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4">
             <p className="text-sm font-medium mb-2">¿Necesitas ayuda?</p>
             <p className="text-xs text-muted-foreground">
-              Si tienes alguna duda, puedes contactar con tu administrador a través de la
-              sección de mensajes.
+              Si tienes alguna duda, puedes contactar con tu administrador a través de la sección de
+              mensajes.
             </p>
           </div>
         </div>
@@ -304,17 +309,16 @@ export function TenantOnboarding({ tenantId, tenantName }: TenantOnboardingProps
 
           {/* Botones de navegación */}
           <div className="flex justify-between items-center pt-4 border-t">
-            <Button
-              variant="outline"
-              onClick={handlePrevious}
-              disabled={currentStep === 0}
-            >
+            <Button variant="outline" onClick={handlePrevious} disabled={currentStep === 0}>
               <ArrowLeft className="w-4 h-4 mr-2" />
               Anterior
             </Button>
 
             {currentStep === steps.length - 1 ? (
-              <Button onClick={handleComplete} className="bg-gradient-to-r from-blue-500 to-purple-600">
+              <Button
+                onClick={handleComplete}
+                className="bg-gradient-to-r from-blue-500 to-purple-600"
+              >
                 Comenzar
                 <CheckCircle className="w-4 h-4 ml-2" />
               </Button>

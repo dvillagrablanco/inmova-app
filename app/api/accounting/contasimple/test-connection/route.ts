@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { getContaSimpleService, isContaSimpleConfigured } from '@/lib/contasimple-integration-service';
+import {
+  getContaSimpleService,
+  isContaSimpleConfigured,
+} from '@/lib/contasimple-integration-service';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -23,7 +26,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         {
           error: 'ContaSimple no está configurado',
-          message: 'Por favor configura las variables de entorno CONTASIMPLE_AUTH_KEY y CONTASIMPLE_API_URL',
+          message:
+            'Por favor configura las variables de entorno CONTASIMPLE_AUTH_KEY y CONTASIMPLE_API_URL',
         },
         { status: 400 }
       );

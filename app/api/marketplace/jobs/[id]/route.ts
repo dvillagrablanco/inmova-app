@@ -7,10 +7,7 @@ import logger, { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 // GET /api/marketplace/jobs/[id] - Obtener trabajo específico
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -32,27 +29,18 @@ export async function GET(
     });
 
     if (!job) {
-      return NextResponse.json(
-        { error: 'Trabajo no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Trabajo no encontrado' }, { status: 404 });
     }
 
     return NextResponse.json(job);
   } catch (error) {
     logger.error('Error fetching job:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener trabajo' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener trabajo' }, { status: 500 });
   }
 }
 
 // PATCH /api/marketplace/jobs/[id] - Actualizar trabajo
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -70,10 +58,7 @@ export async function PATCH(
     });
 
     if (!existingJob) {
-      return NextResponse.json(
-        { error: 'Trabajo no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Trabajo no encontrado' }, { status: 404 });
     }
 
     const updateData: any = {};
@@ -83,7 +68,8 @@ export async function PATCH(
     if (body.descripcion !== undefined) updateData.descripcion = body.descripcion;
     if (body.estado !== undefined) updateData.estado = body.estado;
     if (body.fechaInicio !== undefined) updateData.fechaInicio = new Date(body.fechaInicio);
-    if (body.fechaFin !== undefined) updateData.fechaFin = body.fechaFin ? new Date(body.fechaFin) : null;
+    if (body.fechaFin !== undefined)
+      updateData.fechaFin = body.fechaFin ? new Date(body.fechaFin) : null;
     if (body.montoTotal !== undefined) updateData.montoTotal = parseFloat(body.montoTotal);
     if (body.montoPagado !== undefined) updateData.montoPagado = parseFloat(body.montoPagado);
     if (body.garantiaMeses !== undefined) updateData.garantiaMeses = body.garantiaMeses;
@@ -107,18 +93,12 @@ export async function PATCH(
     return NextResponse.json(job);
   } catch (error) {
     logger.error('Error updating job:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar trabajo' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar trabajo' }, { status: 500 });
   }
 }
 
 // DELETE /api/marketplace/jobs/[id] - Eliminar trabajo
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -134,10 +114,7 @@ export async function DELETE(
     });
 
     if (!existingJob) {
-      return NextResponse.json(
-        { error: 'Trabajo no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Trabajo no encontrado' }, { status: 404 });
     }
 
     await prisma.serviceJob.delete({
@@ -147,9 +124,6 @@ export async function DELETE(
     return NextResponse.json({ success: true, message: 'Trabajo eliminado correctamente' });
   } catch (error) {
     logger.error('Error deleting job:', error);
-    return NextResponse.json(
-      { error: 'Error al eliminar trabajo' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar trabajo' }, { status: 500 });
   }
 }

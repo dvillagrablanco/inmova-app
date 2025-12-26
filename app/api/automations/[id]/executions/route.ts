@@ -5,10 +5,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user?.companyId) {
@@ -21,10 +18,7 @@ export async function GET(
       where: { id, companyId },
     });
     if (!automation) {
-      return NextResponse.json(
-        { error: 'Automatización no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Automatización no encontrada' }, { status: 404 });
     }
     // Obtener últimas 50 ejecuciones
     const executions = await prisma.automationExecution.findMany({
@@ -35,9 +29,6 @@ export async function GET(
     return NextResponse.json(executions);
   } catch (error) {
     logger.error('Error fetching executions:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener ejecuciones' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener ejecuciones' }, { status: 500 });
   }
 }

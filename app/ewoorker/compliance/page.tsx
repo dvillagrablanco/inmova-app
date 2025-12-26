@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { 
-  FileCheck, 
-  Upload, 
-  AlertTriangle, 
-  CheckCircle2, 
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import {
+  FileCheck,
+  Upload,
+  AlertTriangle,
+  CheckCircle2,
   Clock,
   XCircle,
   Download,
   Eye,
-  Calendar
-} from "lucide-react";
-import { toast } from "sonner";
+  Calendar,
+} from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Documento {
   id: string;
@@ -34,12 +34,12 @@ export default function ComplianceHub() {
   const [semaforo, setSemaforo] = useState({
     verde: 0,
     amarillo: 0,
-    rojo: 0
+    rojo: 0,
   });
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login");
+    if (status === 'unauthenticated') {
+      router.push('/login');
     }
   }, [status, router]);
 
@@ -51,15 +51,15 @@ export default function ComplianceHub() {
 
   const fetchDocumentos = async () => {
     try {
-      const res = await fetch("/api/ewoorker/compliance/documentos");
+      const res = await fetch('/api/ewoorker/compliance/documentos');
       if (res.ok) {
         const data = await res.json();
         setDocumentos(data.documentos || []);
         setSemaforo(data.semaforo || { verde: 0, amarillo: 0, rojo: 0 });
       }
     } catch (error) {
-      console.error("Error fetching documentos:", error);
-      toast.error("Error al cargar documentos");
+      console.error('Error fetching documentos:', error);
+      toast.error('Error al cargar documentos');
     } finally {
       setLoading(false);
     }
@@ -70,24 +70,24 @@ export default function ComplianceHub() {
 
     const file = e.target.files[0];
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append('file', file);
 
     setUploading(true);
 
     try {
-      const res = await fetch("/api/ewoorker/compliance/upload", {
-        method: "POST",
-        body: formData
+      const res = await fetch('/api/ewoorker/compliance/upload', {
+        method: 'POST',
+        body: formData,
       });
 
       if (res.ok) {
-        toast.success("Documento subido correctamente. Procesando con OCR...");
+        toast.success('Documento subido correctamente. Procesando con OCR...');
         fetchDocumentos(); // Recargar lista
       } else {
-        toast.error("Error al subir documento");
+        toast.error('Error al subir documento');
       }
     } catch (error) {
-      toast.error("Error al subir documento");
+      toast.error('Error al subir documento');
     } finally {
       setUploading(false);
     }
@@ -95,11 +95,11 @@ export default function ComplianceHub() {
 
   const getEstadoIcon = (estado: string) => {
     switch (estado) {
-      case "VERDE":
+      case 'VERDE':
         return <CheckCircle2 className="h-5 w-5 text-green-600" />;
-      case "AMARILLO":
+      case 'AMARILLO':
         return <Clock className="h-5 w-5 text-yellow-600" />;
-      case "ROJO":
+      case 'ROJO':
         return <XCircle className="h-5 w-5 text-red-600" />;
       default:
         return <AlertTriangle className="h-5 w-5 text-gray-600" />;
@@ -108,20 +108,22 @@ export default function ComplianceHub() {
 
   const getEstadoBadge = (estado: string) => {
     const classes: Record<string, string> = {
-      VERDE: "bg-green-100 text-green-800",
-      AMARILLO: "bg-yellow-100 text-yellow-800",
-      ROJO: "bg-red-100 text-red-800",
-      PENDIENTE_VALIDACION: "bg-gray-100 text-gray-800"
+      VERDE: 'bg-green-100 text-green-800',
+      AMARILLO: 'bg-yellow-100 text-yellow-800',
+      ROJO: 'bg-red-100 text-red-800',
+      PENDIENTE_VALIDACION: 'bg-gray-100 text-gray-800',
     };
 
     return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${classes[estado] || "bg-gray-100 text-gray-800"}`}>
-        {estado.replace("_", " ")}
+      <span
+        className={`px-2 py-1 rounded-full text-xs font-medium ${classes[estado] || 'bg-gray-100 text-gray-800'}`}
+      >
+        {estado.replace('_', ' ')}
       </span>
     );
   };
 
-  if (status === "loading" || loading) {
+  if (status === 'loading' || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
@@ -140,9 +142,7 @@ export default function ComplianceHub() {
                 <FileCheck className="h-8 w-8 text-green-600" />
                 Compliance Hub
               </h1>
-              <p className="text-gray-600 mt-2">
-                Gestión documental y cumplimiento Ley 32/2006
-              </p>
+              <p className="text-gray-600 mt-2">Gestión documental y cumplimiento Ley 32/2006</p>
             </div>
             <label className="cursor-pointer">
               <input
@@ -154,7 +154,7 @@ export default function ComplianceHub() {
               />
               <div className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 flex items-center gap-2 transition-colors">
                 <Upload className="h-5 w-5" />
-                {uploading ? "Subiendo..." : "Subir Documento"}
+                {uploading ? 'Subiendo...' : 'Subir Documento'}
               </div>
             </label>
           </div>
@@ -220,9 +220,7 @@ export default function ComplianceHub() {
             <div className="p-12 text-center">
               <FileCheck className="h-16 w-16 text-gray-300 mx-auto mb-4" />
               <p className="text-gray-600 font-medium">No hay documentos cargados</p>
-              <p className="text-gray-500 text-sm mt-2">
-                Sube tu primer documento para empezar
-              </p>
+              <p className="text-gray-500 text-sm mt-2">Sube tu primer documento para empezar</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -259,20 +257,16 @@ export default function ComplianceHub() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm font-medium text-gray-900">
-                          {doc.tipo}
-                        </span>
+                        <span className="text-sm font-medium text-gray-900">{doc.tipo}</span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-sm text-gray-600">
-                          {doc.nombreArchivo}
-                        </span>
+                        <span className="text-sm text-gray-600">{doc.nombreArchivo}</span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {doc.fechaCaducidad ? (
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <Calendar className="h-4 w-4" />
-                            {new Date(doc.fechaCaducidad).toLocaleDateString("es-ES")}
+                            {new Date(doc.fechaCaducidad).toLocaleDateString('es-ES')}
                           </div>
                         ) : (
                           <span className="text-sm text-gray-400">N/A</span>
@@ -280,9 +274,7 @@ export default function ComplianceHub() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {doc.confianzaOCR ? (
-                          <span className="text-sm text-gray-600">
-                            {doc.confianzaOCR}%
-                          </span>
+                          <span className="text-sm text-gray-600">{doc.confianzaOCR}%</span>
                         ) : (
                           <span className="text-sm text-gray-400">Pendiente</span>
                         )}

@@ -86,8 +86,7 @@ export default function PartnerDashboardPage() {
             </div>
           </main>
         </div>
-      </div>
-    );
+  );
   }
 
   if (error || !data) {
@@ -132,7 +131,7 @@ export default function PartnerDashboardPage() {
   ];
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gradient-bg">
+      <div className="flex h-screen overflow-hidden bg-gradient-bg">
       
       
         

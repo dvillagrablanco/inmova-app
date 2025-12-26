@@ -19,24 +19,17 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.companyId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
 
     // Obtener integraciones de la empresa
-    const integrations = await IntegrationManager.getCompanyIntegrations(
-      session.user.companyId
-    );
+    const integrations = await IntegrationManager.getCompanyIntegrations(session.user.companyId);
 
     // Filtrar por categoría si se especifica
-    const filtered = category
-      ? integrations.filter(i => i.category === category)
-      : integrations;
+    const filtered = category ? integrations.filter((i) => i.category === category) : integrations;
 
     return NextResponse.json({
       success: true,
@@ -44,10 +37,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error getting integrations:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -60,20 +50,14 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.companyId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
     const { provider, credentials, settings } = body;
 
     if (!provider || !credentials) {
-      return NextResponse.json(
-        { error: 'Provider and credentials are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Provider and credentials are required' }, { status: 400 });
     }
 
     // Guardar integración

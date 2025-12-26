@@ -1,21 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
-
-
 
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session || session.user?.role !== 'super_admin') {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const { searchParams } = new URL(req.url);
@@ -56,7 +51,7 @@ export async function GET(req: NextRequest) {
 
     // Analizar logs para detectar patrones sospechosos
     const loginsByUser = auditLogs
-      .filter(log => log.action === 'LOGIN')
+      .filter((log) => log.action === 'LOGIN')
       .reduce((acc: any, log) => {
         const key = log.userId;
         if (!acc[key]) {
@@ -81,16 +76,16 @@ export async function GET(req: NextRequest) {
 
     // Cambios recientes importantes
     const recentChanges = auditLogs
-      .filter(log => ['UPDATE', 'DELETE'].includes(log.action))
+      .filter((log) => ['UPDATE', 'DELETE'].includes(log.action))
       .slice(0, 20);
 
     const alerts: any[] = [
-      ...suspiciousActivity.map(a => ({
+      ...suspiciousActivity.map((a) => ({
         type: 'FAILED_LOGINS',
         severity: a.severity,
         data: a,
       })),
-      ...recentChanges.map(c => ({
+      ...recentChanges.map((c) => ({
         type: 'AUDIT_CHANGE',
         severity: c.action === 'DELETE' ? 'high' : 'medium',
         data: c,
@@ -98,12 +93,12 @@ export async function GET(req: NextRequest) {
     ];
 
     if (severity) {
-      const filteredAlerts = alerts.filter(a => a.severity === severity);
+      const filteredAlerts = alerts.filter((a) => a.severity === severity);
       const summary = {
-        critical: alerts.filter(a => a.severity === 'critical').length,
-        high: alerts.filter(a => a.severity === 'high').length,
-        medium: alerts.filter(a => a.severity === 'medium').length,
-        low: alerts.filter(a => a.severity === 'low').length,
+        critical: alerts.filter((a) => a.severity === 'critical').length,
+        high: alerts.filter((a) => a.severity === 'high').length,
+        medium: alerts.filter((a) => a.severity === 'medium').length,
+        low: alerts.filter((a) => a.severity === 'low').length,
       };
       return NextResponse.json({
         summary,
@@ -113,10 +108,10 @@ export async function GET(req: NextRequest) {
     }
 
     const summary = {
-      critical: alerts.filter(a => a.severity === 'critical').length,
-      high: alerts.filter(a => a.severity === 'high').length,
-      medium: alerts.filter(a => a.severity === 'medium').length,
-      low: alerts.filter(a => a.severity === 'low').length,
+      critical: alerts.filter((a) => a.severity === 'critical').length,
+      high: alerts.filter((a) => a.severity === 'high').length,
+      medium: alerts.filter((a) => a.severity === 'medium').length,
+      low: alerts.filter((a) => a.severity === 'low').length,
     };
 
     return NextResponse.json({
@@ -126,9 +121,6 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     logger.error('Error al obtener alertas de seguridad:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener alertas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener alertas' }, { status: 500 });
   }
 }

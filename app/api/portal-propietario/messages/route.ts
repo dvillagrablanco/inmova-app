@@ -12,10 +12,7 @@ export async function GET(request: NextRequest) {
   try {
     const ownerId = request.headers.get('x-owner-id');
     if (!ownerId) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const owner = await prisma.owner.findUnique({
@@ -23,10 +20,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!owner) {
-      return NextResponse.json(
-        { error: 'Propietario no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Propietario no encontrado' }, { status: 404 });
     }
 
     // For now, we'll use the notification system as messages
@@ -43,14 +37,11 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       messages: notifications,
-      unreadCount: notifications.filter(n => !n.leida).length,
+      unreadCount: notifications.filter((n) => !n.leida).length,
     });
   } catch (error: any) {
     logger.error('Error al obtener mensajes del propietario:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener mensajes' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener mensajes' }, { status: 500 });
   }
 }
 
@@ -62,10 +53,7 @@ export async function POST(request: NextRequest) {
   try {
     const ownerId = request.headers.get('x-owner-id');
     if (!ownerId) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -85,9 +73,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error: any) {
     logger.error('Error al marcar mensajes como leídos:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar mensajes' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar mensajes' }, { status: 500 });
   }
 }

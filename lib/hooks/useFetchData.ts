@@ -23,9 +23,7 @@ interface UseFetchDataResult<T> {
   refetch: () => Promise<void>;
 }
 
-export function useFetchData<T = any>(
-  options: UseFetchDataOptions<T>
-): UseFetchDataResult<T> {
+export function useFetchData<T = any>(options: UseFetchDataOptions<T>): UseFetchDataResult<T> {
   const {
     url,
     method = 'GET',

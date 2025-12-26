@@ -91,7 +91,7 @@ export function SkeletonStats({ count = 4 }: { count?: number }) {
 
 export function SkeletonList({ items = 5, className }: { items?: number; className?: string }) {
   return (
-    <div className={cn("space-y-3", className)}>
+    <div className={cn('space-y-3', className)}>
       {Array.from({ length: items }).map((_, i) => (
         <div key={i} className="flex items-center gap-4 p-4 border rounded-lg">
           <Skeleton className="h-12 w-12 rounded-full" />

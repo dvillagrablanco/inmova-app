@@ -1,7 +1,7 @@
 /**
  * API: /api/notifications/[id]/read
  * Marcar una notificación como leída
- * 
+ *
  * PATCH: Marcar como leída
  */
 
@@ -20,18 +20,12 @@ interface RouteContext {
  * PATCH /api/notifications/[id]/read
  * Marca una notificación como leída
  */
-export async function PATCH(
-  request: NextRequest,
-  context: RouteContext
-) {
+export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const { id } = context.params;
@@ -50,9 +44,6 @@ export async function PATCH(
     });
   } catch (error) {
     console.error('[API] Error in PATCH /api/notifications/[id]/read:', error);
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }

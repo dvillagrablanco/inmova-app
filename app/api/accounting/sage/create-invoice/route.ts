@@ -62,14 +62,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `${results.filter(r => r.success).length}/${results.length} facturas creadas en Sage`,
+      message: `${results.filter((r) => r.success).length}/${results.length} facturas creadas en Sage`,
       results,
     });
   } catch (error) {
     logger.error('Error creating invoices in Sage:', error);
-    return NextResponse.json(
-      { error: 'Error al crear facturas en Sage' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear facturas en Sage' }, { status: 500 });
   }
 }

@@ -6,10 +6,7 @@ import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -40,17 +37,11 @@ export async function GET(
 
     return NextResponse.json(certificado);
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Error al obtener certificado' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener certificado' }, { status: 500 });
   }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -102,17 +93,11 @@ export async function PATCH(
     return NextResponse.json(certificado);
   } catch (error) {
     logger.error('Error:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar certificado' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar certificado' }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -141,9 +126,6 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Certificado eliminado' });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Error al eliminar certificado' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar certificado' }, { status: 500 });
   }
 }

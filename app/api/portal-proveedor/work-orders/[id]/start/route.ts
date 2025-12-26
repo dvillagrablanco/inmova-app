@@ -6,10 +6,7 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 // POST /api/portal-proveedor/work-orders/[id]/start - Iniciar orden de trabajo
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Verificar autenticación
     const auth = await requireProviderAuth(req);
@@ -28,10 +25,7 @@ export async function POST(
     });
 
     if (!workOrder) {
-      return NextResponse.json(
-        { error: 'Orden de trabajo no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Orden de trabajo no encontrada' }, { status: 404 });
     }
 
     if (workOrder.providerId !== auth.provider.id) {
@@ -58,9 +52,7 @@ export async function POST(
       },
     });
 
-    logger.info(
-      `Orden ${workOrderId} iniciada por proveedor ${auth.provider.nombre}`
-    );
+    logger.info(`Orden ${workOrderId} iniciada por proveedor ${auth.provider.nombre}`);
 
     return NextResponse.json({
       success: true,
@@ -69,9 +61,6 @@ export async function POST(
     });
   } catch (error) {
     logger.error('Error al iniciar orden de trabajo:', error);
-    return NextResponse.json(
-      { error: 'Error al iniciar orden de trabajo' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al iniciar orden de trabajo' }, { status: 500 });
   }
 }

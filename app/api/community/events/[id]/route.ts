@@ -3,55 +3,52 @@ import { prisma } from '@/lib/db';
 import { requireAuth, hasPermission, forbiddenResponse, notFoundResponse } from '@/lib/permissions';
 
 // GET - Obtener detalle de un evento
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await requireAuth();
     const { id } = params;
-    
+
     const event = await prisma.communityEvent.findFirst({
       where: {
         id,
-        companyId: user.companyId
+        companyId: user.companyId,
       },
       include: {
         building: {
-          select: { id: true, nombre: true, direccion: true }
-        }
-      }
+          select: { id: true, nombre: true, direccion: true },
+        },
+      },
     });
-    
+
     if (!event) {
       return notFoundResponse('Evento no encontrado');
     }
-    
+
     // Obtener asistentes
     const attendees = await prisma.eventAttendee.findMany({
       where: { eventId: id },
       include: {
         tenant: {
-          select: { id: true, nombreCompleto: true, email: true }
-        }
-      }
+          select: { id: true, nombreCompleto: true, email: true },
+        },
+      },
     });
-    
+
     // Obtener comentarios
     const comments = await prisma.eventComment.findMany({
       where: { eventId: id, visible: true },
       include: {
         tenant: {
-          select: { id: true, nombreCompleto: true }
-        }
+          select: { id: true, nombreCompleto: true },
+        },
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
-    
+
     return NextResponse.json({
       ...event,
       attendees,
-      comments
+      comments,
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 401 });
@@ -59,24 +56,21 @@ export async function GET(
 }
 
 // PATCH - Actualizar evento
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await requireAuth();
     const { id } = params;
-    
+
     if (!hasPermission(user.role, 'manageEvents')) {
       return forbiddenResponse('No tienes permiso para editar eventos');
     }
-    
+
     const data = await request.json();
-    
+
     const event = await prisma.communityEvent.updateMany({
       where: {
         id,
-        companyId: user.companyId
+        companyId: user.companyId,
       },
       data: {
         ...(data.titulo && { titulo: data.titulo }),
@@ -90,9 +84,9 @@ export async function PATCH(
         ...(data.precio !== undefined && { precio: data.precio }),
         ...(data.estado && { estado: data.estado }),
         ...(data.fotos && { fotos: data.fotos }),
-      }
+      },
     });
-    
+
     return NextResponse.json({ success: true, updated: event.count });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 400 });
@@ -100,25 +94,22 @@ export async function PATCH(
 }
 
 // DELETE - Eliminar evento
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await requireAuth();
     const { id } = params;
-    
+
     if (!hasPermission(user.role, 'delete')) {
       return forbiddenResponse('No tienes permiso para eliminar eventos');
     }
-    
+
     await prisma.communityEvent.deleteMany({
       where: {
         id,
-        companyId: user.companyId
-      }
+        companyId: user.companyId,
+      },
     });
-    
+
     return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 400 });

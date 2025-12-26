@@ -1,6 +1,6 @@
 /**
  * Servicio de Automatizaciones
- * 
+ *
  * Gestiona tareas automáticas programadas (CRON jobs):
  * - Cálculo mensual de comisiones para partners/comerciales
  * - Envío de notificaciones automáticas
@@ -25,29 +25,29 @@ import { es } from 'date-fns/locale';
 export async function calculateMonthlyCommissions() {
   try {
     console.log('[AUTOMATION] Iniciando cálculo de comisiones mensuales...');
-    
+
     // Obtener el periodo anterior (mes que acaba de terminar)
     const lastMonth = subMonths(new Date(), 1);
     const periodo = format(lastMonth, 'yyyy-MM');
-    
+
     console.log(`[AUTOMATION] Calculando comisiones para periodo: ${periodo}`);
-    
+
     // Generar comisiones recurrentes
     const comisiones = await salesTeamService.generateRecurrentCommissions(periodo);
-    
+
     console.log(`[AUTOMATION] Generadas ${comisiones.length} comisiones recurrentes`);
-    
+
     // Procesar bonificaciones por objetivos cumplidos
     const bonificaciones = await salesTeamService.processBonifications(periodo);
-    
+
     console.log(`[AUTOMATION] Generadas ${bonificaciones.length} bonificaciones por objetivos`);
-    
+
     // Enviar notificaciones a los comerciales
     await notifyCommissionsGenerated(periodo, comisiones, bonificaciones);
-    
+
     // Generar reporte de comisiones para administradores
     await generateCommissionsReport(periodo, comisiones, bonificaciones);
-    
+
     return {
       success: true,
       periodo,
@@ -71,7 +71,7 @@ async function notifyCommissionsGenerated(
   try {
     // Agrupar comisiones por comercial
     const comercialesComisiones = new Map<string, any[]>();
-    
+
     for (const comision of comisiones) {
       const salesRepId = comision.salesRepId;
       if (!comercialesComisiones.has(salesRepId)) {
@@ -79,7 +79,7 @@ async function notifyCommissionsGenerated(
       }
       comercialesComisiones.get(salesRepId)!.push(comision);
     }
-    
+
     // Añadir bonificaciones
     for (const bonificacion of bonificaciones) {
       const salesRepId = bonificacion.salesRepId;
@@ -88,20 +88,17 @@ async function notifyCommissionsGenerated(
       }
       comercialesComisiones.get(salesRepId)!.push(bonificacion);
     }
-    
+
     // Enviar email a cada comercial
     for (const [salesRepId, comisionesList] of comercialesComisiones) {
       const salesRep = await prisma.salesRepresentative.findUnique({
         where: { id: salesRepId },
       });
-      
+
       if (!salesRep || !salesRep.email) continue;
-      
-      const totalComisiones = comisionesList.reduce(
-        (sum, c) => sum + c.montoNeto,
-        0
-      );
-      
+
+      const totalComisiones = comisionesList.reduce((sum, c) => sum + c.montoNeto, 0);
+
       const htmlContent = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #4F46E5;">Comisiones Generadas - ${periodo}</h2>
@@ -162,16 +159,16 @@ async function notifyCommissionsGenerated(
           </p>
         </div>
       `;
-      
+
       await sendEmail({
         to: salesRep.email,
         subject: `💰 Comisiones Generadas - ${periodo}`,
         html: htmlContent,
       });
-      
+
       console.log(`[AUTOMATION] Email enviado a ${salesRep.email}`);
     }
-    
+
     console.log('[AUTOMATION] Notificaciones de comisiones enviadas exitosamente');
   } catch (error) {
     console.error('[AUTOMATION] Error al enviar notificaciones:', error);
@@ -190,14 +187,14 @@ async function generateCommissionsReport(
     const totalComisiones = comisiones.reduce((sum, c) => sum + c.montoNeto, 0);
     const totalBonificaciones = bonificaciones.reduce((sum, b) => sum + b.montoNeto, 0);
     const totalGeneral = totalComisiones + totalBonificaciones;
-    
+
     // Obtener administradores activos
     const admins = await prisma.user.findMany({
       where: {
         role: { in: ['administrador', 'super_admin'] },
       },
     });
-    
+
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;">
         <h2 style="color: #4F46E5;">Reporte de Comisiones - ${periodo}</h2>
@@ -231,7 +228,7 @@ async function generateCommissionsReport(
         </p>
       </div>
     `;
-    
+
     for (const admin of admins) {
       await sendEmail({
         to: admin.email,
@@ -239,7 +236,7 @@ async function generateCommissionsReport(
         html: htmlContent,
       });
     }
-    
+
     console.log('[AUTOMATION] Reporte de comisiones enviado a administradores');
   } catch (error) {
     console.error('[AUTOMATION] Error al generar reporte:', error);
@@ -258,9 +255,9 @@ export async function sendPartnerWelcomeEmail(salesRepId: string) {
     const salesRep = await prisma.salesRepresentative.findUnique({
       where: { id: salesRepId },
     });
-    
+
     if (!salesRep || !salesRep.email) return;
-    
+
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="text-align: center; padding: 40px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
@@ -312,13 +309,13 @@ export async function sendPartnerWelcomeEmail(salesRepId: string) {
         </div>
       </div>
     `;
-    
+
     await sendEmail({
       to: salesRep.email,
       subject: '¡Bienvenido al Programa INMOVA Partners! 🎉',
       html: htmlContent,
     });
-    
+
     console.log(`[AUTOMATION] Email de bienvenida enviado a ${salesRep.email}`);
   } catch (error) {
     console.error('[AUTOMATION] Error al enviar email de bienvenida:', error);
@@ -331,14 +328,14 @@ export async function sendPartnerWelcomeEmail(salesRepId: string) {
 export async function sendMonthlyGoalsReminder() {
   try {
     console.log('[AUTOMATION] Enviando recordatorios de objetivos mensuales...');
-    
+
     const salesReps = await prisma.salesRepresentative.findMany({
       where: { activo: true, estado: 'ACTIVO' },
     });
-    
+
     const today = new Date();
     const periodoActual = format(today, 'yyyy-MM');
-    
+
     for (const salesRep of salesReps) {
       // Obtener objetivo actual
       const target = await prisma.salesTarget.findUnique({
@@ -349,14 +346,14 @@ export async function sendMonthlyGoalsReminder() {
           },
         },
       });
-      
+
       if (!target) continue;
-      
+
       const leadsRestantes = target.objetivoLeads - target.leadsGenerados;
       const conversionesRestantes = target.objetivoConversiones - target.conversionesLogradas;
-      
+
       if (leadsRestantes <= 0 && conversionesRestantes <= 0) continue; // Ya cumplió
-      
+
       const htmlContent = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #4F46E5;">Recordatorio de Objetivos - ${periodoActual}</h2>
@@ -387,13 +384,17 @@ export async function sendMonthlyGoalsReminder() {
             </div>
           </div>
           
-          ${leadsRestantes > 0 || conversionesRestantes > 0 ? `
+          ${
+            leadsRestantes > 0 || conversionesRestantes > 0
+              ? `
             <div style="background: #fef3c7; padding: 15px; border-left: 4px solid #f59e0b; border-radius: 4px; margin: 20px 0;">
               <strong>¡Ánimo!</strong> Te quedan:
               ${leadsRestantes > 0 ? `<br/>- ${leadsRestantes} leads por generar` : ''}
               ${conversionesRestantes > 0 ? `<br/>- ${conversionesRestantes} conversiones por cerrar` : ''}
             </div>
-          ` : ''}
+          `
+              : ''
+          }
           
           <p style="text-align: center; margin-top: 30px;">
             <a href="${process.env.NEXT_PUBLIC_APP_URL}/portal-comercial/dashboard" 
@@ -403,14 +404,14 @@ export async function sendMonthlyGoalsReminder() {
           </p>
         </div>
       `;
-      
+
       await sendEmail({
         to: salesRep.email,
         subject: `🎯 Recordatorio de Objetivos - ${periodoActual}`,
         html: htmlContent,
       });
     }
-    
+
     console.log('[AUTOMATION] Recordatorios de objetivos enviados');
   } catch (error) {
     console.error('[AUTOMATION] Error al enviar recordatorios:', error);
@@ -427,16 +428,16 @@ export async function sendMonthlyGoalsReminder() {
 export async function updateAllSalesRepsMetrics() {
   try {
     console.log('[AUTOMATION] Actualizando métricas de comerciales...');
-    
+
     const salesReps = await prisma.salesRepresentative.findMany({
       where: { activo: true },
     });
-    
+
     for (const salesRep of salesReps) {
       await salesTeamService.updateSalesRepMetrics(salesRep.id);
       await salesTeamService.updateTargetProgress(salesRep.id);
     }
-    
+
     console.log(`[AUTOMATION] Métricas actualizadas para ${salesReps.length} comerciales`);
   } catch (error) {
     console.error('[AUTOMATION] Error al actualizar métricas:', error);

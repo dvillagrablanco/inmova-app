@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useEffect, useCallback, useRef } from 'react';
 
@@ -69,7 +69,17 @@ export function useKeyboardNavigation(options: KeyboardNavigationOptions) {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [enabled, onArrowUp, onArrowDown, onArrowLeft, onArrowRight, onEnter, onEscape, onTab, onSpace]);
+  }, [
+    enabled,
+    onArrowUp,
+    onArrowDown,
+    onArrowLeft,
+    onArrowRight,
+    onEnter,
+    onEscape,
+    onTab,
+    onSpace,
+  ]);
 }
 
 /**
@@ -141,10 +151,7 @@ export function useListKeyboardNavigation<T extends HTMLElement>(
 /**
  * Hook for keyboard shortcuts
  */
-export function useKeyboardShortcuts(
-  shortcuts: Record<string, () => void>,
-  enabled = true
-) {
+export function useKeyboardShortcuts(shortcuts: Record<string, () => void>, enabled = true) {
   useEffect(() => {
     if (!enabled) return;
 

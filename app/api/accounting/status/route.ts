@@ -14,39 +14,36 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const status = {
       sage: {
         connected: getSageService().isConfigured(),
-        name: 'Sage 50cloud / Sage 200cloud'
+        name: 'Sage 50cloud / Sage 200cloud',
       },
       holded: {
         connected: getHoldedService().isConfigured(),
-        name: 'Holded'
+        name: 'Holded',
       },
       a3: {
         connected: getA3Service().isConfigured(),
-        name: 'A3 Software'
+        name: 'A3 Software',
       },
       alegra: {
         connected: getAlegraService().isConfigured(),
-        name: 'Alegra'
+        name: 'Alegra',
       },
       zucchetti: {
         connected: getZucchettiService().isConfigured(),
-        name: 'Zucchetti'
+        name: 'Zucchetti',
       },
       contasimple: {
         connected: getContaSimpleService().isConfigured(),
-        name: 'ContaSimple'
-      }
+        name: 'ContaSimple',
+      },
     };
 
     return NextResponse.json(status);

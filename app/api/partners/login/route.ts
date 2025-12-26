@@ -12,28 +12,19 @@ export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json();
     if (!email || !password) {
-      return NextResponse.json(
-        { error: 'Email y contraseña requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email y contraseña requeridos' }, { status: 400 });
     }
     // Buscar Partner
     const partner = await prisma.partner.findUnique({
       where: { email },
     });
     if (!partner) {
-      return NextResponse.json(
-        { error: 'Credenciales inválidas' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Credenciales inválidas' }, { status: 401 });
     }
     // Verificar contraseña
     const isValidPassword = await bcrypt.compare(password, partner.password);
     if (!isValidPassword) {
-      return NextResponse.json(
-        { error: 'Credenciales inválidas' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Credenciales inválidas' }, { status: 401 });
     }
     // Verificar si está activo
     if (!partner.activo || partner.estado !== 'ACTIVE') {

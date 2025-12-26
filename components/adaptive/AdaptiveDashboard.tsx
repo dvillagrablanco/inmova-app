@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,17 +25,13 @@ interface AdaptiveDashboardProps {
 
 /**
  * ADAPTIVE DASHBOARD - Dashboard que se adapta al nivel de experiencia
- * 
+ *
  * Modos:
  * - Basic (Simple UI Mode): Solo 4 métricas principales, sin gráficos
  * - Standard: 6-8 métricas + gráficos básicos
  * - Detailed (Advanced UI Mode): Todas las métricas + gráficos avanzados
  */
-export function AdaptiveDashboard({
-  userProfile,
-  stats,
-  vertical,
-}: AdaptiveDashboardProps) {
+export function AdaptiveDashboard({ userProfile, stats, vertical }: AdaptiveDashboardProps) {
   const detailLevel = getDashboardDetailLevel(userProfile);
 
   // Métricas básicas (siempre visibles)
@@ -157,9 +153,7 @@ export function AdaptiveDashboard({
               )}
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {metric.label}
-                </CardTitle>
+                <CardTitle className="text-sm font-medium">{metric.label}</CardTitle>
                 <div className={cn('p-2 rounded-lg', metric.bgColor)}>
                   <Icon className={cn('h-4 w-4', metric.color)} />
                 </div>
@@ -167,9 +161,7 @@ export function AdaptiveDashboard({
               <CardContent>
                 <div className="text-2xl font-bold">{metric.value}</div>
                 {(metric as any).alert && (
-                  <p className="text-xs text-orange-600 mt-2">
-                    ⚠️ Requiere atención
-                  </p>
+                  <p className="text-xs text-orange-600 mt-2">⚠️ Requiere atención</p>
                 )}
               </CardContent>
             </Card>
@@ -181,17 +173,13 @@ export function AdaptiveDashboard({
       {detailLevel === 'basic' && userProfile.experienceLevel === 'principiante' && (
         <Card className="border-blue-200 bg-blue-50">
           <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              💡 ¿Primeros pasos?
-            </CardTitle>
+            <CardTitle className="text-base flex items-center gap-2">💡 ¿Primeros pasos?</CardTitle>
           </CardHeader>
           <CardContent className="text-sm space-y-2">
-            <p>
-              Este es tu dashboard simplificado. Aquí verás tus métricas más importantes.
-            </p>
+            <p>Este es tu dashboard simplificado. Aquí verás tus métricas más importantes.</p>
             <p className="text-muted-foreground">
-              A medida que uses INMOVA, podrás activar más métricas y gráficos avanzados
-              desde Configuración → Modo de Interfaz.
+              A medida que uses INMOVA, podrás activar más métricas y gráficos avanzados desde
+              Configuración → Modo de Interfaz.
             </p>
           </CardContent>
         </Card>
@@ -202,9 +190,7 @@ export function AdaptiveDashboard({
         <Card>
           <CardHeader>
             <CardTitle>Acciones Rápidas</CardTitle>
-            <CardDescription>
-              Las tareas más comunes al alcance de un clic
-            </CardDescription>
+            <CardDescription>Las tareas más comunes al alcance de un clic</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-2">
             <button className="px-4 py-3 text-left border rounded-lg hover:bg-accent transition-colors">
@@ -215,21 +201,15 @@ export function AdaptiveDashboard({
             </button>
             <button className="px-4 py-3 text-left border rounded-lg hover:bg-accent transition-colors">
               <div className="font-medium">📝 Nuevo Contrato</div>
-              <div className="text-xs text-muted-foreground mt-1">
-                Crea un contrato de alquiler
-              </div>
+              <div className="text-xs text-muted-foreground mt-1">Crea un contrato de alquiler</div>
             </button>
             <button className="px-4 py-3 text-left border rounded-lg hover:bg-accent transition-colors">
               <div className="font-medium">👤 Añadir Inquilino</div>
-              <div className="text-xs text-muted-foreground mt-1">
-                Registra un nuevo inquilino
-              </div>
+              <div className="text-xs text-muted-foreground mt-1">Registra un nuevo inquilino</div>
             </button>
             <button className="px-4 py-3 text-left border rounded-lg hover:bg-accent transition-colors">
               <div className="font-medium">💰 Registrar Pago</div>
-              <div className="text-xs text-muted-foreground mt-1">
-                Añade un pago recibido
-              </div>
+              <div className="text-xs text-muted-foreground mt-1">Añade un pago recibido</div>
             </button>
           </CardContent>
         </Card>

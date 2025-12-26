@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useWizard } from '@/lib/hooks/useWizard';
@@ -27,7 +27,7 @@ interface PropertyWizardProps {
 
 /**
  * PROPERTY WIZARD - Wizard de creación de propiedad en 5 pasos
- * 
+ *
  * Pasos:
  * 1. Datos Básicos (dirección, tipo, referencia)
  * 2. Características (m2, habitaciones, baños)
@@ -273,7 +273,9 @@ export function PropertyWizard({ onComplete }: PropertyWizardProps) {
                   type="number"
                   placeholder="3"
                   value={featuresData.habitaciones}
-                  onChange={(e) => setFeaturesData({ ...featuresData, habitaciones: e.target.value })}
+                  onChange={(e) =>
+                    setFeaturesData({ ...featuresData, habitaciones: e.target.value })
+                  }
                 />
               </div>
               <div>

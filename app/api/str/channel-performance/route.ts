@@ -24,13 +24,19 @@ export async function GET(request: NextRequest) {
       },
     });
     // Agrupar por canal
-    const channelMap = new Map<string, { bookings: number; revenue: number; nights: number; commission: number }>();
+    const channelMap = new Map<
+      string,
+      { bookings: number; revenue: number; nights: number; commission: number }
+    >();
     for (const sync of channelSyncs) {
       const channelName = sync.canal || 'Directo';
       const bookings = sync.listing.bookings || [];
-      
+
       const channelBookings = bookings.length;
-      const channelRevenue = bookings.reduce((sum: number, b: any) => sum + (b.precioTotal || 0), 0);
+      const channelRevenue = bookings.reduce(
+        (sum: number, b: any) => sum + (b.precioTotal || 0),
+        0
+      );
       const channelNights = bookings.reduce((sum: number, b: any) => sum + (b.numNoches || 1), 0);
       const commission = Math.round(channelRevenue * 0.15); // 15% comisión estimada
       if (channelMap.has(channelName)) {

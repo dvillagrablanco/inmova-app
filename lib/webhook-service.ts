@@ -6,7 +6,7 @@
 import { prisma } from './db';
 import logger from './logger';
 
-export type WebhookEventType = 
+export type WebhookEventType =
   | 'user.created'
   | 'user.onboarding_completed'
   | 'building.created'
@@ -81,7 +81,10 @@ export async function processWebhookEvents(): Promise<{
     for (const webhook of pendingWebhooks) {
       try {
         // Obtener suscripciones de webhook para esta compañía
-        const subscriptions = await getWebhookSubscriptions(webhook.companyId, webhook.event as WebhookEventType);
+        const subscriptions = await getWebhookSubscriptions(
+          webhook.companyId,
+          webhook.event as WebhookEventType
+        );
 
         if (subscriptions.length === 0) {
           // No hay suscripciones, marcar como completado sin envío
@@ -212,10 +215,7 @@ async function sendWebhook(options: {
     // Agregar firma HMAC si hay secret
     if (secret) {
       const crypto = require('crypto');
-      const signature = crypto
-        .createHmac('sha256', secret)
-        .update(body)
-        .digest('hex');
+      const signature = crypto.createHmac('sha256', secret).update(body).digest('hex');
       headers['X-INMOVA-Signature'] = signature;
     }
 

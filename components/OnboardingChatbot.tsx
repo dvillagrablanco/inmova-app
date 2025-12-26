@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
 /**
  * 🤖 ONBOARDING CHATBOT
- * 
+ *
  * Chatbot flotante con IA (GPT-4) que asiste al usuario durante el onboarding.
  * Aparece como un botón flotante en la esquina inferior derecha y se expande
  * en un widget de chat completo.
- * 
+ *
  * Características:
  * - Asistente IA contextual con GPT-4
  * - Sugerencias proactivas basadas en progreso
@@ -62,7 +62,7 @@ export default function OnboardingChatbot({
         timestamp: new Date(),
       };
       setMessages([welcomeMessage]);
-      
+
       // Cargar sugerencias iniciales
       loadSuggestions();
     }
@@ -77,7 +77,7 @@ export default function OnboardingChatbot({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: '___GET_SUGGESTIONS___' }),
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setSuggestions(data.suggestions || []);
@@ -98,7 +98,7 @@ export default function OnboardingChatbot({
       content: text,
       timestamp: new Date(),
     };
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInputValue('');
     setIsLoading(true);
 
@@ -126,7 +126,7 @@ export default function OnboardingChatbot({
         content: data.response,
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, assistantMessage]);
 
       // Actualizar sugerencias
       if (data.suggestions) {
@@ -134,16 +134,15 @@ export default function OnboardingChatbot({
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      
+
       // Mensaje de error
       const errorMessage: Message = {
         id: `error-${Date.now()}`,
         role: 'assistant',
-        content:
-          'Disculpa, estoy teniendo problemas en este momento. ¿Puedes intentarlo de nuevo?',
+        content: 'Disculpa, estoy teniendo problemas en este momento. ¿Puedes intentarlo de nuevo?',
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -190,7 +189,7 @@ export default function OnboardingChatbot({
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-              {messages.map(message => (
+              {messages.map((message) => (
                 <motion.div
                   key={message.id}
                   initial={{ opacity: 0, y: 10 }}
@@ -247,7 +246,7 @@ export default function OnboardingChatbot({
                 <input
                   type="text"
                   value={inputValue}
-                  onChange={e => setInputValue(e.target.value)}
+                  onChange={(e) => setInputValue(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="Escribe tu pregunta..."
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"

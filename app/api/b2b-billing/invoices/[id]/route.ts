@@ -19,10 +19,7 @@ interface RouteParams {
   };
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: RouteParams
-) {
+export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -30,7 +27,7 @@ export async function GET(
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
+      where: { id: session.user.id },
     });
 
     const invoice = await prisma.b2BInvoice.findUnique({
@@ -38,7 +35,7 @@ export async function GET(
       include: {
         company: true,
         subscriptionPlan: true,
-      }
+      },
     });
 
     if (!invoice) {
@@ -69,10 +66,7 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: RouteParams
-) {
+export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -80,7 +74,7 @@ export async function PUT(
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
+      where: { id: session.user.id },
     });
 
     // Solo super-admins pueden modificar facturas
@@ -101,7 +95,7 @@ export async function PUT(
       include: {
         company: true,
         subscriptionPlan: true,
-      }
+      },
     });
 
     return NextResponse.json(invoice);
@@ -114,10 +108,7 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: RouteParams
-) {
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -125,7 +116,7 @@ export async function DELETE(
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
+      where: { id: session.user.id },
     });
 
     // Solo super-admins pueden cancelar facturas
@@ -137,7 +128,7 @@ export async function DELETE(
       where: { id: params.id },
       data: {
         estado: 'CANCELADA',
-      }
+      },
     });
 
     return NextResponse.json({ message: 'Factura cancelada', invoice });

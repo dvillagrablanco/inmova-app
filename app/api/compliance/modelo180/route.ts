@@ -1,14 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import {
-  generateModelo180,
-  GenerateModelo180Params,
-} from '@/lib/services/compliance-service';
+import { generateModelo180, GenerateModelo180Params } from '@/lib/services/compliance-service';
 import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
-
 
 /**
  * @swagger
@@ -44,10 +40,7 @@ export async function GET(req: NextRequest) {
     });
 
     // Calcular totales
-    const totalBaseImponible = records.reduce(
-      (sum, r) => sum + r.baseImponible,
-      0
-    );
+    const totalBaseImponible = records.reduce((sum, r) => sum + r.baseImponible, 0);
     const totalRetenido = records.reduce((sum, r) => sum + r.importeRetenido, 0);
 
     return NextResponse.json({
@@ -57,9 +50,7 @@ export async function GET(req: NextRequest) {
         totalBaseImponible,
         totalRetenido,
         porcentajeRetencion:
-          totalBaseImponible > 0
-            ? (totalRetenido / totalBaseImponible) * 100
-            : 0,
+          totalBaseImponible > 0 ? (totalRetenido / totalBaseImponible) * 100 : 0,
       },
     });
   } catch (error: any) {

@@ -68,14 +68,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `${results.filter(r => r.success).length}/${results.length} pagos registrados en A3`,
+      message: `${results.filter((r) => r.success).length}/${results.length} pagos registrados en A3`,
       results,
     });
   } catch (error) {
     logger.error('Error registering payments in A3:', error);
-    return NextResponse.json(
-      { error: 'Error al registrar pagos en A3' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al registrar pagos en A3' }, { status: 500 });
   }
 }

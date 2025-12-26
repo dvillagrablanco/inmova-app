@@ -259,9 +259,6 @@ export async function GET() {
     });
   } catch (error) {
     logger.error('Error obteniendo alertas:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener alertas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener alertas' }, { status: 500 });
   }
 }

@@ -14,12 +14,7 @@ export function LiveRegion({
   'aria-live': ariaLive = 'polite',
 }: LiveRegionProps) {
   return (
-    <div
-      role={role}
-      aria-live={ariaLive}
-      aria-atomic="true"
-      className="sr-only"
-    >
+    <div role={role} aria-live={ariaLive} aria-atomic="true" className="sr-only">
       {message}
     </div>
   );
@@ -43,13 +38,7 @@ export function useAnnouncer() {
   };
 
   const AnnouncerComponent = () => (
-    <div
-      ref={announcer}
-      role="status"
-      aria-live="polite"
-      aria-atomic="true"
-      className="sr-only"
-    />
+    <div ref={announcer} role="status" aria-live="polite" aria-atomic="true" className="sr-only" />
   );
 
   return { announce, Announcer: AnnouncerComponent };

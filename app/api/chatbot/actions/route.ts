@@ -18,15 +18,12 @@ export async function POST(request: NextRequest) {
     const { sessionId, accion, parametros } = body;
 
     if (!sessionId || !accion) {
-      return NextResponse.json(
-        { error: 'sessionId y acción son requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'sessionId y acción son requeridos' }, { status: 400 });
     }
 
     // Buscar el inquilino por email
     const tenant = await prisma.tenant.findUnique({
-      where: { email: session.user.email! }
+      where: { email: session.user.email! },
     });
 
     if (!tenant) {
@@ -41,7 +38,7 @@ export async function POST(request: NextRequest) {
         case 'solicitar_mantenimiento':
           // Crear solicitud de mantenimiento
           const { titulo, descripcion, prioridad = 'media' } = parametros || {};
-          
+
           if (!titulo || !descripcion) {
             throw new Error('Titulo y descripción son requeridos');
           }
@@ -50,9 +47,9 @@ export async function POST(request: NextRequest) {
           const contract = await prisma.contract.findFirst({
             where: {
               tenantId: tenant.id,
-              estado: 'activo'
+              estado: 'activo',
             },
-            include: { unit: true }
+            include: { unit: true },
           });
 
           if (!contract) {
@@ -65,8 +62,8 @@ export async function POST(request: NextRequest) {
               titulo,
               descripcion,
               prioridad,
-              estado: 'pendiente'
-            }
+              estado: 'pendiente',
+            },
           });
           break;
 
@@ -86,8 +83,8 @@ export async function POST(request: NextRequest) {
             where: { sessionId },
             data: {
               estado: 'escalada',
-              escaladoMotivo: parametros?.motivo || 'Solicitud del usuario'
-            }
+              escaladoMotivo: parametros?.motivo || 'Solicitud del usuario',
+            },
           });
           break;
 
@@ -108,15 +105,15 @@ export async function POST(request: NextRequest) {
         accion,
         parametros: parametros || {},
         resultado,
-        errorDetalle
-      }
+        errorDetalle,
+      },
     });
 
     return NextResponse.json({
       success: resultado === 'exito',
       resultado,
       errorDetalle,
-      action: actionRecord
+      action: actionRecord,
     });
   } catch (error: any) {
     logger.error('Error al ejecutar acción:', error);
@@ -139,14 +136,11 @@ export async function GET(request: NextRequest) {
     const sessionId = searchParams.get('sessionId');
 
     if (!sessionId) {
-      return NextResponse.json(
-        { error: 'sessionId requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'sessionId requerido' }, { status: 400 });
     }
 
     const tenant = await prisma.tenant.findUnique({
-      where: { email: session.user.email! }
+      where: { email: session.user.email! },
     });
 
     if (!tenant) {
@@ -156,17 +150,14 @@ export async function GET(request: NextRequest) {
     const actions = await prisma.chatbotAction.findMany({
       where: {
         sessionId,
-        tenantId: tenant.id
+        tenantId: tenant.id,
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
 
     return NextResponse.json(actions);
   } catch (error: any) {
     logger.error('Error al obtener acciones:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener acciones' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener acciones' }, { status: 500 });
   }
 }

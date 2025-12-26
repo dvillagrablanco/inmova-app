@@ -34,40 +34,40 @@ export type WorkflowActionConfig = {
   notificationMessage?: string;
   notificationUserId?: string;
   notificationUserRole?: string;
-  
+
   // Enviar email
   emailTo?: string;
   emailSubject?: string;
   emailBody?: string;
-  
+
   // Crear tarea
   taskTitle?: string;
   taskDescription?: string;
   taskAssignedTo?: string;
   taskPriority?: string;
   taskDueDate?: string;
-  
+
   // Crear incidencia
   incidentTitle?: string;
   incidentDescription?: string;
   incidentPriority?: string;
   incidentBuildingId?: string;
   incidentUnitId?: string;
-  
+
   // Actualizar registro
   model?: string;
   recordId?: string;
   updateData?: any;
-  
+
   // Webhook
   webhookUrl?: string;
   webhookMethod?: string;
   webhookHeaders?: Record<string, string>;
   webhookBody?: any;
-  
+
   // Script personalizado
   scriptCode?: string;
-  
+
   // Generar documento
   documentTemplate?: string;
   documentData?: any;
@@ -81,9 +81,7 @@ export class WorkflowEngine {
   /**
    * Evalúa y ejecuta workflows que coincidan con el trigger
    */
-  static async executeMatchingWorkflows(
-    context: WorkflowContext
-  ): Promise<{
+  static async executeMatchingWorkflows(context: WorkflowContext): Promise<{
     executed: number;
     results: any[];
     errors: any[];
@@ -121,30 +119,25 @@ export class WorkflowEngine {
     for (const workflow of matchingWorkflows) {
       try {
         // Verificar si el trigger coincide
-        const triggerConfig: WorkflowTriggerConfig = workflow.triggerConfig as WorkflowTriggerConfig;
-        
+        const triggerConfig: WorkflowTriggerConfig =
+          workflow.triggerConfig as WorkflowTriggerConfig;
+
         if (triggerConfig.eventType && triggerConfig.eventType !== eventType) {
           continue; // No coincide el tipo de evento
         }
 
         // Evaluar condiciones si existen
         if (triggerConfig.conditions && triggerConfig.conditions.length > 0) {
-          const conditionsMet = await this.evaluateConditions(
-            triggerConfig.conditions,
-            data
-          );
-          
+          const conditionsMet = await this.evaluateConditions(triggerConfig.conditions, data);
+
           if (!conditionsMet) {
             continue; // Condiciones no cumplidas
           }
         }
 
         // Ejecutar el workflow
-        const executionResult = await this.executeWorkflow(
-          workflow.id,
-          context
-        );
-        
+        const executionResult = await this.executeWorkflow(workflow.id, context);
+
         results.push(executionResult);
         executed++;
       } catch (error: any) {
@@ -162,10 +155,7 @@ export class WorkflowEngine {
   /**
    * Ejecuta un workflow específico
    */
-  static async executeWorkflow(
-    workflowId: string,
-    context: WorkflowContext
-  ): Promise<any> {
+  static async executeWorkflow(workflowId: string, context: WorkflowContext): Promise<any> {
     const workflow = await prisma.workflow.findUnique({
       where: { id: workflowId },
       include: {
@@ -204,11 +194,8 @@ export class WorkflowEngine {
           if (action.conditions) {
             const conditions = action.conditions as any;
             if (conditions && Array.isArray(conditions)) {
-              const conditionsMet = await this.evaluateConditions(
-                conditions,
-                context.data
-              );
-              
+              const conditionsMet = await this.evaluateConditions(conditions, context.data);
+
               if (!conditionsMet) {
                 actionResults.push({
                   actionId: action.id,
@@ -281,10 +268,7 @@ export class WorkflowEngine {
   /**
    * Evalúa condiciones usando el motor de reglas
    */
-  private static async evaluateConditions(
-    conditions: any[],
-    data: any
-  ): Promise<boolean> {
+  private static async evaluateConditions(conditions: any[], data: any): Promise<boolean> {
     if (!conditions || conditions.length === 0) {
       return true;
     }
@@ -326,28 +310,28 @@ export class WorkflowEngine {
     switch (actionType) {
       case 'enviar_notificacion':
         return await this.sendNotification(config, context);
-      
+
       case 'enviar_email':
         return await this.sendEmail(config, context);
-      
+
       case 'crear_tarea':
         return await this.createTask(config, context);
-      
+
       case 'crear_incidencia':
         return await this.createIncident(config, context);
-      
+
       case 'actualizar_registro':
         return await this.updateRecord(config, context);
-      
+
       case 'webhook':
         return await this.callWebhook(config, context);
-      
+
       case 'ejecutar_script':
         return await this.executeScript(config, context);
-      
+
       case 'generar_documento':
         return await this.generateDocument(config, context);
-      
+
       default:
         throw new Error(`Tipo de acción no soportado: ${actionType}`);
     }
@@ -361,7 +345,8 @@ export class WorkflowEngine {
     context: WorkflowContext
   ): Promise<any> {
     const { companyId } = context;
-    const { notificationTitle, notificationMessage, notificationUserId, notificationUserRole } = config;
+    const { notificationTitle, notificationMessage, notificationUserId, notificationUserRole } =
+      config;
 
     // Crear notificación
     const notification = await prisma.notification.create({
@@ -389,7 +374,7 @@ export class WorkflowEngine {
 
     // Aquí integrarías con tu servicio de email (nodemailer, sendgrid, etc.)
     // Por ahora retornamos un placeholder
-    
+
     return {
       emailSent: true,
       to: emailTo,
@@ -405,13 +390,7 @@ export class WorkflowEngine {
     context: WorkflowContext
   ): Promise<any> {
     const { companyId } = context;
-    const {
-      taskTitle,
-      taskDescription,
-      taskAssignedTo,
-      taskPriority,
-      taskDueDate,
-    } = config;
+    const { taskTitle, taskDescription, taskAssignedTo, taskPriority, taskDueDate } = config;
 
     const task = await prisma.task.create({
       data: {
@@ -473,7 +452,7 @@ export class WorkflowEngine {
     // Esta es una simplificación, en producción necesitarías
     // validar el modelo y los permisos
     const modelName = model.toLowerCase() as any;
-    
+
     if (!(prisma as any)[modelName]) {
       throw new Error(`Modelo ${model} no encontrado`);
     }
@@ -534,12 +513,12 @@ export class WorkflowEngine {
     // IMPORTANTE: Esto es un placeholder
     // En producción, deberías usar un sandbox seguro como vm2 o similar
     // para ejecutar código personalizado de forma segura
-    
+
     try {
       // eslint-disable-next-line no-new-func
       const scriptFunction = new Function('context', 'prisma', scriptCode);
       const result = await scriptFunction(context, prisma);
-      
+
       return { scriptExecuted: true, result };
     } catch (error: any) {
       throw new Error(`Error ejecutando script: ${error.message}`);
@@ -557,7 +536,7 @@ export class WorkflowEngine {
 
     // Esta es una simplificación
     // En producción integrarías con tu sistema de generación de documentos
-    
+
     return {
       documentGenerated: true,
       template: documentTemplate,
@@ -574,28 +553,28 @@ export const WORKFLOW_TRIGGERS = {
   CONTRATO_CREADO: 'contrato.creado',
   CONTRATO_VENCE_PRONTO: 'contrato.vence_pronto',
   CONTRATO_VENCIDO: 'contrato.vencido',
-  
+
   // Pagos
   PAGO_RECIBIDO: 'pago.recibido',
   PAGO_ATRASADO: 'pago.atrasado',
   PAGO_RECHAZADO: 'pago.rechazado',
-  
+
   // Mantenimiento
   INCIDENCIA_CREADA: 'incidencia.creada',
   INCIDENCIA_CRITICA: 'incidencia.critica',
   INCIDENCIA_RESUELTA: 'incidencia.resuelta',
-  
+
   // Inquilinos
   INQUILINO_NUEVO: 'inquilino.nuevo',
   INQUILINO_INACTIVO: 'inquilino.inactivo',
-  
+
   // Propietarios
   PROPIETARIO_NUEVO: 'propietario.nuevo',
-  
+
   // Tareas
   TAREA_VENCIDA: 'tarea.vencida',
   TAREA_COMPLETADA: 'tarea.completada',
-  
+
   // Custom
   CUSTOM: 'custom',
 };

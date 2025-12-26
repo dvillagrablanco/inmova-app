@@ -11,7 +11,7 @@ import {
   AlertTriangle,
   CheckCircle,
   Sparkles,
-  ArrowRight
+  ArrowRight,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
@@ -33,41 +33,45 @@ const MOCK_SUGGESTIONS: Suggestion[] = [
     id: '1',
     type: 'opportunity',
     title: 'Activa pagos recurrentes',
-    description: 'Tienes 8 contratos activos sin pagos automatizados. Actívalos para reducir morosidad en un 40%.',
+    description:
+      'Tienes 8 contratos activos sin pagos automatizados. Actívalos para reducir morosidad en un 40%.',
     action: '/contratos',
     actionLabel: 'Configurar ahora',
     priority: 'high',
-    category: 'payments'
+    category: 'payments',
   },
   {
     id: '2',
     type: 'warning',
     title: 'Contratos próximos a vencer',
-    description: '3 contratos vencen en los próximos 30 días. Contacta a tus inquilinos para renovación.',
+    description:
+      '3 contratos vencen en los próximos 30 días. Contacta a tus inquilinos para renovación.',
     action: '/contratos?filter=expiring',
     actionLabel: 'Ver contratos',
     priority: 'high',
-    category: 'contracts'
+    category: 'contracts',
   },
   {
     id: '3',
     type: 'optimization',
     title: 'Completa datos de edificios',
-    description: '5 edificios no tienen fotos. Añade imágenes para mejorar tu presentación profesional.',
+    description:
+      '5 edificios no tienen fotos. Añade imágenes para mejorar tu presentación profesional.',
     action: '/edificios',
     actionLabel: 'Añadir fotos',
     priority: 'medium',
-    category: 'buildings'
+    category: 'buildings',
   },
   {
     id: '4',
     type: 'opportunity',
     title: 'Programa mantenimiento preventivo',
-    description: 'Evita averías costosas. Configura revisiones automáticas de ascensores y calderas.',
+    description:
+      'Evita averías costosas. Configura revisiones automáticas de ascensores y calderas.',
     action: '/mantenimiento-preventivo',
     actionLabel: 'Configurar',
     priority: 'medium',
-    category: 'maintenance'
+    category: 'maintenance',
   },
   {
     id: '5',
@@ -77,8 +81,8 @@ const MOCK_SUGGESTIONS: Suggestion[] = [
     action: '/contabilidad',
     actionLabel: 'Ver integraciones',
     priority: 'low',
-    category: 'accounting'
-  }
+    category: 'accounting',
+  },
 ];
 
 export default function ProactiveSuggestions() {
@@ -93,15 +97,15 @@ export default function ProactiveSuggestions() {
     const stored = localStorage.getItem('dismissed_suggestions');
     const dismissedIds = stored ? JSON.parse(stored) : [];
     setDismissed(dismissedIds);
-    
+
     // Check if widget was hidden
     const widgetHidden = localStorage.getItem('suggestions_widget_hidden');
     if (widgetHidden === 'true') {
       setIsWidgetVisible(false);
       return;
     }
-    
-    const filtered = MOCK_SUGGESTIONS.filter(s => !dismissedIds.includes(s.id));
+
+    const filtered = MOCK_SUGGESTIONS.filter((s) => !dismissedIds.includes(s.id));
     setSuggestions(filtered);
   }, []);
 
@@ -109,7 +113,7 @@ export default function ProactiveSuggestions() {
     const newDismissed = [...dismissed, id];
     setDismissed(newDismissed);
     localStorage.setItem('dismissed_suggestions', JSON.stringify(newDismissed));
-    setSuggestions(prev => prev.filter(s => s.id !== id));
+    setSuggestions((prev) => prev.filter((s) => s.id !== id));
     toast.success('Sugerencia descartada');
   };
 
@@ -169,9 +173,7 @@ export default function ProactiveSuggestions() {
               Recomendaciones personalizadas para optimizar tu gestión
             </CardDescription>
           </div>
-          <Badge variant="outline">
-            {suggestions.length} pendientes
-          </Badge>
+          <Badge variant="outline">{suggestions.length} pendientes</Badge>
           <Button
             variant="ghost"
             size="icon"
@@ -196,15 +198,20 @@ export default function ProactiveSuggestions() {
                 <Card className="hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 mt-0.5">
-                        {getIcon(suggestion.type)}
-                      </div>
+                      <div className="flex-shrink-0 mt-0.5">{getIcon(suggestion.type)}</div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2 mb-1">
                           <h4 className="font-semibold text-sm">{suggestion.title}</h4>
                           <div className="flex items-center gap-1">
-                            <Badge variant={getPriorityColor(suggestion.priority) as any} className="text-xs">
-                              {suggestion.priority === 'high' ? 'Alta' : suggestion.priority === 'medium' ? 'Media' : 'Baja'}
+                            <Badge
+                              variant={getPriorityColor(suggestion.priority) as any}
+                              className="text-xs"
+                            >
+                              {suggestion.priority === 'high'
+                                ? 'Alta'
+                                : suggestion.priority === 'medium'
+                                  ? 'Media'
+                                  : 'Baja'}
                             </Badge>
                             <Button
                               variant="ghost"

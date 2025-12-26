@@ -14,24 +14,18 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session || !session.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Solo administradores
     if (session.user.role !== 'administrador') {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
 
     const body = await request.json();
-    
+
     // Crear un objeto temporal de configuración para la preview
     const previewConfig = {
       id: 'preview',
@@ -64,22 +58,19 @@ export async function POST(request: NextRequest) {
       metaDescription: body.metaDescription || null,
       activo: true,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     // Generar CSS variables para la preview
     const cssVariables = generateCSSVariables(previewConfig);
-    
+
     return NextResponse.json({
       success: true,
       config: previewConfig,
-      cssVariables
+      cssVariables,
     });
   } catch (error) {
     logger.error('[API Branding Preview] Error:', error);
-    return NextResponse.json(
-      { error: 'Error al generar preview' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al generar preview' }, { status: 500 });
   }
 }

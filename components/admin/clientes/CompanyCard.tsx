@@ -12,7 +12,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Building2, Users, TrendingUp, Eye, Trash2, MoreVertical, LogIn, CreditCard, Pencil } from 'lucide-react';
+import {
+  Building2,
+  Users,
+  TrendingUp,
+  Eye,
+  Trash2,
+  MoreVertical,
+  LogIn,
+  CreditCard,
+  Pencil,
+} from 'lucide-react';
 import { CompanyData } from '@/lib/hooks/admin/useCompanies';
 
 interface CompanyCardProps {
@@ -58,12 +68,8 @@ export function CompanyCard({
                 <Badge variant={company.activo ? 'default' : 'secondary'}>
                   {company.activo ? 'Activo' : 'Inactivo'}
                 </Badge>
-                {company.estadoCliente && (
-                  <Badge variant="outline">{company.estadoCliente}</Badge>
-                )}
-                {company.category && (
-                  <Badge variant="secondary">{company.category}</Badge>
-                )}
+                {company.estadoCliente && <Badge variant="outline">{company.estadoCliente}</Badge>}
+                {company.category && <Badge variant="secondary">{company.category}</Badge>}
               </div>
             </div>
           </div>
@@ -92,10 +98,7 @@ export function CompanyCard({
                 Cambiar Plan
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => onDelete(company)}
-                className="text-red-600"
-              >
+              <DropdownMenuItem onClick={() => onDelete(company)} className="text-red-600">
                 <Trash2 className="h-4 w-4 mr-2" />
                 Eliminar
               </DropdownMenuItem>
@@ -123,27 +126,21 @@ export function CompanyCard({
             <div className="flex items-center justify-center mb-1">
               <Building2 className="h-4 w-4 text-indigo-600" />
             </div>
-            <div className="text-2xl font-bold text-indigo-600">
-              {company._count.buildings}
-            </div>
+            <div className="text-2xl font-bold text-indigo-600">{company._count.buildings}</div>
             <div className="text-xs text-gray-600">Inmuebles</div>
           </div>
           <div>
             <div className="flex items-center justify-center mb-1">
               <Users className="h-4 w-4 text-green-600" />
             </div>
-            <div className="text-2xl font-bold text-green-600">
-              {company._count.users}
-            </div>
+            <div className="text-2xl font-bold text-green-600">{company._count.users}</div>
             <div className="text-xs text-gray-600">Usuarios</div>
           </div>
           <div>
             <div className="flex items-center justify-center mb-1">
               <TrendingUp className="h-4 w-4 text-purple-600" />
             </div>
-            <div className="text-2xl font-bold text-purple-600">
-              {company._count.tenants}
-            </div>
+            <div className="text-2xl font-bold text-purple-600">{company._count.tenants}</div>
             <div className="text-xs text-gray-600">Inquilinos</div>
           </div>
         </div>
@@ -151,12 +148,8 @@ export function CompanyCard({
         {/* Contact Info */}
         {(company.contactoPrincipal || company.emailContacto) && (
           <div className="mt-4 pt-4 border-t text-xs text-gray-600 space-y-1">
-            {company.contactoPrincipal && (
-              <div>Contacto: {company.contactoPrincipal}</div>
-            )}
-            {company.emailContacto && (
-              <div>Email: {company.emailContacto}</div>
-            )}
+            {company.contactoPrincipal && <div>Contacto: {company.contactoPrincipal}</div>}
+            {company.emailContacto && <div>Email: {company.emailContacto}</div>}
           </div>
         )}
       </CardContent>

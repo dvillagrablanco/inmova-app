@@ -16,10 +16,7 @@ export async function POST(request: NextRequest) {
     const { subscription, userAgent } = await request.json();
 
     if (!subscription || !subscription.endpoint) {
-      return NextResponse.json(
-        { error: 'Suscripción inválida' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Suscripción inválida' }, { status: 400 });
     }
 
     // Guardar o actualizar la suscripción
@@ -48,9 +45,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     logger.error('Error subscribing to push notifications:', error);
-    return NextResponse.json(
-      { error: error.message || 'Error al suscribirse' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Error al suscribirse' }, { status: 500 });
   }
 }

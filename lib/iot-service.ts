@@ -22,8 +22,8 @@ export async function registrarLectura(
       deviceId,
       metrica,
       valor,
-      unidad
-    }
+      unidad,
+    },
   });
 
   // Verificar umbrales y generar alertas si es necesario
@@ -34,8 +34,8 @@ export async function registrarLectura(
     where: { id: deviceId },
     data: {
       conectado: true,
-      ultimaConexion: new Date()
-    }
+      ultimaConexion: new Date(),
+    },
   });
 
   return reading;
@@ -44,13 +44,9 @@ export async function registrarLectura(
 /**
  * Verifica umbrales configurados y genera alertas
  */
-export async function verificarUmbrales(
-  deviceId: string,
-  metrica: string,
-  valor: number
-) {
+export async function verificarUmbrales(deviceId: string, metrica: string, valor: number) {
   const device = await prisma.ioTDevice.findUnique({
-    where: { id: deviceId }
+    where: { id: deviceId },
   });
 
   if (!device || !device.umbrales) {
@@ -88,8 +84,8 @@ export async function verificarUmbrales(
       where: {
         deviceId,
         estado: 'activa',
-        mensaje: { contains: metrica }
-      }
+        mensaje: { contains: metrica },
+      },
     });
 
     if (!alertaExistente) {
@@ -104,9 +100,9 @@ export async function verificarUmbrales(
           metadata: {
             metrica,
             valor,
-            umbral: umbralMetrica
-          }
-        }
+            umbral: umbralMetrica,
+          },
+        },
       });
     }
   }
@@ -124,7 +120,7 @@ export async function obtenerLecturasHistoricas(
 
   const where: any = {
     deviceId,
-    timestamp: { gte: fechaDesde }
+    timestamp: { gte: fechaDesde },
   };
 
   if (metrica) {
@@ -133,39 +129,37 @@ export async function obtenerLecturasHistoricas(
 
   const lecturas = await prisma.ioTReading.findMany({
     where,
-    orderBy: { timestamp: 'asc' }
+    orderBy: { timestamp: 'asc' },
   });
 
   // Agrupar por métrica
   const porMetrica: Record<string, any[]> = {};
-  
-  lecturas.forEach(lectura => {
+
+  lecturas.forEach((lectura) => {
     if (!porMetrica[lectura.metrica]) {
       porMetrica[lectura.metrica] = [];
     }
     porMetrica[lectura.metrica].push({
       timestamp: lectura.timestamp,
       valor: lectura.valor,
-      unidad: lectura.unidad
+      unidad: lectura.unidad,
     });
   });
 
   return {
     total: lecturas.length,
     porMetrica,
-    lecturas
+    lecturas,
   };
 }
 
 /**
  * Ejecuta una automatización
  */
-export async function ejecutarAutomatizacion(
-  automationId: string
-) {
+export async function ejecutarAutomatizacion(automationId: string) {
   const automation = await prisma.ioTAutomation.findUnique({
     where: { id: automationId },
-    include: { device: true }
+    include: { device: true },
   });
 
   if (!automation || !automation.activa) {
@@ -200,30 +194,27 @@ export async function ejecutarAutomatizacion(
     where: { id: automationId },
     data: {
       ultimaEjecucion: new Date(),
-      vecesEjecutada: { increment: 1 }
-    }
+      vecesEjecutada: { increment: 1 },
+    },
   });
 
   return {
     ejecutado: true,
-    resultados
+    resultados,
   };
 }
 
 /**
  * Verifica condiciones de una automatización
  */
-async function verificarCondiciones(
-  deviceId: string,
-  condiciones: any
-): Promise<boolean> {
+async function verificarCondiciones(deviceId: string, condiciones: any): Promise<boolean> {
   // Obtener última lectura del dispositivo
   const ultimaLectura = await prisma.ioTReading.findFirst({
     where: {
       deviceId,
-      metrica: condiciones.metrica
+      metrica: condiciones.metrica,
     },
-    orderBy: { timestamp: 'desc' }
+    orderBy: { timestamp: 'desc' },
   });
 
   if (!ultimaLectura) {
@@ -251,12 +242,9 @@ async function verificarCondiciones(
 /**
  * Ejecuta una acción en un dispositivo
  */
-async function ejecutarAccion(
-  deviceId: string,
-  accion: any
-) {
+async function ejecutarAccion(deviceId: string, accion: any) {
   const device = await prisma.ioTDevice.findUnique({
-    where: { id: deviceId }
+    where: { id: deviceId },
   });
 
   if (!device) {
@@ -270,7 +258,7 @@ async function ejecutarAccion(
   return {
     tipo: accion.tipo,
     parametros: accion.parametros,
-    timestamp: new Date()
+    timestamp: new Date(),
   };
 }
 
@@ -287,10 +275,10 @@ export async function obtenerEstadisticasEnergia(
   const where: any = {
     device: {
       companyId,
-      tipo: 'energy_meter'
+      tipo: 'energy_meter',
     },
     metrica: 'power',
-    timestamp: { gte: fechaDesde }
+    timestamp: { gte: fechaDesde },
   };
 
   if (buildingId) {
@@ -301,9 +289,9 @@ export async function obtenerEstadisticasEnergia(
     where,
     include: {
       device: {
-        include: { building: true }
-      }
-    }
+        include: { building: true },
+      },
+    },
   });
 
   const consumoTotal = lecturas.reduce((sum, l) => sum + l.valor, 0);
@@ -311,7 +299,7 @@ export async function obtenerEstadisticasEnergia(
 
   // Por edificio
   const porEdificio: Record<string, number> = {};
-  lecturas.forEach(lectura => {
+  lecturas.forEach((lectura) => {
     const buildingName = lectura.device.building?.nombre || 'Sin edificio';
     if (!porEdificio[buildingName]) {
       porEdificio[buildingName] = 0;
@@ -325,7 +313,7 @@ export async function obtenerEstadisticasEnergia(
     consumoPromedioDiario: Math.round(consumoPromedioDiario),
     unidad: 'kWh',
     porEdificio,
-    costEstimado: Math.round(consumoTotal * 0.15) // €0.15/kWh estimado
+    costEstimado: Math.round(consumoTotal * 0.15), // €0.15/kWh estimado
   };
 }
 
@@ -341,15 +329,12 @@ export async function detectarDispositivosDesconectados(
   const dispositivosDesconectados = await prisma.ioTDevice.findMany({
     where: {
       companyId,
-      OR: [
-        { ultimaConexion: { lt: fechaLimite } },
-        { ultimaConexion: null }
-      ]
+      OR: [{ ultimaConexion: { lt: fechaLimite } }, { ultimaConexion: null }],
     },
     include: {
       building: true,
-      unit: true
-    }
+      unit: true,
+    },
   });
 
   // Generar alertas para dispositivos críticos desconectados
@@ -359,8 +344,8 @@ export async function detectarDispositivosDesconectados(
         where: {
           deviceId: device.id,
           estado: 'activa',
-          tipo: 'error'
-        }
+          tipo: 'error',
+        },
       });
 
       if (!alertaExistente) {
@@ -371,8 +356,8 @@ export async function detectarDispositivosDesconectados(
             tipo: 'error',
             titulo: 'Dispositivo Desconectado',
             mensaje: `El dispositivo ${device.nombre} lleva más de ${minutosInactividad} minutos sin conexión`,
-            severidad: 'alta'
-          }
+            severidad: 'alta',
+          },
         });
       }
     }

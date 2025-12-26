@@ -159,7 +159,12 @@ function simulateMLFraudDetection(data: any): number {
 /**
  * Revisa una alerta de fraude
  */
-export async function reviewFraudAlert(alertId: string, revisadoPor: string, accionTomada: string, notas?: string) {
+export async function reviewFraudAlert(
+  alertId: string,
+  revisadoPor: string,
+  accionTomada: string,
+  notas?: string
+) {
   const alert = await prisma.fraudAlert.update({
     where: { id: alertId },
     data: {
@@ -304,10 +309,7 @@ export async function assignSecurityIncident(incidentId: string, responsable: st
 /**
  * Resuelve un incidente de seguridad
  */
-export async function resolveSecurityIncident(
-  incidentId: string,
-  accionesCorrectivas: any
-) {
+export async function resolveSecurityIncident(incidentId: string, accionesCorrectivas: any) {
   const incident = await prisma.securityIncident.update({
     where: { id: incidentId },
     data: {

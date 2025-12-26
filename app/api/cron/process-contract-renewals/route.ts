@@ -18,16 +18,13 @@ export async function GET(request: NextRequest) {
     // Si hay un secret configurado, validarlo
     if (cronSecret) {
       if (!authHeader || authHeader !== `Bearer ${cronSecret}`) {
-        return NextResponse.json(
-          { error: 'No autorizado' },
-          { status: 401 }
-        );
+        return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
       }
     }
 
     logger.info('Iniciando procesamiento de renovación de contratos...');
     await processRenewalAlerts();
-    
+
     return NextResponse.json({
       success: true,
       message: 'Alertas de renovación procesadas correctamente',

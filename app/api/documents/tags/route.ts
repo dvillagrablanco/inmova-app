@@ -40,10 +40,7 @@ export async function POST(request: NextRequest) {
     const { nombre, color } = await request.json();
 
     if (!nombre) {
-      return NextResponse.json(
-        { error: 'El nombre es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'El nombre es requerido' }, { status: 400 });
     }
 
     const companyId = session?.user?.companyId;

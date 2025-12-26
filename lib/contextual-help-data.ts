@@ -8,12 +8,13 @@ export const helpData = {
     sections: [
       {
         title: '¿Qué puedo ver aquí?',
-        content: 'El dashboard te muestra las métricas más importantes de tu negocio: edificios gestionados, inquilinos activos, ingresos mensuales, y tareas pendientes.',
+        content:
+          'El dashboard te muestra las métricas más importantes de tu negocio: edificios gestionados, inquilinos activos, ingresos mensuales, y tareas pendientes.',
         tips: [
           'Las tarjetas KPI muestran cambios respecto al mes anterior',
           'Los gráficos son interactivos: haz clic para más detalles',
-          'Puedes exportar cualquier gráfico como imagen'
-        ]
+          'Puedes exportar cualquier gráfico como imagen',
+        ],
       },
       {
         title: 'Personalización',
@@ -21,12 +22,12 @@ export const helpData = {
         tips: [
           'Arrastra las tarjetas para reordenarlas',
           'Haz clic en el icono de ojo para ocultar/mostrar secciones',
-          'Tus preferencias se guardan automáticamente'
-        ]
-      }
-    ]
+          'Tus preferencias se guardan automáticamente',
+        ],
+      },
+    ],
   },
-  
+
   edificios: {
     module: 'Edificios',
     title: 'Gestión de Edificios',
@@ -34,34 +35,37 @@ export const helpData = {
     sections: [
       {
         title: 'Crear un nuevo edificio',
-        content: 'Haz clic en "Nuevo Edificio" para registrar una nueva propiedad. Necesitarás la dirección completa, número de unidades, y datos del propietario.',
+        content:
+          'Haz clic en "Nuevo Edificio" para registrar una nueva propiedad. Necesitarás la dirección completa, número de unidades, y datos del propietario.',
         tips: [
           'Puedes agregar fotos del edificio durante o después de la creación',
           'Los campos marcados con * son obligatorios',
-          'Guarda borradores para completar la información más tarde'
-        ]
+          'Guarda borradores para completar la información más tarde',
+        ],
       },
       {
         title: 'Ver y editar edificios',
-        content: 'Haz clic en cualquier edificio para ver sus detalles completos, unidades, inquilinos, y documentos asociados.',
+        content:
+          'Haz clic en cualquier edificio para ver sus detalles completos, unidades, inquilinos, y documentos asociados.',
         tips: [
           'Usa los filtros para encontrar edificios rápidamente',
           'Exporta la lista de edificios a Excel o PDF',
-          'Configura alertas para mantenimientos programados'
-        ]
+          'Configura alertas para mantenimientos programados',
+        ],
       },
       {
         title: 'Unidades por edificio',
-        content: 'Cada edificio puede tener múltiples unidades (apartamentos, locales, etc.). Gestiona el estado de ocupación de cada una.',
+        content:
+          'Cada edificio puede tener múltiples unidades (apartamentos, locales, etc.). Gestiona el estado de ocupación de cada una.',
         tips: [
           'Marca unidades como disponibles, ocupadas, o en mantenimiento',
           'Asigna inquilinos directamente desde la vista de unidades',
-          'Configura precios de alquiler diferentes por unidad'
-        ]
-      }
-    ]
+          'Configura precios de alquiler diferentes por unidad',
+        ],
+      },
+    ],
   },
-  
+
   inquilinos: {
     module: 'Inquilinos',
     title: 'Gestión de Inquilinos',
@@ -69,34 +73,37 @@ export const helpData = {
     sections: [
       {
         title: 'Registrar inquilino',
-        content: 'Crea un perfil completo del inquilino con sus datos personales, información de contacto, y referencias.',
+        content:
+          'Crea un perfil completo del inquilino con sus datos personales, información de contacto, y referencias.',
         tips: [
           'Sube documentos como DNI, nóminas, o aval bancario',
           'El scoring automático evalúa la solvencia',
-          'Puedes vincular múltiples inquilinos a un mismo contrato'
-        ]
+          'Puedes vincular múltiples inquilinos a un mismo contrato',
+        ],
       },
       {
         title: 'Verificación y screening',
-        content: 'INMOVA incluye herramientas de verificación para evaluar la idoneidad de los candidatos.',
+        content:
+          'INMOVA incluye herramientas de verificación para evaluar la idoneidad de los candidatos.',
         tips: [
           'Revisa el historial de pagos de inquilinos anteriores',
           'Solicita referencias automáticamente por email',
-          'Accede a informes de solvencia integrados'
-        ]
+          'Accede a informes de solvencia integrados',
+        ],
       },
       {
         title: 'Comunicación',
-        content: 'Mantén comunicación fluida con tus inquilinos a través del chat integrado y notificaciones.',
+        content:
+          'Mantén comunicación fluida con tus inquilinos a través del chat integrado y notificaciones.',
         tips: [
           'Envía recordatorios de pago automáticos',
           'Los inquilinos pueden reportar incidencias desde su portal',
-          'Configura plantillas de mensajes frecuentes'
-        ]
-      }
-    ]
+          'Configura plantillas de mensajes frecuentes',
+        ],
+      },
+    ],
   },
-  
+
   contratos: {
     module: 'Contratos',
     title: 'Gestión de Contratos',
@@ -104,34 +111,37 @@ export const helpData = {
     sections: [
       {
         title: 'Crear contrato',
-        content: 'Genera contratos profesionales usando plantillas personalizables. Incluye todas las cláusulas necesarias y personalizaciones.',
+        content:
+          'Genera contratos profesionales usando plantillas personalizables. Incluye todas las cláusulas necesarias y personalizaciones.',
         tips: [
           'Usa plantillas predefinidas para ahorrar tiempo',
           'Todas las plantillas cumplen con la legislación vigente',
-          'Personaliza cláusulas según tus necesidades'
-        ]
+          'Personaliza cláusulas según tus necesidades',
+        ],
       },
       {
         title: 'Firma digital',
-        content: 'Los contratos pueden firmarse digitalmente por todas las partes, con validez legal completa.',
+        content:
+          'Los contratos pueden firmarse digitalmente por todas las partes, con validez legal completa.',
         tips: [
           'Las firmas digitales tienen la misma validez que las manuscritas',
           'Recibe notificaciones cuando todas las partes firmen',
-          'Descarga el contrato firmado en PDF'
-        ]
+          'Descarga el contrato firmado en PDF',
+        ],
       },
       {
         title: 'Seguimiento y renovación',
-        content: 'Recibe alertas automáticas sobre fechas de vencimiento y gestiona renovaciones fácilmente.',
+        content:
+          'Recibe alertas automáticas sobre fechas de vencimiento y gestiona renovaciones fácilmente.',
         tips: [
           'Configura cuándo recibir alertas de vencimiento (30, 60, 90 días)',
           'Renueva contratos con un solo clic',
-          'Actualiza precios automáticamente según IPC'
-        ]
-      }
-    ]
+          'Actualiza precios automáticamente según IPC',
+        ],
+      },
+    ],
   },
-  
+
   pagos: {
     module: 'Pagos',
     title: 'Gestión de Pagos',
@@ -139,12 +149,13 @@ export const helpData = {
     sections: [
       {
         title: 'Registrar pagos',
-        content: 'Registra pagos manualmente o configura pagos recurrentes automáticos para alquileres mensuales.',
+        content:
+          'Registra pagos manualmente o configura pagos recurrentes automáticos para alquileres mensuales.',
         tips: [
           'Vincula pagos a contratos específicos',
           'Soporta múltiples métodos de pago',
-          'Genera recibos automáticamente'
-        ]
+          'Genera recibos automáticamente',
+        ],
       },
       {
         title: 'Pagos pendientes',
@@ -152,8 +163,8 @@ export const helpData = {
         tips: [
           'Filtra por inquilino, edificio o rango de fechas',
           'Envía recordatorios automáticos antes del vencimiento',
-          'Marca pagos como parciales si es necesario'
-        ]
+          'Marca pagos como parciales si es necesario',
+        ],
       },
       {
         title: 'Morosidad',
@@ -161,12 +172,12 @@ export const helpData = {
         tips: [
           'El sistema predice qué inquilinos tienen riesgo de morosidad',
           'Configura acciones automáticas para pagos atrasados',
-          'Genera reportes de morosidad para análisis'
-        ]
-      }
-    ]
+          'Genera reportes de morosidad para análisis',
+        ],
+      },
+    ],
   },
-  
+
   mantenimiento: {
     module: 'Mantenimiento',
     title: 'Gestión de Mantenimiento',
@@ -178,8 +189,8 @@ export const helpData = {
         tips: [
           'Inquilinos pueden reportar incidencias desde su portal',
           'Asigna prioridades: urgente, alta, media, baja',
-          'Adjunta fotos para mejor comprensión del problema'
-        ]
+          'Adjunta fotos para mejor comprensión del problema',
+        ],
       },
       {
         title: 'Asignar a proveedores',
@@ -187,8 +198,8 @@ export const helpData = {
         tips: [
           'Mantén una base de datos de proveedores de confianza',
           'Los proveedores reciben notificaciones automáticas',
-          'Ellos pueden actualizar el estado desde su portal'
-        ]
+          'Ellos pueden actualizar el estado desde su portal',
+        ],
       },
       {
         title: 'Mantenimiento preventivo',
@@ -196,12 +207,12 @@ export const helpData = {
         tips: [
           'Programa revisiones anuales de calderas, ascensores, etc.',
           'Recibe recordatorios automáticos',
-          'Lleva historial completo de todos los mantenimientos'
-        ]
-      }
-    ]
+          'Lleva historial completo de todos los mantenimientos',
+        ],
+      },
+    ],
   },
-  
+
   documentos: {
     module: 'Documentos',
     title: 'Gestión Documental',
@@ -209,12 +220,13 @@ export const helpData = {
     sections: [
       {
         title: 'Subir documentos',
-        content: 'Sube cualquier tipo de documento relacionado con edificios, inquilinos o contratos.',
+        content:
+          'Sube cualquier tipo de documento relacionado con edificios, inquilinos o contratos.',
         tips: [
           'Soporta PDF, imágenes, Word, Excel y más',
           'Organiza en carpetas por categoría',
-          'Agrega etiquetas para búsqueda rápida'
-        ]
+          'Agrega etiquetas para búsqueda rápida',
+        ],
       },
       {
         title: 'Compartir documentos',
@@ -222,8 +234,8 @@ export const helpData = {
         tips: [
           'Controla quién puede ver o descargar cada documento',
           'Los documentos compartidos aparecen en sus portales',
-          'Recibe notificaciones cuando se visualicen'
-        ]
+          'Recibe notificaciones cuando se visualicen',
+        ],
       },
       {
         title: 'Firma digital',
@@ -231,12 +243,12 @@ export const helpData = {
         tips: [
           'Válido para contratos, acuerdos y documentos oficiales',
           'Seguimiento del estado de firma en tiempo real',
-          'Certificados de firma con timestamp'
-        ]
-      }
-    ]
+          'Certificados de firma con timestamp',
+        ],
+      },
+    ],
   },
-  
+
   reportes: {
     module: 'Reportes',
     title: 'Reportes y Analítica',
@@ -244,12 +256,13 @@ export const helpData = {
     sections: [
       {
         title: 'Reportes predefinidos',
-        content: 'Accede a una variedad de reportes listos para usar: ocupación, ingresos, morosidad, etc.',
+        content:
+          'Accede a una variedad de reportes listos para usar: ocupación, ingresos, morosidad, etc.',
         tips: [
           'Exporta reportes en Excel, PDF o CSV',
           'Filtra por rangos de fecha personalizados',
-          'Programa envío automático por email'
-        ]
+          'Programa envío automático por email',
+        ],
       },
       {
         title: 'Reportes personalizados',
@@ -257,18 +270,19 @@ export const helpData = {
         tips: [
           'Arrastra y suelta campos para crear tu reporte',
           'Guarda plantillas para reutilizar',
-          'Comparte reportes con tu equipo'
-        ]
+          'Comparte reportes con tu equipo',
+        ],
       },
       {
         title: 'Programación de reportes',
-        content: 'Configura el envío automático de reportes por email en los intervalos que necesites.',
+        content:
+          'Configura el envío automático de reportes por email en los intervalos que necesites.',
         tips: [
           'Elige frecuencia: diaria, semanal, mensual o personalizada',
           'Define múltiples destinatarios para cada reporte',
           'Los reportes se generan y envían automáticamente en segundo plano',
-          'Incluye gráficos y visualizaciones en formato PDF'
-        ]
+          'Incluye gráficos y visualizaciones en formato PDF',
+        ],
       },
       {
         title: 'Análisis comparativo',
@@ -277,26 +291,28 @@ export const helpData = {
           'Compara mes actual vs mes anterior automáticamente',
           'Visualiza crecimiento o decrecimiento con indicadores claros',
           'Identifica patrones estacionales en tu negocio',
-          'Exporta análisis comparativos para presentaciones'
-        ]
-      }
-    ]
+          'Exporta análisis comparativos para presentaciones',
+        ],
+      },
+    ],
   },
-  
+
   bi: {
     module: 'Business Intelligence',
     title: 'Inteligencia de Negocio',
-    description: 'Herramientas avanzadas de análisis y visualización de datos para tomar decisiones estratégicas.',
+    description:
+      'Herramientas avanzadas de análisis y visualización de datos para tomar decisiones estratégicas.',
     sections: [
       {
         title: '¿Qué es Business Intelligence?',
-        content: 'BI transforma tus datos operativos en información estratégica mediante dashboards interactivos, análisis predictivo y visualizaciones avanzadas.',
+        content:
+          'BI transforma tus datos operativos en información estratégica mediante dashboards interactivos, análisis predictivo y visualizaciones avanzadas.',
         tips: [
           'Accede a métricas clave como ROI, cash flow, y ocupación',
           'Visualiza tendencias históricas y proyecciones futuras',
           'Identifica oportunidades de optimización en tu negocio',
-          'Toma decisiones basadas en datos reales, no intuiciones'
-        ]
+          'Toma decisiones basadas en datos reales, no intuiciones',
+        ],
       },
       {
         title: 'Dashboard ejecutivo',
@@ -305,18 +321,19 @@ export const helpData = {
           'Métricas financieras: ingresos totales, gastos, margen neto',
           'Métricas operativas: tasa de ocupación, tiempo medio de alquiler',
           'Métricas de cliente: satisfacción, retención, NPS',
-          'Alertas inteligentes sobre desviaciones importantes'
-        ]
+          'Alertas inteligentes sobre desviaciones importantes',
+        ],
       },
       {
         title: 'Análisis predictivo',
-        content: 'Utiliza inteligencia artificial para predecir comportamientos futuros y anticiparte a problemas.',
+        content:
+          'Utiliza inteligencia artificial para predecir comportamientos futuros y anticiparte a problemas.',
         tips: [
           'Predicción de morosidad: identifica inquilinos con riesgo de impago',
           'Forecast de ingresos: proyecta tus ingresos futuros con precisión',
           'Análisis de rotación: predice cuándo es probable que un inquilino se vaya',
-          'Optimización de precios: sugerencias de ajuste de rentas según mercado'
-        ]
+          'Optimización de precios: sugerencias de ajuste de rentas según mercado',
+        ],
       },
       {
         title: 'Segmentación de portafolio',
@@ -325,8 +342,8 @@ export const helpData = {
           'Agrupa por rentabilidad, ubicación, tipo de propiedad',
           'Identifica las propiedades más y menos rentables',
           'Compara performance entre diferentes segmentos',
-          'Toma decisiones de inversión basadas en datos históricos'
-        ]
+          'Toma decisiones de inversión basadas en datos históricos',
+        ],
       },
       {
         title: 'Benchmarking de mercado',
@@ -335,8 +352,8 @@ export const helpData = {
           'Precios de alquiler vs competencia local',
           'Tiempo de vacancia comparado con el promedio del mercado',
           'Rentabilidad vs estándares del sector',
-          'Identifica oportunidades de mejora competitiva'
-        ]
+          'Identifica oportunidades de mejora competitiva',
+        ],
       },
       {
         title: 'Visualizaciones interactivas',
@@ -345,8 +362,8 @@ export const helpData = {
           'Haz clic en cualquier elemento para profundizar (drill-down)',
           'Aplica filtros dinámicos para analizar segmentos específicos',
           'Cambia entre diferentes tipos de visualización (barras, líneas, mapas)',
-          'Exporta visualizaciones para presentaciones o reportes'
-        ]
+          'Exporta visualizaciones para presentaciones o reportes',
+        ],
       },
       {
         title: 'Alertas inteligentes',
@@ -355,8 +372,8 @@ export const helpData = {
           'Configura umbrales personalizados para cada KPI',
           'Recibe alertas cuando se detecten anomalías o tendencias preocupantes',
           'Notificaciones por email, SMS o push en la app',
-          'Prioriza alertas críticas vs informativas'
-        ]
+          'Prioriza alertas críticas vs informativas',
+        ],
       },
       {
         title: 'Exportación y compartición',
@@ -365,25 +382,27 @@ export const helpData = {
           'Exporta dashboards completos en PDF de alta calidad',
           'Genera links compartibles con acceso temporal',
           'Programa envíos automáticos de reportes BI',
-          'Presenta datos en reuniones con modo presentación'
-        ]
-      }
-    ]
+          'Presenta datos en reuniones con modo presentación',
+        ],
+      },
+    ],
   },
   calendario: {
     module: 'Calendario Unificado',
     title: '¿Cómo usar el Calendario Unificado?',
-    description: 'Gestiona todos tus eventos, visitas, inspecciones y reuniones en un solo lugar centralizado.',
+    description:
+      'Gestiona todos tus eventos, visitas, inspecciones y reuniones en un solo lugar centralizado.',
     sections: [
       {
         title: 'Sincronización automática',
-        content: 'El calendario se sincroniza automáticamente con eventos de todos los módulos del sistema.',
+        content:
+          'El calendario se sincroniza automáticamente con eventos de todos los módulos del sistema.',
         tips: [
           'Los pagos pendientes se muestran automáticamente',
           'Los vencimientos de contratos aparecen como eventos',
           'El mantenimiento programado se integra en el calendario',
-          'Las visitas de candidatos se añaden automáticamente'
-        ]
+          'Las visitas de candidatos se añaden automáticamente',
+        ],
       },
       {
         title: 'Crear eventos personalizados',
@@ -392,8 +411,8 @@ export const helpData = {
           'Asigna eventos a edificios y unidades específicas',
           'Configura recordatorios para eventos importantes',
           'Marca eventos como completados o cancelados',
-          'Añade notas y detalles relevantes a cada evento'
-        ]
+          'Añade notas y detalles relevantes a cada evento',
+        ],
       },
       {
         title: 'Vistas y filtros',
@@ -402,15 +421,16 @@ export const helpData = {
           'Cambia entre vista mensual, semanal, diaria o agenda',
           'Filtra por tipo de evento (pagos, contratos, mantenimiento)',
           'Exporta tu calendario para compartir con el equipo',
-          'Sincroniza con calendarios externos (próximamente)'
-        ]
-      }
-    ]
+          'Sincroniza con calendarios externos (próximamente)',
+        ],
+      },
+    ],
   },
   'room-rental': {
     module: 'Alquiler por Habitaciones',
     title: '¿Cómo gestionar el Alquiler por Habitaciones?',
-    description: 'Administra habitaciones individuales con contratos independientes, prorrateo de gastos y convivencia.',
+    description:
+      'Administra habitaciones individuales con contratos independientes, prorrateo de gastos y convivencia.',
     sections: [
       {
         title: 'Crear y gestionar habitaciones',
@@ -419,8 +439,8 @@ export const helpData = {
           'Divide unidades en múltiples habitaciones alquilables',
           'Asigna características únicas a cada habitación',
           'Controla disponibilidad y precios por habitación',
-          'Gestiona contratos independientes por habitación'
-        ]
+          'Gestiona contratos independientes por habitación',
+        ],
       },
       {
         title: 'Prorrateo automático de gastos',
@@ -429,8 +449,8 @@ export const helpData = {
           'Configura métodos de prorrateo (por partes iguales, por uso, por m²)',
           'Previsualiza cálculos antes de aplicarlos',
           'Genera pagos automáticos de servicios prorrateados',
-          'Mantén un registro claro y transparente de costos'
-        ]
+          'Mantén un registro claro y transparente de costos',
+        ],
       },
       {
         title: 'Calendarios de limpieza',
@@ -439,8 +459,8 @@ export const helpData = {
           'Crea calendarios automáticos de limpieza',
           'Notifica a inquilinos sobre sus turnos asignados',
           'Registra cumplimiento de tareas de limpieza',
-          'Personaliza frecuencia y áreas a limpiar'
-        ]
+          'Personaliza frecuencia y áreas a limpiar',
+        ],
       },
       {
         title: 'Reglas de convivencia',
@@ -449,10 +469,10 @@ export const helpData = {
           'Define horarios de silencio y uso de espacios comunes',
           'Establece políticas de visitas y mascotas',
           'Comunica reglas al firmar contratos',
-          'Gestiona infracciones y resolución de conflictos'
-        ]
-      }
-    ]
+          'Gestiona infracciones y resolución de conflictos',
+        ],
+      },
+    ],
   },
   marketplace: {
     module: 'Marketplace de Servicios',
@@ -466,8 +486,8 @@ export const helpData = {
           'Revisa solicitudes de inquilinos en tiempo real',
           'Asigna proveedores adecuados para cada servicio',
           'Envía cotizaciones detalladas y profesionales',
-          'Haz seguimiento del estado de cada solicitud'
-        ]
+          'Haz seguimiento del estado de cada solicitud',
+        ],
       },
       {
         title: 'Administrar trabajos',
@@ -476,8 +496,8 @@ export const helpData = {
           'Programa fechas de servicio con proveedores',
           'Monitorea el progreso de trabajos activos',
           'Confirma finalización y calidad del servicio',
-          'Procesa pagos y comisiones automáticamente'
-        ]
+          'Procesa pagos y comisiones automáticamente',
+        ],
       },
       {
         title: 'Sistema de reseñas',
@@ -486,8 +506,8 @@ export const helpData = {
           'Solicita reseñas a inquilinos tras cada servicio',
           'Modera comentarios para mantener calidad',
           'Identifica proveedores top por sus valoraciones',
-          'Usa feedback para mejorar la red de servicios'
-        ]
+          'Usa feedback para mejorar la red de servicios',
+        ],
       },
       {
         title: 'Programa de fidelización',
@@ -496,15 +516,16 @@ export const helpData = {
           'Configura niveles de fidelidad (bronce, plata, oro)',
           'Otorga descuentos progresivos por uso',
           'Ofrece cashback en servicios premium',
-          'Genera lealtad y satisfacción de inquilinos'
-        ]
-      }
-    ]
+          'Genera lealtad y satisfacción de inquilinos',
+        ],
+      },
+    ],
   },
   crm: {
     module: 'CRM y Ventas',
     title: '¿Cómo usar el CRM de INMOVA?',
-    description: 'Gestiona tu pipeline de ventas y convierte leads en clientes con un sistema CRM integrado.',
+    description:
+      'Gestiona tu pipeline de ventas y convierte leads en clientes con un sistema CRM integrado.',
     sections: [
       {
         title: 'Pipeline visual Kanban',
@@ -513,8 +534,8 @@ export const helpData = {
           'Arrastra leads entre etapas del pipeline',
           'Prioriza por scoring y probabilidad de cierre',
           'Identifica cuellos de botella en el proceso',
-          'Mide conversión por cada etapa del embudo'
-        ]
+          'Mide conversión por cada etapa del embudo',
+        ],
       },
       {
         title: 'Scoring automático',
@@ -523,8 +544,8 @@ export const helpData = {
           'Factores: presupuesto, urgencia, fit con servicios',
           'Prioriza leads de alto valor',
           'Identifica oportunidades más prometedoras',
-          'Optimiza el tiempo de tu equipo comercial'
-        ]
+          'Optimiza el tiempo de tu equipo comercial',
+        ],
       },
       {
         title: 'Gestión de leads',
@@ -533,8 +554,8 @@ export const helpData = {
           'Importa leads desde landing page o formularios',
           'Asigna leads automáticamente a comerciales',
           'Programa seguimientos y recordatorios',
-          'Registra todas las interacciones con el lead'
-        ]
+          'Registra todas las interacciones con el lead',
+        ],
       },
       {
         title: 'Análisis y reportes',
@@ -543,9 +564,9 @@ export const helpData = {
           'Analiza tasas de conversión por etapa',
           'Calcula valor promedio del pipeline',
           'Identifica comerciales top performers',
-          'Genera informes para la dirección comercial'
-        ]
-      }
-    ]
-  }
+          'Genera informes para la dirección comercial',
+        ],
+      },
+    ],
+  },
 };

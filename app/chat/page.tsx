@@ -143,8 +143,8 @@ function AdminChatPage() {
   if (status === 'loading' || loading) {
     return (
       <AuthenticatedLayout>
-            <LoadingState message="Cargando chat..." size="lg" />
-          </AuthenticatedLayout>
+        <LoadingState message="Cargando chat..." size="lg" />
+      </AuthenticatedLayout>
     );
   }
 
@@ -152,47 +152,47 @@ function AdminChatPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto space-y-6">
-            {/* Breadcrumb */}
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/dashboard">
-                    <Home className="h-4 w-4" />
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Chat</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Breadcrumb */}
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/dashboard">
+                <Home className="h-4 w-4" />
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Chat</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 
-            {/* Header */}
-            <div className="space-y-4">
-              <BackButton href="/dashboard" label="Volver al Dashboard" />
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight gradient-text">Mensajes</h1>
-                <p className="text-muted-foreground mt-1">
-                  Atiende consultas y comunicaciones con inquilinos
-                </p>
-              </div>
-            </div>
-
-            {/* Interfaz de Chat Mejorada */}
-            <ImprovedChatInterface
-              conversations={conversations}
-              selectedConversation={selectedConversation}
-              messages={messages}
-              newMessage={newMessage}
-              sending={sending}
-              onSelectConversation={setSelectedConversation}
-              onSendMessage={sendMessage}
-              onNewMessageChange={setNewMessage}
-              onCloseConversation={closeConversation}
-            />
+        {/* Header */}
+        <div className="space-y-4">
+          <BackButton href="/dashboard" label="Volver al Dashboard" />
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight gradient-text">Mensajes</h1>
+            <p className="text-muted-foreground mt-1">
+              Atiende consultas y comunicaciones con inquilinos
+            </p>
           </div>
-        </AuthenticatedLayout>
+        </div>
+
+        {/* Interfaz de Chat Mejorada */}
+        <ImprovedChatInterface
+          conversations={conversations}
+          selectedConversation={selectedConversation}
+          messages={messages}
+          newMessage={newMessage}
+          sending={sending}
+          onSelectConversation={setSelectedConversation}
+          onSendMessage={sendMessage}
+          onNewMessageChange={setNewMessage}
+          onCloseConversation={closeConversation}
+        />
+      </div>
+    </AuthenticatedLayout>
   );
 }
 

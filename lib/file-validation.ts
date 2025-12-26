@@ -17,14 +17,7 @@ interface FileTypeConfig {
  */
 export const FILE_TYPE_CONFIGS: Record<string, FileTypeConfig> = {
   image: {
-    mimeTypes: [
-      'image/jpeg',
-      'image/jpg',
-      'image/png',
-      'image/gif',
-      'image/webp',
-      'image/svg+xml',
-    ],
+    mimeTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'],
     maxSize: 10 * 1024 * 1024, // 10MB
     extensions: ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'],
     magicNumbers: [
@@ -103,7 +96,11 @@ export function sanitizeFileName(fileName: string): string {
 
   // Añadir timestamp único si es necesario
   const timestamp = Date.now();
-  const hash = crypto.createHash('md5').update(fileName + timestamp).digest('hex').substring(0, 8);
+  const hash = crypto
+    .createHash('md5')
+    .update(fileName + timestamp)
+    .digest('hex')
+    .substring(0, 8);
   sanitized = `${name}_${hash}${ext}`;
 
   return sanitized;

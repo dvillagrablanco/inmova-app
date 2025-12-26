@@ -18,15 +18,12 @@ export async function POST(request: NextRequest) {
     // TODO: Sincronizar con APIs de Airbnb, Booking, etc.
     logger.info(`Applying price €${price} to listing ${listingId}`);
 
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Precio actualizado correctamente' 
+    return NextResponse.json({
+      success: true,
+      message: 'Precio actualizado correctamente',
     });
   } catch (error) {
     logger.error('Error applying pricing:', error);
-    return NextResponse.json(
-      { error: 'Error al aplicar precio' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al aplicar precio' }, { status: 500 });
   }
 }

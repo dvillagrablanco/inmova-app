@@ -103,10 +103,7 @@ export function ResponsiveTable<T extends Record<string, any>>({
             {columns.map((column) => (
               <th
                 key={column.key}
-                className={cn(
-                  'px-4 py-3 text-left text-sm font-semibold',
-                  column.className
-                )}
+                className={cn('px-4 py-3 text-left text-sm font-semibold', column.className)}
               >
                 {column.header}
               </th>
@@ -124,10 +121,7 @@ export function ResponsiveTable<T extends Record<string, any>>({
               onClick={() => onRowClick?.(item)}
             >
               {columns.map((column) => (
-                <td
-                  key={column.key}
-                  className={cn('px-4 py-3 text-sm', column.className)}
-                >
+                <td key={column.key} className={cn('px-4 py-3 text-sm', column.className)}>
                   {column.render ? column.render(item) : item[column.key]}
                 </td>
               ))}
@@ -141,7 +135,7 @@ export function ResponsiveTable<T extends Record<string, any>>({
 
 /**
  * Ejemplo de uso:
- * 
+ *
  * <ResponsiveTable
  *   data={buildings}
  *   columns={[

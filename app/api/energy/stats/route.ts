@@ -63,9 +63,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(stats);
   } catch (error) {
     logger.error('Error fetching energy stats:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener estadísticas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener estadísticas' }, { status: 500 });
   }
 }

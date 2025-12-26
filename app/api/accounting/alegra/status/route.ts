@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     }
 
     const isConfigured = isAlegraConfigured();
-    
+
     return NextResponse.json({
       integrated: isConfigured,
       mode: isConfigured ? 'production' : 'demo',
@@ -24,15 +24,12 @@ export async function GET(req: NextRequest) {
         'Contabilidad en tiempo real',
         'Inventarios',
         'Nómina electrónica',
-        'Conciliación bancaria'
+        'Conciliación bancaria',
       ],
-      status: isConfigured ? 'active' : 'demo'
+      status: isConfigured ? 'active' : 'demo',
     });
   } catch (error) {
     logger.error('Error checking Alegra status:', error);
-    return NextResponse.json(
-      { error: 'Error al verificar estado de Alegra' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al verificar estado de Alegra' }, { status: 500 });
   }
 }

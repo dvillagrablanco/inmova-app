@@ -217,131 +217,131 @@ export default function PlanesPage() {
   if (loading && planes.length === 0) {
     return (
       <AuthenticatedLayout>
-            <div className="flex items-center justify-center h-full">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-            </div>
-          </AuthenticatedLayout>
+        <div className="flex items-center justify-center h-full">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        </div>
+      </AuthenticatedLayout>
     );
   }
 
   return (
-    <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto">
-            {/* Header */}
-            <div className="mb-4">
-              <BackButton href="/dashboard" />
-            </div>
-            <div className="mb-6 flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold gradient-text">Planes de Suscripción</h1>
-                <p className="text-gray-600 mt-1">
-                  Gestiona los planes disponibles para las empresas
-                </p>
-              </div>
-              <Button
-                size="lg"
-                onClick={() => handleOpenDialog()}
-                className="gradient-primary shadow-md hover:shadow-lg transition-all"
-              >
-                <Plus className="h-5 w-5 mr-2" />
-                Nuevo Plan
-              </Button>
-            </div>
-
-            {/* Lista de Planes */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {planes.map((plan) => (
-                <Card key={plan.id} className="card-hover">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="p-2 gradient-primary rounded-lg">
-                          <Package className="h-5 w-5 text-white" />
-                        </div>
-                        <div>
-                          <CardTitle className="text-lg">{plan.nombre}</CardTitle>
-                          <Badge className={getTierBadge(plan.tier)} variant="secondary">
-                            {plan.tier.toUpperCase()}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="flex space-x-1">
-                        <Button variant="ghost" size="sm" onClick={() => handleOpenDialog(plan)}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => openDeleteDialog(plan.id, plan.nombre)}
-                        >
-                          <Trash2 className="h-4 w-4 text-red-600" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-baseline space-x-2">
-                        <span className="text-3xl font-bold text-indigo-600">
-                          €{plan.precioMensual}
-                        </span>
-                        <span className="text-gray-500">/mes</span>
-                      </div>
-
-                      {plan.descripcion && (
-                        <p className="text-sm text-gray-600">{plan.descripcion}</p>
-                      )}
-
-                      <div className="space-y-2 pt-4 border-t">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600 flex items-center">
-                            <Users className="h-4 w-4 mr-2" />
-                            Usuarios
-                          </span>
-                          <span className="font-medium">
-                            {plan.maxUsuarios ? plan.maxUsuarios : 'Ilimitado'}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600 flex items-center">
-                            <Building2 className="h-4 w-4 mr-2" />
-                            Propiedades
-                          </span>
-                          <span className="font-medium">
-                            {plan.maxPropiedades ? plan.maxPropiedades : 'Ilimitado'}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">Módulos</span>
-                          <span className="font-medium">{plan.modulosIncluidos.length}</span>
-                        </div>
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">Empresas activas</span>
-                          <span className="font-medium">{plan._count.companies}</span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center pt-2">
-                        {plan.activo ? (
-                          <Badge variant="default" className="bg-green-100 text-green-800">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Activo
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary" className="bg-red-100 text-red-800">
-                            <XCircle className="h-3 w-3 mr-1" />
-                            Inactivo
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+    <>
+      <AuthenticatedLayout>
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="mb-4">
+            <BackButton href="/dashboard" />
           </div>
-        </main>
-      </div>
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold gradient-text">Planes de Suscripción</h1>
+              <p className="text-gray-600 mt-1">
+                Gestiona los planes disponibles para las empresas
+              </p>
+            </div>
+            <Button
+              size="lg"
+              onClick={() => handleOpenDialog()}
+              className="gradient-primary shadow-md hover:shadow-lg transition-all"
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              Nuevo Plan
+            </Button>
+          </div>
+
+          {/* Lista de Planes */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {planes.map((plan) => (
+              <Card key={plan.id} className="card-hover">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 gradient-primary rounded-lg">
+                        <Package className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg">{plan.nombre}</CardTitle>
+                        <Badge className={getTierBadge(plan.tier)} variant="secondary">
+                          {plan.tier.toUpperCase()}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="flex space-x-1">
+                      <Button variant="ghost" size="sm" onClick={() => handleOpenDialog(plan)}>
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openDeleteDialog(plan.id, plan.nombre)}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-600" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-baseline space-x-2">
+                      <span className="text-3xl font-bold text-indigo-600">
+                        €{plan.precioMensual}
+                      </span>
+                      <span className="text-gray-500">/mes</span>
+                    </div>
+
+                    {plan.descripcion && (
+                      <p className="text-sm text-gray-600">{plan.descripcion}</p>
+                    )}
+
+                    <div className="space-y-2 pt-4 border-t">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600 flex items-center">
+                          <Users className="h-4 w-4 mr-2" />
+                          Usuarios
+                        </span>
+                        <span className="font-medium">
+                          {plan.maxUsuarios ? plan.maxUsuarios : 'Ilimitado'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600 flex items-center">
+                          <Building2 className="h-4 w-4 mr-2" />
+                          Propiedades
+                        </span>
+                        <span className="font-medium">
+                          {plan.maxPropiedades ? plan.maxPropiedades : 'Ilimitado'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Módulos</span>
+                        <span className="font-medium">{plan.modulosIncluidos.length}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Empresas activas</span>
+                        <span className="font-medium">{plan._count.companies}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center pt-2">
+                      {plan.activo ? (
+                        <Badge variant="default" className="bg-green-100 text-green-800">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Activo
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary" className="bg-red-100 text-red-800">
+                          <XCircle className="h-3 w-3 mr-1" />
+                          Inactivo
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </AuthenticatedLayout>
 
       {/* Dialog para Crear/Editar Plan */}
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
@@ -520,6 +520,6 @@ export default function PlanesPage() {
         variant="destructive"
         loading={isDeleting}
       />
-    </div>
+    </>
   );
 }

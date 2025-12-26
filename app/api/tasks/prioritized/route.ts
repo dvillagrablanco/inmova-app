@@ -19,9 +19,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    userId = session?.user?.id
+    userId = session?.user?.id;
     companyId = session?.user?.companyId;
-    
+
     if (!companyId) {
       return NextResponse.json({ error: 'companyId no encontrado' }, { status: 400 });
     }
@@ -46,14 +46,14 @@ export async function GET(req: NextRequest) {
       count: tasks.length,
     });
   } catch (error) {
-    logError(new Error(error instanceof Error ? error.message : 'Error fetching prioritized tasks'), {
-      context: 'GET /api/tasks/prioritized',
-      userId,
-      companyId,
-    });
-    return NextResponse.json(
-      { error: 'Error al obtener tareas priorizadas' },
-      { status: 500 }
+    logError(
+      new Error(error instanceof Error ? error.message : 'Error fetching prioritized tasks'),
+      {
+        context: 'GET /api/tasks/prioritized',
+        userId,
+        companyId,
+      }
     );
+    return NextResponse.json({ error: 'Error al obtener tareas priorizadas' }, { status: 500 });
   }
 }

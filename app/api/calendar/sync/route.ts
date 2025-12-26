@@ -30,9 +30,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result);
   } catch (error) {
     logger.error('Error sincronizando eventos:', error);
-    return NextResponse.json(
-      { error: 'Error sincronizando eventos' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error sincronizando eventos' }, { status: 500 });
   }
 }

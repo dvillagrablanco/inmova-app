@@ -272,15 +272,15 @@ export default function NotificationRulesPage() {
   if (status === 'loading' || loading) {
     return (
       <AuthenticatedLayout>
-            <div className="max-w-7xl mx-auto">
-              <Skeleton className="h-10 w-96" />
-              <div className="space-y-4">
-                {[...Array(3)].map((_, i) => (
-                  <Skeleton key={i} className="h-48" />
-                ))}
-              </div>
-            </div>
-          </AuthenticatedLayout>
+        <div className="max-w-7xl mx-auto">
+          <Skeleton className="h-10 w-96" />
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <Skeleton key={i} className="h-48" />
+            ))}
+          </div>
+        </div>
+      </AuthenticatedLayout>
     );
   }
 

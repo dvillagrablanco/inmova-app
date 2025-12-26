@@ -15,43 +15,40 @@ export async function GET(request: NextRequest) {
 
     const projects = await prisma.flippingProject.findMany({
       where: {
-        companyId: session.user.companyId
+        companyId: session.user.companyId,
       },
       include: {
         unit: {
           include: {
-            building: true
-          }
+            building: true,
+          },
         },
         building: true,
         renovations: {
           orderBy: {
-            createdAt: 'desc'
-          }
+            createdAt: 'desc',
+          },
         },
         expenses: {
           orderBy: {
-            fecha: 'desc'
-          }
+            fecha: 'desc',
+          },
         },
         milestones: {
           orderBy: {
-            fechaPrevista: 'asc'
-          }
-        }
+            fechaPrevista: 'asc',
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: 'desc',
+      },
     });
 
     return NextResponse.json(projects);
   } catch (error) {
     logger.error('Error fetching flipping projects:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch projects' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch projects' }, { status: 500 });
   }
 }
 
@@ -63,15 +60,15 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await request.json();
-    
+
     // Calcular inversión total
     const inversionTotal = data.precioCompra + data.gastosCompra + data.presupuestoRenovacion;
-    
+
     // Si ya se vendió, calcular beneficio y ROI
     let updateData: any = {
       ...data,
       companyId: session.user.companyId,
-      inversionTotal
+      inversionTotal,
     };
 
     if (data.precioVentaReal && data.gastosVenta) {
@@ -86,19 +83,16 @@ export async function POST(request: NextRequest) {
       include: {
         unit: {
           include: {
-            building: true
-          }
+            building: true,
+          },
         },
-        building: true
-      }
+        building: true,
+      },
     });
 
     return NextResponse.json(project, { status: 201 });
   } catch (error) {
     logger.error('Error creating flipping project:', error);
-    return NextResponse.json(
-      { error: 'Failed to create project' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create project' }, { status: 500 });
   }
 }

@@ -24,7 +24,7 @@ export async function createInAppNotification(
   try {
     // TODO: Create notification in database
     // This requires a Notification model in Prisma schema
-    
+
     logger.info('Creating in-app notification', {
       userId: recipient.id,
       title: payload.title,

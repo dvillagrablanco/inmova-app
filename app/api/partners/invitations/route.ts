@@ -26,18 +26,12 @@ export async function POST(request: NextRequest) {
     // Verificar autenticación
     const decoded = verifyToken(request);
     if (!decoded || !decoded.partnerId) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
     const partnerId = decoded.partnerId;
     const { email, nombre, telefono, mensaje } = await request.json();
     if (!email) {
-      return NextResponse.json(
-        { error: 'Email es obligatorio' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email es obligatorio' }, { status: 400 });
     }
     // Verificar si ya existe una invitación pendiente para este email
     const existingInvitation = await prisma.partnerInvitation.findFirst({
@@ -73,10 +67,13 @@ export async function POST(request: NextRequest) {
     // TODO: Enviar email con el link de invitación
     // const invitationLink = `${process.env.NEXT_PUBLIC_APP_URL}/partners/accept/${token}`;
     // await sendInvitationEmail(email, invitationLink, mensaje);
-    return NextResponse.json({
-      message: 'Invitación creada exitosamente',
-      invitation,
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        message: 'Invitación creada exitosamente',
+        invitation,
+      },
+      { status: 201 }
+    );
   } catch (error: any) {
     logger.error('Error creando invitación:', error);
     return NextResponse.json(

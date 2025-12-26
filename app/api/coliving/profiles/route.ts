@@ -14,23 +14,17 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const tenantId = searchParams.get('tenantId');
     if (!tenantId) {
-      return NextResponse.json(
-        { error: 'tenantId requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'tenantId requerido' }, { status: 400 });
     }
     const result = await socialService.getColivingProfile(tenantId);
-    
+
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
     return NextResponse.json(result.profile);
   } catch (error) {
     logger.error('Error en GET /api/coliving/profiles:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener perfil' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener perfil' }, { status: 500 });
   }
 }
 export async function POST(request: NextRequest) {
@@ -47,10 +41,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result.profile, { status: 201 });
   } catch (error) {
     logger.error('Error en POST /api/coliving/profiles:', error);
-    return NextResponse.json(
-      { error: 'Error al crear perfil' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear perfil' }, { status: 500 });
   }
 }
 export async function PATCH(request: NextRequest) {
@@ -61,10 +52,7 @@ export async function PATCH(request: NextRequest) {
     }
     const { profileId, ...updates } = await request.json();
     if (!profileId) {
-      return NextResponse.json(
-        { error: 'profileId requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'profileId requerido' }, { status: 400 });
     }
     const result = await socialService.updateColivingProfile(profileId, updates);
     if (!result.success) {
@@ -73,9 +61,6 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json(result.profile);
   } catch (error) {
     logger.error('Error en PATCH /api/coliving/profiles:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar perfil' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar perfil' }, { status: 500 });
   }
 }

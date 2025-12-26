@@ -1,24 +1,37 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
-import { 
-  Building2, 
-  Home, 
-  Users, 
-  FileText, 
-  CheckCircle, 
-  ArrowRight, 
-  ArrowLeft, 
+import {
+  Building2,
+  Home,
+  Users,
+  FileText,
+  CheckCircle,
+  ArrowRight,
+  ArrowLeft,
   Sparkles,
   Upload,
-  MapPin
+  MapPin,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
@@ -56,32 +69,32 @@ const WIZARD_STEPS = [
     id: 1,
     title: 'Información de tu Empresa',
     description: 'Cuéntanos sobre tu negocio inmobiliario',
-    icon: Building2
+    icon: Building2,
   },
   {
     id: 2,
     title: 'Tu Primer Edificio',
     description: 'Registra tu primera propiedad',
-    icon: Home
+    icon: Home,
   },
   {
     id: 3,
     title: 'Configuración de Unidades',
     description: 'Define las características de tus unidades',
-    icon: Users
+    icon: Users,
   },
   {
     id: 4,
     title: 'Preferencias y Automatización',
     description: 'Personaliza tu experiencia',
-    icon: FileText
+    icon: FileText,
   },
   {
     id: 5,
     title: '¡Todo Listo!',
     description: 'Tu cuenta está configurada',
-    icon: CheckCircle
-  }
+    icon: CheckCircle,
+  },
 ];
 
 interface SetupWizardProps {
@@ -97,25 +110,25 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
       name: '',
       type: 'individual',
       email: '',
-      phone: ''
+      phone: '',
     },
     building: {
       name: '',
       address: '',
       city: '',
       postalCode: '',
-      totalUnits: ''
+      totalUnits: '',
     },
     units: {
       count: 1,
       type: 'apartment',
-      priceRange: ''
+      priceRange: '',
     },
     preferences: {
       autoReminders: true,
       aiAssistant: true,
-      analytics: true
-    }
+      analytics: true,
+    },
   });
 
   const progress = (currentStep / WIZARD_STEPS.length) * 100;
@@ -140,7 +153,7 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
       const response = await fetch('/api/setup/complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(setupData)
+        body: JSON.stringify(setupData),
       });
 
       if (response.ok) {
@@ -170,10 +183,12 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
               <Input
                 id="companyName"
                 value={setupData.company.name}
-                onChange={(e) => setSetupData({
-                  ...setupData,
-                  company: { ...setupData.company, name: e.target.value }
-                })}
+                onChange={(e) =>
+                  setSetupData({
+                    ...setupData,
+                    company: { ...setupData.company, name: e.target.value },
+                  })
+                }
                 placeholder="Ej: Inmobiliaria García"
               />
             </div>
@@ -181,10 +196,12 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
               <Label htmlFor="companyType">Tipo de Negocio *</Label>
               <Select
                 value={setupData.company.type}
-                onValueChange={(value) => setSetupData({
-                  ...setupData,
-                  company: { ...setupData.company, type: value }
-                })}
+                onValueChange={(value) =>
+                  setSetupData({
+                    ...setupData,
+                    company: { ...setupData.company, type: value },
+                  })
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -203,10 +220,12 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
                 id="companyEmail"
                 type="email"
                 value={setupData.company.email}
-                onChange={(e) => setSetupData({
-                  ...setupData,
-                  company: { ...setupData.company, email: e.target.value }
-                })}
+                onChange={(e) =>
+                  setSetupData({
+                    ...setupData,
+                    company: { ...setupData.company, email: e.target.value },
+                  })
+                }
                 placeholder="contacto@empresa.com"
               />
             </div>
@@ -215,10 +234,12 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
               <Input
                 id="companyPhone"
                 value={setupData.company.phone}
-                onChange={(e) => setSetupData({
-                  ...setupData,
-                  company: { ...setupData.company, phone: e.target.value }
-                })}
+                onChange={(e) =>
+                  setSetupData({
+                    ...setupData,
+                    company: { ...setupData.company, phone: e.target.value },
+                  })
+                }
                 placeholder="+34 XXX XXX XXX"
               />
             </div>
@@ -233,10 +254,12 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
               <Input
                 id="buildingName"
                 value={setupData.building.name}
-                onChange={(e) => setSetupData({
-                  ...setupData,
-                  building: { ...setupData.building, name: e.target.value }
-                })}
+                onChange={(e) =>
+                  setSetupData({
+                    ...setupData,
+                    building: { ...setupData.building, name: e.target.value },
+                  })
+                }
                 placeholder="Ej: Edificio Plaza Mayor"
               />
             </div>
@@ -245,10 +268,12 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
               <Input
                 id="buildingAddress"
                 value={setupData.building.address}
-                onChange={(e) => setSetupData({
-                  ...setupData,
-                  building: { ...setupData.building, address: e.target.value }
-                })}
+                onChange={(e) =>
+                  setSetupData({
+                    ...setupData,
+                    building: { ...setupData.building, address: e.target.value },
+                  })
+                }
                 placeholder="Calle, Número, Piso"
               />
             </div>
@@ -258,10 +283,12 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
                 <Input
                   id="city"
                   value={setupData.building.city}
-                  onChange={(e) => setSetupData({
-                    ...setupData,
-                    building: { ...setupData.building, city: e.target.value }
-                  })}
+                  onChange={(e) =>
+                    setSetupData({
+                      ...setupData,
+                      building: { ...setupData.building, city: e.target.value },
+                    })
+                  }
                   placeholder="Madrid"
                 />
               </div>
@@ -270,10 +297,12 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
                 <Input
                   id="postalCode"
                   value={setupData.building.postalCode}
-                  onChange={(e) => setSetupData({
-                    ...setupData,
-                    building: { ...setupData.building, postalCode: e.target.value }
-                  })}
+                  onChange={(e) =>
+                    setSetupData({
+                      ...setupData,
+                      building: { ...setupData.building, postalCode: e.target.value },
+                    })
+                  }
                   placeholder="28001"
                 />
               </div>
@@ -284,16 +313,18 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
                 id="totalUnits"
                 type="number"
                 value={setupData.building.totalUnits}
-                onChange={(e) => setSetupData({
-                  ...setupData,
-                  building: { ...setupData.building, totalUnits: e.target.value }
-                })}
+                onChange={(e) =>
+                  setSetupData({
+                    ...setupData,
+                    building: { ...setupData.building, totalUnits: e.target.value },
+                  })
+                }
                 placeholder="10"
               />
             </div>
             <div className="bg-blue-50 p-3 rounded-lg">
               <p className="text-sm text-blue-800">
-                💡 <strong>Consejo:</strong> Podrás añadir más edificios después. Por ahora, 
+                💡 <strong>Consejo:</strong> Podrás añadir más edificios después. Por ahora,
                 registra el principal para comenzar.
               </p>
             </div>
@@ -309,10 +340,12 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
                 id="unitsCount"
                 type="number"
                 value={setupData.units.count}
-                onChange={(e) => setSetupData({
-                  ...setupData,
-                  units: { ...setupData.units, count: parseInt(e.target.value) || 1 }
-                })}
+                onChange={(e) =>
+                  setSetupData({
+                    ...setupData,
+                    units: { ...setupData.units, count: parseInt(e.target.value) || 1 },
+                  })
+                }
                 placeholder="1"
                 min="1"
               />
@@ -321,10 +354,12 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
               <Label htmlFor="unitsType">Tipo de Unidades *</Label>
               <Select
                 value={setupData.units.type}
-                onValueChange={(value) => setSetupData({
-                  ...setupData,
-                  units: { ...setupData.units, type: value }
-                })}
+                onValueChange={(value) =>
+                  setSetupData({
+                    ...setupData,
+                    units: { ...setupData.units, type: value },
+                  })
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -343,10 +378,12 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
               <Input
                 id="priceRange"
                 value={setupData.units.priceRange}
-                onChange={(e) => setSetupData({
-                  ...setupData,
-                  units: { ...setupData.units, priceRange: e.target.value }
-                })}
+                onChange={(e) =>
+                  setSetupData({
+                    ...setupData,
+                    units: { ...setupData.units, priceRange: e.target.value },
+                  })
+                }
                 placeholder="Ej: 800-1200€"
               />
             </div>
@@ -367,10 +404,12 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
                   type="checkbox"
                   id="autoReminders"
                   checked={setupData.preferences.autoReminders}
-                  onChange={(e) => setSetupData({
-                    ...setupData,
-                    preferences: { ...setupData.preferences, autoReminders: e.target.checked }
-                  })}
+                  onChange={(e) =>
+                    setSetupData({
+                      ...setupData,
+                      preferences: { ...setupData.preferences, autoReminders: e.target.checked },
+                    })
+                  }
                   className="mt-1"
                 />
                 <div>
@@ -388,10 +427,12 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
                   type="checkbox"
                   id="aiAssistant"
                   checked={setupData.preferences.aiAssistant}
-                  onChange={(e) => setSetupData({
-                    ...setupData,
-                    preferences: { ...setupData.preferences, aiAssistant: e.target.checked }
-                  })}
+                  onChange={(e) =>
+                    setSetupData({
+                      ...setupData,
+                      preferences: { ...setupData.preferences, aiAssistant: e.target.checked },
+                    })
+                  }
                   className="mt-1"
                 />
                 <div>
@@ -409,10 +450,12 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
                   type="checkbox"
                   id="analytics"
                   checked={setupData.preferences.analytics}
-                  onChange={(e) => setSetupData({
-                    ...setupData,
-                    preferences: { ...setupData.preferences, analytics: e.target.checked }
-                  })}
+                  onChange={(e) =>
+                    setSetupData({
+                      ...setupData,
+                      preferences: { ...setupData.preferences, analytics: e.target.checked },
+                    })
+                  }
                   className="mt-1"
                 />
                 <div>
@@ -427,19 +470,13 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
             </div>
 
             <div className="bg-purple-50 p-4 rounded-lg mt-6">
-              <h4 className="font-semibold text-purple-900 mb-2">
-                🚀 Funcionalidades Activadas:
-              </h4>
+              <h4 className="font-semibold text-purple-900 mb-2">🚀 Funcionalidades Activadas:</h4>
               <ul className="text-sm text-purple-800 space-y-1">
                 {setupData.preferences.autoReminders && (
                   <li>• Recordatorios de pago automáticos</li>
                 )}
-                {setupData.preferences.aiAssistant && (
-                  <li>• Chatbot IA para soporte 24/7</li>
-                )}
-                {setupData.preferences.analytics && (
-                  <li>• Dashboard BI con análisis predictivo</li>
-                )}
+                {setupData.preferences.aiAssistant && <li>• Chatbot IA para soporte 24/7</li>}
+                {setupData.preferences.analytics && <li>• Dashboard BI con análisis predictivo</li>}
               </ul>
             </div>
           </div>
@@ -454,12 +491,8 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
               </div>
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                ¡Todo está listo! 🎉
-              </h3>
-              <p className="text-gray-600">
-                Tu cuenta de INMOVA ha sido configurada exitosamente.
-              </p>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">¡Todo está listo! 🎉</h3>
+              <p className="text-gray-600">Tu cuenta de INMOVA ha sido configurada exitosamente.</p>
             </div>
             <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg">
               <h4 className="font-semibold mb-3">Próximos pasos sugeridos:</h4>
@@ -528,29 +561,18 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
         </CardContent>
 
         <CardFooter className="flex justify-between">
-          <Button
-            variant="outline"
-            onClick={handlePrev}
-            disabled={currentStep === 1}
-          >
+          <Button variant="outline" onClick={handlePrev} disabled={currentStep === 1}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Anterior
           </Button>
 
           {currentStep < WIZARD_STEPS.length ? (
-            <Button
-              onClick={handleNext}
-              className="gradient-primary"
-            >
+            <Button onClick={handleNext} className="gradient-primary">
               {currentStep === WIZARD_STEPS.length - 1 ? 'Finalizar' : 'Siguiente'}
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           ) : (
-            <Button
-              onClick={handleComplete}
-              disabled={isSubmitting}
-              className="gradient-primary"
-            >
+            <Button onClick={handleComplete} disabled={isSubmitting} className="gradient-primary">
               {isSubmitting ? 'Procesando...' : 'Ir al Dashboard'}
               <Sparkles className="h-4 w-4 ml-2" />
             </Button>

@@ -143,7 +143,7 @@ export default function HomeMobilePage() {
             <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalEdificios}</div>
+        <div className="text-2xl font-bold">{stats.totalEdificios}</div>
             <p className="text-xs text-muted-foreground">En cartera</p>
           </CardContent>
         </Card>
@@ -154,7 +154,7 @@ export default function HomeMobilePage() {
             <Home className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalUnidades}</div>
+        <div className="text-2xl font-bold">{stats.totalUnidades}</div>
             <p className="text-xs text-muted-foreground">Total disponibles</p>
           </CardContent>
         </Card>
@@ -165,7 +165,7 @@ export default function HomeMobilePage() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.ocupacionPromedio}%</div>
+        <div className="text-2xl font-bold">{stats.ocupacionPromedio}%</div>
             <p className="text-xs text-muted-foreground">Promedio</p>
           </CardContent>
         </Card>
@@ -176,7 +176,7 @@ export default function HomeMobilePage() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+        <div className="text-2xl font-bold">
               €{stats.ingresosMensuales.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">Mensuales</p>
@@ -189,7 +189,7 @@ export default function HomeMobilePage() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.contratosActivos}</div>
+        <div className="text-2xl font-bold">{stats.contratosActivos}</div>
             <p className="text-xs text-muted-foreground">Activos</p>
           </CardContent>
         </Card>
@@ -200,7 +200,7 @@ export default function HomeMobilePage() {
             <AlertCircle className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-destructive">
+        <div className="text-2xl font-bold text-destructive">
               {stats.pagosVencidos}
             </div>
             <p className="text-xs text-muted-foreground">Pagos vencidos</p>
@@ -214,7 +214,7 @@ export default function HomeMobilePage() {
           <CardTitle>Acceso Rápido</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3">
             <Link href="/edificios">
               <div className="p-4 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors text-center cursor-pointer">
                 <Building2 className="h-8 w-8 mx-auto mb-2 text-blue-600" />
@@ -262,7 +262,7 @@ export default function HomeMobilePage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="container-mobile-first py-6">
+      <div className="container-mobile-first py-6">
             {isMobile ? (
               <PullToRefresh onRefresh={handleRefresh}>
                 {mainContent}
@@ -270,11 +270,10 @@ export default function HomeMobilePage() {
             ) : (
               mainContent
             )}
-          </div>
-        </main>
+      </div>
 
-        {/* Mobile FAB for Quick Actions */}
-        {isMobile && (
+      {/* Mobile FAB for Quick Actions */}
+      {isMobile && (
           <>
             <MobileFAB onClick={() => setIsQuickActionsOpen(true)} label="Acciones rápidas" />
             <MobileSheet
@@ -303,7 +302,7 @@ export default function HomeMobilePage() {
             </MobileSheet>
           </>
         )}
-      </div>
     </div>
+      </AuthenticatedLayout>
   );
 }

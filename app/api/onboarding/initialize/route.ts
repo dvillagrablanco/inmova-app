@@ -13,19 +13,13 @@ export async function POST(request: Request) {
     // Autenticación
     const session = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const { vertical } = await request.json();
 
     if (!vertical) {
-      return NextResponse.json(
-        { error: 'Vertical de negocio requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Vertical de negocio requerido' }, { status: 400 });
     }
 
     const userId = session.user.id;
@@ -37,7 +31,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       tasks,
-      message: `Inicializadas ${tasks.length} tareas de onboarding`
+      message: `Inicializadas ${tasks.length} tareas de onboarding`,
     });
   } catch (error: any) {
     console.error('Error inicializando onboarding:', error);

@@ -15,7 +15,17 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { tenantId, unitId, type, startDate, endDate, monthlyRent, deposit, paymentDay, additionalClauses } = body;
+    const {
+      tenantId,
+      unitId,
+      type,
+      startDate,
+      endDate,
+      monthlyRent,
+      deposit,
+      paymentDay,
+      additionalClauses,
+    } = body;
 
     // Validar datos requeridos
     if (!tenantId || !unitId || !type) {
@@ -24,7 +34,7 @@ export async function POST(request: NextRequest) {
 
     // Obtener datos del inquilino
     const tenant = await prisma.tenant.findUnique({
-      where: { id: tenantId }
+      where: { id: tenantId },
     });
 
     if (!tenant) {
@@ -35,8 +45,8 @@ export async function POST(request: NextRequest) {
     const unit = await prisma.unit.findUnique({
       where: { id: unitId },
       include: {
-        building: true
-      }
+        building: true,
+      },
     });
 
     if (!unit) {
@@ -45,7 +55,7 @@ export async function POST(request: NextRequest) {
 
     // Obtener datos de la compañía (arrendador)
     const company = await prisma.company.findUnique({
-      where: { id: session?.user?.companyId }
+      where: { id: session?.user?.companyId },
     });
 
     if (!company) {
@@ -59,32 +69,32 @@ export async function POST(request: NextRequest) {
         dni: company.cif || 'N/A',
         address: company.direccion || 'N/A',
         email: company.email || session?.user?.email,
-        phone: company.telefono || 'N/A'
+        phone: company.telefono || 'N/A',
       },
       tenant: {
         name: tenant.nombreCompleto,
         dni: tenant.dni,
         address: tenant.direccionActual || 'N/A',
         email: tenant.email,
-        phone: tenant.telefono
+        phone: tenant.telefono,
       },
       property: {
         address: unit.building.direccion,
         type: unit.tipo,
         area: unit.superficie,
         floor: unit.planta?.toString(),
-        number: unit.numero
+        number: unit.numero,
       },
       terms: {
         startDate: new Date(startDate),
         endDate: new Date(endDate),
         monthlyRent: monthlyRent || unit.rentaMensual,
-        deposit: deposit || (unit.rentaMensual * 2),
+        deposit: deposit || unit.rentaMensual * 2,
         paymentDay: paymentDay || 5,
         includesUtilities: false,
-        utilities: []
+        utilities: [],
       },
-      additionalClauses: additionalClauses || []
+      additionalClauses: additionalClauses || [],
     };
 
     // Generar el contrato
@@ -98,14 +108,17 @@ export async function POST(request: NextRequest) {
         tenant: contractData.tenant.name,
         property: `${contractData.property.address}, ${contractData.property.number}`,
         monthlyRent: contractData.terms.monthlyRent,
-        duration: `${Math.round((contractData.terms.endDate.getTime() - contractData.terms.startDate.getTime()) / (1000 * 60 * 60 * 24 * 30))} meses`
-      }
+        duration: `${Math.round((contractData.terms.endDate.getTime() - contractData.terms.startDate.getTime()) / (1000 * 60 * 60 * 24 * 30))} meses`,
+      },
     });
   } catch (error) {
     logger.error('Error generating contract:', error);
-    return NextResponse.json({ 
-      error: 'Error al generar contrato',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Error al generar contrato',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
   }
 }

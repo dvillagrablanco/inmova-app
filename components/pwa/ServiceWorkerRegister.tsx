@@ -13,19 +13,19 @@ export function ServiceWorkerRegister() {
           logger.info('[SW] Service Worker registered:', registration.scope);
 
           // Verificar actualizaciones del SW cada hora
-          setInterval(() => {
-            registration.update();
-          }, 60 * 60 * 1000);
+          setInterval(
+            () => {
+              registration.update();
+            },
+            60 * 60 * 1000
+          );
 
           // Detectar actualizaciones del SW
           registration.addEventListener('updatefound', () => {
             const newWorker = registration.installing;
             if (newWorker) {
               newWorker.addEventListener('statechange', () => {
-                if (
-                  newWorker.state === 'installed' &&
-                  navigator.serviceWorker.controller
-                ) {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                   // Hay una nueva versión disponible
                   toast.info('Nueva versión disponible', {
                     description: 'Recarga la página para actualizar',

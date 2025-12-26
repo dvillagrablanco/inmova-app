@@ -396,218 +396,215 @@ export default function IntegracionesContablesPage() {
   if (status === 'loading' || loading) {
     return (
       <AuthenticatedLayout>
-            <div className="max-w-7xl mx-auto">
-              <Skeleton className="h-10 w-96" />
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, i) => (
-                  <Skeleton key={i} className="h-64" />
-                ))}
-              </div>
-            </div>
-          </AuthenticatedLayout>
+        <div className="max-w-7xl mx-auto">
+          <Skeleton className="h-10 w-96" />
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <Skeleton key={i} className="h-64" />
+            ))}
+          </div>
+        </div>
+      </AuthenticatedLayout>
     );
   }
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto space-y-6">
-            <div>
-              <h1 className="text-3xl font-bold">Integraciones Contables</h1>
-              <p className="text-muted-foreground mt-2">
-                Conecta INMOVA con tu software contable para sincronizar automáticamente facturas,
-                pagos y gastos.
-              </p>
-            </div>
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold">Integraciones Contables</h1>
+          <p className="text-muted-foreground mt-2">
+            Conecta INMOVA con tu software contable para sincronizar automáticamente facturas, pagos
+            y gastos.
+          </p>
+        </div>
 
-            {selectedIntegration ? (
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle>{selectedIntegration.name}</CardTitle>
-                      <CardDescription>{selectedIntegration.description}</CardDescription>
-                    </div>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setSelectedIntegration(null);
-                        setConfigValues({});
-                      }}
-                    >
-                      Volver
-                    </Button>
+        {selectedIntegration ? (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>{selectedIntegration.name}</CardTitle>
+                  <CardDescription>{selectedIntegration.description}</CardDescription>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSelectedIntegration(null);
+                    setConfigValues({});
+                  }}
+                >
+                  Volver
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Las credenciales se almacenan de forma segura. Nunca compartimos tu información
+                  con terceros.
+                </AlertDescription>
+              </Alert>
+
+              <div className="space-y-4">
+                {selectedIntegration.configFields.map((field) => (
+                  <div key={field.name} className="space-y-2">
+                    <Label htmlFor={field.name}>
+                      {field.label} {field.required && <span className="text-red-500">*</span>}
+                    </Label>
+                    <Input
+                      id={field.name}
+                      type={field.type}
+                      placeholder={field.placeholder}
+                      value={configValues[field.name] || ''}
+                      onChange={(e) =>
+                        setConfigValues((prev) => ({
+                          ...prev,
+                          [field.name]: e.target.value,
+                        }))
+                      }
+                      required={field.required}
+                    />
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <Alert>
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>
-                      Las credenciales se almacenan de forma segura. Nunca compartimos tu
-                      información con terceros.
-                    </AlertDescription>
-                  </Alert>
+                ))}
+              </div>
 
-                  <div className="space-y-4">
-                    {selectedIntegration.configFields.map((field) => (
-                      <div key={field.name} className="space-y-2">
-                        <Label htmlFor={field.name}>
-                          {field.label} {field.required && <span className="text-red-500">*</span>}
-                        </Label>
-                        <Input
-                          id={field.name}
-                          type={field.type}
-                          placeholder={field.placeholder}
-                          value={configValues[field.name] || ''}
-                          onChange={(e) =>
-                            setConfigValues((prev) => ({
-                              ...prev,
-                              [field.name]: e.target.value,
-                            }))
-                          }
-                          required={field.required}
-                        />
+              <div className="flex items-center justify-between">
+                <a
+                  href={selectedIntegration.documentation}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-600 hover:underline flex items-center gap-1"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Ver documentación
+                </a>
+                <Button onClick={() => handleSaveConfig(selectedIntegration.id)}>
+                  Guardar configuración
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {integrations.map((integration) => {
+              const isConnected = getIntegrationStatus(integration.id) === 'connected';
+
+              return (
+                <Card key={integration.id} className="relative">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1">
+                        <CardTitle className="text-lg">{integration.name}</CardTitle>
+                        <CardDescription className="text-sm">
+                          {integration.description}
+                        </CardDescription>
                       </div>
-                    ))}
-                  </div>
+                      {getStatusBadge(integration.id)}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <h4 className="text-sm font-semibold mb-2">Funcionalidades:</h4>
+                      <ul className="text-sm space-y-1">
+                        {integration.features.map((feature, idx) => (
+                          <li key={idx} className="flex items-center gap-2">
+                            <Check className="w-3 h-3 text-green-500" />
+                            <span>{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
 
-                  <div className="flex items-center justify-between">
-                    <a
-                      href={selectedIntegration.documentation}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-blue-600 hover:underline flex items-center gap-1"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                      Ver documentación
-                    </a>
-                    <Button onClick={() => handleSaveConfig(selectedIntegration.id)}>
-                      Guardar configuración
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {integrations.map((integration) => {
-                  const isConnected = getIntegrationStatus(integration.id) === 'connected';
-
-                  return (
-                    <Card key={integration.id} className="relative">
-                      <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div className="space-y-1">
-                            <CardTitle className="text-lg">{integration.name}</CardTitle>
-                            <CardDescription className="text-sm">
-                              {integration.description}
-                            </CardDescription>
-                          </div>
-                          {getStatusBadge(integration.id)}
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div>
-                          <h4 className="text-sm font-semibold mb-2">Funcionalidades:</h4>
-                          <ul className="text-sm space-y-1">
-                            {integration.features.map((feature, idx) => (
-                              <li key={idx} className="flex items-center gap-2">
-                                <Check className="w-3 h-3 text-green-500" />
-                                <span>{feature}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-
-                        <div className="flex gap-2">
-                          {isConnected ? (
-                            <>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="flex-1"
-                                onClick={() => handleTestConnection(integration.id)}
-                                disabled={testingConnection === integration.id}
-                              >
-                                {testingConnection === integration.id ? (
-                                  <>
-                                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> Probando...
-                                  </>
-                                ) : (
-                                  <>
-                                    <RefreshCw className="w-4 h-4 mr-2" /> Probar
-                                  </>
-                                )}
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleDisconnect(integration.id)}
-                              >
-                                <Unlink className="w-4 h-4" />
-                              </Button>
-                            </>
-                          ) : (
-                            <Button
-                              size="sm"
-                              className="flex-1"
-                              onClick={() => setSelectedIntegration(integration)}
-                            >
-                              <LinkIcon className="w-4 h-4 mr-2" />
-                              Conectar
-                            </Button>
-                          )}
+                    <div className="flex gap-2">
+                      {isConnected ? (
+                        <>
                           <Button
                             size="sm"
-                            variant="ghost"
-                            onClick={() => window.open(integration.documentation, '_blank')}
+                            variant="outline"
+                            className="flex-1"
+                            onClick={() => handleTestConnection(integration.id)}
+                            disabled={testingConnection === integration.id}
                           >
-                            <ExternalLink className="w-4 h-4" />
+                            {testingConnection === integration.id ? (
+                              <>
+                                <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> Probando...
+                              </>
+                            ) : (
+                              <>
+                                <RefreshCw className="w-4 h-4 mr-2" /> Probar
+                              </>
+                            )}
                           </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            )}
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Guía de Integración</CardTitle>
-              </CardHeader>
-              <CardContent className="prose max-w-none">
-                <h3>Cómo configurar las integraciones:</h3>
-                <ol>
-                  <li>Haz clic en "Conectar" en la integración que desees activar</li>
-                  <li>Completa los campos requeridos con las credenciales de tu cuenta</li>
-                  <li>Haz clic en "Guardar configuración"</li>
-                  <li>
-                    Usa el botón "Probar" para verificar que la conexión funciona correctamente
-                  </li>
-                </ol>
-
-                <h3>Funcionalidades automáticas:</h3>
-                <p>Una vez conectado, INMOVA sincronizará automáticamente:</p>
-                <ul>
-                  <li>
-                    <strong>Inquilinos como clientes:</strong> Cada inquilino se creará
-                    automáticamente como cliente en tu sistema contable
-                  </li>
-                  <li>
-                    <strong>Facturas de alquiler:</strong> Las rentas mensuales generarán facturas
-                    automáticamente
-                  </li>
-                  <li>
-                    <strong>Pagos recibidos:</strong> Los pagos de inquilinos se registrarán como
-                    cobros
-                  </li>
-                  <li>
-                    <strong>Gastos y proveedores:</strong> Los gastos de mantenimiento se
-                    sincronizarán como compras
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDisconnect(integration.id)}
+                          >
+                            <Unlink className="w-4 h-4" />
+                          </Button>
+                        </>
+                      ) : (
+                        <Button
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => setSelectedIntegration(integration)}
+                        >
+                          <LinkIcon className="w-4 h-4 mr-2" />
+                          Conectar
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => window.open(integration.documentation, '_blank')}
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
-        </AuthenticatedLayout>
+        )}
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Guía de Integración</CardTitle>
+          </CardHeader>
+          <CardContent className="prose max-w-none">
+            <h3>Cómo configurar las integraciones:</h3>
+            <ol>
+              <li>Haz clic en "Conectar" en la integración que desees activar</li>
+              <li>Completa los campos requeridos con las credenciales de tu cuenta</li>
+              <li>Haz clic en "Guardar configuración"</li>
+              <li>Usa el botón "Probar" para verificar que la conexión funciona correctamente</li>
+            </ol>
+
+            <h3>Funcionalidades automáticas:</h3>
+            <p>Una vez conectado, INMOVA sincronizará automáticamente:</p>
+            <ul>
+              <li>
+                <strong>Inquilinos como clientes:</strong> Cada inquilino se creará automáticamente
+                como cliente en tu sistema contable
+              </li>
+              <li>
+                <strong>Facturas de alquiler:</strong> Las rentas mensuales generarán facturas
+                automáticamente
+              </li>
+              <li>
+                <strong>Pagos recibidos:</strong> Los pagos de inquilinos se registrarán como cobros
+              </li>
+              <li>
+                <strong>Gastos y proveedores:</strong> Los gastos de mantenimiento se sincronizarán
+                como compras
+              </li>
+            </ul>
+          </CardContent>
+        </Card>
+      </div>
+    </AuthenticatedLayout>
   );
 }

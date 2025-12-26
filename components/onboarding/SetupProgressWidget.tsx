@@ -8,7 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Circle, ChevronRight, X, Sparkles, Database, Loader2 } from 'lucide-react';
-import { getUserVerticalTour, calculateSetupProgress, getNextRecommendedAction, SetupAction, type BusinessVertical } from '@/lib/onboarding-tours';
+import {
+  getUserVerticalTour,
+  calculateSetupProgress,
+  getNextRecommendedAction,
+  SetupAction,
+  type BusinessVertical,
+} from '@/lib/onboarding-tours';
 import logger from '@/lib/logger';
 import { cn } from '@/lib/utils';
 
@@ -56,7 +62,7 @@ export function SetupProgressWidget({ className }: SetupProgressWidgetProps) {
       const response = await fetch('/api/user/setup-progress');
       if (response.ok) {
         const data = await response.json();
-        const updatedActions = actions.map(action => ({
+        const updatedActions = actions.map((action) => ({
           ...action,
           completed: data.completedActions?.includes(action.id) || false,
         }));
@@ -67,7 +73,7 @@ export function SetupProgressWidget({ className }: SetupProgressWidgetProps) {
         const localState = localStorage.getItem('setup_actions_state');
         if (localState) {
           const savedState: Record<string, boolean> = JSON.parse(localState);
-          const updatedActions = actions.map(action => ({
+          const updatedActions = actions.map((action) => ({
             ...action,
             completed: savedState[action.id] || false,
           }));
@@ -90,7 +96,7 @@ export function SetupProgressWidget({ className }: SetupProgressWidgetProps) {
   };
 
   const handleToggleComplete = async (actionId: string) => {
-    const updatedActions = setupActions.map(action =>
+    const updatedActions = setupActions.map((action) =>
       action.id === actionId ? { ...action, completed: !action.completed } : action
     );
     setSetupActions(updatedActions);
@@ -98,10 +104,13 @@ export function SetupProgressWidget({ className }: SetupProgressWidgetProps) {
     setProgress(newProgress);
 
     // Guardar en localStorage
-    const stateToSave = updatedActions.reduce((acc, action) => {
-      acc[action.id] = action.completed;
-      return acc;
-    }, {} as Record<string, boolean>);
+    const stateToSave = updatedActions.reduce(
+      (acc, action) => {
+        acc[action.id] = action.completed;
+        return acc;
+      },
+      {} as Record<string, boolean>
+    );
     localStorage.setItem('setup_actions_state', JSON.stringify(stateToSave));
 
     // Intentar guardar en la API
@@ -110,7 +119,7 @@ export function SetupProgressWidget({ className }: SetupProgressWidgetProps) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          completedActions: updatedActions.filter(a => a.completed).map(a => a.id),
+          completedActions: updatedActions.filter((a) => a.completed).map((a) => a.id),
         }),
       });
     } catch (error) {
@@ -148,7 +157,8 @@ export function SetupProgressWidget({ className }: SetupProgressWidgetProps) {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-green-700">
-            Has completado todas las acciones de configuración inicial. ¡Ahora estás listo para sacar el máximo partido a INMOVA!
+            Has completado todas las acciones de configuración inicial. ¡Ahora estás listo para
+            sacar el máximo partido a INMOVA!
           </p>
         </CardContent>
       </Card>
@@ -195,10 +205,10 @@ export function SetupProgressWidget({ className }: SetupProgressWidgetProps) {
         <div className="space-y-2">
           <Progress value={progress} className="h-2" />
           <div className="flex justify-between text-xs text-gray-600">
-            <span>{setupActions.filter(a => a.completed).length} de {setupActions.length} completadas</span>
-            {progress < 100 && (
-              <span className="text-indigo-600 font-medium">Casi listo...</span>
-            )}
+            <span>
+              {setupActions.filter((a) => a.completed).length} de {setupActions.length} completadas
+            </span>
+            {progress < 100 && <span className="text-indigo-600 font-medium">Casi listo...</span>}
           </div>
         </div>
 
@@ -248,10 +258,7 @@ export function SetupProgressWidget({ className }: SetupProgressWidgetProps) {
                     : 'bg-white border-gray-200 hover:border-indigo-300'
                 )}
               >
-                <button
-                  onClick={() => handleToggleComplete(action.id)}
-                  className="flex-shrink-0"
-                >
+                <button onClick={() => handleToggleComplete(action.id)} className="flex-shrink-0">
                   {action.completed ? (
                     <CheckCircle2 className="h-5 w-5 text-green-600" />
                   ) : (
@@ -259,10 +266,12 @@ export function SetupProgressWidget({ className }: SetupProgressWidgetProps) {
                   )}
                 </button>
                 <div className="flex-1 min-w-0">
-                  <h5 className={cn(
-                    'text-sm font-medium',
-                    action.completed ? 'text-green-800 line-through' : 'text-gray-900'
-                  )}>
+                  <h5
+                    className={cn(
+                      'text-sm font-medium',
+                      action.completed ? 'text-green-800 line-through' : 'text-gray-900'
+                    )}
+                  >
                     {action.title}
                   </h5>
                   <p className="text-xs text-gray-500 mt-0.5">{action.description}</p>

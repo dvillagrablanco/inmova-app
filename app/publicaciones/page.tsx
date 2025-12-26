@@ -390,6 +390,5 @@ export default function PublicacionesPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
   );
 }

@@ -50,14 +50,10 @@ export async function addEmailJob(
   }
 
   try {
-    const job = await queue.add(
-      options?.emailType || 'generic',
-      data,
-      {
-        priority: options?.priority,
-        delay: options?.delay,
-      }
-    );
+    const job = await queue.add(options?.emailType || 'generic', data, {
+      priority: options?.priority,
+      delay: options?.delay,
+    });
 
     logger.info(`✅ Email job ${job.id} added to queue for: ${data.to}`);
   } catch (error) {
@@ -107,7 +103,7 @@ export async function sendPaymentReminder(
         <p>Por favor, realiza tu pago a tiempo para evitar cargos adicionales.</p>
       `,
     },
-    { 
+    {
       emailType: EmailType.PAYMENT_REMINDER,
       priority: 2, // Prioridad media-alta
     }
@@ -168,7 +164,7 @@ export async function sendContractExpiringNotification(
         <p>Por favor, contáctanos si deseas renovar tu contrato.</p>
       `,
     },
-    { 
+    {
       emailType: EmailType.CONTRACT_EXPIRING,
       priority: 2,
     }
@@ -180,7 +176,7 @@ export async function sendContractExpiringNotification(
  */
 export async function getEmailQueueStats(): Promise<any> {
   const queue = getEmailQueue();
-  
+
   if (!queue) {
     return { available: false };
   }

@@ -8,18 +8,12 @@ export const dynamic = 'force-dynamic';
  * GET /api/portal-proveedor/invoices/[id]
  * Obtiene los detalles de una factura específica
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const providerId = request.headers.get('x-provider-id');
 
     if (!providerId) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const invoice = await prisma.providerInvoice.findUnique({
@@ -57,10 +51,7 @@ export async function GET(
     });
 
     if (!invoice) {
-      return NextResponse.json(
-        { error: 'Factura no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Factura no encontrada' }, { status: 404 });
     }
 
     // Verificar que la factura pertenece al proveedor
@@ -76,10 +67,7 @@ export async function GET(
     logError(error instanceof Error ? error : new Error(String(error)), {
       context: 'GET /api/portal-proveedor/invoices/[id]',
     });
-    return NextResponse.json(
-      { error: 'Error al obtener factura' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener factura' }, { status: 500 });
   }
 }
 
@@ -87,18 +75,12 @@ export async function GET(
  * PATCH /api/portal-proveedor/invoices/[id]
  * Actualiza una factura (enviarla, por ejemplo)
  */
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const providerId = request.headers.get('x-provider-id');
 
     if (!providerId) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Verificar que la factura existe y pertenece al proveedor
@@ -107,10 +89,7 @@ export async function PATCH(
     });
 
     if (!invoice) {
-      return NextResponse.json(
-        { error: 'Factura no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Factura no encontrada' }, { status: 404 });
     }
 
     if (invoice.providerId !== providerId) {
@@ -167,9 +146,6 @@ export async function PATCH(
     logError(error instanceof Error ? error : new Error(String(error)), {
       context: 'PATCH /api/portal-proveedor/invoices/[id]',
     });
-    return NextResponse.json(
-      { error: 'Error al actualizar factura' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar factura' }, { status: 500 });
   }
 }

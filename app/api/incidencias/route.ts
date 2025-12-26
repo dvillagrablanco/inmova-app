@@ -38,10 +38,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(incidencias);
   } catch (error) {
     logger.error('Error fetching incidencias:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener incidencias' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener incidencias' }, { status: 500 });
   }
 }
 
@@ -90,9 +87,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(incidencia, { status: 201 });
   } catch (error) {
     logger.error('Error creating incidencia:', error);
-    return NextResponse.json(
-      { error: 'Error al crear incidencia' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear incidencia' }, { status: 500 });
   }
 }

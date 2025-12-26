@@ -3,7 +3,14 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { HelpCircle, X, BookOpen, Lightbulb, Target } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
@@ -21,21 +28,21 @@ interface ContextualHelpProps {
   quickActions?: { label: string; action: () => void }[];
 }
 
-export function ContextualHelp({ 
-  module, 
-  title, 
-  description, 
+export function ContextualHelp({
+  module,
+  title,
+  description,
   sections,
-  quickActions 
+  quickActions,
 }: ContextualHelpProps) {
   const [open, setOpen] = useState(false);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="sm" 
+        <Button
+          variant="ghost"
+          size="sm"
           className="flex items-center gap-2 text-muted-foreground hover:text-primary"
         >
           <HelpCircle className="h-5 w-5" />
@@ -46,12 +53,8 @@ export function ContextualHelp({
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <DialogTitle className="text-2xl">
-                {title}
-              </DialogTitle>
-              <DialogDescription className="mt-2">
-                {description}
-              </DialogDescription>
+              <DialogTitle className="text-2xl">{title}</DialogTitle>
+              <DialogDescription className="mt-2">{description}</DialogDescription>
             </div>
             <Badge variant="secondary" className="ml-4">
               {module}
@@ -121,9 +124,7 @@ export function ContextualHelp({
         </div>
 
         <div className="flex justify-end mt-6">
-          <Button onClick={() => setOpen(false)}>
-            Entendido
-          </Button>
+          <Button onClick={() => setOpen(false)}>Entendido</Button>
         </div>
       </DialogContent>
     </Dialog>

@@ -33,9 +33,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     logger.error('Error syncing to accounting:', error);
-    return NextResponse.json(
-      { error: 'Error al sincronizar con contabilidad' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al sincronizar con contabilidad' }, { status: 500 });
   }
 }

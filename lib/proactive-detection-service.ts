@@ -8,7 +8,13 @@ import { addDays, differenceInDays, isBefore } from 'date-fns';
 
 export interface DetectedIssue {
   id: string;
-  type: 'contract_expiring' | 'payment_overdue' | 'maintenance_overdue' | 'low_occupancy' | 'missing_data' | 'document_missing';
+  type:
+    | 'contract_expiring'
+    | 'payment_overdue'
+    | 'maintenance_overdue'
+    | 'low_occupancy'
+    | 'missing_data'
+    | 'document_missing';
   severity: 'low' | 'medium' | 'high' | 'critical';
   title: string;
   description: string;
@@ -36,17 +42,17 @@ export interface SystemHealthReport {
 /**
  * Genera un reporte completo de salud del sistema para una empresa
  */
-export async function generateSystemHealthReport(
-  companyId: string
-): Promise<SystemHealthReport> {
+export async function generateSystemHealthReport(companyId: string): Promise<SystemHealthReport> {
   const issues: DetectedIssue[] = [];
   const warnings: DetectedIssue[] = [];
   const opportunities: DetectedIssue[] = [];
 
   // Detectar contratos próximos a vencer (30 días)
   const expiringContracts = await detectExpiringContracts(companyId);
-  issues.push(...expiringContracts.filter(i => i.severity === 'high' || i.severity === 'critical'));
-  warnings.push(...expiringContracts.filter(i => i.severity === 'medium'));
+  issues.push(
+    ...expiringContracts.filter((i) => i.severity === 'high' || i.severity === 'critical')
+  );
+  warnings.push(...expiringContracts.filter((i) => i.severity === 'medium'));
 
   // Detectar pagos vencidos
   const overduePayments = await detectOverduePayments(companyId);
@@ -71,12 +77,12 @@ export async function generateSystemHealthReport(
   opportunities.push(...automationOpportunities);
 
   const allIssues = [...issues, ...warnings, ...opportunities];
-  const criticalCount = allIssues.filter(i => i.severity === 'critical').length;
-  const highCount = allIssues.filter(i => i.severity === 'high').length;
-  const mediumCount = allIssues.filter(i => i.severity === 'medium').length;
+  const criticalCount = allIssues.filter((i) => i.severity === 'critical').length;
+  const highCount = allIssues.filter((i) => i.severity === 'high').length;
+  const mediumCount = allIssues.filter((i) => i.severity === 'medium').length;
 
   // Calcular puntuación de salud (0-100)
-  const healthScore = Math.max(0, 100 - (criticalCount * 20) - (highCount * 10) - (mediumCount * 5));
+  const healthScore = Math.max(0, 100 - criticalCount * 20 - highCount * 10 - mediumCount * 5);
 
   return {
     overallScore: healthScore,
@@ -86,16 +92,14 @@ export async function generateSystemHealthReport(
     totalIssues: allIssues.length,
     criticalIssues: criticalCount,
     companyId,
-    generatedAt: new Date()
+    generatedAt: new Date(),
   };
 }
 
 /**
  * Detecta contratos que están por vencer
  */
-async function detectExpiringContracts(
-  companyId: string
-): Promise<DetectedIssue[]> {
+async function detectExpiringContracts(companyId: string): Promise<DetectedIssue[]> {
   const today = new Date();
   const in30Days = addDays(today, 30);
   const in7Days = addDays(today, 7);
@@ -104,28 +108,28 @@ async function detectExpiringContracts(
     where: {
       unit: {
         building: {
-          companyId
-        }
+          companyId,
+        },
       },
       estado: 'activo',
       fechaFin: {
         lte: in30Days,
-        gte: today
-      }
+        gte: today,
+      },
     },
     include: {
       tenant: true,
       unit: {
         include: {
-          building: true
-        }
-      }
-    }
+          building: true,
+        },
+      },
+    },
   });
 
-  return contracts.map(contract => {
+  return contracts.map((contract) => {
     const daysUntilExpiry = differenceInDays(contract.fechaFin, today);
-    
+
     let severity: 'high' | 'critical' | 'medium';
     if (daysUntilExpiry <= 7) {
       severity = 'critical';
@@ -144,11 +148,11 @@ async function detectExpiringContracts(
       affectedEntity: {
         type: 'contract',
         id: contract.id,
-        name: `${contract.tenant.nombreCompleto} - Unidad ${contract.unit.numero}`
+        name: `${contract.tenant.nombreCompleto} - Unidad ${contract.unit.numero}`,
       },
       suggestedAction: 'Contacta al inquilino para renovar el contrato o buscar nuevo inquilino.',
       actionUrl: `/contratos/${contract.id}`,
-      detectedAt: new Date()
+      detectedAt: new Date(),
     };
   });
 }
@@ -156,9 +160,7 @@ async function detectExpiringContracts(
 /**
  * Detecta pagos vencidos
  */
-async function detectOverduePayments(
-  companyId: string
-): Promise<DetectedIssue[]> {
+async function detectOverduePayments(companyId: string): Promise<DetectedIssue[]> {
   const today = new Date();
 
   const overduePayments = await prisma.payment.findMany({
@@ -166,16 +168,16 @@ async function detectOverduePayments(
       contract: {
         unit: {
           building: {
-            companyId
-          }
-        }
+            companyId,
+          },
+        },
       },
       estado: {
-        in: ['pendiente']
+        in: ['pendiente'],
       },
       fechaVencimiento: {
-        lt: today
-      }
+        lt: today,
+      },
     },
     include: {
       contract: {
@@ -183,20 +185,20 @@ async function detectOverduePayments(
           tenant: true,
           unit: {
             include: {
-              building: true
-            }
-          }
-        }
-      }
+              building: true,
+            },
+          },
+        },
+      },
     },
     orderBy: {
-      fechaVencimiento: 'asc'
-    }
+      fechaVencimiento: 'asc',
+    },
   });
 
   return overduePayments.map((payment: any) => {
     const daysOverdue = differenceInDays(today, payment.fechaVencimiento);
-    
+
     let severity: 'high' | 'critical' | 'medium';
     if (daysOverdue >= 30) {
       severity = 'critical';
@@ -215,20 +217,18 @@ async function detectOverduePayments(
       affectedEntity: {
         type: 'payment',
         id: payment.id,
-        name: `${payment.contract.tenant.nombreCompleto} - €${payment.monto}`
+        name: `${payment.contract.tenant.nombreCompleto} - €${payment.monto}`,
       },
       suggestedAction: 'Envía un recordatorio automático o contacta al inquilino directamente.',
       actionUrl: `/pagos/${payment.id}`,
-      detectedAt: new Date()
+      detectedAt: new Date(),
     };
   });
 }
 /**
  * Detecta mantenimientos atrasados
  */
-async function detectOverdueMaintenances(
-  companyId: string
-): Promise<DetectedIssue[]> {
+async function detectOverdueMaintenances(companyId: string): Promise<DetectedIssue[]> {
   // TODO: Implementar cuando el modelo Maintenance esté disponible
   return [];
 }
@@ -236,26 +236,24 @@ async function detectOverdueMaintenances(
 /**
  * Detecta baja ocupación
  */
-async function detectLowOccupancy(
-  companyId: string
-): Promise<DetectedIssue | null> {
+async function detectLowOccupancy(companyId: string): Promise<DetectedIssue | null> {
   const totalUnits = await prisma.unit.count({
     where: {
       building: {
-        companyId
-      }
-    }
+        companyId,
+      },
+    },
   });
 
   const occupiedUnits = await prisma.contract.count({
     where: {
       unit: {
         building: {
-          companyId
-        }
+          companyId,
+        },
       },
-      estado: 'activo'
-    }
+      estado: 'activo',
+    },
   });
 
   if (totalUnits === 0) return null;
@@ -264,7 +262,7 @@ async function detectLowOccupancy(
 
   if (occupancyRate < 70) {
     const emptyUnits = totalUnits - occupiedUnits;
-    
+
     return {
       id: 'low-occupancy',
       type: 'low_occupancy',
@@ -274,11 +272,12 @@ async function detectLowOccupancy(
       affectedEntity: {
         type: 'company',
         id: companyId,
-        name: 'Portfolio general'
+        name: 'Portfolio general',
       },
-      suggestedAction: 'Publica en portales inmobiliarios o activa módulos STR para alquiler vacacional.',
+      suggestedAction:
+        'Publica en portales inmobiliarios o activa módulos STR para alquiler vacacional.',
       actionUrl: '/anuncios',
-      detectedAt: new Date()
+      detectedAt: new Date(),
     };
   }
 
@@ -288,9 +287,7 @@ async function detectLowOccupancy(
 /**
  * Detecta datos faltantes importantes
  */
-async function detectMissingData(
-  companyId: string
-): Promise<DetectedIssue[]> {
+async function detectMissingData(companyId: string): Promise<DetectedIssue[]> {
   const issues: DetectedIssue[] = [];
 
   // Edificios sin fotos - Simplificado
@@ -306,11 +303,11 @@ async function detectMissingData(
       affectedEntity: {
         type: 'buildings',
         id: 'multiple',
-        name: `${buildingsWithoutPhotos} edificios`
+        name: `${buildingsWithoutPhotos} edificios`,
       },
       suggestedAction: 'Sube fotos de calidad de tus edificios.',
       actionUrl: '/edificios',
-      detectedAt: new Date()
+      detectedAt: new Date(),
     });
   }
 
@@ -318,8 +315,8 @@ async function detectMissingData(
   const tenantsWithoutEmail = await prisma.tenant.count({
     where: {
       companyId,
-      email: ''
-    }
+      email: '',
+    },
   });
 
   if (tenantsWithoutEmail > 0) {
@@ -332,11 +329,11 @@ async function detectMissingData(
       affectedEntity: {
         type: 'tenants',
         id: 'multiple',
-        name: `${tenantsWithoutEmail} inquilinos`
+        name: `${tenantsWithoutEmail} inquilinos`,
       },
       suggestedAction: 'Actualiza los datos de contacto de tus inquilinos.',
       actionUrl: '/inquilinos',
-      detectedAt: new Date()
+      detectedAt: new Date(),
     });
   }
 
@@ -346,9 +343,7 @@ async function detectMissingData(
 /**
  * Detecta oportunidades de automatización
  */
-async function detectAutomationOpportunities(
-  companyId: string
-): Promise<DetectedIssue[]> {
+async function detectAutomationOpportunities(companyId: string): Promise<DetectedIssue[]> {
   const opportunities: DetectedIssue[] = [];
 
   // Contratos sin pagos recurrentes configurados
@@ -356,12 +351,12 @@ async function detectAutomationOpportunities(
     where: {
       unit: {
         building: {
-          companyId
-        }
+          companyId,
+        },
       },
       estado: 'activo',
-      stripeSubscription: null
-    }
+      stripeSubscription: null,
+    },
   });
 
   if (contractsWithoutRecurring > 3) {
@@ -374,11 +369,11 @@ async function detectAutomationOpportunities(
       affectedEntity: {
         type: 'contracts',
         id: 'recurring-payments',
-        name: `${contractsWithoutRecurring} contratos`
+        name: `${contractsWithoutRecurring} contratos`,
       },
       suggestedAction: 'Configura pagos recurrentes en contratos activos.',
       actionUrl: '/contratos',
-      detectedAt: new Date()
+      detectedAt: new Date(),
     });
   }
 
@@ -395,11 +390,11 @@ async function detectAutomationOpportunities(
       affectedEntity: {
         type: 'company',
         id: companyId,
-        name: 'Sistema de mantenimiento'
+        name: 'Sistema de mantenimiento',
       },
       suggestedAction: 'Configura programación de mantenimientos.',
       actionUrl: '/mantenimiento-preventivo',
-      detectedAt: new Date()
+      detectedAt: new Date(),
     });
   }
 
@@ -409,14 +404,12 @@ async function detectAutomationOpportunities(
 /**
  * Envía notificaciones automáticas sobre problemas detectados
  */
-export async function sendProactiveNotifications(
-  companyId: string
-): Promise<void> {
+export async function sendProactiveNotifications(companyId: string): Promise<void> {
   const report = await generateSystemHealthReport(companyId);
-  
+
   // Filtrar solo problemas críticos y altos
   const criticalIssues = [...report.issues].filter(
-    i => i.severity === 'critical' || i.severity === 'high'
+    (i) => i.severity === 'critical' || i.severity === 'high'
   );
 
   if (criticalIssues.length === 0) {
@@ -429,9 +422,9 @@ export async function sendProactiveNotifications(
       companyId,
       activo: true,
       role: {
-        in: ['super_admin', 'gestor']
-      }
-    }
+        in: ['super_admin', 'gestor'],
+      },
+    },
   });
 
   // Crear notificaciones
@@ -444,8 +437,8 @@ export async function sendProactiveNotifications(
           tipo: 'alerta_sistema',
           titulo: issue.title,
           mensaje: issue.description,
-          leida: false
-        }
+          leida: false,
+        },
       });
     }
   }

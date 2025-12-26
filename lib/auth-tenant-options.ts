@@ -38,10 +38,7 @@ export const authTenantOptions: NextAuthOptions = {
         }
 
         // Validar la contraseña
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          tenant.password
-        );
+        const isPasswordValid = await bcrypt.compare(credentials.password, tenant.password);
 
         if (!isPasswordValid) {
           throw new Error('Contraseña incorrecta');

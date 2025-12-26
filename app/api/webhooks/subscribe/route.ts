@@ -1,6 +1,6 @@
 /**
  * API: Gestionar Suscripciones de Webhooks
- * 
+ *
  * Permite a las compañías registrar URLs para recibir eventos webhook
  */
 
@@ -20,7 +20,7 @@ interface SubscribeRequest {
 
 /**
  * POST /api/webhooks/subscribe
- * 
+ *
  * Body:
  * {
  *   url: 'https://example.com/webhooks',
@@ -33,10 +33,7 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Solo administradores pueden gestionar webhooks
@@ -62,10 +59,7 @@ export async function POST(req: NextRequest) {
     try {
       new URL(url);
     } catch (e) {
-      return NextResponse.json(
-        { error: 'URL inválida' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'URL inválida' }, { status: 400 });
     }
 
     // Validar eventos
@@ -79,7 +73,7 @@ export async function POST(req: NextRequest) {
       'maintenance.created',
     ];
 
-    const invalidEvents = events.filter(e => !validEvents.includes(e));
+    const invalidEvents = events.filter((e) => !validEvents.includes(e));
     if (invalidEvents.length > 0) {
       return NextResponse.json(
         {
@@ -91,12 +85,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Registrar suscripción
-    await registerWebhookSubscription(
-      session.user.companyId,
-      url,
-      events,
-      secret
-    );
+    await registerWebhookSubscription(session.user.companyId, url, events, secret);
 
     logger.info(`Webhook suscrito para compañía ${session.user.companyId}`, {
       url,
@@ -126,17 +115,14 @@ export async function POST(req: NextRequest) {
 
 /**
  * GET /api/webhooks/subscribe
- * 
+ *
  * Obtiene información sobre eventos disponibles
  */
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
-    return NextResponse.json(
-      { error: 'No autenticado' },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
   }
 
   const availableEvents = [
@@ -173,7 +159,8 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     availableEvents,
     info: {
-      authentication: 'Los webhooks incluyen firma HMAC-SHA256 en el header X-INMOVA-Signature si se proporciona un secret',
+      authentication:
+        'Los webhooks incluyen firma HMAC-SHA256 en el header X-INMOVA-Signature si se proporciona un secret',
       timeout: '10 segundos',
       retries: 'Máximo 3 intentos',
       format: 'JSON con estructura: { event, timestamp, data }',

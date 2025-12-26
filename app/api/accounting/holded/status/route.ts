@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     }
 
     const isConfigured = isHoldedConfigured();
-    
+
     return NextResponse.json({
       integrated: isConfigured,
       mode: isConfigured ? 'production' : 'demo',
@@ -24,15 +24,12 @@ export async function GET(req: NextRequest) {
         'Gestión de clientes y proveedores',
         'Control de gastos',
         'Proyectos y CRM',
-        'Integración bancaria'
+        'Integración bancaria',
       ],
-      status: isConfigured ? 'active' : 'demo'
+      status: isConfigured ? 'active' : 'demo',
     });
   } catch (error) {
     logger.error('Error checking Holded status:', error);
-    return NextResponse.json(
-      { error: 'Error al verificar estado de Holded' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al verificar estado de Holded' }, { status: 500 });
   }
 }

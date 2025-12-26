@@ -27,29 +27,32 @@ export function useRoutePreloader() {
   /**
    * Precarga una ruta cuando el usuario hace hover
    */
-  const preloadRoute = useCallback((route: string, options: PreloadOptions = {}) => {
-    const { delay = 200 } = options;
+  const preloadRoute = useCallback(
+    (route: string, options: PreloadOptions = {}) => {
+      const { delay = 200 } = options;
 
-    // Evitar precargas duplicadas
-    if (preloadCache.has(route)) {
-      return;
-    }
-
-    timeoutRef.current = setTimeout(() => {
-      try {
-        // Usar router.prefetch de Next.js
-        router.prefetch(route);
-        preloadCache.set(route, true);
-        
-        // Log para debugging (remover en producción)
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`[RoutePreloader] Precargando ruta: ${route}`);
-        }
-      } catch (error) {
-        console.error(`[RoutePreloader] Error precargando ${route}:`, error);
+      // Evitar precargas duplicadas
+      if (preloadCache.has(route)) {
+        return;
       }
-    }, delay);
-  }, [router]);
+
+      timeoutRef.current = setTimeout(() => {
+        try {
+          // Usar router.prefetch de Next.js
+          router.prefetch(route);
+          preloadCache.set(route, true);
+
+          // Log para debugging (remover en producción)
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`[RoutePreloader] Precargando ruta: ${route}`);
+          }
+        } catch (error) {
+          console.error(`[RoutePreloader] Error precargando ${route}:`, error);
+        }
+      }, delay);
+    },
+    [router]
+  );
 
   /**
    * Cancela una precarga pendiente

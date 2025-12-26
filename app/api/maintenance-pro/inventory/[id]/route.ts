@@ -6,10 +6,7 @@ import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -33,10 +30,7 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -50,9 +44,6 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error: any) {
     logger.error('Error deleting inventory item:', error);
-    return NextResponse.json(
-      { error: error.message || 'Error al eliminar item' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Error al eliminar item' }, { status: 500 });
   }
 }

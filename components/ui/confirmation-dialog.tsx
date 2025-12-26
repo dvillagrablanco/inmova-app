@@ -71,16 +71,12 @@ export function ConfirmationDialog({
             <div className="flex-shrink-0 mt-0.5">{getIcon()}</div>
             <div className="flex-1">
               <AlertDialogTitle>{title}</AlertDialogTitle>
-              <AlertDialogDescription className="mt-2">
-                {description}
-              </AlertDialogDescription>
+              <AlertDialogDescription className="mt-2">{description}</AlertDialogDescription>
             </div>
           </div>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isProcessing || isLoading}>
-            {cancelText}
-          </AlertDialogCancel>
+          <AlertDialogCancel disabled={isProcessing || isLoading}>{cancelText}</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleConfirm}
             disabled={isProcessing || isLoading}
@@ -102,13 +98,12 @@ export function useConfirmation() {
   const [state, setState] = useState<{
     open: boolean;
     options: Omit<ConfirmationDialogProps, 'open' | 'onOpenChange'>;
-  }>(
-{ open: false,
-      options: {
-        onConfirm: () => {},
-      },
-    }
-  );
+  }>({
+    open: false,
+    options: {
+      onConfirm: () => {},
+    },
+  });
 
   const confirm = (options: Omit<ConfirmationDialogProps, 'open' | 'onOpenChange'>) => {
     return new Promise<boolean>((resolve) => {

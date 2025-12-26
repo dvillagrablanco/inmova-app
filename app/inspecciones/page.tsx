@@ -251,320 +251,312 @@ export default function InspeccionesPage() {
 
   return (
     <AuthenticatedLayout>
-          {/* Header */}
-          <div className="mb-6">
-            <Button variant="ghost" onClick={() => router.push('/dashboard')} className="mb-4">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Volver al Dashboard
-            </Button>
+      {/* Header */}
+      <div className="mb-6">
+        <Button variant="ghost" onClick={() => router.push('/dashboard')} className="mb-4">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Volver al Dashboard
+        </Button>
 
-            <Breadcrumb className="mb-4">
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/dashboard">
-                    <Home className="h-4 w-4" />
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Inspecciones</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
+        <Breadcrumb className="mb-4">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/dashboard">
+                <Home className="h-4 w-4" />
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Inspecciones</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Inspecciones</h1>
-                <p className="text-muted-foreground mt-1">
-                  Gestiona inspecciones de entrada, salida y periódicas
-                </p>
-              </div>
-              {canCreate && (
-                <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-                  <DialogTrigger asChild>
-                    <Button className="w-full sm:w-auto">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Nueva Inspección
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Inspecciones</h1>
+            <p className="text-muted-foreground mt-1">
+              Gestiona inspecciones de entrada, salida y periódicas
+            </p>
+          </div>
+          {canCreate && (
+            <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+              <DialogTrigger asChild>
+                <Button className="w-full sm:w-auto">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Nueva Inspección
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Programar Nueva Inspección</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <Label>Tipo de Inspección *</Label>
+                    <Select
+                      value={form.tipo}
+                      onValueChange={(value) => setForm({ ...form, tipo: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="entrada">Entrada</SelectItem>
+                        <SelectItem value="salida">Salida</SelectItem>
+                        <SelectItem value="periodica">Periódica</SelectItem>
+                        <SelectItem value="precompra">Pre-compra</SelectItem>
+                        <SelectItem value="mantenimiento">Mantenimiento</SelectItem>
+                        <SelectItem value="emergencia">Emergencia</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label>Edificio</Label>
+                    <Select value={form.buildingId} onValueChange={handleBuildingChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona un edificio" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {buildings.map((b) => (
+                          <SelectItem key={b.id} value={b.id}>
+                            {b.nombre}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {form.buildingId && (
+                    <div>
+                      <Label>Unidad</Label>
+                      <Select
+                        value={form.unitId}
+                        onValueChange={(value) => setForm({ ...form, unitId: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona una unidad" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {units.map((u) => (
+                            <SelectItem key={u.id} value={u.id}>
+                              {u.numero}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  <div>
+                    <Label>Fecha Programada *</Label>
+                    <Input
+                      type="datetime-local"
+                      value={form.fechaProgramada}
+                      onChange={(e) => setForm({ ...form, fechaProgramada: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Inspector *</Label>
+                    <Input
+                      value={form.inspector}
+                      onChange={(e) => setForm({ ...form, inspector: e.target.value })}
+                      placeholder="Nombre del inspector"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Observaciones</Label>
+                    <Input
+                      value={form.observaciones}
+                      onChange={(e) => setForm({ ...form, observaciones: e.target.value })}
+                      placeholder="Notas adicionales"
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-2">
+                    <Button type="button" variant="outline" onClick={() => setOpenDialog(false)}>
+                      Cancelar
                     </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle>Programar Nueva Inspección</DialogTitle>
-                    </DialogHeader>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                      <div>
-                        <Label>Tipo de Inspección *</Label>
-                        <Select
-                          value={form.tipo}
-                          onValueChange={(value) => setForm({ ...form, tipo: value })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="entrada">Entrada</SelectItem>
-                            <SelectItem value="salida">Salida</SelectItem>
-                            <SelectItem value="periodica">Periódica</SelectItem>
-                            <SelectItem value="precompra">Pre-compra</SelectItem>
-                            <SelectItem value="mantenimiento">Mantenimiento</SelectItem>
-                            <SelectItem value="emergencia">Emergencia</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
+                    <Button type="submit">Programar</Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
+      </div>
 
-                      <div>
-                        <Label>Edificio</Label>
-                        <Select value={form.buildingId} onValueChange={handleBuildingChange}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona un edificio" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {buildings.map((b) => (
-                              <SelectItem key={b.id} value={b.id}>
-                                {b.nombre}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+      {/* KPIs */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Inspecciones</CardTitle>
+            <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalInspections}</div>
+          </CardContent>
+        </Card>
 
-                      {form.buildingId && (
-                        <div>
-                          <Label>Unidad</Label>
-                          <Select
-                            value={form.unitId}
-                            onValueChange={(value) => setForm({ ...form, unitId: value })}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecciona una unidad" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {units.map((u) => (
-                                <SelectItem key={u.id} value={u.id}>
-                                  {u.numero}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      )}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Programadas</CardTitle>
+            <Calendar className="h-4 w-4 text-blue-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{programadas}</div>
+          </CardContent>
+        </Card>
 
-                      <div>
-                        <Label>Fecha Programada *</Label>
-                        <Input
-                          type="datetime-local"
-                          value={form.fechaProgramada}
-                          onChange={(e) => setForm({ ...form, fechaProgramada: e.target.value })}
-                          required
-                        />
-                      </div>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Completadas</CardTitle>
+            <FileText className="h-4 w-4 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{completadas}</div>
+          </CardContent>
+        </Card>
 
-                      <div>
-                        <Label>Inspector *</Label>
-                        <Input
-                          value={form.inspector}
-                          onChange={(e) => setForm({ ...form, inspector: e.target.value })}
-                          placeholder="Nombre del inspector"
-                          required
-                        />
-                      </div>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Acción Requerida</CardTitle>
+            <AlertCircle className="h-4 w-4 text-red-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{pendientes}</div>
+          </CardContent>
+        </Card>
+      </div>
 
-                      <div>
-                        <Label>Observaciones</Label>
-                        <Input
-                          value={form.observaciones}
-                          onChange={(e) => setForm({ ...form, observaciones: e.target.value })}
-                          placeholder="Notas adicionales"
-                        />
-                      </div>
-
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => setOpenDialog(false)}
-                        >
-                          Cancelar
-                        </Button>
-                        <Button type="submit">Programar</Button>
-                      </div>
-                    </form>
-                  </DialogContent>
-                </Dialog>
-              )}
+      {/* Filtros */}
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <div className="grid gap-4 md:grid-cols-3">
+            <div>
+              <Label>Buscar</Label>
+              <Input
+                placeholder="Inspector, edificio, unidad..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Tipo</Label>
+              <Select value={filterTipo} onValueChange={setFilterTipo}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="entrada">Entrada</SelectItem>
+                  <SelectItem value="salida">Salida</SelectItem>
+                  <SelectItem value="periodica">Periódica</SelectItem>
+                  <SelectItem value="precompra">Pre-compra</SelectItem>
+                  <SelectItem value="mantenimiento">Mantenimiento</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Estado</Label>
+              <Select value={filterEstado} onValueChange={setFilterEstado}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="programada">Programada</SelectItem>
+                  <SelectItem value="en_progreso">En Progreso</SelectItem>
+                  <SelectItem value="completada">Completada</SelectItem>
+                  <SelectItem value="pendiente_accion">Acción Requerida</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
+        </CardContent>
+      </Card>
 
-          {/* KPIs */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Inspecciones</CardTitle>
-                <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{totalInspections}</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Programadas</CardTitle>
-                <Calendar className="h-4 w-4 text-blue-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{programadas}</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Completadas</CardTitle>
-                <FileText className="h-4 w-4 text-green-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{completadas}</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Acción Requerida</CardTitle>
-                <AlertCircle className="h-4 w-4 text-red-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{pendientes}</div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Filtros */}
-          <Card className="mb-6">
-            <CardContent className="pt-6">
-              <div className="grid gap-4 md:grid-cols-3">
-                <div>
-                  <Label>Buscar</Label>
-                  <Input
-                    placeholder="Inspector, edificio, unidad..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label>Tipo</Label>
-                  <Select value={filterTipo} onValueChange={setFilterTipo}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      <SelectItem value="entrada">Entrada</SelectItem>
-                      <SelectItem value="salida">Salida</SelectItem>
-                      <SelectItem value="periodica">Periódica</SelectItem>
-                      <SelectItem value="precompra">Pre-compra</SelectItem>
-                      <SelectItem value="mantenimiento">Mantenimiento</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Estado</Label>
-                  <Select value={filterEstado} onValueChange={setFilterEstado}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      <SelectItem value="programada">Programada</SelectItem>
-                      <SelectItem value="en_progreso">En Progreso</SelectItem>
-                      <SelectItem value="completada">Completada</SelectItem>
-                      <SelectItem value="pendiente_accion">Acción Requerida</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+      {/* Lista de Inspecciones */}
+      <div className="space-y-4">
+        {filteredInspections.length === 0 ? (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <ClipboardCheck className="h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-muted-foreground text-center">No se encontraron inspecciones</p>
             </CardContent>
           </Card>
+        ) : (
+          filteredInspections.map((inspection) => (
+            <Card key={inspection.id} className="hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                  <div className="flex-1 space-y-3">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <Badge variant="outline">{getTipoLabel(inspection.tipo)}</Badge>
+                      {getEstadoBadge(inspection.estado)}
+                    </div>
 
-          {/* Lista de Inspecciones */}
-          <div className="space-y-4">
-            {filteredInspections.length === 0 ? (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <ClipboardCheck className="h-12 w-12 text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground text-center">
-                    No se encontraron inspecciones
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              filteredInspections.map((inspection) => (
-                <Card key={inspection.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                      <div className="flex-1 space-y-3">
-                        <div className="flex items-center gap-3 flex-wrap">
-                          <Badge variant="outline">{getTipoLabel(inspection.tipo)}</Badge>
-                          {getEstadoBadge(inspection.estado)}
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {inspection.buildingName && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <Building2 className="h-4 w-4 text-muted-foreground" />
+                          <span>{inspection.buildingName}</span>
                         </div>
-
-                        <div className="grid gap-2 sm:grid-cols-2">
-                          {inspection.buildingName && (
-                            <div className="flex items-center gap-2 text-sm">
-                              <Building2 className="h-4 w-4 text-muted-foreground" />
-                              <span>{inspection.buildingName}</span>
-                            </div>
-                          )}
-                          {inspection.unitNumber && (
-                            <div className="flex items-center gap-2 text-sm">
-                              <MapPin className="h-4 w-4 text-muted-foreground" />
-                              <span>Unidad {inspection.unitNumber}</span>
-                            </div>
-                          )}
-                          <div className="flex items-center gap-2 text-sm">
-                            <User className="h-4 w-4 text-muted-foreground" />
-                            <span>{inspection.inspector}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                            <span>
-                              {format(new Date(inspection.fechaProgramada), "d 'de' MMMM, yyyy", {
-                                locale: es,
-                              })}
-                            </span>
-                          </div>
+                      )}
+                      {inspection.unitNumber && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <MapPin className="h-4 w-4 text-muted-foreground" />
+                          <span>Unidad {inspection.unitNumber}</span>
                         </div>
-
-                        {inspection.observaciones && (
-                          <p className="text-sm text-muted-foreground">
-                            {inspection.observaciones}
-                          </p>
-                        )}
-
-                        {inspection.costoEstimadoDanos && inspection.costoEstimadoDanos > 0 && (
-                          <div className="flex items-center gap-2 text-sm text-red-600">
-                            <AlertCircle className="h-4 w-4" />
-                            <span>
-                              Daños estimados: €{inspection.costoEstimadoDanos.toLocaleString()}
-                            </span>
-                          </div>
-                        )}
+                      )}
+                      <div className="flex items-center gap-2 text-sm">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        <span>{inspection.inspector}</span>
                       </div>
-
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => router.push(`/inspecciones/${inspection.id}`)}
-                        >
-                          Ver Detalles
-                        </Button>
+                      <div className="flex items-center gap-2 text-sm">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span>
+                          {format(new Date(inspection.fechaProgramada), "d 'de' MMMM, yyyy", {
+                            locale: es,
+                          })}
+                        </span>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
-        </AuthenticatedLayout>
+
+                    {inspection.observaciones && (
+                      <p className="text-sm text-muted-foreground">{inspection.observaciones}</p>
+                    )}
+
+                    {inspection.costoEstimadoDanos && inspection.costoEstimadoDanos > 0 && (
+                      <div className="flex items-center gap-2 text-sm text-red-600">
+                        <AlertCircle className="h-4 w-4" />
+                        <span>
+                          Daños estimados: €{inspection.costoEstimadoDanos.toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => router.push(`/inspecciones/${inspection.id}`)}
+                    >
+                      Ver Detalles
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+    </AuthenticatedLayout>
   );
 }

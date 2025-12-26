@@ -7,7 +7,7 @@ import { prisma } from './db';
 import { addDays, differenceInDays, format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-export type PermitType = 
+export type PermitType =
   | 'building_permit' // Licencia de obra
   | 'demolition_permit' // Licencia de demolición
   | 'occupancy_permit' // Cédula de habitabilidad
@@ -18,7 +18,13 @@ export type PermitType =
   | 'structural_approval' // Aprobación estructural
   | 'other';
 
-export type PermitStatus = 'pending' | 'submitted' | 'under_review' | 'approved' | 'rejected' | 'expired';
+export type PermitStatus =
+  | 'pending'
+  | 'submitted'
+  | 'under_review'
+  | 'approved'
+  | 'rejected'
+  | 'expired';
 
 export interface Permit {
   id: string;
@@ -28,27 +34,27 @@ export interface Permit {
   description?: string;
   status: PermitStatus;
   authority: string; // Entidad que emite (Ayuntamiento, Junta, etc.)
-  
+
   // Fechas
   applicationDate?: Date;
   approvalDate?: Date;
   expirationDate?: Date;
   estimatedApprovalDays?: number;
-  
+
   // Documentos
   requiredDocuments: string[];
   submittedDocuments: string[];
-  
+
   // Costes
   applicationFee?: number;
   totalCost?: number;
-  
+
   // Referencias
   referenceNumber?: string;
   contactPerson?: string;
   contactEmail?: string;
   contactPhone?: string;
-  
+
   notes?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -71,7 +77,7 @@ export interface PermitChecklist {
  */
 export function getPermitChecklist(projectType: string): PermitChecklist {
   const checklists: Record<string, PermitChecklist> = {
-    'new_construction': {
+    new_construction: {
       projectType: 'Obra Nueva',
       requiredPermits: [
         {
@@ -132,7 +138,7 @@ export function getPermitChecklist(projectType: string): PermitChecklist {
         },
       ],
     },
-    'major_renovation': {
+    major_renovation: {
       projectType: 'Reforma Integral',
       requiredPermits: [
         {
@@ -161,7 +167,7 @@ export function getPermitChecklist(projectType: string): PermitChecklist {
         },
       ],
     },
-    'minor_renovation': {
+    minor_renovation: {
       projectType: 'Reforma Menor',
       requiredPermits: [
         {
@@ -175,7 +181,7 @@ export function getPermitChecklist(projectType: string): PermitChecklist {
       ],
     },
   };
-  
+
   return checklists[projectType] || checklists['major_renovation'];
 }
 
@@ -188,7 +194,7 @@ export async function createPermitsFromChecklist(
   projectType: string
 ): Promise<void> {
   const checklist = getPermitChecklist(projectType);
-  
+
   for (const requiredPermit of checklist.requiredPermits) {
     // Crear el permiso en la base de datos (guardado como JSON en el proyecto)
     const permitData = {
@@ -207,7 +213,7 @@ export async function createPermitsFromChecklist(
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    
+
     // Guardar en el proyecto (asumiendo campo JSON 'permits')
     await prisma.constructionProject.update({
       where: { id: projectId },
@@ -224,7 +230,7 @@ export async function createPermitsFromChecklist(
  */
 function getRequiredDocuments(permitType: PermitType): string[] {
   const documents: Record<PermitType, string[]> = {
-    'building_permit': [
+    building_permit: [
       'Proyecto Básico y de Ejecución',
       'Estudio de Seguridad y Salud',
       'Dirección Facultativa',
@@ -232,50 +238,50 @@ function getRequiredDocuments(permitType: PermitType): string[] {
       'Escrituras Propiedad',
       'Nota Simple Registral',
     ],
-    'demolition_permit': [
+    demolition_permit: [
       'Proyecto de Demolición',
       'Plan de Gestión de Residuos',
       'Seguro Responsabilidad Civil',
       'Escrituras Propiedad',
     ],
-    'occupancy_permit': [
+    occupancy_permit: [
       'Certificado Final de Obra',
       'Libro del Edificio',
       'Certificado Eficiencia Energética',
       'ITE (Inspección Técnica)',
       'Planos As-Built',
     ],
-    'zoning_approval': [
+    zoning_approval: [
       'Planos de Situación',
       'Memoria Urbanística',
       'Cédula Urbanística',
       'Certificado Catastral',
     ],
-    'environmental_permit': [
+    environmental_permit: [
       'Estudio de Impacto Ambiental',
       'Plan de Vigilancia Ambiental',
       'Informe Técnico',
     ],
-    'utility_connection': [
+    utility_connection: [
       'Solicitud de Suministro',
       'Proyecto de Instalaciones',
       'Boletín Eléctrico/Gas',
       'Contrato con Compañías',
     ],
-    'fire_safety': [
+    fire_safety: [
       'Proyecto de Protección contra Incendios',
       'Planos de Evacuación',
       'Certificado de Instalación',
     ],
-    'structural_approval': [
+    structural_approval: [
       'Cálculo de Estructuras',
       'Planos Estructurales',
       'Memoria de Cálculo',
       'Certificado Director de Obra',
     ],
-    'other': ['Documentación Específica'],
+    other: ['Documentación Específica'],
   };
-  
+
   return documents[permitType] || [];
 }
 
@@ -293,14 +299,14 @@ export function calculatePermitTimeline(permits: Permit[]): {
     const bPriority = (b as any).priority || 1;
     return aPriority - bPriority;
   });
-  
+
   // Calcular días totales (algunos pueden ser paralelos)
   const totalDays = permits.reduce((max, permit) => {
     return Math.max(max, permit.estimatedApprovalDays || 0);
   }, 0);
-  
+
   const estimatedCompletionDate = addDays(new Date(), totalDays);
-  
+
   return {
     totalDays,
     criticalPath: sortedPermits,
@@ -312,15 +318,15 @@ export function calculatePermitTimeline(permits: Permit[]): {
  * Genera reporte de estado de permisos
  */
 export function generatePermitStatusReport(permits: Permit[]): string {
-  const pending = permits.filter(p => p.status === 'pending').length;
-  const submitted = permits.filter(p => p.status === 'submitted').length;
-  const underReview = permits.filter(p => p.status === 'under_review').length;
-  const approved = permits.filter(p => p.status === 'approved').length;
-  const rejected = permits.filter(p => p.status === 'rejected').length;
-  
+  const pending = permits.filter((p) => p.status === 'pending').length;
+  const submitted = permits.filter((p) => p.status === 'submitted').length;
+  const underReview = permits.filter((p) => p.status === 'under_review').length;
+  const approved = permits.filter((p) => p.status === 'approved').length;
+  const rejected = permits.filter((p) => p.status === 'rejected').length;
+
   const totalCost = permits.reduce((sum, p) => sum + (p.totalCost || 0), 0);
   const completionRate = permits.length > 0 ? (approved / permits.length) * 100 : 0;
-  
+
   return `
 # REPORTE DE PERMISOS Y LICENCIAS
 
@@ -336,7 +342,9 @@ export function generatePermitStatusReport(permits: Permit[]): string {
 
 ## Estado por Permiso
 
-${permits.map(p => `
+${permits
+  .map(
+    (p) => `
 ### ${p.name}
 - **Estado:** ${getStatusLabel(p.status)}
 - **Tipo:** ${getPermitTypeLabel(p.type)}
@@ -346,37 +354,39 @@ ${p.applicationDate ? `- **Fecha Solicitud:** ${format(p.applicationDate, 'dd/MM
 ${p.approvalDate ? `- **Fecha Aprobación:** ${format(p.approvalDate, 'dd/MM/yyyy', { locale: es })}` : ''}
 ${p.expirationDate ? `- **Vencimiento:** ${format(p.expirationDate, 'dd/MM/yyyy', { locale: es })}` : ''}
 - **Coste:** €${(p.totalCost || 0).toLocaleString()}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ---
 
-*Generado: ${format(new Date(), "dd/MM/yyyy HH:mm", { locale: es })}*
+*Generado: ${format(new Date(), 'dd/MM/yyyy HH:mm', { locale: es })}*
   `.trim();
 }
 
 function getStatusLabel(status: PermitStatus): string {
   const labels: Record<PermitStatus, string> = {
-    'pending': '⏳ Pendiente',
-    'submitted': '📤 Enviado',
-    'under_review': '🔍 En Revisión',
-    'approved': '✅ Aprobado',
-    'rejected': '❌ Rechazado',
-    'expired': '⏰ Vencido',
+    pending: '⏳ Pendiente',
+    submitted: '📤 Enviado',
+    under_review: '🔍 En Revisión',
+    approved: '✅ Aprobado',
+    rejected: '❌ Rechazado',
+    expired: '⏰ Vencido',
   };
   return labels[status];
 }
 
 function getPermitTypeLabel(type: PermitType): string {
   const labels: Record<PermitType, string> = {
-    'building_permit': 'Licencia de Obra',
-    'demolition_permit': 'Licencia de Demolición',
-    'occupancy_permit': 'Cédula de Habitabilidad',
-    'zoning_approval': 'Aprobación Urbanística',
-    'environmental_permit': 'Permiso Ambiental',
-    'utility_connection': 'Conexión Servicios',
-    'fire_safety': 'Seguridad Incendios',
-    'structural_approval': 'Aprobación Estructural',
-    'other': 'Otro',
+    building_permit: 'Licencia de Obra',
+    demolition_permit: 'Licencia de Demolición',
+    occupancy_permit: 'Cédula de Habitabilidad',
+    zoning_approval: 'Aprobación Urbanística',
+    environmental_permit: 'Permiso Ambiental',
+    utility_connection: 'Conexión Servicios',
+    fire_safety: 'Seguridad Incendios',
+    structural_approval: 'Aprobación Estructural',
+    other: 'Otro',
   };
   return labels[type];
 }

@@ -6,7 +6,13 @@
  */
 
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle2, Building2, Home, UserPlus, FileText, Sparkles } from 'lucide-react';
@@ -30,9 +36,7 @@ const STEPS = [
           INMOVA es la plataforma todo-en-uno para gestión inmobiliaria profesional.
         </p>
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h4 className="font-semibold text-blue-900 mb-2">
-            ¿Qué aprenderás en este tutorial?
-          </h4>
+          <h4 className="font-semibold text-blue-900 mb-2">¿Qué aprenderás en este tutorial?</h4>
           <ul className="space-y-2 text-sm text-blue-800">
             <li className="flex items-start">
               <CheckCircle2 className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
@@ -52,9 +56,7 @@ const STEPS = [
             </li>
           </ul>
         </div>
-        <p className="text-sm text-gray-500">
-          ⏱️ Tiempo estimado: 5 minutos
-        </p>
+        <p className="text-sm text-gray-500">⏱️ Tiempo estimado: 5 minutos</p>
       </div>
     ),
   },
@@ -66,9 +68,7 @@ const STEPS = [
     content: (
       <div className="space-y-4">
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
-          <h4 className="font-semibold text-gray-900 mb-3">
-            💡 ¿Qué es un edificio?
-          </h4>
+          <h4 className="font-semibold text-gray-900 mb-3">💡 ¿Qué es un edificio?</h4>
           <p className="text-sm text-gray-600 mb-3">
             Un edificio es una propiedad que contiene una o más unidades. Puede ser:
           </p>
@@ -79,13 +79,14 @@ const STEPS = [
             <li>• Una oficina</li>
           </ul>
         </div>
-        
+
         <div className="border-l-4 border-yellow-400 bg-yellow-50 p-4 rounded">
           <p className="text-sm text-yellow-800">
-            <strong>Consejo:</strong> Empieza con los datos básicos. Podrás agregar más detalles después.
+            <strong>Consejo:</strong> Empieza con los datos básicos. Podrás agregar más detalles
+            después.
           </p>
         </div>
-        
+
         <Button className="w-full" size="lg">
           <Building2 className="h-5 w-5 mr-2" />
           Crear mi primer edificio
@@ -101,9 +102,7 @@ const STEPS = [
     content: (
       <div className="space-y-4">
         <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 border border-green-200">
-          <h4 className="font-semibold text-gray-900 mb-3">
-            🏠 ¿Qué es una unidad?
-          </h4>
+          <h4 className="font-semibold text-gray-900 mb-3">🏠 ¿Qué es una unidad?</h4>
           <p className="text-sm text-gray-600 mb-3">
             Una unidad es un espacio individual dentro de un edificio:
           </p>
@@ -114,7 +113,7 @@ const STEPS = [
             <li>• Plaza de garaje</li>
           </ul>
         </div>
-        
+
         <div className="grid grid-cols-2 gap-4">
           <div className="bg-white border rounded-lg p-4">
             <div className="font-semibold text-gray-900 mb-1">Dormitorios</div>
@@ -125,7 +124,7 @@ const STEPS = [
             <div className="text-2xl font-bold text-blue-600">75 m²</div>
           </div>
         </div>
-        
+
         <Button className="w-full" size="lg">
           <Home className="h-5 w-5 mr-2" />
           Agregar unidad al edificio
@@ -141,12 +140,8 @@ const STEPS = [
     content: (
       <div className="space-y-4">
         <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4 border border-purple-200">
-          <h4 className="font-semibold text-gray-900 mb-3">
-            👥 Datos del inquilino
-          </h4>
-          <p className="text-sm text-gray-600 mb-3">
-            Información básica que necesitarás:
-          </p>
+          <h4 className="font-semibold text-gray-900 mb-3">👥 Datos del inquilino</h4>
+          <p className="text-sm text-gray-600 mb-3">Información básica que necesitarás:</p>
           <ul className="space-y-2 text-sm text-gray-600">
             <li>• Nombre completo</li>
             <li>• Email y teléfono</li>
@@ -154,10 +149,11 @@ const STEPS = [
             <li>• Documentación (opcional)</li>
           </ul>
         </div>
-        
+
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <p className="text-sm text-blue-800">
-            <strong>✨ Extra:</strong> INMOVA te permite crear un portal para que tus inquilinos puedan:
+            <strong>✨ Extra:</strong> INMOVA te permite crear un portal para que tus inquilinos
+            puedan:
           </p>
           <ul className="mt-2 space-y-1 text-sm text-blue-700">
             <li>• Ver sus pagos</li>
@@ -166,7 +162,7 @@ const STEPS = [
             <li>• Comunicarse contigo</li>
           </ul>
         </div>
-        
+
         <Button className="w-full" size="lg">
           <UserPlus className="h-5 w-5 mr-2" />
           Registrar inquilino
@@ -182,12 +178,8 @@ const STEPS = [
     content: (
       <div className="space-y-4">
         <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-4 border border-orange-200">
-          <h4 className="font-semibold text-gray-900 mb-3">
-            📄 Contrato de alquiler
-          </h4>
-          <p className="text-sm text-gray-600 mb-3">
-            Un contrato vincula:
-          </p>
+          <h4 className="font-semibold text-gray-900 mb-3">📄 Contrato de alquiler</h4>
+          <p className="text-sm text-gray-600 mb-3">Un contrato vincula:</p>
           <div className="space-y-3">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center">
@@ -218,7 +210,7 @@ const STEPS = [
             </div>
           </div>
         </div>
-        
+
         <Button className="w-full" size="lg">
           <FileText className="h-5 w-5 mr-2" />
           Crear contrato
@@ -237,19 +229,13 @@ const STEPS = [
           <div className="h-16 w-16 rounded-full bg-green-500 mx-auto mb-4 flex items-center justify-center">
             <CheckCircle2 className="h-8 w-8 text-white" />
           </div>
-          <h4 className="text-2xl font-bold text-gray-900 mb-2">
-            ¡Completaste el onboarding!
-          </h4>
-          <p className="text-gray-600">
-            Ya estás listo para empezar a gestionar tus propiedades
-          </p>
+          <h4 className="text-2xl font-bold text-gray-900 mb-2">¡Completaste el onboarding!</h4>
+          <p className="text-gray-600">Ya estás listo para empezar a gestionar tus propiedades</p>
         </div>
-        
+
         <div className="space-y-3">
           <div className="bg-white border rounded-lg p-4">
-            <h5 className="font-semibold text-gray-900 mb-2">
-              📚 Próximos pasos recomendados:
-            </h5>
+            <h5 className="font-semibold text-gray-900 mb-2">📚 Próximos pasos recomendados:</h5>
             <ul className="space-y-2 text-sm text-gray-600">
               <li className="flex items-start">
                 <CheckCircle2 className="h-4 w-4 mr-2 mt-0.5 text-green-500 flex-shrink-0" />
@@ -269,10 +255,11 @@ const STEPS = [
               </li>
             </ul>
           </div>
-          
+
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <p className="text-sm text-blue-800">
-              <strong>💡 ¿Necesitas ayuda?</strong> Usa el chatbot de soporte (abajo a la derecha) o escríbenos a soporte@inmova.app
+              <strong>💡 ¿Necesitas ayuda?</strong> Usa el chatbot de soporte (abajo a la derecha) o
+              escríbenos a soporte@inmova.app
             </p>
           </div>
         </div>
@@ -313,18 +300,18 @@ export function OnboardingWizard({ open, onClose, onComplete }: OnboardingWizard
         <DialogHeader>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className={cn(
-                "h-12 w-12 rounded-full flex items-center justify-center",
-                currentStep === STEPS.length - 1
-                  ? "bg-green-100"
-                  : "bg-blue-100"
-              )}>
-                <Icon className={cn(
-                  "h-6 w-6",
-                  currentStep === STEPS.length - 1
-                    ? "text-green-600"
-                    : "text-blue-600"
-                )} />
+              <div
+                className={cn(
+                  'h-12 w-12 rounded-full flex items-center justify-center',
+                  currentStep === STEPS.length - 1 ? 'bg-green-100' : 'bg-blue-100'
+                )}
+              >
+                <Icon
+                  className={cn(
+                    'h-6 w-6',
+                    currentStep === STEPS.length - 1 ? 'text-green-600' : 'text-blue-600'
+                  )}
+                />
               </div>
               <div>
                 <DialogTitle>{step.title}</DialogTitle>
@@ -340,37 +327,30 @@ export function OnboardingWizard({ open, onClose, onComplete }: OnboardingWizard
               Saltar tutorial
             </Button>
           </div>
-          
+
           {/* Progress bar */}
           <div className="space-y-2">
             <Progress value={progress} className="h-2" />
             <div className="flex justify-between text-xs text-gray-500">
-              <span>Paso {currentStep + 1} de {STEPS.length}</span>
+              <span>
+                Paso {currentStep + 1} de {STEPS.length}
+              </span>
               <span>{Math.round(progress)}% completado</span>
             </div>
           </div>
         </DialogHeader>
 
         {/* Content */}
-        <div className="py-6">
-          {step.content}
-        </div>
+        <div className="py-6">{step.content}</div>
 
         {/* Navigation */}
         <div className="flex justify-between gap-3 pt-4 border-t">
-          <Button
-            variant="outline"
-            onClick={handlePrevious}
-            disabled={currentStep === 0}
-          >
+          <Button variant="outline" onClick={handlePrevious} disabled={currentStep === 0}>
             Anterior
           </Button>
           <Button
             onClick={handleNext}
-            className={cn(
-              currentStep === STEPS.length - 1 &&
-              "bg-green-600 hover:bg-green-700"
-            )}
+            className={cn(currentStep === STEPS.length - 1 && 'bg-green-600 hover:bg-green-700')}
           >
             {currentStep === STEPS.length - 1 ? '¡Empezar!' : 'Siguiente'}
           </Button>
@@ -383,12 +363,12 @@ export function OnboardingWizard({ open, onClose, onComplete }: OnboardingWizard
               key={index}
               onClick={() => setCurrentStep(index)}
               className={cn(
-                "h-2 rounded-full transition-all",
+                'h-2 rounded-full transition-all',
                 index === currentStep
-                  ? "w-8 bg-blue-600"
+                  ? 'w-8 bg-blue-600'
                   : index < currentStep
-                  ? "w-2 bg-green-500"
-                  : "w-2 bg-gray-300"
+                    ? 'w-2 bg-green-500'
+                    : 'w-2 bg-gray-300'
               )}
               aria-label={`Ir al paso ${index + 1}`}
             />

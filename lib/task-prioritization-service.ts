@@ -4,7 +4,15 @@
  */
 
 import { prisma } from './db';
-import { differenceInDays, differenceInHours, isToday, isTomorrow, isPast, startOfDay, endOfDay } from 'date-fns';
+import {
+  differenceInDays,
+  differenceInHours,
+  isToday,
+  isTomorrow,
+  isPast,
+  startOfDay,
+  endOfDay,
+} from 'date-fns';
 
 export interface TaskPriorityScore {
   totalScore: number;
@@ -159,20 +167,14 @@ function getSuggestedTimeSlot(
 /**
  * Get prioritized tasks for "My Day" view
  */
-export async function getMyDayTasks(
-  userId: string,
-  companyId: string
-): Promise<PrioritizedTask[]> {
+export async function getMyDayTasks(userId: string, companyId: string): Promise<PrioritizedTask[]> {
   const today = new Date();
 
   // Fetch all pending and in-progress tasks
   const tasks = await prisma.task.findMany({
     where: {
       companyId,
-      OR: [
-        { asignadoA: userId },
-        { creadoPor: userId },
-      ],
+      OR: [{ asignadoA: userId }, { creadoPor: userId }],
       estado: {
         in: ['pendiente', 'en_progreso'],
       },
@@ -226,10 +228,7 @@ export async function getMyDayTasks(
     }
 
     // Include critical/high priority without due date
-    if (
-      !fechaLimite &&
-      (priorityScore.level === 'critical' || priorityScore.level === 'high')
-    ) {
+    if (!fechaLimite && (priorityScore.level === 'critical' || priorityScore.level === 'high')) {
       return true;
     }
 
@@ -251,10 +250,7 @@ export async function getPrioritizedTasks(
     where: {
       companyId,
       ...(userId && {
-        OR: [
-          { asignadoA: userId },
-          { creadoPor: userId },
-        ],
+        OR: [{ asignadoA: userId }, { creadoPor: userId }],
       }),
       estado: {
         in: ['pendiente', 'en_progreso'],
@@ -292,10 +288,7 @@ export async function getTaskStats(companyId: string, userId?: string) {
     where: {
       companyId,
       ...(userId && {
-        OR: [
-          { asignadoA: userId },
-          { creadoPor: userId },
-        ],
+        OR: [{ asignadoA: userId }, { creadoPor: userId }],
       }),
     },
   });
@@ -313,10 +306,7 @@ export async function getTaskStats(companyId: string, userId?: string) {
     critical: prioritizedTasks.filter((t) => t.priorityScore.level === 'critical').length,
     high: prioritizedTasks.filter((t) => t.priorityScore.level === 'high').length,
     overdue: prioritizedTasks.filter(
-      (t) =>
-        t.fechaLimite &&
-        isPast(t.fechaLimite) &&
-        t.estado !== 'completada'
+      (t) => t.fechaLimite && isPast(t.fechaLimite) && t.estado !== 'completada'
     ).length,
     dueToday: prioritizedTasks.filter(
       (t) => t.fechaLimite && isToday(t.fechaLimite) && t.estado !== 'completada'

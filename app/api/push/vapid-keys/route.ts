@@ -13,21 +13,15 @@ export async function GET() {
     const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 
     if (!publicKey) {
-      return NextResponse.json(
-        { error: 'VAPID keys no configuradas' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'VAPID keys no configuradas' }, { status: 500 });
     }
 
     return NextResponse.json({
-      publicKey
+      publicKey,
     });
   } catch (error) {
     console.error('Error obteniendo VAPID keys:', error);
-    return NextResponse.json(
-      { error: 'Error obteniendo claves VAPID' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error obteniendo claves VAPID' }, { status: 500 });
   }
 }
 
@@ -42,13 +36,11 @@ export async function POST() {
     return NextResponse.json({
       publicKey: vapidKeys.publicKey,
       privateKey: vapidKeys.privateKey,
-      message: 'Agrega estas claves a tu archivo .env:\nNEXT_PUBLIC_VAPID_PUBLIC_KEY=...\nVAPID_PRIVATE_KEY=...'
+      message:
+        'Agrega estas claves a tu archivo .env:\nNEXT_PUBLIC_VAPID_PUBLIC_KEY=...\nVAPID_PRIVATE_KEY=...',
     });
   } catch (error) {
     console.error('Error generando VAPID keys:', error);
-    return NextResponse.json(
-      { error: 'Error generando claves VAPID' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error generando claves VAPID' }, { status: 500 });
   }
 }

@@ -64,7 +64,7 @@ interface MultiFileUploadProps {
 
 /**
  * Componente de subida múltiple de archivos con drag & drop
- * 
+ *
  * Ejemplo de uso:
  * ```tsx
  * <MultiFileUpload
@@ -190,17 +190,13 @@ export function MultiFileUpload({
 
     try {
       await onUpload(uploadedFile.file, (progress) => {
-        setFiles((prev) =>
-          prev.map((f) => (f.id === uploadedFile.id ? { ...f, progress } : f))
-        );
+        setFiles((prev) => prev.map((f) => (f.id === uploadedFile.id ? { ...f, progress } : f)));
       });
 
       // Éxito
       setFiles((prev) =>
         prev.map((f) =>
-          f.id === uploadedFile.id
-            ? { ...f, status: 'success' as const, progress: 100 }
-            : f
+          f.id === uploadedFile.id ? { ...f, status: 'success' as const, progress: 100 } : f
         )
       );
       toast.success(`${uploadedFile.file.name} subido correctamente`);
@@ -209,9 +205,7 @@ export function MultiFileUpload({
       const errorMessage = error instanceof Error ? error.message : 'Error al subir';
       setFiles((prev) =>
         prev.map((f) =>
-          f.id === uploadedFile.id
-            ? { ...f, status: 'error' as const, error: errorMessage }
-            : f
+          f.id === uploadedFile.id ? { ...f, status: 'error' as const, error: errorMessage } : f
         )
       );
       toast.error(`Error al subir ${uploadedFile.file.name}`);
@@ -278,7 +272,12 @@ export function MultiFileUpload({
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
       >
-        <Upload className={cn('h-12 w-12 mx-auto mb-4', isDragging ? 'text-primary' : 'text-muted-foreground')} />
+        <Upload
+          className={cn(
+            'h-12 w-12 mx-auto mb-4',
+            isDragging ? 'text-primary' : 'text-muted-foreground'
+          )}
+        />
         <h3 className="text-lg font-semibold mb-2">
           Arrastra archivos aquí o haz clic para seleccionar
         </h3>
@@ -320,16 +319,12 @@ export function MultiFileUpload({
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3">
                     {/* Icon */}
-                    <div className="flex-shrink-0">
-                      {getFileIcon(uploadedFile.file.name)}
-                    </div>
+                    <div className="flex-shrink-0">{getFileIcon(uploadedFile.file.name)}</div>
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2 mb-1">
-                        <p className="text-sm font-medium truncate">
-                          {uploadedFile.file.name}
-                        </p>
+                        <p className="text-sm font-medium truncate">{uploadedFile.file.name}</p>
                         <div className="flex items-center gap-2">
                           {uploadedFile.status === 'success' && (
                             <CheckCircle className="h-4 w-4 text-green-500" />
@@ -359,10 +354,10 @@ export function MultiFileUpload({
                             uploadedFile.status === 'success'
                               ? 'default'
                               : uploadedFile.status === 'error'
-                              ? 'destructive'
-                              : uploadedFile.status === 'uploading'
-                              ? 'secondary'
-                              : 'outline'
+                                ? 'destructive'
+                                : uploadedFile.status === 'uploading'
+                                  ? 'secondary'
+                                  : 'outline'
                           }
                           className="text-xs"
                         >

@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get('endDate');
 
     const where: any = {
-      companyId: session.user.companyId
+      companyId: session.user.companyId,
     };
 
     if (listingId) {
@@ -48,24 +48,21 @@ export async function GET(request: NextRequest) {
           include: {
             unit: {
               include: {
-                building: true
-              }
-            }
-          }
-        }
+                building: true,
+              },
+            },
+          },
+        },
       },
       orderBy: {
-        checkInDate: 'desc'
-      }
+        checkInDate: 'desc',
+      },
     });
 
     return NextResponse.json(bookings);
   } catch (error) {
     logger.error('Error fetching STR bookings:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch bookings' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch bookings' }, { status: 500 });
   }
 }
 
@@ -77,13 +74,11 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await request.json();
-    
+
     // Calcular número de noches
     const checkIn = new Date(data.checkInDate);
     const checkOut = new Date(data.checkOutDate);
-    const numNoches = Math.ceil(
-      (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24)
-    );
+    const numNoches = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
 
     // Calcular ingreso neto
     const ingresoNeto = data.precioTotal - data.comisionCanal - data.tasasImpuestos;
@@ -93,19 +88,19 @@ export async function POST(request: NextRequest) {
         ...data,
         companyId: session.user.companyId,
         numNoches,
-        ingresoNeto
+        ingresoNeto,
       },
       include: {
         listing: {
           include: {
             unit: {
               include: {
-                building: true
-              }
-            }
-          }
-        }
-      }
+                building: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     // Actualizar contador de reservas del listing
@@ -113,17 +108,14 @@ export async function POST(request: NextRequest) {
       where: { id: data.listingId },
       data: {
         totalReservas: {
-          increment: 1
-        }
-      }
+          increment: 1,
+        },
+      },
     });
 
     return NextResponse.json(booking, { status: 201 });
   } catch (error) {
     logger.error('Error creating STR booking:', error);
-    return NextResponse.json(
-      { error: 'Failed to create booking' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create booking' }, { status: 500 });
   }
 }

@@ -23,10 +23,7 @@ export async function POST(request: NextRequest) {
     const { paymentId } = body;
 
     if (!paymentId) {
-      return NextResponse.json(
-        { error: 'Se requiere paymentId' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Se requiere paymentId' }, { status: 400 });
     }
 
     // Obtener datos del pago
@@ -47,14 +44,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    if (
-      !payment ||
-      payment.contract?.unit?.building?.companyId !== session?.user?.companyId
-    ) {
-      return NextResponse.json(
-        { error: 'Pago no encontrado' },
-        { status: 404 }
-      );
+    if (!payment || payment.contract?.unit?.building?.companyId !== session?.user?.companyId) {
+      return NextResponse.json({ error: 'Pago no encontrado' }, { status: 404 });
     }
 
     // Registrar pago en Zucchetti (modo demo)
@@ -68,9 +59,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error al registrar pago en Zucchetti:', error);
-    return NextResponse.json(
-      { error: 'Error al registrar pago' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al registrar pago' }, { status: 500 });
   }
 }

@@ -18,7 +18,11 @@ const SIGNATURIT_API_KEY = process.env.SIGNATURIT_API_KEY;
 const SIGNATURIT_SANDBOX = process.env.SIGNATURIT_SANDBOX === 'true';
 
 // Detectar si hay credenciales configuradas
-const isDocuSignConfigured = !!(DOCUSIGN_INTEGRATION_KEY && DOCUSIGN_USER_ID && DOCUSIGN_ACCOUNT_ID);
+const isDocuSignConfigured = !!(
+  DOCUSIGN_INTEGRATION_KEY &&
+  DOCUSIGN_USER_ID &&
+  DOCUSIGN_ACCOUNT_ID
+);
 const isSignaturitConfigured = !!SIGNATURIT_API_KEY;
 
 interface FirmanteData {
@@ -57,14 +61,14 @@ export function getActiveProvider(): 'docusign' | 'signaturit' | 'demo' {
 
 /**
  * Envia documento a DocuSign (cuando esté configurado)
- * 
+ *
  * NOTA IMPORTANTE: La integración real de DocuSign está preparada pero requiere
  * implementación manual debido a incompatibilidades del paquete docusign-esign con Next.js.
- * 
+ *
  * Ver documentación completa en:
  * - /home/ubuntu/homming_vidaro/INTEGRACION_DOCUSIGN_VIDARO.md
  * - /home/ubuntu/homming_vidaro/GUIA_RAPIDA_DOCUSIGN.md
- * 
+ *
  * Para activar la integración real:
  * 1. Obtener credenciales de DocuSign (ver guías)
  * 2. Configurar variables de entorno en .env
@@ -79,22 +83,22 @@ async function enviarDocuSignEnvelope(params: {
 }) {
   // TODO: Implementar integración real con DocuSign API
   // Referencia: Ver INTEGRACION_DOCUSIGN_VIDARO.md para código completo
-  
+
   const isConfigured = isDocuSignConfigured;
-  
+
   logger.info('📧 [DocuSign] Envío de documento', {
     modo: isConfigured ? 'PREPARADO (requiere implementación)' : 'DEMO',
     titulo: params.titulo,
     firmantes: params.firmantes.length,
-    credencialesConfiguradas: isConfigured
+    credencialesConfiguradas: isConfigured,
   });
-  
+
   return {
     envelopeId: `DS_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     status: 'sent',
-    message: isConfigured 
+    message: isConfigured
       ? 'Documento preparado para DocuSign (Consulte la documentación para activar integración real)'
-      : 'Documento enviado via DocuSign (MODO DEMO - Configure credenciales en .env)'
+      : 'Documento enviado via DocuSign (MODO DEMO - Configure credenciales en .env)',
   };
 }
 
@@ -110,13 +114,13 @@ async function enviarSignaturitDocument(params: {
 }) {
   // TODO: Implementar integración real con Signaturit API
   // Referencia: https://docs.signaturit.com/
-  
+
   logger.info('📧 [Signaturit] Envío de documento (preparado para integración real)');
-  
+
   return {
     documentId: `SIG_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     status: 'sent',
-    message: 'Documento enviado via Signaturit (simulado - configure credenciales)'
+    message: 'Documento enviado via Signaturit (simulado - configure credenciales)',
   };
 }
 
@@ -135,7 +139,7 @@ export async function crearSolicitudFirma(params: CrearDocumentoFirmaParams) {
     firmantes,
     creadoPor,
     diasExpiracion = 30,
-    provider: requestedProvider
+    provider: requestedProvider,
   } = params;
 
   const fechaExpiracion = new Date();
@@ -153,7 +157,7 @@ export async function crearSolicitudFirma(params: CrearDocumentoFirmaParams) {
       documentUrl,
       mensaje,
       firmantes,
-      diasExpiracion
+      diasExpiracion,
     });
     externalId = result.envelopeId;
     providerMessage = result.message;
@@ -163,7 +167,7 @@ export async function crearSolicitudFirma(params: CrearDocumentoFirmaParams) {
       documentUrl,
       mensaje,
       firmantes,
-      diasExpiracion
+      diasExpiracion,
     });
     externalId = result.documentId;
     providerMessage = result.message;
@@ -192,15 +196,15 @@ export async function crearSolicitudFirma(params: CrearDocumentoFirmaParams) {
           nombre: firmante.nombre,
           rol: firmante.rol,
           orden: index + 1,
-          estado: SignerStatus.pendiente
-        }))
-      }
+          estado: SignerStatus.pendiente,
+        })),
+      },
     },
     include: {
       firmantes: true,
       tenant: true,
-      contract: true
-    }
+      contract: true,
+    },
   });
 
   logger.info(`✍️ Solicitud de firma creada: ${documento.id} via ${provider}`);
@@ -209,7 +213,7 @@ export async function crearSolicitudFirma(params: CrearDocumentoFirmaParams) {
     success: true,
     documento,
     provider,
-    message: providerMessage
+    message: providerMessage,
   };
 }
 
@@ -224,7 +228,7 @@ export async function firmarDocumento(
 ) {
   const documento = await prisma.documentoFirma.findUnique({
     where: { id: documentoId },
-    include: { firmantes: true }
+    include: { firmantes: true },
   });
 
   if (!documento) {
@@ -234,12 +238,12 @@ export async function firmarDocumento(
   if (documento.fechaExpiracion && new Date() > documento.fechaExpiracion) {
     await prisma.documentoFirma.update({
       where: { id: documentoId },
-      data: { estado: SignatureStatus.expirado }
+      data: { estado: SignatureStatus.expirado },
     });
     throw new Error('El documento ha expirado');
   }
 
-  const firmante = documento.firmantes.find(f => f.id === firmanteId);
+  const firmante = documento.firmantes.find((f) => f.id === firmanteId);
   if (!firmante) {
     throw new Error('Firmante no encontrado');
   }
@@ -256,64 +260,60 @@ export async function firmarDocumento(
       firmadoEn: new Date(),
       ipFirma: '192.168.1.1',
       dispositivo: 'Demo Browser',
-      geolocalizacion: firmaData.ubicacion || 'No especificada'
-    }
+      geolocalizacion: firmaData.ubicacion || 'No especificada',
+    },
   });
 
   const firmantesPendientes = documento.firmantes.filter(
-    f => f.id !== firmanteId && f.estado !== SignerStatus.firmado
+    (f) => f.id !== firmanteId && f.estado !== SignerStatus.firmado
   ).length;
 
-  const nuevoEstado = firmantesPendientes === 0 
-    ? SignatureStatus.firmado 
-    : SignatureStatus.pendiente;
+  const nuevoEstado =
+    firmantesPendientes === 0 ? SignatureStatus.firmado : SignatureStatus.pendiente;
 
   const documentoActualizado = await prisma.documentoFirma.update({
     where: { id: documentoId },
     data: {
       estado: nuevoEstado,
       ...(nuevoEstado === SignatureStatus.firmado && {
-        fechaCompletada: new Date()
-      })
+        fechaCompletada: new Date(),
+      }),
     },
     include: {
-      firmantes: true
-    }
+      firmantes: true,
+    },
   });
 
   return {
     success: true,
     documento: documentoActualizado,
-    message: nuevoEstado === SignatureStatus.firmado
-      ? 'Documento firmado completamente'
-      : 'Firma registrada, esperando a otros firmantes'
+    message:
+      nuevoEstado === SignatureStatus.firmado
+        ? 'Documento firmado completamente'
+        : 'Firma registrada, esperando a otros firmantes',
   };
 }
 
-export async function rechazarDocumento(
-  documentoId: string,
-  firmanteId: string,
-  motivo: string
-) {
+export async function rechazarDocumento(documentoId: string, firmanteId: string, motivo: string) {
   await prisma.firmante.update({
     where: { id: firmanteId },
     data: {
       estado: SignerStatus.rechazado,
       rechazadoEn: new Date(),
-      motivoRechazo: motivo
-    }
+      motivoRechazo: motivo,
+    },
   });
 
   await prisma.documentoFirma.update({
     where: { id: documentoId },
     data: {
-      estado: SignatureStatus.rechazado
-    }
+      estado: SignatureStatus.rechazado,
+    },
   });
 
   return {
     success: true,
-    message: 'Documento rechazado'
+    message: 'Documento rechazado',
   };
 }
 
@@ -327,12 +327,12 @@ export async function obtenerEstadoDocumento(documentoId: string) {
         include: {
           unit: {
             include: {
-              building: true
-            }
-          }
-        }
-      }
-    }
+              building: true,
+            },
+          },
+        },
+      },
+    },
   });
 
   if (!documento) {
@@ -340,9 +340,9 @@ export async function obtenerEstadoDocumento(documentoId: string) {
   }
 
   const totalFirmantes = documento.firmantes.length;
-  const firmados = documento.firmantes.filter(f => f.estado === SignerStatus.firmado).length;
-  const pendientes = documento.firmantes.filter(f => f.estado === SignerStatus.pendiente).length;
-  const rechazados = documento.firmantes.filter(f => f.estado === SignerStatus.rechazado).length;
+  const firmados = documento.firmantes.filter((f) => f.estado === SignerStatus.firmado).length;
+  const pendientes = documento.firmantes.filter((f) => f.estado === SignerStatus.pendiente).length;
+  const rechazados = documento.firmantes.filter((f) => f.estado === SignerStatus.rechazado).length;
 
   return {
     documento,
@@ -351,17 +351,14 @@ export async function obtenerEstadoDocumento(documentoId: string) {
       firmados,
       pendientes,
       rechazados,
-      porcentajeCompletado: Math.round((firmados / totalFirmantes) * 100)
-    }
+      porcentajeCompletado: Math.round((firmados / totalFirmantes) * 100),
+    },
   };
 }
 
-export async function reenviarInvitacion(
-  documentoId: string,
-  firmanteId: string
-) {
+export async function reenviarInvitacion(documentoId: string, firmanteId: string) {
   const firmante = await prisma.firmante.findUnique({
-    where: { id: firmanteId }
+    where: { id: firmanteId },
   });
 
   if (!firmante) {
@@ -372,7 +369,7 @@ export async function reenviarInvitacion(
 
   return {
     success: true,
-    message: '[MODO DEMO] Invitación reenviada (simulado)'
+    message: '[MODO DEMO] Invitación reenviada (simulado)',
   };
 }
 
@@ -381,12 +378,12 @@ export async function cancelarSolicitudFirma(documentoId: string, motivo: string
     where: { id: documentoId },
     data: {
       estado: SignatureStatus.cancelado,
-      canceladoEn: new Date()
-    }
+      canceladoEn: new Date(),
+    },
   });
 
   return {
     success: true,
-    message: 'Solicitud cancelada'
+    message: 'Solicitud cancelada',
   };
 }

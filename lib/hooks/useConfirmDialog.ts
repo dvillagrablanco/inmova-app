@@ -23,9 +23,7 @@ interface UseConfirmDialogResult {
   handleCancel: () => void;
 }
 
-export function useConfirmDialog(
-  options: UseConfirmDialogOptions
-): UseConfirmDialogResult {
+export function useConfirmDialog(options: UseConfirmDialogOptions): UseConfirmDialogResult {
   const {
     onConfirm,
     onCancel,

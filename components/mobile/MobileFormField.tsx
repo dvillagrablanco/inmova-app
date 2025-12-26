@@ -36,7 +36,7 @@ export function MobileFormField({
   placeholder,
   required = false,
   options = [],
-  className
+  className,
 }: MobileFormFieldProps) {
   const renderInput = () => {
     switch (type) {
@@ -49,26 +49,14 @@ export function MobileFormField({
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
             required={required}
-            className={cn(
-              'mobile-form-input min-h-[120px]',
-              error && 'border-red-500'
-            )}
+            className={cn('mobile-form-input min-h-[120px]', error && 'border-red-500')}
           />
         );
 
       case 'select':
         return (
-          <Select
-            value={value.toString()}
-            onValueChange={onChange}
-            required={required}
-          >
-            <SelectTrigger
-              className={cn(
-                'mobile-form-input',
-                error && 'border-red-500'
-              )}
-            >
+          <Select value={value.toString()} onValueChange={onChange} required={required}>
+            <SelectTrigger className={cn('mobile-form-input', error && 'border-red-500')}>
               <SelectValue placeholder={placeholder} />
             </SelectTrigger>
             <SelectContent>
@@ -91,10 +79,7 @@ export function MobileFormField({
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
             required={required}
-            className={cn(
-              'mobile-form-input',
-              error && 'border-red-500'
-            )}
+            className={cn('mobile-form-input', error && 'border-red-500')}
           />
         );
     }
@@ -107,9 +92,7 @@ export function MobileFormField({
         {required && <span className="text-red-500 ml-1">*</span>}
       </Label>
       {renderInput()}
-      {error && (
-        <p className="mobile-form-error">{error}</p>
-      )}
+      {error && <p className="mobile-form-error">{error}</p>}
     </div>
   );
 }

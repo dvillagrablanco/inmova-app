@@ -19,10 +19,7 @@ export async function GET(request: NextRequest) {
     const periodo = searchParams.get('periodo');
 
     if (!buildingId) {
-      return NextResponse.json(
-        { error: 'buildingId requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'buildingId requerido' }, { status: 400 });
     }
 
     const companyId = session?.user?.companyId;
@@ -36,10 +33,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!building) {
-      return NextResponse.json(
-        { error: 'Edificio no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Edificio no encontrado' }, { status: 404 });
     }
 
     // Get metrics
@@ -81,10 +75,7 @@ export async function POST(request: NextRequest) {
     const { buildingId } = await request.json();
 
     if (!buildingId) {
-      return NextResponse.json(
-        { error: 'buildingId requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'buildingId requerido' }, { status: 400 });
     }
 
     const companyId = session?.user?.companyId;
@@ -98,10 +89,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!building) {
-      return NextResponse.json(
-        { error: 'Edificio no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Edificio no encontrado' }, { status: 404 });
     }
 
     const metrics = await generateBuildingMetrics(buildingId);

@@ -105,10 +105,7 @@ export async function GET(request: Request) {
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
-    return NextResponse.json(
-      { error: 'Error al obtener aprobaciones' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener aprobaciones' }, { status: 500 });
   }
 }
 
@@ -123,10 +120,7 @@ export async function POST(request: Request) {
     const { tipo, entityId, monto, motivo } = body;
 
     if (!tipo || !entityId || !monto) {
-      return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
 
     // Crear solicitud de aprobación
@@ -189,9 +183,6 @@ export async function POST(request: Request) {
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
-    return NextResponse.json(
-      { error: 'Error al crear solicitud de aprobación' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear solicitud de aprobación' }, { status: 500 });
   }
 }

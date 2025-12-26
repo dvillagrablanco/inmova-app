@@ -97,42 +97,36 @@ export interface BookingPriceCalculation {
 /**
  * Obtiene la temporada activa para una fecha específica
  */
-export function getActiveSeason(
-  date: Date,
-  seasons: Season[]
-): Season | null {
+export function getActiveSeason(date: Date, seasons: Season[]): Season | null {
   const targetDate = startOfDay(date);
-  
+
   for (const season of seasons) {
     const seasonStart = startOfDay(season.startDate);
     const seasonEnd = endOfDay(season.endDate);
-    
+
     if (targetDate >= seasonStart && targetDate <= seasonEnd) {
       return season;
     }
   }
-  
+
   return null;
 }
 
 /**
  * Obtiene evento especial activo para una fecha
  */
-export function getActiveEvent(
-  date: Date,
-  events: SpecialEvent[]
-): SpecialEvent | null {
+export function getActiveEvent(date: Date, events: SpecialEvent[]): SpecialEvent | null {
   const targetDate = startOfDay(date);
-  
+
   for (const event of events) {
     const eventStart = startOfDay(event.startDate);
     const eventEnd = endOfDay(event.endDate);
-    
+
     if (targetDate >= eventStart && targetDate <= eventEnd) {
       return event;
     }
   }
-  
+
   return null;
 }
 
@@ -255,25 +249,25 @@ export function calculateDailyPrice(
 ): PriceBreakdown {
   let finalPrice = basePrice;
   const discounts: Array<{ type: string; amount: number }> = [];
-  
+
   // 1. Aplicar temporada
   const season = getActiveSeason(date, rules.seasons);
   const seasonMultiplier = season?.priceMultiplier || 1.0;
-  
+
   // 2. Aplicar evento especial (sobrescribe temporada si existe)
   const event = getActiveEvent(date, rules.specialEvents);
   const eventMultiplier = event?.priceMultiplier || 1.0;
-  
+
   // 3. Aplicar día de la semana
   const dayOfWeek = date.getDay() as DayOfWeek;
-  const weekdayRule = rules.weekdayPricing.find(w => w.dayOfWeek === dayOfWeek);
+  const weekdayRule = rules.weekdayPricing.find((w) => w.dayOfWeek === dayOfWeek);
   const weekdayMultiplier = weekdayRule?.priceMultiplier || 1.0;
-  
+
   // Calcular precio con multiplicadores
   // Si hay evento, el evento tiene prioridad sobre la temporada
   const activeMultiplier = event ? eventMultiplier : seasonMultiplier;
   finalPrice = basePrice * activeMultiplier * weekdayMultiplier;
-  
+
   return {
     date: format(date, 'yyyy-MM-dd'),
     basePrice,
@@ -296,33 +290,33 @@ export function calculateBookingPrice(
   rules: DynamicPricingRule
 ): BookingPriceCalculation {
   const nights = differenceInDays(checkOut, checkIn);
-  
+
   if (nights <= 0) {
     throw new Error('La fecha de checkout debe ser posterior a la de check-in');
   }
-  
+
   // Calcular precios diarios
   const dailyPrices: PriceBreakdown[] = [];
   let currentDate = new Date(checkIn);
-  
+
   for (let i = 0; i < nights; i++) {
     const dailyPrice = calculateDailyPrice(currentDate, rules.basePrice, rules);
     dailyPrices.push(dailyPrice);
     currentDate = addDays(currentDate, 1);
   }
-  
+
   // Calcular subtotal
   const subtotal = dailyPrices.reduce((sum, day) => sum + day.finalPrice, 0);
-  
+
   // Aplicar descuentos
   const discounts: Array<{ type: string; amount: number }> = [];
   let total = subtotal;
-  
+
   // 1. Descuento por estancia larga
   if (rules.longStayDiscount) {
     // Ordenar de mayor a menor por minNights
     const sortedDiscounts = [...rules.longStayDiscount].sort((a, b) => b.minNights - a.minNights);
-    
+
     for (const discount of sortedDiscounts) {
       if (nights >= discount.minNights) {
         const discountAmount = (subtotal * discount.discountPercentage) / 100;
@@ -335,7 +329,7 @@ export function calculateBookingPrice(
       }
     }
   }
-  
+
   // 2. Descuento early bird (reserva anticipada)
   if (rules.earlyBirdDiscount) {
     const daysUntilCheckIn = differenceInDays(checkIn, new Date());
@@ -348,7 +342,7 @@ export function calculateBookingPrice(
       total -= discountAmount;
     }
   }
-  
+
   // 3. Descuento last minute
   if (rules.lastMinuteDiscount) {
     const daysUntilCheckIn = differenceInDays(checkIn, new Date());
@@ -361,9 +355,9 @@ export function calculateBookingPrice(
       total -= discountAmount;
     }
   }
-  
+
   const averageNightlyRate = nights > 0 ? total / nights : 0;
-  
+
   return {
     checkIn,
     checkOut,
@@ -396,7 +390,7 @@ export async function saveDynamicPricingRules(
       updatedAt: new Date(),
     },
   });
-  
+
   return rules;
 }
 
@@ -410,9 +404,9 @@ export async function getDynamicPricingRules(
     where: { id: listingId },
     select: { pricingRules: true, precioPorNoche: true },
   });
-  
+
   if (!listing) return null;
-  
+
   // Si no hay reglas guardadas, crear unas por defecto
   if (!listing.pricingRules) {
     const currentYear = new Date().getFullYear();
@@ -437,7 +431,7 @@ export async function getDynamicPricingRules(
       },
     };
   }
-  
+
   return listing.pricingRules as unknown as DynamicPricingRule;
 }
 
@@ -450,20 +444,20 @@ export async function getPriceCalendar(
   endDate: Date
 ): Promise<PriceBreakdown[]> {
   const rules = await getDynamicPricingRules(listingId);
-  
+
   if (!rules) {
     throw new Error('No se encontraron reglas de pricing para este listing');
   }
-  
+
   const calendar: PriceBreakdown[] = [];
   let currentDate = new Date(startDate);
-  
+
   while (currentDate <= endDate) {
     const dailyPrice = calculateDailyPrice(currentDate, rules.basePrice, rules);
     calendar.push(dailyPrice);
     currentDate = addDays(currentDate, 1);
   }
-  
+
   return calendar;
 }
 
@@ -477,15 +471,15 @@ export async function getSuggestedPrice(
   competitorPrices?: number[]
 ): Promise<number> {
   const rules = await getDynamicPricingRules(listingId);
-  
+
   if (!rules) {
     throw new Error('No se encontraron reglas de pricing');
   }
-  
+
   // Calcular precio base con temporada y día de semana
   const baseCalculation = calculateDailyPrice(date, rules.basePrice, rules);
   let suggestedPrice = baseCalculation.finalPrice;
-  
+
   // Ajustar según tasa de ocupación
   if (occupancyRate < 30) {
     // Baja ocupación: reducir precio 10-20%
@@ -494,11 +488,12 @@ export async function getSuggestedPrice(
     // Alta ocupación: aumentar precio 10-15%
     suggestedPrice *= 1.12;
   }
-  
+
   // Ajustar según precios de competencia (opcional)
   if (competitorPrices && competitorPrices.length > 0) {
-    const avgCompetitorPrice = competitorPrices.reduce((a, b) => a + b, 0) / competitorPrices.length;
-    
+    const avgCompetitorPrice =
+      competitorPrices.reduce((a, b) => a + b, 0) / competitorPrices.length;
+
     // Si estamos muy por debajo de la competencia, podemos subir un poco
     if (suggestedPrice < avgCompetitorPrice * 0.85) {
       suggestedPrice = avgCompetitorPrice * 0.9;
@@ -508,7 +503,7 @@ export async function getSuggestedPrice(
       suggestedPrice = avgCompetitorPrice * 1.1;
     }
   }
-  
+
   return parseFloat(suggestedPrice.toFixed(2));
 }
 
@@ -521,30 +516,30 @@ export async function getSuggestedPrice(
  */
 export function formatPriceBreakdown(breakdown: PriceBreakdown): string {
   const parts: string[] = [];
-  
+
   parts.push(`Fecha: ${breakdown.date}`);
   parts.push(`Precio base: €${breakdown.basePrice}`);
-  
+
   if (breakdown.seasonName) {
     parts.push(`Temporada: ${breakdown.seasonName} (x${breakdown.seasonMultiplier})`);
   }
-  
+
   if (breakdown.eventName) {
     parts.push(`Evento: ${breakdown.eventName} (x${breakdown.eventMultiplier})`);
   }
-  
+
   if (breakdown.weekdayMultiplier !== 1.0) {
     parts.push(`Día de semana: x${breakdown.weekdayMultiplier}`);
   }
-  
+
   if (breakdown.discounts.length > 0) {
-    breakdown.discounts.forEach(d => {
+    breakdown.discounts.forEach((d) => {
       parts.push(`${d.type}: -€${d.amount}`);
     });
   }
-  
+
   parts.push(`**TOTAL: €${breakdown.finalPrice}**`);
-  
+
   return parts.join('\n');
 }
 
@@ -553,25 +548,25 @@ export function formatPriceBreakdown(breakdown: PriceBreakdown): string {
  */
 export function formatBookingCalculation(calc: BookingPriceCalculation): string {
   const parts: string[] = [];
-  
+
   parts.push(`**CÁLCULO DE RESERVA**`);
   parts.push(`Check-in: ${format(calc.checkIn, 'dd/MM/yyyy', { locale: es })}`);
   parts.push(`Check-out: ${format(calc.checkOut, 'dd/MM/yyyy', { locale: es })}`);
   parts.push(`Noches: ${calc.nights}`);
   parts.push('');
   parts.push(`Subtotal: €${calc.subtotal}`);
-  
+
   if (calc.discounts.length > 0) {
     parts.push('');
     parts.push('**Descuentos aplicados:**');
-    calc.discounts.forEach(d => {
+    calc.discounts.forEach((d) => {
       parts.push(`- ${d.type}: -€${d.amount}`);
     });
   }
-  
+
   parts.push('');
   parts.push(`**TOTAL: €${calc.total}**`);
   parts.push(`Tarifa promedio por noche: €${calc.averageNightlyRate}`);
-  
+
   return parts.join('\n');
 }

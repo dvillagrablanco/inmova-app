@@ -41,10 +41,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(staff);
   } catch (error) {
     console.error('Error al obtener personal:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener personal' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener personal' }, { status: 500 });
   }
 }
 
@@ -70,10 +67,7 @@ export async function POST(req: NextRequest) {
     } = body;
 
     if (!nombre || !telefono) {
-      return NextResponse.json(
-        { error: 'Nombre y teléfono son requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Nombre y teléfono son requeridos' }, { status: 400 });
     }
 
     const staff = await prisma.sTRHousekeepingStaff.create({
@@ -94,9 +88,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(staff, { status: 201 });
   } catch (error) {
     console.error('Error al crear personal:', error);
-    return NextResponse.json(
-      { error: 'Error al crear personal' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear personal' }, { status: 500 });
   }
 }

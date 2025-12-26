@@ -8,13 +8,13 @@ export const dynamic = 'force-dynamic';
 
 /**
  * Búsqueda Global Optimizada
- * 
+ *
  * Optimizaciones aplicadas (Semana 2, Tarea 2.4):
  * - Filtrado por companyId para seguridad y performance
  * - Queries en paralelo
  * - Límite de 10 resultados por entidad
  * - Select específico mínimo
- * 
+ *
  * Mejora: De ~2100ms a ~250ms (-88%)
  */
 export async function GET(req: NextRequest) {
@@ -47,9 +47,9 @@ export async function GET(req: NextRequest) {
             { direccion: { contains: query, mode: 'insensitive' } },
           ],
         },
-        select: { 
-          id: true, 
-          nombre: true, 
+        select: {
+          id: true,
+          nombre: true,
           direccion: true,
           tipo: true,
         },
@@ -67,11 +67,11 @@ export async function GET(req: NextRequest) {
           numero: true,
           tipo: true,
           estado: true,
-          building: { 
-            select: { 
+          building: {
+            select: {
               nombre: true,
-              direccion: true, 
-            } 
+              direccion: true,
+            },
           },
         },
         take: 10,
@@ -87,9 +87,9 @@ export async function GET(req: NextRequest) {
             { email: { contains: query, mode: 'insensitive' } },
           ],
         },
-        select: { 
-          id: true, 
-          nombreCompleto: true, 
+        select: {
+          id: true,
+          nombreCompleto: true,
           email: true,
           telefono: true,
         },
@@ -112,18 +112,18 @@ export async function GET(req: NextRequest) {
           estado: true,
           fechaInicio: true,
           fechaFin: true,
-          unit: { 
-            select: { 
+          unit: {
+            select: {
               numero: true,
               building: {
-                select: { nombre: true }
-              }
-            } 
+                select: { nombre: true },
+              },
+            },
           },
-          tenant: { 
-            select: { 
-              nombreCompleto: true 
-            } 
+          tenant: {
+            select: {
+              nombreCompleto: true,
+            },
           },
         },
         take: 10,
@@ -138,9 +138,9 @@ export async function GET(req: NextRequest) {
             { tipo: { contains: query, mode: 'insensitive' } },
           ],
         },
-        select: { 
-          id: true, 
-          nombre: true, 
+        select: {
+          id: true,
+          nombre: true,
           tipo: true,
           telefono: true,
         },

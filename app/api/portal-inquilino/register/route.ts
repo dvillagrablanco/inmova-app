@@ -4,7 +4,6 @@ import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -12,17 +11,11 @@ export async function POST(request: NextRequest) {
 
     // Validaciones
     if (!invitationCode || !password || !confirmPassword) {
-      return NextResponse.json(
-        { error: 'Todos los campos son requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Todos los campos son requeridos' }, { status: 400 });
     }
 
     if (password !== confirmPassword) {
-      return NextResponse.json(
-        { error: 'Las contraseñas no coinciden' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Las contraseñas no coinciden' }, { status: 400 });
     }
 
     if (password.length < 8) {
@@ -37,7 +30,7 @@ export async function POST(request: NextRequest) {
 
     logger.info('Inquilino registrado exitosamente', {
       tenantId: tenant.id,
-      email: tenant.email
+      email: tenant.email,
     });
 
     return NextResponse.json({
@@ -46,15 +39,15 @@ export async function POST(request: NextRequest) {
       tenant: {
         id: tenant.id,
         email: tenant.email,
-        nombreCompleto: tenant.nombreCompleto
-      }
+        nombreCompleto: tenant.nombreCompleto,
+      },
     });
   } catch (error: any) {
     logger.error('Error en registro de inquilino', {
       error: error.message,
-      stack: error.stack
+      stack: error.stack,
     });
-    
+
     return NextResponse.json(
       { error: error.message || 'Error al completar el registro' },
       { status: 500 }

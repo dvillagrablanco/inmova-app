@@ -11,17 +11,11 @@ export async function GET() {
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     if (session.user.role !== 'super_admin') {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
 
     // Obtener todos los tags únicos de todas las empresas
@@ -58,9 +52,6 @@ export async function GET() {
     });
   } catch (error) {
     logger.error('Error fetching tags:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener tags' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener tags' }, { status: 500 });
   }
 }

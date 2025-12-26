@@ -180,10 +180,10 @@ export default function LeadDetailPage() {
   if (status === 'loading' || loading) {
     return (
       <AuthenticatedLayout>
-            <div className="max-w-7xl mx-auto">
-              <LoadingState message="Cargando lead..." />
-            </div>
-          </AuthenticatedLayout>
+        <div className="max-w-7xl mx-auto">
+          <LoadingState message="Cargando lead..." />
+        </div>
+      </AuthenticatedLayout>
     );
   }
 
@@ -202,19 +202,13 @@ export default function LeadDetailPage() {
                 </Button>
               </Link>
               <div>
-                <h1 className="text-2xl font-bold gradient-text">
-                  {lead.nombreCompleto}
-                </h1>
+                <h1 className="text-2xl font-bold gradient-text">{lead.nombreCompleto}</h1>
                 <p className="text-sm text-muted-foreground mt-1">
                   {lead.empresa || 'Sin empresa'}
                 </p>
               </div>
             </div>
-            <Button
-              onClick={handleSave}
-              disabled={saving}
-              className="gradient-primary"
-            >
+            <Button onClick={handleSave} disabled={saving} className="gradient-primary">
               <Save className="mr-2 h-4 w-4" />
               {saving ? 'Guardando...' : 'Guardar Cambios'}
             </Button>
@@ -239,12 +233,9 @@ export default function LeadDetailPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Email</p>
-                      <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                       <Mail className="h-4 w-4 text-muted-foreground" />
-                      <a
-                        href={`mailto:${lead.email}`}
-                        className="text-primary hover:underline"
-                      >
+                      <a href={`mailto:${lead.email}`} className="text-primary hover:underline">
                         {lead.email}
                       </a>
                     </div>
@@ -253,12 +244,9 @@ export default function LeadDetailPage() {
                   {lead.telefono && (
                     <div>
                       <p className="text-sm text-muted-foreground mb-1">Teléfono</p>
-                        <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2">
                         <Phone className="h-4 w-4 text-muted-foreground" />
-                        <a
-                          href={`tel:${lead.telefono}`}
-                          className="text-primary hover:underline"
-                        >
+                        <a href={`tel:${lead.telefono}`} className="text-primary hover:underline">
                           {lead.telefono}
                         </a>
                       </div>
@@ -268,7 +256,7 @@ export default function LeadDetailPage() {
                   {lead.empresa && (
                     <div>
                       <p className="text-sm text-muted-foreground mb-1">Empresa</p>
-                        <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2">
                         <Building2 className="h-4 w-4 text-muted-foreground" />
                         <p>{lead.empresa}</p>
                       </div>
@@ -278,7 +266,7 @@ export default function LeadDetailPage() {
                   {lead.cargo && (
                     <div>
                       <p className="text-sm text-muted-foreground mb-1">Cargo</p>
-                        <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2">
                         <Briefcase className="h-4 w-4 text-muted-foreground" />
                         <p>{lead.cargo}</p>
                       </div>
@@ -300,41 +288,33 @@ export default function LeadDetailPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {lead.presupuestoMensual && (
                     <div>
-                      <p className="text-sm text-muted-foreground mb-1">
-                        Presupuesto Mensual
-                      </p>
+                      <p className="text-sm text-muted-foreground mb-1">Presupuesto Mensual</p>
                       <div className="flex items-center gap-2">
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
-                        <p className="text-lg font-semibold">
-                          {lead.presupuestoMensual}€/mes
-                        </p>
+                        <p className="text-lg font-semibold">{lead.presupuestoMensual}€/mes</p>
                       </div>
                     </div>
                   )}
 
                   {lead.propiedadesEstimadas && (
                     <div>
-                      <p className="text-sm text-muted-foreground mb-1">
-                        Propiedades Estimadas
-                      </p>
+                      <p className="text-sm text-muted-foreground mb-1">Propiedades Estimadas</p>
                       <div className="flex items-center gap-2">
                         <Home className="h-4 w-4 text-muted-foreground" />
-                        <p className="text-lg font-semibold">
-                          {lead.propiedadesEstimadas}
-                        </p>
+                        <p className="text-lg font-semibold">{lead.propiedadesEstimadas}</p>
                       </div>
                     </div>
                   )}
 
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Fuente</p>
-                      <Badge variant="outline">{lead.fuente}</Badge>
+                    <Badge variant="outline">{lead.fuente}</Badge>
                   </div>
 
                   {lead.scoring && (
                     <div>
                       <p className="text-sm text-muted-foreground mb-1">Scoring</p>
-                        <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2">
                         <TrendingUp className="h-4 w-4 text-muted-foreground" />
                         <div className="flex items-center gap-2">
                           <div className="w-32 bg-gray-200 rounded-full h-2">
@@ -343,9 +323,7 @@ export default function LeadDetailPage() {
                               style={{ width: `${lead.scoring}%` }}
                             />
                           </div>
-                          <span className="text-sm font-semibold">
-                            {lead.scoring}/100
-                          </span>
+                          <span className="text-sm font-semibold">{lead.scoring}/100</span>
                         </div>
                       </div>
                     </div>
@@ -381,7 +359,7 @@ export default function LeadDetailPage() {
               <CardContent className="space-y-4">
                 <div>
                   <label className="text-sm font-medium mb-2 block">Estado</label>
-                    <Select value={estado} onValueChange={setEstado}>
+                  <Select value={estado} onValueChange={setEstado}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -397,7 +375,7 @@ export default function LeadDetailPage() {
 
                 <div>
                   <label className="text-sm font-medium mb-2 block">Prioridad</label>
-                    <Select value={prioridad} onValueChange={setPrioridad}>
+                  <Select value={prioridad} onValueChange={setPrioridad}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -413,9 +391,7 @@ export default function LeadDetailPage() {
 
                 <div className="pt-4 border-t">
                   <div className="flex items-center gap-2 mb-2">
-                    <Badge className={getBadgeColor(estado)}>
-                      {estado.replace('_', ' ')}
-                    </Badge>
+                    <Badge className={getBadgeColor(estado)}>{estado.replace('_', ' ')}</Badge>
                     <Badge variant="outline" className={getPriorityColor(prioridad)}>
                       {prioridad}
                     </Badge>
@@ -435,7 +411,7 @@ export default function LeadDetailPage() {
               <CardContent className="space-y-3">
                 <div>
                   <p className="text-sm text-muted-foreground">Fecha de Creación</p>
-                    <p className="text-sm font-medium">
+                  <p className="text-sm font-medium">
                     {lead.fechaCreacion
                       ? format(new Date(lead.fechaCreacion), "d 'de' MMMM 'de' yyyy", {
                           locale: es,
@@ -447,7 +423,7 @@ export default function LeadDetailPage() {
                 {lead.fechaContacto && (
                   <div>
                     <p className="text-sm text-muted-foreground">Primer Contacto</p>
-                      <p className="text-sm font-medium">
+                    <p className="text-sm font-medium">
                       {format(new Date(lead.fechaContacto), "d 'de' MMMM 'de' yyyy", {
                         locale: es,
                       })}
@@ -458,7 +434,7 @@ export default function LeadDetailPage() {
                 {lead.fechaConversion && (
                   <div>
                     <p className="text-sm text-muted-foreground">Fecha de Conversión</p>
-                      <p className="text-sm font-medium">
+                    <p className="text-sm font-medium">
                       {format(new Date(lead.fechaConversion), "d 'de' MMMM 'de' yyyy", {
                         locale: es,
                       })}

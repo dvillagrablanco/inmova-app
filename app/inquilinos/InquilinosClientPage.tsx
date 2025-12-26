@@ -4,17 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
-import {
-  Users,
-  Plus,
-  Mail,
-  Phone,
-  Home,
-  MoreVertical,
-  Eye,
-  Trash2,
-  Pencil,
-} from 'lucide-react';
+import { Users, Plus, Mail, Phone, Home, MoreVertical, Eye, Trash2, Pencil } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -265,10 +255,7 @@ export default function InquilinosClientPage({
                     placeholder="Buscar por nombre, email o DNI..."
                     className="flex-1"
                   />
-                  <ViewModeToggle
-                    value={viewMode}
-                    onChange={handleViewModeChange}
-                  />
+                  <ViewModeToggle value={viewMode} onChange={handleViewModeChange} />
                 </div>
 
                 {activeFilters.length > 0 && (
@@ -302,14 +289,14 @@ export default function InquilinosClientPage({
                       },
                     ]
                   : canCreate
-                  ? [
-                      {
-                        label: 'Agregar Inquilino',
-                        onClick: () => router.push('/inquilinos/nuevo'),
-                        variant: 'default' as const,
-                      },
-                    ]
-                  : undefined
+                    ? [
+                        {
+                          label: 'Agregar Inquilino',
+                          onClick: () => router.push('/inquilinos/nuevo'),
+                          variant: 'default' as const,
+                        },
+                      ]
+                    : undefined
               }
             />
           ) : viewMode === 'grid' ? (
@@ -327,15 +314,9 @@ export default function InquilinosClientPage({
                           <AvatarFallback>{getInitials(tenant.nombreCompleto)}</AvatarFallback>
                         </Avatar>
                         <div>
-                          <CardTitle className="text-lg">
-                            {tenant.nombreCompleto}
-                          </CardTitle>
+                          <CardTitle className="text-lg">{tenant.nombreCompleto}</CardTitle>
                           <Badge
-                            variant={
-                              getTenantStatus(tenant) === 'activo'
-                                ? 'default'
-                                : 'secondary'
-                            }
+                            variant={getTenantStatus(tenant) === 'activo' ? 'default' : 'secondary'}
                           >
                             {getTenantStatus(tenant)}
                           </Badge>
@@ -424,9 +405,7 @@ export default function InquilinosClientPage({
                             <p className="font-medium">{tenant.nombreCompleto}</p>
                             <Badge
                               variant={
-                                getTenantStatus(tenant) === 'activo'
-                                  ? 'default'
-                                  : 'secondary'
+                                getTenantStatus(tenant) === 'activo' ? 'default' : 'secondary'
                               }
                             >
                               {getTenantStatus(tenant)}

@@ -5,10 +5,7 @@ import { authOptions } from '@/lib/auth-options';
 import * as conciergeService from '@/lib/services/coliving-concierge-service';
 
 export const dynamic = 'force-dynamic';
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -22,9 +19,6 @@ export async function POST(
     return NextResponse.json(result.package);
   } catch (error) {
     logger.error('Error en POST /api/coliving/packages/[id]/collect:', error);
-    return NextResponse.json(
-      { error: 'Error al marcar paquete como recogido' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al marcar paquete como recogido' }, { status: 500 });
   }
 }

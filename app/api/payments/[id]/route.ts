@@ -90,7 +90,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         periodo,
         monto: monto ? parseFloat(monto) : undefined,
         fechaVencimiento: fechaVencimiento ? new Date(fechaVencimiento) : undefined,
-        fechaPago: fechaPago ? new Date(fechaPago) : (estado === 'pagado' && !currentPayment.fechaPago) ? new Date() : null,
+        fechaPago: fechaPago
+          ? new Date(fechaPago)
+          : estado === 'pagado' && !currentPayment.fechaPago
+            ? new Date()
+            : null,
         estado,
         metodoPago,
         nivelRiesgo,

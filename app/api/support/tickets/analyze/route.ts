@@ -4,7 +4,6 @@ import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-
 export async function POST(request: NextRequest) {
   try {
     const { subject, description } = await request.json();
@@ -15,7 +14,7 @@ export async function POST(request: NextRequest) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`
+        Authorization: `Bearer ${process.env.ABACUSAI_API_KEY}`,
       },
       body: JSON.stringify({
         model: 'gpt-4.1-mini',
@@ -34,17 +33,17 @@ Analiza el problema del usuario y responde SOLO con JSON puro:
   "keywords": ["palabra1", "palabra2"],
   "suggestedSolution": "Descripción de la solución si es auto-resoluble",
   "reasoning": "Breve explicación del análisis"
-}`
+}`,
           },
           {
             role: 'user',
-            content: `Analiza este problema:\n\nAsunto: ${subject}\n\nDescripción: ${description}`
-          }
+            content: `Analiza este problema:\n\nAsunto: ${subject}\n\nDescripción: ${description}`,
+          },
         ],
-        response_format: { type: "json_object" },
+        response_format: { type: 'json_object' },
         temperature: 0.3,
-        max_tokens: 500
-      })
+        max_tokens: 500,
+      }),
     });
 
     if (!analysisResponse.ok) {
@@ -60,19 +59,19 @@ Analiza el problema del usuario y responde SOLO con JSON puro:
 
     // 3. Si es auto-resoluble, generar solución detallada
     let detailedSolution = analysis.suggestedSolution;
-    
+
     if (analysis.autoResolvable && analysis.confidence > 0.7) {
       // Construir contexto con artículos y FAQs
       const context = [
-        ...relevantArticles.map(a => `Artículo: ${a.title}\n${a.excerpt}`),
-        ...relevantFAQs.map(f => `FAQ: ${f.question}\nRespuesta: ${f.answer}`)
+        ...relevantArticles.map((a) => `Artículo: ${a.title}\n${a.excerpt}`),
+        ...relevantFAQs.map((f) => `FAQ: ${f.question}\nRespuesta: ${f.answer}`),
       ].join('\n\n');
 
       const solutionResponse = await fetch('https://apps.abacus.ai/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`
+          Authorization: `Bearer ${process.env.ABACUSAI_API_KEY}`,
         },
         body: JSON.stringify({
           model: 'gpt-4.1-mini',
@@ -82,7 +81,7 @@ Analiza el problema del usuario y responde SOLO con JSON puro:
               content: `Eres un asistente experto en INMOVA. Proporciona una solución paso a paso clara y concisa.
 
 Contexto disponible:
-${context}`
+${context}`,
             },
             {
               role: 'user',
@@ -91,12 +90,12 @@ ${context}`
 Asunto: ${subject}
 Descripción: ${description}
 
-Máximo 200 palabras, paso a paso numerado.`
-            }
+Máximo 200 palabras, paso a paso numerado.`,
+            },
           ],
           temperature: 0.7,
-          max_tokens: 400
-        })
+          max_tokens: 400,
+        }),
       });
 
       if (solutionResponse.ok) {
@@ -114,19 +113,16 @@ Máximo 200 palabras, paso a paso numerado.`
         solution: detailedSolution,
         confidence: analysis.confidence,
         autoResolvable: analysis.autoResolvable && analysis.confidence > 0.7,
-        relatedArticles: relevantArticles.slice(0, 3).map(a => ({
+        relatedArticles: relevantArticles.slice(0, 3).map((a) => ({
           id: a.id,
-          title: a.title
-        }))
-      }
+          title: a.title,
+        })),
+      },
     };
 
     return NextResponse.json(response);
   } catch (error) {
     logger.error('Error analyzing ticket:', error);
-    return NextResponse.json(
-      { error: 'Error al analizar el ticket' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al analizar el ticket' }, { status: 500 });
   }
 }

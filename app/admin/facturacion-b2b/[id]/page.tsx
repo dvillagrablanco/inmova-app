@@ -309,15 +309,15 @@ export default function InvoiceDetailPage() {
   if (loading) {
     return (
       <AuthenticatedLayout>
-            <div className="max-w-7xl mx-auto">
-              <div className="flex items-center justify-center h-64">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                  <p className="text-muted-foreground">Cargando factura...</p>
-                </div>
-              </div>
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Cargando factura...</p>
             </div>
-          </AuthenticatedLayout>
+          </div>
+        </div>
+      </AuthenticatedLayout>
     );
   }
 
@@ -342,441 +342,426 @@ export default function InvoiceDetailPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <Button variant="outline" size="sm" onClick={() => router.back()}>
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Volver
-                </Button>
-                <div>
-                  <h1 className="text-3xl font-bold">Factura {invoice.numeroFactura}</h1>
-                  <p className="text-muted-foreground">Detalle completo de la factura</p>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={handleDownloadPDF}>
-                  <Download className="w-4 h-4 mr-2" />
-                  Descargar PDF
-                </Button>
-                {invoice.estado !== 'CANCELADA' && invoice.estado !== 'PAGADA' && (
-                  <>
-                    <Button variant="outline" onClick={() => setShowEditDialog(true)}>
-                      <Edit className="w-4 h-4 mr-2" />
-                      Editar
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowCancelDialog(true)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Cancelar
-                    </Button>
-                  </>
-                )}
-                {(invoice.estado === 'PENDIENTE' ||
-                  invoice.estado === 'PARCIALMENTE_PAGADA' ||
-                  invoice.estado === 'VENCIDA') && (
-                  <Button onClick={() => setShowPaymentDialog(true)}>
-                    <DollarSign className="w-4 h-4 mr-2" />
-                    Registrar Pago
-                  </Button>
-                )}
-              </div>
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="outline" size="sm" onClick={() => router.back()}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Volver
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold">Factura {invoice.numeroFactura}</h1>
+              <p className="text-muted-foreground">Detalle completo de la factura</p>
             </div>
-
-            {/* Estado y Datos Principales */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Estado
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>{getEstadoBadge(invoice.estado)}</CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Fecha de Emisión
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-muted-foreground" />
-                    <span className="font-medium">
-                      {format(new Date(invoice.fechaEmision), 'dd/MM/yyyy', { locale: es })}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Fecha de Vencimiento
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-muted-foreground" />
-                    <span className="font-medium">
-                      {format(new Date(invoice.fechaVencimiento), 'dd/MM/yyyy', { locale: es })}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Total</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">€{invoice.total.toFixed(2)}</div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Información del Cliente */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Building className="w-5 h-5" />
-                  Información del Cliente
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Empresa</p>
-                    <p className="font-medium">{invoice.company.nombre}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Email</p>
-                    <p className="font-medium">{invoice.company.email}</p>
-                  </div>
-                  {invoice.company.cif && (
-                    <div>
-                      <p className="text-sm text-muted-foreground">CIF</p>
-                      <p className="font-medium">{invoice.company.cif}</p>
-                    </div>
-                  )}
-                  {invoice.company.direccion && (
-                    <div>
-                      <p className="text-sm text-muted-foreground">Dirección</p>
-                      <p className="font-medium">
-                        {invoice.company.direccion}
-                        {invoice.company.ciudad && `, ${invoice.company.ciudad}`}
-                        {invoice.company.codigoPostal && ` ${invoice.company.codigoPostal}`}
-                      </p>
-                    </div>
-                  )}
-                </div>
-                {invoice.subscriptionPlan && (
-                  <div className="mt-4">
-                    <p className="text-sm text-muted-foreground">Plan de Suscripción</p>
-                    <Badge variant="outline" className="mt-1">
-                      {invoice.subscriptionPlan.nombre} ({invoice.subscriptionPlan.tier})
-                    </Badge>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Conceptos de Factura */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Conceptos</CardTitle>
-                <CardDescription>Detalle de los servicios facturados</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Descripción</TableHead>
-                      <TableHead className="text-center">Cantidad</TableHead>
-                      <TableHead className="text-right">Precio Unitario</TableHead>
-                      <TableHead className="text-right">Total</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {invoice.conceptos.map((item, index) => (
-                      <TableRow key={index}>
-                        <TableCell className="font-medium">{item.descripcion}</TableCell>
-                        <TableCell className="text-center">{item.cantidad}</TableCell>
-                        <TableCell className="text-right">
-                          €{item.precioUnitario.toFixed(2)}
-                        </TableCell>
-                        <TableCell className="text-right font-medium">
-                          €{item.total.toFixed(2)}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                  <TableFooter>
-                    <TableRow>
-                      <TableCell colSpan={3} className="text-right font-medium">
-                        Subtotal
-                      </TableCell>
-                      <TableCell className="text-right">€{invoice.subtotal.toFixed(2)}</TableCell>
-                    </TableRow>
-                    {invoice.descuento > 0 && (
-                      <TableRow>
-                        <TableCell colSpan={3} className="text-right font-medium">
-                          Descuento
-                        </TableCell>
-                        <TableCell className="text-right text-red-600">
-                          -€{invoice.descuento.toFixed(2)}
-                        </TableCell>
-                      </TableRow>
-                    )}
-                    <TableRow>
-                      <TableCell colSpan={3} className="text-right font-medium">
-                        IVA (21%)
-                      </TableCell>
-                      <TableCell className="text-right">€{invoice.impuestos.toFixed(2)}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell colSpan={3} className="text-right text-lg font-bold">
-                        Total
-                      </TableCell>
-                      <TableCell className="text-right text-lg font-bold">
-                        €{invoice.total.toFixed(2)}
-                      </TableCell>
-                    </TableRow>
-                  </TableFooter>
-                </Table>
-
-                {invoice.notas && (
-                  <div className="mt-4 p-4 bg-muted rounded-lg">
-                    <p className="text-sm font-medium mb-1">Notas</p>
-                    <p className="text-sm text-muted-foreground">{invoice.notas}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Historial de Pagos */}
-            {invoice.payments && invoice.payments.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CreditCard className="w-5 h-5" />
-                    Historial de Pagos
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Fecha</TableHead>
-                        <TableHead>Método de Pago</TableHead>
-                        <TableHead>Referencia</TableHead>
-                        <TableHead className="text-right">Monto</TableHead>
-                        <TableHead>Estado</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {invoice.payments.map((payment) => (
-                        <TableRow key={payment.id}>
-                          <TableCell>
-                            {format(new Date(payment.fechaPago), 'dd/MM/yyyy HH:mm', {
-                              locale: es,
-                            })}
-                          </TableCell>
-                          <TableCell className="capitalize">{payment.metodoPago}</TableCell>
-                          <TableCell>{payment.referencia || '-'}</TableCell>
-                          <TableCell className="text-right font-medium">
-                            €{payment.monto.toFixed(2)}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="default" className="bg-green-100 text-green-800">
-                              {payment.estado}
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Diálogo de Registro de Pago */}
-            <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Registrar Pago</DialogTitle>
-                  <DialogDescription>
-                    Registra el pago recibido para la factura {invoice.numeroFactura}
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="monto">Monto</Label>
-                    <Input
-                      id="monto"
-                      type="number"
-                      step="0.01"
-                      value={paymentData.monto}
-                      onChange={(e) => setPaymentData({ ...paymentData, monto: e.target.value })}
-                      placeholder="0.00"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="metodoPago">Método de Pago</Label>
-                    <Select
-                      value={paymentData.metodoPago}
-                      onValueChange={(value) =>
-                        setPaymentData({ ...paymentData, metodoPago: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="transferencia">Transferencia Bancaria</SelectItem>
-                        <SelectItem value="stripe">Stripe</SelectItem>
-                        <SelectItem value="tarjeta">Tarjeta de Crédito</SelectItem>
-                        <SelectItem value="efectivo">Efectivo</SelectItem>
-                        <SelectItem value="otro">Otro</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="referencia">Referencia (Opcional)</Label>
-                    <Input
-                      id="referencia"
-                      value={paymentData.referencia}
-                      onChange={(e) =>
-                        setPaymentData({ ...paymentData, referencia: e.target.value })
-                      }
-                      placeholder="Número de transacción, comprobante, etc."
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowPaymentDialog(false)}
-                    disabled={isProcessingPayment}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    onClick={handleRegisterPayment}
-                    disabled={isProcessingPayment || !paymentData.monto}
-                  >
-                    {isProcessingPayment ? 'Procesando...' : 'Registrar Pago'}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-
-            {/* Diálogo de Edición */}
-            <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Editar Factura</DialogTitle>
-                  <DialogDescription>
-                    Actualiza los detalles de la factura {invoice.numeroFactura}
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="fechaVencimiento">Fecha de Vencimiento</Label>
-                    <Input
-                      id="fechaVencimiento"
-                      type="date"
-                      value={editData.fechaVencimiento}
-                      onChange={(e) =>
-                        setEditData({ ...editData, fechaVencimiento: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="terminosPago">Términos de Pago</Label>
-                    <Textarea
-                      id="terminosPago"
-                      value={editData.terminosPago}
-                      onChange={(e) => setEditData({ ...editData, terminosPago: e.target.value })}
-                      placeholder="Ej: Pago a 30 días desde la fecha de emisión"
-                      rows={3}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="notas">Notas</Label>
-                    <Textarea
-                      id="notas"
-                      value={editData.notas}
-                      onChange={(e) => setEditData({ ...editData, notas: e.target.value })}
-                      placeholder="Notas adicionales sobre la factura"
-                      rows={4}
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowEditDialog(false)}
-                    disabled={isUpdating}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button onClick={handleUpdateInvoice} disabled={isUpdating}>
-                    {isUpdating ? 'Actualizando...' : 'Guardar Cambios'}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-
-            {/* Diálogo de Cancelación */}
-            <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Cancelar Factura</DialogTitle>
-                  <DialogDescription>
-                    ¿Estás seguro de que deseas cancelar la factura {invoice.numeroFactura}? Esta
-                    acción no se puede deshacer.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="py-4">
-                  <div className="bg-red-50 border border-red-200 rounded-md p-4">
-                    <div className="flex gap-3">
-                      <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                      <div className="text-sm text-red-800">
-                        <p className="font-semibold mb-1">Advertencia</p>
-                        <p>
-                          Al cancelar esta factura, se marcará como cancelada y no podrá ser
-                          reactivada. Los registros de pago asociados se mantendrán para fines de
-                          auditoría.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowCancelDialog(false)}
-                    disabled={isCancelling}
-                  >
-                    No, mantener factura
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    onClick={handleCancelInvoice}
-                    disabled={isCancelling}
-                  >
-                    {isCancelling ? 'Cancelando...' : 'Sí, cancelar factura'}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
           </div>
-        </AuthenticatedLayout>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleDownloadPDF}>
+              <Download className="w-4 h-4 mr-2" />
+              Descargar PDF
+            </Button>
+            {invoice.estado !== 'CANCELADA' && invoice.estado !== 'PAGADA' && (
+              <>
+                <Button variant="outline" onClick={() => setShowEditDialog(true)}>
+                  <Edit className="w-4 h-4 mr-2" />
+                  Editar
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowCancelDialog(true)}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Cancelar
+                </Button>
+              </>
+            )}
+            {(invoice.estado === 'PENDIENTE' ||
+              invoice.estado === 'PARCIALMENTE_PAGADA' ||
+              invoice.estado === 'VENCIDA') && (
+              <Button onClick={() => setShowPaymentDialog(true)}>
+                <DollarSign className="w-4 h-4 mr-2" />
+                Registrar Pago
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Estado y Datos Principales */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Estado</CardTitle>
+            </CardHeader>
+            <CardContent>{getEstadoBadge(invoice.estado)}</CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Fecha de Emisión
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-muted-foreground" />
+                <span className="font-medium">
+                  {format(new Date(invoice.fechaEmision), 'dd/MM/yyyy', { locale: es })}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Fecha de Vencimiento
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-muted-foreground" />
+                <span className="font-medium">
+                  {format(new Date(invoice.fechaVencimiento), 'dd/MM/yyyy', { locale: es })}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">€{invoice.total.toFixed(2)}</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Información del Cliente */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building className="w-5 h-5" />
+              Información del Cliente
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <p className="text-sm text-muted-foreground">Empresa</p>
+                <p className="font-medium">{invoice.company.nombre}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Email</p>
+                <p className="font-medium">{invoice.company.email}</p>
+              </div>
+              {invoice.company.cif && (
+                <div>
+                  <p className="text-sm text-muted-foreground">CIF</p>
+                  <p className="font-medium">{invoice.company.cif}</p>
+                </div>
+              )}
+              {invoice.company.direccion && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Dirección</p>
+                  <p className="font-medium">
+                    {invoice.company.direccion}
+                    {invoice.company.ciudad && `, ${invoice.company.ciudad}`}
+                    {invoice.company.codigoPostal && ` ${invoice.company.codigoPostal}`}
+                  </p>
+                </div>
+              )}
+            </div>
+            {invoice.subscriptionPlan && (
+              <div className="mt-4">
+                <p className="text-sm text-muted-foreground">Plan de Suscripción</p>
+                <Badge variant="outline" className="mt-1">
+                  {invoice.subscriptionPlan.nombre} ({invoice.subscriptionPlan.tier})
+                </Badge>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Conceptos de Factura */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Conceptos</CardTitle>
+            <CardDescription>Detalle de los servicios facturados</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Descripción</TableHead>
+                  <TableHead className="text-center">Cantidad</TableHead>
+                  <TableHead className="text-right">Precio Unitario</TableHead>
+                  <TableHead className="text-right">Total</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {invoice.conceptos.map((item, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="font-medium">{item.descripcion}</TableCell>
+                    <TableCell className="text-center">{item.cantidad}</TableCell>
+                    <TableCell className="text-right">€{item.precioUnitario.toFixed(2)}</TableCell>
+                    <TableCell className="text-right font-medium">
+                      €{item.total.toFixed(2)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TableCell colSpan={3} className="text-right font-medium">
+                    Subtotal
+                  </TableCell>
+                  <TableCell className="text-right">€{invoice.subtotal.toFixed(2)}</TableCell>
+                </TableRow>
+                {invoice.descuento > 0 && (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-right font-medium">
+                      Descuento
+                    </TableCell>
+                    <TableCell className="text-right text-red-600">
+                      -€{invoice.descuento.toFixed(2)}
+                    </TableCell>
+                  </TableRow>
+                )}
+                <TableRow>
+                  <TableCell colSpan={3} className="text-right font-medium">
+                    IVA (21%)
+                  </TableCell>
+                  <TableCell className="text-right">€{invoice.impuestos.toFixed(2)}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell colSpan={3} className="text-right text-lg font-bold">
+                    Total
+                  </TableCell>
+                  <TableCell className="text-right text-lg font-bold">
+                    €{invoice.total.toFixed(2)}
+                  </TableCell>
+                </TableRow>
+              </TableFooter>
+            </Table>
+
+            {invoice.notas && (
+              <div className="mt-4 p-4 bg-muted rounded-lg">
+                <p className="text-sm font-medium mb-1">Notas</p>
+                <p className="text-sm text-muted-foreground">{invoice.notas}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Historial de Pagos */}
+        {invoice.payments && invoice.payments.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="w-5 h-5" />
+                Historial de Pagos
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Fecha</TableHead>
+                    <TableHead>Método de Pago</TableHead>
+                    <TableHead>Referencia</TableHead>
+                    <TableHead className="text-right">Monto</TableHead>
+                    <TableHead>Estado</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {invoice.payments.map((payment) => (
+                    <TableRow key={payment.id}>
+                      <TableCell>
+                        {format(new Date(payment.fechaPago), 'dd/MM/yyyy HH:mm', {
+                          locale: es,
+                        })}
+                      </TableCell>
+                      <TableCell className="capitalize">{payment.metodoPago}</TableCell>
+                      <TableCell>{payment.referencia || '-'}</TableCell>
+                      <TableCell className="text-right font-medium">
+                        €{payment.monto.toFixed(2)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="default" className="bg-green-100 text-green-800">
+                          {payment.estado}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Diálogo de Registro de Pago */}
+        <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Registrar Pago</DialogTitle>
+              <DialogDescription>
+                Registra el pago recibido para la factura {invoice.numeroFactura}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="monto">Monto</Label>
+                <Input
+                  id="monto"
+                  type="number"
+                  step="0.01"
+                  value={paymentData.monto}
+                  onChange={(e) => setPaymentData({ ...paymentData, monto: e.target.value })}
+                  placeholder="0.00"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="metodoPago">Método de Pago</Label>
+                <Select
+                  value={paymentData.metodoPago}
+                  onValueChange={(value) => setPaymentData({ ...paymentData, metodoPago: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="transferencia">Transferencia Bancaria</SelectItem>
+                    <SelectItem value="stripe">Stripe</SelectItem>
+                    <SelectItem value="tarjeta">Tarjeta de Crédito</SelectItem>
+                    <SelectItem value="efectivo">Efectivo</SelectItem>
+                    <SelectItem value="otro">Otro</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="referencia">Referencia (Opcional)</Label>
+                <Input
+                  id="referencia"
+                  value={paymentData.referencia}
+                  onChange={(e) => setPaymentData({ ...paymentData, referencia: e.target.value })}
+                  placeholder="Número de transacción, comprobante, etc."
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowPaymentDialog(false)}
+                disabled={isProcessingPayment}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleRegisterPayment}
+                disabled={isProcessingPayment || !paymentData.monto}
+              >
+                {isProcessingPayment ? 'Procesando...' : 'Registrar Pago'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Diálogo de Edición */}
+        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Editar Factura</DialogTitle>
+              <DialogDescription>
+                Actualiza los detalles de la factura {invoice.numeroFactura}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="fechaVencimiento">Fecha de Vencimiento</Label>
+                <Input
+                  id="fechaVencimiento"
+                  type="date"
+                  value={editData.fechaVencimiento}
+                  onChange={(e) => setEditData({ ...editData, fechaVencimiento: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="terminosPago">Términos de Pago</Label>
+                <Textarea
+                  id="terminosPago"
+                  value={editData.terminosPago}
+                  onChange={(e) => setEditData({ ...editData, terminosPago: e.target.value })}
+                  placeholder="Ej: Pago a 30 días desde la fecha de emisión"
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="notas">Notas</Label>
+                <Textarea
+                  id="notas"
+                  value={editData.notas}
+                  onChange={(e) => setEditData({ ...editData, notas: e.target.value })}
+                  placeholder="Notas adicionales sobre la factura"
+                  rows={4}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowEditDialog(false)}
+                disabled={isUpdating}
+              >
+                Cancelar
+              </Button>
+              <Button onClick={handleUpdateInvoice} disabled={isUpdating}>
+                {isUpdating ? 'Actualizando...' : 'Guardar Cambios'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Diálogo de Cancelación */}
+        <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Cancelar Factura</DialogTitle>
+              <DialogDescription>
+                ¿Estás seguro de que deseas cancelar la factura {invoice.numeroFactura}? Esta acción
+                no se puede deshacer.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="bg-red-50 border border-red-200 rounded-md p-4">
+                <div className="flex gap-3">
+                  <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-red-800">
+                    <p className="font-semibold mb-1">Advertencia</p>
+                    <p>
+                      Al cancelar esta factura, se marcará como cancelada y no podrá ser reactivada.
+                      Los registros de pago asociados se mantendrán para fines de auditoría.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowCancelDialog(false)}
+                disabled={isCancelling}
+              >
+                No, mantener factura
+              </Button>
+              <Button variant="destructive" onClick={handleCancelInvoice} disabled={isCancelling}>
+                {isCancelling ? 'Cancelando...' : 'Sí, cancelar factura'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </AuthenticatedLayout>
   );
 }

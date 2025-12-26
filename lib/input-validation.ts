@@ -20,35 +20,23 @@ export const passwordSchema = z
   .regex(/[0-9]/, 'Debe contener al menos un número')
   .regex(/[^A-Za-z0-9]/, 'Debe contener al menos un carácter especial');
 
-export const phoneSchema = z.string().regex(
-  /^(\+34|0034|34)?[6789]\d{8}$/,
-  'Teléfono español inválido'
-);
+export const phoneSchema = z
+  .string()
+  .regex(/^(\+34|0034|34)?[6789]\d{8}$/, 'Teléfono español inválido');
 
-export const postalCodeSchema = z.string().regex(
-  /^[0-9]{5}$/,
-  'Código postal español inválido (5 dígitos)'
-);
+export const postalCodeSchema = z
+  .string()
+  .regex(/^[0-9]{5}$/, 'Código postal español inválido (5 dígitos)');
 
-export const nifSchema = z.string().regex(
-  /^[0-9]{8}[A-Z]$/,
-  'NIF inválido (8 dígitos + letra)'
-);
+export const nifSchema = z.string().regex(/^[0-9]{8}[A-Z]$/, 'NIF inválido (8 dígitos + letra)');
 
-export const nieSchema = z.string().regex(
-  /^[XYZ][0-9]{7}[A-Z]$/,
-  'NIE inválido (letra + 7 dígitos + letra)'
-);
+export const nieSchema = z
+  .string()
+  .regex(/^[XYZ][0-9]{7}[A-Z]$/, 'NIE inválido (letra + 7 dígitos + letra)');
 
-export const cifSchema = z.string().regex(
-  /^[ABCDEFGHJNPQRSUVW][0-9]{7}[0-9A-J]$/,
-  'CIF inválido'
-);
+export const cifSchema = z.string().regex(/^[ABCDEFGHJNPQRSUVW][0-9]{7}[0-9A-J]$/, 'CIF inválido');
 
-export const ibanSchema = z.string().regex(
-  /^ES\d{22}$/,
-  'IBAN español inválido (ES + 22 dígitos)'
-);
+export const ibanSchema = z.string().regex(/^ES\d{22}$/, 'IBAN español inválido (ES + 22 dígitos)');
 
 export const urlSchema = z.string().url('URL inválida');
 
@@ -72,15 +60,13 @@ export const dateSchema = z.coerce.date({
   invalid_type_error: 'Fecha inválida',
 });
 
-export const futureDateSchema = dateSchema.refine(
-  (date) => date > new Date(),
-  { message: 'La fecha debe ser futura' }
-);
+export const futureDateSchema = dateSchema.refine((date) => date > new Date(), {
+  message: 'La fecha debe ser futura',
+});
 
-export const pastDateSchema = dateSchema.refine(
-  (date) => date < new Date(),
-  { message: 'La fecha debe ser pasada' }
-);
+export const pastDateSchema = dateSchema.refine((date) => date < new Date(), {
+  message: 'La fecha debe ser pasada',
+});
 
 // ============================================
 // SCHEMAS DE ENTIDADES
@@ -98,22 +84,21 @@ export const createBuildingSchema = z.object({
   anosConstruccion: z.number().int().min(1800).max(new Date().getFullYear()).optional(),
 });
 
-export const createContractSchema = z.object({
-  tenantId: z.string().uuid('ID de inquilino inválido'),
-  unitId: z.string().uuid('ID de unidad inválida'),
-  fechaInicio: dateSchema,
-  fechaFin: dateSchema,
-  renta: amountSchema,
-  deposito: amountSchema.optional(),
-  diaVencimiento: z.number().int().min(1).max(31),
-  tipo: z.enum(['alquiler', 'str', 'coliving']),
-}).refine(
-  (data) => data.fechaFin > data.fechaInicio,
-  {
+export const createContractSchema = z
+  .object({
+    tenantId: z.string().uuid('ID de inquilino inválido'),
+    unitId: z.string().uuid('ID de unidad inválida'),
+    fechaInicio: dateSchema,
+    fechaFin: dateSchema,
+    renta: amountSchema,
+    deposito: amountSchema.optional(),
+    diaVencimiento: z.number().int().min(1).max(31),
+    tipo: z.enum(['alquiler', 'str', 'coliving']),
+  })
+  .refine((data) => data.fechaFin > data.fechaInicio, {
     message: 'La fecha de fin debe ser posterior a la fecha de inicio',
     path: ['fechaFin'],
-  }
-);
+  });
 
 export const createPaymentSchema = z.object({
   contractId: z.string().uuid('ID de contrato inválido'),
@@ -160,7 +145,7 @@ export function sanitizeHtml(dirty: string): string {
       ALLOWED_ATTR: ['href', 'title'],
     });
   }
-  
+
   // Client-side
   return DOMPurify.sanitize(dirty);
 }
@@ -195,12 +180,12 @@ export function sanitizeFilename(filename: string): string {
 export function sanitizeUrl(url: string): string | null {
   try {
     const parsed = new URL(url);
-    
+
     // Solo permitir http y https
     if (!['http:', 'https:'].includes(parsed.protocol)) {
       return null;
     }
-    
+
     return parsed.toString();
   } catch {
     return null;
@@ -212,7 +197,7 @@ export function sanitizeUrl(url: string): string | null {
  */
 export function sanitizeQueryParams(params: Record<string, any>): Record<string, string> {
   const sanitized: Record<string, string> = {};
-  
+
   for (const [key, value] of Object.entries(params)) {
     if (typeof value === 'string') {
       sanitized[key] = sanitizePlainText(value);
@@ -220,7 +205,7 @@ export function sanitizeQueryParams(params: Record<string, any>): Record<string,
       sanitized[key] = String(value);
     }
   }
-  
+
   return sanitized;
 }
 
@@ -236,17 +221,17 @@ export function validateInput<T>(
   data: unknown
 ): { success: true; data: T } | { success: false; errors: Record<string, string> } {
   const result = schema.safeParse(data);
-  
+
   if (result.success) {
     return { success: true, data: result.data };
   }
-  
+
   const errors: Record<string, string> = {};
   for (const issue of result.error.issues) {
     const path = issue.path.join('.');
     errors[path] = issue.message;
   }
-  
+
   return { success: false, errors };
 }
 
@@ -266,7 +251,7 @@ export function validateFields(
       };
     }
   }
-  
+
   return { valid: true };
 }
 
@@ -280,7 +265,7 @@ export async function validateRequest<T>(
   try {
     const body = await request.json();
     const result = validateInput(schema, body);
-    
+
     if (!result.success) {
       return {
         success: false,
@@ -296,7 +281,7 @@ export async function validateRequest<T>(
         ),
       };
     }
-    
+
     return { success: true, data: result.data };
   } catch (error) {
     return {
@@ -345,16 +330,18 @@ export function validateFileSize(size: number, maxSize: number = MAX_FILE_SIZE):
   return size > 0 && size <= maxSize;
 }
 
-export const fileUploadSchema = z.object({
-  filename: z.string().min(1).max(255),
-  mimeType: z.string(),
-  size: z.number().positive().max(MAX_FILE_SIZE),
-  data: z.string(), // Base64
-}).refine(
-  (data) => {
-    const isImage = validateFileType(data.mimeType, ALLOWED_IMAGE_TYPES);
-    const isDocument = validateFileType(data.mimeType, ALLOWED_DOCUMENT_TYPES);
-    return isImage || isDocument;
-  },
-  { message: 'Tipo de archivo no permitido' }
-);
+export const fileUploadSchema = z
+  .object({
+    filename: z.string().min(1).max(255),
+    mimeType: z.string(),
+    size: z.number().positive().max(MAX_FILE_SIZE),
+    data: z.string(), // Base64
+  })
+  .refine(
+    (data) => {
+      const isImage = validateFileType(data.mimeType, ALLOWED_IMAGE_TYPES);
+      const isDocument = validateFileType(data.mimeType, ALLOWED_DOCUMENT_TYPES);
+      return isImage || isDocument;
+    },
+    { message: 'Tipo de archivo no permitido' }
+  );

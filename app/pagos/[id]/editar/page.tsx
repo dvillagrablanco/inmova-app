@@ -53,21 +53,21 @@ export default function EditarPagoPage() {
       try {
         setIsFetchingData(true);
         const response = await fetch(`/api/payments/${paymentId}`);
-        
+
         if (!response.ok) {
           throw new Error('Error al cargar el pago');
         }
 
         const payment = await response.json();
-        
+
         setFormData({
           periodo: payment.periodo || '',
           monto: payment.monto?.toString() || '',
-          fechaVencimiento: payment.fechaVencimiento 
-            ? new Date(payment.fechaVencimiento).toISOString().split('T')[0] 
+          fechaVencimiento: payment.fechaVencimiento
+            ? new Date(payment.fechaVencimiento).toISOString().split('T')[0]
             : '',
-          fechaPago: payment.fechaPago 
-            ? new Date(payment.fechaPago).toISOString().split('T')[0] 
+          fechaPago: payment.fechaPago
+            ? new Date(payment.fechaPago).toISOString().split('T')[0]
             : '',
           estado: payment.estado || 'pendiente',
           metodoPago: payment.metodoPago || '',
@@ -138,171 +138,171 @@ export default function EditarPagoPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="container mx-auto p-6 space-y-6">
-            {/* Botón Volver y Breadcrumbs */}
-            <div className="flex items-center gap-4 pt-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push('/pagos')}
-                className="gap-2 shadow-sm"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Volver a Pagos
-              </Button>
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/dashboard">
-                      <Home className="h-4 w-4" />
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/pagos">Pagos</BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>Editar Pago</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
-            </div>
+      <div className="container mx-auto p-6 space-y-6">
+        {/* Botón Volver y Breadcrumbs */}
+        <div className="flex items-center gap-4 pt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push('/pagos')}
+            className="gap-2 shadow-sm"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Volver a Pagos
+          </Button>
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/dashboard">
+                  <Home className="h-4 w-4" />
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/pagos">Pagos</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Editar Pago</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
 
-            {/* Header Section */}
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-                <Pencil className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight">Editar Pago</h1>
-                <p className="text-muted-foreground">Actualiza la información del pago</p>
-              </div>
-            </div>
-
-            {/* Formulario */}
-            <form onSubmit={handleSubmit}>
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="space-y-4">
-                    {/* Período */}
-                    <div className="space-y-2">
-                      <Label htmlFor="periodo">Período</Label>
-                      <Input
-                        id="periodo"
-                        name="periodo"
-                        value={formData.periodo}
-                        onChange={handleChange}
-                        placeholder="Ej: Enero 2024"
-                      />
-                    </div>
-
-                    {/* Monto */}
-                    <div className="space-y-2">
-                      <Label htmlFor="monto">Monto (€) *</Label>
-                      <Input
-                        id="monto"
-                        name="monto"
-                        type="number"
-                        step="0.01"
-                        value={formData.monto}
-                        onChange={handleChange}
-                        required
-                        placeholder="1200.00"
-                      />
-                    </div>
-
-                    {/* Estado */}
-                    <div className="space-y-2">
-                      <Label htmlFor="estado">Estado *</Label>
-                      <Select
-                        value={formData.estado}
-                        onValueChange={(value) => setFormData({ ...formData, estado: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="pendiente">Pendiente</SelectItem>
-                          <SelectItem value="pagado">Pagado</SelectItem>
-                          <SelectItem value="vencido">Vencido</SelectItem>
-                          <SelectItem value="parcial">Parcial</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Fecha de Vencimiento */}
-                    <div className="space-y-2">
-                      <Label htmlFor="fechaVencimiento">Fecha de Vencimiento *</Label>
-                      <Input
-                        id="fechaVencimiento"
-                        name="fechaVencimiento"
-                        type="date"
-                        value={formData.fechaVencimiento}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-
-                    {/* Fecha de Pago */}
-                    <div className="space-y-2">
-                      <Label htmlFor="fechaPago">Fecha de Pago</Label>
-                      <Input
-                        id="fechaPago"
-                        name="fechaPago"
-                        type="date"
-                        value={formData.fechaPago}
-                        onChange={handleChange}
-                      />
-                    </div>
-
-                    {/* Método de Pago */}
-                    <div className="space-y-2">
-                      <Label htmlFor="metodoPago">Método de Pago</Label>
-                      <Select
-                        value={formData.metodoPago}
-                        onValueChange={(value) => setFormData({ ...formData, metodoPago: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar método" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="transferencia">Transferencia</SelectItem>
-                          <SelectItem value="efectivo">Efectivo</SelectItem>
-                          <SelectItem value="tarjeta">Tarjeta</SelectItem>
-                          <SelectItem value="domiciliacion">Domiciliación</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3 mt-6">
-                    <Button type="submit" disabled={isLoading}>
-                      {isLoading ? (
-                        <>
-                          <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
-                          Guardando...
-                        </>
-                      ) : (
-                        <>
-                          <Save className="mr-2 h-4 w-4" />
-                          Guardar Cambios
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => router.push('/pagos')}
-                      disabled={isLoading}
-                    >
-                      Cancelar
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </form>
+        {/* Header Section */}
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+            <Pencil className="h-6 w-6 text-blue-600 dark:text-blue-400" />
           </div>
-        </AuthenticatedLayout>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Editar Pago</h1>
+            <p className="text-muted-foreground">Actualiza la información del pago</p>
+          </div>
+        </div>
+
+        {/* Formulario */}
+        <form onSubmit={handleSubmit}>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="space-y-4">
+                {/* Período */}
+                <div className="space-y-2">
+                  <Label htmlFor="periodo">Período</Label>
+                  <Input
+                    id="periodo"
+                    name="periodo"
+                    value={formData.periodo}
+                    onChange={handleChange}
+                    placeholder="Ej: Enero 2024"
+                  />
+                </div>
+
+                {/* Monto */}
+                <div className="space-y-2">
+                  <Label htmlFor="monto">Monto (€) *</Label>
+                  <Input
+                    id="monto"
+                    name="monto"
+                    type="number"
+                    step="0.01"
+                    value={formData.monto}
+                    onChange={handleChange}
+                    required
+                    placeholder="1200.00"
+                  />
+                </div>
+
+                {/* Estado */}
+                <div className="space-y-2">
+                  <Label htmlFor="estado">Estado *</Label>
+                  <Select
+                    value={formData.estado}
+                    onValueChange={(value) => setFormData({ ...formData, estado: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pendiente">Pendiente</SelectItem>
+                      <SelectItem value="pagado">Pagado</SelectItem>
+                      <SelectItem value="vencido">Vencido</SelectItem>
+                      <SelectItem value="parcial">Parcial</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Fecha de Vencimiento */}
+                <div className="space-y-2">
+                  <Label htmlFor="fechaVencimiento">Fecha de Vencimiento *</Label>
+                  <Input
+                    id="fechaVencimiento"
+                    name="fechaVencimiento"
+                    type="date"
+                    value={formData.fechaVencimiento}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                {/* Fecha de Pago */}
+                <div className="space-y-2">
+                  <Label htmlFor="fechaPago">Fecha de Pago</Label>
+                  <Input
+                    id="fechaPago"
+                    name="fechaPago"
+                    type="date"
+                    value={formData.fechaPago}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                {/* Método de Pago */}
+                <div className="space-y-2">
+                  <Label htmlFor="metodoPago">Método de Pago</Label>
+                  <Select
+                    value={formData.metodoPago}
+                    onValueChange={(value) => setFormData({ ...formData, metodoPago: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar método" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="transferencia">Transferencia</SelectItem>
+                      <SelectItem value="efectivo">Efectivo</SelectItem>
+                      <SelectItem value="tarjeta">Tarjeta</SelectItem>
+                      <SelectItem value="domiciliacion">Domiciliación</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
+                      Guardando...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Guardar Cambios
+                    </>
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => router.push('/pagos')}
+                  disabled={isLoading}
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </form>
+      </div>
+    </AuthenticatedLayout>
   );
 }

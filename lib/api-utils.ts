@@ -1,6 +1,6 @@
 /**
  * Utilidades para APIs
- * 
+ *
  * Funciones helper para respuestas HTTP estandarizadas
  * y manejo consistente de errores.
  */
@@ -35,10 +35,7 @@ export interface PaginatedResponse<T> {
 /**
  * Crea una respuesta de éxito con datos
  */
-export function successResponse<T>(
-  data: T,
-  status: number = 200
-): NextResponse<T> {
+export function successResponse<T>(data: T, status: number = 200): NextResponse<T> {
   return NextResponse.json(data, { status });
 }
 
@@ -94,9 +91,7 @@ export function forbiddenResponse(
 /**
  * Respuesta de error 404 - Not Found
  */
-export function notFoundResponse(
-  resource: string = 'Recurso'
-): NextResponse<ErrorResponse> {
+export function notFoundResponse(resource: string = 'Recurso'): NextResponse<ErrorResponse> {
   return errorResponse('No encontrado', `${resource} no encontrado`, 404);
 }
 
@@ -121,9 +116,7 @@ export function internalServerErrorResponse(
 /**
  * Maneja errores de validación Zod
  */
-export function handleZodError(
-  error: z.ZodError
-): NextResponse<ErrorResponse> {
+export function handleZodError(error: z.ZodError): NextResponse<ErrorResponse> {
   return errorResponse(
     'Validación fallida',
     'Los datos proporcionados no son válidos',
@@ -135,10 +128,7 @@ export function handleZodError(
 /**
  * Maneja errores genéricos con logging
  */
-export function handleError(
-  error: any,
-  context: string
-): NextResponse<ErrorResponse> {
+export function handleError(error: any, context: string): NextResponse<ErrorResponse> {
   logger.error(`Error in ${context}:`, error);
 
   // Errores de validación Zod
@@ -210,8 +200,7 @@ export function parsePaginationParams(searchParams: URLSearchParams): {
  * Valida que un UUID sea válido
  */
 export function isValidUUID(uuid: string): boolean {
-  const uuidRegex =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   return uuidRegex.test(uuid);
 }
 
@@ -226,17 +215,15 @@ export function isValidDate(date: string): boolean {
 /**
  * Sanitiza un objeto eliminando campos undefined/null
  */
-export function sanitizeObject<T extends Record<string, any>>(
-  obj: T
-): Partial<T> {
+export function sanitizeObject<T extends Record<string, any>>(obj: T): Partial<T> {
   const sanitized: any = {};
-  
+
   for (const [key, value] of Object.entries(obj)) {
     if (value !== undefined && value !== null) {
       sanitized[key] = value;
     }
   }
-  
+
   return sanitized;
 }
 

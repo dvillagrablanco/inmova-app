@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
 /**
  * 📊 ANALYTICS PROVIDER
- * 
+ *
  * Proveedor de contexto para inicializar Google Analytics y tracking global.
  * Debe wrappear toda la aplicación.
  */
@@ -17,10 +17,7 @@ interface AnalyticsProviderProps {
   measurementId?: string;
 }
 
-export default function AnalyticsProvider({
-  children,
-  measurementId,
-}: AnalyticsProviderProps) {
+export default function AnalyticsProvider({ children, measurementId }: AnalyticsProviderProps) {
   const { data: session } = useSession() || {};
   const pathname = usePathname();
   const userId = (session?.user as any)?.id;

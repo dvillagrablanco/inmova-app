@@ -68,8 +68,7 @@ export const EMPTY_STATE_PRESETS = {
   units: {
     icon: <Home size={64} className="text-gray-400" aria-hidden="true" />,
     title: 'No hay unidades registradas',
-    description:
-      'Agrega unidades a tus edificios para comenzar a gestionarlas y alquilarlas.',
+    description: 'Agrega unidades a tus edificios para comenzar a gestionarlas y alquilarlas.',
     illustration: <NoUnitsIllustration className="w-full h-auto" />,
     helpText: 'Las unidades pueden ser apartamentos, locales comerciales, oficinas, etc.',
   },
@@ -103,8 +102,7 @@ export const EMPTY_STATE_PRESETS = {
   tenantsFiltered: {
     icon: <Users size={64} className="text-gray-400" aria-hidden="true" />,
     title: 'No se encontraron inquilinos',
-    description:
-      'No hay inquilinos que coincidan con tu búsqueda. Verifica los filtros aplicados.',
+    description: 'No hay inquilinos que coincidan con tu búsqueda. Verifica los filtros aplicados.',
     illustration: <NoSearchResultsIllustration className="w-full h-auto" />,
   },
 
@@ -112,8 +110,7 @@ export const EMPTY_STATE_PRESETS = {
   contracts: {
     icon: <FileText size={64} className="text-gray-400" aria-hidden="true" />,
     title: 'No hay contratos activos',
-    description:
-      'Crea tu primer contrato de arrendamiento para comenzar a gestionar tus rentas.',
+    description: 'Crea tu primer contrato de arrendamiento para comenzar a gestionar tus rentas.',
     illustration: <NoContractsIllustration className="w-full h-auto" />,
     helpText: 'Los contratos se generan automáticamente en formato PDF',
   },
@@ -198,8 +195,7 @@ export const EMPTY_STATE_PRESETS = {
   error: {
     icon: <AlertTriangle size={64} className="text-red-400" aria-hidden="true" />,
     title: 'Error al cargar datos',
-    description:
-      'Ocurrió un problema al cargar la información. Por favor, intenta de nuevo.',
+    description: 'Ocurrió un problema al cargar la información. Por favor, intenta de nuevo.',
     helpText: 'Si el problema persiste, contacta con soporte',
   },
 } as const;

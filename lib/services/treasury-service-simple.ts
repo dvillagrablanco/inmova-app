@@ -88,7 +88,11 @@ export async function registerDeposit(params: DepositManagementParams) {
   });
 }
 
-export async function returnDeposit(depositId: string, importeDevuelto: number, deducciones: any[]) {
+export async function returnDeposit(
+  depositId: string,
+  importeDevuelto: number,
+  deducciones: any[]
+) {
   const deduccionesTotal = deducciones.reduce((sum, d) => sum + d.monto, 0);
 
   return await prisma.depositManagement.update({
@@ -98,7 +102,7 @@ export async function returnDeposit(depositId: string, importeDevuelto: number, 
       fechaDevolucion: new Date(),
       importeDevuelto,
       deducciones: deduccionesTotal,
-      motivoDeducciones: deducciones.map(d => d.motivo).join('; '),
+      motivoDeducciones: deducciones.map((d) => d.motivo).join('; '),
     },
   });
 }
@@ -111,7 +115,7 @@ export async function calculateBadDebtProvisions(params: BadDebtProvisionParams)
     },
   });
 
-  const tenantIds = tenants.map(t => t.id);
+  const tenantIds = tenants.map((t) => t.id);
 
   // Get contracts for these tenants
   const contracts = await prisma.contract.findMany({
@@ -195,7 +199,7 @@ export async function generateFinancialAlerts(params: GenerateFinancialAlertsPar
     },
   });
 
-  const tenantIds = tenants.map(t => t.id);
+  const tenantIds = tenants.map((t) => t.id);
 
   // Alerta 1: Pagos vencidos
   const contracts = await prisma.contract.findMany({
@@ -218,17 +222,19 @@ export async function generateFinancialAlerts(params: GenerateFinancialAlertsPar
 
   if (pagosVencidos > 0) {
     const severidad = pagosVencidos > 5 ? 'alto' : 'medio';
-    alerts.push(await prisma.financialAlert.create({
-      data: {
-        companyId: params.companyId,
-        tipo: 'morosidad',
-        severidad,
-        titulo: `${pagosVencidos} pagos vencidos hace más de 30 días`,
-        descripcion: `Hay ${pagosVencidos} pagos pendientes con más de 30 días de retraso.`,
-        fechaDeteccion: new Date(),
-        estado: 'pendiente',
-      },
-    }));
+    alerts.push(
+      await prisma.financialAlert.create({
+        data: {
+          companyId: params.companyId,
+          tipo: 'morosidad',
+          severidad,
+          titulo: `${pagosVencidos} pagos vencidos hace más de 30 días`,
+          descripcion: `Hay ${pagosVencidos} pagos pendientes con más de 30 días de retraso.`,
+          fechaDeteccion: new Date(),
+          estado: 'pendiente',
+        },
+      })
+    );
   }
 
   // Alerta 2: Cash flow negativo proyectado
@@ -241,17 +247,19 @@ export async function generateFinancialAlerts(params: GenerateFinancialAlertsPar
   });
 
   if (cashFlowProximo) {
-    alerts.push(await prisma.financialAlert.create({
-      data: {
-        companyId: params.companyId,
-        tipo: 'cashflow',
-        severidad: 'alto',
-        titulo: `Cash flow negativo proyectado en ${cashFlowProximo.mes}`,
-        descripcion: `Se proyecta un déficit de €${Math.abs(cashFlowProximo.saldoFinal).toFixed(2)}`,
-        fechaDeteccion: new Date(),
-        estado: 'pendiente',
-      },
-    }));
+    alerts.push(
+      await prisma.financialAlert.create({
+        data: {
+          companyId: params.companyId,
+          tipo: 'cashflow',
+          severidad: 'alto',
+          titulo: `Cash flow negativo proyectado en ${cashFlowProximo.mes}`,
+          descripcion: `Se proyecta un déficit de €${Math.abs(cashFlowProximo.saldoFinal).toFixed(2)}`,
+          fechaDeteccion: new Date(),
+          estado: 'pendiente',
+        },
+      })
+    );
   }
 
   return alerts;

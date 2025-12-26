@@ -29,14 +29,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
     const companyId = session?.user?.companyId;
-    const userId = session?.user?.id
+    const userId = session?.user?.id;
     const body = await request.json();
     const { nombre, descripcion, tipo, triggerType, prioridad, activa } = body;
     if (!nombre || !tipo || !triggerType) {
-      return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
     // Crear automatización con configuración básica
     const automation = await prisma.automation.create({

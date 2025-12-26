@@ -1,12 +1,12 @@
 /**
  * API Endpoint: Obtener Transacciones Bancarias via Redsys PSD2
- * 
+ *
  * Este endpoint obtiene las transacciones de una cuenta bancaria específica
  * a través de la API de Redsys PSD2.
- * 
+ *
  * Método: GET
  * Query params: aspsp, connectionId, accountId, dateFrom, dateTo
- * 
+ *
  * @author INMOVA Development Team
  */
 
@@ -23,7 +23,6 @@ import { prisma } from '@/lib/db';
 
 // Force dynamic rendering for this route
 export const dynamic = 'force-dynamic';
-
 
 export async function GET(request: NextRequest) {
   try {
@@ -74,10 +73,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (!connection.consents || connection.consents.length === 0) {
-      return NextResponse.json(
-        { error: 'No hay consentimiento válido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No hay consentimiento válido' }, { status: 400 });
     }
 
     const consent = connection.consents[0];

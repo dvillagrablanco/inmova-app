@@ -25,12 +25,20 @@ export const passwordSchema = z
 export const phoneSchema = z
   .string()
   .min(1, 'El teléfono es requerido')
-  .regex(/^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/, 'Formato de teléfono inválido');
+  .regex(
+    /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/,
+    'Formato de teléfono inválido'
+  );
 
 export const currencySchema = z
   .number()
   .min(0, 'El monto debe ser mayor o igual a 0')
-  .or(z.string().transform((val) => parseFloat(val)).pipe(z.number().min(0)));
+  .or(
+    z
+      .string()
+      .transform((val) => parseFloat(val))
+      .pipe(z.number().min(0))
+  );
 
 export const percentageSchema = z
   .number()
@@ -88,7 +96,12 @@ export const buildingSchema = z.object({
     .number()
     .int('Debe ser un número entero')
     .min(1, 'Debe haber al menos 1 unidad')
-    .or(z.string().transform((val) => parseInt(val, 10)).pipe(z.number().int().min(1))),
+    .or(
+      z
+        .string()
+        .transform((val) => parseInt(val, 10))
+        .pipe(z.number().int().min(1))
+    ),
   anoConstructor: z
     .number()
     .int()
@@ -99,7 +112,14 @@ export const buildingSchema = z.object({
       z
         .string()
         .transform((val) => (val ? parseInt(val, 10) : undefined))
-        .pipe(z.number().int().min(1800).max(new Date().getFullYear() + 1).optional())
+        .pipe(
+          z
+            .number()
+            .int()
+            .min(1800)
+            .max(new Date().getFullYear() + 1)
+            .optional()
+        )
     ),
   descripcion: z.string().optional(),
 });
@@ -119,20 +139,37 @@ export const unitSchema = z.object({
   superficie: z
     .number()
     .min(1, 'La superficie debe ser mayor a 0')
-    .or(z.string().transform((val) => parseFloat(val)).pipe(z.number().min(1))),
+    .or(
+      z
+        .string()
+        .transform((val) => parseFloat(val))
+        .pipe(z.number().min(1))
+    ),
   habitaciones: z
     .number()
     .int()
     .min(0, 'Las habitaciones no pueden ser negativas')
-    .or(z.string().transform((val) => parseInt(val, 10)).pipe(z.number().int().min(0))),
+    .or(
+      z
+        .string()
+        .transform((val) => parseInt(val, 10))
+        .pipe(z.number().int().min(0))
+    ),
   banos: z
     .number()
     .min(0, 'Los baños no pueden ser negativos')
-    .or(z.string().transform((val) => parseFloat(val)).pipe(z.number().min(0))),
+    .or(
+      z
+        .string()
+        .transform((val) => parseFloat(val))
+        .pipe(z.number().min(0))
+    ),
   rentaMensual: currencySchema,
-  estado: z.enum(['disponible', 'ocupada', 'mantenimiento', 'reservada'], {
-    errorMap: () => ({ message: 'Seleccione un estado válido' }),
-  }).default('disponible'),
+  estado: z
+    .enum(['disponible', 'ocupada', 'mantenimiento', 'reservada'], {
+      errorMap: () => ({ message: 'Seleccione un estado válido' }),
+    })
+    .default('disponible'),
   planta: z
     .number()
     .int()
@@ -185,7 +222,12 @@ export const contractSchema = z.object({
     .int()
     .min(1, 'El día debe estar entre 1 y 31')
     .max(31, 'El día debe estar entre 1 y 31')
-    .or(z.string().transform((val) => parseInt(val, 10)).pipe(z.number().int().min(1).max(31))),
+    .or(
+      z
+        .string()
+        .transform((val) => parseInt(val, 10))
+        .pipe(z.number().int().min(1).max(31))
+    ),
   duracionMeses: z
     .number()
     .int()
@@ -211,9 +253,11 @@ export const paymentSchema = z.object({
   monto: currencySchema,
   fechaVencimiento: z.string().min(1, 'La fecha de vencimiento es requerida'),
   concepto: z.string().min(3, 'El concepto debe tener al menos 3 caracteres'),
-  metodoPago: z.enum(['efectivo', 'transferencia', 'tarjeta', 'cheque', 'otro'], {
-    errorMap: () => ({ message: 'Seleccione un método válido' }),
-  }).optional(),
+  metodoPago: z
+    .enum(['efectivo', 'transferencia', 'tarjeta', 'cheque', 'otro'], {
+      errorMap: () => ({ message: 'Seleccione un método válido' }),
+    })
+    .optional(),
   notas: z.string().optional(),
 });
 

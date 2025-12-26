@@ -13,10 +13,7 @@ import logger, { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 // POST /api/maintenance/[id]/photos - Subir fotos de mantenimiento
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -50,17 +47,11 @@ export async function POST(
     }
 
     if (files.length === 0) {
-      return NextResponse.json(
-        { error: 'No se proporcionaron archivos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No se proporcionaron archivos' }, { status: 400 });
     }
 
     if (files.length > 5) {
-      return NextResponse.json(
-        { error: 'Máximo 5 fotos por solicitud' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Máximo 5 fotos por solicitud' }, { status: 400 });
     }
 
     // Validar que sean imágenes
@@ -80,16 +71,14 @@ export async function POST(
       const buffer = Buffer.from(await file.arrayBuffer());
       const timestamp = Date.now();
       const filename = `${timestamp}_${file.name.replace(/\s+/g, '_')}`;
-      const s3Key = await uploadFile(
-        buffer,
-        `maintenance/${maintenanceId}/${type}/${filename}`
-      );
+      const s3Key = await uploadFile(buffer, `maintenance/${maintenanceId}/${type}/${filename}`);
       uploadedUrls.push(s3Key);
     }
 
     // Actualizar la solicitud de mantenimiento
     const fieldToUpdate = type === 'problem' ? 'fotosProblem' : 'fotosCompletado';
-    const currentPhotos = type === 'problem' ? maintenance.fotosProblem : maintenance.fotosCompletado;
+    const currentPhotos =
+      type === 'problem' ? maintenance.fotosProblem : maintenance.fotosCompletado;
 
     const updatedMaintenance = await prisma.maintenanceRequest.update({
       where: { id: maintenanceId },
@@ -106,18 +95,12 @@ export async function POST(
     });
   } catch (error) {
     logger.error('Error subiendo fotos de mantenimiento:', error);
-    return NextResponse.json(
-      { error: 'Error al subir fotos' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al subir fotos' }, { status: 500 });
   }
 }
 
 // DELETE /api/maintenance/[id]/photos - Eliminar una foto específica
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -130,10 +113,7 @@ export async function DELETE(
     const type = searchParams.get('type'); // 'problem' o 'completed'
 
     if (!photoUrl || !type) {
-      return NextResponse.json(
-        { error: 'Faltan parámetros requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Faltan parámetros requeridos' }, { status: 400 });
     }
 
     const maintenance = await prisma.maintenanceRequest.findUnique({
@@ -149,7 +129,8 @@ export async function DELETE(
 
     // Remover la URL del array correspondiente
     const fieldToUpdate = type === 'problem' ? 'fotosProblem' : 'fotosCompletado';
-    const currentPhotos = type === 'problem' ? maintenance.fotosProblem : maintenance.fotosCompletado;
+    const currentPhotos =
+      type === 'problem' ? maintenance.fotosProblem : maintenance.fotosCompletado;
     const updatedPhotos = currentPhotos.filter((url) => url !== photoUrl);
 
     const updatedMaintenance = await prisma.maintenanceRequest.update({
@@ -168,9 +149,6 @@ export async function DELETE(
     });
   } catch (error) {
     logger.error('Error eliminando foto de mantenimiento:', error);
-    return NextResponse.json(
-      { error: 'Error al eliminar foto' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar foto' }, { status: 500 });
   }
 }

@@ -1,6 +1,6 @@
 /**
  * Endpoints API para Proveedores
- * 
+ *
  * Implementa operaciones CRUD con validación Zod, manejo de errores
  * y códigos de estado HTTP correctos.
  */
@@ -22,16 +22,16 @@ export async function GET(req: NextRequest) {
   try {
     const user = await requireAuth();
     const { searchParams } = new URL(req.url);
-    
+
     const tipo = searchParams.get('tipo');
     const search = searchParams.get('search');
 
     const where: any = { companyId: user.companyId };
-    
+
     if (tipo) {
       where.tipo = tipo;
     }
-    
+
     if (search) {
       where.OR = [
         { nombre: { contains: search, mode: 'insensitive' } },
@@ -55,17 +55,16 @@ export async function GET(req: NextRequest) {
 
     logger.info(`Proveedores obtenidos: ${providers.length}`, { userId: user.id });
     return NextResponse.json(providers, { status: 200 });
-    
   } catch (error: any) {
     logger.error('Error fetching providers:', error);
-    
+
     if (error.message === 'No autenticado') {
       return NextResponse.json(
         { error: 'No autenticado', message: 'Debe iniciar sesión' },
         { status: 401 }
       );
     }
-    
+
     return NextResponse.json(
       { error: 'Error interno del servidor', message: 'Error al obtener proveedores' },
       { status: 500 }
@@ -93,7 +92,7 @@ export async function POST(req: NextRequest) {
           email: validatedData.email,
         },
       });
-      
+
       if (existingEmail) {
         return NextResponse.json(
           { error: 'Proveedor duplicado', message: 'Ya existe un proveedor con este email' },
@@ -117,7 +116,6 @@ export async function POST(req: NextRequest) {
 
     logger.info(`Proveedor creado: ${provider.id}`, { userId: user.id, providerId: provider.id });
     return NextResponse.json(provider, { status: 201 });
-    
   } catch (error: any) {
     logger.error('Error creating provider:', error);
 
@@ -133,12 +131,9 @@ export async function POST(req: NextRequest) {
     }
 
     if (error.message?.includes('permiso')) {
-      return NextResponse.json(
-        { error: 'Prohibido', message: error.message },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Prohibido', message: error.message }, { status: 403 });
     }
-    
+
     if (error.message === 'No autenticado') {
       return NextResponse.json(
         { error: 'No autenticado', message: 'Debe iniciar sesión' },

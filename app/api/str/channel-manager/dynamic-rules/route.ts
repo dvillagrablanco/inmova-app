@@ -6,12 +6,12 @@ import { requireAuth } from '@/lib/permissions';
 export async function GET(request: NextRequest) {
   try {
     const user = await requireAuth();
-    
+
     const { searchParams } = new URL(request.url);
     const listingId = searchParams.get('listingId');
-    
+
     const where: any = {};
-    
+
     if (listingId) {
       // Verificar que el listing pertenece a la empresa
       const listing = await prisma.sTRListing.findFirst({
@@ -20,17 +20,17 @@ export async function GET(request: NextRequest) {
           companyId: user.companyId,
         },
       });
-      
+
       if (!listing) {
         return NextResponse.json({ error: 'Listing no encontrado' }, { status: 404 });
       }
-      
+
       where.listingId = listingId;
     } else {
       // Obtener todas las reglas de listings de la empresa
       where.listing = { companyId: user.companyId };
     }
-    
+
     const rules = await prisma.sTRDynamicPricingRule.findMany({
       where,
       include: {
@@ -38,12 +38,12 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             titulo: true,
-          }
-        }
+          },
+        },
       },
       orderBy: [{ prioridad: 'desc' }, { createdAt: 'desc' }],
     });
-    
+
     return NextResponse.json(rules);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 401 });
@@ -55,9 +55,9 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth();
     const data = await request.json();
-    
+
     const { listingId, ...ruleData } = data;
-    
+
     // Verificar que el listing pertenece a la empresa
     const listing = await prisma.sTRListing.findFirst({
       where: {
@@ -65,11 +65,11 @@ export async function POST(request: NextRequest) {
         companyId: user.companyId,
       },
     });
-    
+
     if (!listing) {
       return NextResponse.json({ error: 'Listing no encontrado' }, { status: 404 });
     }
-    
+
     const rule = await prisma.sTRDynamicPricingRule.create({
       data: {
         listingId,
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
         activo: ruleData.activo ?? true,
       },
     });
-    
+
     return NextResponse.json(rule, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 400 });

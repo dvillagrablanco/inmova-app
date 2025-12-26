@@ -5,11 +5,7 @@ import { Bell, Check, Trash2, CheckCheck, Filter, Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
@@ -46,7 +42,7 @@ export function NotificationCenter() {
 
   // Actualizar contador de no leídas
   useEffect(() => {
-    setUnreadCount(notifications.filter(n => !n.read).length);
+    setUnreadCount(notifications.filter((n) => !n.read).length);
   }, [notifications]);
 
   const fetchNotifications = async () => {
@@ -66,11 +62,9 @@ export function NotificationCenter() {
       const response = await fetch(`/api/notifications/${id}/read`, {
         method: 'PATCH',
       });
-      
+
       if (response.ok) {
-        setNotifications(prev =>
-          prev.map(n => (n.id === id ? { ...n, read: true } : n))
-        );
+        setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
       }
     } catch (error) {
       logger.error('Error marking notification as read:', error);
@@ -82,9 +76,9 @@ export function NotificationCenter() {
       const response = await fetch('/api/notifications/read-all', {
         method: 'PATCH',
       });
-      
+
       if (response.ok) {
-        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+        setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
       }
     } catch (error) {
       logger.error('Error marking all as read:', error);
@@ -96,9 +90,9 @@ export function NotificationCenter() {
       const response = await fetch(`/api/notifications/${id}`, {
         method: 'DELETE',
       });
-      
+
       if (response.ok) {
-        setNotifications(prev => prev.filter(n => n.id !== id));
+        setNotifications((prev) => prev.filter((n) => n.id !== id));
       }
     } catch (error) {
       logger.error('Error deleting notification:', error);
@@ -110,9 +104,9 @@ export function NotificationCenter() {
       const response = await fetch('/api/notifications/delete-read', {
         method: 'DELETE',
       });
-      
+
       if (response.ok) {
-        setNotifications(prev => prev.filter(n => !n.read));
+        setNotifications((prev) => prev.filter((n) => !n.read));
       }
     } catch (error) {
       logger.error('Error deleting read notifications:', error);
@@ -134,7 +128,7 @@ export function NotificationCenter() {
     return null;
   };
 
-  const filteredNotifications = notifications.filter(n => {
+  const filteredNotifications = notifications.filter((n) => {
     if (activeTab === 'unread') return !n.read;
     return true;
   });
@@ -158,7 +152,9 @@ export function NotificationCenter() {
         )}
         onClick={handleClick}
       >
-        <div className={cn('w-2 h-2 rounded-full mt-2 shrink-0', getTypeColor(notification.type))} />
+        <div
+          className={cn('w-2 h-2 rounded-full mt-2 shrink-0', getTypeColor(notification.type))}
+        />
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <p className={cn('text-sm font-medium', !notification.read && 'font-semibold')}>
@@ -176,13 +172,11 @@ export function NotificationCenter() {
               <Trash2 className="h-3 w-3" />
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-            {notification.message}
-          </p>
+          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{notification.message}</p>
           <p className="text-xs text-muted-foreground mt-2">
-            {formatDistanceToNow(new Date(notification.createdAt), { 
+            {formatDistanceToNow(new Date(notification.createdAt), {
               addSuffix: true,
-              locale: es 
+              locale: es,
             })}
           </p>
         </div>
@@ -206,8 +200,8 @@ export function NotificationCenter() {
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <Badge 
-              variant="destructive" 
+            <Badge
+              variant="destructive"
               className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
             >
               {unreadCount > 99 ? '99+' : unreadCount}
@@ -249,8 +243,8 @@ export function NotificationCenter() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full justify-start rounded-none border-b bg-transparent p-0">
-            <TabsTrigger 
-              value="all" 
+            <TabsTrigger
+              value="all"
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary"
             >
               Todas
@@ -258,7 +252,7 @@ export function NotificationCenter() {
                 {notifications.length}
               </Badge>
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="unread"
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary"
             >
@@ -283,7 +277,7 @@ export function NotificationCenter() {
                 </div>
               ) : (
                 <div className="space-y-1 p-2">
-                  {filteredNotifications.map(notification => (
+                  {filteredNotifications.map((notification) => (
                     <NotificationItem key={notification.id} notification={notification} />
                   ))}
                 </div>
@@ -303,7 +297,7 @@ export function NotificationCenter() {
                 </div>
               ) : (
                 <div className="space-y-1 p-2">
-                  {filteredNotifications.map(notification => (
+                  {filteredNotifications.map((notification) => (
                     <NotificationItem key={notification.id} notification={notification} />
                   ))}
                 </div>

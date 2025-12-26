@@ -72,7 +72,9 @@ export function OnboardingChecklist({ userId }: OnboardingChecklistProps) {
 
   return (
     <>
-      {showConfetti && <Confetti width={width} height={height} recycle={false} numberOfPieces={500} />}
+      {showConfetti && (
+        <Confetti width={width} height={height} recycle={false} numberOfPieces={500} />
+      )}
 
       <AnimatePresence>
         <motion.div
@@ -109,27 +111,16 @@ export function OnboardingChecklist({ userId }: OnboardingChecklistProps) {
                 </div>
                 <div className="flex gap-2">
                   {progress.percentage < 100 && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setIsCollapsed(!isCollapsed)}
-                    >
+                    <Button size="sm" variant="ghost" onClick={() => setIsCollapsed(!isCollapsed)}>
                       {isCollapsed ? 'Mostrar' : 'Ocultar'}
                     </Button>
                   )}
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-8 w-8"
-                    onClick={handleDismiss}
-                  >
+                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={handleDismiss}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
-              {!isCollapsed && (
-                <Progress value={progress.percentage} className="mt-4 h-2" />
-              )}
+              {!isCollapsed && <Progress value={progress.percentage} className="mt-4 h-2" />}
             </CardHeader>
 
             {!isCollapsed && progress.percentage < 100 && (
@@ -148,9 +139,7 @@ export function OnboardingChecklist({ userId }: OnboardingChecklistProps) {
                     <div className="flex items-center gap-3">
                       <div
                         className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                          step.completed
-                            ? 'bg-green-500 text-white'
-                            : 'bg-gray-200 text-gray-500'
+                          step.completed ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'
                         }`}
                       >
                         {step.completed ? (
@@ -170,9 +159,7 @@ export function OnboardingChecklist({ userId }: OnboardingChecklistProps) {
                         )}
                       </div>
                     </div>
-                    {!step.completed && (
-                      <ChevronRight className="h-5 w-5 text-gray-400" />
-                    )}
+                    {!step.completed && <ChevronRight className="h-5 w-5 text-gray-400" />}
                   </motion.div>
                 ))}
 
@@ -198,14 +185,11 @@ export function OnboardingChecklist({ userId }: OnboardingChecklistProps) {
               <CardContent>
                 <div className="text-center space-y-4">
                   <p className="text-muted-foreground">
-                    ¡Excelente trabajo! Has completado todos los pasos esenciales. Ahora estás
-                    listo para aprovechar al máximo INMOVA.
+                    ¡Excelente trabajo! Has completado todos los pasos esenciales. Ahora estás listo
+                    para aprovechar al máximo INMOVA.
                   </p>
                   <div className="flex gap-2 justify-center">
-                    <Button
-                      onClick={() => router.push('/dashboard')}
-                      className="gradient-primary"
-                    >
+                    <Button onClick={() => router.push('/dashboard')} className="gradient-primary">
                       Ir al Dashboard
                     </Button>
                     <Button variant="outline" onClick={handleDismiss}>

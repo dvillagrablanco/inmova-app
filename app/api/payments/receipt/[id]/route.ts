@@ -7,10 +7,7 @@ import logger, { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 // GET /api/payments/receipt/[id] - Obtener datos para generar recibo
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -102,9 +99,6 @@ export async function GET(
     return NextResponse.json(receiptData);
   } catch (error) {
     logger.error('Error al obtener datos del recibo:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener datos del recibo' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener datos del recibo' }, { status: 500 });
   }
 }

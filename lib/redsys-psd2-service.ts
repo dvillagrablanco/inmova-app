@@ -1,15 +1,15 @@
 /**
  * Servicio de Integración Redsys PSD2
- * 
+ *
  * Este servicio proporciona funcionalidades completas para la integración
  * con la plataforma Redsys PSD2, permitiendo acceso a servicios bancarios
  * de Bankinter y otros bancos españoles a través de open banking.
- * 
+ *
  * Servicios disponibles:
  * - AIS (Account Information Services): Consulta de cuentas, saldos y transacciones
  * - PIS (Payment Initiation Services): Iniciación de pagos y transferencias
  * - FCS (Funds Confirmation Services): Confirmación de disponibilidad de fondos
- * 
+ *
  * @author INMOVA Development Team
  * @version 1.0.0
  * @date 2025-12
@@ -102,7 +102,17 @@ export interface PaymentInitiation {
 }
 
 export interface PaymentStatus {
-  transactionStatus: 'ACCP' | 'ACSC' | 'ACSP' | 'ACTC' | 'ACWC' | 'ACWP' | 'RCVD' | 'PDNG' | 'RJCT' | 'CANC';
+  transactionStatus:
+    | 'ACCP'
+    | 'ACSC'
+    | 'ACSP'
+    | 'ACTC'
+    | 'ACWC'
+    | 'ACWP'
+    | 'RCVD'
+    | 'PDNG'
+    | 'RJCT'
+    | 'CANC';
   fundsAvailable?: boolean;
 }
 
@@ -168,9 +178,7 @@ export function generateCodeVerifier(): string {
  * Genera un code challenge a partir de un code verifier
  */
 export function generateCodeChallenge(verifier: string): string {
-  return createHash('sha256')
-    .update(verifier)
-    .digest('base64url');
+  return createHash('sha256').update(verifier).digest('base64url');
 }
 
 /**
@@ -190,11 +198,11 @@ export function generateState(): string {
 export function buildAuthorizationUrl(params: OAuthAuthorizationParams): string {
   const config = getRedsysConfig();
   const state = params.state || generateState();
-  
+
   // Si se usa PKCE, generar el code challenge
   let codeChallenge = params.codeChallenge;
   let codeChallengeMethod = params.codeChallengeMethod || 'S256';
-  
+
   const queryParams = new URLSearchParams({
     response_type: 'code',
     client_id: config.clientId,
@@ -202,12 +210,12 @@ export function buildAuthorizationUrl(params: OAuthAuthorizationParams): string 
     state,
     redirect_uri: config.redirectUri,
   });
-  
+
   if (codeChallenge) {
     queryParams.append('code_challenge', codeChallenge);
     queryParams.append('code_challenge_method', codeChallengeMethod);
   }
-  
+
   return `${config.baseUrl}/${params.aspsp}/authorize?${queryParams.toString()}`;
 }
 
@@ -219,7 +227,7 @@ export async function exchangeCodeForToken(
   codeVerifier?: string
 ): Promise<OAuthTokenResponse> {
   const config = getRedsysConfig();
-  
+
   const body = new URLSearchParams({
     grant_type: 'authorization_code',
     code,
@@ -227,11 +235,11 @@ export async function exchangeCodeForToken(
     client_id: config.clientId,
     client_secret: config.clientSecret,
   });
-  
+
   if (codeVerifier) {
     body.append('code_verifier', codeVerifier);
   }
-  
+
   const response = await fetch(`${config.baseUrl}/token`, {
     method: 'POST',
     headers: {
@@ -239,12 +247,12 @@ export async function exchangeCodeForToken(
     },
     body: body.toString(),
   });
-  
+
   if (!response.ok) {
     const error = await response.text();
     throw new Error(`Failed to exchange code for token: ${response.status} ${error}`);
   }
-  
+
   return response.json();
 }
 
@@ -253,14 +261,14 @@ export async function exchangeCodeForToken(
  */
 export async function refreshAccessToken(refreshToken: string): Promise<OAuthTokenResponse> {
   const config = getRedsysConfig();
-  
+
   const body = new URLSearchParams({
     grant_type: 'refresh_token',
     refresh_token: refreshToken,
     client_id: config.clientId,
     client_secret: config.clientSecret,
   });
-  
+
   const response = await fetch(`${config.baseUrl}/token`, {
     method: 'POST',
     headers: {
@@ -268,12 +276,12 @@ export async function refreshAccessToken(refreshToken: string): Promise<OAuthTok
     },
     body: body.toString(),
   });
-  
+
   if (!response.ok) {
     const error = await response.text();
     throw new Error(`Failed to refresh token: ${response.status} ${error}`);
   }
-  
+
   return response.json();
 }
 
@@ -290,22 +298,25 @@ export async function createAISConsent(
   consent: ConsentRequest
 ): Promise<ConsentResponse> {
   const config = getRedsysConfig();
-  
-  const response = await fetch(`${config.baseUrl}/api-entrada-xs2a/services/${aspsp}/v1.1/consents`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-      'X-Request-ID': randomBytes(16).toString('hex'),
-    },
-    body: JSON.stringify(consent),
-  });
-  
+
+  const response = await fetch(
+    `${config.baseUrl}/api-entrada-xs2a/services/${aspsp}/v1.1/consents`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+        'X-Request-ID': randomBytes(16).toString('hex'),
+      },
+      body: JSON.stringify(consent),
+    }
+  );
+
   if (!response.ok) {
     const error = await response.text();
     throw new Error(`Failed to create AIS consent: ${response.status} ${error}`);
   }
-  
+
   return response.json();
 }
 
@@ -318,20 +329,23 @@ export async function getConsentStatus(
   accessToken: string
 ): Promise<any> {
   const config = getRedsysConfig();
-  
-  const response = await fetch(`${config.baseUrl}/api-entrada-xs2a/services/${aspsp}/v1.1/consents/${consentId}/status`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'X-Request-ID': randomBytes(16).toString('hex'),
-    },
-  });
-  
+
+  const response = await fetch(
+    `${config.baseUrl}/api-entrada-xs2a/services/${aspsp}/v1.1/consents/${consentId}/status`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'X-Request-ID': randomBytes(16).toString('hex'),
+      },
+    }
+  );
+
   if (!response.ok) {
     const error = await response.text();
     throw new Error(`Failed to get consent status: ${response.status} ${error}`);
   }
-  
+
   return response.json();
 }
 
@@ -344,21 +358,24 @@ export async function getAccounts(
   accessToken: string
 ): Promise<BankAccount[]> {
   const config = getRedsysConfig();
-  
-  const response = await fetch(`${config.baseUrl}/api-entrada-xs2a/services/${aspsp}/v1.1/accounts`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Consent-ID': consentId,
-      'X-Request-ID': randomBytes(16).toString('hex'),
-    },
-  });
-  
+
+  const response = await fetch(
+    `${config.baseUrl}/api-entrada-xs2a/services/${aspsp}/v1.1/accounts`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Consent-ID': consentId,
+        'X-Request-ID': randomBytes(16).toString('hex'),
+      },
+    }
+  );
+
   if (!response.ok) {
     const error = await response.text();
     throw new Error(`Failed to get accounts: ${response.status} ${error}`);
   }
-  
+
   const data = await response.json();
   return data.accounts || [];
 }
@@ -373,21 +390,24 @@ export async function getAccountDetails(
   accessToken: string
 ): Promise<BankAccount> {
   const config = getRedsysConfig();
-  
-  const response = await fetch(`${config.baseUrl}/api-entrada-xs2a/services/${aspsp}/v1.1/accounts/${accountId}`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Consent-ID': consentId,
-      'X-Request-ID': randomBytes(16).toString('hex'),
-    },
-  });
-  
+
+  const response = await fetch(
+    `${config.baseUrl}/api-entrada-xs2a/services/${aspsp}/v1.1/accounts/${accountId}`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Consent-ID': consentId,
+        'X-Request-ID': randomBytes(16).toString('hex'),
+      },
+    }
+  );
+
   if (!response.ok) {
     const error = await response.text();
     throw new Error(`Failed to get account details: ${response.status} ${error}`);
   }
-  
+
   const data = await response.json();
   return data.account;
 }
@@ -402,21 +422,24 @@ export async function getBalances(
   accessToken: string
 ): Promise<BankBalance[]> {
   const config = getRedsysConfig();
-  
-  const response = await fetch(`${config.baseUrl}/api-entrada-xs2a/services/${aspsp}/v1.1/accounts/${accountId}/balances`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Consent-ID': consentId,
-      'X-Request-ID': randomBytes(16).toString('hex'),
-    },
-  });
-  
+
+  const response = await fetch(
+    `${config.baseUrl}/api-entrada-xs2a/services/${aspsp}/v1.1/accounts/${accountId}/balances`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Consent-ID': consentId,
+        'X-Request-ID': randomBytes(16).toString('hex'),
+      },
+    }
+  );
+
   if (!response.ok) {
     const error = await response.text();
     throw new Error(`Failed to get balances: ${response.status} ${error}`);
   }
-  
+
   const data = await response.json();
   return data.balances || [];
 }
@@ -433,28 +456,28 @@ export async function getTransactions(
   dateTo?: string
 ): Promise<BankTransaction[]> {
   const config = getRedsysConfig();
-  
+
   const queryParams = new URLSearchParams();
   if (dateFrom) queryParams.append('dateFrom', dateFrom);
   if (dateTo) queryParams.append('dateTo', dateTo);
-  
+
   const queryString = queryParams.toString();
   const url = `${config.baseUrl}/api-entrada-xs2a/services/${aspsp}/v1.1/accounts/${accountId}/transactions${queryString ? `?${queryString}` : ''}`;
-  
+
   const response = await fetch(url, {
     method: 'GET',
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
       'Consent-ID': consentId,
       'X-Request-ID': randomBytes(16).toString('hex'),
     },
   });
-  
+
   if (!response.ok) {
     const error = await response.text();
     throw new Error(`Failed to get transactions: ${response.status} ${error}`);
   }
-  
+
   const data = await response.json();
   return data.transactions?.booked || [];
 }
@@ -473,23 +496,26 @@ export async function initiatePayment(
   accessToken: string
 ): Promise<any> {
   const config = getRedsysConfig();
-  
-  const response = await fetch(`${config.baseUrl}/api-entrada-xs2a/services/${aspsp}/v1.1/payments/${paymentProduct}`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-      'X-Request-ID': randomBytes(16).toString('hex'),
-      'PSU-IP-Address': '127.0.0.1', // Should be real user IP
-    },
-    body: JSON.stringify(payment),
-  });
-  
+
+  const response = await fetch(
+    `${config.baseUrl}/api-entrada-xs2a/services/${aspsp}/v1.1/payments/${paymentProduct}`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+        'X-Request-ID': randomBytes(16).toString('hex'),
+        'PSU-IP-Address': '127.0.0.1', // Should be real user IP
+      },
+      body: JSON.stringify(payment),
+    }
+  );
+
   if (!response.ok) {
     const error = await response.text();
     throw new Error(`Failed to initiate payment: ${response.status} ${error}`);
   }
-  
+
   return response.json();
 }
 
@@ -503,20 +529,23 @@ export async function getPaymentStatus(
   accessToken: string
 ): Promise<PaymentStatus> {
   const config = getRedsysConfig();
-  
-  const response = await fetch(`${config.baseUrl}/api-entrada-xs2a/services/${aspsp}/v1.1/payments/${paymentProduct}/${paymentId}/status`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'X-Request-ID': randomBytes(16).toString('hex'),
-    },
-  });
-  
+
+  const response = await fetch(
+    `${config.baseUrl}/api-entrada-xs2a/services/${aspsp}/v1.1/payments/${paymentProduct}/${paymentId}/status`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'X-Request-ID': randomBytes(16).toString('hex'),
+      },
+    }
+  );
+
   if (!response.ok) {
     const error = await response.text();
     throw new Error(`Failed to get payment status: ${response.status} ${error}`);
   }
-  
+
   return response.json();
 }
 
@@ -530,20 +559,23 @@ export async function getPaymentDetails(
   accessToken: string
 ): Promise<any> {
   const config = getRedsysConfig();
-  
-  const response = await fetch(`${config.baseUrl}/api-entrada-xs2a/services/${aspsp}/v1.1/payments/${paymentProduct}/${paymentId}`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'X-Request-ID': randomBytes(16).toString('hex'),
-    },
-  });
-  
+
+  const response = await fetch(
+    `${config.baseUrl}/api-entrada-xs2a/services/${aspsp}/v1.1/payments/${paymentProduct}/${paymentId}`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'X-Request-ID': randomBytes(16).toString('hex'),
+      },
+    }
+  );
+
   if (!response.ok) {
     const error = await response.text();
     throw new Error(`Failed to get payment details: ${response.status} ${error}`);
   }
-  
+
   return response.json();
 }
 
@@ -557,20 +589,23 @@ export async function cancelPayment(
   accessToken: string
 ): Promise<any> {
   const config = getRedsysConfig();
-  
-  const response = await fetch(`${config.baseUrl}/api-entrada-xs2a/services/${aspsp}/v1.1/payments/${paymentProduct}/${paymentId}`, {
-    method: 'DELETE',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'X-Request-ID': randomBytes(16).toString('hex'),
-    },
-  });
-  
+
+  const response = await fetch(
+    `${config.baseUrl}/api-entrada-xs2a/services/${aspsp}/v1.1/payments/${paymentProduct}/${paymentId}`,
+    {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'X-Request-ID': randomBytes(16).toString('hex'),
+      },
+    }
+  );
+
   if (!response.ok) {
     const error = await response.text();
     throw new Error(`Failed to cancel payment: ${response.status} ${error}`);
   }
-  
+
   return response.json();
 }
 
@@ -589,30 +624,33 @@ export async function confirmFunds(
   accessToken: string
 ): Promise<{ fundsAvailable: boolean }> {
   const config = getRedsysConfig();
-  
-  const response = await fetch(`${config.baseUrl}/api-entrada-xs2a/services/${aspsp}/v1.1/funds-confirmations`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-      'X-Request-ID': randomBytes(16).toString('hex'),
-    },
-    body: JSON.stringify({
-      account: {
-        iban: accountId,
+
+  const response = await fetch(
+    `${config.baseUrl}/api-entrada-xs2a/services/${aspsp}/v1.1/funds-confirmations`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+        'X-Request-ID': randomBytes(16).toString('hex'),
       },
-      instructedAmount: {
-        amount,
-        currency,
-      },
-    }),
-  });
-  
+      body: JSON.stringify({
+        account: {
+          iban: accountId,
+        },
+        instructedAmount: {
+          amount,
+          currency,
+        },
+      }),
+    }
+  );
+
   if (!response.ok) {
     const error = await response.text();
     throw new Error(`Failed to confirm funds: ${response.status} ${error}`);
   }
-  
+
   return response.json();
 }
 
@@ -670,10 +708,10 @@ export const BANK_NAMES: Record<string, string> = {
 export function validateSpanishIBAN(iban: string): boolean {
   // Eliminar espacios y convertir a mayúsculas
   const cleanIban = iban.replace(/\s/g, '').toUpperCase();
-  
+
   // Verificar formato español: ES + 2 dígitos de control + 20 dígitos
   const spanishIbanRegex = /^ES\d{22}$/;
-  
+
   return spanishIbanRegex.test(cleanIban);
 }
 
@@ -709,17 +747,17 @@ export function getConsentExpirationDate(days: number = 90): string {
 export default {
   // Config
   getRedsysConfig,
-  
+
   // PKCE
   generateCodeVerifier,
   generateCodeChallenge,
   generateState,
-  
+
   // OAuth
   buildAuthorizationUrl,
   exchangeCodeForToken,
   refreshAccessToken,
-  
+
   // AIS
   createAISConsent,
   getConsentStatus,
@@ -727,16 +765,16 @@ export default {
   getAccountDetails,
   getBalances,
   getTransactions,
-  
+
   // PIS
   initiatePayment,
   getPaymentStatus,
   getPaymentDetails,
   cancelPayment,
-  
+
   // FCS
   confirmFunds,
-  
+
   // Utils
   SPANISH_BANKS,
   BANK_NAMES,

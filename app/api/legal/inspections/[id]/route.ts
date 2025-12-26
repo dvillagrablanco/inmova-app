@@ -6,10 +6,7 @@ import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -21,26 +18,17 @@ export async function GET(
     });
 
     if (!inspection) {
-      return NextResponse.json(
-        { error: 'Inspección no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Inspección no encontrada' }, { status: 404 });
     }
 
     return NextResponse.json(inspection);
   } catch (error) {
     logger.error('Error fetching inspection:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener inspección' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener inspección' }, { status: 500 });
   }
 }
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -54,8 +42,7 @@ export async function PATCH(
     if (body.fechaRealizada) updateData.fechaRealizada = new Date(body.fechaRealizada);
     if (body.observaciones !== undefined) updateData.observaciones = body.observaciones;
     if (body.checklist) updateData.checklist = body.checklist;
-    if (body.daniosEncontrados !== undefined)
-      updateData.daniosEncontrados = body.daniosEncontrados;
+    if (body.daniosEncontrados !== undefined) updateData.daniosEncontrados = body.daniosEncontrados;
     if (body.costoEstimadoDanos !== undefined)
       updateData.costoEstimadoDanos = parseFloat(body.costoEstimadoDanos);
     if (body.fotosAntes) updateData.fotosAntes = body.fotosAntes;
@@ -70,17 +57,11 @@ export async function PATCH(
     return NextResponse.json(inspection);
   } catch (error) {
     logger.error('Error updating inspection:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar inspección' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar inspección' }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -104,10 +85,7 @@ export async function DELETE(
     });
 
     if (!existingInspection) {
-      return NextResponse.json(
-        { error: 'Inspección no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Inspección no encontrada' }, { status: 404 });
     }
 
     await prisma.legalInspection.delete({
@@ -117,9 +95,6 @@ export async function DELETE(
     return NextResponse.json({ success: true, message: 'Inspección eliminada correctamente' });
   } catch (error) {
     logger.error('Error deleting inspection:', error);
-    return NextResponse.json(
-      { error: 'Error al eliminar inspección' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar inspección' }, { status: 500 });
   }
 }

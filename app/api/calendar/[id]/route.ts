@@ -10,10 +10,7 @@ export const dynamic = 'force-dynamic';
  * PATCH /api/calendar/[id]
  * Actualiza un evento del calendario
  */
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -27,15 +24,12 @@ export async function PATCH(
     const evento = await prisma.calendarEvent.findFirst({
       where: {
         id,
-        companyId: session.user.companyId
-      }
+        companyId: session.user.companyId,
+      },
     });
 
     if (!evento) {
-      return NextResponse.json(
-        { error: 'Evento no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Evento no encontrado' }, { status: 404 });
     }
 
     // Actualizar el evento
@@ -55,23 +49,20 @@ export async function PATCH(
         motivoCancelacion: body.motivoCancelacion,
         notas: body.notas,
         recordatorioActivo: body.recordatorioActivo,
-        recordatorioMinutos: body.recordatorioMinutos
+        recordatorioMinutos: body.recordatorioMinutos,
       },
       include: {
         building: true,
         unit: true,
         tenant: true,
-        contract: true
-      }
+        contract: true,
+      },
     });
 
     return NextResponse.json(eventoActualizado);
   } catch (error) {
     logger.error('Error actualizando evento:', error);
-    return NextResponse.json(
-      { error: 'Error actualizando evento' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error actualizando evento' }, { status: 500 });
   }
 }
 
@@ -79,10 +70,7 @@ export async function PATCH(
  * DELETE /api/calendar/[id]
  * Elimina un evento del calendario
  */
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -95,28 +83,22 @@ export async function DELETE(
     const evento = await prisma.calendarEvent.findFirst({
       where: {
         id,
-        companyId: session.user.companyId
-      }
+        companyId: session.user.companyId,
+      },
     });
 
     if (!evento) {
-      return NextResponse.json(
-        { error: 'Evento no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Evento no encontrado' }, { status: 404 });
     }
 
     // Eliminar el evento
     await prisma.calendarEvent.delete({
-      where: { id }
+      where: { id },
     });
 
     return NextResponse.json({ success: true, message: 'Evento eliminado' });
   } catch (error) {
     logger.error('Error eliminando evento:', error);
-    return NextResponse.json(
-      { error: 'Error eliminando evento' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error eliminando evento' }, { status: 500 });
   }
 }

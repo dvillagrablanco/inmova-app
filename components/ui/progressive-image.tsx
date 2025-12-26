@@ -23,14 +23,14 @@ interface ProgressiveImageProps {
 
 /**
  * ProgressiveImage - Componente de imagen optimizado con lazy loading progresivo
- * 
+ *
  * Características:
  * - Lazy loading con Intersection Observer
  * - Placeholder de baja calidad mientras carga
  * - Transición suave entre placeholder y imagen final
  * - Compatible con Next.js Image component
  * - Configuración personalizable de threshold y rootMargin
- * 
+ *
  * @example
  * ```tsx
  * <ProgressiveImage
@@ -89,27 +89,19 @@ export function ProgressiveImage({
   return (
     <div
       ref={imgRef as any}
-      className={cn(
-        'relative overflow-hidden bg-muted',
-        containerClassName
-      )}
+      className={cn('relative overflow-hidden bg-muted', containerClassName)}
       style={{ aspectRatio: width && height ? `${width}/${height}` : undefined }}
     >
       {/* Placeholder */}
       {isLoading && placeholderSrc && (
-        <div
-          className="absolute inset-0 animate-pulse bg-gradient-to-br from-muted via-muted/80 to-muted"
-        >
+        <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-muted via-muted/80 to-muted">
           <Image
             src={placeholderSrc}
             alt={`${alt} (cargando)`}
             width={width}
             height={height}
             fill={fill}
-            className={cn(
-              'object-cover blur-sm scale-105 transition-all duration-300',
-              className
-            )}
+            className={cn('object-cover blur-sm scale-105 transition-all duration-300', className)}
             unoptimized
           />
         </div>

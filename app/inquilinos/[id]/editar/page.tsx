@@ -63,7 +63,7 @@ export default function EditarInquilinoPage() {
           const fechaNacimiento = data.fechaNacimiento
             ? new Date(data.fechaNacimiento).toISOString().split('T')[0]
             : '';
-          
+
           setFormData({
             nombre: data.nombreCompleto || data.nombre || '',
             email: data.email || '',
@@ -139,218 +139,214 @@ export default function EditarInquilinoPage() {
   if (status === 'loading' || isFetching) {
     return (
       <AuthenticatedLayout>
-            <div className="max-w-4xl mx-auto">
-              <p>Cargando...</p>
-            </div>
-          </AuthenticatedLayout>
+        <div className="max-w-4xl mx-auto">
+          <p>Cargando...</p>
+        </div>
+      </AuthenticatedLayout>
     );
   }
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-4xl mx-auto space-y-6">
-            {/* Breadcrumb */}
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/home">
-                    <HomeIcon className="h-4 w-4" />
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/inquilinos">Inquilinos</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Editar Inquilino</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Breadcrumb */}
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/home">
+                <HomeIcon className="h-4 w-4" />
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/inquilinos">Inquilinos</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Editar Inquilino</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 
-            {/* Header */}
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" onClick={() => router.back()}>
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight">Editar Inquilino</h1>
-                <p className="text-muted-foreground">Modifica los datos del inquilino</p>
-              </div>
-            </div>
-
-            {/* Form */}
-            <form onSubmit={handleSubmit}>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Información del Inquilino</CardTitle>
-                  <CardDescription>
-                    Actualiza los campos necesarios y haz clic en guardar
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="grid gap-4 md:grid-cols-2">
-                    {/* Nombre Completo */}
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="nombre">Nombre Completo *</Label>
-                      <Input
-                        id="nombre"
-                        name="nombre"
-                        value={formData.nombre}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-
-                    {/* Email */}
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email *</Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-
-                    {/* Teléfono */}
-                    <div className="space-y-2">
-                      <Label htmlFor="telefono">Teléfono *</Label>
-                      <Input
-                        id="telefono"
-                        name="telefono"
-                        type="tel"
-                        value={formData.telefono}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-
-                    {/* Tipo de Documento */}
-                    <div className="space-y-2">
-                      <Label htmlFor="tipoDocumento">Tipo de Documento *</Label>
-                      <Select
-                        value={formData.tipoDocumento}
-                        onValueChange={(value) =>
-                          setFormData({ ...formData, tipoDocumento: value })
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="dni">DNI</SelectItem>
-                          <SelectItem value="nie">NIE</SelectItem>
-                          <SelectItem value="pasaporte">Pasaporte</SelectItem>
-                          <SelectItem value="otro">Otro</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Número de Documento */}
-                    <div className="space-y-2">
-                      <Label htmlFor="documentoIdentidad">Número de Documento *</Label>
-                      <Input
-                        id="documentoIdentidad"
-                        name="documentoIdentidad"
-                        value={formData.documentoIdentidad}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-
-                    {/* Fecha de Nacimiento */}
-                    <div className="space-y-2">
-                      <Label htmlFor="fechaNacimiento">Fecha de Nacimiento</Label>
-                      <Input
-                        id="fechaNacimiento"
-                        name="fechaNacimiento"
-                        type="date"
-                        value={formData.fechaNacimiento}
-                        onChange={handleChange}
-                      />
-                    </div>
-
-                    {/* Nacionalidad */}
-                    <div className="space-y-2">
-                      <Label htmlFor="nacionalidad">Nacionalidad</Label>
-                      <Input
-                        id="nacionalidad"
-                        name="nacionalidad"
-                        value={formData.nacionalidad}
-                        onChange={handleChange}
-                      />
-                    </div>
-
-                    {/* Estado Civil */}
-                    <div className="space-y-2">
-                      <Label htmlFor="estadoCivil">Estado Civil</Label>
-                      <Select
-                        value={formData.estadoCivil}
-                        onValueChange={(value) =>
-                          setFormData({ ...formData, estadoCivil: value })
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="soltero">Soltero/a</SelectItem>
-                          <SelectItem value="casado">Casado/a</SelectItem>
-                          <SelectItem value="divorciado">Divorciado/a</SelectItem>
-                          <SelectItem value="viudo">Viudo/a</SelectItem>
-                          <SelectItem value="pareja_hecho">Pareja de Hecho</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Profesión */}
-                    <div className="space-y-2">
-                      <Label htmlFor="profesion">Profesión</Label>
-                      <Input
-                        id="profesion"
-                        name="profesion"
-                        value={formData.profesion}
-                        onChange={handleChange}
-                      />
-                    </div>
-
-                    {/* Ingresos Mensuales */}
-                    <div className="space-y-2">
-                      <Label htmlFor="ingresosMensuales">Ingresos Mensuales (€)</Label>
-                      <Input
-                        id="ingresosMensuales"
-                        name="ingresosMensuales"
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={formData.ingresosMensuales}
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Buttons */}
-                  <div className="flex gap-4 justify-end">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => router.back()}
-                      disabled={isLoading}
-                    >
-                      Cancelar
-                    </Button>
-                    <Button type="submit" disabled={isLoading}>
-                      <Save className="mr-2 h-4 w-4" />
-                      {isLoading ? 'Guardando...' : 'Guardar Cambios'}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </form>
+        {/* Header */}
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => router.back()}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Editar Inquilino</h1>
+            <p className="text-muted-foreground">Modifica los datos del inquilino</p>
           </div>
-        </AuthenticatedLayout>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit}>
+          <Card>
+            <CardHeader>
+              <CardTitle>Información del Inquilino</CardTitle>
+              <CardDescription>
+                Actualiza los campos necesarios y haz clic en guardar
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid gap-4 md:grid-cols-2">
+                {/* Nombre Completo */}
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="nombre">Nombre Completo *</Label>
+                  <Input
+                    id="nombre"
+                    name="nombre"
+                    value={formData.nombre}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                {/* Email */}
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                {/* Teléfono */}
+                <div className="space-y-2">
+                  <Label htmlFor="telefono">Teléfono *</Label>
+                  <Input
+                    id="telefono"
+                    name="telefono"
+                    type="tel"
+                    value={formData.telefono}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                {/* Tipo de Documento */}
+                <div className="space-y-2">
+                  <Label htmlFor="tipoDocumento">Tipo de Documento *</Label>
+                  <Select
+                    value={formData.tipoDocumento}
+                    onValueChange={(value) => setFormData({ ...formData, tipoDocumento: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="dni">DNI</SelectItem>
+                      <SelectItem value="nie">NIE</SelectItem>
+                      <SelectItem value="pasaporte">Pasaporte</SelectItem>
+                      <SelectItem value="otro">Otro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Número de Documento */}
+                <div className="space-y-2">
+                  <Label htmlFor="documentoIdentidad">Número de Documento *</Label>
+                  <Input
+                    id="documentoIdentidad"
+                    name="documentoIdentidad"
+                    value={formData.documentoIdentidad}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                {/* Fecha de Nacimiento */}
+                <div className="space-y-2">
+                  <Label htmlFor="fechaNacimiento">Fecha de Nacimiento</Label>
+                  <Input
+                    id="fechaNacimiento"
+                    name="fechaNacimiento"
+                    type="date"
+                    value={formData.fechaNacimiento}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                {/* Nacionalidad */}
+                <div className="space-y-2">
+                  <Label htmlFor="nacionalidad">Nacionalidad</Label>
+                  <Input
+                    id="nacionalidad"
+                    name="nacionalidad"
+                    value={formData.nacionalidad}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                {/* Estado Civil */}
+                <div className="space-y-2">
+                  <Label htmlFor="estadoCivil">Estado Civil</Label>
+                  <Select
+                    value={formData.estadoCivil}
+                    onValueChange={(value) => setFormData({ ...formData, estadoCivil: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="soltero">Soltero/a</SelectItem>
+                      <SelectItem value="casado">Casado/a</SelectItem>
+                      <SelectItem value="divorciado">Divorciado/a</SelectItem>
+                      <SelectItem value="viudo">Viudo/a</SelectItem>
+                      <SelectItem value="pareja_hecho">Pareja de Hecho</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Profesión */}
+                <div className="space-y-2">
+                  <Label htmlFor="profesion">Profesión</Label>
+                  <Input
+                    id="profesion"
+                    name="profesion"
+                    value={formData.profesion}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                {/* Ingresos Mensuales */}
+                <div className="space-y-2">
+                  <Label htmlFor="ingresosMensuales">Ingresos Mensuales (€)</Label>
+                  <Input
+                    id="ingresosMensuales"
+                    name="ingresosMensuales"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formData.ingresosMensuales}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+
+              {/* Buttons */}
+              <div className="flex gap-4 justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => router.back()}
+                  disabled={isLoading}
+                >
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={isLoading}>
+                  <Save className="mr-2 h-4 w-4" />
+                  {isLoading ? 'Guardando...' : 'Guardar Cambios'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </form>
+      </div>
+    </AuthenticatedLayout>
   );
 }

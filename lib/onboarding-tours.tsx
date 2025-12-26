@@ -2,7 +2,7 @@ import React from 'react';
 import { Step } from 'react-joyride';
 
 // Tipo local para BusinessVertical (replica el enum de Prisma)
-export type BusinessVertical = 
+export type BusinessVertical =
   | 'alquiler_tradicional'
   | 'str_vacacional'
   | 'coliving'
@@ -49,7 +49,9 @@ export const VERTICAL_TOURS: Record<BusinessVertical, VerticalTour> = {
         content: (
           <div className="space-y-3">
             <h3 className="text-lg font-bold text-indigo-600">¡Bienvenido a INMOVA!</h3>
-            <p className="text-sm">Te guiaremos paso a paso para configurar tu plataforma de alquiler tradicional.</p>
+            <p className="text-sm">
+              Te guiaremos paso a paso para configurar tu plataforma de alquiler tradicional.
+            </p>
             <p className="text-sm font-medium">Duración estimada: 5 minutos</p>
           </div>
         ),
@@ -91,7 +93,9 @@ export const VERTICAL_TOURS: Record<BusinessVertical, VerticalTour> = {
         content: (
           <div className="space-y-2">
             <h4 className="font-semibold">Paso 4: Crear contratos</h4>
-            <p className="text-sm">Formaliza la relación con tus inquilinos mediante contratos digitales.</p>
+            <p className="text-sm">
+              Formaliza la relación con tus inquilinos mediante contratos digitales.
+            </p>
           </div>
         ),
         placement: 'right',
@@ -101,8 +105,12 @@ export const VERTICAL_TOURS: Record<BusinessVertical, VerticalTour> = {
         content: (
           <div className="space-y-2">
             <h4 className="font-semibold">¡Perfecto!</h4>
-            <p className="text-sm">Ahora puedes ver todas tus métricas en tiempo real en el dashboard.</p>
-            <p className="text-xs text-gray-500 mt-2">Tip: Completa las acciones sugeridas para un setup óptimo.</p>
+            <p className="text-sm">
+              Ahora puedes ver todas tus métricas en tiempo real en el dashboard.
+            </p>
+            <p className="text-xs text-gray-500 mt-2">
+              Tip: Completa las acciones sugeridas para un setup óptimo.
+            </p>
           </div>
         ),
         placement: 'bottom',
@@ -156,7 +164,7 @@ export const VERTICAL_TOURS: Record<BusinessVertical, VerticalTour> = {
       },
     ],
   },
-  
+
   coliving: {
     id: 'coliving',
     name: 'Coliving',
@@ -167,7 +175,9 @@ export const VERTICAL_TOURS: Record<BusinessVertical, VerticalTour> = {
         content: (
           <div className="space-y-3">
             <h3 className="text-lg font-bold text-purple-600">¡Bienvenido a INMOVA Coliving!</h3>
-            <p className="text-sm">Configuraremos tu espacio de coliving con todas las herramientas necesarias.</p>
+            <p className="text-sm">
+              Configuraremos tu espacio de coliving con todas las herramientas necesarias.
+            </p>
             <p className="text-sm font-medium">Duración estimada: 6 minutos</p>
           </div>
         ),
@@ -199,7 +209,9 @@ export const VERTICAL_TOURS: Record<BusinessVertical, VerticalTour> = {
         content: (
           <div className="space-y-2">
             <h4 className="font-semibold">Paso 3: Activar comunidad social</h4>
-            <p className="text-sm">Fomenta la interacción entre residents con herramientas sociales.</p>
+            <p className="text-sm">
+              Fomenta la interacción entre residents con herramientas sociales.
+            </p>
           </div>
         ),
         placement: 'right',
@@ -244,7 +256,7 @@ export const VERTICAL_TOURS: Record<BusinessVertical, VerticalTour> = {
       },
     ],
   },
-  
+
   str_vacacional: {
     id: 'str_vacacional',
     name: 'Alquiler Turístico (STR)',
@@ -255,7 +267,9 @@ export const VERTICAL_TOURS: Record<BusinessVertical, VerticalTour> = {
         content: (
           <div className="space-y-3">
             <h3 className="text-lg font-bold text-pink-600">¡Bienvenido a INMOVA STR!</h3>
-            <p className="text-sm">Configuraremos tu gestión de alquileres turísticos con channel manager integrado.</p>
+            <p className="text-sm">
+              Configuraremos tu gestión de alquileres turísticos con channel manager integrado.
+            </p>
             <p className="text-sm font-medium">Duración estimada: 7 minutos</p>
           </div>
         ),
@@ -351,7 +365,7 @@ export const VERTICAL_TOURS: Record<BusinessVertical, VerticalTour> = {
       },
     ],
   },
-  
+
   flipping: {
     id: 'flipping',
     name: 'House Flipping',
@@ -439,7 +453,7 @@ export const VERTICAL_TOURS: Record<BusinessVertical, VerticalTour> = {
       },
     ],
   },
-  
+
   construccion: {
     id: 'construccion',
     name: 'Construcción/Desarrollo',
@@ -450,7 +464,9 @@ export const VERTICAL_TOURS: Record<BusinessVertical, VerticalTour> = {
         content: (
           <div className="space-y-3">
             <h3 className="text-lg font-bold text-blue-600">¡Bienvenido a INMOVA Construction!</h3>
-            <p className="text-sm">Gestiona proyectos de construcción desde la planificación hasta la entrega.</p>
+            <p className="text-sm">
+              Gestiona proyectos de construcción desde la planificación hasta la entrega.
+            </p>
             <p className="text-sm font-medium">Duración estimada: 6 minutos</p>
           </div>
         ),
@@ -527,7 +543,7 @@ export const VERTICAL_TOURS: Record<BusinessVertical, VerticalTour> = {
       },
     ],
   },
-  
+
   servicios_profesionales: {
     id: 'servicios_profesionales',
     name: 'Servicios Profesionales',
@@ -538,7 +554,9 @@ export const VERTICAL_TOURS: Record<BusinessVertical, VerticalTour> = {
         content: (
           <div className="space-y-3">
             <h3 className="text-lg font-bold text-teal-600">¡Bienvenido a INMOVA Professional!</h3>
-            <p className="text-sm">Gestiona proyectos profesionales y clientes de forma eficiente.</p>
+            <p className="text-sm">
+              Gestiona proyectos profesionales y clientes de forma eficiente.
+            </p>
             <p className="text-sm font-medium">Duración estimada: 5 minutos</p>
           </div>
         ),
@@ -627,7 +645,8 @@ export const VERTICAL_TOURS: Record<BusinessVertical, VerticalTour> = {
           <div className="space-y-3">
             <h3 className="text-lg font-bold">Bienvenido a INMOVA - Modelo Mixto</h3>
             <p className="text-sm">
-              Has seleccionado un modelo mixto. Esta configuración te permite gestionar múltiples tipos de propiedades y negocios inmobiliarios.
+              Has seleccionado un modelo mixto. Esta configuración te permite gestionar múltiples
+              tipos de propiedades y negocios inmobiliarios.
             </p>
             <p className="text-sm font-medium">Duración estimada: 5 minutos</p>
           </div>
@@ -677,20 +696,20 @@ export function getUserVerticalTour(vertical?: BusinessVertical | null): Vertica
 // Función para calcular el progreso del setup
 export function calculateSetupProgress(actions: SetupAction[]): number {
   if (actions.length === 0) return 0;
-  
+
   const totalWeight = actions.reduce((sum, action) => sum + action.weight, 0);
   const completedWeight = actions
-    .filter(action => action.completed)
+    .filter((action) => action.completed)
     .reduce((sum, action) => sum + action.weight, 0);
-  
+
   return Math.round((completedWeight / totalWeight) * 100);
 }
 
 // Función para obtener la siguiente acción recomendada
 export function getNextRecommendedAction(actions: SetupAction[]): SetupAction | null {
-  const incompleteActions = actions.filter(action => !action.completed);
+  const incompleteActions = actions.filter((action) => !action.completed);
   if (incompleteActions.length === 0) return null;
-  
+
   // Retornar la acción incompleta con mayor peso
   return incompleteActions.sort((a, b) => b.weight - a.weight)[0];
 }

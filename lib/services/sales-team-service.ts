@@ -1,6 +1,6 @@
 /**
  * Servicio de Equipo Comercial Externo
- * 
+ *
  * Gestiona comerciales autónomos, leads, comisiones y objetivos de ventas
  */
 
@@ -9,7 +9,14 @@ import { prisma } from '../db';
 
 // Definiciones de tipos inline (reemplaza imports de @prisma/client)
 type SalesRepStatus = 'ACTIVO' | 'INACTIVO' | 'SUSPENDIDO' | 'CANCELADO';
-type LeadStatus = 'NUEVO' | 'CONTACTADO' | 'CALIFICADO' | 'DEMO' | 'PROPUESTA' | 'CERRADO' | 'PERDIDO';
+type LeadStatus =
+  | 'NUEVO'
+  | 'CONTACTADO'
+  | 'CALIFICADO'
+  | 'DEMO'
+  | 'PROPUESTA'
+  | 'CERRADO'
+  | 'PERDIDO';
 type SalesCommissionType = 'CAPTACION' | 'RECURRENTE' | 'REACTIVACION' | 'BONIFICACION' | 'NIVEL2';
 type SalesCommissionStatus = 'PENDIENTE' | 'APROBADA' | 'PAGADA' | 'CANCELADA' | 'RETENIDA';
 type SalesCommission = any; // Tipo del modelo Prisma, se mantiene como any para compatibilidad
@@ -44,7 +51,9 @@ export async function createSalesRepresentative(data: {
   // Generar código de referido único
   const nombreLimpio = data.nombre.toUpperCase().replace(/[^A-Z]/g, '');
   const year = new Date().getFullYear();
-  const random = Math.floor(Math.random() * 9999).toString().padStart(4, '0');
+  const random = Math.floor(Math.random() * 9999)
+    .toString()
+    .padStart(4, '0');
   const codigoReferido = `COM-${nombreLimpio}-${year}-${random}`;
 
   // Hashear password
@@ -69,7 +78,7 @@ export async function createSalesRepresentative(data: {
   for (let i = 0; i < 3; i++) {
     const targetMonth = new Date(today.getFullYear(), today.getMonth() + i, 1);
     const periodo = `${targetMonth.getFullYear()}-${(targetMonth.getMonth() + 1).toString().padStart(2, '0')}`;
-    
+
     await createSalesTarget({
       salesRepId: salesRep.id,
       periodo,
@@ -88,27 +97,30 @@ export async function createSalesRepresentative(data: {
 /**
  * Actualizar información de un comercial
  */
-export async function updateSalesRepresentative(id: string, data: Partial<{
-  nombre: string;
-  apellidos: string;
-  email: string;
-  telefono: string;
-  telefonoSecundario: string;
-  numeroAutonomo: string;
-  iban: string;
-  direccion: string;
-  ciudad: string;
-  codigoPostal: string;
-  comisionCaptacion: number;
-  comisionRecurrente: number;
-  bonificacionObjetivo: number;
-  objetivoLeadsMes: number;
-  objetivoConversionesMes: number;
-  estado: SalesRepStatus;
-  notas: string;
-}>) {
+export async function updateSalesRepresentative(
+  id: string,
+  data: Partial<{
+    nombre: string;
+    apellidos: string;
+    email: string;
+    telefono: string;
+    telefonoSecundario: string;
+    numeroAutonomo: string;
+    iban: string;
+    direccion: string;
+    ciudad: string;
+    codigoPostal: string;
+    comisionCaptacion: number;
+    comisionRecurrente: number;
+    bonificacionObjetivo: number;
+    objetivoLeadsMes: number;
+    objetivoConversionesMes: number;
+    estado: SalesRepStatus;
+    notas: string;
+  }>
+) {
   const updateData: any = { ...data };
-  
+
   if (data.nombre || data.apellidos) {
     const current = await prisma.salesRepresentative.findUnique({ where: { id } });
     if (current) {
@@ -136,7 +148,11 @@ export async function changeSalesRepPassword(id: string, newPassword: string) {
 /**
  * Suspender o reactivar un comercial
  */
-export async function updateSalesRepStatus(id: string, estado: SalesRepStatus, motivoBaja?: string) {
+export async function updateSalesRepStatus(
+  id: string,
+  estado: SalesRepStatus,
+  motivoBaja?: string
+) {
   return await prisma.salesRepresentative.update({
     where: { id },
     data: {
@@ -221,9 +237,10 @@ export async function updateSalesRepMetrics(id: string) {
   if (!salesRep) throw new Error('Comercial no encontrado');
 
   const totalLeadsGenerados = salesRep.leads.length;
-  const totalConversiones = salesRep.leads.filter(l => l.convertido).length;
+  const totalConversiones = salesRep.leads.filter((l) => l.convertido).length;
   const totalComisionGenerada = salesRep.comisiones.reduce((sum, c) => sum + c.montoNeto, 0);
-  const tasaConversion = totalLeadsGenerados > 0 ? (totalConversiones / totalLeadsGenerados) * 100 : 0;
+  const tasaConversion =
+    totalLeadsGenerados > 0 ? (totalConversiones / totalLeadsGenerados) * 100 : 0;
 
   return await prisma.salesRepresentative.update({
     where: { id },
@@ -273,16 +290,21 @@ export async function createLead(data: {
 /**
  * Actualizar estado de un lead
  */
-export async function updateLeadStatus(id: string, estado: LeadStatus, notas?: string, motivoRechazo?: string) {
+export async function updateLeadStatus(
+  id: string,
+  estado: LeadStatus,
+  notas?: string,
+  motivoRechazo?: string
+) {
   const updateData: any = { estado };
-  
+
   if (notas) updateData.notas = notas;
   if (motivoRechazo) updateData.motivoRechazo = motivoRechazo;
-  
+
   if (estado === 'CONTACTADO' && !updateData.fechaPrimerContacto) {
     updateData.fechaPrimerContacto = new Date();
   }
-  
+
   updateData.fechaUltimoContacto = new Date();
 
   return await prisma.salesLead.update({
@@ -294,20 +316,23 @@ export async function updateLeadStatus(id: string, estado: LeadStatus, notas?: s
 /**
  * Actualizar información de un lead
  */
-export async function updateLead(id: string, data: Partial<{
-  nombreContacto: string;
-  emailContacto: string;
-  telefonoContacto: string;
-  nombreEmpresa: string;
-  sector: string;
-  tipoCliente: string;
-  propiedadesEstimadas: number;
-  presupuestoMensual: number;
-  prioridad: string;
-  probabilidadCierre: number;
-  proximoSeguimiento: Date;
-  notas: string;
-}>) {
+export async function updateLead(
+  id: string,
+  data: Partial<{
+    nombreContacto: string;
+    emailContacto: string;
+    telefonoContacto: string;
+    nombreEmpresa: string;
+    sector: string;
+    tipoCliente: string;
+    propiedadesEstimadas: number;
+    presupuestoMensual: number;
+    prioridad: string;
+    probabilidadCierre: number;
+    proximoSeguimiento: Date;
+    notas: string;
+  }>
+) {
   return await prisma.salesLead.update({
     where: { id },
     data,
@@ -481,11 +506,14 @@ export async function approveCommission(id: string, aprobadoPor: string, notaApr
 /**
  * Marcar comisión como pagada
  */
-export async function markCommissionPaid(id: string, data: {
-  referenciaPago: string;
-  metodoPago: string;
-  comprobantePago?: string;
-}) {
+export async function markCommissionPaid(
+  id: string,
+  data: {
+    referenciaPago: string;
+    metodoPago: string;
+    comprobantePago?: string;
+  }
+) {
   const commission = await prisma.salesCommission.update({
     where: { id },
     data: {
@@ -651,15 +679,17 @@ export async function updateTargetProgress(salesRepId: string) {
   });
 
   const leadsGenerados = leads.length;
-  const conversionesLogradas = leads.filter(l => l.convertido).length;
+  const conversionesLogradas = leads.filter((l) => l.convertido).length;
   const mrrGenerado = leads
-    .filter(l => l.convertido && l.valorMensual)
+    .filter((l) => l.convertido && l.valorMensual)
     .reduce((sum, l) => sum + (l.valorMensual || 0), 0);
 
-  const porcentajeLeads = target.objetivoLeads > 0 ? (leadsGenerados / target.objetivoLeads) * 100 : 0;
-  const porcentajeConversiones = target.objetivoConversiones > 0 
-    ? (conversionesLogradas / target.objetivoConversiones) * 100 
-    : 0;
+  const porcentajeLeads =
+    target.objetivoLeads > 0 ? (leadsGenerados / target.objetivoLeads) * 100 : 0;
+  const porcentajeConversiones =
+    target.objetivoConversiones > 0
+      ? (conversionesLogradas / target.objetivoConversiones) * 100
+      : 0;
   const porcentajeMRR = target.objetivoMRR > 0 ? (mrrGenerado / target.objetivoMRR) * 100 : 0;
 
   const cumplido = porcentajeLeads >= 100 && porcentajeConversiones >= 100 && porcentajeMRR >= 100;
@@ -890,7 +920,7 @@ export default {
   getSalesRepresentatives,
   getSalesRepresentativeById,
   updateSalesRepMetrics,
-  
+
   // Leads
   createLead,
   updateLeadStatus,
@@ -899,7 +929,7 @@ export default {
   convertLead,
   getLeads,
   getLeadById,
-  
+
   // Comisiones
   createCommission,
   approveCommission,
@@ -907,13 +937,13 @@ export default {
   cancelCommission,
   getCommissions,
   generateRecurrentCommissions,
-  
+
   // Objetivos
   createSalesTarget,
   updateTargetProgress,
   processBonifications,
   getSalesTargets,
-  
+
   // Dashboards
   getSalesRepDashboard,
   getAdminDashboard,

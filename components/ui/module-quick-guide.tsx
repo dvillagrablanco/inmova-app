@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from 'react';
 import { X, ChevronDown, ChevronUp, Check, Lightbulb } from 'lucide-react';
@@ -102,7 +102,9 @@ export function ModuleQuickGuide({
   const allCompleted = completedSteps.size === steps.length;
 
   return (
-    <Card className={cn('border-primary/20 bg-gradient-to-br from-primary/5 to-background', className)}>
+    <Card
+      className={cn('border-primary/20 bg-gradient-to-br from-primary/5 to-background', className)}
+    >
       <div className="p-4">
         {/* Header */}
         <div className="flex items-start justify-between gap-3 mb-3">
@@ -156,7 +158,13 @@ export function ModuleQuickGuide({
 
         {/* Progress Bar */}
         {!allCompleted && (
-          <div className="w-full bg-secondary rounded-full h-1.5 mb-3" role="progressbar" aria-valuenow={completionPercentage} aria-valuemin={0} aria-valuemax={100}>
+          <div
+            className="w-full bg-secondary rounded-full h-1.5 mb-3"
+            role="progressbar"
+            aria-valuenow={completionPercentage}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          >
             <div
               className="bg-primary h-1.5 rounded-full transition-all duration-300"
               style={{ width: `${completionPercentage}%` }}
@@ -188,7 +196,11 @@ export function ModuleQuickGuide({
                         ? 'bg-primary border-primary text-primary-foreground'
                         : 'border-muted-foreground/30 hover:border-primary'
                     )}
-                    aria-label={isCompleted ? `Marcar paso ${index + 1} como no completado` : `Marcar paso ${index + 1} como completado`}
+                    aria-label={
+                      isCompleted
+                        ? `Marcar paso ${index + 1} como no completado`
+                        : `Marcar paso ${index + 1} como completado`
+                    }
                     aria-pressed={isCompleted}
                   >
                     {isCompleted && <Check className="h-3 w-3" aria-hidden="true" />}
@@ -196,7 +208,9 @@ export function ModuleQuickGuide({
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
-                    <h4 className={cn('font-medium text-sm', isCompleted && 'text-muted-foreground')}>
+                    <h4
+                      className={cn('font-medium text-sm', isCompleted && 'text-muted-foreground')}
+                    >
                       {step.title}
                     </h4>
                     <p className="text-xs text-muted-foreground mt-1">{step.description}</p>
@@ -226,7 +240,8 @@ export function ModuleQuickGuide({
         {allCompleted && isExpanded && (
           <div className="mt-3 p-3 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
             <p className="text-sm text-green-800 dark:text-green-200">
-              🎉 ¡Felicitaciones! Ya dominas los conceptos básicos de este módulo. Explora funcionalidades avanzadas o contacta a soporte si necesitas ayuda.
+              🎉 ¡Felicitaciones! Ya dominas los conceptos básicos de este módulo. Explora
+              funcionalidades avanzadas o contacta a soporte si necesitas ayuda.
             </p>
           </div>
         )}

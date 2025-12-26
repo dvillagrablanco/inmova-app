@@ -49,14 +49,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `${results.filter(r => r.success).length}/${results.length} clientes sincronizados con A3`,
+      message: `${results.filter((r) => r.success).length}/${results.length} clientes sincronizados con A3`,
       results,
     });
   } catch (error) {
     logger.error('Error syncing customers to A3:', error);
-    return NextResponse.json(
-      { error: 'Error al sincronizar clientes con A3' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al sincronizar clientes con A3' }, { status: 500 });
   }
 }

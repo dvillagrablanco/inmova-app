@@ -19,9 +19,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    userId = session?.user?.id
+    userId = session?.user?.id;
     companyId = session?.user?.companyId;
-    
+
     if (!companyId) {
       return NextResponse.json({ error: 'companyId no encontrado' }, { status: 400 });
     }
@@ -43,9 +43,6 @@ export async function GET(req: NextRequest) {
       userId,
       companyId,
     });
-    return NextResponse.json(
-      { error: 'Error al obtener tareas de Mi Día' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener tareas de Mi Día' }, { status: 500 });
   }
 }

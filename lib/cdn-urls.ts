@@ -14,10 +14,10 @@ export function getCDNUrl(path: string): string {
   if (!CDN_BASE_URL) {
     return path; // Fallback a URL local
   }
-  
+
   // Remover slash inicial si existe
   const cleanPath = path.startsWith('/') ? path.slice(1) : path;
-  
+
   return `${CDN_BASE_URL}/${cleanPath}`;
 }
 
@@ -35,21 +35,18 @@ export interface ImageOptimizationOptions {
  * Genera URL optimizada de imagen con transformaciones
  * Compatible con servicios de transformación de imágenes
  */
-export function getOptimizedImageUrl(
-  path: string,
-  options?: ImageOptimizationOptions
-): string {
+export function getOptimizedImageUrl(path: string, options?: ImageOptimizationOptions): string {
   const baseUrl = getCDNUrl(path);
-  
+
   if (!options) return baseUrl;
-  
+
   // Construir query params para transformaciones
   const params = new URLSearchParams();
   if (options.width) params.set('w', options.width.toString());
   if (options.height) params.set('h', options.height.toString());
   if (options.quality) params.set('q', options.quality.toString());
   if (options.format) params.set('fm', options.format);
-  
+
   return `${baseUrl}?${params.toString()}`;
 }
 
@@ -57,10 +54,10 @@ export function getOptimizedImageUrl(
  * URLs responsive para diferentes breakpoints
  */
 export interface ResponsiveImageUrls {
-  sm: string;  // Mobile - 640px
-  md: string;  // Tablet - 1024px
-  lg: string;  // Desktop - 1920px
-  xl: string;  // 4K - 3840px
+  sm: string; // Mobile - 640px
+  md: string; // Tablet - 1024px
+  lg: string; // Desktop - 1920px
+  xl: string; // 4K - 3840px
 }
 
 /**
@@ -82,13 +79,8 @@ export function getResponsiveImageUrls(path: string): ResponsiveImageUrls {
  */
 export function getImageSrcSet(path: string): string {
   const urls = getResponsiveImageUrls(path);
-  
-  return [
-    `${urls.sm} 640w`,
-    `${urls.md} 1024w`,
-    `${urls.lg} 1920w`,
-    `${urls.xl} 3840w`,
-  ].join(', ');
+
+  return [`${urls.sm} 640w`, `${urls.md} 1024w`, `${urls.lg} 1920w`, `${urls.xl} 3840w`].join(', ');
 }
 
 /**
@@ -140,34 +132,31 @@ export type AssetType = 'image' | 'document' | 'video' | 'audio' | 'other';
  */
 export function getAssetType(path: string): AssetType {
   const ext = path.split('.').pop()?.toLowerCase();
-  
+
   const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'svg'];
   const documentExts = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'];
   const videoExts = ['mp4', 'webm', 'ogg', 'mov', 'avi'];
   const audioExts = ['mp3', 'wav', 'ogg', 'aac'];
-  
+
   if (ext && imageExts.includes(ext)) return 'image';
   if (ext && documentExts.includes(ext)) return 'document';
   if (ext && videoExts.includes(ext)) return 'video';
   if (ext && audioExts.includes(ext)) return 'audio';
-  
+
   return 'other';
 }
 
 /**
  * Genera URL apropiada según el tipo de asset
  */
-export function getAssetUrl(
-  path: string,
-  optimization?: ImageOptimizationOptions
-): string {
+export function getAssetUrl(path: string, optimization?: ImageOptimizationOptions): string {
   const assetType = getAssetType(path);
-  
+
   // Solo optimizar imágenes
   if (assetType === 'image' && optimization) {
     return getOptimizedImageUrl(path, optimization);
   }
-  
+
   // Para otros tipos, solo usar CDN básico
   return getCDNUrl(path);
 }
@@ -178,16 +167,16 @@ export function getAssetUrl(
 export const CACHE_HEADERS = {
   // Inmutable: nunca cambiará (usa versioning)
   immutable: 'public, max-age=31536000, immutable',
-  
+
   // Assets estáticos (1 año)
   longTerm: 'public, max-age=31536000, s-maxage=31536000',
-  
+
   // Imágenes y documentos (1 mes)
   mediumTerm: 'public, max-age=2592000, s-maxage=2592000',
-  
+
   // Contenido dinámico (1 hora)
   shortTerm: 'public, max-age=3600, s-maxage=3600',
-  
+
   // Sin cache
   noCache: 'no-store, no-cache, must-revalidate',
 } as const;
@@ -197,22 +186,22 @@ export const CACHE_HEADERS = {
  */
 export function getCacheHeaders(path: string): string {
   const assetType = getAssetType(path);
-  
+
   // Assets con version en URL
   if (path.includes('?v=') || path.includes('&v=')) {
     return CACHE_HEADERS.immutable;
   }
-  
+
   // Imágenes y documentos
   if (assetType === 'image' || assetType === 'document') {
     return CACHE_HEADERS.mediumTerm;
   }
-  
+
   // Videos y audio
   if (assetType === 'video' || assetType === 'audio') {
     return CACHE_HEADERS.longTerm;
   }
-  
+
   // Por defecto
   return CACHE_HEADERS.shortTerm;
 }

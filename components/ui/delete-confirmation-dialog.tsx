@@ -41,9 +41,7 @@ export function DeleteConfirmationDialog({
             <Trash2 className="h-5 w-5" />
             <AlertDialogTitle>{title}</AlertDialogTitle>
           </div>
-          <AlertDialogDescription>
-            {description || defaultDescription}
-          </AlertDialogDescription>
+          <AlertDialogDescription>{description || defaultDescription}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>

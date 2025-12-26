@@ -16,10 +16,7 @@ export async function POST(request: NextRequest) {
     const { endpoint } = await request.json();
 
     if (!endpoint) {
-      return NextResponse.json(
-        { error: 'Endpoint requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Endpoint requerido' }, { status: 400 });
     }
 
     // Eliminar la suscripción

@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     const companyId = session?.user?.companyId;
     // Obtener proyectos vendidos
     const projects = await prisma.flippingProject.findMany({
-      where: { 
+      where: {
         companyId,
         estado: 'VENDIDO',
       },

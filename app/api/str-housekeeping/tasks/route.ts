@@ -76,10 +76,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(tasks);
   } catch (error) {
     console.error('Error al obtener tareas:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener tareas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener tareas' }, { status: 500 });
   }
 }
 
@@ -112,10 +109,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!listing) {
-      return NextResponse.json(
-        { error: 'Listing no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Listing no encontrado' }, { status: 404 });
     }
 
     const task = await prisma.sTRHousekeepingTask.create({
@@ -148,9 +142,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(task, { status: 201 });
   } catch (error) {
     console.error('Error al crear tarea:', error);
-    return NextResponse.json(
-      { error: 'Error al crear tarea' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear tarea' }, { status: 500 });
   }
 }

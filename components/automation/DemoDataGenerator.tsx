@@ -5,16 +5,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Sparkles, 
-  Building2, 
-  Users, 
-  FileText, 
-  CheckCircle2, 
-  AlertCircle, 
+import {
+  Sparkles,
+  Building2,
+  Users,
+  FileText,
+  CheckCircle2,
+  AlertCircle,
   Loader2,
   Database,
-  Zap
+  Zap,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
@@ -35,10 +35,10 @@ export default function DemoDataGenerator() {
 
   const handleGenerate = async () => {
     setLoading(true);
-    
+
     try {
       const res = await fetch('/api/automation/generate-demo-data', {
-        method: 'POST'
+        method: 'POST',
       });
 
       const data = await res.json();
@@ -47,7 +47,7 @@ export default function DemoDataGenerator() {
         if (data.hasData) {
           setHasExistingData(true);
           toast.error('Ya tienes datos en tu cuenta', {
-            description: 'Los datos demo solo se pueden generar en cuentas nuevas'
+            description: 'Los datos demo solo se pueden generar en cuentas nuevas',
           });
         } else {
           throw new Error(data.error || 'Error al generar datos');
@@ -56,7 +56,7 @@ export default function DemoDataGenerator() {
         setGenerated(true);
         setSummary(data.summary);
         toast.success('¡Datos demo generados!', {
-          description: data.message
+          description: data.message,
         });
       }
     } catch (error) {
@@ -80,10 +80,7 @@ export default function DemoDataGenerator() {
 
   if (generated && summary) {
     return (
-      <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-      >
+      <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
         <Card className="border-2 border-green-500/20 bg-green-50/50 dark:bg-green-950/20">
           <CardHeader>
             <div className="flex items-center gap-3">
@@ -148,17 +145,21 @@ export default function DemoDataGenerator() {
         <Alert>
           <Zap className="h-4 w-4" />
           <AlertDescription>
-            Se crearán automáticamente:<br />
-            • 3 edificios de diferentes tipos<br />
-            • 7 unidades (apartamentos, locales, habitaciones)<br />
-            • 4 inquilinos con datos completos<br />
-            • 2 contratos activos
+            Se crearán automáticamente:
+            <br />
+            • 3 edificios de diferentes tipos
+            <br />
+            • 7 unidades (apartamentos, locales, habitaciones)
+            <br />
+            • 4 inquilinos con datos completos
+            <br />• 2 contratos activos
           </AlertDescription>
         </Alert>
 
         <div className="space-y-2">
           <p className="text-sm text-muted-foreground">
-            Esto te permitirá explorar todas las funcionalidades sin tener que ingresar datos manualmente.
+            Esto te permitirá explorar todas las funcionalidades sin tener que ingresar datos
+            manualmente.
           </p>
           <div className="flex flex-wrap gap-2">
             <Badge variant="outline">
@@ -176,12 +177,7 @@ export default function DemoDataGenerator() {
           </div>
         </div>
 
-        <Button 
-          onClick={handleGenerate}
-          disabled={loading}
-          className="w-full"
-          size="lg"
-        >
+        <Button onClick={handleGenerate} disabled={loading} className="w-full" size="lg">
           {loading ? (
             <>
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />

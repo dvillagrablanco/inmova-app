@@ -40,10 +40,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(reviews);
   } catch (error) {
     logger.error('Error fetching reviews:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener reseñas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener reseñas' }, { status: 500 });
   }
 }
 
@@ -104,7 +101,7 @@ export async function POST(req: NextRequest) {
         precioJusto: precioJusto ? parseInt(precioJusto) : null,
         comentario: comentario || null,
         recomendaria: recomendaria !== false,
-        creadoPor: session?.user?.email|| '',
+        creadoPor: session?.user?.email || '',
       },
       include: {
         provider: true,
@@ -118,9 +115,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(review, { status: 201 });
   } catch (error) {
     logger.error('Error creating review:', error);
-    return NextResponse.json(
-      { error: 'Error al crear reseña' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear reseña' }, { status: 500 });
   }
 }

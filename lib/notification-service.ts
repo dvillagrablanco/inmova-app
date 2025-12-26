@@ -1,7 +1,7 @@
 /**
  * NOTIFICATION SERVICE
  * Servicio para gestionar notificaciones in-app
- * 
+ *
  * Funciones:
  * - createNotification: Crear una notificación para un usuario
  * - getUnreadCount: Obtener el número de notificaciones no leídas
@@ -119,10 +119,7 @@ export async function markAllAsRead(userId: string) {
 /**
  * Obtiene las notificaciones más recientes de un usuario
  */
-export async function getRecentNotifications(
-  userId: string,
-  limit: number = 20
-) {
+export async function getRecentNotifications(userId: string, limit: number = 20) {
   try {
     const notifications = await prisma.inAppNotification.findMany({
       where: {
@@ -179,7 +176,8 @@ export async function notifyWelcome(userId: string, companyId: string) {
     companyId,
     type: 'success',
     title: '¡Bienvenido a INMOVA! 🎉',
-    message: 'Tu cuenta ha sido creada exitosamente. Completa tu perfil y comienza a gestionar tus propiedades.',
+    message:
+      'Tu cuenta ha sido creada exitosamente. Completa tu perfil y comienza a gestionar tus propiedades.',
     icon: 'PartyPopper',
     actionLabel: 'Ir al Onboarding',
     actionRoute: '/onboarding',
@@ -195,7 +193,8 @@ export async function notifyOnboardingCompleted(userId: string, companyId: strin
     companyId,
     type: 'success',
     title: '¡Onboarding Completado! 🚀',
-    message: 'Has completado todas las tareas de configuración inicial. ¡Ahora estás listo para aprovechar todo el potencial de INMOVA!',
+    message:
+      'Has completado todas las tareas de configuración inicial. ¡Ahora estás listo para aprovechar todo el potencial de INMOVA!',
     icon: 'CheckCircle2',
     actionLabel: 'Ir al Dashboard',
     actionRoute: '/home',
@@ -227,7 +226,8 @@ export async function notifyFirstUnit(userId: string, companyId: string) {
     companyId,
     type: 'success',
     title: '¡Primera Unidad Creada! 🏠',
-    message: 'Has añadido tu primera unidad. Ahora puedes crear contratos y comenzar a gestionar inquilinos.',
+    message:
+      'Has añadido tu primera unidad. Ahora puedes crear contratos y comenzar a gestionar inquilinos.',
     icon: 'Home',
     actionLabel: 'Ver Unidades',
     actionRoute: '/units',
@@ -243,7 +243,8 @@ export async function notifyFirstContract(userId: string, companyId: string) {
     companyId,
     type: 'success',
     title: '¡Primer Contrato Creado! 📝',
-    message: 'Has creado tu primer contrato. INMOVA se encargará de gestionar los pagos y notificaciones automáticamente.',
+    message:
+      'Has creado tu primer contrato. INMOVA se encargará de gestionar los pagos y notificaciones automáticamente.',
     icon: 'FileText',
     actionLabel: 'Ver Contratos',
     actionRoute: '/contracts',
@@ -253,7 +254,11 @@ export async function notifyFirstContract(userId: string, companyId: string) {
 /**
  * Crea una notificación de recordatorio de onboarding
  */
-export async function notifyOnboardingReminder(userId: string, companyId: string, progress: number) {
+export async function notifyOnboardingReminder(
+  userId: string,
+  companyId: string,
+  progress: number
+) {
   return createNotification({
     userId,
     companyId,

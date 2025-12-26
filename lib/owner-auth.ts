@@ -182,13 +182,16 @@ export async function requireOwnerAuth(req: NextRequest) {
 /**
  * Verifica si el propietario tiene acceso a un edificio específico
  */
-export async function ownerHasAccessToBuilding(ownerId: string, buildingId: string): Promise<boolean> {
+export async function ownerHasAccessToBuilding(
+  ownerId: string,
+  buildingId: string
+): Promise<boolean> {
   const ownerBuilding = await prisma.ownerBuilding.findFirst({
     where: {
       ownerId,
       buildingId,
     },
   });
-  
+
   return !!ownerBuilding;
 }

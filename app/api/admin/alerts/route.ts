@@ -12,17 +12,11 @@ export async function GET() {
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     if (session.user.role !== 'super_admin') {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
 
     const alerts: Array<{
@@ -50,10 +44,7 @@ export async function GET() {
     });
 
     companies.forEach((company) => {
-      if (
-        company.maxUsuarios &&
-        company._count.users >= company.maxUsuarios
-      ) {
+      if (company.maxUsuarios && company._count.users >= company.maxUsuarios) {
         alerts.push({
           id: `users-limit-${company.id}`,
           type: 'warning',
@@ -66,10 +57,7 @@ export async function GET() {
         });
       }
 
-      if (
-        company.maxEdificios &&
-        company._count.buildings >= company.maxEdificios
-      ) {
+      if (company.maxEdificios && company._count.buildings >= company.maxEdificios) {
         alerts.push({
           id: `buildings-limit-${company.id}`,
           type: 'warning',
@@ -189,9 +177,6 @@ export async function GET() {
     });
   } catch (error) {
     logger.error('Error fetching alerts:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener alertas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener alertas' }, { status: 500 });
   }
 }

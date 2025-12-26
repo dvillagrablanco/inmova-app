@@ -1,9 +1,9 @@
 /**
  * Error Boundary para Contratos
- * 
+ *
  * Captura y muestra errores que ocurren en la página de contratos.
  * Proporciona opciones de recuperación para el usuario.
- * 
+ *
  * @since Semana 2, Tarea 2.5
  */
 

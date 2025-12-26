@@ -9,8 +9,10 @@ import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
-export interface PasswordInputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
+export interface PasswordInputProps extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  'type'
+> {
   showToggle?: boolean;
 }
 
@@ -37,9 +39,15 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
             tabIndex={-1}
           >
             {showPassword ? (
-              <EyeOff className="h-4 w-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" aria-hidden="true" />
+              <EyeOff
+                className="h-4 w-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                aria-hidden="true"
+              />
             ) : (
-              <Eye className="h-4 w-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" aria-hidden="true" />
+              <Eye
+                className="h-4 w-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                aria-hidden="true"
+              />
             )}
           </Button>
         )}

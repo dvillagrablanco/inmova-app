@@ -49,12 +49,12 @@ export function BreadcrumbAuto({
   className,
 }: BreadcrumbAutoProps) {
   const pathname = usePathname();
-  
+
   // Dividir el pathname en segmentos
   if (!pathname) return null;
-  
+
   const segments = pathname.split('/').filter(Boolean);
-  
+
   // Si estamos en la raíz, no mostrar breadcrumbs
   if (segments.length === 0) {
     return null;
@@ -74,13 +74,10 @@ export function BreadcrumbAuto({
   });
 
   // Limitar el número de items si es necesario
-  const displayItems = items.length > maxItems
-    ? [
-        ...items.slice(0, 1),
-        { href: '#', label: '...', isLast: false },
-        ...items.slice(-2),
-      ]
-    : items;
+  const displayItems =
+    items.length > maxItems
+      ? [...items.slice(0, 1), { href: '#', label: '...', isLast: false }, ...items.slice(-2)]
+      : items;
 
   return (
     <Breadcrumb className={className}>

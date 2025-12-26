@@ -101,7 +101,7 @@ export function ChatPanel() {
       const response = await fetch(`/api/chat/messages/${selectedUser.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: newMessage })
+        body: JSON.stringify({ message: newMessage }),
       });
 
       if (response.ok) {
@@ -166,7 +166,10 @@ export function ChatPanel() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <p className="font-medium text-sm truncate">{conv.user.name}</p>
-                          <Badge variant={getRoleBadgeColor(conv.user.role)} className="text-[9px] h-4 px-1">
+                          <Badge
+                            variant={getRoleBadgeColor(conv.user.role)}
+                            className="text-[9px] h-4 px-1"
+                          >
                             {conv.user.role}
                           </Badge>
                         </div>
@@ -231,15 +234,11 @@ export function ChatPanel() {
                   messages.map((msg) => (
                     <div
                       key={msg.id}
-                      className={`flex ${
-                        msg.isSent ? 'justify-start' : 'justify-end'
-                      }`}
+                      className={`flex ${msg.isSent ? 'justify-start' : 'justify-end'}`}
                     >
                       <div
                         className={`max-w-[70%] rounded-lg px-4 py-2 ${
-                          msg.isSent
-                            ? 'bg-gray-100 text-gray-900'
-                            : 'bg-indigo-600 text-white'
+                          msg.isSent ? 'bg-gray-100 text-gray-900' : 'bg-indigo-600 text-white'
                         }`}
                       >
                         <p className="text-sm whitespace-pre-wrap break-words">{msg.mensaje}</p>
@@ -250,7 +249,7 @@ export function ChatPanel() {
                         >
                           {formatDistanceToNow(new Date(msg.createdAt), {
                             addSuffix: true,
-                            locale: es
+                            locale: es,
                           })}
                         </p>
                       </div>

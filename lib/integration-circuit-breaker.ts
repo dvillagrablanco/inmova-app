@@ -1,7 +1,7 @@
 /**
  * Circuit Breaker Pattern para Integraciones Externas
  * Previene cascadas de fallos protegiendo contra APIs caídas
- * 
+ *
  * Estados:
  * - CLOSED: Normal, todas las requests pasan
  * - OPEN: Circuito abierto, todas las requests fallan inmediatamente

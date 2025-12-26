@@ -13,18 +13,11 @@ export async function GET(request: NextRequest) {
     }
     // Obtener plantillas de automatización
     const templates = await prisma.automationTemplate.findMany({
-      orderBy: [
-        { popular: 'desc' },
-        { vecesUsada: 'desc' },
-        { createdAt: 'desc' },
-      ],
+      orderBy: [{ popular: 'desc' }, { vecesUsada: 'desc' }, { createdAt: 'desc' }],
     });
     return NextResponse.json(templates);
   } catch (error) {
     logger.error('Error fetching automation templates:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener plantillas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener plantillas' }, { status: 500 });
   }
 }

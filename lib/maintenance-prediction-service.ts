@@ -7,7 +7,7 @@ import { addDays, differenceInDays, subMonths } from 'date-fns';
 export async function predictEquipmentFailures(companyId: string) {
   // Obtener historial de mantenimiento de los últimos 24 meses
   const cutoffDate = subMonths(new Date(), 24);
-  
+
   const maintenanceHistory = await prisma.maintenanceHistory.findMany({
     where: {
       fechaDeteccion: {
@@ -24,7 +24,7 @@ export async function predictEquipmentFailures(companyId: string) {
 
   for (const record of maintenanceHistory) {
     const key = record.equipoSistema;
-    
+
     if (!equipmentStats.has(key)) {
       equipmentStats.set(key, {
         equipoSistema: key,
@@ -56,18 +56,21 @@ export async function predictEquipmentFailures(companyId: string) {
     if (stats.numeroFallas < 2) continue; // Necesitamos al menos 2 fallas para predecir
 
     // Calcular tiempo promedio entre fallas
-    const fechas = stats.problemas.map((p: any) => new Date(p.fecha)).sort((a: Date, b: Date) => a.getTime() - b.getTime());
+    const fechas = stats.problemas
+      .map((p: any) => new Date(p.fecha))
+      .sort((a: Date, b: Date) => a.getTime() - b.getTime());
     const intervalos: number[] = [];
     for (let i = 1; i < fechas.length; i++) {
       intervalos.push(differenceInDays(fechas[i], fechas[i - 1]));
     }
-    
-    const intervaloPromedio = intervalos.length > 0 
-      ? intervalos.reduce((sum, val) => sum + val, 0) / intervalos.length 
-      : 180;
+
+    const intervaloPromedio =
+      intervalos.length > 0
+        ? intervalos.reduce((sum, val) => sum + val, 0) / intervalos.length
+        : 180;
 
     // Calcular probabilidad de falla
-    const diasDesdeFalla = stats.ultimaReparacion 
+    const diasDesdeFalla = stats.ultimaReparacion
       ? differenceInDays(new Date(), new Date(stats.ultimaReparacion))
       : 365;
 
@@ -79,7 +82,8 @@ export async function predictEquipmentFailures(companyId: string) {
     if (stats.numeroFallas > 5) factoresRiesgo.push('Alto historial de fallas');
     if (stats.costoTotal > 2000) factoresRiesgo.push('Costos de reparación elevados');
     if (intervaloPromedio < 90) factoresRiesgo.push('Intervalos cortos entre fallas');
-    if (diasDesdeFalla > intervaloPromedio * 0.8) factoresRiesgo.push('Próximo al tiempo promedio de falla');
+    if (diasDesdeFalla > intervaloPromedio * 0.8)
+      factoresRiesgo.push('Próximo al tiempo promedio de falla');
 
     // Recomendaciones
     const recomendaciones: string[] = [];
@@ -93,9 +97,9 @@ export async function predictEquipmentFailures(companyId: string) {
     recomendaciones.push('Revisar manual de mantenimiento');
 
     const fechaObjetivo = addDays(new Date(), Math.round(diasEstimados));
-    
+
     const confianza = Math.min(
-      0.5 + (stats.numeroFallas * 0.05) + (intervalos.length > 3 ? 0.2 : 0),
+      0.5 + stats.numeroFallas * 0.05 + (intervalos.length > 3 ? 0.2 : 0),
       0.95
     );
 
@@ -153,10 +157,7 @@ export async function generateDiagnostic(
   const solucionesExitosas = new Map<string, any>();
 
   for (const caso of similarCases) {
-    problemasComunes.set(
-      caso.tipoProblema,
-      (problemasComunes.get(caso.tipoProblema) || 0) + 1
-    );
+    problemasComunes.set(caso.tipoProblema, (problemasComunes.get(caso.tipoProblema) || 0) + 1);
 
     if (caso.solucionAplicada) {
       if (!solucionesExitosas.has(caso.tipoProblema)) {
@@ -201,7 +202,7 @@ export async function generateDiagnostic(
     repuestosNecesarios = solucion.repuestos;
     costoEstimado = solucion.costo || null;
     tiempoEstimado = solucion.tiempo || null;
-    confianza = Math.min(0.5 + (maxFrecuencia * 0.1), 0.95);
+    confianza = Math.min(0.5 + maxFrecuencia * 0.1, 0.95);
 
     // Determinar prioridad
     if (solucion.costo && solucion.costo > 1000) prioridad = 'alta';
@@ -209,7 +210,8 @@ export async function generateDiagnostic(
       prioridad = 'alta';
     }
   } else {
-    diagnostico = 'No se encontraron casos similares en el historial. Se recomienda inspección técnica.';
+    diagnostico =
+      'No se encontraron casos similares en el historial. Se recomienda inspección técnica.';
     causaProbable = 'Requiere evaluación por técnico especializado.';
     solucionSugerida = 'Programar visita de técnico para evaluación detallada.';
     confianza = 0.3;
@@ -238,7 +240,11 @@ export async function generateDiagnostic(
 /**
  * Calcula métricas de eficiencia de mantenimiento
  */
-export async function calculateMaintenanceMetrics(companyId: string, periodo: string, buildingId?: string) {
+export async function calculateMaintenanceMetrics(
+  companyId: string,
+  periodo: string,
+  buildingId?: string
+) {
   const [year, month] = periodo.split('-');
   const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
   const endDate = new Date(parseInt(year), parseInt(month), 0, 23, 59, 59);
@@ -275,9 +281,9 @@ export async function calculateMaintenanceMetrics(companyId: string, periodo: st
     },
   });
 
-  const completas = solicitudes.filter(s => s.estado === 'completado');
-  const pendientes = solicitudes.filter(s => s.estado === 'pendiente');
-  const enProgreso = solicitudes.filter(s => s.estado === 'en_progreso');
+  const completas = solicitudes.filter((s) => s.estado === 'completado');
+  const pendientes = solicitudes.filter((s) => s.estado === 'pendiente');
+  const enProgreso = solicitudes.filter((s) => s.estado === 'en_progreso');
 
   // Calcular tiempos promedio
   let tiempoRespuestaTotal = 0;
@@ -299,27 +305,29 @@ export async function calculateMaintenanceMetrics(companyId: string, periodo: st
     contadorRespuesta += 1;
   }
 
-  const tiempoRespuestaPromedio = contadorRespuesta > 0 ? tiempoRespuestaTotal / contadorRespuesta : 0;
-  const tiempoResolucionPromedio = contadorResolucion > 0 ? tiempoResolucionTotal / contadorResolucion : 0;
+  const tiempoRespuestaPromedio =
+    contadorRespuesta > 0 ? tiempoRespuestaTotal / contadorRespuesta : 0;
+  const tiempoResolucionPromedio =
+    contadorResolucion > 0 ? tiempoResolucionTotal / contadorResolucion : 0;
 
   // Calcular tasa de resolución en primera visita (asumimos 80% si no hay datos)
   const tasaResolucionPrimera = completas.length > 0 ? 80 : 0;
 
   // Calcular costos - como no hay tipo, usamos prioridad como proxy
   const costosPreventivo = solicitudes
-    .filter(s => s.prioridad === 'baja')
+    .filter((s) => s.prioridad === 'baja')
     .reduce((sum, s) => sum + (s.costoEstimado || 0), 0);
 
   const costosCorrectivo = solicitudes
-    .filter(s => s.prioridad === 'media')
+    .filter((s) => s.prioridad === 'media')
     .reduce((sum, s) => sum + (s.costoEstimado || 0), 0);
 
   const costosEmergencia = solicitudes
-    .filter(s => s.prioridad === 'alta')
+    .filter((s) => s.prioridad === 'alta')
     .reduce((sum, s) => sum + (s.costoEstimado || 0), 0);
 
   // Solicitudes atrasadas (más de 7 días desde creación y aún pendientes)
-  const solicitudesAtrasadas = [...pendientes, ...enProgreso].filter(s => {
+  const solicitudesAtrasadas = [...pendientes, ...enProgreso].filter((s) => {
     const dias = differenceInDays(new Date(), new Date(s.createdAt));
     return dias > 7;
   }).length;

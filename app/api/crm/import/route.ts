@@ -1,8 +1,8 @@
 /**
  * API: /api/crm/import
- * 
+ *
  * POST: Importar leads desde diferentes fuentes
- * 
+ *
  * Body:
  * {
  *   source: 'linkedin_job' | 'csv' | 'manual' | 'target_clients',
@@ -54,10 +54,7 @@ export async function POST(request: Request) {
       case 'csv':
       case 'manual':
         if (!leads || !Array.isArray(leads)) {
-          return NextResponse.json(
-            { error: 'Se requiere array de leads' },
-            { status: 400 }
-          );
+          return NextResponse.json({ error: 'Se requiere array de leads' }, { status: 400 });
         }
         result = await CRMLeadImporter.importFromCSV(
           session.user.companyId,
@@ -72,10 +69,7 @@ export async function POST(request: Request) {
         break;
 
       default:
-        return NextResponse.json(
-          { error: 'Fuente de importación no válida' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Fuente de importación no válida' }, { status: 400 });
     }
 
     return NextResponse.json(result, { status: 200 });

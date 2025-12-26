@@ -47,7 +47,7 @@ export const generatePaymentReceiptPDF = async (
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.width;
   const pageHeight = doc.internal.pageSize.height;
-  
+
   // Colores de INMOVA
   const primaryColor: [number, number, number] = [0, 0, 0]; // Negro
   const secondaryColor: [number, number, number] = [100, 100, 100]; // Gris
@@ -55,7 +55,7 @@ export const generatePaymentReceiptPDF = async (
   // ============================================
   // ENCABEZADO
   // ============================================
-  
+
   // Logo (si existe)
   if (paymentData.company.logoUrl) {
     try {
@@ -71,13 +71,13 @@ export const generatePaymentReceiptPDF = async (
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(...primaryColor);
   doc.text(paymentData.company.nombre || 'INMOVA', 15, 25);
-  
+
   // Datos de la empresa
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...secondaryColor);
   let yPos = 32;
-  
+
   if (paymentData.company.cif) {
     doc.text(`CIF: ${paymentData.company.cif}`, 15, yPos);
     yPos += 5;
@@ -100,12 +100,14 @@ export const generatePaymentReceiptPDF = async (
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(...primaryColor);
   doc.text('RECIBO', pageWidth - 15, 25, { align: 'right' });
-  
+
   // Número de recibo y fecha
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...secondaryColor);
-  doc.text(`Nº: REC-${paymentData.id.substring(0, 8).toUpperCase()}`, pageWidth - 15, 35, { align: 'right' });
+  doc.text(`Nº: REC-${paymentData.id.substring(0, 8).toUpperCase()}`, pageWidth - 15, 35, {
+    align: 'right',
+  });
   doc.text(
     `Fecha: ${format(new Date(paymentData.fechaPago), 'dd/MM/yyyy', { locale: es })}`,
     pageWidth - 15,
@@ -129,7 +131,7 @@ export const generatePaymentReceiptPDF = async (
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(...primaryColor);
   doc.text('DATOS DEL INQUILINO', 15, yPos);
-  
+
   yPos += 8;
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
@@ -148,7 +150,7 @@ export const generatePaymentReceiptPDF = async (
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(...primaryColor);
   doc.text('PROPIEDAD ARRENDADA', 15, yPos);
-  
+
   yPos += 8;
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
@@ -169,18 +171,12 @@ export const generatePaymentReceiptPDF = async (
   doc.text('DETALLE DEL PAGO', 15, yPos);
 
   yPos += 8;
-  
+
   // Tabla de conceptos
   autoTable(doc, {
     startY: yPos,
     head: [['Concepto', 'Periodo', 'Importe']],
-    body: [
-      [
-        'Renta Mensual',
-        paymentData.periodo,
-        `${paymentData.monto.toFixed(2)} €`,
-      ],
-    ],
+    body: [['Renta Mensual', paymentData.periodo, `${paymentData.monto.toFixed(2)} €`]],
     theme: 'plain',
     headStyles: {
       fillColor: [0, 0, 0],
@@ -208,7 +204,7 @@ export const generatePaymentReceiptPDF = async (
   const totalY = finalY + 5;
   doc.setFillColor(240, 240, 240);
   doc.rect(15, totalY, pageWidth - 30, 12, 'F');
-  
+
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(...primaryColor);
@@ -222,11 +218,7 @@ export const generatePaymentReceiptPDF = async (
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...secondaryColor);
-    doc.text(
-      `Método de pago: ${paymentData.metodoPago}`,
-      15,
-      totalY + 20
-    );
+    doc.text(`Método de pago: ${paymentData.metodoPago}`, 15, totalY + 20);
   }
 
   // ============================================
@@ -236,7 +228,7 @@ export const generatePaymentReceiptPDF = async (
   doc.setDrawColor(200, 200, 200);
   doc.setLineWidth(0.3);
   doc.line(15, footerY, pageWidth - 15, footerY);
-  
+
   doc.setFontSize(8);
   doc.setFont('helvetica', 'italic');
   doc.setTextColor(150, 150, 150);

@@ -30,6 +30,10 @@
     "db:seed": "prisma db seed",
     "db:status": "prisma migrate status",
     "audit:deployment": "node scripts/pre-deployment-audit.js",
+    "quality:check": "./scripts/code-quality/lint-and-fix.sh",
+    "quality:fix-jsx": "tsx scripts/code-quality/auto-fix-jsx.ts",
+    "quality:watch": "./scripts/code-quality/watch-quality.sh",
+    "quality:pre-commit": "./scripts/code-quality/pre-commit-check.sh",
     "prepare": "husky"
   },
   "lint-staged": {

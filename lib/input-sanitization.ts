@@ -1,6 +1,6 @@
 /**
  * Sistema de sanitización de inputs para prevenir XSS, SQL Injection y otros ataques
- * 
+ *
  * IMPORTANTE: Prisma ya protege contra SQL Injection automáticamente,
  * pero aún necesitamos sanitizar inputs para XSS en el frontend.
  */
@@ -42,7 +42,7 @@ export function sanitizeObject<T extends Record<string, any>>(obj: T): T {
     if (typeof value === 'string') {
       sanitized[key] = sanitizeString(value);
     } else if (Array.isArray(value)) {
-      sanitized[key] = value.map(item =>
+      sanitized[key] = value.map((item) =>
         typeof item === 'string'
           ? sanitizeString(item)
           : typeof item === 'object' && item !== null
@@ -129,14 +129,11 @@ export const uuidSchema = z.string().uuid('ID inválido');
 export const currencySchema = z
   .number()
   .nonnegative('No puede ser negativo')
-  .refine(val => Number.isFinite(val), 'Monto inválido')
-  .transform(val => Math.round(val * 100) / 100); // Redondear a 2 decimales
+  .refine((val) => Number.isFinite(val), 'Monto inválido')
+  .transform((val) => Math.round(val * 100) / 100); // Redondear a 2 decimales
 
 // Porcentaje (0-100)
-export const percentageSchema = z
-  .number()
-  .min(0, 'Mínimo 0%')
-  .max(100, 'Máximo 100%');
+export const percentageSchema = z.number().min(0, 'Mínimo 0%').max(100, 'Máximo 100%');
 
 /**
  * Helper para crear respuestas de error de validación
@@ -150,27 +147,27 @@ export function validationErrorResponse(error: z.ZodError) {
 
 /**
  * Ejemplo de uso en una API route:
- * 
+ *
  * import { validateAndSanitize, shortTextSchema, currencySchema } from '@/lib/input-sanitization';
  * import { z } from 'zod';
- * 
+ *
  * const roomSchema = z.object({
  *   numero: shortTextSchema,
  *   precio: currencySchema,
  *   descripcion: longTextSchema,
  * });
- * 
+ *
  * export async function POST(req: NextRequest) {
  *   const body = await req.json();
  *   const result = await validateAndSanitize(roomSchema, body);
- *   
+ *
  *   if (!result.success) {
  *     return NextResponse.json(
  *       validationErrorResponse(result.error),
  *       { status: 400 }
  *     );
  *   }
- *   
+ *
  *   // Usar result.data (ya validado y sanitizado)
  *   const room = await prisma.room.create({ data: result.data });
  *   return NextResponse.json(room);

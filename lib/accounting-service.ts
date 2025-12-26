@@ -66,10 +66,7 @@ export async function calculateCashFlow(
   return summary;
 }
 
-export async function generateCashFlowStatement(
-  companyId: string,
-  periodo: string
-): Promise<void> {
+export async function generateCashFlowStatement(companyId: string, periodo: string): Promise<void> {
   const [year, month] = periodo.split('-').map(Number);
   const fechaInicio = startOfMonth(new Date(year, month - 1));
   const fechaFin = endOfMonth(new Date(year, month - 1));
@@ -177,10 +174,7 @@ export async function syncExpensesToAccounting(companyId: string): Promise<numbe
   // Sincronizar gastos aprobados que no están en contabilidad
   const approvedExpenses = await prisma.expense.findMany({
     where: {
-      OR: [
-        { requiereAprobacion: false },
-        { estadoAprobacion: 'aprobado' },
-      ],
+      OR: [{ requiereAprobacion: false }, { estadoAprobacion: 'aprobado' }],
       building: {
         companyId,
       },

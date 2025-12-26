@@ -89,7 +89,7 @@ export async function sendTemplatedEmail(
 ): Promise<NotificationResult> {
   // TODO: Load template from database or file system
   // TODO: Render template with variables (use handlebars, ejs, etc.)
-  
+
   const payload: NotificationPayload = {
     subject: `Template ${templateId}`,
     body: JSON.stringify(variables),

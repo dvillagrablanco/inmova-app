@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
+      where: { email: session.user.email },
     });
 
     if (!user || user.role !== 'administrador') {
@@ -29,12 +29,12 @@ export async function POST(request: NextRequest) {
       where: {
         estado: 'activo',
         tenant: {
-          companyId: user.companyId
-        }
+          companyId: user.companyId,
+        },
       },
       include: {
-        tenant: true
-      }
+        tenant: true,
+      },
     });
 
     const resultados: Array<{
@@ -77,9 +77,10 @@ export async function POST(request: NextRequest) {
             confianzaModelo: 0.89,
             ultimoEntrenamiento: new Date(),
             alertaGenerada: result.nivelRiesgo === 'alto' || result.nivelRiesgo === 'critico',
-            fechaAlerta: result.nivelRiesgo === 'alto' || result.nivelRiesgo === 'critico' ? new Date() : null,
-            validaHasta: addDays(new Date(), 30)
-          }
+            fechaAlerta:
+              result.nivelRiesgo === 'alto' || result.nivelRiesgo === 'critico' ? new Date() : null,
+            validaHasta: addDays(new Date(), 30),
+          },
         });
 
         generadas++;
@@ -88,7 +89,7 @@ export async function POST(request: NextRequest) {
           tenantName: contract.tenant.nombreCompleto,
           nivelRiesgo: result.nivelRiesgo,
           probabilidad: result.probabilidadImpago,
-          status: 'success'
+          status: 'success',
         });
       } catch (error: any) {
         errores++;
@@ -97,7 +98,7 @@ export async function POST(request: NextRequest) {
           tenantName: contract.tenant.nombreCompleto,
           nivelRiesgo: 'error',
           probabilidad: 0,
-          status: 'error'
+          status: 'error',
         });
       }
     }
@@ -107,7 +108,7 @@ export async function POST(request: NextRequest) {
       generadas,
       errores,
       total: contracts.length,
-      resultados
+      resultados,
     });
   } catch (error: any) {
     logger.error('Error al generar predicciones:', error);

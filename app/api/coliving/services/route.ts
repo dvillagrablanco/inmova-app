@@ -15,25 +15,16 @@ export async function GET(request: NextRequest) {
     const companyId = searchParams.get('companyId');
     const categoria = searchParams.get('categoria') || undefined;
     if (!companyId) {
-      return NextResponse.json(
-        { error: 'companyId requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'companyId requerido' }, { status: 400 });
     }
-    const result = await conciergeService.getServicesByCategory(
-      companyId,
-      categoria
-    );
+    const result = await conciergeService.getServicesByCategory(companyId, categoria);
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
     return NextResponse.json(result.services);
   } catch (error) {
     logger.error('Error en GET /api/coliving/services:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener servicios' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener servicios' }, { status: 500 });
   }
 }
 export async function POST(request: NextRequest) {
@@ -50,9 +41,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result.service, { status: 201 });
   } catch (error) {
     logger.error('Error en POST /api/coliving/services:', error);
-    return NextResponse.json(
-      { error: 'Error al crear servicio' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear servicio' }, { status: 500 });
   }
 }

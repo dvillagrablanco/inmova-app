@@ -90,12 +90,14 @@ export async function calculateUtilityProration(
     case 'by_surface':
       // Por superficie
       const totalSurface = input.rooms.reduce((sum, room) => sum + room.surface, 0);
-      
+
       // BUG FIX: Prevenir división por cero
       if (totalSurface === 0) {
-        throw new Error('No se puede prorratear por superficie: todas las habitaciones tienen superficie = 0');
+        throw new Error(
+          'No se puede prorratear por superficie: todas las habitaciones tienen superficie = 0'
+        );
       }
-      
+
       input.rooms.forEach((room) => {
         const percentage = (room.surface / totalSurface) * 100;
         const amount = (input.totalAmount * room.surface) / totalSurface;
@@ -111,12 +113,14 @@ export async function calculateUtilityProration(
     case 'by_occupants':
       // Por número de ocupantes
       const totalOccupants = input.rooms.reduce((sum, room) => sum + room.occupants, 0);
-      
+
       // BUG FIX: Prevenir división por cero
       if (totalOccupants === 0) {
-        throw new Error('No se puede prorratear por ocupantes: todas las habitaciones tienen 0 ocupantes');
+        throw new Error(
+          'No se puede prorratear por ocupantes: todas las habitaciones tienen 0 ocupantes'
+        );
       }
-      
+
       input.rooms.forEach((room) => {
         const percentage = (room.occupants / totalOccupants) * 100;
         const amount = (input.totalAmount * room.occupants) / totalOccupants;
@@ -133,12 +137,14 @@ export async function calculateUtilityProration(
       // Combinado: 50% por superficie + 50% por ocupantes
       const totalSurfaceComb = input.rooms.reduce((sum, room) => sum + room.surface, 0);
       const totalOccupantsComb = input.rooms.reduce((sum, room) => sum + room.occupants, 0);
-      
+
       // BUG FIX: Prevenir división por cero
       if (totalSurfaceComb === 0 && totalOccupantsComb === 0) {
-        throw new Error('No se puede prorratear: todas las habitaciones tienen superficie = 0 y ocupantes = 0');
+        throw new Error(
+          'No se puede prorratear: todas las habitaciones tienen superficie = 0 y ocupantes = 0'
+        );
       }
-      
+
       // Si uno es cero, usar solo el otro
       if (totalSurfaceComb === 0) {
         // Solo por ocupantes
@@ -171,7 +177,7 @@ export async function calculateUtilityProration(
           const occupantsPercentage = room.occupants / totalOccupantsComb;
           const combinedPercentage = (surfacePercentage + occupantsPercentage) / 2;
           const amount = input.totalAmount * combinedPercentage;
-          
+
           results.push({
             roomId: room.roomId,
             amount: parseFloat(amount.toFixed(2)),
@@ -289,18 +295,21 @@ export async function applyUtilityProrationToUnit(
       montoProrrateoGas: results.gas?.find((r) => r.roomId === room.id)?.amount || 0,
       montoProrrateoInternet: results.internet?.find((r) => r.roomId === room.id)?.amount || 0,
       montoProrrateoLimpieza: results.cleaning?.find((r) => r.roomId === room.id)?.amount || 0,
-      fechaVencimiento: new Date(currentMonth.getFullYear(), currentMonth.getMonth(), activeContract.diaPago),
+      fechaVencimiento: new Date(
+        currentMonth.getFullYear(),
+        currentMonth.getMonth(),
+        activeContract.diaPago
+      ),
       estado: 'pendiente' as const,
     };
 
     // Sumar todos los prorrateos al monto total
-    paymentData.monto += (
+    paymentData.monto +=
       (paymentData.montoProrrateoLuz || 0) +
       (paymentData.montoProrrateoAgua || 0) +
       (paymentData.montoProrrateoGas || 0) +
       (paymentData.montoProrrateoInternet || 0) +
-      (paymentData.montoProrrateoLimpieza || 0)
-    );
+      (paymentData.montoProrrateoLimpieza || 0);
 
     const payment = await prisma.roomPayment.create({ data: paymentData });
     payments.push(payment);
@@ -426,10 +435,7 @@ export async function checkRoomAvailability(
     include: {
       contracts: {
         where: {
-          OR: [
-            { estado: 'activo' },
-            { estado: 'pendiente' },
-          ],
+          OR: [{ estado: 'activo' }, { estado: 'pendiente' }],
         },
         orderBy: { fechaFin: 'desc' },
       },
@@ -526,18 +532,19 @@ export async function getRoomRentalAnalytics(
     where: whereClause,
     include: {
       contracts: {
-        where: startDate && endDate
-          ? {
-              OR: [
-                {
-                  fechaInicio: { gte: startDate, lte: endDate },
-                },
-                {
-                  fechaFin: { gte: startDate, lte: endDate },
-                },
-              ],
-            }
-          : {},
+        where:
+          startDate && endDate
+            ? {
+                OR: [
+                  {
+                    fechaInicio: { gte: startDate, lte: endDate },
+                  },
+                  {
+                    fechaFin: { gte: startDate, lte: endDate },
+                  },
+                ],
+              }
+            : {},
         include: {
           payments: true,
         },
@@ -576,9 +583,7 @@ export async function getRoomRentalAnalytics(
 
   // 5. Precio promedio por habitación
   const averageRoomPrice =
-    rooms.length > 0
-      ? rooms.reduce((sum, room) => sum + room.precioPorMes, 0) / rooms.length
-      : 0;
+    rooms.length > 0 ? rooms.reduce((sum, room) => sum + room.precioPorMes, 0) / rooms.length : 0;
 
   // 6. Habitaciones con mejor rendimiento
   const roomPerformance = rooms.map((room) => {
@@ -606,9 +611,7 @@ export async function getRoomRentalAnalytics(
     };
   });
 
-  const topPerformingRooms = roomPerformance
-    .sort((a, b) => b.revenue - a.revenue)
-    .slice(0, 5);
+  const topPerformingRooms = roomPerformance.sort((a, b) => b.revenue - a.revenue).slice(0, 5);
 
   return {
     occupancyRate: parseFloat(occupancyRate.toFixed(2)),
@@ -622,9 +625,7 @@ export async function getRoomRentalAnalytics(
 /**
  * Genera plantilla de normas de convivencia
  */
-export function generateColivingRulesTemplate(
-  customRules?: string[]
-): string {
+export function generateColivingRulesTemplate(customRules?: string[]): string {
   const defaultRules = [
     '🔇 Horario de silencio: 22:00 - 8:00',
     '🧼 Mantener limpios los espacios comunes después de usarlos',
@@ -639,7 +640,7 @@ export function generateColivingRulesTemplate(
   ];
 
   const allRules = [...defaultRules, ...(customRules || [])];
-  
+
   return `
 # NORMAS DE CONVIVENCIA
 
@@ -676,29 +677,29 @@ export interface RoomContractTemplateData {
   landlordName: string;
   landlordId: string;
   landlordAddress: string;
-  
+
   // Datos del inquilino
   tenantName: string;
   tenantId: string;
   tenantEmail: string;
   tenantPhone: string;
-  
+
   // Datos de la propiedad
   buildingAddress: string;
   roomNumber: string;
   roomSurface: number;
   commonAreas: string[];
-  
+
   // Datos económicos
   monthlyRent: number;
   deposit: number;
   utilitiesIncluded: boolean;
   utilityProrationMethod?: string;
-  
+
   // Fechas
   startDate: Date;
   endDate: Date;
-  
+
   // Reglas adicionales
   customRules?: string[];
 }
@@ -710,8 +711,10 @@ export function generateRoomRentalContract(data: RoomContractTemplateData): stri
   const contractDate = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: es });
   const startDateFormatted = format(data.startDate, "dd 'de' MMMM 'de' yyyy", { locale: es });
   const endDateFormatted = format(data.endDate, "dd 'de' MMMM 'de' yyyy", { locale: es });
-  const duration = Math.ceil((data.endDate.getTime() - data.startDate.getTime()) / (1000 * 60 * 60 * 24 * 30));
-  
+  const duration = Math.ceil(
+    (data.endDate.getTime() - data.startDate.getTime()) / (1000 * 60 * 60 * 24 * 30)
+  );
+
   return `
 # CONTRATO DE ARRENDAMIENTO DE HABITACIÓN
 
@@ -764,13 +767,16 @@ La fianza será devuelta al finalizar el contrato, previa comprobación del esta
 
 ## IV. GASTOS Y SUMINISTROS
 
-${data.utilitiesIncluded 
-  ? `Los suministros (agua, luz, gas, internet) están **INCLUIDOS** en la renta mensual.
+${
+  data.utilitiesIncluded
+    ? `Los suministros (agua, luz, gas, internet) están **INCLUIDOS** en la renta mensual.
 
-${data.utilityProrationMethod 
-  ? `Los gastos de suministros se prorratean entre todas las habitaciones usando el método: **${data.utilityProrationMethod}**`
-  : ''}` 
-  : `Los suministros (agua, luz, gas, internet) **NO están incluidos** en la renta y se prorratearán entre todos los arrendatarios según consumo o superficie.`
+${
+  data.utilityProrationMethod
+    ? `Los gastos de suministros se prorratean entre todas las habitaciones usando el método: **${data.utilityProrationMethod}**`
+    : ''
+}`
+    : `Los suministros (agua, luz, gas, internet) **NO están incluidos** en la renta y se prorratearán entre todos los arrendatarios según consumo o superficie.`
 }
 
 ### Concepto de Gastos Comunes
@@ -873,7 +879,7 @@ export function generateRoomInventoryAnnex(
   items: Array<{ name: string; quantity: number; condition: string; observations?: string }>
 ): string {
   const today = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: es });
-  
+
   return `
 # ANEXO I: INVENTARIO DETALLADO
 ## Habitación ${roomNumber}
@@ -882,9 +888,12 @@ Fecha: ${today}
 
 | Artículo | Cantidad | Estado | Observaciones |
 |----------|----------|--------|---------------|
-${items.map(item => 
-  `| ${item.name} | ${item.quantity} | ${item.condition} | ${item.observations || '-'} |`
-).join('\n')}
+${items
+  .map(
+    (item) =>
+      `| ${item.name} | ${item.quantity} | ${item.condition} | ${item.observations || '-'} |`
+  )
+  .join('\n')}
 
 **Estado General:** El inquilino reconoce haber recibido la habitación y sus enseres en el estado descrito.
 
@@ -911,7 +920,7 @@ export function generateContractAddendum(
   tenantName: string
 ): string {
   const today = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: es });
-  
+
   return `
 # ADDENDA AL CONTRATO DE ARRENDAMIENTO
 ## Contrato ID: ${contractId}
@@ -922,13 +931,17 @@ Las partes firmantes del contrato original acuerdan las siguientes modificacione
 
 ## MODIFICACIONES
 
-${modifications.map((mod, i) => `
+${modifications
+  .map(
+    (mod, i) => `
 ### ${i + 1}. Modificación de: ${mod.section}
 
 **Valor Original:** ${mod.oldValue}
 **Nuevo Valor:** ${mod.newValue}
 **Motivo:** ${mod.reason}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## VIGENCIA
 
@@ -956,14 +969,58 @@ function numberToWords(num: number): string {
   const hundreds = Math.floor(num / 100);
   const tens = Math.floor((num % 100) / 10);
   const units = num % 10;
-  
-  const hundredsWords = ['', 'ciento', 'doscientos', 'trescientos', 'cuatrocientos', 'quinientos', 'seiscientos', 'setecientos', 'ochocientos', 'novecientos'];
-  const tensWords = ['', '', 'veinte', 'treinta', 'cuarenta', 'cincuenta', 'sesenta', 'setenta', 'ochenta', 'noventa'];
-  const unitsWords = ['', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve'];
-  const teens = ['diez', 'once', 'doce', 'trece', 'catorce', 'quince', 'dieciséis', 'diecisiete', 'dieciocho', 'diecinueve'];
-  
+
+  const hundredsWords = [
+    '',
+    'ciento',
+    'doscientos',
+    'trescientos',
+    'cuatrocientos',
+    'quinientos',
+    'seiscientos',
+    'setecientos',
+    'ochocientos',
+    'novecientos',
+  ];
+  const tensWords = [
+    '',
+    '',
+    'veinte',
+    'treinta',
+    'cuarenta',
+    'cincuenta',
+    'sesenta',
+    'setenta',
+    'ochenta',
+    'noventa',
+  ];
+  const unitsWords = [
+    '',
+    'uno',
+    'dos',
+    'tres',
+    'cuatro',
+    'cinco',
+    'seis',
+    'siete',
+    'ocho',
+    'nueve',
+  ];
+  const teens = [
+    'diez',
+    'once',
+    'doce',
+    'trece',
+    'catorce',
+    'quince',
+    'dieciséis',
+    'diecisiete',
+    'dieciocho',
+    'diecinueve',
+  ];
+
   let result = '';
-  
+
   if (hundreds === 1 && tens === 0 && units === 0) {
     result = 'cien';
   } else {
@@ -975,13 +1032,30 @@ function numberToWords(num: number): string {
       if (tens > 0) result += (result ? ' ' : '') + tensWords[tens];
       if (units > 0) {
         if (tens === 2) {
-          result += (units === 1 ? 'uno' : units === 2 ? 'dos' : units === 3 ? 'tres' : units === 4 ? 'cuatro' : units === 5 ? 'cinco' : units === 6 ? 'seis' : units === 7 ? 'siete' : units === 8 ? 'ocho' : 'nueve');
+          result +=
+            units === 1
+              ? 'uno'
+              : units === 2
+                ? 'dos'
+                : units === 3
+                  ? 'tres'
+                  : units === 4
+                    ? 'cuatro'
+                    : units === 5
+                      ? 'cinco'
+                      : units === 6
+                        ? 'seis'
+                        : units === 7
+                          ? 'siete'
+                          : units === 8
+                            ? 'ocho'
+                            : 'nueve';
         } else {
           result += (result ? ' y ' : '') + unitsWords[units];
         }
       }
     }
   }
-  
+
   return result || 'cero';
 }

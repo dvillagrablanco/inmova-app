@@ -1,7 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { X, ArrowRight, ArrowLeft, Check } from 'lucide-react';
@@ -19,37 +26,42 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 'welcome',
     title: '¡Bienvenido a INMOVA! 👋',
-    description: 'Te vamos a guiar en tus primeros pasos. Este tour te tomará solo 2 minutos y te ayudará a aprovechar al máximo todas las funcionalidades.',
-    icon: '🎉'
+    description:
+      'Te vamos a guiar en tus primeros pasos. Este tour te tomará solo 2 minutos y te ayudará a aprovechar al máximo todas las funcionalidades.',
+    icon: '🎉',
   },
   {
     id: 'buildings',
     title: 'Paso 1: Crea tu primer edificio',
-    description: 'Empieza registrando las propiedades que gestionas. Un edificio puede tener múltiples unidades (apartamentos, locales, etc.).',
+    description:
+      'Empieza registrando las propiedades que gestionas. Un edificio puede tener múltiples unidades (apartamentos, locales, etc.).',
     action: { label: 'Crear Edificio', route: '/edificios/nuevo' },
-    icon: '🏢'
+    icon: '🏢',
   },
   {
     id: 'units',
     title: 'Paso 2: Añade unidades',
-    description: 'Registra los apartamentos, locales o habitaciones dentro de cada edificio. Cada unidad puede tener su propio contrato e inquilino.',
+    description:
+      'Registra los apartamentos, locales o habitaciones dentro de cada edificio. Cada unidad puede tener su propio contrato e inquilino.',
     action: { label: 'Ver Unidades', route: '/unidades' },
-    icon: '🏠'
+    icon: '🏠',
   },
   {
     id: 'tenants',
     title: 'Paso 3: Gestiona inquilinos',
-    description: 'Añade los datos de tus inquilinos. Puedes vincularlos a contratos, ver su historial y comunicarte con ellos.',
+    description:
+      'Añade los datos de tus inquilinos. Puedes vincularlos a contratos, ver su historial y comunicarte con ellos.',
     action: { label: 'Ver Inquilinos', route: '/inquilinos' },
-    icon: '👥'
+    icon: '👥',
   },
   {
     id: 'dashboard',
     title: 'Tu Dashboard está listo',
-    description: 'Desde el dashboard verás todos tus KPIs, alertas y métricas importantes. ¡También puedes explorar los 88 módulos disponibles!',
+    description:
+      'Desde el dashboard verás todos tus KPIs, alertas y métricas importantes. ¡También puedes explorar los 88 módulos disponibles!',
     action: { label: 'Ir al Dashboard', route: '/dashboard' },
-    icon: '📊'
-  }
+    icon: '📊',
+  },
 ];
 
 interface OnboardingTourProps {
@@ -122,11 +134,7 @@ export function OnboardingTour({ onComplete }: OnboardingTourProps) {
           </CardDescription>
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Button
-            variant="outline"
-            onClick={handlePrev}
-            disabled={currentStep === 0}
-          >
+          <Button variant="outline" onClick={handlePrev} disabled={currentStep === 0}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Anterior
           </Button>

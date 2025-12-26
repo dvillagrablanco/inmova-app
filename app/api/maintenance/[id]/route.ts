@@ -32,7 +32,10 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json(maintenanceRequest);
   } catch (error) {
     logger.error('Error fetching maintenance request:', error);
-    return NextResponse.json({ error: 'Error al obtener solicitud de mantenimiento' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Error al obtener solicitud de mantenimiento' },
+      { status: 500 }
+    );
   }
 }
 
@@ -44,7 +47,17 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     }
 
     const body = await req.json();
-    const { titulo, descripcion, prioridad, estado, fechaProgramada, fechaCompletada, providerId, costoEstimado, costoReal } = body;
+    const {
+      titulo,
+      descripcion,
+      prioridad,
+      estado,
+      fechaProgramada,
+      fechaCompletada,
+      providerId,
+      costoEstimado,
+      costoReal,
+    } = body;
 
     const maintenanceRequest = await prisma.maintenanceRequest.update({
       where: { id: params.id },
@@ -64,7 +77,10 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json(maintenanceRequest);
   } catch (error) {
     logger.error('Error updating maintenance request:', error);
-    return NextResponse.json({ error: 'Error al actualizar solicitud de mantenimiento' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Error al actualizar solicitud de mantenimiento' },
+      { status: 500 }
+    );
   }
 }
 
@@ -82,6 +98,9 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     return NextResponse.json({ message: 'Solicitud de mantenimiento eliminada' });
   } catch (error) {
     logger.error('Error deleting maintenance request:', error);
-    return NextResponse.json({ error: 'Error al eliminar solicitud de mantenimiento' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Error al eliminar solicitud de mantenimiento' },
+      { status: 500 }
+    );
   }
 }

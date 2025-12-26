@@ -41,11 +41,7 @@ export const cspConfig: CSPConfig = {
     'https:',
     'http:', // For development
   ],
-  'font-src': [
-    "'self'",
-    'data:',
-    'https://fonts.gstatic.com',
-  ],
+  'font-src': ["'self'", 'data:', 'https://fonts.gstatic.com'],
   'connect-src': [
     "'self'",
     'https://api.stripe.com',
@@ -54,10 +50,7 @@ export const cspConfig: CSPConfig = {
   ].filter(Boolean),
   'media-src': ["'self'", 'data:', 'blob:'],
   'object-src': ["'none'"],
-  'frame-src': [
-    "'self'",
-    'https://js.stripe.com',
-  ],
+  'frame-src': ["'self'", 'https://js.stripe.com'],
   'base-uri': ["'self'"],
   'form-action': ["'self'"],
   'frame-ancestors': ["'self'"],

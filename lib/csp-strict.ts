@@ -38,8 +38,8 @@ export function applyStrictCSP(response: NextResponse, nonce: string): NextRespo
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
-    "upgrade-insecure-requests",
-    "block-all-mixed-content",
+    'upgrade-insecure-requests',
+    'block-all-mixed-content',
     "object-src 'none'",
     "media-src 'self' blob:",
     "worker-src 'self' blob:",
@@ -50,19 +50,19 @@ export function applyStrictCSP(response: NextResponse, nonce: string): NextRespo
 
   // Aplicar todos los headers de seguridad
   response.headers.set('Content-Security-Policy', csp);
-  
+
   // Prevenir MIME type sniffing
   response.headers.set('X-Content-Type-Options', 'nosniff');
-  
+
   // Prevenir clickjacking
   response.headers.set('X-Frame-Options', 'DENY');
-  
+
   // XSS Protection (legacy pero aún útil)
   response.headers.set('X-XSS-Protection', '1; mode=block');
-  
+
   // Referrer Policy
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  
+
   // Permissions Policy (Feature Policy)
   const permissionsPolicy = [
     'geolocation=()',
@@ -75,7 +75,7 @@ export function applyStrictCSP(response: NextResponse, nonce: string): NextRespo
     'accelerometer=()',
   ].join(', ');
   response.headers.set('Permissions-Policy', permissionsPolicy);
-  
+
   // Strict Transport Security (HSTS)
   // Solo en producción HTTPS
   if (process.env.NODE_ENV === 'production') {
@@ -84,7 +84,7 @@ export function applyStrictCSP(response: NextResponse, nonce: string): NextRespo
       'max-age=31536000; includeSubDomains; preload'
     );
   }
-  
+
   // Cross-Origin Policies
   response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
   response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
@@ -111,7 +111,7 @@ export function getCSPForPage(page: string, nonce: string): string {
       break;
     case '/payments':
       baseCSP.push("connect-src 'self' https://*.stripe.com");
-      baseCSP.push("frame-src https://*.stripe.com");
+      baseCSP.push('frame-src https://*.stripe.com');
       break;
     case '/analytics':
       baseCSP.push("connect-src 'self' https://www.google-analytics.com");
@@ -131,19 +131,19 @@ export function applyAPISecurityHeaders(response: NextResponse): NextResponse {
   response.headers.set('X-Frame-Options', 'DENY');
   response.headers.set('Referrer-Policy', 'no-referrer');
   response.headers.set('Cache-Control', 'no-store, max-age=0');
-  
+
   // CORS headers (ajustar según necesidades)
   if (process.env.NODE_ENV === 'production') {
     response.headers.set('Access-Control-Allow-Origin', process.env.NEXT_PUBLIC_APP_URL || '');
   } else {
     response.headers.set('Access-Control-Allow-Origin', '*');
   }
-  
+
   response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   response.headers.set(
     'Access-Control-Allow-Headers',
     'Content-Type, Authorization, X-Requested-With'
   );
-  
+
   return response;
 }

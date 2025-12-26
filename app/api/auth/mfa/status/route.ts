@@ -12,14 +12,11 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
-    
+
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
       select: {
@@ -29,14 +26,11 @@ export async function GET() {
         role: true,
       },
     });
-    
+
     if (!user) {
-      return NextResponse.json(
-        { error: 'Usuario no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
-    
+
     return NextResponse.json({
       mfaEnabled: user.mfaEnabled,
       mfaVerifiedAt: user.mfaVerifiedAt,
@@ -44,9 +38,6 @@ export async function GET() {
       canEnableMFA: user.role === 'super_admin',
     });
   } catch (error: any) {
-    return NextResponse.json(
-      { error: 'Error al obtener estado MFA' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener estado MFA' }, { status: 500 });
   }
 }

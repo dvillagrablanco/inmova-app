@@ -2,11 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger, { logError } from '@/lib/logger';
-import {
-  analyzeRevenueTrends,
-  benchmarkProperties,
-  compareMultiPeriod,
-} from '@/lib/bi-service';
+import { analyzeRevenueTrends, benchmarkProperties, compareMultiPeriod } from '@/lib/bi-service';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,11 +30,7 @@ export async function GET(req: NextRequest) {
 
     if (type === 'compare') {
       const metric = searchParams.get('metric') || 'revenue';
-      const comparison = await compareMultiPeriod(
-        session?.user?.companyId,
-        metric as any,
-        months
-      );
+      const comparison = await compareMultiPeriod(session?.user?.companyId, metric as any, months);
       return NextResponse.json(comparison);
     }
 
@@ -54,9 +46,6 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     logger.error('Error fetching BI stats:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener estadísticas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener estadísticas' }, { status: 500 });
   }
 }

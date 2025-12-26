@@ -36,9 +36,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error al verificar estado de ContaSimple:', error);
-    return NextResponse.json(
-      { error: 'Error al verificar el estado' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al verificar el estado' }, { status: 500 });
   }
 }

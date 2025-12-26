@@ -13,10 +13,7 @@ export async function GET(request: NextRequest) {
     const providerId = request.headers.get('x-provider-id');
 
     if (!providerId) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Verificar que el proveedor existe
@@ -26,10 +23,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!provider) {
-      return NextResponse.json(
-        { error: 'Proveedor no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Proveedor no encontrado' }, { status: 404 });
     }
 
     // Obtener filtros de query params
@@ -85,10 +79,7 @@ export async function GET(request: NextRequest) {
     logError(error instanceof Error ? error : new Error(String(error)), {
       context: 'GET /api/portal-proveedor/quotes',
     });
-    return NextResponse.json(
-      { error: 'Error al obtener presupuestos' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener presupuestos' }, { status: 500 });
   }
 }
 
@@ -101,10 +92,7 @@ export async function POST(request: NextRequest) {
     const providerId = request.headers.get('x-provider-id');
 
     if (!providerId) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Verificar que el proveedor existe
@@ -114,10 +102,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!provider) {
-      return NextResponse.json(
-        { error: 'Proveedor no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Proveedor no encontrado' }, { status: 404 });
     }
 
     const body = await request.json();
@@ -131,11 +116,14 @@ export async function POST(request: NextRequest) {
     } = body;
 
     // Validar campos requeridos
-    if (!workOrderId || !titulo || !conceptos || !Array.isArray(conceptos) || conceptos.length === 0) {
-      return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
-        { status: 400 }
-      );
+    if (
+      !workOrderId ||
+      !titulo ||
+      !conceptos ||
+      !Array.isArray(conceptos) ||
+      conceptos.length === 0
+    ) {
+      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
 
     // Verificar que la orden de trabajo existe
@@ -144,15 +132,12 @@ export async function POST(request: NextRequest) {
     });
 
     if (!workOrder) {
-      return NextResponse.json(
-        { error: 'Orden de trabajo no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Orden de trabajo no encontrada' }, { status: 404 });
     }
 
     // Calcular subtotal, IVA y total
     const subtotal = conceptos.reduce(
-      (sum: number, item: any) => sum + (item.cantidad * item.precioUnitario),
+      (sum: number, item: any) => sum + item.cantidad * item.precioUnitario,
       0
     );
     const iva = 21.0; // 21% IVA
@@ -205,9 +190,6 @@ export async function POST(request: NextRequest) {
     logError(error instanceof Error ? error : new Error(String(error)), {
       context: 'POST /api/portal-proveedor/quotes',
     });
-    return NextResponse.json(
-      { error: 'Error al crear presupuesto' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear presupuesto' }, { status: 500 });
   }
 }

@@ -236,161 +236,161 @@ export default function CertificacionesPage() {
   };
 
   return (
-    <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto space-y-6">
-            <div className="flex items-center justify-between">
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/dashboard">
-                      <Home className="h-4 w-4" />
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>Certificaciones</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
-              <Button variant="outline" size="sm" onClick={() => router.push('/dashboard')}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Volver
-              </Button>
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold">Certificaciones Energéticas</h1>
-              <p className="text-muted-foreground">Control de eficiencia energética</p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total</CardTitle>
-                  <Leaf className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{totalCertificados}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Vigentes</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{vigentes}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Por Vencer</CardTitle>
-                  <AlertCircle className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-orange-600">{porVencer}</div>
-                  <p className="text-xs text-muted-foreground">Próximo año</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Distribución</CardTitle>
-                  <Leaf className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="flex gap-1">
-                    {['A', 'B', 'C', 'D', 'E', 'F', 'G'].map((cal) => (
-                      <div key={cal} className="text-center">
-                        <div
-                          className={`text-xs font-bold px-1 rounded ${getCalificacionColor(cal)}`}
-                        >
-                          {cal}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {calificacionesCount[cal] || 0}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input
-                  placeholder="Buscar..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <Button onClick={() => setOpenNew(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Nuevo Certificado
-              </Button>
-            </div>
-            <div className="grid grid-cols-1 gap-4">
-              {filteredCerts.map((cert) => (
-                <Card key={cert.id}>
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-lg">
-                          Unidad {cert.unit?.numero} - {cert.unit?.building?.nombre}
-                        </CardTitle>
-                        <CardDescription>Técnico: {cert.nombreTecnico}</CardDescription>
-                      </div>
-                      <div className="flex gap-2 items-center">
-                        <Button variant="outline" size="sm" onClick={() => handleOpenEdit(cert)}>
-                          <Edit className="h-4 w-4 mr-2" />
-                          Editar
-                        </Button>
-                        <Badge className={getCalificacionColor(cert.calificacion)}>
-                          {cert.calificacion}
-                        </Badge>
-                        <Badge variant={cert.vigente ? 'default' : 'secondary'}>
-                          {cert.vigente ? 'Vigente' : 'Vencido'}
-                        </Badge>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                      <div>
-                        <p className="text-xs text-muted-foreground">Consumo</p>
-                        <p className="text-sm font-medium">{cert.consumoEnergetico} kWh/m²/año</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Emisiones CO₂</p>
-                        <p className="text-sm font-medium">{cert.emisionesCO2} kg/m²/año</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Emisión</p>
-                        <p className="text-sm font-medium">
-                          {format(new Date(cert.fechaEmision), 'dd/MM/yyyy', { locale: es })}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Vencimiento</p>
-                        <p className="text-sm font-medium">
-                          {format(new Date(cert.fechaVencimiento), 'dd/MM/yyyy', { locale: es })}
-                        </p>
-                      </div>
-                    </div>
-                    {cert.ahorroEstimado && (
-                      <div className="mt-3 p-2 bg-green-50 rounded-md text-sm flex items-center gap-2">
-                        <Euro className="h-4 w-4 text-green-600" />
-                        <span className="text-green-700">
-                          Ahorro estimado: €{cert.ahorroEstimado.toLocaleString()}/año
-                        </span>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+    <>
+      <AuthenticatedLayout>
+        <div className="max-w-7xl mx-auto space-y-6">
+          <div className="flex items-center justify-between">
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/dashboard">
+                    <Home className="h-4 w-4" />
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Certificaciones</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+            <Button variant="outline" size="sm" onClick={() => router.push('/dashboard')}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Volver
+            </Button>
           </div>
-        </main>
-      </div>
+          <div>
+            <h1 className="text-3xl font-bold">Certificaciones Energéticas</h1>
+            <p className="text-muted-foreground">Control de eficiencia energética</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total</CardTitle>
+                <Leaf className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{totalCertificados}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Vigentes</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{vigentes}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Por Vencer</CardTitle>
+                <AlertCircle className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-orange-600">{porVencer}</div>
+                <p className="text-xs text-muted-foreground">Próximo año</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Distribución</CardTitle>
+                <Leaf className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-1">
+                  {['A', 'B', 'C', 'D', 'E', 'F', 'G'].map((cal) => (
+                    <div key={cal} className="text-center">
+                      <div
+                        className={`text-xs font-bold px-1 rounded ${getCalificacionColor(cal)}`}
+                      >
+                        {cal}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {calificacionesCount[cal] || 0}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                placeholder="Buscar..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Button onClick={() => setOpenNew(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Nuevo Certificado
+            </Button>
+          </div>
+          <div className="grid grid-cols-1 gap-4">
+            {filteredCerts.map((cert) => (
+              <Card key={cert.id}>
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle className="text-lg">
+                        Unidad {cert.unit?.numero} - {cert.unit?.building?.nombre}
+                      </CardTitle>
+                      <CardDescription>Técnico: {cert.nombreTecnico}</CardDescription>
+                    </div>
+                    <div className="flex gap-2 items-center">
+                      <Button variant="outline" size="sm" onClick={() => handleOpenEdit(cert)}>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Editar
+                      </Button>
+                      <Badge className={getCalificacionColor(cert.calificacion)}>
+                        {cert.calificacion}
+                      </Badge>
+                      <Badge variant={cert.vigente ? 'default' : 'secondary'}>
+                        {cert.vigente ? 'Vigente' : 'Vencido'}
+                      </Badge>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Consumo</p>
+                      <p className="text-sm font-medium">{cert.consumoEnergetico} kWh/m²/año</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Emisiones CO₂</p>
+                      <p className="text-sm font-medium">{cert.emisionesCO2} kg/m²/año</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Emisión</p>
+                      <p className="text-sm font-medium">
+                        {format(new Date(cert.fechaEmision), 'dd/MM/yyyy', { locale: es })}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Vencimiento</p>
+                      <p className="text-sm font-medium">
+                        {format(new Date(cert.fechaVencimiento), 'dd/MM/yyyy', { locale: es })}
+                      </p>
+                    </div>
+                  </div>
+                  {cert.ahorroEstimado && (
+                    <div className="mt-3 p-2 bg-green-50 rounded-md text-sm flex items-center gap-2">
+                      <Euro className="h-4 w-4 text-green-600" />
+                      <span className="text-green-700">
+                        Ahorro estimado: €{cert.ahorroEstimado.toLocaleString()}/año
+                      </span>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </AuthenticatedLayout>
       <Dialog open={openNew} onOpenChange={setOpenNew}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -657,6 +657,6 @@ export default function CertificacionesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

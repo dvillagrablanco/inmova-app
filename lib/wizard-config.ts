@@ -14,7 +14,16 @@ export interface WizardStep {
 export interface WizardField {
   name: string;
   label: string;
-  type: 'text' | 'email' | 'number' | 'select' | 'multiselect' | 'date' | 'textarea' | 'file' | 'checkbox';
+  type:
+    | 'text'
+    | 'email'
+    | 'number'
+    | 'select'
+    | 'multiselect'
+    | 'date'
+    | 'textarea'
+    | 'file'
+    | 'checkbox';
   placeholder?: string;
   required?: boolean;
   options?: Array<{ value: string; label: string }>;

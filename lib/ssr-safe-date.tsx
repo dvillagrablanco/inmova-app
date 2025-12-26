@@ -11,7 +11,7 @@ import { format } from 'date-fns';
 /**
  * Hook para obtener la fecha actual de manera segura en SSR
  * Retorna null en el servidor y la fecha real en el cliente
- * 
+ *
  * @example
  * const currentDate = useClientDate();
  * if (!currentDate) return <div>Loading...</div>;
@@ -29,7 +29,7 @@ export function useClientDate(initialDate?: Date): Date | null {
 
 /**
  * Hook para obtener un timestamp de manera segura en SSR
- * 
+ *
  * @example
  * const now = useClientTimestamp();
  * if (now === null) return <div>Loading...</div>;
@@ -48,11 +48,11 @@ export function useClientTimestamp(): number | null {
 /**
  * Hook para formatear fechas de manera segura
  * Usa un placeholder durante SSR y el valor real en el cliente
- * 
+ *
  * @param date - Fecha a formatear
  * @param formatStr - Formato de fecha (date-fns)
  * @param placeholder - Texto a mostrar durante SSR
- * 
+ *
  * @example
  * const formattedDate = useSafeFormattedDate(new Date(), 'yyyy-MM-dd', '--');
  * return <div>{formattedDate}</div>; // Muestra '--' en SSR, fecha real en cliente
@@ -96,10 +96,10 @@ export function isServer(): boolean {
 /**
  * Obtiene la fecha actual de manera segura
  * En servidor retorna una fecha fija, en cliente retorna la fecha actual
- * 
+ *
  * NOTA: Solo usar esto si necesitas un valor durante SSR.
  * Si puedes esperar al montaje del cliente, usa useClientDate() en su lugar.
- * 
+ *
  * @param fallbackDate - Fecha a usar durante SSR (default: epoch)
  */
 export function getSafeDate(fallbackDate?: Date): Date {
@@ -112,7 +112,7 @@ export function getSafeDate(fallbackDate?: Date): Date {
 /**
  * Hook para inicializar estado con fecha de manera segura
  * Previene hydration errors usando null como estado inicial
- * 
+ *
  * @example
  * const [selectedDate, setSelectedDate] = useSafeDateState();
  * // selectedDate será null inicialmente, luego new Date() después del montaje
@@ -130,7 +130,7 @@ export function useSafeDateState(initialDate?: Date): [Date | null, (date: Date 
 /**
  * Componente wrapper que solo renderiza children en el cliente
  * Útil para componentes que dependen de APIs del navegador
- * 
+ *
  * @example
  * <ClientOnly fallback={<div>Loading...</div>}>
  *   <ComponentThatUsesWindow />

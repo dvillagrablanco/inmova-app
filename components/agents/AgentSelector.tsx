@@ -30,7 +30,7 @@ interface AgentSelectorProps {
 export default function AgentSelector({
   selectedAgent,
   onSelectAgent,
-  className = ''
+  className = '',
 }: AgentSelectorProps) {
   const [agents, setAgents] = useState<AgentInfo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,7 +43,7 @@ export default function AgentSelector({
     try {
       const response = await fetch('/api/agents/list');
       const data = await response.json();
-      
+
       if (data.success) {
         setAgents(data.agents);
       }
@@ -67,7 +67,7 @@ export default function AgentSelector({
       financial_analysis: 'border-purple-500 hover:bg-purple-50',
       legal_compliance: 'border-red-500 hover:bg-red-50',
       maintenance_preventive: 'border-yellow-500 hover:bg-yellow-50',
-      general: 'border-gray-500 hover:bg-gray-50'
+      general: 'border-gray-500 hover:bg-gray-50',
     };
     return colors[agentType] || 'border-gray-500 hover:bg-gray-50';
   };

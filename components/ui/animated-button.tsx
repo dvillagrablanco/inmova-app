@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { motion, HTMLMotionProps } from 'framer-motion';
 import { Button, ButtonProps } from '@/components/ui/button';
@@ -15,12 +15,7 @@ interface AnimatedButtonProps extends ButtonProps {
 export const AnimatedButton = forwardRef<HTMLButtonElement, AnimatedButtonProps>(
   ({ children, className, ripple = true, ...props }, ref) => {
     return (
-      <Button
-        ref={ref}
-        asChild
-        className={cn('relative overflow-hidden', className)}
-        {...props}
-      >
+      <Button ref={ref} asChild className={cn('relative overflow-hidden', className)} {...props}>
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}

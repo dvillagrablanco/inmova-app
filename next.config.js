@@ -135,9 +135,14 @@ const nextConfig = {
   },
   
   // Performance optimizations
-  swcMinify: true,
+  swcMinify: false,
   compress: true,
   poweredByHeader: false,
+  
+  // Additional compiler options
+  compiler: {
+    styledComponents: false,
+  },
   
   // Logging
   logging: {

@@ -69,14 +69,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `${results.filter(r => r.success).length}/${results.length} pagos registrados en Sage`,
+      message: `${results.filter((r) => r.success).length}/${results.length} pagos registrados en Sage`,
       results,
     });
   } catch (error) {
     logger.error('Error registering payments in Sage:', error);
-    return NextResponse.json(
-      { error: 'Error al registrar pagos en Sage' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al registrar pagos en Sage' }, { status: 500 });
   }
 }

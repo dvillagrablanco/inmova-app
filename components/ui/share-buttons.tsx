@@ -148,7 +148,9 @@ export function ShareButtons({
               )}
               aria-label={`Compartir en ${link.name}`}
             >
-              <Icon className={cn(size === 'sm' ? 'h-4 w-4' : size === 'lg' ? 'h-6 w-6' : 'h-5 w-5')} />
+              <Icon
+                className={cn(size === 'sm' ? 'h-4 w-4' : size === 'lg' ? 'h-6 w-6' : 'h-5 w-5')}
+              />
             </Button>
           );
         })}
@@ -163,7 +165,9 @@ export function ShareButtons({
           )}
           aria-label="Copiar enlace"
         >
-          <LinkIcon className={cn(size === 'sm' ? 'h-4 w-4' : size === 'lg' ? 'h-6 w-6' : 'h-5 w-5')} />
+          <LinkIcon
+            className={cn(size === 'sm' ? 'h-4 w-4' : size === 'lg' ? 'h-6 w-6' : 'h-5 w-5')}
+          />
         </Button>
       </div>
     );
@@ -178,7 +182,12 @@ export function ShareButtons({
           size={size === 'sm' ? 'sm' : size === 'lg' ? 'lg' : 'default'}
           className={className}
         >
-          <Share2 className={cn('mr-2', size === 'sm' ? 'h-4 w-4' : size === 'lg' ? 'h-6 w-6' : 'h-5 w-5')} />
+          <Share2
+            className={cn(
+              'mr-2',
+              size === 'sm' ? 'h-4 w-4' : size === 'lg' ? 'h-6 w-6' : 'h-5 w-5'
+            )}
+          />
           Compartir
         </Button>
       </DropdownMenuTrigger>
@@ -248,7 +257,9 @@ export function SimpleShareButton({
       onClick={handleShare}
       className={className}
     >
-      <Share2 className={cn('mr-2', size === 'sm' ? 'h-4 w-4' : size === 'lg' ? 'h-6 w-6' : 'h-5 w-5')} />
+      <Share2
+        className={cn('mr-2', size === 'sm' ? 'h-4 w-4' : size === 'lg' ? 'h-6 w-6' : 'h-5 w-5')}
+      />
       Compartir
     </Button>
   );

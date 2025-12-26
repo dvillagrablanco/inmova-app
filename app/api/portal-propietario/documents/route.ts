@@ -13,10 +13,7 @@ export async function GET(request: NextRequest) {
     // Get owner session (assuming we have owner authentication)
     const ownerId = request.headers.get('x-owner-id');
     if (!ownerId) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const owner = await prisma.owner.findUnique({
@@ -31,16 +28,13 @@ export async function GET(request: NextRequest) {
     });
 
     if (!owner) {
-      return NextResponse.json(
-        { error: 'Propietario no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Propietario no encontrado' }, { status: 404 });
     }
 
     // Get all buildings the owner has access to
     const buildingIds = owner.ownerBuildings
-      .filter(ob => ob.verDocumentos)
-      .map(ob => ob.buildingId);
+      .filter((ob) => ob.verDocumentos)
+      .map((ob) => ob.buildingId);
 
     // Get units for these buildings
     const units = await prisma.unit.findMany({
@@ -49,7 +43,7 @@ export async function GET(request: NextRequest) {
       },
       select: { id: true },
     });
-    const unitIds = units.map(u => u.id);
+    const unitIds = units.map((u) => u.id);
 
     // Get contracts and related documents
     const contracts = await prisma.contract.findMany({
@@ -109,7 +103,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Get contract IDs for payments
-    const contractIds = contracts.map(c => c.id);
+    const contractIds = contracts.map((c) => c.id);
 
     // Get financial documents (invoices, receipts)
     const payments = await prisma.payment.findMany({
@@ -151,9 +145,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error: any) {
     logger.error('Error al obtener documentos del propietario:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener documentos' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener documentos' }, { status: 500 });
   }
 }

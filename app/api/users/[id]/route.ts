@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { requireAuth, forbiddenResponse, badRequestResponse, notFoundResponse } from '@/lib/permissions';
+import {
+  requireAuth,
+  forbiddenResponse,
+  badRequestResponse,
+  notFoundResponse,
+} from '@/lib/permissions';
 import bcrypt from 'bcryptjs';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await requireAuth();
 
@@ -42,10 +44,7 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await requireAuth();
 
@@ -98,10 +97,7 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await requireAuth();
 

@@ -20,18 +20,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Temporarily disabled - function not implemented
-    return NextResponse.json(
-      { error: 'Funcionalidad en desarrollo' },
-      { status: 501 }
-    );
-
+    return NextResponse.json({ error: 'Funcionalidad en desarrollo' }, { status: 501 });
   } catch (error) {
     logError(error as Error, {
       context: 'POST /api/push-notifications/send',
     });
-    return NextResponse.json(
-      { error: 'Error al enviar notificación push' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al enviar notificación push' }, { status: 500 });
   }
 }

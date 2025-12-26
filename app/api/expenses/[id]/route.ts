@@ -1,6 +1,6 @@
 /**
  * Endpoints API para operaciones específicas de Gastos
- * 
+ *
  * Implementa operaciones GET, PUT y DELETE con validación Zod
  */
 
@@ -17,10 +17,7 @@ export const dynamic = 'force-dynamic';
  * GET /api/expenses/[id]
  * Obtiene un gasto específico con sus relaciones
  */
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await requireAuth();
 
@@ -48,7 +45,7 @@ export async function GET(
 
     // Verificar que el gasto pertenece a la compañía del usuario
     const expenseCompanyId = expense.building?.companyId || expense.unit?.building?.companyId;
-    
+
     if (expenseCompanyId !== user.companyId) {
       return NextResponse.json(
         { error: 'Prohibido', message: 'No tiene acceso a este gasto' },
@@ -58,17 +55,16 @@ export async function GET(
 
     logger.info(`Gasto obtenido: ${expense.id}`, { userId: user.id });
     return NextResponse.json(expense, { status: 200 });
-    
   } catch (error: any) {
     logger.error('Error fetching expense:', error);
-    
+
     if (error.message === 'No autenticado') {
       return NextResponse.json(
         { error: 'No autenticado', message: 'Debe iniciar sesión' },
         { status: 401 }
       );
     }
-    
+
     return NextResponse.json(
       { error: 'Error interno del servidor', message: 'Error al obtener gasto' },
       { status: 500 }
@@ -80,10 +76,7 @@ export async function GET(
  * PUT /api/expenses/[id]
  * Actualiza un gasto existente con validación Zod
  */
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await requirePermission('update');
     const body = await req.json();
@@ -110,8 +103,9 @@ export async function PUT(
     }
 
     // Verificar permisos
-    const expenseCompanyId = existingExpense.building?.companyId || existingExpense.unit?.building?.companyId;
-    
+    const expenseCompanyId =
+      existingExpense.building?.companyId || existingExpense.unit?.building?.companyId;
+
     if (expenseCompanyId !== user.companyId) {
       return NextResponse.json(
         { error: 'Prohibido', message: 'No tiene acceso a este gasto' },
@@ -179,7 +173,6 @@ export async function PUT(
 
     logger.info(`Gasto actualizado: ${expense.id}`, { userId: user.id, expenseId: expense.id });
     return NextResponse.json(expense, { status: 200 });
-    
   } catch (error: any) {
     logger.error('Error updating expense:', error);
 
@@ -195,12 +188,9 @@ export async function PUT(
     }
 
     if (error.message?.includes('permiso')) {
-      return NextResponse.json(
-        { error: 'Prohibido', message: error.message },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Prohibido', message: error.message }, { status: 403 });
     }
-    
+
     if (error.message === 'No autenticado') {
       return NextResponse.json(
         { error: 'No autenticado', message: 'Debe iniciar sesión' },
@@ -219,10 +209,7 @@ export async function PUT(
  * DELETE /api/expenses/[id]
  * Elimina un gasto existente
  */
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await requirePermission('delete');
 
@@ -245,8 +232,9 @@ export async function DELETE(
     }
 
     // Verificar permisos
-    const expenseCompanyId = existingExpense.building?.companyId || existingExpense.unit?.building?.companyId;
-    
+    const expenseCompanyId =
+      existingExpense.building?.companyId || existingExpense.unit?.building?.companyId;
+
     if (expenseCompanyId !== user.companyId) {
       return NextResponse.json(
         { error: 'Prohibido', message: 'No tiene acceso a este gasto' },
@@ -259,21 +247,14 @@ export async function DELETE(
     });
 
     logger.info(`Gasto eliminado: ${params.id}`, { userId: user.id, expenseId: params.id });
-    return NextResponse.json(
-      { message: 'Gasto eliminado exitosamente' },
-      { status: 200 }
-    );
-    
+    return NextResponse.json({ message: 'Gasto eliminado exitosamente' }, { status: 200 });
   } catch (error: any) {
     logger.error('Error deleting expense:', error);
 
     if (error.message?.includes('permiso')) {
-      return NextResponse.json(
-        { error: 'Prohibido', message: error.message },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Prohibido', message: error.message }, { status: 403 });
     }
-    
+
     if (error.message === 'No autenticado') {
       return NextResponse.json(
         { error: 'No autenticado', message: 'Debe iniciar sesión' },

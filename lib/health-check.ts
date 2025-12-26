@@ -60,7 +60,7 @@ async function checkRedis(): Promise<{
   if (!redis) {
     return { status: 'disabled' };
   }
-  
+
   const start = Date.now();
   try {
     await redis.ping();
@@ -84,7 +84,7 @@ function checkMemory(): {
   const used = process.memoryUsage().heapUsed;
   const total = process.memoryUsage().heapTotal;
   const percentage = (used / total) * 100;
-  
+
   return {
     used: Math.round(used / 1024 / 1024), // MB
     total: Math.round(total / 1024 / 1024), // MB
@@ -94,22 +94,19 @@ function checkMemory(): {
 
 // Perform full health check
 export async function performHealthCheck(): Promise<HealthStatus> {
-  const [database, redis] = await Promise.all([
-    checkDatabase(),
-    checkRedis(),
-  ]);
-  
+  const [database, redis] = await Promise.all([checkDatabase(), checkRedis()]);
+
   const memory = checkMemory();
-  
+
   // Determine overall status
   let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
-  
+
   if (database.status === 'down') {
     status = 'unhealthy';
   } else if (redis.status === 'down' || memory.percentage > 90) {
     status = 'degraded';
   }
-  
+
   return {
     status,
     timestamp: new Date().toISOString(),

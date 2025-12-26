@@ -7,11 +7,11 @@ import { prisma } from '@/lib/db';
 import type { BusinessVertical, OnboardingTaskStatus, OnboardingTaskType } from '@prisma/client';
 import { sendOnboardingEmail } from '@/lib/onboarding-email-service';
 import { createWebhookEvent } from '@/lib/webhook-service';
-import { 
-  notifyOnboardingCompleted, 
-  notifyFirstBuilding, 
-  notifyFirstUnit, 
-  notifyFirstContract 
+import {
+  notifyOnboardingCompleted,
+  notifyFirstBuilding,
+  notifyFirstUnit,
+  notifyFirstContract,
 } from '@/lib/notification-service';
 import { celebrateOnboardingCompleted } from '@/lib/celebration-service';
 
@@ -43,7 +43,7 @@ const ONBOARDING_ALQUILER_TRADICIONAL: OnboardingTaskDefinition[] = [
     isMandatory: false,
     estimatedTime: 90,
     videoUrl: '/videos/onboarding/intro-90s.mp4',
-    unlocks: []
+    unlocks: [],
   },
   {
     taskId: 'data_import_choice',
@@ -55,7 +55,7 @@ const ONBOARDING_ALQUILER_TRADICIONAL: OnboardingTaskDefinition[] = [
     estimatedTime: 180,
     route: '/admin/importar?wizard=true',
     helpArticle: '/docs/importar-datos',
-    unlocks: ['edificios_module']
+    unlocks: ['edificios_module'],
   },
   {
     taskId: 'create_first_building',
@@ -68,7 +68,7 @@ const ONBOARDING_ALQUILER_TRADICIONAL: OnboardingTaskDefinition[] = [
     route: '/edificios/nuevo?wizard=true',
     videoUrl: '/videos/crear-edificio.mp4',
     helpArticle: '/docs/edificios',
-    unlocks: ['unidades_module', 'dashboard_building_card']
+    unlocks: ['unidades_module', 'dashboard_building_card'],
   },
   {
     taskId: 'create_first_unit',
@@ -79,7 +79,7 @@ const ONBOARDING_ALQUILER_TRADICIONAL: OnboardingTaskDefinition[] = [
     isMandatory: true,
     estimatedTime: 90,
     route: '/unidades/nueva?wizard=true',
-    unlocks: ['contratos_module', 'inquilinos_module']
+    unlocks: ['contratos_module', 'inquilinos_module'],
   },
   {
     taskId: 'configure_payments',
@@ -91,7 +91,7 @@ const ONBOARDING_ALQUILER_TRADICIONAL: OnboardingTaskDefinition[] = [
     estimatedTime: 180,
     route: '/pagos/configurar?wizard=true',
     helpArticle: '/docs/configurar-pagos',
-    unlocks: ['pagos_automaticos', 'portal_inquilino_pagos']
+    unlocks: ['pagos_automaticos', 'portal_inquilino_pagos'],
   },
   {
     taskId: 'explore_dashboard',
@@ -102,7 +102,7 @@ const ONBOARDING_ALQUILER_TRADICIONAL: OnboardingTaskDefinition[] = [
     isMandatory: false,
     estimatedTime: 60,
     route: '/dashboard',
-    unlocks: []
+    unlocks: [],
   },
   {
     taskId: 'complete_celebration',
@@ -113,8 +113,8 @@ const ONBOARDING_ALQUILER_TRADICIONAL: OnboardingTaskDefinition[] = [
     isMandatory: true,
     estimatedTime: 30,
     route: '/onboarding/complete',
-    unlocks: ['todos_los_modulos']
-  }
+    unlocks: ['todos_los_modulos'],
+  },
 ];
 
 const ONBOARDING_ROOM_RENTAL: OnboardingTaskDefinition[] = [
@@ -127,7 +127,7 @@ const ONBOARDING_ROOM_RENTAL: OnboardingTaskDefinition[] = [
     isMandatory: false,
     estimatedTime: 90,
     videoUrl: '/videos/onboarding/room-rental-intro.mp4',
-    unlocks: []
+    unlocks: [],
   },
   {
     taskId: 'create_shared_home',
@@ -139,7 +139,7 @@ const ONBOARDING_ROOM_RENTAL: OnboardingTaskDefinition[] = [
     estimatedTime: 120,
     route: '/room-rental/nueva?wizard=true',
     helpArticle: '/docs/room-rental',
-    unlocks: ['room_rental_module']
+    unlocks: ['room_rental_module'],
   },
   {
     taskId: 'add_rooms',
@@ -150,7 +150,7 @@ const ONBOARDING_ROOM_RENTAL: OnboardingTaskDefinition[] = [
     isMandatory: true,
     estimatedTime: 90,
     route: '/room-rental/[unitId]/rooms/nueva',
-    unlocks: ['rooms_management']
+    unlocks: ['rooms_management'],
   },
   {
     taskId: 'configure_proration',
@@ -163,7 +163,7 @@ const ONBOARDING_ROOM_RENTAL: OnboardingTaskDefinition[] = [
     route: '/room-rental/[unitId]/proration',
     videoUrl: '/videos/prorrateo-gastos.mp4',
     helpArticle: '/docs/prorrateo',
-    unlocks: ['automatic_proration']
+    unlocks: ['automatic_proration'],
   },
   {
     taskId: 'set_house_rules',
@@ -174,7 +174,7 @@ const ONBOARDING_ROOM_RENTAL: OnboardingTaskDefinition[] = [
     isMandatory: false,
     estimatedTime: 60,
     route: '/room-rental/[unitId]/rules',
-    unlocks: ['house_rules']
+    unlocks: ['house_rules'],
   },
   {
     taskId: 'explore_dashboard',
@@ -185,7 +185,7 @@ const ONBOARDING_ROOM_RENTAL: OnboardingTaskDefinition[] = [
     isMandatory: false,
     estimatedTime: 60,
     route: '/room-rental',
-    unlocks: []
+    unlocks: [],
   },
   {
     taskId: 'complete_celebration',
@@ -196,8 +196,8 @@ const ONBOARDING_ROOM_RENTAL: OnboardingTaskDefinition[] = [
     isMandatory: true,
     estimatedTime: 30,
     route: '/onboarding/complete',
-    unlocks: ['todos_los_modulos']
-  }
+    unlocks: ['todos_los_modulos'],
+  },
 ];
 
 const ONBOARDING_STR: OnboardingTaskDefinition[] = [
@@ -210,7 +210,7 @@ const ONBOARDING_STR: OnboardingTaskDefinition[] = [
     isMandatory: false,
     estimatedTime: 90,
     videoUrl: '/videos/onboarding/str-intro.mp4',
-    unlocks: []
+    unlocks: [],
   },
   {
     taskId: 'connect_channels',
@@ -223,7 +223,7 @@ const ONBOARDING_STR: OnboardingTaskDefinition[] = [
     route: '/str/channels?wizard=true',
     videoUrl: '/videos/conectar-channel-manager.mp4',
     helpArticle: '/docs/str-channels',
-    unlocks: ['str_channel_manager']
+    unlocks: ['str_channel_manager'],
   },
   {
     taskId: 'import_listings',
@@ -234,7 +234,7 @@ const ONBOARDING_STR: OnboardingTaskDefinition[] = [
     isMandatory: true,
     estimatedTime: 180,
     route: '/str/listings?import=true',
-    unlocks: ['str_listings']
+    unlocks: ['str_listings'],
   },
   {
     taskId: 'activate_dynamic_pricing',
@@ -246,7 +246,7 @@ const ONBOARDING_STR: OnboardingTaskDefinition[] = [
     estimatedTime: 120,
     route: '/str/pricing?wizard=true',
     helpArticle: '/docs/pricing-dinamico',
-    unlocks: ['dynamic_pricing']
+    unlocks: ['dynamic_pricing'],
   },
   {
     taskId: 'explore_dashboard',
@@ -257,7 +257,7 @@ const ONBOARDING_STR: OnboardingTaskDefinition[] = [
     isMandatory: false,
     estimatedTime: 60,
     route: '/str',
-    unlocks: []
+    unlocks: [],
   },
   {
     taskId: 'complete_celebration',
@@ -268,8 +268,8 @@ const ONBOARDING_STR: OnboardingTaskDefinition[] = [
     isMandatory: true,
     estimatedTime: 30,
     route: '/onboarding/complete',
-    unlocks: ['todos_los_modulos']
-  }
+    unlocks: ['todos_los_modulos'],
+  },
 ];
 
 const ONBOARDING_FLIPPING: OnboardingTaskDefinition[] = [
@@ -282,7 +282,7 @@ const ONBOARDING_FLIPPING: OnboardingTaskDefinition[] = [
     isMandatory: false,
     estimatedTime: 90,
     videoUrl: '/videos/onboarding/flipping-intro.mp4',
-    unlocks: []
+    unlocks: [],
   },
   {
     taskId: 'create_project',
@@ -294,7 +294,7 @@ const ONBOARDING_FLIPPING: OnboardingTaskDefinition[] = [
     estimatedTime: 120,
     route: '/flipping/nuevo?wizard=true',
     helpArticle: '/docs/flipping',
-    unlocks: ['flipping_module']
+    unlocks: ['flipping_module'],
   },
   {
     taskId: 'calculate_budget',
@@ -306,7 +306,7 @@ const ONBOARDING_FLIPPING: OnboardingTaskDefinition[] = [
     estimatedTime: 180,
     route: '/flipping/[id]/presupuesto',
     videoUrl: '/videos/calcular-presupuesto-reforma.mp4',
-    unlocks: ['budget_calculator']
+    unlocks: ['budget_calculator'],
   },
   {
     taskId: 'sale_projection',
@@ -317,7 +317,7 @@ const ONBOARDING_FLIPPING: OnboardingTaskDefinition[] = [
     isMandatory: true,
     estimatedTime: 90,
     route: '/flipping/[id]/venta',
-    unlocks: ['roi_calculator']
+    unlocks: ['roi_calculator'],
   },
   {
     taskId: 'configure_financing',
@@ -328,7 +328,7 @@ const ONBOARDING_FLIPPING: OnboardingTaskDefinition[] = [
     isMandatory: false,
     estimatedTime: 120,
     route: '/flipping/[id]/financiacion',
-    unlocks: ['financing_calculator']
+    unlocks: ['financing_calculator'],
   },
   {
     taskId: 'explore_dashboard',
@@ -339,7 +339,7 @@ const ONBOARDING_FLIPPING: OnboardingTaskDefinition[] = [
     isMandatory: false,
     estimatedTime: 60,
     route: '/flipping',
-    unlocks: []
+    unlocks: [],
   },
   {
     taskId: 'complete_celebration',
@@ -350,8 +350,8 @@ const ONBOARDING_FLIPPING: OnboardingTaskDefinition[] = [
     isMandatory: true,
     estimatedTime: 30,
     route: '/onboarding/complete',
-    unlocks: ['todos_los_modulos']
-  }
+    unlocks: ['todos_los_modulos'],
+  },
 ];
 
 const ONBOARDING_GENERAL: OnboardingTaskDefinition[] = [
@@ -364,7 +364,7 @@ const ONBOARDING_GENERAL: OnboardingTaskDefinition[] = [
     isMandatory: false,
     estimatedTime: 90,
     videoUrl: '/videos/onboarding/intro-90s.mp4',
-    unlocks: []
+    unlocks: [],
   },
   {
     taskId: 'create_first_building',
@@ -375,7 +375,7 @@ const ONBOARDING_GENERAL: OnboardingTaskDefinition[] = [
     isMandatory: true,
     estimatedTime: 120,
     route: '/edificios/nuevo?wizard=true',
-    unlocks: ['edificios_module']
+    unlocks: ['edificios_module'],
   },
   {
     taskId: 'add_units',
@@ -386,7 +386,7 @@ const ONBOARDING_GENERAL: OnboardingTaskDefinition[] = [
     isMandatory: true,
     estimatedTime: 90,
     route: '/unidades/nueva?wizard=true',
-    unlocks: ['unidades_module']
+    unlocks: ['unidades_module'],
   },
   {
     taskId: 'manage_tenants',
@@ -397,7 +397,7 @@ const ONBOARDING_GENERAL: OnboardingTaskDefinition[] = [
     isMandatory: false,
     estimatedTime: 90,
     route: '/inquilinos/nuevo',
-    unlocks: ['inquilinos_module']
+    unlocks: ['inquilinos_module'],
   },
   {
     taskId: 'explore_dashboard',
@@ -408,7 +408,7 @@ const ONBOARDING_GENERAL: OnboardingTaskDefinition[] = [
     isMandatory: false,
     estimatedTime: 60,
     route: '/dashboard',
-    unlocks: []
+    unlocks: [],
   },
   {
     taskId: 'complete_celebration',
@@ -419,22 +419,22 @@ const ONBOARDING_GENERAL: OnboardingTaskDefinition[] = [
     isMandatory: true,
     estimatedTime: 30,
     route: '/onboarding/complete',
-    unlocks: ['todos_los_modulos']
-  }
+    unlocks: ['todos_los_modulos'],
+  },
 ];
 
 // Mapeo de verticales a tareas
 const ONBOARDING_TASKS_BY_VERTICAL: Record<string, OnboardingTaskDefinition[]> = {
-  'alquiler_tradicional': ONBOARDING_ALQUILER_TRADICIONAL,
-  'room_rental': ONBOARDING_ROOM_RENTAL,
-  'coliving': ONBOARDING_ROOM_RENTAL, // Usa el mismo que room_rental
-  'str_vacacional': ONBOARDING_STR,
-  'flipping': ONBOARDING_FLIPPING,
-  'construccion': ONBOARDING_GENERAL, // TODO: Crear específico
-  'servicios_profesionales': ONBOARDING_GENERAL, // TODO: Crear específico
-  'comunidades': ONBOARDING_GENERAL, // TODO: Crear específico
-  'mixto': ONBOARDING_GENERAL,
-  'general': ONBOARDING_GENERAL
+  alquiler_tradicional: ONBOARDING_ALQUILER_TRADICIONAL,
+  room_rental: ONBOARDING_ROOM_RENTAL,
+  coliving: ONBOARDING_ROOM_RENTAL, // Usa el mismo que room_rental
+  str_vacacional: ONBOARDING_STR,
+  flipping: ONBOARDING_FLIPPING,
+  construccion: ONBOARDING_GENERAL, // TODO: Crear específico
+  servicios_profesionales: ONBOARDING_GENERAL, // TODO: Crear específico
+  comunidades: ONBOARDING_GENERAL, // TODO: Crear específico
+  mixto: ONBOARDING_GENERAL,
+  general: ONBOARDING_GENERAL,
 };
 
 // ===================================
@@ -452,7 +452,7 @@ export async function initializeOnboardingTasks(
   try {
     // Verificar si ya tiene tareas creadas
     const existingTasks = await prisma.onboardingTask.findMany({
-      where: { userId, companyId }
+      where: { userId, companyId },
     });
 
     if (existingTasks.length > 0) {
@@ -465,7 +465,7 @@ export async function initializeOnboardingTasks(
 
     // Crear las tareas en la base de datos
     const tasks = await Promise.all(
-      taskDefinitions.map(def =>
+      taskDefinitions.map((def) =>
         prisma.onboardingTask.create({
           data: {
             userId,
@@ -482,8 +482,8 @@ export async function initializeOnboardingTasks(
             videoUrl: def.videoUrl,
             helpArticle: def.helpArticle,
             unlocks: def.unlocks,
-            status: 'pending'
-          }
+            status: 'pending',
+          },
         })
       )
     );
@@ -502,41 +502,37 @@ export async function initializeOnboardingTasks(
 export async function getOnboardingTasks(userId: string, companyId: string) {
   return await prisma.onboardingTask.findMany({
     where: { userId, companyId },
-    orderBy: { order: 'asc' }
+    orderBy: { order: 'asc' },
   });
 }
 
 /**
  * Marca una tarea como completada
  */
-export async function completeOnboardingTask(
-  userId: string,
-  companyId: string,
-  taskId: string
-) {
+export async function completeOnboardingTask(userId: string, companyId: string, taskId: string) {
   try {
     const task = await prisma.onboardingTask.updateMany({
       where: {
         userId,
         companyId,
-        taskId
+        taskId,
       },
       data: {
         status: 'completed',
-        completedAt: new Date()
-      }
+        completedAt: new Date(),
+      },
     });
 
     // Verificar si se completó el onboarding completo
     const allTasks = await getOnboardingTasks(userId, companyId);
-    const mandatoryTasks = allTasks.filter(t => t.isMandatory);
-    const completedMandatory = mandatoryTasks.filter(t => t.status === 'completed');
+    const mandatoryTasks = allTasks.filter((t) => t.isMandatory);
+    const completedMandatory = mandatoryTasks.filter((t) => t.status === 'completed');
 
     if (completedMandatory.length === mandatoryTasks.length) {
       // Todas las tareas obligatorias completadas
       await prisma.user.update({
         where: { id: userId },
-        data: { onboardingCompleted: true }
+        data: { onboardingCompleted: true },
       });
 
       console.log(`Usuario ${userId} ha completado el onboarding!`);
@@ -555,21 +551,17 @@ export async function completeOnboardingTask(
 /**
  * Marca una tarea como saltada
  */
-export async function skipOnboardingTask(
-  userId: string,
-  companyId: string,
-  taskId: string
-) {
+export async function skipOnboardingTask(userId: string, companyId: string, taskId: string) {
   return await prisma.onboardingTask.updateMany({
     where: {
       userId,
       companyId,
-      taskId
+      taskId,
     },
     data: {
       status: 'skipped',
-      skippedAt: new Date()
-    }
+      skippedAt: new Date(),
+    },
   });
 }
 
@@ -578,12 +570,12 @@ export async function skipOnboardingTask(
  */
 export async function getOnboardingProgress(userId: string, companyId: string) {
   const tasks = await getOnboardingTasks(userId, companyId);
-  const completedTasks = tasks.filter(t => t.status === 'completed');
+  const completedTasks = tasks.filter((t) => t.status === 'completed');
   const totalTasks = tasks.length;
   const percentage = totalTasks > 0 ? Math.round((completedTasks.length / totalTasks) * 100) : 0;
 
   // Calcular tiempo restante estimado
-  const remainingTasks = tasks.filter(t => t.status === 'pending' || t.status === 'in_progress');
+  const remainingTasks = tasks.filter((t) => t.status === 'pending' || t.status === 'in_progress');
   const estimatedTimeRemaining = remainingTasks.reduce((sum, task) => sum + task.estimatedTime, 0);
 
   return {
@@ -591,7 +583,7 @@ export async function getOnboardingProgress(userId: string, companyId: string) {
     completedTasks: completedTasks.length,
     percentage,
     estimatedTimeRemaining, // en segundos
-    tasks
+    tasks,
   };
 }
 
@@ -612,8 +604,8 @@ async function triggerOnboardingCompleteEvent(userId: string, companyId: string)
       companyId,
       type: 'onboarding_completed',
       templateData: {
-        actionUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`
-      }
+        actionUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+      },
     });
 
     // 4. Crear evento webhook
@@ -623,8 +615,8 @@ async function triggerOnboardingCompleteEvent(userId: string, companyId: string)
       payload: {
         userId,
         companyId,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
 
     console.log(`Eventos de onboarding completado creados para usuario ${userId}`);

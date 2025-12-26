@@ -14,11 +14,7 @@ const vapidKeys = {
 };
 
 if (vapidKeys.publicKey && vapidKeys.privateKey) {
-  webpush.setVapidDetails(
-    'mailto:admin@inmova.app',
-    vapidKeys.publicKey,
-    vapidKeys.privateKey
-  );
+  webpush.setVapidDetails('mailto:admin@inmova.app', vapidKeys.publicKey, vapidKeys.privateKey);
 }
 
 export interface PushNotificationPayload {
@@ -64,10 +60,7 @@ export async function sendPushNotification(
             },
           };
 
-          await webpush.sendNotification(
-            subscriptionObject,
-            JSON.stringify(payload)
-          );
+          await webpush.sendNotification(subscriptionObject, JSON.stringify(payload));
 
           logger.info('Push notification enviada', {
             userId,

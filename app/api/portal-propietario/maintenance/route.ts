@@ -12,10 +12,7 @@ export async function GET(request: NextRequest) {
   try {
     const ownerId = request.headers.get('x-owner-id');
     if (!ownerId) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const owner = await prisma.owner.findUnique({
@@ -30,15 +27,12 @@ export async function GET(request: NextRequest) {
     });
 
     if (!owner) {
-      return NextResponse.json(
-        { error: 'Propietario no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Propietario no encontrado' }, { status: 404 });
     }
 
     const buildingIds = owner.ownerBuildings
-      .filter(ob => ob.verMantenimiento)
-      .map(ob => ob.buildingId);
+      .filter((ob) => ob.verMantenimiento)
+      .map((ob) => ob.buildingId);
 
     // Get units for these buildings
     const units = await prisma.unit.findMany({
@@ -47,7 +41,7 @@ export async function GET(request: NextRequest) {
       },
       select: { id: true },
     });
-    const unitIds = units.map(u => u.id);
+    const unitIds = units.map((u) => u.id);
 
     const maintenanceRecords = await prisma.maintenanceRequest.findMany({
       where: {
@@ -84,7 +78,9 @@ export async function GET(request: NextRequest) {
       pendiente: maintenanceRecords.filter((m: any) => m.estado === 'pendiente').length,
       en_progreso: maintenanceRecords.filter((m: any) => m.estado === 'en_progreso').length,
       completado: maintenanceRecords.filter((m: any) => m.estado === 'completado').length,
-      urgente: maintenanceRecords.filter((m: any) => m.prioridad === 'critico' || m.prioridad === 'alto').length,
+      urgente: maintenanceRecords.filter(
+        (m: any) => m.prioridad === 'critico' || m.prioridad === 'alto'
+      ).length,
     };
 
     return NextResponse.json({
@@ -93,9 +89,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error: any) {
     logger.error('Error al obtener mantenimiento del propietario:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener mantenimiento' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener mantenimiento' }, { status: 500 });
   }
 }

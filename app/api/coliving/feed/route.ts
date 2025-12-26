@@ -15,10 +15,7 @@ export async function GET(request: NextRequest) {
     const companyId = searchParams.get('companyId');
     const buildingId = searchParams.get('buildingId') || undefined;
     if (!companyId) {
-      return NextResponse.json(
-        { error: 'companyId requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'companyId requerido' }, { status: 400 });
     }
     const result = await socialService.getFeed(companyId, buildingId);
     if (!result.success) {
@@ -27,10 +24,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(result.posts);
   } catch (error) {
     logger.error('Error en GET /api/coliving/feed:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener feed' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener feed' }, { status: 500 });
   }
 }
 export async function POST(request: NextRequest) {
@@ -47,9 +41,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result.post, { status: 201 });
   } catch (error) {
     logger.error('Error en POST /api/coliving/feed:', error);
-    return NextResponse.json(
-      { error: 'Error al crear publicación' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear publicación' }, { status: 500 });
   }
 }

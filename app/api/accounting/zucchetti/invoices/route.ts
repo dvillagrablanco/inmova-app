@@ -23,10 +23,7 @@ export async function POST(request: NextRequest) {
     const { contractId } = body;
 
     if (!contractId) {
-      return NextResponse.json(
-        { error: 'Se requiere contractId' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Se requiere contractId' }, { status: 400 });
     }
 
     // Obtener datos del contrato
@@ -45,10 +42,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!contract || contract.unit?.building?.companyId !== session?.user?.companyId) {
-      return NextResponse.json(
-        { error: 'Contrato no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Contrato no encontrado' }, { status: 404 });
     }
 
     // Crear factura en Zucchetti (modo demo)
@@ -62,9 +56,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error al crear factura en Zucchetti:', error);
-    return NextResponse.json(
-      { error: 'Error al crear factura' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear factura' }, { status: 500 });
   }
 }

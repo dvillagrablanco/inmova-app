@@ -47,12 +47,7 @@ export function SocialPreview({
   if (!isVisible) {
     return (
       <div className={cn('flex justify-center', className)}>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setIsVisible(true)}
-          className="gap-2"
-        >
+        <Button variant="outline" size="sm" onClick={() => setIsVisible(true)} className="gap-2">
           <Eye className="h-4 w-4" />
           Vista previa de redes sociales
         </Button>
@@ -96,13 +91,7 @@ export function SocialPreview({
             <div className="rounded-lg border border-gray-200 bg-white overflow-hidden shadow-sm">
               {/* Image */}
               <div className="relative aspect-[1.91/1] w-full bg-gray-100">
-                <Image
-                  src={image}
-                  alt={title}
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
+                <Image src={image} alt={title} fill className="object-cover" unoptimized />
               </div>
               {/* Content */}
               <div className="p-3 space-y-1">
@@ -121,20 +110,16 @@ export function SocialPreview({
             <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden shadow-sm">
               {/* Image */}
               <div className="relative aspect-[2/1] w-full bg-gray-100">
-                <Image
-                  src={image}
-                  alt={title}
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
+                <Image src={image} alt={title} fill className="object-cover" unoptimized />
               </div>
               {/* Content */}
               <div className="p-3 space-y-1">
                 <h3 className="font-semibold text-gray-900 text-[15px] line-clamp-1">
                   {truncate(title, 70)}
                 </h3>
-                <p className="text-[15px] text-gray-600 line-clamp-2">{truncate(description, 150)}</p>
+                <p className="text-[15px] text-gray-600 line-clamp-2">
+                  {truncate(description, 150)}
+                </p>
                 <div className="flex items-center gap-1 text-[13px] text-gray-500 pt-1">
                   <ExternalLink className="h-3 w-3" />
                   {domain}
@@ -151,13 +136,7 @@ export function SocialPreview({
             <div className="rounded border border-gray-300 bg-white overflow-hidden shadow-sm">
               {/* Image */}
               <div className="relative aspect-[1.91/1] w-full bg-gray-100">
-                <Image
-                  src={image}
-                  alt={title}
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
+                <Image src={image} alt={title} fill className="object-cover" unoptimized />
               </div>
               {/* Content */}
               <div className="p-3 bg-gray-50 space-y-1">
@@ -221,8 +200,7 @@ export function SocialPreviewCompact({
               FB
             </Badge>
             <Badge variant="outline" className="text-[10px] h-5">
-              <Twitter className="h-3 w-3 mr-1" />
-              X
+              <Twitter className="h-3 w-3 mr-1" />X
             </Badge>
             <Badge variant="outline" className="text-[10px] h-5">
               <Linkedin className="h-3 w-3 mr-1" />

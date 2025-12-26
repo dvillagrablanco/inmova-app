@@ -6,7 +6,6 @@ import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-
 const updateSuggestionSchema = z.object({
   estado: z.enum(['pendiente', 'en_revision', 'resuelta', 'rechazada']).optional(),
   respuesta: z.string().optional(),
@@ -14,10 +13,7 @@ const updateSuggestionSchema = z.object({
 });
 
 // GET - Obtener una sugerencia específica
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await requireAuth();
     const { id } = params;
@@ -43,17 +39,11 @@ export async function GET(
     });
 
     if (!suggestion) {
-      return NextResponse.json(
-        { error: 'Sugerencia no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Sugerencia no encontrada' }, { status: 404 });
     }
 
     // Solo super_admin o el usuario que creó la sugerencia pueden verla
-    if (
-      user.role !== 'super_admin' &&
-      suggestion.userId !== user.id
-    ) {
+    if (user.role !== 'super_admin' && suggestion.userId !== user.id) {
       return NextResponse.json(
         { error: 'No tienes permisos para ver esta sugerencia' },
         { status: 403 }
@@ -71,10 +61,7 @@ export async function GET(
 }
 
 // PATCH - Actualizar una sugerencia (solo super_admin o soporte)
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await requireAuth();
     const { id } = params;
@@ -95,10 +82,7 @@ export async function PATCH(
     });
 
     if (!suggestion) {
-      return NextResponse.json(
-        { error: 'Sugerencia no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Sugerencia no encontrada' }, { status: 404 });
     }
 
     const updateData: any = { ...validatedData };
@@ -146,14 +130,14 @@ export async function PATCH(
     return NextResponse.json(updatedSuggestion);
   } catch (error: any) {
     logger.error('Error al actualizar sugerencia:', error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Datos inválidos', details: error.errors },
         { status: 400 }
       );
     }
-    
+
     return NextResponse.json(
       { error: error.message || 'Error al actualizar sugerencia' },
       { status: 500 }
@@ -162,10 +146,7 @@ export async function PATCH(
 }
 
 // DELETE - Eliminar una sugerencia (solo super_admin)
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await requireAuth();
     const { id } = params;

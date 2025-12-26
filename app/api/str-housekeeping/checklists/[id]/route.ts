@@ -6,10 +6,7 @@ import { prisma } from '@/lib/db';
 export const dynamic = 'force-dynamic';
 
 // GET - Obtener checklist específica
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -30,18 +27,12 @@ export async function GET(
     return NextResponse.json(checklist);
   } catch (error) {
     console.error('Error al obtener checklist:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener checklist' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener checklist' }, { status: 500 });
   }
 }
 
 // PATCH - Actualizar checklist
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -79,18 +70,12 @@ export async function PATCH(
     return NextResponse.json(checklist);
   } catch (error) {
     console.error('Error al actualizar checklist:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar checklist' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar checklist' }, { status: 500 });
   }
 }
 
 // DELETE - Eliminar checklist
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -116,9 +101,6 @@ export async function DELETE(
     return NextResponse.json({ message: 'Checklist eliminada correctamente' });
   } catch (error) {
     console.error('Error al eliminar checklist:', error);
-    return NextResponse.json(
-      { error: 'Error al eliminar checklist' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar checklist' }, { status: 500 });
   }
 }

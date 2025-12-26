@@ -32,8 +32,8 @@ export async function createBackup(options: BackupOptions) {
         tipo: tipo as any,
         estado: 'en_progreso' as any,
         inicioPor,
-        registros: 0
-      }
+        registros: 0,
+      },
     });
 
     // Obtener todos los datos de la empresa
@@ -47,12 +47,12 @@ export async function createBackup(options: BackupOptions) {
         units: {
           include: {
             contracts: true,
-            documents: true
-          }
+            documents: true,
+          },
         },
         expenses: true,
-        documents: true
-      }
+        documents: true,
+      },
     });
     totalRegistros += data.buildings.length;
 
@@ -61,8 +61,8 @@ export async function createBackup(options: BackupOptions) {
       where: { companyId },
       include: {
         contracts: true,
-        documents: true
-      }
+        documents: true,
+      },
     });
     totalRegistros += data.tenants.length;
 
@@ -70,18 +70,18 @@ export async function createBackup(options: BackupOptions) {
     data.contracts = await prisma.contract.findMany({
       where: {
         unit: {
-          building: { companyId }
-        }
+          building: { companyId },
+        },
       },
       include: {
-        payments: true
-      }
+        payments: true,
+      },
     });
     totalRegistros += data.contracts.length;
 
     // Proveedores
     data.providers = await prisma.provider.findMany({
-      where: { companyId }
+      where: { companyId },
     });
     totalRegistros += data.providers.length;
 
@@ -94,8 +94,8 @@ export async function createBackup(options: BackupOptions) {
         name: true,
         role: true,
         activo: true,
-        createdAt: true
-      }
+        createdAt: true,
+      },
     });
     totalRegistros += data.users.length;
 
@@ -115,8 +115,8 @@ export async function createBackup(options: BackupOptions) {
         registros: totalRegistros,
         tamano: `${sizeInMB} MB`,
         ubicacion,
-        completedAt: new Date()
-      }
+        completedAt: new Date(),
+      },
     });
 
     return {
@@ -124,7 +124,7 @@ export async function createBackup(options: BackupOptions) {
       backup: backup.id,
       registros: totalRegistros,
       tamano: sizeInMB,
-      data // En producción, no retornar los datos, solo la ubicación
+      data, // En producción, no retornar los datos, solo la ubicación
     };
   } catch (error: any) {
     logger.error('Error creating backup:', error);
@@ -142,18 +142,21 @@ export async function exportData(options: ExportOptions) {
     let data: any[] = [];
 
     // Filtros de fecha si aplican
-    const dateFilter = startDate && endDate ? {
-      createdAt: {
-        gte: startDate,
-        lte: endDate
-      }
-    } : {};
+    const dateFilter =
+      startDate && endDate
+        ? {
+            createdAt: {
+              gte: startDate,
+              lte: endDate,
+            },
+          }
+        : {};
 
     // Obtener datos según el modelo
     switch (model) {
       case 'buildings':
         data = await prisma.building.findMany({
-          where: { companyId, ...filters, ...dateFilter }
+          where: { companyId, ...filters, ...dateFilter },
         });
         break;
 
@@ -162,17 +165,17 @@ export async function exportData(options: ExportOptions) {
           where: {
             building: { companyId },
             ...filters,
-            ...dateFilter
+            ...dateFilter,
           },
           include: {
-            building: { select: { nombre: true } }
-          }
+            building: { select: { nombre: true } },
+          },
         });
         break;
 
       case 'tenants':
         data = await prisma.tenant.findMany({
-          where: { companyId, ...filters, ...dateFilter }
+          where: { companyId, ...filters, ...dateFilter },
         });
         break;
 
@@ -181,17 +184,17 @@ export async function exportData(options: ExportOptions) {
           where: {
             unit: { building: { companyId } },
             ...filters,
-            ...dateFilter
+            ...dateFilter,
           },
           include: {
             tenant: { select: { nombreCompleto: true } },
             unit: {
               select: {
                 numero: true,
-                building: { select: { nombre: true } }
-              }
-            }
-          }
+                building: { select: { nombre: true } },
+              },
+            },
+          },
         });
         break;
 
@@ -199,10 +202,10 @@ export async function exportData(options: ExportOptions) {
         data = await prisma.payment.findMany({
           where: {
             contract: {
-              unit: { building: { companyId } }
+              unit: { building: { companyId } },
             },
             ...filters,
-            ...dateFilter
+            ...dateFilter,
           },
           include: {
             contract: {
@@ -211,12 +214,12 @@ export async function exportData(options: ExportOptions) {
                 unit: {
                   select: {
                     numero: true,
-                    building: { select: { nombre: true } }
-                  }
-                }
-              }
-            }
-          }
+                    building: { select: { nombre: true } },
+                  },
+                },
+              },
+            },
+          },
         });
         break;
 
@@ -224,8 +227,8 @@ export async function exportData(options: ExportOptions) {
         data = await prisma.maintenanceRequest.findMany({
           where: {
             ...filters,
-            ...dateFilter
-          }
+            ...dateFilter,
+          },
         });
         break;
 
@@ -234,17 +237,17 @@ export async function exportData(options: ExportOptions) {
           where: {
             building: { companyId },
             ...filters,
-            ...dateFilter
+            ...dateFilter,
           },
           include: {
-            building: { select: { nombre: true } }
-          }
+            building: { select: { nombre: true } },
+          },
         });
         break;
 
       case 'providers':
         data = await prisma.provider.findMany({
-          where: { companyId, ...filters, ...dateFilter }
+          where: { companyId, ...filters, ...dateFilter },
         });
         break;
 
@@ -260,13 +263,13 @@ export async function exportData(options: ExportOptions) {
       return {
         data,
         format: 'xlsx',
-        filename: `${model}_${formatDate(new Date(), 'yyyy-MM-dd')}.xlsx`
+        filename: `${model}_${formatDate(new Date(), 'yyyy-MM-dd')}.xlsx`,
       };
     } else {
       return {
         data,
         format: 'json',
-        filename: `${model}_${formatDate(new Date(), 'yyyy-MM-dd')}.json`
+        filename: `${model}_${formatDate(new Date(), 'yyyy-MM-dd')}.json`,
       };
     }
   } catch (error: any) {
@@ -285,20 +288,22 @@ function convertToCSV(data: any[]): string {
 
   // Obtener headers (keys del primer objeto)
   const headers = Object.keys(flattenObject(data[0]));
-  
+
   // Crear filas
-  const rows = data.map(item => {
+  const rows = data.map((item) => {
     const flattened = flattenObject(item);
-    return headers.map(header => {
-      const value = flattened[header];
-      // Escapar comas y comillas en valores
-      if (value === null || value === undefined) return '';
-      const stringValue = typeof value === 'string' ? value : value.toString();
-      if (stringValue.includes(',') || stringValue.includes('"')) {
-        return `"${stringValue.replace(/"/g, '""')}"`;
-      }
-      return stringValue;
-    }).join(',');
+    return headers
+      .map((header) => {
+        const value = flattened[header];
+        // Escapar comas y comillas en valores
+        if (value === null || value === undefined) return '';
+        const stringValue = typeof value === 'string' ? value : value.toString();
+        if (stringValue.includes(',') || stringValue.includes('"')) {
+          return `"${stringValue.replace(/"/g, '""')}"`;
+        }
+        return stringValue;
+      })
+      .join(',');
   });
 
   // Combinar headers y rows
@@ -314,7 +319,11 @@ function flattenObject(obj: any, prefix = ''): any {
   for (const key in obj) {
     if (obj[key] === null || obj[key] === undefined) {
       flattened[prefix + key] = obj[key];
-    } else if (typeof obj[key] === 'object' && !Array.isArray(obj[key]) && !(obj[key] instanceof Date)) {
+    } else if (
+      typeof obj[key] === 'object' &&
+      !Array.isArray(obj[key]) &&
+      !(obj[key] instanceof Date)
+    ) {
       Object.assign(flattened, flattenObject(obj[key], `${prefix}${key}_`));
     } else if (Array.isArray(obj[key])) {
       flattened[prefix + key] = obj[key].join('; ');
@@ -333,7 +342,7 @@ export async function getBackups(companyId: string) {
   return await prisma.systemBackup.findMany({
     where: { companyId },
     orderBy: { createdAt: 'desc' },
-    take: 50
+    take: 50,
   });
 }
 
@@ -348,8 +357,8 @@ export async function cleanOldBackups(companyId: string, daysToKeep = 30) {
     where: {
       companyId,
       createdAt: {
-        lt: cutoffDate
-      }
-    }
+        lt: cutoffDate,
+      },
+    },
   });
 }

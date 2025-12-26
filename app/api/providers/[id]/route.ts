@@ -1,6 +1,6 @@
 /**
  * Endpoints API para operaciones específicas de Proveedores
- * 
+ *
  * Implementa operaciones GET, PUT y DELETE con validación Zod
  */
 
@@ -19,13 +19,10 @@ export const dynamic = 'force-dynamic';
  * GET /api/providers/[id]
  * Obtiene un proveedor específico con sus relaciones
  */
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session) {
       return NextResponse.json(
         { error: 'No autenticado', message: 'Debe iniciar sesión' },
@@ -80,9 +77,8 @@ export async function GET(
       );
     }
 
-    logger.info(`Proveedor obtenido: ${provider.id}`, { userId: session?.user?.id});
+    logger.info(`Proveedor obtenido: ${provider.id}`, { userId: session?.user?.id });
     return NextResponse.json(provider, { status: 200 });
-    
   } catch (error) {
     logger.error('Error fetching provider:', error);
     return NextResponse.json(
@@ -96,10 +92,7 @@ export async function GET(
  * PUT /api/providers/[id]
  * Actualiza un proveedor existente con validación Zod
  */
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await requirePermission('update');
     const body = await req.json();
@@ -135,7 +128,7 @@ export async function PUT(
           id: { not: params.id },
         },
       });
-      
+
       if (duplicateEmail) {
         return NextResponse.json(
           { error: 'Proveedor duplicado', message: 'Ya existe un proveedor con este email' },
@@ -149,9 +142,11 @@ export async function PUT(
       data: validatedData,
     });
 
-    logger.info(`Proveedor actualizado: ${provider.id}`, { userId: user.id, providerId: provider.id });
+    logger.info(`Proveedor actualizado: ${provider.id}`, {
+      userId: user.id,
+      providerId: provider.id,
+    });
     return NextResponse.json(provider, { status: 200 });
-    
   } catch (error: any) {
     logger.error('Error updating provider:', error);
 
@@ -167,12 +162,9 @@ export async function PUT(
     }
 
     if (error.message?.includes('permiso')) {
-      return NextResponse.json(
-        { error: 'Prohibido', message: error.message },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Prohibido', message: error.message }, { status: 403 });
     }
-    
+
     if (error.message === 'No autenticado') {
       return NextResponse.json(
         { error: 'No autenticado', message: 'Debe iniciar sesión' },
@@ -191,10 +183,7 @@ export async function PUT(
  * DELETE /api/providers/[id]
  * Elimina un proveedor existente
  */
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await requirePermission('delete');
 
@@ -230,7 +219,8 @@ export async function DELETE(
       return NextResponse.json(
         {
           error: 'Conflicto',
-          message: 'No se puede eliminar el proveedor porque tiene solicitudes de mantenimiento o gastos asociados',
+          message:
+            'No se puede eliminar el proveedor porque tiene solicitudes de mantenimiento o gastos asociados',
         },
         { status: 409 }
       );
@@ -241,21 +231,14 @@ export async function DELETE(
     });
 
     logger.info(`Proveedor eliminado: ${params.id}`, { userId: user.id, providerId: params.id });
-    return NextResponse.json(
-      { message: 'Proveedor eliminado exitosamente' },
-      { status: 200 }
-    );
-    
+    return NextResponse.json({ message: 'Proveedor eliminado exitosamente' }, { status: 200 });
   } catch (error: any) {
     logger.error('Error deleting provider:', error);
 
     if (error.message?.includes('permiso')) {
-      return NextResponse.json(
-        { error: 'Prohibido', message: error.message },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Prohibido', message: error.message }, { status: 403 });
     }
-    
+
     if (error.message === 'No autenticado') {
       return NextResponse.json(
         { error: 'No autenticado', message: 'Debe iniciar sesión' },

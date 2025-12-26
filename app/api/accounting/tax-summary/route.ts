@@ -12,10 +12,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.companyId) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const searchParams = request.nextUrl.searchParams;
@@ -26,11 +23,7 @@ export async function GET(request: NextRequest) {
     const fechaInicio = startOfMonth(new Date(year, month - 1));
     const fechaFin = endOfMonth(new Date(year, month - 1));
 
-    const taxSummary = await getTaxSummary(
-      session.user.companyId,
-      fechaInicio,
-      fechaFin
-    );
+    const taxSummary = await getTaxSummary(session.user.companyId, fechaInicio, fechaFin);
 
     return NextResponse.json({
       success: true,
@@ -39,9 +32,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error al obtener resumen fiscal:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener resumen fiscal' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener resumen fiscal' }, { status: 500 });
   }
 }

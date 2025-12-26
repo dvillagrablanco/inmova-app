@@ -46,14 +46,10 @@ export async function addReportJob(
   }
 
   try {
-    const job = await queue.add(
-      data.type,
-      data,
-      {
-        priority: options?.priority || 5, // Prioridad baja por defecto
-        delay: options?.delay,
-      }
-    );
+    const job = await queue.add(data.type, data, {
+      priority: options?.priority || 5, // Prioridad baja por defecto
+      delay: options?.delay,
+    });
 
     logger.info(`✅ Report job ${job.id} added to queue: ${data.type}`);
     return job.id || null;
@@ -164,14 +160,14 @@ export async function generateMaintenanceReport(
  */
 export async function getReportJobStatus(jobId: string): Promise<any> {
   const queue = getReportQueue();
-  
+
   if (!queue) {
     return { available: false };
   }
 
   try {
     const job = await queue.getJob(jobId);
-    
+
     if (!job) {
       return { found: false };
     }
@@ -198,7 +194,7 @@ export async function getReportJobStatus(jobId: string): Promise<any> {
  */
 export async function getReportQueueStats(): Promise<any> {
   const queue = getReportQueue();
-  
+
   if (!queue) {
     return { available: false };
   }

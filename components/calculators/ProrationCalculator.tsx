@@ -5,7 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Calculator, Info, TrendingUp } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -32,9 +38,11 @@ export function ProrationCalculator() {
     { id: '2', name: 'Habitación 2', occupants: 2, superficie: 25, rentaMensual: 500 },
     { id: '3', name: 'Habitación 3', occupants: 1, superficie: 18, rentaMensual: 380 },
   ]);
-  
+
   const [totalUtilityAmount, setTotalUtilityAmount] = useState<number>(150);
-  const [method, setMethod] = useState<'by_occupants' | 'by_surface' | 'combined' | 'equal'>('combined');
+  const [method, setMethod] = useState<'by_occupants' | 'by_surface' | 'combined' | 'equal'>(
+    'combined'
+  );
   const [results, setResults] = useState<ProrationResult[]>([]);
 
   useEffect(() => {
@@ -69,9 +77,9 @@ export function ProrationCalculator() {
 
   const calculateByOccupants = (): ProrationResult[] => {
     const totalOccupants = rooms.reduce((sum, room) => sum + room.occupants, 0);
-    
+
     if (totalOccupants === 0) {
-      return rooms.map(room => ({
+      return rooms.map((room) => ({
         roomId: room.id,
         roomName: room.name,
         baseRent: room.rentaMensual,
@@ -81,10 +89,10 @@ export function ProrationCalculator() {
       }));
     }
 
-    return rooms.map(room => {
+    return rooms.map((room) => {
       const percentage = (room.occupants / totalOccupants) * 100;
       const utilityShare = (room.occupants / totalOccupants) * totalUtilityAmount;
-      
+
       return {
         roomId: room.id,
         roomName: room.name,
@@ -98,9 +106,9 @@ export function ProrationCalculator() {
 
   const calculateBySurface = (): ProrationResult[] => {
     const totalSurface = rooms.reduce((sum, room) => sum + room.superficie, 0);
-    
+
     if (totalSurface === 0) {
-      return rooms.map(room => ({
+      return rooms.map((room) => ({
         roomId: room.id,
         roomName: room.name,
         baseRent: room.rentaMensual,
@@ -110,10 +118,10 @@ export function ProrationCalculator() {
       }));
     }
 
-    return rooms.map(room => {
+    return rooms.map((room) => {
       const percentage = (room.superficie / totalSurface) * 100;
       const utilityShare = (room.superficie / totalSurface) * totalUtilityAmount;
-      
+
       return {
         roomId: room.id,
         roomName: room.name,
@@ -128,10 +136,10 @@ export function ProrationCalculator() {
   const calculateCombined = (): ProrationResult[] => {
     const totalOccupants = rooms.reduce((sum, room) => sum + room.occupants, 0);
     const totalSurface = rooms.reduce((sum, room) => sum + room.superficie, 0);
-    
+
     // Si ambos son 0, retornar sin prorrateo
     if (totalOccupants === 0 && totalSurface === 0) {
-      return rooms.map(room => ({
+      return rooms.map((room) => ({
         roomId: room.id,
         roomName: room.name,
         baseRent: room.rentaMensual,
@@ -146,14 +154,14 @@ export function ProrationCalculator() {
     if (totalSurface === 0) return calculateByOccupants();
 
     // Método combinado: 50% por ocupantes, 50% por superficie
-    return rooms.map(room => {
+    return rooms.map((room) => {
       const occupantWeight = room.occupants / totalOccupants;
       const surfaceWeight = room.superficie / totalSurface;
       const combinedWeight = (occupantWeight + surfaceWeight) / 2;
-      
+
       const percentage = combinedWeight * 100;
       const utilityShare = combinedWeight * totalUtilityAmount;
-      
+
       return {
         roomId: room.id,
         roomName: room.name,
@@ -167,8 +175,8 @@ export function ProrationCalculator() {
 
   const calculateEqual = (): ProrationResult[] => {
     const sharePerRoom = totalUtilityAmount / rooms.length;
-    
-    return rooms.map(room => ({
+
+    return rooms.map((room) => ({
       roomId: room.id,
       roomName: room.name,
       baseRent: room.rentaMensual,
@@ -190,13 +198,11 @@ export function ProrationCalculator() {
   };
 
   const removeRoom = (id: string) => {
-    setRooms(rooms.filter(room => room.id !== id));
+    setRooms(rooms.filter((room) => room.id !== id));
   };
 
   const updateRoom = (id: string, field: keyof Room, value: any) => {
-    setRooms(rooms.map(room => 
-      room.id === id ? { ...room, [field]: value } : room
-    ));
+    setRooms(rooms.map((room) => (room.id === id ? { ...room, [field]: value } : room)));
   };
 
   const totalRent = results.reduce((sum, r) => sum + r.baseRent, 0);
@@ -227,7 +233,9 @@ export function ProrationCalculator() {
                       <Info className="inline h-4 w-4 ml-1 text-muted-foreground cursor-help" />
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Suma de todos los gastos comunes del mes (agua, luz, gas, internet, etc.)</p>
+                      <p>
+                        Suma de todos los gastos comunes del mes (agua, luz, gas, internet, etc.)
+                      </p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -253,10 +261,18 @@ export function ProrationCalculator() {
                     </TooltipTrigger>
                     <TooltipContent className="max-w-xs">
                       <div className="space-y-1">
-                        <p><strong>Por ocupantes:</strong> Divide según número de personas</p>
-                        <p><strong>Por superficie:</strong> Divide según metros cuadrados</p>
-                        <p><strong>Combinado:</strong> 50% ocupantes + 50% superficie</p>
-                        <p><strong>Igualitario:</strong> Divide en partes iguales</p>
+                        <p>
+                          <strong>Por ocupantes:</strong> Divide según número de personas
+                        </p>
+                        <p>
+                          <strong>Por superficie:</strong> Divide según metros cuadrados
+                        </p>
+                        <p>
+                          <strong>Combinado:</strong> 50% ocupantes + 50% superficie
+                        </p>
+                        <p>
+                          <strong>Igualitario:</strong> Divide en partes iguales
+                        </p>
                       </div>
                     </TooltipContent>
                   </Tooltip>
@@ -298,7 +314,7 @@ export function ProrationCalculator() {
                           onChange={(e) => updateRoom(room.id, 'name', e.target.value)}
                         />
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor={`occupants-${room.id}`}>Ocupantes</Label>
                         <Input
@@ -306,10 +322,12 @@ export function ProrationCalculator() {
                           type="number"
                           min="0"
                           value={room.occupants}
-                          onChange={(e) => updateRoom(room.id, 'occupants', parseInt(e.target.value) || 0)}
+                          onChange={(e) =>
+                            updateRoom(room.id, 'occupants', parseInt(e.target.value) || 0)
+                          }
                         />
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor={`superficie-${room.id}`}>m²</Label>
                         <Input
@@ -318,10 +336,12 @@ export function ProrationCalculator() {
                           min="0"
                           step="0.01"
                           value={room.superficie}
-                          onChange={(e) => updateRoom(room.id, 'superficie', parseFloat(e.target.value) || 0)}
+                          onChange={(e) =>
+                            updateRoom(room.id, 'superficie', parseFloat(e.target.value) || 0)
+                          }
                         />
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor={`rent-${room.id}`}>Renta (€)</Label>
                         <Input
@@ -330,10 +350,12 @@ export function ProrationCalculator() {
                           min="0"
                           step="0.01"
                           value={room.rentaMensual}
-                          onChange={(e) => updateRoom(room.id, 'rentaMensual', parseFloat(e.target.value) || 0)}
+                          onChange={(e) =>
+                            updateRoom(room.id, 'rentaMensual', parseFloat(e.target.value) || 0)
+                          }
                         />
                       </div>
-                      
+
                       <div className="flex items-end">
                         <Button
                           variant="destructive"
@@ -362,9 +384,7 @@ export function ProrationCalculator() {
               <TrendingUp className="h-5 w-5 text-green-600" />
               Resultados del Prorrateo
             </CardTitle>
-            <CardDescription>
-              Distribución automática según el método seleccionado
-            </CardDescription>
+            <CardDescription>Distribución automática según el método seleccionado</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
@@ -414,10 +434,14 @@ export function ProrationCalculator() {
                 💡 Información del Método
               </h4>
               <p className="text-sm text-blue-800 dark:text-blue-200">
-                {method === 'combined' && 'Método combinado: Los gastos se distribuyen 50% según número de ocupantes y 50% según superficie de cada habitación.'}
-                {method === 'by_occupants' && 'Los gastos se distribuyen proporcionalmente según el número de ocupantes en cada habitación.'}
-                {method === 'by_surface' && 'Los gastos se distribuyen proporcionalmente según los metros cuadrados de cada habitación.'}
-                {method === 'equal' && 'Los gastos se distribuyen en partes iguales entre todas las habitaciones, independientemente de ocupantes o tamaño.'}
+                {method === 'combined' &&
+                  'Método combinado: Los gastos se distribuyen 50% según número de ocupantes y 50% según superficie de cada habitación.'}
+                {method === 'by_occupants' &&
+                  'Los gastos se distribuyen proporcionalmente según el número de ocupantes en cada habitación.'}
+                {method === 'by_surface' &&
+                  'Los gastos se distribuyen proporcionalmente según los metros cuadrados de cada habitación.'}
+                {method === 'equal' &&
+                  'Los gastos se distribuyen en partes iguales entre todas las habitaciones, independientemente de ocupantes o tamaño.'}
               </p>
             </div>
           </CardContent>

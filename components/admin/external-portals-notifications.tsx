@@ -2,14 +2,19 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { Bell, X, MessageSquare, DollarSign, CheckCircle, FileSignature, Target, Trophy } from 'lucide-react';
+import {
+  Bell,
+  X,
+  MessageSquare,
+  DollarSign,
+  CheckCircle,
+  FileSignature,
+  Target,
+  Trophy,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -110,12 +115,7 @@ export function ExternalPortalsNotifications() {
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative"
-          onClick={() => setIsOpen(true)}
-        >
+        <Button variant="ghost" size="icon" className="relative" onClick={() => setIsOpen(true)}>
           <Bell className="h-5 w-5" />
           {counts && counts.total > 0 && (
             <Badge
@@ -140,12 +140,7 @@ export function ExternalPortalsNotifications() {
               </p>
             )}
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsOpen(false)}
-            className="h-8 w-8"
-          >
+          <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="h-8 w-8">
             <X className="h-4 w-4" />
           </Button>
         </div>
@@ -187,18 +182,15 @@ export function ExternalPortalsNotifications() {
                   className="w-full p-4 hover:bg-muted/50 transition-colors text-left"
                 >
                   <div className="flex items-start gap-3">
-                    <div className={cn('flex-shrink-0 mt-1', getPriorityColor(notification.priority))}>
+                    <div
+                      className={cn('flex-shrink-0 mt-1', getPriorityColor(notification.priority))}
+                    >
                       {getIcon(notification.icon)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2 mb-1">
-                        <p className="text-sm font-medium line-clamp-1">
-                          {notification.title}
-                        </p>
-                        <Badge
-                          variant="outline"
-                          className="text-xs flex-shrink-0"
-                        >
+                        <p className="text-sm font-medium line-clamp-1">{notification.title}</p>
+                        <Badge variant="outline" className="text-xs flex-shrink-0">
                           {notification.portal}
                         </Badge>
                       </div>

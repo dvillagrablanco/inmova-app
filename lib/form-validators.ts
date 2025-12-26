@@ -126,10 +126,7 @@ export function validatePassword(password: string): ValidationResult {
 /**
  * Valida que dos contraseñas coincidan
  */
-export function validatePasswordMatch(
-  password: string,
-  confirmPassword: string
-): ValidationResult {
+export function validatePasswordMatch(password: string, confirmPassword: string): ValidationResult {
   if (!confirmPassword) {
     return { valid: false, error: 'Debes confirmar la contraseña' };
   }
@@ -144,10 +141,7 @@ export function validatePasswordMatch(
 /**
  * Valida número positivo
  */
-export function validatePositiveNumber(
-  value: any,
-  fieldName: string = 'Valor'
-): ValidationResult {
+export function validatePositiveNumber(value: any, fieldName: string = 'Valor'): ValidationResult {
   if (!value && value !== 0) {
     return { valid: false, error: `${fieldName} es obligatorio` };
   }

@@ -86,7 +86,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(maintenanceRequests);
   } catch (error) {
     logger.error('Error fetching maintenance requests:', error);
-    return NextResponse.json({ error: 'Error al obtener solicitudes de mantenimiento' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Error al obtener solicitudes de mantenimiento' },
+      { status: 500 }
+    );
   }
 }
 
@@ -98,7 +101,16 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { unitId, titulo, descripcion, prioridad, estado, fechaProgramada, providerId, costoEstimado } = body;
+    const {
+      unitId,
+      titulo,
+      descripcion,
+      prioridad,
+      estado,
+      fechaProgramada,
+      providerId,
+      costoEstimado,
+    } = body;
 
     if (!unitId || !titulo || !descripcion) {
       return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
@@ -120,6 +132,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(maintenanceRequest, { status: 201 });
   } catch (error) {
     logger.error('Error creating maintenance request:', error);
-    return NextResponse.json({ error: 'Error al crear solicitud de mantenimiento' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Error al crear solicitud de mantenimiento' },
+      { status: 500 }
+    );
   }
 }

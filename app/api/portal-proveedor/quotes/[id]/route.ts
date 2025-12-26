@@ -8,18 +8,12 @@ export const dynamic = 'force-dynamic';
  * GET /api/portal-proveedor/quotes/[id]
  * Obtiene los detalles de un presupuesto específico
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const providerId = request.headers.get('x-provider-id');
 
     if (!providerId) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const quote = await prisma.providerQuote.findUnique({
@@ -59,10 +53,7 @@ export async function GET(
     });
 
     if (!quote) {
-      return NextResponse.json(
-        { error: 'Presupuesto no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Presupuesto no encontrado' }, { status: 404 });
     }
 
     // Verificar que el presupuesto pertenece al proveedor
@@ -78,10 +69,7 @@ export async function GET(
     logError(error instanceof Error ? error : new Error(String(error)), {
       context: 'GET /api/portal-proveedor/quotes/[id]',
     });
-    return NextResponse.json(
-      { error: 'Error al obtener presupuesto' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener presupuesto' }, { status: 500 });
   }
 }
 
@@ -89,18 +77,12 @@ export async function GET(
  * PATCH /api/portal-proveedor/quotes/[id]
  * Actualiza un presupuesto (editar, enviar, retirar)
  */
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const providerId = request.headers.get('x-provider-id');
 
     if (!providerId) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Verificar que el presupuesto existe y pertenece al proveedor
@@ -109,10 +91,7 @@ export async function PATCH(
     });
 
     if (!quote) {
-      return NextResponse.json(
-        { error: 'Presupuesto no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Presupuesto no encontrado' }, { status: 404 });
     }
 
     if (quote.providerId !== providerId) {
@@ -130,7 +109,7 @@ export async function PATCH(
     // Si se actualizan conceptos, recalcular totales
     if (conceptos && Array.isArray(conceptos)) {
       const subtotal = conceptos.reduce(
-        (sum: number, item: any) => sum + (item.cantidad * item.precioUnitario),
+        (sum: number, item: any) => sum + item.cantidad * item.precioUnitario,
         0
       );
       const iva = subtotal * 0.21;
@@ -178,9 +157,6 @@ export async function PATCH(
     logError(error instanceof Error ? error : new Error(String(error)), {
       context: 'PATCH /api/portal-proveedor/quotes/[id]',
     });
-    return NextResponse.json(
-      { error: 'Error al actualizar presupuesto' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar presupuesto' }, { status: 500 });
   }
 }

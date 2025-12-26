@@ -55,7 +55,7 @@ export function useSlowConnection() {
   useEffect(() => {
     if ('connection' in navigator) {
       const connection = (navigator as any).connection;
-      
+
       if (connection) {
         const checkConnection = () => {
           // Considerar conexión lenta si effectiveType es 'slow-2g', '2g', o '3g'
@@ -78,7 +78,7 @@ export function useSlowConnection() {
  */
 export function getOptimizedImageUrl(url: string, isMobile: boolean): string {
   if (!url) return '';
-  
+
   // Si la imagen ya está optimizada o es un data URL, retornarla tal cual
   if (url.startsWith('data:') || url.includes('w=') || url.includes('q=')) {
     return url;
@@ -88,7 +88,7 @@ export function getOptimizedImageUrl(url: string, isMobile: boolean): string {
   const separator = url.includes('?') ? '&' : '?';
   const width = isMobile ? '800' : '1920';
   const quality = isMobile ? '70' : '85';
-  
+
   return `${url}${separator}w=${width}&q=${quality}`;
 }
 
@@ -147,7 +147,7 @@ export function throttle<T extends (...args: any[]) => any>(
  */
 export function isTouchDevice(): boolean {
   if (typeof window === 'undefined') return false;
-  
+
   return (
     'ontouchstart' in window ||
     navigator.maxTouchPoints > 0 ||
@@ -162,7 +162,7 @@ export function improveTouch() {
   if (typeof document === 'undefined') return;
 
   // Eliminar delay de 300ms en taps
-  document.addEventListener('touchstart', function() {}, { passive: true });
+  document.addEventListener('touchstart', function () {}, { passive: true });
 }
 
 /**
@@ -171,7 +171,7 @@ export function improveTouch() {
 export function preloadCriticalResources(urls: string[]) {
   if (typeof document === 'undefined') return;
 
-  urls.forEach(url => {
+  urls.forEach((url) => {
     const link = document.createElement('link');
     link.rel = 'prefetch';
     link.href = url;

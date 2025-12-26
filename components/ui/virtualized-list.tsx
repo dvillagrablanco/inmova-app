@@ -25,7 +25,7 @@ interface VirtualizedListProps<T> {
 /**
  * Componente de lista virtualizada para mejorar el rendimiento con listas largas
  * Solo renderiza los items visibles en el viewport
- * 
+ *
  * Beneficios:
  * - Renderiza solo items visibles (~10-20 items en lugar de 1000+)
  * - Scroll suave incluso con miles de items
@@ -52,7 +52,7 @@ function VirtualizedListInner<T>({
   // Componente Row para cada item
   const Row = ({ index, style }: RowProps) => {
     const item = items[index];
-    
+
     return (
       <div
         style={style}
@@ -139,7 +139,7 @@ export function VariableVirtualizedList({
 
   const Row = ({ index, style }: RowProps) => {
     const item = items[index]?.data;
-    
+
     return (
       <div
         style={style}

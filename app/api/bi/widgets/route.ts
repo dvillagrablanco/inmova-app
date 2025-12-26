@@ -25,10 +25,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(widgets);
   } catch (error) {
     logger.error('Error fetching widgets:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener widgets' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener widgets' }, { status: 500 });
   }
 }
 
@@ -52,16 +49,13 @@ export async function POST(req: NextRequest) {
         dataSource,
         config,
         posicion: posicion || 0,
-        creadoPor: session?.user?.email|| '',
+        creadoPor: session?.user?.email || '',
       },
     });
 
     return NextResponse.json(widget, { status: 201 });
   } catch (error) {
     logger.error('Error creating widget:', error);
-    return NextResponse.json(
-      { error: 'Error al crear widget' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear widget' }, { status: 500 });
   }
 }

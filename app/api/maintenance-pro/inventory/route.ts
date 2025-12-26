@@ -66,9 +66,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ item }, { status: 201 });
   } catch (error: any) {
     logger.error('Error creating inventory item:', error);
-    return NextResponse.json(
-      { error: error.message || 'Error al crear item' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Error al crear item' }, { status: 500 });
   }
 }

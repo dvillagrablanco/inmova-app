@@ -2,7 +2,13 @@
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Search, Filter, Download, RefreshCw } from 'lucide-react';
 import { SubscriptionPlan } from '@/lib/hooks/admin/useCompanies';
 
@@ -68,7 +74,7 @@ export function FilterBar({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Todos los planes</SelectItem>
-          {plans.map(plan => (
+          {plans.map((plan) => (
             <SelectItem key={plan.id} value={plan.id}>
               {plan.nombre}
             </SelectItem>

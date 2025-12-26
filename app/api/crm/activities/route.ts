@@ -45,10 +45,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(activities);
   } catch (error) {
     logger.error('Error al obtener actividades CRM:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener actividades' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener actividades' }, { status: 500 });
   }
 }
 
@@ -65,13 +62,20 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { leadId, tipo, asunto, descripcion, fecha, duracion, resultado, proximaAccion, completada } = body;
+    const {
+      leadId,
+      tipo,
+      asunto,
+      descripcion,
+      fecha,
+      duracion,
+      resultado,
+      proximaAccion,
+      completada,
+    } = body;
 
     if (!leadId || !tipo || !asunto || !fecha) {
-      return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
 
     // Verificar que el lead existe
@@ -82,10 +86,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!lead) {
-      return NextResponse.json(
-        { error: 'Lead no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Lead no encontrado' }, { status: 404 });
     }
 
     const activity = await prisma.crmActivity.create({
@@ -114,9 +115,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(activity, { status: 201 });
   } catch (error) {
     logger.error('Error al crear actividad CRM:', error);
-    return NextResponse.json(
-      { error: 'Error al crear actividad' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear actividad' }, { status: 500 });
   }
 }

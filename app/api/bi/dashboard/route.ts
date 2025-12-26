@@ -36,43 +36,43 @@ export async function GET(req: NextRequest) {
     for (let i = 0; i < periodo; i++) {
       const monthStart = startOfMonth(subMonths(now, periodo - i - 1));
       const monthEnd = endOfMonth(monthStart);
-      
+
       const payments = await prisma.payment.findMany({
         where: {
           contract: {
             unit: {
-              building: buildingFilter
-            }
+              building: buildingFilter,
+            },
           },
           estado: 'pagado',
           fechaPago: {
             gte: monthStart,
-            lte: monthEnd
-          }
-        }
+            lte: monthEnd,
+          },
+        },
       });
 
       const rentas = payments.reduce((sum, p) => sum + p.monto, 0);
-      
+
       ingresos.push({
         mes: format(monthStart, 'MMM yyyy', { locale: es }),
         rentas: parseFloat(rentas.toFixed(2)),
         servicios: parseFloat((rentas * 0.05).toFixed(2)), // 5% en servicios
-        otros: parseFloat((rentas * 0.02).toFixed(2)) // 2% otros
+        otros: parseFloat((rentas * 0.02).toFixed(2)), // 2% otros
       });
     }
 
     // 2. Datos de Gastos
-    const gastos: Array<{categoria: string; monto: number; porcentaje: number}> = [];
+    const gastos: Array<{ categoria: string; monto: number; porcentaje: number }> = [];
     const gastosPorCategoria: Record<string, number> = {};
-    
+
     const allGastos = await prisma.expense.findMany({
       where: {
         building: buildingFilter,
         fecha: {
-          gte: startDate
-        }
-      }
+          gte: startDate,
+        },
+      },
     });
 
     allGastos.forEach((gasto: any) => {
@@ -82,13 +82,16 @@ export async function GET(req: NextRequest) {
       gastosPorCategoria[gasto.categoria] += gasto.monto;
     });
 
-    const totalGastos = Object.values(gastosPorCategoria).reduce((sum: any, val: any) => sum + val, 0) as number;
+    const totalGastos = Object.values(gastosPorCategoria).reduce(
+      (sum: any, val: any) => sum + val,
+      0
+    ) as number;
 
     Object.entries(gastosPorCategoria).forEach(([categoria, monto]: [string, any]) => {
       gastos.push({
         categoria,
         monto: parseFloat(monto.toFixed(2)),
-        porcentaje: parseFloat(((monto / totalGastos) * 100).toFixed(1))
+        porcentaje: parseFloat(((monto / totalGastos) * 100).toFixed(1)),
       });
     });
 
@@ -103,17 +106,14 @@ export async function GET(req: NextRequest) {
                 OR: [
                   { estado: 'activo' },
                   {
-                    AND: [
-                      { fechaInicio: { lte: now } },
-                      { fechaFin: { gte: now } }
-                    ]
-                  }
-                ]
-              }
-            }
-          }
-        }
-      }
+                    AND: [{ fechaInicio: { lte: now } }, { fechaFin: { gte: now } }],
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
     });
 
     const ocupacion = buildings.map((building: any) => {
@@ -125,7 +125,7 @@ export async function GET(req: NextRequest) {
         edificio: building.nombre,
         total: totalUnits,
         ocupadas: occupiedUnits,
-        porcentaje: parseFloat(porcentaje.toFixed(1))
+        porcentaje: parseFloat(porcentaje.toFixed(1)),
       };
     });
 
@@ -138,55 +138,59 @@ export async function GET(req: NextRequest) {
     for (let i = 0; i < periodo; i++) {
       const monthStart = startOfMonth(subMonths(now, periodo - i - 1));
       const monthEnd = endOfMonth(monthStart);
-      
+
       const paymentsOverdue = await prisma.payment.findMany({
         where: {
           contract: {
             unit: {
-              building: buildingFilter
-            }
+              building: buildingFilter,
+            },
           },
           fechaVencimiento: {
             gte: monthStart,
-            lte: monthEnd
+            lte: monthEnd,
           },
-          estado: 'pendiente'
-        }
+          estado: 'pendiente',
+        },
       });
 
       const paymentsPaid = await prisma.payment.findMany({
         where: {
           contract: {
             unit: {
-              building: buildingFilter
-            }
+              building: buildingFilter,
+            },
           },
           fechaVencimiento: {
             gte: monthStart,
-            lte: monthEnd
+            lte: monthEnd,
           },
           estado: 'pagado',
           fechaPago: {
-            gt: monthEnd // Pagados con retraso
-          }
-        }
+            gt: monthEnd, // Pagados con retraso
+          },
+        },
       });
 
       morosidad.push({
         mes: format(monthStart, 'MMM yyyy', { locale: es }),
         morosidad: parseFloat(paymentsOverdue.reduce((sum, p) => sum + p.monto, 0).toFixed(2)),
-        recuperado: parseFloat(paymentsPaid.reduce((sum, p) => sum + p.monto, 0).toFixed(2))
+        recuperado: parseFloat(paymentsPaid.reduce((sum, p) => sum + p.monto, 0).toFixed(2)),
       });
     }
 
     // 5. Datos de Rentabilidad
-    const totalIngresos = ingresos.reduce((sum, item) => sum + item.rentas + item.servicios + item.otros, 0);
+    const totalIngresos = ingresos.reduce(
+      (sum, item) => sum + item.rentas + item.servicios + item.otros,
+      0
+    );
     const totalGastosCalculado = gastos.reduce((sum, item) => sum + item.monto, 0);
     const ingresosNetos = totalIngresos - totalGastosCalculado;
-    
+
     const totalUnits = buildings.reduce((sum: number, b: any) => sum + b.units.length, 0);
-    const occupiedUnits = buildings.reduce((sum: number, b: any) => 
-      sum + b.units.filter((u: any) => u.contracts.length > 0).length, 0
+    const occupiedUnits = buildings.reduce(
+      (sum: number, b: any) => sum + b.units.filter((u: any) => u.contracts.length > 0).length,
+      0
     );
     const tasaOcupacion = totalUnits > 0 ? (occupiedUnits / totalUnits) * 100 : 0;
 
@@ -200,7 +204,7 @@ export async function GET(req: NextRequest) {
       margenNeto: parseFloat(((ingresosNetos / totalIngresos) * 100).toFixed(2)),
       tasaOcupacion: parseFloat(tasaOcupacion.toFixed(1)),
       tasaMorosidad: parseFloat(tasaMorosidad.toFixed(1)),
-      roiPromedio: parseFloat(((ingresosNetos / totalIngresos) * 100).toFixed(2))
+      roiPromedio: parseFloat(((ingresosNetos / totalIngresos) * 100).toFixed(2)),
     };
 
     // 6. Tendencias y Predicciones (simplificado)
@@ -208,8 +212,8 @@ export async function GET(req: NextRequest) {
       data: ingresos.map((item, index) => ({
         periodo: item.mes,
         real: item.rentas,
-        prediccion: index >= ingresos.length - 3 ? item.rentas * 1.08 : null
-      }))
+        prediccion: index >= ingresos.length - 3 ? item.rentas * 1.08 : null,
+      })),
     };
 
     return NextResponse.json({
@@ -218,7 +222,7 @@ export async function GET(req: NextRequest) {
       ocupacion,
       morosidad,
       rentabilidad,
-      tendencias
+      tendencias,
     });
   } catch (error: any) {
     logger.error('Error en BI dashboard:', error);

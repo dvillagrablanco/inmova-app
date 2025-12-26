@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useEffect, useRef, useCallback } from 'react';
 
@@ -20,9 +20,7 @@ export function useFocusTrap(enabled = true) {
       '[tabindex]:not([tabindex="-1"])',
     ].join(', ');
 
-    return Array.from(
-      containerRef.current.querySelectorAll<HTMLElement>(focusableSelectors)
-    );
+    return Array.from(containerRef.current.querySelectorAll<HTMLElement>(focusableSelectors));
   }, []);
 
   useEffect(() => {
@@ -86,7 +84,7 @@ export function useRovingTabIndex(itemsCount: number) {
 
   const setItemRef = useCallback((index: number, element: HTMLElement | null) => {
     itemsRef.current[index] = element;
-    
+
     // Update tabindex
     itemsRef.current.forEach((item, i) => {
       if (item) {
@@ -95,21 +93,24 @@ export function useRovingTabIndex(itemsCount: number) {
     });
   }, []);
 
-  const focusItem = useCallback((index: number) => {
-    if (index < 0 || index >= itemsCount) return;
+  const focusItem = useCallback(
+    (index: number) => {
+      if (index < 0 || index >= itemsCount) return;
 
-    currentIndexRef.current = index;
-    
-    // Update tabindex for all items
-    itemsRef.current.forEach((item, i) => {
-      if (item) {
-        item.tabIndex = i === index ? 0 : -1;
-      }
-    });
+      currentIndexRef.current = index;
 
-    // Focus the item
-    itemsRef.current[index]?.focus();
-  }, [itemsCount]);
+      // Update tabindex for all items
+      itemsRef.current.forEach((item, i) => {
+        if (item) {
+          item.tabIndex = i === index ? 0 : -1;
+        }
+      });
+
+      // Focus the item
+      itemsRef.current[index]?.focus();
+    },
+    [itemsCount]
+  );
 
   return {
     setItemRef,

@@ -19,18 +19,15 @@ export async function GET(req: NextRequest) {
       where: {
         userId: session.user.id,
         companyId,
-        activa: true
+        activa: true,
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
 
     return NextResponse.json({ saved });
   } catch (error: any) {
     logger.error('Error al obtener búsquedas guardadas:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener búsquedas guardadas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener búsquedas guardadas' }, { status: 500 });
   }
 }
 
@@ -50,17 +47,14 @@ export async function POST(req: NextRequest) {
         companyId,
         nombre,
         query,
-        filters
-      }
+        filters,
+      },
     });
 
     return NextResponse.json({ saved }, { status: 201 });
   } catch (error: any) {
     logger.error('Error al guardar búsqueda:', error);
-    return NextResponse.json(
-      { error: 'Error al guardar búsqueda' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al guardar búsqueda' }, { status: 500 });
   }
 }
 
@@ -79,15 +73,12 @@ export async function DELETE(req: NextRequest) {
     }
 
     await prisma.savedSearch.delete({
-      where: { id }
+      where: { id },
     });
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
     logger.error('Error al eliminar búsqueda guardada:', error);
-    return NextResponse.json(
-      { error: 'Error al eliminar búsqueda guardada' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar búsqueda guardada' }, { status: 500 });
   }
 }

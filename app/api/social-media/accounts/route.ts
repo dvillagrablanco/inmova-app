@@ -19,10 +19,7 @@ export async function GET(request: NextRequest) {
     const accounts = await getConnectedAccounts(session.user.companyId);
     return NextResponse.json({ success: true, accounts });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Error al obtener cuentas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener cuentas' }, { status: 500 });
   }
 }
 
@@ -47,10 +44,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, account });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Error al conectar cuenta' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al conectar cuenta' }, { status: 500 });
   }
 }
 
@@ -65,18 +59,12 @@ export async function DELETE(request: NextRequest) {
     const accountId = searchParams.get('accountId');
 
     if (!accountId) {
-      return NextResponse.json(
-        { error: 'accountId requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'accountId requerido' }, { status: 400 });
     }
 
     await disconnectSocialMediaAccount(accountId);
     return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Error al desconectar cuenta' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al desconectar cuenta' }, { status: 500 });
   }
 }

@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import {
-  createCoupon,
-  getCompanyCoupons,
-  validateCoupon,
-} from '@/lib/coupon-service';
+import { createCoupon, getCompanyCoupons, validateCoupon } from '@/lib/coupon-service';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -30,10 +26,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(coupons);
   } catch (error) {
     logger.error('Error al obtener cupones:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener cupones' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener cupones' }, { status: 500 });
   }
 }
 
@@ -57,10 +50,7 @@ export async function POST(request: NextRequest) {
       const { codigo, montoCompra, userId, tenantId } = body;
 
       if (!codigo || !montoCompra) {
-        return NextResponse.json(
-          { error: 'Código y monto son requeridos' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Código y monto son requeridos' }, { status: 400 });
       }
 
       const result = await validateCoupon({
@@ -91,10 +81,7 @@ export async function POST(request: NextRequest) {
     } = body;
 
     if (!codigo || !tipo || !valor || !fechaInicio || !fechaExpiracion) {
-      return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
 
     const coupon = await createCoupon({
@@ -117,9 +104,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(coupon, { status: 201 });
   } catch (error: any) {
     logger.error('Error al crear cupón:', error);
-    return NextResponse.json(
-      { error: error.message || 'Error al crear cupón' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Error al crear cupón' }, { status: 500 });
   }
 }

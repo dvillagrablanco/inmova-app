@@ -82,11 +82,7 @@ export async function POST(request: NextRequest) {
 
     // Calculate billing cycle anchor (next payment day)
     const now = new Date();
-    const billingCycleAnchor = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      contract.diaPago
-    );
+    const billingCycleAnchor = new Date(now.getFullYear(), now.getMonth(), contract.diaPago);
 
     // If the day has passed this month, set it for next month
     if (billingCycleAnchor < now) {

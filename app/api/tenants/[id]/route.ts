@@ -54,7 +54,8 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     }
 
     const body = await req.json();
-    const { nombreCompleto, dni, email, telefono, fechaNacimiento, scoring, nivelRiesgo, notas } = body;
+    const { nombreCompleto, dni, email, telefono, fechaNacimiento, scoring, nivelRiesgo, notas } =
+      body;
 
     const tenant = await prisma.tenant.update({
       where: { id: params.id },

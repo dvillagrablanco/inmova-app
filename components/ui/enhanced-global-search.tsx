@@ -83,14 +83,19 @@ const TYPE_COLORS: Record<string, string> = {
   page: 'bg-gray-500',
 };
 
-export function EnhancedGlobalSearch({ open: externalOpen, onOpenChange }: EnhancedGlobalSearchProps) {
+export function EnhancedGlobalSearch({
+  open: externalOpen,
+  onOpenChange,
+}: EnhancedGlobalSearchProps) {
   const router = useRouter();
   const [internalOpen, setInternalOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
-  const [searchScope, setSearchScope] = useState<'all' | 'buildings' | 'tenants' | 'contracts'>('all');
+  const [searchScope, setSearchScope] = useState<'all' | 'buildings' | 'tenants' | 'contracts'>(
+    'all'
+  );
 
   const open = externalOpen !== undefined ? externalOpen : internalOpen;
   const setOpen = onOpenChange || setInternalOpen;
@@ -119,74 +124,80 @@ export function EnhancedGlobalSearch({ open: externalOpen, onOpenChange }: Enhan
   }, []);
 
   // Process query for special prefixes
-  const processQuery = useCallback((q: string) => {
-    const trimmed = q.trim();
-    
-    if (trimmed.startsWith('/')) {
-      // Direct navigation
-      const path = trimmed.slice(1);
-      router.push(`/${path}`);
-      setOpen(false);
-      return null;
-    }
+  const processQuery = useCallback(
+    (q: string) => {
+      const trimmed = q.trim();
 
-    let searchType = 'general';
-    let searchQuery = trimmed;
-
-    if (trimmed.startsWith('@')) {
-      searchType = 'name';
-      searchQuery = trimmed.slice(1);
-    } else if (trimmed.startsWith('#')) {
-      searchType = 'id';
-      searchQuery = trimmed.slice(1);
-    } else if (trimmed.startsWith('$')) {
-      searchType = 'amount';
-      searchQuery = trimmed.slice(1);
-    } else if (trimmed.startsWith('*')) {
-      searchType = 'wildcard';
-      searchQuery = trimmed.slice(1);
-    }
-
-    return { type: searchType, query: searchQuery };
-  }, [router, setOpen]);
-
-  // Perform search
-  const performSearch = useCallback(async (searchQuery: string) => {
-    if (!searchQuery || searchQuery.length < 2) {
-      setResults([]);
-      return;
-    }
-
-    const processed = processQuery(searchQuery);
-    if (!processed) return; // Direct navigation handled
-
-    setIsSearching(true);
-    
-    try {
-      const response = await fetch('/api/search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: processed.query,
-          type: processed.type,
-          scope: searchScope,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Search failed');
+      if (trimmed.startsWith('/')) {
+        // Direct navigation
+        const path = trimmed.slice(1);
+        router.push(`/${path}`);
+        setOpen(false);
+        return null;
       }
 
-      const data = await response.json();
-      setResults(data.results || []);
-    } catch (error) {
-      console.error('Search error:', error);
-      toast.error('Error al buscar');
-      setResults([]);
-    } finally {
-      setIsSearching(false);
-    }
-  }, [processQuery, searchScope]);
+      let searchType = 'general';
+      let searchQuery = trimmed;
+
+      if (trimmed.startsWith('@')) {
+        searchType = 'name';
+        searchQuery = trimmed.slice(1);
+      } else if (trimmed.startsWith('#')) {
+        searchType = 'id';
+        searchQuery = trimmed.slice(1);
+      } else if (trimmed.startsWith('$')) {
+        searchType = 'amount';
+        searchQuery = trimmed.slice(1);
+      } else if (trimmed.startsWith('*')) {
+        searchType = 'wildcard';
+        searchQuery = trimmed.slice(1);
+      }
+
+      return { type: searchType, query: searchQuery };
+    },
+    [router, setOpen]
+  );
+
+  // Perform search
+  const performSearch = useCallback(
+    async (searchQuery: string) => {
+      if (!searchQuery || searchQuery.length < 2) {
+        setResults([]);
+        return;
+      }
+
+      const processed = processQuery(searchQuery);
+      if (!processed) return; // Direct navigation handled
+
+      setIsSearching(true);
+
+      try {
+        const response = await fetch('/api/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            query: processed.query,
+            type: processed.type,
+            scope: searchScope,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Search failed');
+        }
+
+        const data = await response.json();
+        setResults(data.results || []);
+      } catch (error) {
+        console.error('Search error:', error);
+        toast.error('Error al buscar');
+        setResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    },
+    [processQuery, searchScope]
+  );
 
   // Trigger search when debounced query changes
   useEffect(() => {
@@ -217,7 +228,7 @@ export function EnhancedGlobalSearch({ open: externalOpen, onOpenChange }: Enhan
   // Group results by type
   const groupedResults = useMemo(() => {
     const groups: Record<string, SearchResult[]> = {};
-    
+
     results.forEach((result) => {
       if (!groups[result.type]) {
         groups[result.type] = [];
@@ -228,12 +239,15 @@ export function EnhancedGlobalSearch({ open: externalOpen, onOpenChange }: Enhan
     return groups;
   }, [results]);
 
-  const handleSelect = useCallback((result: SearchResult) => {
-    addToRecentSearches(query);
-    router.push(result.route);
-    setOpen(false);
-    setQuery('');
-  }, [query, router, setOpen, addToRecentSearches]);
+  const handleSelect = useCallback(
+    (result: SearchResult) => {
+      addToRecentSearches(query);
+      router.push(result.route);
+      setOpen(false);
+      setQuery('');
+    },
+    [query, router, setOpen, addToRecentSearches]
+  );
 
   return (
     <>
@@ -257,7 +271,7 @@ export function EnhancedGlobalSearch({ open: externalOpen, onOpenChange }: Enhan
           value={query}
           onValueChange={setQuery}
         />
-        
+
         <CommandList>
           {/* Show shortcuts when no query */}
           {!query && (
@@ -321,61 +335,71 @@ export function EnhancedGlobalSearch({ open: externalOpen, onOpenChange }: Enhan
             </CommandEmpty>
           )}
 
-          {!isSearching && Object.keys(groupedResults).map((type) => (
-            <div key={type}>
-              <CommandSeparator />
-              <CommandGroup heading={`${TYPE_LABELS[type]}s (${groupedResults[type].length})`}>
-                {groupedResults[type].map((result) => {
-                  const Icon = TYPE_ICONS[result.type];
-                  return (
-                    <CommandItem
-                      key={result.id}
-                      onSelect={() => handleSelect(result)}
-                      className="cursor-pointer"
-                    >
-                      <div className="flex items-center gap-3 flex-1">
-                        <div className={cn(
-                          'w-8 h-8 rounded flex items-center justify-center',
-                          TYPE_COLORS[result.type],
-                          'text-white'
-                        )}>
-                          {Icon && <Icon className="h-4 w-4" />}
+          {!isSearching &&
+            Object.keys(groupedResults).map((type) => (
+              <div key={type}>
+                <CommandSeparator />
+                <CommandGroup heading={`${TYPE_LABELS[type]}s (${groupedResults[type].length})`}>
+                  {groupedResults[type].map((result) => {
+                    const Icon = TYPE_ICONS[result.type];
+                    return (
+                      <CommandItem
+                        key={result.id}
+                        onSelect={() => handleSelect(result)}
+                        className="cursor-pointer"
+                      >
+                        <div className="flex items-center gap-3 flex-1">
+                          <div
+                            className={cn(
+                              'w-8 h-8 rounded flex items-center justify-center',
+                              TYPE_COLORS[result.type],
+                              'text-white'
+                            )}
+                          >
+                            {Icon && <Icon className="h-4 w-4" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{result.title}</p>
+                            {result.subtitle && (
+                              <p className="text-xs text-muted-foreground truncate">
+                                {result.subtitle}
+                              </p>
+                            )}
+                          </div>
+                          <Badge variant="secondary" className="text-xs">
+                            {TYPE_LABELS[result.type]}
+                          </Badge>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">
-                            {result.title}
-                          </p>
-                          {result.subtitle && (
-                            <p className="text-xs text-muted-foreground truncate">
-                              {result.subtitle}
-                            </p>
-                          )}
-                        </div>
-                        <Badge variant="secondary" className="text-xs">
-                          {TYPE_LABELS[result.type]}
-                        </Badge>
-                      </div>
-                    </CommandItem>
-                  );
-                })}
-              </CommandGroup>
-            </div>
-          ))}
+                      </CommandItem>
+                    );
+                  })}
+                </CommandGroup>
+              </div>
+            ))}
 
           {/* Quick Actions */}
           {!query && (
             <>
               <CommandSeparator />
               <CommandGroup heading="Acciones Rápidas">
-                <CommandItem onSelect={() => router.push('/edificios/nuevo-wizard')} className="cursor-pointer">
+                <CommandItem
+                  onSelect={() => router.push('/edificios/nuevo-wizard')}
+                  className="cursor-pointer"
+                >
                   <Building2 className="mr-2 h-4 w-4" />
                   Crear Nueva Propiedad
                 </CommandItem>
-                <CommandItem onSelect={() => router.push('/inquilinos/nuevo')} className="cursor-pointer">
+                <CommandItem
+                  onSelect={() => router.push('/inquilinos/nuevo')}
+                  className="cursor-pointer"
+                >
                   <Users className="mr-2 h-4 w-4" />
                   Añadir Inquilino
                 </CommandItem>
-                <CommandItem onSelect={() => router.push('/contratos/nuevo')} className="cursor-pointer">
+                <CommandItem
+                  onSelect={() => router.push('/contratos/nuevo')}
+                  className="cursor-pointer"
+                >
                   <FileText className="mr-2 h-4 w-4" />
                   Nuevo Contrato
                 </CommandItem>

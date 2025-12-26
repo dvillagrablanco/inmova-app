@@ -6,10 +6,7 @@ import { prisma } from '@/lib/db';
 export const dynamic = 'force-dynamic';
 
 // GET - Obtener personal específico
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -45,18 +42,12 @@ export async function GET(
     return NextResponse.json(staff);
   } catch (error) {
     console.error('Error al obtener personal:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener personal' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener personal' }, { status: 500 });
   }
 }
 
 // PATCH - Actualizar personal
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -88,7 +79,8 @@ export async function PATCH(
     if (body.capacidadDiaria !== undefined) updateData.capacidadDiaria = body.capacidadDiaria;
     if (body.tarifaPorHora !== undefined) updateData.tarifaPorHora = body.tarifaPorHora;
     if (body.tarifaPorTurnover !== undefined) updateData.tarifaPorTurnover = body.tarifaPorTurnover;
-    if (body.calificacionPromedio !== undefined) updateData.calificacionPromedio = body.calificacionPromedio;
+    if (body.calificacionPromedio !== undefined)
+      updateData.calificacionPromedio = body.calificacionPromedio;
     if (body.tareasCompletadas !== undefined) updateData.tareasCompletadas = body.tareasCompletadas;
     if (body.diasDisponibles !== undefined) updateData.diasDisponibles = body.diasDisponibles;
     if (body.horaInicio !== undefined) updateData.horaInicio = body.horaInicio;
@@ -102,18 +94,12 @@ export async function PATCH(
     return NextResponse.json(staff);
   } catch (error) {
     console.error('Error al actualizar personal:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar personal' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar personal' }, { status: 500 });
   }
 }
 
 // DELETE - Eliminar personal
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -156,9 +142,6 @@ export async function DELETE(
     return NextResponse.json({ message: 'Personal eliminado correctamente' });
   } catch (error) {
     console.error('Error al eliminar personal:', error);
-    return NextResponse.json(
-      { error: 'Error al eliminar personal' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar personal' }, { status: 500 });
   }
 }

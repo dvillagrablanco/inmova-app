@@ -12,30 +12,11 @@ import { useEffect } from 'react';
  * Route groups that should be preloaded together
  */
 const ROUTE_GROUPS = {
-  admin: [
-    '/admin/clientes',
-    '/admin/dashboard',
-    '/admin/usuarios',
-    '/admin/configuracion',
-  ],
-  marketplace: [
-    '/marketplace',
-    '/marketplace/servicios',
-    '/marketplace/presupuestos',
-  ],
-  str: [
-    '/str/listings',
-    '/str/bookings',
-    '/str/channels',
-  ],
-  flipping: [
-    '/flipping/projects',
-    '/flipping/analytics',
-  ],
-  construction: [
-    '/construction/projects',
-    '/construction/suppliers',
-  ],
+  admin: ['/admin/clientes', '/admin/dashboard', '/admin/usuarios', '/admin/configuracion'],
+  marketplace: ['/marketplace', '/marketplace/servicios', '/marketplace/presupuestos'],
+  str: ['/str/listings', '/str/bookings', '/str/channels'],
+  flipping: ['/flipping/projects', '/flipping/analytics'],
+  construction: ['/construction/projects', '/construction/suppliers'],
 };
 
 /**
@@ -43,8 +24,8 @@ const ROUTE_GROUPS = {
  */
 function getRelatedRoutes(currentPath: string): string[] {
   for (const [groupName, routes] of Object.entries(ROUTE_GROUPS)) {
-    if (routes.some(route => currentPath.startsWith(route))) {
-      return routes.filter(route => route !== currentPath);
+    if (routes.some((route) => currentPath.startsWith(route))) {
+      return routes.filter((route) => route !== currentPath);
     }
   }
   return [];
@@ -60,10 +41,10 @@ export function useRoutePreloader() {
     if (!pathname) return;
 
     const relatedRoutes = getRelatedRoutes(pathname);
-    
+
     // Preload after a short delay to avoid impacting initial load
     const timeoutId = setTimeout(() => {
-      relatedRoutes.forEach(route => {
+      relatedRoutes.forEach((route) => {
         // Use Next.js router prefetch
         const link = document.createElement('link');
         link.rel = 'prefetch';

@@ -42,9 +42,7 @@ export const MemoizedListCard = memo<{
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 space-y-1">
             <CardTitle className="text-lg">{title}</CardTitle>
-            {description && (
-              <CardDescription className="text-sm">{description}</CardDescription>
-            )}
+            {description && <CardDescription className="text-sm">{description}</CardDescription>}
           </div>
           <div className="flex items-center gap-2">
             {badges?.map((badge, idx) => (
@@ -79,10 +77,7 @@ export const MemoizedTableRow = memo<{
     <tr
       key={id}
       onClick={onClick}
-      className={cn(
-        onClick && 'cursor-pointer hover:bg-muted/50 transition-colors',
-        className
-      )}
+      className={cn(onClick && 'cursor-pointer hover:bg-muted/50 transition-colors', className)}
     >
       {cells.map((cell, idx) => (
         <td key={`${id}-cell-${idx}`} className="px-4 py-3">

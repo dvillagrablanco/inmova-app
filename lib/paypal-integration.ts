@@ -58,9 +58,10 @@ export class PayPalClient {
   constructor(config: PayPalConfig) {
     this.clientId = config.clientId;
     this.clientSecret = config.clientSecret;
-    this.baseUrl = config.environment === 'production'
-      ? 'https://api-m.paypal.com'
-      : 'https://api-m.sandbox.paypal.com';
+    this.baseUrl =
+      config.environment === 'production'
+        ? 'https://api-m.paypal.com'
+        : 'https://api-m.sandbox.paypal.com';
   }
 
   /**
@@ -78,7 +79,7 @@ export class PayPalClient {
       const response = await fetch(`${this.baseUrl}/v1/oauth2/token`, {
         method: 'POST',
         headers: {
-          'Authorization': `Basic ${credentials}`,
+          Authorization: `Basic ${credentials}`,
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: 'grant_type=client_credentials',
@@ -89,9 +90,9 @@ export class PayPalClient {
       }
 
       const data = await response.json();
-      
+
       this.accessToken = data.access_token;
-      this.tokenExpiresAt = Date.now() + (data.expires_in * 1000);
+      this.tokenExpiresAt = Date.now() + data.expires_in * 1000;
 
       return this.accessToken;
     } catch (error) {
@@ -105,9 +106,9 @@ export class PayPalClient {
    */
   private async getAuthHeaders(): Promise<HeadersInit> {
     const token = await this.getAccessToken();
-    
+
     return {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     };
   }
@@ -121,14 +122,16 @@ export class PayPalClient {
 
       const orderData = {
         intent: 'CAPTURE',
-        purchase_units: [{
-          amount: {
-            currency_code: params.currency || 'EUR',
-            value: params.amount.toFixed(2),
+        purchase_units: [
+          {
+            amount: {
+              currency_code: params.currency || 'EUR',
+              value: params.amount.toFixed(2),
+            },
+            description: params.description,
+            custom_id: JSON.stringify(params.metadata || {}),
           },
-          description: params.description,
-          custom_id: JSON.stringify(params.metadata || {}),
-        }],
+        ],
         application_context: {
           return_url: params.returnUrl,
           cancel_url: params.cancelUrl,
@@ -238,21 +241,23 @@ export class PayPalClient {
         name: params.name,
         description: params.description,
         status: 'ACTIVE',
-        billing_cycles: [{
-          frequency: {
-            interval_unit: params.intervalUnit,
-            interval_count: params.intervalCount || 1,
-          },
-          tenure_type: 'REGULAR',
-          sequence: 1,
-          total_cycles: 0, // Infinito
-          pricing_scheme: {
-            fixed_price: {
-              value: params.amount.toFixed(2),
-              currency_code: params.currency || 'EUR',
+        billing_cycles: [
+          {
+            frequency: {
+              interval_unit: params.intervalUnit,
+              interval_count: params.intervalCount || 1,
+            },
+            tenure_type: 'REGULAR',
+            sequence: 1,
+            total_cycles: 0, // Infinito
+            pricing_scheme: {
+              fixed_price: {
+                value: params.amount.toFixed(2),
+                currency_code: params.currency || 'EUR',
+              },
             },
           },
-        }],
+        ],
         payment_preferences: {
           auto_bill_outstanding: true,
           payment_failure_threshold: 3,
@@ -343,13 +348,16 @@ export class PayPalClient {
     try {
       const headers = await this.getAuthHeaders();
 
-      const response = await fetch(`${this.baseUrl}/v1/billing/subscriptions/${subscriptionId}/cancel`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          reason: reason || 'Customer request',
-        }),
-      });
+      const response = await fetch(
+        `${this.baseUrl}/v1/billing/subscriptions/${subscriptionId}/cancel`,
+        {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            reason: reason || 'Customer request',
+          }),
+        }
+      );
 
       if (!response.ok) {
         const error = await response.json();
@@ -429,11 +437,7 @@ export class PayPalClient {
  */
 export function isPayPalConfigured(config?: PayPalConfig | null): boolean {
   if (!config) return false;
-  return !!(
-    config.clientId &&
-    config.clientSecret &&
-    config.enabled
-  );
+  return !!(config.clientId && config.clientSecret && config.enabled);
 }
 
 /**

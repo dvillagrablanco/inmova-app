@@ -12,10 +12,7 @@ export async function POST(req: NextRequest) {
     const { email, password } = await req.json();
 
     if (!email || !password) {
-      return NextResponse.json(
-        { error: 'Email y contraseña son requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email y contraseña son requeridos' }, { status: 400 });
     }
 
     // Buscar proveedor por email
@@ -33,10 +30,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!proveedor) {
-      return NextResponse.json(
-        { error: 'Credenciales inválidas' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Credenciales inválidas' }, { status: 401 });
     }
 
     // Verificar que el proveedor está activo
@@ -58,10 +52,7 @@ export async function POST(req: NextRequest) {
     const isPasswordValid = await bcrypt.compare(password, proveedor.password);
 
     if (!isPasswordValid) {
-      return NextResponse.json(
-        { error: 'Credenciales inválidas' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Credenciales inválidas' }, { status: 401 });
     }
 
     // Actualizar último acceso
@@ -91,9 +82,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     logger.error('Error en login de proveedor:', error);
-    return NextResponse.json(
-      { error: 'Error al iniciar sesión' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al iniciar sesión' }, { status: 500 });
   }
 }

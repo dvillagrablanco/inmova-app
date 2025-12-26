@@ -32,7 +32,7 @@ export function PerformanceMonitor() {
     // Toggle visibility con Ctrl+Shift+P
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey && e.key === 'P') {
-        setIsVisible(prev => !prev);
+        setIsVisible((prev) => !prev);
       }
     };
 
@@ -52,7 +52,7 @@ export function PerformanceMonitor() {
         frameCount = 0;
         lastTime = currentTime;
 
-        setMetrics(prev => ({ ...prev, fps }));
+        setMetrics((prev) => ({ ...prev, fps }));
       }
 
       animationFrameId = requestAnimationFrame(measureFPS);
@@ -65,7 +65,7 @@ export function PerformanceMonitor() {
       if ('memory' in performance) {
         const memory = (performance as any).memory;
         const usedMB = Math.round(memory.usedJSHeapSize / 1048576);
-        setMetrics(prev => ({ ...prev, memory: usedMB }));
+        setMetrics((prev) => ({ ...prev, memory: usedMB }));
       }
     };
 
@@ -73,11 +73,11 @@ export function PerformanceMonitor() {
 
     // Load Time
     const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
-    setMetrics(prev => ({ ...prev, loadTime: Math.round(loadTime) }));
+    setMetrics((prev) => ({ ...prev, loadTime: Math.round(loadTime) }));
 
     // Resource Count
     const resources = performance.getEntriesByType('resource');
-    setMetrics(prev => ({ ...prev, resourceCount: resources.length }));
+    setMetrics((prev) => ({ ...prev, resourceCount: resources.length }));
 
     return () => {
       window.removeEventListener('keydown', handleKeyPress);

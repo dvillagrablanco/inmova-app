@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 /**
  * OPTIMIZADO - Semana 2: Query Optimization
- * 
+ *
  * Cambios:
  * - Agregación en DB con groupBy (vs filtrado en memoria)
  * - Solo trae últimos 12 meses (vs todos los datos históricos)
@@ -24,7 +24,7 @@ export async function GET() {
 
     // Usar caché de 5 minutos para analytics
     const cacheKey = `analytics:monthly:${companyId}`;
-    
+
     const analyticsData = await cacheGetOrSet(
       cacheKey,
       async () => {
@@ -55,10 +55,7 @@ export async function GET() {
         // Get expenses - OPTIMIZADO: Solo últimos 12 meses, solo campos necesarios
         const expenses = await prisma.expense.findMany({
           where: {
-            OR: [
-              { building: { companyId } },
-              { unit: { building: { companyId } } },
-            ],
+            OR: [{ building: { companyId } }, { unit: { building: { companyId } } }],
             fecha: {
               gte: twelveMonthsAgo,
             },
@@ -78,8 +75,18 @@ export async function GET() {
           neto: number;
         }> = [];
         const monthNames = [
-          'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-          'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
+          'Ene',
+          'Feb',
+          'Mar',
+          'Abr',
+          'May',
+          'Jun',
+          'Jul',
+          'Ago',
+          'Sep',
+          'Oct',
+          'Nov',
+          'Dic',
         ];
 
         for (let i = 11; i >= 0; i--) {
@@ -91,20 +98,14 @@ export async function GET() {
           // Calculate income for this month
           const monthPayments = payments.filter((p) => {
             const paymentDate = new Date(p.fechaVencimiento);
-            return (
-              paymentDate.getMonth() === month &&
-              paymentDate.getFullYear() === year
-            );
+            return paymentDate.getMonth() === month && paymentDate.getFullYear() === year;
           });
           const ingresos = monthPayments.reduce((sum, p) => sum + p.monto, 0);
 
           // Calculate expenses for this month
           const monthExpenses = expenses.filter((e) => {
             const expenseDate = new Date(e.fecha);
-            return (
-              expenseDate.getMonth() === month &&
-              expenseDate.getFullYear() === year
-            );
+            return expenseDate.getMonth() === month && expenseDate.getFullYear() === year;
           });
           const gastos = monthExpenses.reduce((sum, e) => sum + e.monto, 0);
 
@@ -131,9 +132,6 @@ export async function GET() {
     if (error.message === 'No autorizado') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
-    return NextResponse.json(
-      { error: 'Error al obtener analytics' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener analytics' }, { status: 500 });
   }
 }

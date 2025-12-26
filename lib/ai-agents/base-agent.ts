@@ -1,6 +1,6 @@
 /**
  * Sistema de Agentes IA - Agente Base
- * 
+ *
  * Clase base para todos los agentes especializados
  */
 
@@ -20,7 +20,7 @@ import {
 // CONFIGURACIÓN ANTHROPIC
 // ============================================================================
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || ''
+  apiKey: process.env.ANTHROPIC_API_KEY || '',
 });
 
 const DEFAULT_MODEL = 'claude-3-5-sonnet-20241022';
@@ -71,29 +71,29 @@ export abstract class BaseAgent {
     conversationHistory: AgentMessage[] = []
   ): Promise<AgentResponse> {
     const startTime = Date.now();
-    
+
     try {
       this.status = 'thinking';
 
       // Preparar mensajes
       const messages: Anthropic.Messages.MessageParam[] = [
-        ...conversationHistory.map(msg => ({
+        ...conversationHistory.map((msg) => ({
           role: msg.role as 'user' | 'assistant',
-          content: msg.content
+          content: msg.content,
         })),
         {
           role: 'user' as const,
-          content: userMessage
-        }
+          content: userMessage,
+        },
       ];
 
       logger.info(`🤖 [${this.config.type}] Processing message from ${context.userName}`);
 
       // Convertir tools a formato de Anthropic
-      const anthropicTools: Anthropic.Messages.Tool[] = this.config.tools.map(tool => ({
+      const anthropicTools: Anthropic.Messages.Tool[] = this.config.tools.map((tool) => ({
         name: tool.name,
         description: tool.description,
-        input_schema: tool.inputSchema
+        input_schema: tool.inputSchema,
       }));
 
       // Primera llamada a Claude
@@ -103,10 +103,12 @@ export abstract class BaseAgent {
         temperature: this.config.temperature || DEFAULT_TEMPERATURE,
         system: this.buildSystemPrompt(context),
         tools: anthropicTools,
-        messages: messages
+        messages: messages,
       });
 
-      logger.info(`💬 [${this.config.type}] Claude response - Stop reason: ${response.stop_reason}`);
+      logger.info(
+        `💬 [${this.config.type}] Claude response - Stop reason: ${response.stop_reason}`
+      );
 
       // Iterar si Claude quiere usar herramientas
       const toolsUsed: string[] = [];
@@ -116,27 +118,23 @@ export abstract class BaseAgent {
       while (response.stop_reason === 'tool_use' && iterations < MAX_ITERATIONS) {
         iterations++;
         this.status = 'executing';
-        
+
         const toolResults: Anthropic.Messages.MessageParam[] = [];
-        
+
         for (const block of response.content) {
           if (block.type === 'tool_use') {
             toolsUsed.push(block.name);
-            
+
             // Ejecutar tool
-            const tool = this.config.tools.find(t => t.name === block.name);
+            const tool = this.config.tools.find((t) => t.name === block.name);
             if (!tool) {
               logger.error(`Tool ${block.name} not found`);
               continue;
             }
 
             logger.info(`🔧 [${this.config.type}] Executing tool: ${block.name}`);
-            
-            const toolResult = await this.executeTool(
-              tool,
-              block.input,
-              context
-            );
+
+            const toolResult = await this.executeTool(tool, block.input, context);
 
             actions.push({
               id: `action_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -144,7 +142,7 @@ export abstract class BaseAgent {
               description: tool.description,
               status: toolResult.success ? 'completed' : 'failed',
               result: toolResult,
-              timestamp: new Date()
+              timestamp: new Date(),
             });
 
             toolResults.push({
@@ -153,9 +151,9 @@ export abstract class BaseAgent {
                 {
                   type: 'tool_result',
                   tool_use_id: block.id,
-                  content: JSON.stringify(toolResult)
-                }
-              ]
+                  content: JSON.stringify(toolResult),
+                },
+              ],
             });
           }
         }
@@ -164,7 +162,7 @@ export abstract class BaseAgent {
         messages.push(
           {
             role: 'assistant',
-            content: response.content
+            content: response.content,
           },
           ...toolResults
         );
@@ -176,10 +174,12 @@ export abstract class BaseAgent {
           temperature: this.config.temperature || DEFAULT_TEMPERATURE,
           system: this.buildSystemPrompt(context),
           tools: anthropicTools,
-          messages: messages
+          messages: messages,
         });
 
-        logger.info(`🔄 [${this.config.type}] Iteration ${iterations} - Stop reason: ${response.stop_reason}`);
+        logger.info(
+          `🔄 [${this.config.type}] Iteration ${iterations} - Stop reason: ${response.stop_reason}`
+        );
       }
 
       // Extraer respuesta final de texto
@@ -200,25 +200,26 @@ export abstract class BaseAgent {
         actions: actions.length > 0 ? actions : undefined,
         toolsUsed: toolsUsed.length > 0 ? toolsUsed : undefined,
         executionTime,
-        confidence: 0.85 // Placeholder - podría calcularse basado en varios factores
+        confidence: 0.85, // Placeholder - podría calcularse basado en varios factores
       };
 
-      logger.info(`✅ [${this.config.type}] Completed - Tools used: ${toolsUsed.join(', ') || 'none'} - Time: ${executionTime}ms`);
+      logger.info(
+        `✅ [${this.config.type}] Completed - Tools used: ${toolsUsed.join(', ') || 'none'} - Time: ${executionTime}ms`
+      );
 
       return agentResponse;
-
     } catch (error: any) {
       this.status = 'error';
       logger.error(`❌ [${this.config.type}] Error:`, error);
-      
+
       return {
         agentType: this.config.type,
         status: 'error',
         message: 'Lo siento, hubo un error procesando tu solicitud. Por favor, inténtalo de nuevo.',
         executionTime: Date.now() - startTime,
         metadata: {
-          error: error.message
-        }
+          error: error.message,
+        },
       };
     }
   }
@@ -226,11 +227,7 @@ export abstract class BaseAgent {
   /**
    * Ejecutar herramienta
    */
-  protected async executeTool(
-    tool: AgentTool,
-    input: any,
-    context: UserContext
-  ): Promise<any> {
+  protected async executeTool(tool: AgentTool, input: any, context: UserContext): Promise<any> {
     try {
       // Verificar permisos si es necesario
       if (tool.permissions && tool.permissions.length > 0) {
@@ -238,7 +235,7 @@ export abstract class BaseAgent {
         if (!hasPermission) {
           return {
             success: false,
-            error: 'No tienes permisos suficientes para ejecutar esta acción'
+            error: 'No tienes permisos suficientes para ejecutar esta acción',
           };
         }
       }
@@ -247,13 +244,13 @@ export abstract class BaseAgent {
       const result = await tool.handler(input, context);
       return {
         success: true,
-        ...result
+        ...result,
       };
     } catch (error: any) {
       logger.error(`Error executing tool ${tool.name}:`, error);
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -272,7 +269,7 @@ Información del usuario:
 ${context.role ? `- Rol: ${context.role}` : ''}
 
 Tus capacidades incluyen:
-${this.config.capabilities.map(cap => `- ${cap.name}: ${cap.description}`).join('\n')}
+${this.config.capabilities.map((cap) => `- ${cap.name}: ${cap.description}`).join('\n')}
 
 Normas importantes:
 1. Siempre ser profesional, amable y eficiente
@@ -294,7 +291,7 @@ Normas importantes:
   ): Promise<boolean> {
     // Implementación básica - puede ser extendida
     const adminRoles = ['super_admin', 'admin', 'administrador', 'gestor'];
-    
+
     if (adminRoles.includes(context.userType) || adminRoles.includes(context.role || '')) {
       return true;
     }

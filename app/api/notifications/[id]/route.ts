@@ -7,10 +7,7 @@ import logger, { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 // PATCH - Marcar notificación como leída
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -28,18 +25,12 @@ export async function PATCH(
     return NextResponse.json(notification);
   } catch (error) {
     logger.error('Error updating notification:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar la notificación' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar la notificación' }, { status: 500 });
   }
 }
 
 // DELETE - Eliminar notificación
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -55,9 +46,6 @@ export async function DELETE(
     return NextResponse.json({ message: 'Notificación eliminada' });
   } catch (error) {
     logger.error('Error deleting notification:', error);
-    return NextResponse.json(
-      { error: 'Error al eliminar la notificación' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar la notificación' }, { status: 500 });
   }
 }

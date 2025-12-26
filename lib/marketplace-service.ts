@@ -19,22 +19,19 @@ export function calcularPrecioReserva(
   return {
     precioBase,
     comision,
-    precioTotal
+    precioTotal,
   };
 }
 
 /**
  * Calcula puntos de fidelización por una reserva
  */
-export function calcularPuntosFidelizacion(
-  precioTotal: number,
-  nivelActual: string
-): number {
+export function calcularPuntosFidelizacion(precioTotal: number, nivelActual: string): number {
   const multiplicadores: Record<string, number> = {
     bronce: 1,
     plata: 1.5,
     oro: 2,
-    platino: 3
+    platino: 3,
   };
 
   const puntosBase = Math.floor(precioTotal / 10); // 1 punto por cada 10€
@@ -61,7 +58,7 @@ export function calcularDescuentoPorNivel(nivel: string): number {
     bronce: 0,
     plata: 5,
     oro: 10,
-    platino: 15
+    platino: 15,
   };
 
   return descuentos[nivel] || 0;
@@ -77,7 +74,7 @@ export async function actualizarFidelizacion(
 ) {
   // Buscar o crear registro de fidelización
   let loyalty = await prisma.marketplaceLoyalty.findUnique({
-    where: { tenantId }
+    where: { tenantId },
   });
 
   if (!loyalty) {
@@ -86,8 +83,8 @@ export async function actualizarFidelizacion(
         tenantId,
         companyId,
         puntos: 0,
-        nivel: 'bronce'
-      }
+        nivel: 'bronce',
+      },
     });
   }
 
@@ -110,8 +107,8 @@ export async function actualizarFidelizacion(
       cashbackAcumulado: { increment: cashback },
       puntosGanados: { increment: puntosGanados },
       serviciosUsados: { increment: 1 },
-      ultimaActividad: new Date()
-    }
+      ultimaActividad: new Date(),
+    },
   });
 
   return {
@@ -120,7 +117,7 @@ export async function actualizarFidelizacion(
     nivel: updated.nivel,
     descuento: updated.descuentoActual,
     cashback,
-    cambioNivel: nuevoNivel !== loyalty.nivel
+    cambioNivel: nuevoNivel !== loyalty.nivel,
   };
 }
 
@@ -136,15 +133,15 @@ export async function obtenerServiciosRecomendados(
   const reservasPrevias = await prisma.marketplaceBooking.findMany({
     where: {
       tenantId,
-      estado: 'completada'
+      estado: 'completada',
     },
     include: {
-      service: true
+      service: true,
     },
-    take: 10
+    take: 10,
   });
 
-  const categoriasUsadas = [...new Set(reservasPrevias.map(r => r.service.categoria))];
+  const categoriasUsadas = [...new Set(reservasPrevias.map((r) => r.service.categoria))];
 
   // Buscar servicios populares en esas categorías
   const servicios = await prisma.marketplaceService.findMany({
@@ -152,14 +149,10 @@ export async function obtenerServiciosRecomendados(
       companyId,
       activo: true,
       disponible: true,
-      categoria: categoria || { in: categoriasUsadas.length > 0 ? categoriasUsadas : undefined }
+      categoria: categoria || { in: categoriasUsadas.length > 0 ? categoriasUsadas : undefined },
     },
-    orderBy: [
-      { destacado: 'desc' },
-      { rating: 'desc' },
-      { totalReviews: 'desc' }
-    ],
-    take: 6
+    orderBy: [{ destacado: 'desc' }, { rating: 'desc' }, { totalReviews: 'desc' }],
+    take: 6,
   });
 
   return servicios;
@@ -179,20 +172,16 @@ export async function procesarPagoReserva(
       pagado: true,
       stripePaymentId,
       metodoPago,
-      estado: 'confirmada'
+      estado: 'confirmada',
     },
     include: {
       service: true,
-      tenant: true
-    }
+      tenant: true,
+    },
   });
 
   // Actualizar fidelización
-  await actualizarFidelizacion(
-    booking.tenantId,
-    booking.companyId,
-    booking.precioTotal
-  );
+  await actualizarFidelizacion(booking.tenantId, booking.companyId, booking.precioTotal);
 
   return booking;
 }

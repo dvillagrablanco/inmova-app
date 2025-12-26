@@ -2,7 +2,7 @@ import { prisma } from './db';
 import Papa from 'papaparse';
 
 // Tipos de datos que se pueden importar
-export type ImportableEntity = 
+export type ImportableEntity =
   | 'buildings'
   | 'units'
   | 'tenants'
@@ -20,7 +20,7 @@ export const SYSTEM_MAPPINGS = {
       ciudad: ['ciudad', 'city'],
       codigoPostal: ['codigo_postal', 'cp', 'zip_code'],
       numeroUnidades: ['num_unidades', 'units', 'numero_viviendas'],
-      anosConstruccion: ['ano_construccion', 'year_built', 'construccion']
+      anosConstruccion: ['ano_construccion', 'year_built', 'construccion'],
     },
     units: {
       numero: ['numero', 'number', 'unit_number', 'portal_piso_puerta'],
@@ -29,7 +29,7 @@ export const SYSTEM_MAPPINGS = {
       habitaciones: ['habitaciones', 'rooms', 'bedrooms', 'dormitorios'],
       banos: ['banos', 'bathrooms', 'aseos'],
       rentaMensual: ['renta', 'rent', 'precio', 'monthly_rent'],
-      estado: ['estado', 'status', 'availability']
+      estado: ['estado', 'status', 'availability'],
     },
     tenants: {
       nombre: ['nombre', 'name', 'full_name', 'tenant_name'],
@@ -37,7 +37,7 @@ export const SYSTEM_MAPPINGS = {
       email: ['email', 'correo', 'e-mail'],
       telefono: ['telefono', 'phone', 'mobile', 'tel'],
       dni: ['dni', 'nif', 'id', 'document_id'],
-      fechaNacimiento: ['fecha_nacimiento', 'birth_date', 'dob']
+      fechaNacimiento: ['fecha_nacimiento', 'birth_date', 'dob'],
     },
     contracts: {
       fechaInicio: ['fecha_inicio', 'start_date', 'fecha_alta'],
@@ -45,15 +45,15 @@ export const SYSTEM_MAPPINGS = {
       rentaMensual: ['renta_mensual', 'monthly_rent', 'renta'],
       diaPago: ['dia_pago', 'payment_day', 'dia_cobro'],
       deposito: ['deposito', 'deposit', 'fianza'],
-      duracionMeses: ['duracion', 'duration_months', 'plazo']
+      duracionMeses: ['duracion', 'duration_months', 'plazo'],
     },
     payments: {
       fechaVencimiento: ['fecha_vencimiento', 'due_date', 'vencimiento'],
       monto: ['monto', 'amount', 'importe'],
       estado: ['estado', 'status', 'payment_status'],
       concepto: ['concepto', 'description', 'concept'],
-      mes: ['mes', 'month', 'periodo']
-    }
+      mes: ['mes', 'month', 'periodo'],
+    },
   },
   rentger: {
     buildings: {
@@ -61,37 +61,37 @@ export const SYSTEM_MAPPINGS = {
       direccion: ['direccion_fiscal', 'domicilio'],
       ciudad: ['poblacion', 'municipio'],
       codigoPostal: ['cp', 'codigo_postal'],
-      numeroUnidades: ['numero_viviendas', 'total_pisos']
+      numeroUnidades: ['numero_viviendas', 'total_pisos'],
     },
     units: {
       numero: ['referencia', 'identificador', 'num_vivienda'],
       tipo: ['tipologia', 'categoria'],
       superficie: ['metros_cuadrados', 'superficie_util'],
-      rentaMensual: ['alquiler_mensual', 'cuota']
+      rentaMensual: ['alquiler_mensual', 'cuota'],
     },
     tenants: {
       nombre: ['nombre_completo', 'inquilino'],
       email: ['correo_electronico', 'email'],
       telefono: ['telefono_movil', 'contacto'],
-      dni: ['documento', 'nif_nie']
-    }
+      dni: ['documento', 'nif_nie'],
+    },
   },
   nester: {
     buildings: {
       nombre: ['property_name', 'building'],
       direccion: ['full_address', 'street_address'],
-      numeroUnidades: ['total_units', 'num_apartments']
+      numeroUnidades: ['total_units', 'num_apartments'],
     },
     units: {
       numero: ['apt_number', 'unit_ref'],
       superficie: ['sqm', 'size'],
-      rentaMensual: ['rent_amount', 'monthly_price']
+      rentaMensual: ['rent_amount', 'monthly_price'],
     },
     tenants: {
       nombre: ['tenant_name', 'resident_name'],
       email: ['contact_email'],
-      telefono: ['phone_number']
-    }
+      telefono: ['phone_number'],
+    },
   },
   buildium: {
     buildings: {
@@ -99,42 +99,42 @@ export const SYSTEM_MAPPINGS = {
       direccion: ['StreetAddress'],
       ciudad: ['City'],
       codigoPostal: ['PostalCode'],
-      numeroUnidades: ['NumberOfUnits']
+      numeroUnidades: ['NumberOfUnits'],
     },
     units: {
       numero: ['UnitNumber', 'UnitAddress'],
       tipo: ['PropertyType'],
       superficie: ['SquareFeet'],
-      rentaMensual: ['MarketRent', 'ActualRent']
+      rentaMensual: ['MarketRent', 'ActualRent'],
     },
     tenants: {
       nombre: ['TenantName', 'FirstName LastName'],
       email: ['EmailAddress'],
       telefono: ['PhoneNumber'],
-      fechaNacimiento: ['DateOfBirth']
+      fechaNacimiento: ['DateOfBirth'],
     },
     contracts: {
       fechaInicio: ['LeaseStartDate'],
       fechaFin: ['LeaseEndDate'],
       rentaMensual: ['MonthlyRent'],
-      deposito: ['SecurityDeposit']
-    }
+      deposito: ['SecurityDeposit'],
+    },
   },
   appfolio: {
     buildings: {
       nombre: ['Property'],
       direccion: ['Address'],
-      numeroUnidades: ['Unit Count']
+      numeroUnidades: ['Unit Count'],
     },
     units: {
       numero: ['Unit'],
-      rentaMensual: ['Market Rent']
+      rentaMensual: ['Market Rent'],
     },
     tenants: {
       nombre: ['Tenant'],
       email: ['Email'],
-      telefono: ['Phone']
-    }
+      telefono: ['Phone'],
+    },
   },
   generic_csv: {
     buildings: {
@@ -142,60 +142,60 @@ export const SYSTEM_MAPPINGS = {
       direccion: ['direccion', 'address', 'calle', 'street'],
       ciudad: ['ciudad', 'city', 'municipio', 'town'],
       codigoPostal: ['codigo_postal', 'cp', 'zip', 'postal_code'],
-      numeroUnidades: ['unidades', 'units', 'viviendas', 'apartments']
+      numeroUnidades: ['unidades', 'units', 'viviendas', 'apartments'],
     },
     units: {
       numero: ['numero', 'number', 'unit', 'vivienda', 'apartment'],
       tipo: ['tipo', 'type', 'category', 'categoria'],
       superficie: ['superficie', 'area', 'm2', 'sqm', 'size'],
-      rentaMensual: ['renta', 'rent', 'precio', 'price', 'alquiler']
+      rentaMensual: ['renta', 'rent', 'precio', 'price', 'alquiler'],
     },
     tenants: {
       nombre: ['nombre', 'name', 'inquilino', 'tenant'],
       email: ['email', 'correo', 'mail'],
       telefono: ['telefono', 'phone', 'tel', 'movil'],
-      dni: ['dni', 'nif', 'id', 'documento']
-    }
-  }
+      dni: ['dni', 'nif', 'id', 'documento'],
+    },
+  },
 };
 
 // Mapeo de valores de estado
 const STATUS_MAPPINGS: Record<string, Record<string, string>> = {
   unit: {
-    'disponible': 'disponible',
-    'available': 'disponible',
-    'vacant': 'disponible',
-    'libre': 'disponible',
-    'ocupada': 'ocupada',
-    'occupied': 'ocupada',
-    'rented': 'ocupada',
-    'alquilada': 'ocupada',
-    'mantenimiento': 'mantenimiento',
-    'maintenance': 'mantenimiento',
-    'reform': 'mantenimiento'
+    disponible: 'disponible',
+    available: 'disponible',
+    vacant: 'disponible',
+    libre: 'disponible',
+    ocupada: 'ocupada',
+    occupied: 'ocupada',
+    rented: 'ocupada',
+    alquilada: 'ocupada',
+    mantenimiento: 'mantenimiento',
+    maintenance: 'mantenimiento',
+    reform: 'mantenimiento',
   },
   contract: {
-    'activo': 'activo',
-    'active': 'activo',
-    'vigente': 'activo',
-    'finalizado': 'finalizado',
-    'ended': 'finalizado',
-    'expired': 'finalizado',
-    'cancelado': 'cancelado',
-    'cancelled': 'cancelado',
-    'terminated': 'cancelado'
+    activo: 'activo',
+    active: 'activo',
+    vigente: 'activo',
+    finalizado: 'finalizado',
+    ended: 'finalizado',
+    expired: 'finalizado',
+    cancelado: 'cancelado',
+    cancelled: 'cancelado',
+    terminated: 'cancelado',
   },
   payment: {
-    'pagado': 'pagado',
-    'paid': 'pagado',
-    'completed': 'pagado',
-    'pendiente': 'pendiente',
-    'pending': 'pendiente',
-    'unpaid': 'pendiente',
-    'vencido': 'vencido',
-    'overdue': 'vencido',
-    'late': 'vencido'
-  }
+    pagado: 'pagado',
+    paid: 'pagado',
+    completed: 'pagado',
+    pendiente: 'pendiente',
+    pending: 'pendiente',
+    unpaid: 'pendiente',
+    vencido: 'vencido',
+    overdue: 'vencido',
+    late: 'vencido',
+  },
 };
 
 export interface ImportResult {
@@ -240,7 +240,7 @@ export async function parseCSV(fileContent: string): Promise<any[]> {
       },
       error: (error: Error) => {
         reject(error);
-      }
+      },
     });
   });
 }
@@ -264,17 +264,17 @@ export function mapFields(
   }
 
   const mapped: any = {};
-  const recordKeys = Object.keys(record).map(k => k.toLowerCase().trim());
+  const recordKeys = Object.keys(record).map((k) => k.toLowerCase().trim());
 
   for (const [targetField, possibleSourceFields] of Object.entries(entityMapping)) {
     // Buscar el primer campo que coincida
     if (Array.isArray(possibleSourceFields)) {
       for (const sourceField of possibleSourceFields) {
         const sourceFieldLower = sourceField.toLowerCase();
-        const foundKey = recordKeys.find(key => key === sourceFieldLower);
-        
+        const foundKey = recordKeys.find((key) => key === sourceFieldLower);
+
         if (foundKey) {
-          const originalKey = Object.keys(record).find(k => k.toLowerCase().trim() === foundKey);
+          const originalKey = Object.keys(record).find((k) => k.toLowerCase().trim() === foundKey);
           if (originalKey) {
             mapped[targetField] = record[originalKey];
             break;
@@ -292,14 +292,14 @@ export function mapFields(
  */
 function normalizeStatus(value: string | undefined, entityType: string): string | undefined {
   if (!value) return undefined;
-  
+
   const normalized = value.toLowerCase().trim();
   const mapping = STATUS_MAPPINGS[entityType];
-  
+
   if (mapping && mapping[normalized]) {
     return mapping[normalized];
   }
-  
+
   return value;
 }
 
@@ -319,49 +319,77 @@ export async function validateImportData(
   for (let i = 0; i < Math.min(data.length, 10); i++) {
     const record = data[i];
     const mapped = mapFields(record, entityType, sourceSystem);
-    
+
     // Validaciones específicas por tipo de entidad
     switch (entityType) {
       case 'buildings':
         if (!mapped.nombre) {
-          errors.push({ row: i + 1, field: 'nombre', message: 'El nombre del edificio es obligatorio' });
+          errors.push({
+            row: i + 1,
+            field: 'nombre',
+            message: 'El nombre del edificio es obligatorio',
+          });
         }
         if (!mapped.direccion) {
           errors.push({ row: i + 1, field: 'direccion', message: 'La dirección es obligatoria' });
         }
         break;
-        
+
       case 'units':
         if (!mapped.numero) {
-          errors.push({ row: i + 1, field: 'numero', message: 'El número de unidad es obligatorio' });
+          errors.push({
+            row: i + 1,
+            field: 'numero',
+            message: 'El número de unidad es obligatorio',
+          });
         }
         if (mapped.superficie && isNaN(parseFloat(mapped.superficie))) {
-          errors.push({ row: i + 1, field: 'superficie', message: 'La superficie debe ser un número' });
+          errors.push({
+            row: i + 1,
+            field: 'superficie',
+            message: 'La superficie debe ser un número',
+          });
         }
         if (mapped.rentaMensual && isNaN(parseFloat(mapped.rentaMensual))) {
-          errors.push({ row: i + 1, field: 'rentaMensual', message: 'La renta mensual debe ser un número' });
+          errors.push({
+            row: i + 1,
+            field: 'rentaMensual',
+            message: 'La renta mensual debe ser un número',
+          });
         }
         break;
-        
+
       case 'tenants':
         if (!mapped.nombre && !mapped.apellidos) {
-          errors.push({ row: i + 1, field: 'nombre', message: 'El nombre del inquilino es obligatorio' });
+          errors.push({
+            row: i + 1,
+            field: 'nombre',
+            message: 'El nombre del inquilino es obligatorio',
+          });
         }
         if (mapped.email && !mapped.email.includes('@')) {
           errors.push({ row: i + 1, field: 'email', message: 'El email no es válido' });
         }
         break;
-        
+
       case 'contracts':
         if (!mapped.fechaInicio) {
-          errors.push({ row: i + 1, field: 'fechaInicio', message: 'La fecha de inicio es obligatoria' });
+          errors.push({
+            row: i + 1,
+            field: 'fechaInicio',
+            message: 'La fecha de inicio es obligatoria',
+          });
         }
         if (!mapped.rentaMensual || isNaN(parseFloat(mapped.rentaMensual))) {
-          errors.push({ row: i + 1, field: 'rentaMensual', message: 'La renta mensual es obligatoria y debe ser un número' });
+          errors.push({
+            row: i + 1,
+            field: 'rentaMensual',
+            message: 'La renta mensual es obligatoria y debe ser un número',
+          });
         }
         break;
     }
-    
+
     preview.push(mapped);
   }
 
@@ -369,7 +397,7 @@ export async function validateImportData(
     valid: errors.length === 0,
     errors,
     warnings,
-    preview
+    preview,
   };
 }
 
@@ -388,19 +416,19 @@ async function importBuildings(
     failedImports: 0,
     errors: [],
     warnings: [],
-    importedIds: []
+    importedIds: [],
   };
 
   for (let i = 0; i < data.length; i++) {
     try {
       const record = mapFields(data[i], 'buildings', sourceSystem);
-      
+
       // Validar campos obligatorios
       if (!record.nombre || !record.direccion) {
         result.errors.push({
           row: i + 1,
           message: 'Nombre y dirección son obligatorios',
-          data: record
+          data: record,
         });
         result.failedImports++;
         continue;
@@ -411,8 +439,8 @@ async function importBuildings(
         where: {
           companyId,
           nombre: record.nombre,
-          direccion: record.direccion
-        }
+          direccion: record.direccion,
+        },
       });
 
       if (existingBuilding) {
@@ -426,8 +454,10 @@ async function importBuildings(
         record.direccion,
         record.ciudad,
         record.codigoPostal,
-        record.pais || 'España'
-      ].filter(Boolean).join(', ');
+        record.pais || 'España',
+      ]
+        .filter(Boolean)
+        .join(', ');
 
       // Crear el edificio
       const building = await prisma.building.create({
@@ -437,8 +467,10 @@ async function importBuildings(
           direccion: direccionCompleta,
           tipo: 'residencial',
           numeroUnidades: parseInt(record.numeroUnidades) || 0,
-          anoConstructor: record.anosConstruccion ? parseInt(record.anosConstruccion) : new Date().getFullYear()
-        }
+          anoConstructor: record.anosConstruccion
+            ? parseInt(record.anosConstruccion)
+            : new Date().getFullYear(),
+        },
       });
 
       result.successfulImports++;
@@ -447,7 +479,7 @@ async function importBuildings(
       result.errors.push({
         row: i + 1,
         message: error instanceof Error ? error.message : String(error) || 'Error desconocido',
-        data: data[i]
+        data: data[i],
       });
       result.failedImports++;
     }
@@ -473,20 +505,20 @@ async function importUnits(
     failedImports: 0,
     errors: [],
     warnings: [],
-    importedIds: []
+    importedIds: [],
   };
 
   for (let i = 0; i < data.length; i++) {
     try {
       const record = mapFields(data[i], 'units', sourceSystem);
-      
+
       // Validar campos obligatorios
       if (!record.numero) {
         result.errors.push({
           row: i + 1,
           field: 'numero',
           message: 'El número de unidad es obligatorio',
-          data: record
+          data: record,
         });
         result.failedImports++;
         continue;
@@ -494,16 +526,16 @@ async function importUnits(
 
       // Determinar el edificio
       let targetBuildingId = buildingId;
-      
+
       if (!targetBuildingId && record.edificio) {
         // Buscar el edificio por nombre
         const building = await prisma.building.findFirst({
           where: {
             companyId,
-            nombre: { contains: record.edificio, mode: 'insensitive' }
-          }
+            nombre: { contains: record.edificio, mode: 'insensitive' },
+          },
         });
-        
+
         if (building) {
           targetBuildingId = building.id;
         }
@@ -513,7 +545,7 @@ async function importUnits(
         result.errors.push({
           row: i + 1,
           message: 'No se pudo determinar el edificio para esta unidad',
-          data: record
+          data: record,
         });
         result.failedImports++;
         continue;
@@ -523,8 +555,8 @@ async function importUnits(
       const existingUnit = await prisma.unit.findFirst({
         where: {
           buildingId: targetBuildingId,
-          numero: record.numero
-        }
+          numero: record.numero,
+        },
       });
 
       if (existingUnit) {
@@ -534,7 +566,7 @@ async function importUnits(
       }
 
       // Normalizar el estado
-      const estado = normalizeStatus(record.estado, 'unit') as any || 'disponible';
+      const estado = (normalizeStatus(record.estado, 'unit') as any) || 'disponible';
 
       // Crear la unidad
       const unit = await prisma.unit.create({
@@ -546,8 +578,8 @@ async function importUnits(
           habitaciones: record.habitaciones ? parseInt(record.habitaciones) : undefined,
           banos: record.banos ? parseInt(record.banos) : undefined,
           rentaMensual: record.rentaMensual ? parseFloat(record.rentaMensual) : 0,
-          estado: estado
-        }
+          estado: estado,
+        },
       });
 
       result.successfulImports++;
@@ -556,7 +588,7 @@ async function importUnits(
       result.errors.push({
         row: i + 1,
         message: error instanceof Error ? error.message : String(error) || 'Error desconocido',
-        data: data[i]
+        data: data[i],
       });
       result.failedImports++;
     }
@@ -581,20 +613,20 @@ async function importTenants(
     failedImports: 0,
     errors: [],
     warnings: [],
-    importedIds: []
+    importedIds: [],
   };
 
   for (let i = 0; i < data.length; i++) {
     try {
       const record = mapFields(data[i], 'tenants', sourceSystem);
-      
+
       // Validar campos obligatorios
       if (!record.nombre && !record.apellidos) {
         result.errors.push({
           row: i + 1,
           field: 'nombre',
           message: 'El nombre del inquilino es obligatorio',
-          data: record
+          data: record,
         });
         result.failedImports++;
         continue;
@@ -605,8 +637,8 @@ async function importTenants(
         const existingTenant = await prisma.tenant.findFirst({
           where: {
             companyId,
-            email: record.email
-          }
+            email: record.email,
+          },
         });
 
         if (existingTenant) {
@@ -617,7 +649,8 @@ async function importTenants(
       }
 
       // Crear el inquilino
-      const nombreCompleto = [record.nombre, record.apellidos].filter(Boolean).join(' ') || 'Sin nombre';
+      const nombreCompleto =
+        [record.nombre, record.apellidos].filter(Boolean).join(' ') || 'Sin nombre';
       const tenant = await prisma.tenant.create({
         data: {
           companyId,
@@ -625,12 +658,16 @@ async function importTenants(
           email: record.email || `tenant_${Date.now()}@example.com`,
           telefono: record.telefono || '000000000',
           dni: record.dni || `DNI_${Date.now()}`,
-          fechaNacimiento: record.fechaNacimiento ? new Date(record.fechaNacimiento) : new Date('1990-01-01'),
+          fechaNacimiento: record.fechaNacimiento
+            ? new Date(record.fechaNacimiento)
+            : new Date('1990-01-01'),
           direccionActual: record.direccionAnterior,
           empresa: record.empresaTrabajo,
-          ingresosMensuales: record.ingresosMensuales ? parseFloat(record.ingresosMensuales) : undefined,
-          notas: record.ocupacion || ''
-        }
+          ingresosMensuales: record.ingresosMensuales
+            ? parseFloat(record.ingresosMensuales)
+            : undefined,
+          notas: record.ocupacion || '',
+        },
       });
 
       result.successfulImports++;
@@ -639,7 +676,7 @@ async function importTenants(
       result.errors.push({
         row: i + 1,
         message: error instanceof Error ? error.message : String(error) || 'Error desconocido',
-        data: data[i]
+        data: data[i],
       });
       result.failedImports++;
     }
@@ -662,13 +699,13 @@ export async function importData(
   switch (entityType) {
     case 'buildings':
       return await importBuildings(data, companyId, sourceSystem);
-    
+
     case 'units':
       return await importUnits(data, companyId, sourceSystem, options.buildingId);
-    
+
     case 'tenants':
       return await importTenants(data, companyId, sourceSystem);
-    
+
     default:
       throw new Error(`Tipo de entidad no soportado: ${entityType}`);
   }
@@ -678,40 +715,208 @@ export async function importData(
  * Genera una plantilla CSV para un tipo de entidad
  */
 export function generateCSVTemplate(entityType: ImportableEntity): string {
-  const templates: Record<ImportableEntity, { headers: string[], examples: string[] }> = {
+  const templates: Record<ImportableEntity, { headers: string[]; examples: string[] }> = {
     buildings: {
-      headers: ['nombre', 'direccion', 'tipo', 'anoConstructor', 'numeroUnidades', 'ascensor', 'garaje', 'piscina', 'gastosComunidad', 'ibiAnual', 'latitud', 'longitud'],
-      examples: ['Edificio Central', 'Calle Mayor 123, Madrid', 'residencial', '2010', '24', 'true', 'true', 'false', '150.50', '800.00', '40.4168', '-3.7038']
+      headers: [
+        'nombre',
+        'direccion',
+        'tipo',
+        'anoConstructor',
+        'numeroUnidades',
+        'ascensor',
+        'garaje',
+        'piscina',
+        'gastosComunidad',
+        'ibiAnual',
+        'latitud',
+        'longitud',
+      ],
+      examples: [
+        'Edificio Central',
+        'Calle Mayor 123, Madrid',
+        'residencial',
+        '2010',
+        '24',
+        'true',
+        'true',
+        'false',
+        '150.50',
+        '800.00',
+        '40.4168',
+        '-3.7038',
+      ],
     },
     units: {
-      headers: ['numero', 'edificioNombre', 'tipo', 'estado', 'superficie', 'superficieUtil', 'habitaciones', 'banos', 'planta', 'orientacion', 'rentaMensual', 'aireAcondicionado', 'calefaccion', 'terraza', 'amueblado'],
-      examples: ['1A', 'Edificio Central', 'piso', 'disponible', '85.5', '78.0', '3', '2', '1', 'sur', '950.00', 'true', 'true', 'false', 'false']
+      headers: [
+        'numero',
+        'edificioNombre',
+        'tipo',
+        'estado',
+        'superficie',
+        'superficieUtil',
+        'habitaciones',
+        'banos',
+        'planta',
+        'orientacion',
+        'rentaMensual',
+        'aireAcondicionado',
+        'calefaccion',
+        'terraza',
+        'amueblado',
+      ],
+      examples: [
+        '1A',
+        'Edificio Central',
+        'piso',
+        'disponible',
+        '85.5',
+        '78.0',
+        '3',
+        '2',
+        '1',
+        'sur',
+        '950.00',
+        'true',
+        'true',
+        'false',
+        'false',
+      ],
     },
     tenants: {
-      headers: ['nombreCompleto', 'dni', 'email', 'telefono', 'fechaNacimiento', 'nacionalidad', 'estadoCivil', 'numeroOcupantes', 'direccionActual', 'situacionLaboral', 'empresa', 'puesto', 'antiguedad', 'ingresosMensuales'],
-      examples: ['Juan P\u00e9rez Garc\u00eda', '12345678A', 'juan.perez@email.com', '+34600123456', '1985-06-15', 'Espa\u00f1ola', 'casado', '3', 'Calle Falsa 123, Madrid', 'empleado', 'Tech Corp SL', 'Desarrollador Senior', '5', '3500.00']
+      headers: [
+        'nombreCompleto',
+        'dni',
+        'email',
+        'telefono',
+        'fechaNacimiento',
+        'nacionalidad',
+        'estadoCivil',
+        'numeroOcupantes',
+        'direccionActual',
+        'situacionLaboral',
+        'empresa',
+        'puesto',
+        'antiguedad',
+        'ingresosMensuales',
+      ],
+      examples: [
+        'Juan P\u00e9rez Garc\u00eda',
+        '12345678A',
+        'juan.perez@email.com',
+        '+34600123456',
+        '1985-06-15',
+        'Espa\u00f1ola',
+        'casado',
+        '3',
+        'Calle Falsa 123, Madrid',
+        'empleado',
+        'Tech Corp SL',
+        'Desarrollador Senior',
+        '5',
+        '3500.00',
+      ],
     },
     contracts: {
-      headers: ['tenantEmail', 'unitNumero', 'edificioNombre', 'fechaInicio', 'fechaFin', 'rentaMensual', 'diaPago', 'deposito', 'mesesFianza', 'renovacionAutomatica', 'tipo', 'estado'],
-      examples: ['juan.perez@email.com', '1A', 'Edificio Central', '2024-01-01', '2025-12-31', '950.00', '5', '1900.00', '2', 'true', 'residencial', 'activo']
+      headers: [
+        'tenantEmail',
+        'unitNumero',
+        'edificioNombre',
+        'fechaInicio',
+        'fechaFin',
+        'rentaMensual',
+        'diaPago',
+        'deposito',
+        'mesesFianza',
+        'renovacionAutomatica',
+        'tipo',
+        'estado',
+      ],
+      examples: [
+        'juan.perez@email.com',
+        '1A',
+        'Edificio Central',
+        '2024-01-01',
+        '2025-12-31',
+        '950.00',
+        '5',
+        '1900.00',
+        '2',
+        'true',
+        'residencial',
+        'activo',
+      ],
     },
     payments: {
-      headers: ['contratoTenantEmail', 'periodo', 'monto', 'fechaVencimiento', 'fechaPago', 'estado', 'metodoPago'],
-      examples: ['juan.perez@email.com', '2024-01', '950.00', '2024-01-05', '2024-01-03', 'pagado', 'transferencia']
+      headers: [
+        'contratoTenantEmail',
+        'periodo',
+        'monto',
+        'fechaVencimiento',
+        'fechaPago',
+        'estado',
+        'metodoPago',
+      ],
+      examples: [
+        'juan.perez@email.com',
+        '2024-01',
+        '950.00',
+        '2024-01-05',
+        '2024-01-03',
+        'pagado',
+        'transferencia',
+      ],
     },
     providers: {
-      headers: ['nombre', 'email', 'telefono', 'cif', 'servicios', 'calificacion', 'certificaciones', 'activo'],
-      examples: ['Mantenimiento 24h SL', 'contacto@mant24h.com', '+34910123456', 'B12345678', 'fontaneria,electricidad,climatizacion', '4.5', 'ISO9001,ISO14001', 'true']
+      headers: [
+        'nombre',
+        'email',
+        'telefono',
+        'cif',
+        'servicios',
+        'calificacion',
+        'certificaciones',
+        'activo',
+      ],
+      examples: [
+        'Mantenimiento 24h SL',
+        'contacto@mant24h.com',
+        '+34910123456',
+        'B12345678',
+        'fontaneria,electricidad,climatizacion',
+        '4.5',
+        'ISO9001,ISO14001',
+        'true',
+      ],
     },
     expenses: {
-      headers: ['concepto', 'categoria', 'monto', 'fecha', 'edificioNombre', 'metodoPago', 'proveedorNombre', 'notas', 'recurrente'],
-      examples: ['Reparaci\u00f3n ascensor', 'mantenimiento', '450.00', '2024-01-15', 'Edificio Central', 'transferencia', 'Ascensores R\u00e1pidos SA', 'Reparaci\u00f3n urgente', 'false']
-    }
+      headers: [
+        'concepto',
+        'categoria',
+        'monto',
+        'fecha',
+        'edificioNombre',
+        'metodoPago',
+        'proveedorNombre',
+        'notas',
+        'recurrente',
+      ],
+      examples: [
+        'Reparaci\u00f3n ascensor',
+        'mantenimiento',
+        '450.00',
+        '2024-01-15',
+        'Edificio Central',
+        'transferencia',
+        'Ascensores R\u00e1pidos SA',
+        'Reparaci\u00f3n urgente',
+        'false',
+      ],
+    },
   };
 
   const template = templates[entityType];
   const headerRow = template.headers.join(',');
   const exampleRow = template.examples.join(',');
-  
+
   return `${headerRow}\n${exampleRow}\n`;
 }

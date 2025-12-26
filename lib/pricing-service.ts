@@ -22,9 +22,9 @@ export async function analizarPrecioOptimo(
       contracts: {
         where: { estado: 'activo' },
         orderBy: { fechaInicio: 'desc' },
-        take: 1
-      }
-    }
+        take: 1,
+      },
+    },
   });
 
   if (!unit) {
@@ -37,14 +37,14 @@ export async function analizarPrecioOptimo(
   const zona = unit.building.direccion || 'Madrid';
   const habitaciones = 2; // Valor por defecto ya que no existe unit.habitaciones
   const metrosCuadrados = 80; // Valor por defecto ya que no existe unit.metrosCuadrados
-  
+
   const marketData = await prisma.marketData.findFirst({
     where: {
       companyId,
       zona: { contains: zona },
-      numHabitaciones: habitaciones
+      numHabitaciones: habitaciones,
     },
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: 'desc' },
   });
 
   const precioMercado = marketData?.precioPromedio || precioActual;
@@ -55,7 +55,7 @@ export async function analizarPrecioOptimo(
     estado: 1.0,
     amenities: 1.0,
     demanda: 1.0,
-    estacionalidad: 1.0
+    estacionalidad: 1.0,
   };
 
   // Ajuste por estado de la unidad (usar estado general)
@@ -65,26 +65,30 @@ export async function analizarPrecioOptimo(
 
   // Ajuste por amenities (valores por defecto)
   const amenitiesCount = 3; // Valor estimado
-  factores.amenities = 1 + (amenitiesCount * 0.03);
+  factores.amenities = 1 + amenitiesCount * 0.03;
 
   // Ajuste por demanda (basado en estado)
   const diasVacante = unit.estado === 'disponible' ? 30 : 0; // Simulación
-  if (diasVacante > 60) factores.demanda = 0.90;
+  if (diasVacante > 60) factores.demanda = 0.9;
   else if (diasVacante > 30) factores.demanda = 0.95;
   else factores.demanda = 1.05;
 
   // Ajuste por estacionalidad
   const mesActual = new Date().getMonth();
-  if ([5, 6, 7].includes(mesActual)) factores.estacionalidad = 1.08; // Verano
+  if ([5, 6, 7].includes(mesActual))
+    factores.estacionalidad = 1.08; // Verano
   else if ([0, 1, 11].includes(mesActual)) factores.estacionalidad = 0.95; // Invierno
 
   // Calcular factor total
-  const factorTotal = Object.values(factores).reduce((a: number, b) => a * (b as number), 1) as number;
+  const factorTotal = Object.values(factores).reduce(
+    (a: number, b) => a * (b as number),
+    1
+  ) as number;
   let precioSugerido = precioMercado * factorTotal;
 
   // Aplicar estrategia
   if (estrategia === 'aggressive') {
-    precioSugerido *= 1.10; // +10%
+    precioSugerido *= 1.1; // +10%
   } else if (estrategia === 'conservative') {
     precioSugerido *= 0.95; // -5%
   }
@@ -104,9 +108,11 @@ export async function analizarPrecioOptimo(
   // Recomendación
   let recomendacion = '';
   if (precioActual > precioSugerido * 1.1) {
-    recomendacion = 'REDUCIR PRECIO: El precio actual está significativamente por encima del mercado. Recomendamos reducir para aumentar competitividad.';
+    recomendacion =
+      'REDUCIR PRECIO: El precio actual está significativamente por encima del mercado. Recomendamos reducir para aumentar competitividad.';
   } else if (precioActual < precioSugerido * 0.9) {
-    recomendacion = 'INCREMENTAR PRECIO: Hay margen para incrementar el precio y optimizar ingresos sin afectar la demanda.';
+    recomendacion =
+      'INCREMENTAR PRECIO: Hay margen para incrementar el precio y optimizar ingresos sin afectar la demanda.';
   } else {
     recomendacion = 'MANTENER PRECIO: El precio actual está dentro del rango óptimo del mercado.';
   }
@@ -120,11 +126,12 @@ export async function analizarPrecioOptimo(
     factores,
     probabilidadAlquiler,
     diasHastaAlquiler,
-    demandaEstimada: probabilidadAlquiler > 70 ? 'alta' : probabilidadAlquiler > 50 ? 'media' : 'baja',
+    demandaEstimada:
+      probabilidadAlquiler > 70 ? 'alta' : probabilidadAlquiler > 50 ? 'media' : 'baja',
     estrategia,
     recomendacion,
     competidores: [],
-    validoHasta: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 días
+    validoHasta: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 días
   };
 }
 
@@ -139,12 +146,12 @@ export async function simularDatosMercado(
 ) {
   // Precios base por zona (ejemplo Madrid)
   const preciosBase: Record<string, number> = {
-    'Centro': 1500,
-    'Salamanca': 1800,
-    'Chamberí': 1600,
-    'Retiro': 1400,
-    'Chamartín': 1500,
-    'default': 1200
+    Centro: 1500,
+    Salamanca: 1800,
+    Chamberí: 1600,
+    Retiro: 1400,
+    Chamartín: 1500,
+    default: 1200,
   };
 
   const precioBase = preciosBase[zona] || preciosBase.default;
@@ -161,9 +168,9 @@ export async function simularDatosMercado(
 
   // Crear dato de mercado (sin upsert por problema de índice único)
   const existing = await prisma.marketData.findFirst({
-    where: { companyId, zona, periodo }
+    where: { companyId, zona, periodo },
   });
-  
+
   let marketData;
   if (existing) {
     marketData = await prisma.marketData.update({
@@ -172,8 +179,8 @@ export async function simularDatosMercado(
         precioPromedio,
         precioMin,
         precioMax,
-        muestras: (existing.muestras || 0) + 1
-      }
+        muestras: (existing.muestras || 0) + 1,
+      },
     });
   } else {
     marketData = await prisma.marketData.create({
@@ -191,8 +198,8 @@ export async function simularDatosMercado(
         numHabitaciones,
         metrosCuadrados,
         fuente: 'simulacion',
-        periodo
-      }
+        periodo,
+      },
     });
   }
 
@@ -202,12 +209,9 @@ export async function simularDatosMercado(
 /**
  * Aplica una estrategia de pricing a una unidad
  */
-export async function aplicarEstrategiaPricing(
-  strategyId: string,
-  unitId: string
-) {
+export async function aplicarEstrategiaPricing(strategyId: string, unitId: string) {
   const strategy = await prisma.pricingStrategy.findUnique({
-    where: { id: strategyId }
+    where: { id: strategyId },
   });
 
   if (!strategy || !strategy.activa) {
@@ -220,11 +224,7 @@ export async function aplicarEstrategiaPricing(
   }
 
   // Analizar precio óptimo
-  const analisis = await analizarPrecioOptimo(
-    strategy.companyId,
-    unitId,
-    strategy.tipo as any
-  );
+  const analisis = await analizarPrecioOptimo(strategy.companyId, unitId, strategy.tipo as any);
 
   // Verificar límite de ajuste
   const cambioPortcentaje = Math.abs(
@@ -232,12 +232,12 @@ export async function aplicarEstrategiaPricing(
   );
 
   let precioFinal = analisis.precioSugerido;
-  
+
   if (strategy.ajusteAutomatico && cambioPortcentaje <= strategy.limitePorcentaje) {
     // Aplicar cambio automático
     await prisma.unit.update({
       where: { id: unitId },
-      data: { rentaMensual: precioFinal }
+      data: { rentaMensual: precioFinal },
     });
 
     // Actualizar estrategia
@@ -245,15 +245,15 @@ export async function aplicarEstrategiaPricing(
       where: { id: strategyId },
       data: {
         ultimaEjecucion: new Date(),
-        vecesAplicada: { increment: 1 }
-      }
+        vecesAplicada: { increment: 1 },
+      },
     });
 
     return {
       aplicado: true,
       precioAnterior: unit.rentaMensual,
       precioNuevo: precioFinal,
-      cambioPortcentaje
+      cambioPortcentaje,
     };
   }
 
@@ -262,6 +262,6 @@ export async function aplicarEstrategiaPricing(
     motivo: 'Cambio excede el límite configurado',
     precioSugerido: precioFinal,
     precioActual: unit.rentaMensual,
-    cambioPortcentaje
+    cambioPortcentaje,
   };
 }

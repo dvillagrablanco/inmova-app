@@ -26,10 +26,7 @@ export async function validateWithSchema(
 /**
  * Validates required fields
  */
-export function validateRequiredFields(
-  data: any,
-  fields: string[]
-): boolean | string {
+export function validateRequiredFields(data: any, fields: string[]): boolean | string {
   const missingFields = fields.filter((field) => {
     const value = getNestedValue(data, field);
     return value === undefined || value === null || value === '';

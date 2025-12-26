@@ -37,10 +37,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(jobs);
   } catch (error) {
     logger.error('Error fetching jobs:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener trabajos' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener trabajos' }, { status: 500 });
   }
 }
 
@@ -99,9 +96,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(job, { status: 201 });
   } catch (error) {
     logger.error('Error creating job:', error);
-    return NextResponse.json(
-      { error: 'Error al crear trabajo' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear trabajo' }, { status: 500 });
   }
 }

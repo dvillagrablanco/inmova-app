@@ -6,10 +6,7 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 // POST /api/portal-proveedor/work-orders/[id]/reject - Rechazar orden de trabajo
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Verificar autenticación
     const auth = await requireProviderAuth(req);
@@ -27,10 +24,7 @@ export async function POST(
     const { motivo } = body;
 
     if (!motivo || motivo.trim() === '') {
-      return NextResponse.json(
-        { error: 'El motivo del rechazo es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'El motivo del rechazo es requerido' }, { status: 400 });
     }
 
     // Verificar que la orden existe y pertenece al proveedor
@@ -39,10 +33,7 @@ export async function POST(
     });
 
     if (!workOrder) {
-      return NextResponse.json(
-        { error: 'Orden de trabajo no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Orden de trabajo no encontrada' }, { status: 404 });
     }
 
     if (workOrder.providerId !== auth.provider.id) {
@@ -87,9 +78,6 @@ export async function POST(
     });
   } catch (error) {
     logger.error('Error al rechazar orden de trabajo:', error);
-    return NextResponse.json(
-      { error: 'Error al rechazar orden de trabajo' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al rechazar orden de trabajo' }, { status: 500 });
   }
 }

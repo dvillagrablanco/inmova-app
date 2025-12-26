@@ -2,15 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval, differenceInDays, parseISO } from 'date-fns';
+import {
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  isWithinInterval,
+  differenceInDays,
+  parseISO,
+} from 'date-fns';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { unitId: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { unitId: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -34,10 +38,10 @@ export async function GET(
         numero: true,
         building: {
           select: {
-            nombre: true
-          }
-        }
-      }
+            nombre: true,
+          },
+        },
+      },
     });
 
     if (!unit) {
@@ -52,13 +56,13 @@ export async function GET(
           include: {
             tenant: {
               select: {
-                nombreCompleto: true
-              }
-            }
-          }
-        }
+                nombreCompleto: true,
+              },
+            },
+          },
+        },
       },
-      orderBy: { numero: 'asc' }
+      orderBy: { numero: 'asc' },
     });
 
     // Calcular días del período
@@ -77,16 +81,16 @@ export async function GET(
           if (contract.fechaInicio && contract.fechaFin) {
             const contractStart = new Date(contract.fechaInicio);
             const contractEnd = new Date(contract.fechaFin);
-            
+
             // Check if contract overlaps with period
             if (contractStart <= periodEnd && contractEnd >= periodStart) {
               activeContract = contract;
-              
+
               // Calcular cuántos días del período estuvo ocupada
-              const occupiedDays = daysInPeriod.filter(day => 
+              const occupiedDays = daysInPeriod.filter((day) =>
                 isWithinInterval(day, { start: contractStart, end: contractEnd })
               ).length;
-              
+
               daysOccupied += occupiedDays;
             }
           }
@@ -110,21 +114,20 @@ export async function GET(
         revenue,
         tenantName: activeContract?.tenant?.nombreCompleto || null,
         checkInDate: activeContract?.fechaInicio?.toISOString() || null,
-        checkOutDate: activeContract?.fechaFin?.toISOString() || null
+        checkOutDate: activeContract?.fechaFin?.toISOString() || null,
       };
     });
 
     // Calcular resumen
     const totalOccupiedDays = roomsData.reduce((sum: number, r: any) => sum + r.daysOccupied, 0);
     const totalAvailableDays = totalDays * rooms.length;
-    const averageOccupancyRate = totalAvailableDays > 0 
-      ? (totalOccupiedDays / totalAvailableDays) * 100 
-      : 0;
+    const averageOccupancyRate =
+      totalAvailableDays > 0 ? (totalOccupiedDays / totalAvailableDays) * 100 : 0;
     const totalRevenue = roomsData.reduce((sum: number, r: any) => sum + r.revenue, 0);
     const avgRevPerRoom = rooms.length > 0 ? totalRevenue / rooms.length : 0;
 
     // Crear línea de tiempo
-    const timeline = daysInPeriod.map(day => {
+    const timeline = daysInPeriod.map((day) => {
       let occupiedRooms = 0;
       let dailyRevenue = 0;
 
@@ -150,34 +153,31 @@ export async function GET(
       return {
         date: day.toISOString(),
         occupiedRooms,
-        revenue: dailyRevenue
+        revenue: dailyRevenue,
       };
     });
 
     return NextResponse.json({
       unit: {
         id: unit.id,
-        nombre: `${unit.building?.nombre || 'Unidad'} - ${unit.numero}`
+        nombre: `${unit.building?.nombre || 'Unidad'} - ${unit.numero}`,
       },
       period: {
         start: periodStart.toISOString(),
-        end: periodEnd.toISOString()
+        end: periodEnd.toISOString(),
       },
       summary: {
         averageOccupancyRate,
         totalRevenue,
         totalOccupiedDays,
         totalAvailableDays,
-        avgRevPerRoom
+        avgRevPerRoom,
       },
       roomsData,
-      timeline
+      timeline,
     });
   } catch (error) {
     logger.error('Error generating occupancy report:', error);
-    return NextResponse.json(
-      { error: 'Error al generar reporte' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al generar reporte' }, { status: 500 });
   }
 }

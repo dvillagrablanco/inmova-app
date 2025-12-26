@@ -11,23 +11,20 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { 
-      email, 
-      password, 
-      name, 
-      role, 
+    const {
+      email,
+      password,
+      name,
+      role,
       businessVertical,
       // Zero-Touch Onboarding fields
       experienceLevel,
       techSavviness,
-      portfolioSize
+      portfolioSize,
     } = body;
 
     if (!email || !password || !name) {
-      return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
 
     const existingUser = await prisma.user.findUnique({
@@ -35,51 +32,50 @@ export async function POST(req: NextRequest) {
     });
 
     if (existingUser) {
-      return NextResponse.json(
-        { error: 'El email ya está registrado' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'El email ya está registrado' }, { status: 400 });
     }
 
     // Validar que el role sea un valor válido del enum UserRole
     const validRoles: any[] = ['administrador', 'gestor', 'operador'];
-    const userRole: any = role && validRoles.includes(role as any) 
-      ? (role as any) 
-      : 'gestor';
+    const userRole: any = role && validRoles.includes(role as any) ? (role as any) : 'gestor';
 
     // Validar que el businessVertical sea un valor válido del enum BusinessVertical
     const validVerticals: any[] = [
-      'alquiler_tradicional', 
-      'str_vacacional', 
+      'alquiler_tradicional',
+      'str_vacacional',
       'coliving',
-      'room_rental', 
-      'construccion', 
-      'flipping', 
+      'room_rental',
+      'construccion',
+      'flipping',
       'servicios_profesionales',
-      'comunidades', 
-      'mixto'
+      'comunidades',
+      'mixto',
     ];
-    const userVertical: any | undefined = businessVertical && validVerticals.includes(businessVertical as any) 
-      ? (businessVertical as any) 
-      : 'alquiler_tradicional'; // Default a tradicional si no se proporciona
+    const userVertical: any | undefined =
+      businessVertical && validVerticals.includes(businessVertical as any)
+        ? (businessVertical as any)
+        : 'alquiler_tradicional'; // Default a tradicional si no se proporciona
 
     // Validar experienceLevel
     const validExperienceLevels: any[] = ['principiante', 'intermedio', 'avanzado'];
-    const userExperienceLevel: any | undefined = experienceLevel && validExperienceLevels.includes(experienceLevel as any)
-      ? (experienceLevel as any)
-      : 'intermedio'; // Default a intermedio
+    const userExperienceLevel: any | undefined =
+      experienceLevel && validExperienceLevels.includes(experienceLevel as any)
+        ? (experienceLevel as any)
+        : 'intermedio'; // Default a intermedio
 
     // Validar techSavviness
     const validTechSavviness: any[] = ['bajo', 'medio', 'alto'];
-    const userTechSavviness: any | undefined = techSavviness && validTechSavviness.includes(techSavviness as any)
-      ? (techSavviness as any)
-      : 'medio'; // Default a medio
+    const userTechSavviness: any | undefined =
+      techSavviness && validTechSavviness.includes(techSavviness as any)
+        ? (techSavviness as any)
+        : 'medio'; // Default a medio
 
     // Validar portfolioSize
     const validPortfolioSizes: any[] = ['size_1_5', 'size_6_20', 'size_21_100', 'size_100_plus'];
-    const userPortfolioSize: any | undefined = portfolioSize && validPortfolioSizes.includes(portfolioSize as any)
-      ? (portfolioSize as any)
-      : 'size_1_5'; // Default a 1-5
+    const userPortfolioSize: any | undefined =
+      portfolioSize && validPortfolioSizes.includes(portfolioSize as any)
+        ? (portfolioSize as any)
+        : 'size_1_5'; // Default a 1-5
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -157,9 +153,6 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     logger.error('Signup error:', error);
-    return NextResponse.json(
-      { error: 'Error al crear usuario' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear usuario' }, { status: 500 });
   }
 }

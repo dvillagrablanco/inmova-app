@@ -17,10 +17,7 @@ export async function GET(request: NextRequest) {
     const conversationId = searchParams.get('conversationId');
 
     if (!conversationId) {
-      return NextResponse.json(
-        { error: 'ID de conversación requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'ID de conversación requerido' }, { status: 400 });
     }
 
     // Get tenant
@@ -29,10 +26,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!tenant) {
-      return NextResponse.json(
-        { error: 'Inquilino no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Inquilino no encontrado' }, { status: 404 });
     }
 
     // Verify conversation belongs to tenant
@@ -85,19 +79,13 @@ export async function POST(request: NextRequest) {
     });
 
     if (!tenant) {
-      return NextResponse.json(
-        { error: 'Inquilino no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Inquilino no encontrado' }, { status: 404 });
     }
 
     const { conversationId, mensaje } = await request.json();
 
     if (!conversationId || !mensaje) {
-      return NextResponse.json(
-        { error: 'Datos incompletos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Datos incompletos' }, { status: 400 });
     }
 
     // Verify conversation belongs to tenant

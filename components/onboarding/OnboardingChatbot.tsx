@@ -36,9 +36,7 @@ interface OnboardingChatbotProps {
   className?: string;
 }
 
-export default function OnboardingChatbot({
-  className = '',
-}: OnboardingChatbotProps) {
+export default function OnboardingChatbot({ className = '' }: OnboardingChatbotProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -122,8 +120,7 @@ export default function OnboardingChatbot({
         ...prev,
         {
           role: 'assistant',
-          content:
-            'Lo siento, he tenido un problema. ¿Podrías intentarlo de nuevo? 😔',
+          content: 'Lo siento, he tenido un problema. ¿Podrías intentarlo de nuevo? 😔',
         },
       ]);
     } finally {
@@ -160,9 +157,7 @@ export default function OnboardingChatbot({
                   <Sparkles className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-white font-semibold text-sm">
-                    Asistente INMOVA
-                  </h3>
+                  <h3 className="text-white font-semibold text-sm">Asistente INMOVA</h3>
                   <p className="text-indigo-100 text-xs">Estoy aquí para ayudarte</p>
                 </div>
               </div>
@@ -220,9 +215,7 @@ export default function OnboardingChatbot({
               {/* Quick Questions (solo al inicio) */}
               {messages.length === 1 && quickQuestions.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-xs text-gray-500 font-medium">
-                    Preguntas frecuentes:
-                  </p>
+                  <p className="text-xs text-gray-500 font-medium">Preguntas frecuentes:</p>
                   {quickQuestions.map((q, i) => (
                     <button
                       key={i}
@@ -276,11 +269,7 @@ export default function OnboardingChatbot({
         whileTap={{ scale: 0.9 }}
         aria-label="Abrir asistente virtual"
       >
-        {isOpen ? (
-          <X className="w-6 h-6" />
-        ) : (
-          <MessageCircle className="w-6 h-6" />
-        )}
+        {isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
       </motion.button>
 
       {/* Badge de nuevo mensaje (opcional) */}

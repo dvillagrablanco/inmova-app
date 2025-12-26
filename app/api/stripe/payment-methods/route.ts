@@ -26,10 +26,7 @@ export async function GET(request: NextRequest) {
     const tenantId = searchParams.get('tenantId');
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: 'ID de inquilino requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'ID de inquilino requerido' }, { status: 400 });
     }
 
     // Get Stripe customer

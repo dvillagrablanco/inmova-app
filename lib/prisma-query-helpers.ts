@@ -1,12 +1,12 @@
 /**
  * Prisma Query Helpers - Funciones Optimizadas Reutilizables
- * 
+ *
  * Helpers para queries comunes con optimizaciones de performance:
  * - Paginación obligatoria
  * - Select específico en lugar de include
  * - Agregaciones en base de datos
  * - Índices apropiados
- * 
+ *
  * @module prisma-query-helpers
  * @since Semana 2, Tarea 2.4
  */
@@ -73,7 +73,7 @@ interface BuildingFilters {
 
 /**
  * Obtiene contratos optimizados con paginación y select específico
- * 
+ *
  * Optimizaciones:
  * - Select en lugar de include (-70% payload)
  * - Paginación obligatoria
@@ -141,7 +141,7 @@ export async function getOptimizedContracts(
   ]);
 
   // Calcular días hasta vencimiento
-  const contractsWithExpiration = contracts.map(contract => {
+  const contractsWithExpiration = contracts.map((contract) => {
     const daysUntilExpiration = Math.ceil(
       (new Date(contract.fechaFin).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
     );
@@ -183,7 +183,7 @@ export async function getContractStats(companyId: string) {
   ]);
 
   const statsMap: any = {};
-  byStatus.forEach(item => {
+  byStatus.forEach((item) => {
     statsMap[item.estado] = item._count;
   });
 
@@ -201,7 +201,7 @@ export async function getContractStats(companyId: string) {
 
 /**
  * Obtiene pagos optimizados con paginación y agregaciones en DB
- * 
+ *
  * Optimizaciones:
  * - Select mínimo necesario
  * - Paginación obligatoria
@@ -298,7 +298,7 @@ export async function getOptimizedPayments(
 
 /**
  * Obtiene estadísticas de pagos usando agregaciones en DB
- * 
+ *
  * Optimización: Calcula en PostgreSQL en lugar de en memoria
  * Mejora: -99% datos transferidos, -95% tiempo de cálculo
  */
@@ -348,7 +348,7 @@ export async function getPaymentStats(companyId: string) {
     countPendiente: totalPendiente._count,
     totalAtrasado: totalAtrasado._sum.monto || 0,
     countAtrasado: totalAtrasado._count,
-    byStatus: countByStatus.map(item => ({
+    byStatus: countByStatus.map((item) => ({
       estado: item.estado,
       count: item._count,
     })),
@@ -361,7 +361,7 @@ export async function getPaymentStats(companyId: string) {
 
 /**
  * Obtiene edificios optimizados con métricas calculadas en DB
- * 
+ *
  * Optimizaciones:
  * - Paginación obligatoria
  * - Agregación de unidades en DB
@@ -410,7 +410,8 @@ export async function getOptimizedBuildings(
   const buildingsWithMetrics = buildings.map((building: any) => {
     const totalUnidades = building.units?.length || 0;
     const unidadesOcupadas = building.units?.filter((u: any) => u.estado === 'ocupada').length || 0;
-    const unidadesDisponibles = building.units?.filter((u: any) => u.estado === 'disponible').length || 0;
+    const unidadesDisponibles =
+      building.units?.filter((u: any) => u.estado === 'disponible').length || 0;
     const tasaOcupacion = totalUnidades > 0 ? (unidadesOcupadas / totalUnidades) * 100 : 0;
 
     return {
@@ -454,7 +455,7 @@ export async function getBuildingStats(companyId: string) {
   ]);
 
   const unitsMap: any = {};
-  unitsByStatus.forEach(item => {
+  unitsByStatus.forEach((item) => {
     unitsMap[item.estado] = item._count;
   });
 
@@ -473,17 +474,12 @@ export async function getBuildingStats(companyId: string) {
 
 /**
  * Obtiene todas las estadísticas del dashboard de manera optimizada
- * 
+ *
  * Optimización: Todas las queries en paralelo con agregaciones en DB
  * Mejora: De ~2000ms a ~100ms (-95%)
  */
 export async function getDashboardStats(companyId: string): Promise<DashboardStats> {
-  const [
-    buildingStats,
-    contractStats,
-    paymentStats,
-    tenantCount,
-  ] = await Promise.all([
+  const [buildingStats, contractStats, paymentStats, tenantCount] = await Promise.all([
     getBuildingStats(companyId),
     getContractStats(companyId),
     getPaymentStats(companyId),
@@ -510,7 +506,7 @@ export async function getDashboardStats(companyId: string): Promise<DashboardSta
 
 /**
  * Búsqueda global optimizada
- * 
+ *
  * Optimizaciones:
  * - Búsquedas en paralelo
  * - Límite de 10 por modelo
@@ -613,7 +609,7 @@ export async function optimizedGlobalSearch(companyId: string, query: string) {
 export function normalizePagination(params: PaginationParams): Required<PaginationParams> {
   const page = Math.max(params.page || 1, 1);
   const limit = Math.min(Math.max(params.limit || 50, 1), 100); // Entre 1 y 100
-  
+
   return { page, limit };
 }
 

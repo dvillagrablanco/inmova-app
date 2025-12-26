@@ -8,7 +8,6 @@ import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-
 const switchCompanySchema = z.object({
   companyId: z.string(),
 });
@@ -35,10 +34,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!company) {
-      return NextResponse.json(
-        { error: 'Empresa no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Empresa no encontrada' }, { status: 404 });
     }
 
     // Verificar si el usuario ya tiene acceso a esta empresa
@@ -77,14 +73,14 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     logger.error('Error al cambiar de empresa:', error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Datos inválidos', details: error.errors },
         { status: 400 }
       );
     }
-    
+
     return NextResponse.json(
       { error: error.message || 'Error al cambiar de empresa' },
       { status: 500 }

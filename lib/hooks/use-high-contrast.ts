@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useEffect, useState } from 'react';
 
@@ -20,10 +20,8 @@ export function useHighContrast() {
     checkHighContrast();
 
     // Listen for changes
-    const mediaQuery = window.matchMedia(
-      '(prefers-contrast: more), (prefers-contrast: high)'
-    );
-    
+    const mediaQuery = window.matchMedia('(prefers-contrast: more), (prefers-contrast: high)');
+
     const handleChange = (e: MediaQueryListEvent | MediaQueryList) => {
       setIsHighContrast(e.matches);
     };
@@ -47,10 +45,10 @@ export function useHighContrast() {
   const toggleHighContrast = () => {
     const newValue = !isHighContrast;
     setIsHighContrast(newValue);
-    
+
     // Store preference
     localStorage.setItem('high-contrast', newValue.toString());
-    
+
     // Apply CSS class
     if (newValue) {
       document.documentElement.classList.add('high-contrast');

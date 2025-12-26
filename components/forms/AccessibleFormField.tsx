@@ -7,7 +7,13 @@ import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { InfoTooltip } from '@/components/ui/info-tooltip';
 import { AlertCircle, Eye, EyeOff } from 'lucide-react';
@@ -199,10 +205,7 @@ export function AccessibleTextareaField({
         aria-invalid={hasError}
         aria-describedby={hasError || helpText ? describedBy : undefined}
         aria-required={required}
-        className={cn(
-          hasError && 'border-red-500 focus-visible:ring-red-500',
-          'transition-colors'
-        )}
+        className={cn(hasError && 'border-red-500 focus-visible:ring-red-500', 'transition-colors')}
       />
 
       {helpText && !hasError && (
@@ -261,12 +264,7 @@ export function AccessibleSelectField({
         {tooltip && <InfoTooltip content={tooltip} />}
       </div>
 
-      <Select
-        value={value}
-        onValueChange={onChange}
-        disabled={disabled}
-        required={required}
-      >
+      <Select value={value} onValueChange={onChange} disabled={disabled} required={required}>
         <SelectTrigger
           id={id}
           aria-invalid={hasError}

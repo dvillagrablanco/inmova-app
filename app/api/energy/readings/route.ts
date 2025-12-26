@@ -42,10 +42,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(readings);
   } catch (error) {
     logger.error('Error fetching energy readings:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener lecturas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener lecturas' }, { status: 500 });
   }
 }
 
@@ -58,16 +55,8 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const {
-      buildingId,
-      unitId,
-      tipo,
-      lecturaAnterior,
-      lecturaActual,
-      fechaLectura,
-      costo,
-      notas,
-    } = body;
+    const { buildingId, unitId, tipo, lecturaAnterior, lecturaActual, fechaLectura, costo, notas } =
+      body;
 
     const lectura = parseFloat(lecturaActual);
     const anterior = lecturaAnterior ? parseFloat(lecturaAnterior) : 0;
@@ -88,7 +77,7 @@ export async function POST(req: NextRequest) {
         fechaLectura: fecha,
         periodo,
         costo: costo ? parseFloat(costo) : null,
-        registradoPor: session?.user?.email|| '',
+        registradoPor: session?.user?.email || '',
         notas: notas || null,
       },
       include: {
@@ -108,9 +97,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(reading, { status: 201 });
   } catch (error) {
     logger.error('Error creating energy reading:', error);
-    return NextResponse.json(
-      { error: 'Error al crear lectura' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear lectura' }, { status: 500 });
   }
 }

@@ -12,7 +12,8 @@ export const quickGuides = {
     steps: [
       {
         title: 'Crea tu primer edificio',
-        description: 'Registra la información básica de tu primer edificio (dirección, tipo, descripción).',
+        description:
+          'Registra la información básica de tu primer edificio (dirección, tipo, descripción).',
         action: {
           label: 'Crear edificio',
           href: '/edificios/nuevo',
@@ -20,7 +21,8 @@ export const quickGuides = {
       },
       {
         title: 'Añade unidades al edificio',
-        description: 'Define las unidades (apartamentos, locales, oficinas) que componen el edificio.',
+        description:
+          'Define las unidades (apartamentos, locales, oficinas) que componen el edificio.',
         action: {
           label: 'Gestionar unidades',
         },
@@ -83,7 +85,8 @@ export const quickGuides = {
     steps: [
       {
         title: 'Crea tu primer contrato',
-        description: 'Genera un contrato de arrendamiento con todos los detalles legales y económicos.',
+        description:
+          'Genera un contrato de arrendamiento con todos los detalles legales y económicos.',
         action: {
           label: 'Nuevo contrato',
           href: '/contratos/nuevo',
@@ -105,7 +108,8 @@ export const quickGuides = {
       },
       {
         title: 'Revisa contratos por vencer',
-        description: 'Mantén control de contratos próximos a expirar para planificar renovaciones o nuevos arrendatarios.',
+        description:
+          'Mantén control de contratos próximos a expirar para planificar renovaciones o nuevos arrendatarios.',
         action: {
           label: 'Ver contratos por vencer',
         },
@@ -256,7 +260,8 @@ export const quickGuides = {
     steps: [
       {
         title: 'Explora eventos automáticos',
-        description: 'Revisa pagos pendientes, vencimientos de contratos y mantenimiento programado.',
+        description:
+          'Revisa pagos pendientes, vencimientos de contratos y mantenimiento programado.',
         action: {
           label: 'Ver calendario',
           href: '/calendario',

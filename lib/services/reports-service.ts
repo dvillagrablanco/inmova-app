@@ -1,6 +1,6 @@
 /**
  * Servicio de Reportes Avanzados
- * 
+ *
  * Genera reportes en formato PDF, CSV y gráficas
  * para comisiones, leads, objetivos y más
  */
@@ -23,11 +23,11 @@ export async function generateCommissionsCSV(filters?: {
   estado?: string;
 }) {
   const where: any = {};
-  
+
   if (filters?.salesRepId) where.salesRepId = filters.salesRepId;
   if (filters?.periodo) where.periodo = filters.periodo;
   if (filters?.estado) where.estado = filters.estado;
-  
+
   const comisiones = await prisma.salesCommission.findMany({
     where,
     include: {
@@ -47,7 +47,7 @@ export async function generateCommissionsCSV(filters?: {
     },
     orderBy: { fechaGeneracion: 'desc' },
   });
-  
+
   const data = comisiones.map((c) => ({
     ID: c.id,
     Comercial: c.salesRep.nombreCompleto,
@@ -63,7 +63,9 @@ export async function generateCommissionsCSV(filters?: {
     'Monto Neto': c.montoNeto.toFixed(2),
     Estado: c.estado,
     'Fecha Generación': format(new Date(c.fechaGeneracion), 'dd/MM/yyyy HH:mm'),
-    'Fecha Aprobación': c.fechaAprobacion ? format(new Date(c.fechaAprobacion), 'dd/MM/yyyy HH:mm') : '-',
+    'Fecha Aprobación': c.fechaAprobacion
+      ? format(new Date(c.fechaAprobacion), 'dd/MM/yyyy HH:mm')
+      : '-',
     'Fecha Pago': c.fechaPago ? format(new Date(c.fechaPago), 'dd/MM/yyyy HH:mm') : '-',
     'Aprobado Por': c.aprobadoPor || '-',
     'Referencia Pago': c.referenciaPago || '-',
@@ -71,12 +73,12 @@ export async function generateCommissionsCSV(filters?: {
     'Empresa Lead': c.lead?.nombreEmpresa || '-',
     'Contacto Lead': c.lead?.nombreContacto || '-',
   }));
-  
+
   const csv = Papa.unparse(data, {
     delimiter: ',',
     header: true,
   });
-  
+
   return csv;
 }
 
@@ -89,11 +91,11 @@ export async function generateLeadsCSV(filters?: {
   convertido?: boolean;
 }) {
   const where: any = {};
-  
+
   if (filters?.salesRepId) where.salesRepId = filters.salesRepId;
   if (filters?.estado) where.estado = filters.estado;
   if (filters?.convertido !== undefined) where.convertido = filters.convertido;
-  
+
   const leads = await prisma.salesLead.findMany({
     where,
     include: {
@@ -107,7 +109,7 @@ export async function generateLeadsCSV(filters?: {
     },
     orderBy: { fechaCaptura: 'desc' },
   });
-  
+
   const data = leads.map((l) => ({
     ID: l.id,
     Comercial: l.salesRep.nombreCompleto,
@@ -123,8 +125,12 @@ export async function generateLeadsCSV(filters?: {
     Prioridad: l.prioridad || '-',
     'Origen Captura': l.origenCaptura || '-',
     'Fecha Captura': format(new Date(l.fechaCaptura), 'dd/MM/yyyy HH:mm'),
-    'Primer Contacto': l.fechaPrimerContacto ? format(new Date(l.fechaPrimerContacto), 'dd/MM/yyyy') : '-',
-    'Último Contacto': l.fechaUltimoContacto ? format(new Date(l.fechaUltimoContacto), 'dd/MM/yyyy') : '-',
+    'Primer Contacto': l.fechaPrimerContacto
+      ? format(new Date(l.fechaPrimerContacto), 'dd/MM/yyyy')
+      : '-',
+    'Último Contacto': l.fechaUltimoContacto
+      ? format(new Date(l.fechaUltimoContacto), 'dd/MM/yyyy')
+      : '-',
     'Nº Llamadas': l.numeroLlamadas,
     'Nº Emails': l.numeroEmails,
     'Nº Reuniones': l.numeroReuniones,
@@ -135,27 +141,24 @@ export async function generateLeadsCSV(filters?: {
     'Valor Mensual': l.valorMensual ? `€${l.valorMensual.toFixed(2)}` : '-',
     'Motivo Rechazo': l.motivoRechazo || '-',
   }));
-  
+
   const csv = Papa.unparse(data, {
     delimiter: ',',
     header: true,
   });
-  
+
   return csv;
 }
 
 /**
  * Generar reporte CSV de objetivos
  */
-export async function generateTargetsCSV(filters?: {
-  salesRepId?: string;
-  periodo?: string;
-}) {
+export async function generateTargetsCSV(filters?: { salesRepId?: string; periodo?: string }) {
   const where: any = {};
-  
+
   if (filters?.salesRepId) where.salesRepId = filters.salesRepId;
   if (filters?.periodo) where.periodo = filters.periodo;
-  
+
   const targets = await prisma.salesTarget.findMany({
     where,
     include: {
@@ -168,7 +171,7 @@ export async function generateTargetsCSV(filters?: {
     },
     orderBy: { fechaInicio: 'desc' },
   });
-  
+
   const data = targets.map((t) => ({
     ID: t.id,
     Comercial: t.salesRep.nombreCompleto,
@@ -189,32 +192,29 @@ export async function generateTargetsCSV(filters?: {
     'Fecha Inicio': format(new Date(t.fechaInicio), 'dd/MM/yyyy'),
     'Fecha Fin': format(new Date(t.fechaFin), 'dd/MM/yyyy'),
   }));
-  
+
   const csv = Papa.unparse(data, {
     delimiter: ',',
     header: true,
   });
-  
+
   return csv;
 }
 
 /**
  * Generar reporte CSV de comerciales
  */
-export async function generateSalesRepsCSV(filters?: {
-  estado?: string;
-  activo?: boolean;
-}) {
+export async function generateSalesRepsCSV(filters?: { estado?: string; activo?: boolean }) {
   const where: any = {};
-  
+
   if (filters?.estado) where.estado = filters.estado;
   if (filters?.activo !== undefined) where.activo = filters.activo;
-  
+
   const salesReps = await prisma.salesRepresentative.findMany({
     where,
     orderBy: { createdAt: 'desc' },
   });
-  
+
   const data = salesReps.map((s) => ({
     ID: s.id,
     'Nombre Completo': s.nombreCompleto,
@@ -243,12 +243,12 @@ export async function generateSalesRepsCSV(filters?: {
     'Fecha Baja': s.fechaBaja ? format(new Date(s.fechaBaja), 'dd/MM/yyyy') : '-',
     'Motivo Baja': s.motivoBaja || '-',
   }));
-  
+
   const csv = Papa.unparse(data, {
     delimiter: ',',
     header: true,
   });
-  
+
   return csv;
 }
 
@@ -265,10 +265,10 @@ export async function getCommissionsChartData(salesRepId?: string, months = 12) 
     const date = subMonths(new Date(), i);
     monthsArray.push(format(date, 'yyyy-MM'));
   }
-  
+
   const where: any = { periodo: { in: monthsArray } };
   if (salesRepId) where.salesRepId = salesRepId;
-  
+
   const comisiones = await prisma.salesCommission.findMany({
     where,
     select: {
@@ -277,7 +277,7 @@ export async function getCommissionsChartData(salesRepId?: string, months = 12) 
       montoNeto: true,
     },
   });
-  
+
   const chartData = monthsArray.map((periodo) => {
     const comisionesMes = comisiones.filter((c) => c.periodo === periodo);
     const recurrentes = comisionesMes
@@ -289,7 +289,7 @@ export async function getCommissionsChartData(salesRepId?: string, months = 12) 
     const bonificaciones = comisionesMes
       .filter((c) => c.tipo === 'BONIFICACION')
       .reduce((sum, c) => sum + c.montoNeto, 0);
-    
+
     return {
       periodo,
       recurrentes,
@@ -298,7 +298,7 @@ export async function getCommissionsChartData(salesRepId?: string, months = 12) 
       total: recurrentes + captacion + bonificaciones,
     };
   });
-  
+
   return chartData;
 }
 
@@ -313,7 +313,7 @@ export async function getLeadsChartData(salesRepId?: string, months = 12) {
     const end = endOfMonth(date);
     monthsArray.push({ periodo: format(date, 'yyyy-MM'), start, end });
   }
-  
+
   const chartData: Array<{
     periodo: string;
     totalLeads: number;
@@ -322,7 +322,7 @@ export async function getLeadsChartData(salesRepId?: string, months = 12) {
     perdidos: number;
     tasaConversion: string;
   }> = [];
-  
+
   for (const { periodo, start, end } of monthsArray) {
     const where: any = {
       fechaCaptura: {
@@ -331,7 +331,7 @@ export async function getLeadsChartData(salesRepId?: string, months = 12) {
       },
     };
     if (salesRepId) where.salesRepId = salesRepId;
-    
+
     const totalLeads = await prisma.salesLead.count({ where });
     const convertidos = await prisma.salesLead.count({
       where: { ...where, convertido: true },
@@ -342,7 +342,7 @@ export async function getLeadsChartData(salesRepId?: string, months = 12) {
     const perdidos = await prisma.salesLead.count({
       where: { ...where, estado: 'CERRADO_PERDIDO' },
     });
-    
+
     chartData.push({
       periodo,
       totalLeads,
@@ -352,7 +352,7 @@ export async function getLeadsChartData(salesRepId?: string, months = 12) {
       tasaConversion: totalLeads > 0 ? ((convertidos / totalLeads) * 100).toFixed(1) : '0',
     });
   }
-  
+
   return chartData;
 }
 
@@ -365,15 +365,15 @@ export async function getTargetsChartData(salesRepId?: string, months = 6) {
     const date = subMonths(new Date(), i);
     monthsArray.push(format(date, 'yyyy-MM'));
   }
-  
+
   const where: any = { periodo: { in: monthsArray } };
   if (salesRepId) where.salesRepId = salesRepId;
-  
+
   const targets = await prisma.salesTarget.findMany({
     where,
     orderBy: { fechaInicio: 'asc' },
   });
-  
+
   const chartData = monthsArray.map((periodo) => {
     const target = targets.find((t) => t.periodo === periodo);
     if (!target) {
@@ -393,7 +393,7 @@ export async function getTargetsChartData(salesRepId?: string, months = 6) {
       cumplido: target.cumplido,
     };
   });
-  
+
   return chartData;
 }
 
@@ -402,7 +402,7 @@ export async function getTargetsChartData(salesRepId?: string, months = 6) {
  */
 export async function getSalesRepsRanking(periodo?: string) {
   const where: any = { activo: true };
-  
+
   const salesReps = await prisma.salesRepresentative.findMany({
     where,
     select: {
@@ -416,7 +416,7 @@ export async function getSalesRepsRanking(periodo?: string) {
     orderBy: { totalComisionGenerada: 'desc' },
     take: 20,
   });
-  
+
   return salesReps;
 }
 
@@ -426,26 +426,26 @@ export async function getSalesRepsRanking(periodo?: string) {
 export async function getGeneralStats(periodo?: string) {
   const where: any = {};
   if (periodo) where.periodo = periodo;
-  
+
   const totalComerciales = await prisma.salesRepresentative.count();
   const comercialesActivos = await prisma.salesRepresentative.count({
     where: { activo: true },
   });
-  
+
   const totalLeads = await prisma.salesLead.count();
   const leadsConvertidos = await prisma.salesLead.count({ where: { convertido: true } });
-  
+
   const comisionesTotales = await prisma.salesCommission.aggregate({
     where,
     _sum: { montoNeto: true },
   });
-  
+
   const comisionesPendientes = await prisma.salesCommission.aggregate({
     where: { ...where, estado: 'PENDIENTE' },
     _sum: { montoNeto: true },
     _count: true,
   });
-  
+
   return {
     totalComerciales,
     comercialesActivos,
@@ -466,7 +466,7 @@ export default {
   generateLeadsCSV,
   generateTargetsCSV,
   generateSalesRepsCSV,
-  
+
   // Gráficas
   getCommissionsChartData,
   getLeadsChartData,

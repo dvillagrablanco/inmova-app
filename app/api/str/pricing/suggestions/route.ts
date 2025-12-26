@@ -77,9 +77,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(suggestions);
   } catch (error) {
     logger.error('Error fetching pricing suggestions:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener sugerencias' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener sugerencias' }, { status: 500 });
   }
 }

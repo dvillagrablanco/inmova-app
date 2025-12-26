@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true, companyId: true, name: true, role: true }
+      select: { id: true, companyId: true, name: true, role: true },
     });
 
     if (!user?.companyId) {
@@ -24,15 +24,15 @@ export async function GET(request: NextRequest) {
     const users = await prisma.user.findMany({
       where: {
         companyId: user.companyId,
-        id: { not: user.id } // Excluir al usuario actual
+        id: { not: user.id }, // Excluir al usuario actual
       },
       select: {
         id: true,
         name: true,
         email: true,
-        role: true
+        role: true,
       },
-      orderBy: { name: 'asc' }
+      orderBy: { name: 'asc' },
     });
 
     // Para cada usuario, obtener el último mensaje (si existe)
@@ -44,8 +44,8 @@ export async function GET(request: NextRequest) {
             tipo: 'info', // Usamos 'info' para mensajes de chat
             OR: [
               { userId: otherUser.id, entityId: user.id },
-              { userId: user.id, entityId: otherUser.id }
-            ]
+              { userId: user.id, entityId: otherUser.id },
+            ],
           },
           orderBy: { createdAt: 'desc' },
           select: {
@@ -54,8 +54,8 @@ export async function GET(request: NextRequest) {
             mensaje: true,
             leida: true,
             createdAt: true,
-            userId: true
-          }
+            userId: true,
+          },
         });
 
         const unreadCount = await prisma.notification.count({
@@ -64,14 +64,14 @@ export async function GET(request: NextRequest) {
             tipo: 'info',
             userId: user.id,
             entityId: otherUser.id,
-            leida: false
-          }
+            leida: false,
+          },
         });
 
         return {
           user: otherUser,
           lastMessage,
-          unreadCount
+          unreadCount,
         };
       })
     );
@@ -80,15 +80,14 @@ export async function GET(request: NextRequest) {
     conversations.sort((a, b) => {
       if (!a.lastMessage) return 1;
       if (!b.lastMessage) return -1;
-      return new Date(b.lastMessage.createdAt).getTime() - new Date(a.lastMessage.createdAt).getTime();
+      return (
+        new Date(b.lastMessage.createdAt).getTime() - new Date(a.lastMessage.createdAt).getTime()
+      );
     });
 
     return NextResponse.json({ conversations });
   } catch (error) {
     console.error('Error al obtener conversaciones:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener conversaciones' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener conversaciones' }, { status: 500 });
   }
 }

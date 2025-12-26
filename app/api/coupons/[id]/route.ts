@@ -3,18 +3,11 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
-import {
-  getCouponStats,
-  deactivateCoupon,
-  reactivateCoupon,
-} from '@/lib/coupon-service';
+import { getCouponStats, deactivateCoupon, reactivateCoupon } from '@/lib/coupon-service';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -43,26 +36,17 @@ export async function GET(
     });
 
     if (!coupon) {
-      return NextResponse.json(
-        { error: 'Cupón no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Cupón no encontrado' }, { status: 404 });
     }
 
     return NextResponse.json(coupon);
   } catch (error) {
     logger.error('Error al obtener cupón:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener cupón' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener cupón' }, { status: 500 });
   }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -97,10 +81,7 @@ export async function PATCH(
     });
 
     if (!coupon) {
-      return NextResponse.json(
-        { error: 'Cupón no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Cupón no encontrado' }, { status: 404 });
     }
 
     const updated = await prisma.discountCoupon.update({
@@ -109,9 +90,7 @@ export async function PATCH(
         descripcion: body.descripcion,
         usosMaximos: body.usosMaximos ? parseInt(body.usosMaximos) : undefined,
         montoMinimo: body.montoMinimo ? parseFloat(body.montoMinimo) : undefined,
-        fechaExpiracion: body.fechaExpiracion
-          ? new Date(body.fechaExpiracion)
-          : undefined,
+        fechaExpiracion: body.fechaExpiracion ? new Date(body.fechaExpiracion) : undefined,
       },
     });
 
@@ -125,10 +104,7 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -146,9 +122,6 @@ export async function DELETE(
     return NextResponse.json({ message: 'Cupón eliminado' });
   } catch (error) {
     logger.error('Error al eliminar cupón:', error);
-    return NextResponse.json(
-      { error: 'Error al eliminar cupón' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar cupón' }, { status: 500 });
   }
 }

@@ -25,14 +25,22 @@ interface ChatbotContext {
  * Genera contexto del sistema para el chatbot basado en el usuario
  */
 export async function generateSystemContext(context: ChatbotContext): Promise<string> {
-  const { userId, companyId, userName, vertical, experienceLevel, onboardingProgress, currentPage } = context;
+  const {
+    userId,
+    companyId,
+    userName,
+    vertical,
+    experienceLevel,
+    onboardingProgress,
+    currentPage,
+  } = context;
 
   // Obtener progreso de onboarding
   const progress = await prisma.onboardingTask.findMany({
     where: { userId, companyId },
   });
 
-  const completedTasks = progress.filter(t => t.status === 'completed').length;
+  const completedTasks = progress.filter((t) => t.status === 'completed').length;
   const totalTasks = progress.length;
   const progressPercent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
@@ -115,7 +123,7 @@ export async function processChatbotMessage(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`,
+        Authorization: `Bearer ${process.env.ABACUSAI_API_KEY}`,
       },
       body: JSON.stringify({
         model: 'gpt-4.1-mini',
@@ -226,8 +234,8 @@ function detectSentiment(message: string): 'positive' | 'neutral' | 'negative' {
   // Palabras positivas
   const positiveWords = ['gracias', 'genial', 'excelente', 'perfecto', 'útil', 'bien', 'claro'];
 
-  const hasNegative = negativeWords.some(word => lowerMessage.includes(word));
-  const hasPositive = positiveWords.some(word => lowerMessage.includes(word));
+  const hasNegative = negativeWords.some((word) => lowerMessage.includes(word));
+  const hasPositive = positiveWords.some((word) => lowerMessage.includes(word));
 
   if (hasNegative) return 'negative';
   if (hasPositive) return 'positive';

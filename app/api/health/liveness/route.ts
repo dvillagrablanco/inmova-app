@@ -10,13 +10,10 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   const isAlive = await livenessCheck();
-  
+
   if (isAlive) {
     return NextResponse.json({ status: 'alive' });
   }
-  
-  return NextResponse.json(
-    { status: 'dead' },
-    { status: 503 }
-  );
+
+  return NextResponse.json({ status: 'dead' }, { status: 503 });
 }

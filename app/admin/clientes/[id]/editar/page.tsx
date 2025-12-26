@@ -9,7 +9,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { ArrowLeft, Save, Building2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -161,299 +167,288 @@ export default function EditarEmpresaPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="mb-6">
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/home">Inicio</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/admin/clientes">Clientes</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbLink href={`/admin/clientes/${companyId}`}>
-                    {formData.nombre}
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Editar</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-          </div>
+      <div className="mb-6">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/home">Inicio</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/admin/clientes">Clientes</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href={`/admin/clientes/${companyId}`}>
+                {formData.nombre}
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Editar</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
 
-          <div className="mb-6 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => router.back()}
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-                  <Building2 className="h-8 w-8 text-indigo-600" />
-                  Editar Empresa
-                </h1>
-                <p className="text-gray-600 mt-1">{formData.nombre}</p>
+      <div className="mb-6 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => router.back()}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
+              <Building2 className="h-8 w-8 text-indigo-600" />
+              Editar Empresa
+            </h1>
+            <p className="text-gray-600 mt-1">{formData.nombre}</p>
+          </div>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Información Básica */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Información Básica</CardTitle>
+            <CardDescription>Datos generales de la empresa</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="nombre">Nombre *</Label>
+                <Input
+                  id="nombre"
+                  value={formData.nombre}
+                  onChange={(e) => handleChange('nombre', e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cif">CIF/NIF</Label>
+                <Input
+                  id="cif"
+                  value={formData.cif || ''}
+                  onChange={(e) => handleChange('cif', e.target.value)}
+                />
               </div>
             </div>
-          </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Información Básica */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Información Básica</CardTitle>
-                <CardDescription>
-                  Datos generales de la empresa
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="nombre">Nombre *</Label>
-                    <Input
-                      id="nombre"
-                      value={formData.nombre}
-                      onChange={(e) => handleChange('nombre', e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="cif">CIF/NIF</Label>
-                    <Input
-                      id="cif"
-                      value={formData.cif || ''}
-                      onChange={(e) => handleChange('cif', e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email || ''}
-                      onChange={(e) => handleChange('email', e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="telefono">Teléfono</Label>
-                    <Input
-                      id="telefono"
-                      value={formData.telefono || ''}
-                      onChange={(e) => handleChange('telefono', e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="direccion">Dirección</Label>
-                  <Input
-                    id="direccion"
-                    value={formData.direccion || ''}
-                    onChange={(e) => handleChange('direccion', e.target.value)}
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="ciudad">Ciudad</Label>
-                    <Input
-                      id="ciudad"
-                      value={formData.ciudad || ''}
-                      onChange={(e) => handleChange('ciudad', e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="codigoPostal">Código Postal</Label>
-                    <Input
-                      id="codigoPostal"
-                      value={formData.codigoPostal || ''}
-                      onChange={(e) => handleChange('codigoPostal', e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="pais">País</Label>
-                    <Input
-                      id="pais"
-                      value={formData.pais || ''}
-                      onChange={(e) => handleChange('pais', e.target.value)}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Información de Contacto */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Información de Contacto</CardTitle>
-                <CardDescription>
-                  Datos del contacto principal
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="contactoPrincipal">Nombre Contacto</Label>
-                    <Input
-                      id="contactoPrincipal"
-                      value={formData.contactoPrincipal || ''}
-                      onChange={(e) => handleChange('contactoPrincipal', e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="emailContacto">Email Contacto</Label>
-                    <Input
-                      id="emailContacto"
-                      type="email"
-                      value={formData.emailContacto || ''}
-                      onChange={(e) => handleChange('emailContacto', e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="telefonoContacto">Teléfono Contacto</Label>
-                    <Input
-                      id="telefonoContacto"
-                      value={formData.telefonoContacto || ''}
-                      onChange={(e) => handleChange('telefonoContacto', e.target.value)}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Configuración */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Configuración</CardTitle>
-                <CardDescription>
-                  Plan de suscripción y límites
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="subscriptionPlanId">Plan de Suscripción</Label>
-                    <Select
-                      value={formData.subscriptionPlanId || ''}
-                      onValueChange={(value) => handleChange('subscriptionPlanId', value || null)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar plan" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Sin plan</SelectItem>
-                        {plans.map((plan) => (
-                          <SelectItem key={plan.id} value={plan.id}>
-                            {plan.nombre} - €{plan.precioMensual}/mes
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="estadoCliente">Estado Cliente</Label>
-                    <Select
-                      value={formData.estadoCliente || ''}
-                      onValueChange={(value) => handleChange('estadoCliente', value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="potencial">Potencial</SelectItem>
-                        <SelectItem value="activo">Activo</SelectItem>
-                        <SelectItem value="inactivo">Inactivo</SelectItem>
-                        <SelectItem value="prueba">Prueba</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="maxUsuarios">Máx. Usuarios</Label>
-                    <Input
-                      id="maxUsuarios"
-                      type="number"
-                      value={formData.maxUsuarios || ''}
-                      onChange={(e) => handleChange('maxUsuarios', e.target.value ? parseInt(e.target.value) : null)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="maxPropiedades">Máx. Propiedades</Label>
-                    <Input
-                      id="maxPropiedades"
-                      type="number"
-                      value={formData.maxPropiedades || ''}
-                      onChange={(e) => handleChange('maxPropiedades', e.target.value ? parseInt(e.target.value) : null)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="maxEdificios">Máx. Edificios</Label>
-                    <Input
-                      id="maxEdificios"
-                      type="number"
-                      value={formData.maxEdificios || ''}
-                      onChange={(e) => handleChange('maxEdificios', e.target.value ? parseInt(e.target.value) : null)}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="activo"
-                    checked={formData.activo}
-                    onCheckedChange={(checked) => handleChange('activo', checked)}
-                  />
-                  <Label htmlFor="activo">Empresa Activa</Label>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Notas Admin */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Notas Administrativas</CardTitle>
-                <CardDescription>
-                  Notas internas (no visibles para el cliente)
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Textarea
-                  value={formData.notasAdmin || ''}
-                  onChange={(e) => handleChange('notasAdmin', e.target.value)}
-                  placeholder="Agregar notas internas..."
-                  rows={4}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email || ''}
+                  onChange={(e) => handleChange('email', e.target.value)}
                 />
-              </CardContent>
-            </Card>
-
-            {/* Botones de Acción */}
-            <div className="flex justify-end gap-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.back()}
-                disabled={saving}
-              >
-                Cancelar
-              </Button>
-              <Button type="submit" disabled={saving}>
-                <Save className="h-4 w-4 mr-2" />
-                {saving ? 'Guardando...' : 'Guardar Cambios'}
-              </Button>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="telefono">Teléfono</Label>
+                <Input
+                  id="telefono"
+                  value={formData.telefono || ''}
+                  onChange={(e) => handleChange('telefono', e.target.value)}
+                />
+              </div>
             </div>
-          </form>
-        </AuthenticatedLayout>
+
+            <div className="space-y-2">
+              <Label htmlFor="direccion">Dirección</Label>
+              <Input
+                id="direccion"
+                value={formData.direccion || ''}
+                onChange={(e) => handleChange('direccion', e.target.value)}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="ciudad">Ciudad</Label>
+                <Input
+                  id="ciudad"
+                  value={formData.ciudad || ''}
+                  onChange={(e) => handleChange('ciudad', e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="codigoPostal">Código Postal</Label>
+                <Input
+                  id="codigoPostal"
+                  value={formData.codigoPostal || ''}
+                  onChange={(e) => handleChange('codigoPostal', e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="pais">País</Label>
+                <Input
+                  id="pais"
+                  value={formData.pais || ''}
+                  onChange={(e) => handleChange('pais', e.target.value)}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Información de Contacto */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Información de Contacto</CardTitle>
+            <CardDescription>Datos del contacto principal</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="contactoPrincipal">Nombre Contacto</Label>
+                <Input
+                  id="contactoPrincipal"
+                  value={formData.contactoPrincipal || ''}
+                  onChange={(e) => handleChange('contactoPrincipal', e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="emailContacto">Email Contacto</Label>
+                <Input
+                  id="emailContacto"
+                  type="email"
+                  value={formData.emailContacto || ''}
+                  onChange={(e) => handleChange('emailContacto', e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="telefonoContacto">Teléfono Contacto</Label>
+                <Input
+                  id="telefonoContacto"
+                  value={formData.telefonoContacto || ''}
+                  onChange={(e) => handleChange('telefonoContacto', e.target.value)}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Configuración */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Configuración</CardTitle>
+            <CardDescription>Plan de suscripción y límites</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="subscriptionPlanId">Plan de Suscripción</Label>
+                <Select
+                  value={formData.subscriptionPlanId || ''}
+                  onValueChange={(value) => handleChange('subscriptionPlanId', value || null)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar plan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Sin plan</SelectItem>
+                    {plans.map((plan) => (
+                      <SelectItem key={plan.id} value={plan.id}>
+                        {plan.nombre} - €{plan.precioMensual}/mes
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="estadoCliente">Estado Cliente</Label>
+                <Select
+                  value={formData.estadoCliente || ''}
+                  onValueChange={(value) => handleChange('estadoCliente', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="potencial">Potencial</SelectItem>
+                    <SelectItem value="activo">Activo</SelectItem>
+                    <SelectItem value="inactivo">Inactivo</SelectItem>
+                    <SelectItem value="prueba">Prueba</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="maxUsuarios">Máx. Usuarios</Label>
+                <Input
+                  id="maxUsuarios"
+                  type="number"
+                  value={formData.maxUsuarios || ''}
+                  onChange={(e) =>
+                    handleChange('maxUsuarios', e.target.value ? parseInt(e.target.value) : null)
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="maxPropiedades">Máx. Propiedades</Label>
+                <Input
+                  id="maxPropiedades"
+                  type="number"
+                  value={formData.maxPropiedades || ''}
+                  onChange={(e) =>
+                    handleChange('maxPropiedades', e.target.value ? parseInt(e.target.value) : null)
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="maxEdificios">Máx. Edificios</Label>
+                <Input
+                  id="maxEdificios"
+                  type="number"
+                  value={formData.maxEdificios || ''}
+                  onChange={(e) =>
+                    handleChange('maxEdificios', e.target.value ? parseInt(e.target.value) : null)
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="activo"
+                checked={formData.activo}
+                onCheckedChange={(checked) => handleChange('activo', checked)}
+              />
+              <Label htmlFor="activo">Empresa Activa</Label>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Notas Admin */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Notas Administrativas</CardTitle>
+            <CardDescription>Notas internas (no visibles para el cliente)</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Textarea
+              value={formData.notasAdmin || ''}
+              onChange={(e) => handleChange('notasAdmin', e.target.value)}
+              placeholder="Agregar notas internas..."
+              rows={4}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Botones de Acción */}
+        <div className="flex justify-end gap-4">
+          <Button type="button" variant="outline" onClick={() => router.back()} disabled={saving}>
+            Cancelar
+          </Button>
+          <Button type="submit" disabled={saving}>
+            <Save className="h-4 w-4 mr-2" />
+            {saving ? 'Guardando...' : 'Guardar Cambios'}
+          </Button>
+        </div>
+      </form>
+    </AuthenticatedLayout>
   );
 }

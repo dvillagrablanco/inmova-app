@@ -132,7 +132,10 @@ export const sendPaymentReminders = async (companyId: string) => {
         });
       } else {
         errors++;
-        logger.error(`Error enviando recordatorio a ${payment.contract.tenant.email}:`, result.error);
+        logger.error(
+          `Error enviando recordatorio a ${payment.contract.tenant.email}:`,
+          result.error
+        );
       }
     }
 
@@ -387,7 +390,10 @@ export const sendMaintenanceNotifications = async (companyId: string) => {
         });
       } else {
         errors++;
-        logger.error(`Error enviando notificación a ${maintenance.unit.tenant.email}:`, result.error);
+        logger.error(
+          `Error enviando notificación a ${maintenance.unit.tenant.email}:`,
+          result.error
+        );
       }
     }
 
@@ -408,7 +414,7 @@ export const sendMaintenanceNotifications = async (companyId: string) => {
 // ============================================
 export const runAllReminders = async (companyId: string) => {
   logger.info(`\n🔔 Ejecutando recordatorios automáticos para empresa: ${companyId}`);
-  
+
   const results = {
     paymentReminders: await sendPaymentReminders(companyId),
     contractAlerts: await sendContractExpirationAlerts(companyId),

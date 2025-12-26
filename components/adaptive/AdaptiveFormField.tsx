@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React from 'react';
 import { Input } from '@/components/ui/input';
@@ -20,57 +20,57 @@ interface AdaptiveFormFieldProps {
    * Nombre del campo
    */
   name: string;
-  
+
   /**
    * Label visible
    */
   label: string;
-  
+
   /**
    * Tipo de campo
    */
   type?: 'text' | 'email' | 'number' | 'tel' | 'textarea' | 'select' | 'date';
-  
+
   /**
    * Si es obligatorio
    */
   required?: boolean;
-  
+
   /**
    * Nivel de complejidad
    */
   complexity?: 'low' | 'medium' | 'high';
-  
+
   /**
    * Texto de ayuda
    */
   helpText?: string;
-  
+
   /**
    * Opciones (para select)
    */
   options?: Array<{ value: string; label: string }>;
-  
+
   /**
    * Valor actual
    */
   value?: string;
-  
+
   /**
    * Callback onChange
    */
   onChange?: (value: string) => void;
-  
+
   /**
    * Perfil del usuario
    */
   userProfile: UserProfile;
-  
+
   /**
    * Placeholder
    */
   placeholder?: string;
-  
+
   /**
    * Clases CSS adicionales
    */
@@ -79,12 +79,12 @@ interface AdaptiveFormFieldProps {
 
 /**
  * ADAPTIVE FORM FIELD - Campo de formulario que se adapta al modo UI
- * 
+ *
  * Comportamiento:
  * - Simple Mode: Solo campos obligatorios o de baja complejidad
  * - Standard Mode: Obligatorios + baja y media complejidad
  * - Advanced Mode: Todos los campos
- * 
+ *
  * Features:
  * - Tooltips de ayuda para principiantes
  * - Validación visual automática
@@ -107,15 +107,15 @@ export function AdaptiveFormField({
   // Determinar si el campo debe ser visible
   const shouldShow = () => {
     if (required) return true;
-    
+
     if (userProfile.uiMode === 'simple') {
       return complexity === 'low';
     }
-    
+
     if (userProfile.uiMode === 'standard') {
       return complexity !== 'high';
     }
-    
+
     // Advanced mode: mostrar todo
     return true;
   };
@@ -125,7 +125,8 @@ export function AdaptiveFormField({
   }
 
   const showAdvancedBadge = complexity === 'high' && userProfile.uiMode === 'advanced';
-  const showTooltips = userProfile.experienceLevel === 'principiante' || userProfile.techSavviness === 'bajo';
+  const showTooltips =
+    userProfile.experienceLevel === 'principiante' || userProfile.techSavviness === 'bajo';
 
   const renderInput = () => {
     switch (type) {
@@ -141,7 +142,7 @@ export function AdaptiveFormField({
             className={cn('min-h-[100px]', className)}
           />
         );
-      
+
       case 'select':
         return (
           <Select value={value} onValueChange={onChange}>
@@ -157,7 +158,7 @@ export function AdaptiveFormField({
             </SelectContent>
           </Select>
         );
-      
+
       default:
         return (
           <Input
@@ -187,7 +188,7 @@ export function AdaptiveFormField({
             </span>
           )}
         </Label>
-        
+
         {showTooltips && helpText && (
           <IntelligentTooltip
             content={helpText}
@@ -204,9 +205,7 @@ export function AdaptiveFormField({
       {renderInput()}
 
       {/* Texto de ayuda (solo si no hay tooltip) */}
-      {!showTooltips && helpText && (
-        <p className="text-xs text-muted-foreground">{helpText}</p>
-      )}
+      {!showTooltips && helpText && <p className="text-xs text-muted-foreground">{helpText}</p>}
     </div>
   );
 }

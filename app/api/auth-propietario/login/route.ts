@@ -12,10 +12,7 @@ export async function POST(req: NextRequest) {
     const { email, password } = await req.json();
 
     if (!email || !password) {
-      return NextResponse.json(
-        { error: 'Email y contraseña son requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email y contraseña son requeridos' }, { status: 400 });
     }
 
     // Buscar propietario por email
@@ -46,10 +43,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!owner) {
-      return NextResponse.json(
-        { error: 'Credenciales inválidas' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Credenciales inválidas' }, { status: 401 });
     }
 
     // Verificar que el propietario está activo
@@ -62,12 +56,10 @@ export async function POST(req: NextRequest) {
 
     // Verificar si la cuenta está bloqueada por intentos fallidos
     if (owner.lockoutUntil && owner.lockoutUntil > new Date()) {
-      const minutosRestantes = Math.ceil(
-        (owner.lockoutUntil.getTime() - Date.now()) / (1000 * 60)
-      );
+      const minutosRestantes = Math.ceil((owner.lockoutUntil.getTime() - Date.now()) / (1000 * 60));
       return NextResponse.json(
-        { 
-          error: `Cuenta bloqueada temporalmente. Intenta de nuevo en ${minutosRestantes} minutos.` 
+        {
+          error: `Cuenta bloqueada temporalmente. Intenta de nuevo en ${minutosRestantes} minutos.`,
         },
         { status: 403 }
       );
@@ -92,7 +84,7 @@ export async function POST(req: NextRequest) {
         where: { id: owner.id },
         data: {
           loginAttempts: newLoginAttempts,
-          lockoutUntil: shouldLockout 
+          lockoutUntil: shouldLockout
             ? new Date(Date.now() + 30 * 60 * 1000) // Bloquear por 30 minutos
             : null,
         },
@@ -106,7 +98,7 @@ export async function POST(req: NextRequest) {
       }
 
       return NextResponse.json(
-        { 
+        {
           error: 'Credenciales inválidas',
           intentosRestantes: 5 - newLoginAttempts,
         },
@@ -117,7 +109,7 @@ export async function POST(req: NextRequest) {
     // Restablecer intentos de login y actualizar último acceso
     await prisma.owner.update({
       where: { id: owner.id },
-      data: { 
+      data: {
         lastLogin: new Date(),
         loginAttempts: 0,
         lockoutUntil: null,
@@ -136,7 +128,14 @@ export async function POST(req: NextRequest) {
     setOwnerAuthCookie(token);
 
     // Devolver datos del propietario (sin password)
-    const { password: _, loginAttempts, lockoutUntil, resetToken, resetTokenExpiry, ...ownerSinPassword } = owner;
+    const {
+      password: _,
+      loginAttempts,
+      lockoutUntil,
+      resetToken,
+      resetTokenExpiry,
+      ...ownerSinPassword
+    } = owner;
 
     return NextResponse.json({
       success: true,
@@ -145,9 +144,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     logger.error('Error en login de propietario:', error);
-    return NextResponse.json(
-      { error: 'Error al iniciar sesión' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al iniciar sesión' }, { status: 500 });
   }
 }

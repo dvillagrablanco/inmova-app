@@ -36,7 +36,7 @@ export function useTenant(tenantId: string) {
  */
 export function useCreateTenant() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (data: Partial<Tenant>) => {
       const response = await fetch('/api/tenants', {
@@ -44,16 +44,16 @@ export function useCreateTenant() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      
+
       if (!response.ok) throw new Error('Error al crear inquilino');
       return response.json() as Promise<Tenant>;
     },
     onSuccess: (newTenant) => {
-      queryClient.setQueryData(
-        ['tenants', newTenant.companyId],
-        (old: Tenant[] = []) => [...old, newTenant]
-      );
-      
+      queryClient.setQueryData(['tenants', newTenant.companyId], (old: Tenant[] = []) => [
+        ...old,
+        newTenant,
+      ]);
+
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
       queryClient.invalidateQueries({ queryKey: ['tenants'] });
     },
@@ -65,7 +65,7 @@ export function useCreateTenant() {
  */
 export function useUpdateTenant() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<Tenant> }) => {
       const response = await fetch(`/api/tenants/${id}`, {
@@ -73,17 +73,15 @@ export function useUpdateTenant() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      
+
       if (!response.ok) throw new Error('Error al actualizar inquilino');
       return response.json() as Promise<Tenant>;
     },
     onSuccess: (updatedTenant) => {
       queryClient.setQueryData(['tenant', updatedTenant.id], updatedTenant);
-      
-      queryClient.setQueryData(
-        ['tenants', updatedTenant.companyId],
-        (old: Tenant[] = []) =>
-          old.map((t) => (t.id === updatedTenant.id ? updatedTenant : t))
+
+      queryClient.setQueryData(['tenants', updatedTenant.companyId], (old: Tenant[] = []) =>
+        old.map((t) => (t.id === updatedTenant.id ? updatedTenant : t))
       );
     },
   });
@@ -94,22 +92,21 @@ export function useUpdateTenant() {
  */
 export function useDeleteTenant() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (id: string) => {
       const response = await fetch(`/api/tenants/${id}`, {
         method: 'DELETE',
       });
-      
+
       if (!response.ok) throw new Error('Error al eliminar inquilino');
       return { id };
     },
     onSuccess: ({ id }) => {
-      queryClient.setQueriesData(
-        { queryKey: ['tenants'] },
-        (old: Tenant[] | undefined) => old?.filter((t) => t.id !== id)
+      queryClient.setQueriesData({ queryKey: ['tenants'] }, (old: Tenant[] | undefined) =>
+        old?.filter((t) => t.id !== id)
       );
-      
+
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
     },
   });

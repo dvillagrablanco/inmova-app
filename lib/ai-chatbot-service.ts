@@ -84,7 +84,8 @@ export async function generateChatbotResponse(
     if (!OPENAI_API_KEY) {
       logger.warn('OpenAI API key not configured');
       return {
-        response: 'Lo siento, el chatbot de IA no está configurado actualmente. Por favor, contacta con soporte técnico.',
+        response:
+          'Lo siento, el chatbot de IA no está configurado actualmente. Por favor, contacta con soporte técnico.',
         tokensUsed: 0,
         conversationId: 'fallback',
       };
@@ -97,17 +98,14 @@ export async function generateChatbotResponse(
     }
 
     // Construir mensajes para GPT-4
-    const chatMessages: ChatMessage[] = [
-      { role: 'system', content: systemPrompt },
-      ...messages,
-    ];
+    const chatMessages: ChatMessage[] = [{ role: 'system', content: systemPrompt }, ...messages];
 
     // Llamar a OpenAI API
     const response = await fetch(OPENAI_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
         model: MODEL,
@@ -127,7 +125,8 @@ export async function generateChatbotResponse(
 
     const data: ChatCompletionResponse = await response.json();
 
-    const assistantMessage = data.choices[0]?.message?.content || 'Lo siento, no pude generar una respuesta.';
+    const assistantMessage =
+      data.choices[0]?.message?.content || 'Lo siento, no pude generar una respuesta.';
     const tokensUsed = data.usage?.total_tokens || 0;
 
     logger.info('Chatbot response generated', {
@@ -142,7 +141,6 @@ export async function generateChatbotResponse(
       tokensUsed,
       conversationId: data.id,
     };
-
   } catch (error) {
     logger.error('Error generating chatbot response', {
       error: error instanceof Error ? error.message : String(error),
@@ -151,7 +149,8 @@ export async function generateChatbotResponse(
 
     // Fallback a respuestas predefinidas
     return {
-      response: 'Lo siento, ha ocurrido un error al procesar tu pregunta. Por favor, intenta de nuevo o contacta con soporte.',
+      response:
+        'Lo siento, ha ocurrido un error al procesar tu pregunta. Por favor, intenta de nuevo o contacta con soporte.',
       tokensUsed: 0,
       conversationId: 'error',
     };
@@ -162,11 +161,16 @@ export async function generateChatbotResponse(
  * Respuestas predefinidas para preguntas comunes (fallback)
  */
 const FAQ_RESPONSES: Record<string, string> = {
-  'crear edificio': 'Para crear un edificio: 1) Ve a "Edificios" en el menú, 2) Haz clic en "Nuevo edificio", 3) Completa los datos básicos (nombre, dirección, ciudad). ¡Listo!',
-  'agregar unidad': 'Para agregar una unidad: 1) Selecciona un edificio, 2) Ve a la pestaña "Unidades", 3) Haz clic en "Nueva unidad", 4) Define el tipo, superficie y características.',
-  'crear contrato': 'Para crear un contrato: 1) Asegúrate de tener un inquilino y unidad registrados, 2) Ve a "Contratos", 3) Haz clic en "Nuevo contrato", 4) Selecciona inquilino, unidad y define las condiciones (renta, fechas, depósito).',
-  'registrar pago': 'Para registrar un pago: 1) Ve a "Pagos", 2) Haz clic en "Nuevo pago", 3) Selecciona el contrato, monto, fecha y método de pago. Opcionalmente, adjunta un comprobante.',
-  'reset password': 'Para resetear tu contraseña: 1) Haz clic en "¿Olvidaste tu contraseña?" en el login, 2) Ingresa tu email, 3) Recibirás un link para crear una nueva contraseña.',
+  'crear edificio':
+    'Para crear un edificio: 1) Ve a "Edificios" en el menú, 2) Haz clic en "Nuevo edificio", 3) Completa los datos básicos (nombre, dirección, ciudad). ¡Listo!',
+  'agregar unidad':
+    'Para agregar una unidad: 1) Selecciona un edificio, 2) Ve a la pestaña "Unidades", 3) Haz clic en "Nueva unidad", 4) Define el tipo, superficie y características.',
+  'crear contrato':
+    'Para crear un contrato: 1) Asegúrate de tener un inquilino y unidad registrados, 2) Ve a "Contratos", 3) Haz clic en "Nuevo contrato", 4) Selecciona inquilino, unidad y define las condiciones (renta, fechas, depósito).',
+  'registrar pago':
+    'Para registrar un pago: 1) Ve a "Pagos", 2) Haz clic en "Nuevo pago", 3) Selecciona el contrato, monto, fecha y método de pago. Opcionalmente, adjunta un comprobante.',
+  'reset password':
+    'Para resetear tu contraseña: 1) Haz clic en "¿Olvidaste tu contraseña?" en el login, 2) Ingresa tu email, 3) Recibirás un link para crear una nueva contraseña.',
 };
 
 /**
@@ -174,13 +178,13 @@ const FAQ_RESPONSES: Record<string, string> = {
  */
 export function searchFAQ(query: string): string | null {
   const normalizedQuery = query.toLowerCase().trim();
-  
+
   for (const [keyword, response] of Object.entries(FAQ_RESPONSES)) {
     if (normalizedQuery.includes(keyword)) {
       return response;
     }
   }
-  
+
   return null;
 }
 
@@ -215,13 +219,13 @@ export function getSuggestedQuestions(context?: {
  */
 export function analyzeSentiment(message: string): 'positive' | 'neutral' | 'negative' {
   const lowerMessage = message.toLowerCase();
-  
+
   const positiveKeywords = ['gracias', 'excelente', 'perfecto', 'genial', 'bien', 'bueno'];
   const negativeKeywords = ['error', 'problema', 'no funciona', 'mal', 'ayuda urgente', 'fallo'];
-  
-  const hasPositive = positiveKeywords.some(keyword => lowerMessage.includes(keyword));
-  const hasNegative = negativeKeywords.some(keyword => lowerMessage.includes(keyword));
-  
+
+  const hasPositive = positiveKeywords.some((keyword) => lowerMessage.includes(keyword));
+  const hasNegative = negativeKeywords.some((keyword) => lowerMessage.includes(keyword));
+
   if (hasNegative) return 'negative';
   if (hasPositive) return 'positive';
   return 'neutral';
@@ -239,12 +243,12 @@ export function shouldEscalateToSupport(
   // 1. Sentimiento negativo y más de 2 intentos
   // 2. Usuario pide explícitamente hablar con humano
   // 3. Más de 5 mensajes sin resolución
-  
+
   const lowerMessage = message.toLowerCase();
-  const requestsHuman = ['hablar con persona', 'soporte humano', 'agente real'].some(
-    keyword => lowerMessage.includes(keyword)
+  const requestsHuman = ['hablar con persona', 'soporte humano', 'agente real'].some((keyword) =>
+    lowerMessage.includes(keyword)
   );
-  
+
   return requestsHuman || (sentiment === 'negative' && attemptsCount > 2) || attemptsCount > 5;
 }
 
@@ -254,12 +258,12 @@ export function shouldEscalateToSupport(
 export function formatChatbotResponse(response: string): string {
   // Agregar formato markdown si no lo tiene
   let formatted = response;
-  
+
   // Convertir listas numeradas
   formatted = formatted.replace(/(\d+\))/g, '\n$1');
-  
+
   // Agregar énfasis
   formatted = formatted.replace(/\*\*(.*?)\*\*/g, '**$1**');
-  
+
   return formatted.trim();
 }

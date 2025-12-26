@@ -11,19 +11,12 @@ import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { provider: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { provider: string } }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const { provider } = params;
@@ -50,10 +43,7 @@ export async function POST(
         result = await getContaSimpleService().testConnection();
         break;
       default:
-        return NextResponse.json(
-          { error: 'Proveedor no soportado' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Proveedor no soportado' }, { status: 400 });
     }
 
     return NextResponse.json(result);

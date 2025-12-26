@@ -1,7 +1,7 @@
 /**
  * API: GET /api/cron/cleanup-notifications
  * Cron job para limpiar notificaciones expiradas
- * 
+ *
  * Ejecutar diariamente via cron externo o Vercel Cron:
  * 0 2 * * * (a las 2 AM todos los días)
  */
@@ -26,9 +26,6 @@ export async function GET() {
     });
   } catch (error) {
     console.error('[CRON cleanup-notifications] Error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

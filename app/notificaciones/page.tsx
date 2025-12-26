@@ -237,225 +237,222 @@ export default function NotificacionesPage() {
   if (status === 'loading' || loading) {
     return (
       <AuthenticatedLayout>
-            <div className="max-w-7xl mx-auto space-y-6">
-              <Skeleton className="h-10 w-96" />
-              <div className="space-y-4">
-                {[...Array(5)].map((_, i) => (
-                  <Skeleton key={i} className="h-24" />
-                ))}
-              </div>
-            </div>
-          </AuthenticatedLayout>
+        <div className="max-w-7xl mx-auto space-y-6">
+          <Skeleton className="h-10 w-96" />
+          <div className="space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <Skeleton key={i} className="h-24" />
+            ))}
+          </div>
+        </div>
+      </AuthenticatedLayout>
     );
   }
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto space-y-6">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push('/dashboard')}
-                className="gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Volver al Dashboard
-              </Button>
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/dashboard">
-                      <Home className="h-4 w-4" />
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>Notificaciones</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
-            </div>
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push('/dashboard')}
+            className="gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Volver al Dashboard
+          </Button>
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/dashboard">
+                  <Home className="h-4 w-4" />
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Notificaciones</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
 
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold">Notificaciones</h1>
-                <p className="text-muted-foreground mt-2">
-                  {unreadCount > 0
-                    ? `Tienes ${unreadCount} notificaciones sin leer`
-                    : 'Estás al día con todas tus notificaciones'}
-                </p>
-              </div>
-              <Link href="/configuracion/notificaciones">
-                <Button variant="outline">
-                  <Settings2 className="w-4 h-4 mr-2" />
-                  Configurar
-                </Button>
-              </Link>
-            </div>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Notificaciones</h1>
+            <p className="text-muted-foreground mt-2">
+              {unreadCount > 0
+                ? `Tienes ${unreadCount} notificaciones sin leer`
+                : 'Estás al día con todas tus notificaciones'}
+            </p>
+          </div>
+          <Link href="/configuracion/notificaciones">
+            <Button variant="outline">
+              <Settings2 className="w-4 h-4 mr-2" />
+              Configurar
+            </Button>
+          </Link>
+        </div>
 
-            <Card>
-              <CardHeader>
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto">
-                    <TabsList>
-                      <TabsTrigger value="all">
-                        Todas
-                        <Badge variant="secondary" className="ml-2">
-                          {notifications.length}
-                        </Badge>
-                      </TabsTrigger>
-                      <TabsTrigger value="unread">
-                        Sin leer
-                        {unreadCount > 0 && (
-                          <Badge variant="destructive" className="ml-2">
-                            {unreadCount}
-                          </Badge>
-                        )}
-                      </TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-
-                  <div className="flex gap-2 w-full sm:w-auto">
-                    {selectedNotifications.size > 0 && (
-                      <Button variant="destructive" size="sm" onClick={deleteSelected}>
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Eliminar ({selectedNotifications.size})
-                      </Button>
-                    )}
+        <Card>
+          <CardHeader>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto">
+                <TabsList>
+                  <TabsTrigger value="all">
+                    Todas
+                    <Badge variant="secondary" className="ml-2">
+                      {notifications.length}
+                    </Badge>
+                  </TabsTrigger>
+                  <TabsTrigger value="unread">
+                    Sin leer
                     {unreadCount > 0 && (
-                      <Button variant="outline" size="sm" onClick={markAllAsRead}>
-                        <CheckCheck className="w-4 h-4 mr-2" />
-                        Marcar todo
-                      </Button>
+                      <Badge variant="destructive" className="ml-2">
+                        {unreadCount}
+                      </Badge>
                     )}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                    <Input
-                      placeholder="Buscar notificaciones..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                  <Select value={typeFilter} onValueChange={setTypeFilter}>
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                      <SelectValue placeholder="Filtrar por tipo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos los tipos</SelectItem>
-                      <SelectItem value="info">Información</SelectItem>
-                      <SelectItem value="success">Éxito</SelectItem>
-                      <SelectItem value="warning">Advertencia</SelectItem>
-                      <SelectItem value="error">Error</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
 
-                {filteredNotifications.length > 0 && (
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={selectedNotifications.size === filteredNotifications.length}
-                      onChange={selectAll}
-                      className="rounded"
-                    />
-                    <span className="text-sm text-muted-foreground">Seleccionar todas</span>
-                  </div>
+              <div className="flex gap-2 w-full sm:w-auto">
+                {selectedNotifications.size > 0 && (
+                  <Button variant="destructive" size="sm" onClick={deleteSelected}>
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Eliminar ({selectedNotifications.size})
+                  </Button>
                 )}
+                {unreadCount > 0 && (
+                  <Button variant="outline" size="sm" onClick={markAllAsRead}>
+                    <CheckCheck className="w-4 h-4 mr-2" />
+                    Marcar todo
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  placeholder="Buscar notificaciones..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Filtrar por tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los tipos</SelectItem>
+                  <SelectItem value="info">Información</SelectItem>
+                  <SelectItem value="success">Éxito</SelectItem>
+                  <SelectItem value="warning">Advertencia</SelectItem>
+                  <SelectItem value="error">Error</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-                <div className="space-y-2">
-                  {filteredNotifications.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-center">
-                      <Bell className="w-16 h-16 text-muted-foreground/50 mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">No hay notificaciones</h3>
-                      <p className="text-muted-foreground">
-                        {searchQuery || typeFilter !== 'all'
-                          ? 'No se encontraron resultados con los filtros aplicados'
-                          : 'Te avisaremos cuando haya algo nuevo'}
-                      </p>
-                    </div>
-                  ) : (
-                    filteredNotifications.map((notification) => (
-                      <Card
-                        key={notification.id}
-                        className={cn(
-                          'transition-colors',
-                          !notification.read && 'border-l-4 border-l-blue-500 bg-accent/50',
-                          selectedNotifications.has(notification.id) && 'bg-accent'
-                        )}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex items-start gap-4">
-                            <input
-                              type="checkbox"
-                              checked={selectedNotifications.has(notification.id)}
-                              onChange={() => toggleSelect(notification.id)}
-                              className="mt-1 rounded"
-                            />
-                            <div className="mt-1">{getTypeIcon(notification.type)}</div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-start justify-between gap-2">
-                                <div className="flex-1">
-                                  <h4
-                                    className={cn(
-                                      'font-medium',
-                                      !notification.read && 'font-semibold'
-                                    )}
-                                  >
-                                    {notification.title}
-                                  </h4>
-                                  <p className="text-sm text-muted-foreground mt-1">
-                                    {notification.message}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground mt-2">
-                                    {formatDistanceToNow(new Date(notification.createdAt), {
-                                      addSuffix: true,
-                                      locale: es,
-                                    })}
-                                  </p>
-                                </div>
-                                <div className="flex gap-2">
-                                  {!notification.read && (
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => markAsRead(notification.id)}
-                                    >
-                                      <CheckCheck className="w-4 h-4" />
-                                    </Button>
-                                  )}
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => deleteNotification(notification.id)}
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                </div>
-                              </div>
-                              {notification.link && (
-                                <Link href={notification.link}>
-                                  <Button variant="link" size="sm" className="px-0">
-                                    Ver detalles
-                                  </Button>
-                                </Link>
+            {filteredNotifications.length > 0 && (
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={selectedNotifications.size === filteredNotifications.length}
+                  onChange={selectAll}
+                  className="rounded"
+                />
+                <span className="text-sm text-muted-foreground">Seleccionar todas</span>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              {filteredNotifications.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <Bell className="w-16 h-16 text-muted-foreground/50 mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No hay notificaciones</h3>
+                  <p className="text-muted-foreground">
+                    {searchQuery || typeFilter !== 'all'
+                      ? 'No se encontraron resultados con los filtros aplicados'
+                      : 'Te avisaremos cuando haya algo nuevo'}
+                  </p>
+                </div>
+              ) : (
+                filteredNotifications.map((notification) => (
+                  <Card
+                    key={notification.id}
+                    className={cn(
+                      'transition-colors',
+                      !notification.read && 'border-l-4 border-l-blue-500 bg-accent/50',
+                      selectedNotifications.has(notification.id) && 'bg-accent'
+                    )}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-4">
+                        <input
+                          type="checkbox"
+                          checked={selectedNotifications.has(notification.id)}
+                          onChange={() => toggleSelect(notification.id)}
+                          className="mt-1 rounded"
+                        />
+                        <div className="mt-1">{getTypeIcon(notification.type)}</div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1">
+                              <h4
+                                className={cn('font-medium', !notification.read && 'font-semibold')}
+                              >
+                                {notification.title}
+                              </h4>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {notification.message}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-2">
+                                {formatDistanceToNow(new Date(notification.createdAt), {
+                                  addSuffix: true,
+                                  locale: es,
+                                })}
+                              </p>
+                            </div>
+                            <div className="flex gap-2">
+                              {!notification.read && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => markAsRead(notification.id)}
+                                >
+                                  <CheckCheck className="w-4 h-4" />
+                                </Button>
                               )}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => deleteNotification(notification.id)}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
                             </div>
                           </div>
-                        </CardContent>
-                      </Card>
-                    ))
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </AuthenticatedLayout>
+                          {notification.link && (
+                            <Link href={notification.link}>
+                              <Button variant="link" size="sm" className="px-0">
+                                Ver detalles
+                              </Button>
+                            </Link>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </AuthenticatedLayout>
   );
 }

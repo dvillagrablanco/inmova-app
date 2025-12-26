@@ -18,15 +18,12 @@ export async function GET(request: NextRequest) {
     const conversationId = searchParams.get('conversationId');
 
     if (!conversationId) {
-      return NextResponse.json(
-        { error: 'conversationId requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'conversationId requerido' }, { status: 400 });
     }
 
     // Verificar que la conversación pertenece al usuario
     const tenant = await prisma.tenant.findUnique({
-      where: { email: session.user.email! }
+      where: { email: session.user.email! },
     });
 
     if (!tenant) {
@@ -36,30 +33,24 @@ export async function GET(request: NextRequest) {
     const conversation = await prisma.chatbotConversation.findFirst({
       where: {
         id: conversationId,
-        tenantId: tenant.id
-      }
+        tenantId: tenant.id,
+      },
     });
 
     if (!conversation) {
-      return NextResponse.json(
-        { error: 'Conversación no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Conversación no encontrada' }, { status: 404 });
     }
 
     // Obtener mensajes
     const messages = await prisma.chatbotMessage.findMany({
       where: { conversationId },
-      orderBy: { createdAt: 'asc' }
+      orderBy: { createdAt: 'asc' },
     });
 
     return NextResponse.json(messages);
   } catch (error: any) {
     logger.error('Error al obtener mensajes:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener mensajes' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener mensajes' }, { status: 500 });
   }
 }
 
@@ -83,7 +74,7 @@ export async function POST(request: NextRequest) {
 
     // Verificar que la conversación pertenece al usuario
     const tenant = await prisma.tenant.findUnique({
-      where: { email: session.user.email! }
+      where: { email: session.user.email! },
     });
 
     if (!tenant) {
@@ -93,27 +84,24 @@ export async function POST(request: NextRequest) {
     const conversation = await prisma.chatbotConversation.findFirst({
       where: {
         id: conversationId,
-        tenantId: tenant.id
+        tenantId: tenant.id,
       },
       include: {
         messages: {
           orderBy: { createdAt: 'desc' },
-          take: 10 // Últimos 10 mensajes para contexto
+          take: 10, // Últimos 10 mensajes para contexto
         },
         tenant: {
           select: {
             nombreCompleto: true,
-            email: true
-          }
-        }
-      }
+            email: true,
+          },
+        },
+      },
     });
 
     if (!conversation) {
-      return NextResponse.json(
-        { error: 'Conversación no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Conversación no encontrada' }, { status: 404 });
     }
 
     // Guardar mensaje del usuario
@@ -121,8 +109,8 @@ export async function POST(request: NextRequest) {
       data: {
         conversationId,
         senderType: 'tenant',
-        mensaje
-      }
+        mensaje,
+      },
     });
 
     // Construir contexto para GPT-4
@@ -151,16 +139,16 @@ Instrucciones:
     // Construir historial de conversación para contexto
     const conversationHistory = conversation.messages
       .reverse() // Más reciente primero
-      .map(msg => ({
+      .map((msg) => ({
         role: msg.senderType === 'tenant' ? 'user' : 'assistant',
-        content: msg.mensaje
+        content: msg.mensaje,
       }));
 
     // Preparar mensajes para la API
     const messages = [
       { role: 'system', content: systemPrompt },
       ...conversationHistory,
-      { role: 'user', content: mensaje }
+      { role: 'user', content: mensaje },
     ];
 
     // Llamar a la API de GPT-4 con streaming
@@ -168,15 +156,15 @@ Instrucciones:
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`
+        Authorization: `Bearer ${process.env.ABACUSAI_API_KEY}`,
       },
       body: JSON.stringify({
         model: 'gpt-4.1-mini',
         messages: messages,
         stream: true,
         max_tokens: 500,
-        temperature: 0.7
-      })
+        temperature: 0.7,
+      }),
     });
 
     if (!response.ok) {
@@ -190,7 +178,7 @@ Instrucciones:
         const reader = response.body?.getReader();
         const decoder = new TextDecoder();
         const encoder = new TextEncoder();
-        
+
         try {
           while (reader) {
             const { done, value } = await reader.read();
@@ -202,27 +190,27 @@ Instrucciones:
                   senderType: 'bot',
                   mensaje: fullResponse,
                   confidence: 0.9,
-                  tokens: Math.ceil(fullResponse.length / 4) // Estimación aproximada
-                }
+                  tokens: Math.ceil(fullResponse.length / 4), // Estimación aproximada
+                },
               });
 
               // Actualizar conversación
               await prisma.chatbotConversation.update({
                 where: { id: conversationId },
-                data: { updatedAt: new Date() }
+                data: { updatedAt: new Date() },
               });
 
               break;
             }
-            
+
             const chunk = decoder.decode(value);
-            const lines = chunk.split('\n').filter(line => line.trim() !== '');
-            
+            const lines = chunk.split('\n').filter((line) => line.trim() !== '');
+
             for (const line of lines) {
               if (line.startsWith('data: ')) {
                 const data = line.slice(6);
                 if (data === '[DONE]') continue;
-                
+
                 try {
                   const parsed = JSON.parse(data);
                   const content = parsed.choices?.[0]?.delta?.content || '';
@@ -234,7 +222,7 @@ Instrucciones:
                 }
               }
             }
-            
+
             controller.enqueue(encoder.encode(chunk));
           }
         } catch (error) {
@@ -243,21 +231,18 @@ Instrucciones:
         } finally {
           controller.close();
         }
-      }
+      },
     });
 
     return new Response(stream, {
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
         'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive'
-      }
+        Connection: 'keep-alive',
+      },
     });
   } catch (error: any) {
     logger.error('Error al procesar mensaje:', error);
-    return NextResponse.json(
-      { error: 'Error al procesar mensaje' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al procesar mensaje' }, { status: 500 });
   }
 }

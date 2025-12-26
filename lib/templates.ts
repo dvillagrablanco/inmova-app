@@ -62,13 +62,26 @@ El Arrendador                    El Arrendatario
 
 _________________              _________________`,
     variables: [
-      'CITY', 'DATE', 'LANDLORD_NAME', 'LANDLORD_DNI', 'LANDLORD_ADDRESS',
-      'TENANT_NAME', 'TENANT_DNI', 'TENANT_ADDRESS', 'PROPERTY_ADDRESS',
-      'CATASTRAL_REF', 'DURATION', 'START_DATE', 'END_DATE',
-      'MONTHLY_RENT', 'PAYMENT_DAY', 'DEPOSIT', 'EXPENSES_CLAUSE'
+      'CITY',
+      'DATE',
+      'LANDLORD_NAME',
+      'LANDLORD_DNI',
+      'LANDLORD_ADDRESS',
+      'TENANT_NAME',
+      'TENANT_DNI',
+      'TENANT_ADDRESS',
+      'PROPERTY_ADDRESS',
+      'CATASTRAL_REF',
+      'DURATION',
+      'START_DATE',
+      'END_DATE',
+      'MONTHLY_RENT',
+      'PAYMENT_DAY',
+      'DEPOSIT',
+      'EXPENSES_CLAUSE',
     ],
     tags: ['vivienda', 'residencial', 'lau', 'estándar'],
-    popular: true
+    popular: true,
   },
   {
     id: 'contract-commercial',
@@ -81,7 +94,7 @@ _________________              _________________`,
 [Contenido completo del contrato comercial...]`,
     variables: ['LANDLORD_NAME', 'TENANT_NAME', 'BUSINESS_NAME', 'MONTHLY_RENT', 'DURATION'],
     tags: ['comercial', 'local', 'negocio'],
-    popular: true
+    popular: true,
   },
   {
     id: 'contract-room-coliving',
@@ -94,7 +107,7 @@ _________________              _________________`,
 [Contenido del contrato de habitación con cláusulas de convivencia...]`,
     variables: ['LANDLORD_NAME', 'TENANT_NAME', 'ROOM_NUMBER', 'MONTHLY_RENT', 'SHARED_EXPENSES'],
     tags: ['habitación', 'coliving', 'compartido'],
-    popular: true
+    popular: true,
   },
 
   // EMAILS
@@ -120,9 +133,17 @@ Si ya realizaste el pago, por favor ignora este mensaje.
 
 Saludos,
 {{COMPANY_NAME}}`,
-    variables: ['TENANT_NAME', 'MONTH', 'DUE_DATE', 'AMOUNT', 'PROPERTY_ADDRESS', 'PORTAL_LINK', 'COMPANY_NAME'],
+    variables: [
+      'TENANT_NAME',
+      'MONTH',
+      'DUE_DATE',
+      'AMOUNT',
+      'PROPERTY_ADDRESS',
+      'PORTAL_LINK',
+      'COMPANY_NAME',
+    ],
     tags: ['pago', 'recordatorio', 'alquiler'],
-    popular: true
+    popular: true,
   },
   {
     id: 'email-welcome-tenant',
@@ -156,9 +177,17 @@ Si tienes alguna duda, no dudes en escribirnos.
 
 Saludos,
 {{COMPANY_NAME}}`,
-    variables: ['TENANT_NAME', 'PROPERTY_ADDRESS', 'MOVE_IN_DATE', 'MONTHLY_RENT', 'PAYMENT_DAY', 'PORTAL_LINK', 'COMPANY_NAME'],
+    variables: [
+      'TENANT_NAME',
+      'PROPERTY_ADDRESS',
+      'MOVE_IN_DATE',
+      'MONTHLY_RENT',
+      'PAYMENT_DAY',
+      'PORTAL_LINK',
+      'COMPANY_NAME',
+    ],
     tags: ['bienvenida', 'onboarding', 'inquilino'],
-    popular: true
+    popular: true,
   },
   {
     id: 'email-contract-renewal',
@@ -187,9 +216,19 @@ Estamos a tu disposición para cualquier consulta.
 
 Saludos,
 {{COMPANY_NAME}}`,
-    variables: ['TENANT_NAME', 'PROPERTY_ADDRESS', 'CONTRACT_END_DATE', 'RENEWAL_DURATION', 'NEW_RENT', 'IPC_UPDATE', 'DECISION_DATE', 'RENEWAL_LINK', 'COMPANY_NAME'],
+    variables: [
+      'TENANT_NAME',
+      'PROPERTY_ADDRESS',
+      'CONTRACT_END_DATE',
+      'RENEWAL_DURATION',
+      'NEW_RENT',
+      'IPC_UPDATE',
+      'DECISION_DATE',
+      'RENEWAL_LINK',
+      'COMPANY_NAME',
+    ],
     tags: ['renovación', 'contrato', 'vencimiento'],
-    popular: true
+    popular: true,
   },
 
   // WORKFLOWS
@@ -207,12 +246,12 @@ Saludos,
         { id: 5, name: 'Cobro de fianza y primer mes', automated: true },
         { id: 6, name: 'Envío de email de bienvenida', automated: true },
         { id: 7, name: 'Creación de acceso al portal', automated: true },
-        { id: 8, name: 'Programación de pagos recurrentes', automated: true }
-      ]
+        { id: 8, name: 'Programación de pagos recurrentes', automated: true },
+      ],
     }),
     variables: ['TENANT_ID', 'PROPERTY_ID', 'CONTRACT_ID'],
     tags: ['onboarding', 'inquilino', 'automatización'],
-    popular: true
+    popular: true,
   },
   {
     id: 'workflow-payment-default',
@@ -225,12 +264,12 @@ Saludos,
         { id: 2, name: 'Día 3: Segundo recordatorio', automated: true },
         { id: 3, name: 'Día 7: Llamada telefónica', automated: false },
         { id: 4, name: 'Día 15: Burofax de requerimiento', automated: true },
-        { id: 5, name: 'Día 30: Inicio proceso legal', automated: false }
-      ]
+        { id: 5, name: 'Día 30: Inicio proceso legal', automated: false },
+      ],
     }),
     variables: ['TENANT_ID', 'OVERDUE_AMOUNT', 'OVERDUE_DAYS'],
     tags: ['morosidad', 'impago', 'cobro'],
-    popular: true
+    popular: true,
   },
 
   // REPORTES
@@ -241,15 +280,24 @@ Saludos,
     description: 'Reporte ejecutivo mensual con todas las métricas clave.',
     content: JSON.stringify({
       sections: [
-        { name: 'Resumen Financiero', metrics: ['ingresos_totales', 'gastos_totales', 'beneficio_neto'] },
-        { name: 'Ocupación', metrics: ['tasa_ocupacion', 'unidades_disponibles', 'nuevos_contratos'] },
+        {
+          name: 'Resumen Financiero',
+          metrics: ['ingresos_totales', 'gastos_totales', 'beneficio_neto'],
+        },
+        {
+          name: 'Ocupación',
+          metrics: ['tasa_ocupacion', 'unidades_disponibles', 'nuevos_contratos'],
+        },
         { name: 'Morosidad', metrics: ['tasa_morosidad', 'importe_pendiente', 'recuperado'] },
-        { name: 'Mantenimiento', metrics: ['incidencias_abiertas', 'incidencias_resueltas', 'tiempo_respuesta'] }
-      ]
+        {
+          name: 'Mantenimiento',
+          metrics: ['incidencias_abiertas', 'incidencias_resueltas', 'tiempo_respuesta'],
+        },
+      ],
     }),
     variables: ['MONTH', 'YEAR', 'COMPANY_NAME'],
     tags: ['reporte', 'mensual', 'ejecutivo'],
-    popular: true
+    popular: true,
   },
   {
     id: 'report-occupancy-forecast',
@@ -259,42 +307,49 @@ Saludos,
     content: JSON.stringify({
       sections: [
         { name: 'Ocupación Actual', metrics: ['ocupadas', 'disponibles', 'en_mantenimiento'] },
-        { name: 'Vencimientos Próximos', metrics: ['proximos_30_dias', 'proximos_60_dias', 'proximos_90_dias'] },
-        { name: 'Proyección', metrics: ['ocupacion_estimada', 'ingresos_proyectados'] }
-      ]
+        {
+          name: 'Vencimientos Próximos',
+          metrics: ['proximos_30_dias', 'proximos_60_dias', 'proximos_90_dias'],
+        },
+        { name: 'Proyección', metrics: ['ocupacion_estimada', 'ingresos_proyectados'] },
+      ],
     }),
     variables: ['FORECAST_MONTHS', 'COMPANY_NAME'],
     tags: ['forecast', 'ocupación', 'proyección'],
-    popular: false
-  }
+    popular: false,
+  },
 ];
 
 export function getTemplatesByCategory(category: Template['category']): Template[] {
-  return templates.filter(t => t.category === category);
+  return templates.filter((t) => t.category === category);
 }
 
 export function getTemplatesByIndustry(industry: string): Template[] {
-  return templates.filter(t => t.industry === industry);
+  return templates.filter((t) => t.industry === industry);
 }
 
 export function getPopularTemplates(): Template[] {
-  return templates.filter(t => t.popular);
+  return templates.filter((t) => t.popular);
 }
 
 export function getTemplateById(id: string): Template | undefined {
-  return templates.find(t => t.id === id);
+  return templates.find((t) => t.id === id);
 }
 
 export function searchTemplates(query: string): Template[] {
   const lowerQuery = query.toLowerCase();
-  return templates.filter(t => 
-    t.name.toLowerCase().includes(lowerQuery) ||
-    t.description.toLowerCase().includes(lowerQuery) ||
-    t.tags.some(tag => tag.includes(lowerQuery))
+  return templates.filter(
+    (t) =>
+      t.name.toLowerCase().includes(lowerQuery) ||
+      t.description.toLowerCase().includes(lowerQuery) ||
+      t.tags.some((tag) => tag.includes(lowerQuery))
   );
 }
 
-export function interpolateTemplate(templateContent: string, variables: Record<string, string>): string {
+export function interpolateTemplate(
+  templateContent: string,
+  variables: Record<string, string>
+): string {
   let result = templateContent;
   Object.entries(variables).forEach(([key, value]) => {
     const regex = new RegExp(`{{${key}}}`, 'g');

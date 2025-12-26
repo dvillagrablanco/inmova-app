@@ -18,10 +18,7 @@ export async function GET(request: NextRequest) {
     const tenantId = searchParams.get('tenantId');
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: 'tenantId requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'tenantId requerido' }, { status: 400 });
     }
 
     const companyId = session?.user?.companyId;
@@ -35,10 +32,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!tenant) {
-      return NextResponse.json(
-        { error: 'Inquilino no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Inquilino no encontrado' }, { status: 404 });
     }
 
     // Get behavior history
@@ -68,10 +62,7 @@ export async function POST(request: NextRequest) {
     const { tenantId } = await request.json();
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: 'tenantId requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'tenantId requerido' }, { status: 400 });
     }
 
     const companyId = session?.user?.companyId;
@@ -85,10 +76,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!tenant) {
-      return NextResponse.json(
-        { error: 'Inquilino no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Inquilino no encontrado' }, { status: 404 });
     }
 
     const behavior = await analyzeTenantBehavior(tenantId);

@@ -13,10 +13,7 @@ export async function POST(request: NextRequest) {
     // 1. Verificar autenticación
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // 2. Obtener el ID de la notificación (opcional)
@@ -26,16 +23,16 @@ export async function POST(request: NextRequest) {
     if (markAll) {
       // Marcar todas como leídas
       const result = await markAllAsRead(session.user.id);
-      return NextResponse.json({ 
-        success: result.success, 
-        count: result.count || 0 
+      return NextResponse.json({
+        success: result.success,
+        count: result.count || 0,
       });
     } else if (notificationId) {
       // Marcar una específica como leída
       const result = await markAsRead(notificationId, session.user.id);
-      return NextResponse.json({ 
-        success: result.success, 
-        count: result.success ? 1 : 0 
+      return NextResponse.json({
+        success: result.success,
+        count: result.success ? 1 : 0,
       });
     } else {
       return NextResponse.json(
@@ -44,9 +41,6 @@ export async function POST(request: NextRequest) {
       );
     }
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

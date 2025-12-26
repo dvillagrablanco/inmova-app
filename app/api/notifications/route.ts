@@ -1,7 +1,7 @@
 /**
  * API: /api/notifications
  * Gestión de notificaciones in-app
- * 
+ *
  * GET: Obtener notificaciones del usuario autenticado
  * POST: Crear una nueva notificación (solo admin)
  */
@@ -24,10 +24,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Obtener el parámetro limit de la query string
@@ -47,10 +44,7 @@ export async function GET(request: NextRequest) {
       notifications: result.notifications,
     });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }
 
@@ -63,10 +57,7 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Verificar que el usuario sea admin o el sistema
@@ -86,10 +77,7 @@ export async function POST(request: NextRequest) {
 
     // Validaciones básicas
     if (!params.title || !params.message) {
-      return NextResponse.json(
-        { error: 'Title y message son requeridos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Title y message son requeridos' }, { status: 400 });
     }
 
     const result = await createNotification(params);
@@ -101,14 +89,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { notification: result.notification },
-      { status: 201 }
-    );
+    return NextResponse.json({ notification: result.notification }, { status: 201 });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }

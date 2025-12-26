@@ -145,14 +145,11 @@ export const notifications = {
       error: string | ((error: any) => string);
     }
   ) {
-    return toast.promise(
-      promise,
-      {
-        loading: messages.loading,
-        success: messages.success,
-        error: messages.error,
-      }
-    );
+    return toast.promise(promise, {
+      loading: messages.loading,
+      success: messages.success,
+      error: messages.error,
+    });
   },
 
   /**
@@ -209,10 +206,10 @@ export const notifications = {
 
 /**
  * Ejemplos de uso:
- * 
+ *
  * // Notificación simple
  * notifications.success('Éxito', 'La operación se completó');
- * 
+ *
  * // Notificación con deshacer
  * notifications.withUndo(
  *   'Edificio eliminado',
@@ -221,7 +218,7 @@ export const notifications = {
  *     await restoreBuilding(buildingId);
  *   }
  * );
- * 
+ *
  * // Notificación de promesa
  * notifications.promise(
  *   fetch('/api/buildings', { method: 'POST', body: data }),
@@ -231,7 +228,7 @@ export const notifications = {
  *     error: 'Error al crear edificio',
  *   }
  * );
- * 
+ *
  * // Notificación con acción
  * notifications.show({
  *   type: 'info',

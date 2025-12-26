@@ -46,7 +46,7 @@ export function generateReceipt(data: ReceiptData): jsPDF {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  
+
   const primaryColor = data.company.colorPrimario || '#000000';
   const hexToRgb = (hex: string) => {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -87,10 +87,12 @@ export function generateReceipt(data: ReceiptData): jsPDF {
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
-  if (data.company.cif) doc.text(`CIF: ${data.company.cif}`, 15, yPos), (yPos += 5);
-  if (data.company.direccion) doc.text(`Dirección: ${data.company.direccion}`, 15, yPos), (yPos += 5);
-  if (data.company.telefono) doc.text(`Teléfono: ${data.company.telefono}`, 15, yPos), (yPos += 5);
-  if (data.company.email) doc.text(`Email: ${data.company.email}`, 15, yPos), (yPos += 5);
+  if (data.company.cif) (doc.text(`CIF: ${data.company.cif}`, 15, yPos), (yPos += 5));
+  if (data.company.direccion)
+    (doc.text(`Dirección: ${data.company.direccion}`, 15, yPos), (yPos += 5));
+  if (data.company.telefono)
+    (doc.text(`Teléfono: ${data.company.telefono}`, 15, yPos), (yPos += 5));
+  if (data.company.email) (doc.text(`Email: ${data.company.email}`, 15, yPos), (yPos += 5));
 
   // Información del inquilino (lado derecho)
   yPos = 50;
@@ -143,10 +145,7 @@ export function generateReceipt(data: ReceiptData): jsPDF {
       ['Dirección', data.unit.direccion],
       ['Período', data.payment.periodo],
       ['Fecha de Vencimiento', formatDate(data.payment.fechaVencimiento)],
-      [
-        'Fecha de Pago',
-        data.payment.fechaPago ? formatDate(data.payment.fechaPago) : 'Pendiente',
-      ],
+      ['Fecha de Pago', data.payment.fechaPago ? formatDate(data.payment.fechaPago) : 'Pendiente'],
       ['Método de Pago', data.payment.metodoPago || 'N/A'],
       ['Estado', data.payment.estado.toUpperCase()],
     ],
@@ -193,12 +192,9 @@ export function generateReceipt(data: ReceiptData): jsPDF {
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(150, 150, 150);
   doc.text(`Número de Recibo: ${data.payment.id}`, 15, yPos);
-  doc.text(
-    `Generado: ${new Date().toLocaleDateString('es-ES')}`,
-    pageWidth - 15,
-    yPos,
-    { align: 'right' }
-  );
+  doc.text(`Generado: ${new Date().toLocaleDateString('es-ES')}`, pageWidth - 15, yPos, {
+    align: 'right',
+  });
 
   return doc;
 }

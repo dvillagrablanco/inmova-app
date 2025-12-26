@@ -1,6 +1,6 @@
 /**
  * Web Vitals - Monitoreo de Core Web Vitals
- * 
+ *
  * Captura y reporta métricas de performance críticas:
  * - LCP (Largest Contentful Paint): < 2.5s
  * - FID (First Input Delay): < 100ms
@@ -40,7 +40,7 @@ const THRESHOLDS = {
 function getRating(metric: string, value: number): 'good' | 'needs-improvement' | 'poor' {
   const threshold = THRESHOLDS[metric as keyof typeof THRESHOLDS];
   if (!threshold) return 'good';
-  
+
   if (value <= threshold.good) return 'good';
   if (value <= threshold.poor) return 'needs-improvement';
   return 'poor';
@@ -64,7 +64,7 @@ async function sendToAnalytics(metric: VitalReport) {
         }),
       });
     }
-    
+
     // Log en desarrollo
     if (process.env.NODE_ENV === 'development') {
       console.log(`[Web Vital] ${metric.name}:`, {
@@ -113,19 +113,19 @@ export async function initWebVitals() {
     // Intentar importar web-vitals dinámicamente
     // Si no está disponible, fallar silenciosamente
     const webVitals = await import('web-vitals').catch(() => null);
-    
+
     if (!webVitals) {
       // Web vitals no disponible, continuar sin él
       return;
     }
-    
+
     const { onCLS, onFCP, onLCP, onTTFB, onINP } = webVitals;
-    
+
     onCLS(reportWebVitals);
     onFCP(reportWebVitals);
     onLCP(reportWebVitals);
     onTTFB(reportWebVitals);
-    
+
     // INP (Interaction to Next Paint) - reemplaza FID en web-vitals v3+
     if (onINP) {
       onINP(reportWebVitals);

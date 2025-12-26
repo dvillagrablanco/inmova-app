@@ -42,15 +42,11 @@ export async function addSyncJob(
   }
 
   try {
-    const job = await queue.add(
-      data.type,
-      data,
-      {
-        priority: options?.priority,
-        delay: options?.delay,
-        repeat: options?.repeat,
-      }
-    );
+    const job = await queue.add(data.type, data, {
+      priority: options?.priority,
+      delay: options?.delay,
+      repeat: options?.repeat,
+    });
 
     logger.info(`✅ Sync job ${job.id} added to queue: ${data.type}`);
     return job.id || null;
@@ -152,7 +148,7 @@ export async function scheduleBackup(companyId: string): Promise<string | null> 
  */
 export async function getSyncQueueStats(): Promise<any> {
   const queue = getSyncQueue();
-  
+
   if (!queue) {
     return { available: false };
   }

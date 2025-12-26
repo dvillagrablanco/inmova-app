@@ -19,7 +19,7 @@ export default function Error({
   useEffect(() => {
     // Log error to error reporting service
     console.error('Global error:', error);
-    
+
     // Send to Sentry
     if (typeof window !== 'undefined' && (window as any).Sentry) {
       (window as any).Sentry.captureException(error);
@@ -38,32 +38,29 @@ export default function Error({
                   <AlertTriangle className="h-10 w-10 text-white" />
                 </div>
               </div>
-              
+
               {/* Title */}
               <div className="text-center space-y-2">
-                <h1 className="text-3xl font-bold text-gray-900">
-                  ¡Ups! Algo salió mal
-                </h1>
+                <h1 className="text-3xl font-bold text-gray-900">¡Ups! Algo salió mal</h1>
                 <p className="text-gray-600 text-lg">
-                  Ha ocurrido un error inesperado. No te preocupes, nuestro equipo ha sido notificado.
+                  Ha ocurrido un error inesperado. No te preocupes, nuestro equipo ha sido
+                  notificado.
                 </p>
               </div>
-              
+
               {/* Error digest (for support) */}
               {error.digest && (
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                   <p className="text-sm text-gray-600">
                     <span className="font-semibold">ID del error:</span>{' '}
-                    <code className="text-xs bg-gray-200 px-2 py-1 rounded">
-                      {error.digest}
-                    </code>
+                    <code className="text-xs bg-gray-200 px-2 py-1 rounded">{error.digest}</code>
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
                     Proporciona este ID al soporte técnico para una ayuda más rápida
                   </p>
                 </div>
               )}
-              
+
               {/* Error message in development */}
               {process.env.NODE_ENV === 'development' && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -85,7 +82,7 @@ export default function Error({
                   )}
                 </div>
               )}
-              
+
               {/* Actions */}
               <div className="space-y-3">
                 <Button
@@ -96,7 +93,7 @@ export default function Error({
                   <RefreshCcw className="h-5 w-5 mr-2" />
                   Intentar de nuevo
                 </Button>
-                
+
                 <div className="flex gap-3">
                   <Button
                     onClick={() => (window.location.href = '/')}
@@ -116,7 +113,7 @@ export default function Error({
                   </Button>
                 </div>
               </div>
-              
+
               {/* Help text */}
               <div className="text-center pt-4 border-t border-gray-200">
                 <p className="text-sm text-gray-500">

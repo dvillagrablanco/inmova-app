@@ -54,10 +54,7 @@ export class ColivingSpacesService {
           },
         },
       },
-      orderBy: [
-        { prioridad: 'desc' },
-        { fechaSolicitud: 'asc' },
-      ],
+      orderBy: [{ prioridad: 'desc' }, { fechaSolicitud: 'asc' }],
     });
 
     return waitlist;
@@ -73,10 +70,7 @@ export class ColivingSpacesService {
         status: 'activa',
         fechaDeseada: fechaDisponible,
       },
-      orderBy: [
-        { prioridad: 'desc' },
-        { fechaSolicitud: 'asc' },
-      ],
+      orderBy: [{ prioridad: 'desc' }, { fechaSolicitud: 'asc' }],
       take: 5, // Notificar a los primeros 5
     });
 
@@ -123,7 +117,9 @@ export class ColivingSpacesService {
         horaInicio: waitlistEntry.horaInicio,
         horaFin: waitlistEntry.horaFin,
         estado: 'confirmada',
-        monto: waitlistEntry.space.requierePago ? waitlistEntry.space.costoPorHora! * waitlistEntry.duracionHoras : 0,
+        monto: waitlistEntry.space.requierePago
+          ? waitlistEntry.space.costoPorHora! * waitlistEntry.duracionHoras
+          : 0,
         pagado: !waitlistEntry.space.requierePago,
       },
     });
@@ -375,9 +371,8 @@ export class ColivingSpacesService {
     });
 
     // Calcular promedio
-    const promedio = ratings.length > 0
-      ? ratings.reduce((sum, r) => sum + r.puntuacion, 0) / ratings.length
-      : 0;
+    const promedio =
+      ratings.length > 0 ? ratings.reduce((sum, r) => sum + r.puntuacion, 0) / ratings.length : 0;
 
     return {
       ratings,
@@ -421,16 +416,17 @@ export class ColivingSpacesService {
       return sum + horas;
     }, 0);
 
-    const promedioPersonas = reservations
-      .filter((r: any) => r.numeroPersonas)
-      .reduce((sum: number, r: any) => sum + (r.numeroPersonas || 0), 0) / reservations.length;
+    const promedioPersonas =
+      reservations
+        .filter((r: any) => r.numeroPersonas)
+        .reduce((sum: number, r: any) => sum + (r.numeroPersonas || 0), 0) / reservations.length;
 
     // Calcular índice de desgaste (0-100)
     const indiceDesgaste = Math.min(
       100,
       (horasUso / 200) * 50 + // Horas de uso (50% del peso)
-      (promedioPersonas / 10) * 30 + // Personas por uso (30% del peso)
-      (reservations.length / 50) * 20 // Número de reservas (20% del peso)
+        (promedioPersonas / 10) * 30 + // Personas por uso (30% del peso)
+        (reservations.length / 50) * 20 // Número de reservas (20% del peso)
     );
 
     // Determinar si necesita mantenimiento
@@ -447,13 +443,15 @@ export class ColivingSpacesService {
         nivelUrgencia = 'alta';
         fechaSugerida = addDays(new Date(), 7);
         costoEstimado = 300;
-        descripcion = 'Desgaste crítico detectado. Se recomienda mantenimiento correctivo inmediato.';
+        descripcion =
+          'Desgaste crítico detectado. Se recomienda mantenimiento correctivo inmediato.';
       } else if (indiceDesgaste > 60) {
         tipoMantenimiento = 'preventivo';
         nivelUrgencia = 'media';
         fechaSugerida = addDays(new Date(), 15);
         costoEstimado = 150;
-        descripcion = 'Desgaste moderado. Se recomienda mantenimiento preventivo en las próximas semanas.';
+        descripcion =
+          'Desgaste moderado. Se recomienda mantenimiento preventivo en las próximas semanas.';
       }
     }
 

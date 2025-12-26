@@ -6,20 +6,27 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Check, 
-  Loader2, 
-  SkipForward, 
-  ArrowRight, 
-  Clock, 
+import {
+  Check,
+  Loader2,
+  SkipForward,
+  ArrowRight,
+  Clock,
   PlayCircle,
   FileText,
   Zap,
-  AlertCircle
+  AlertCircle,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -63,11 +70,11 @@ interface OnboardingProgressTrackerProps {
   className?: string;
 }
 
-export function OnboardingProgressTracker({ 
-  userId, 
-  onTaskComplete, 
+export function OnboardingProgressTracker({
+  userId,
+  onTaskComplete,
   onTaskSkip,
-  className 
+  className,
 }: OnboardingProgressTrackerProps) {
   const router = useRouter();
   const [progress, setProgress] = useState<OnboardingProgress | null>(null);
@@ -84,14 +91,14 @@ export function OnboardingProgressTracker({
     try {
       setLoading(true);
       const response = await fetch('/api/onboarding/progress');
-      
+
       if (!response.ok) {
         throw new Error('Error al cargar progreso');
       }
 
       const data = await response.json();
       setProgress(data);
-      
+
       // Establecer tarea actual (primera no completada)
       const currentTask = data.tasks.find(
         (t: OnboardingTask) => t.status === 'pending' || t.status === 'in_progress'
@@ -119,22 +126,22 @@ export function OnboardingProgressTracker({
 
   const handleCompleteTask = async (taskId: string) => {
     try {
-      const task = tasks.find(t => t.taskId === taskId);
+      const task = tasks.find((t) => t.taskId === taskId);
       const response = await fetch('/api/onboarding/task/complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ taskId })
+        body: JSON.stringify({ taskId }),
       });
 
       if (response.ok) {
         await loadProgress(); // Recargar progreso
         onTaskComplete?.(taskId);
-        
+
         // Track analytics
         if (task) {
           trackOnboardingTaskComplete(taskId, task.title, progress);
         }
-        
+
         // Si el progreso es 100%, trackear completación total
         if (progress >= 100) {
           trackOnboardingComplete('user', estimatedTimeRemaining, tasks.length);
@@ -147,17 +154,17 @@ export function OnboardingProgressTracker({
 
   const handleSkipTask = async (taskId: string) => {
     try {
-      const task = tasks.find(t => t.taskId === taskId);
+      const task = tasks.find((t) => t.taskId === taskId);
       const response = await fetch('/api/onboarding/task/skip', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ taskId })
+        body: JSON.stringify({ taskId }),
       });
 
       if (response.ok) {
         await loadProgress();
         onTaskSkip?.(taskId);
-        
+
         // Track analytics
         if (task) {
           trackOnboardingTaskSkip(taskId, task.title, progress);
@@ -205,7 +212,7 @@ export function OnboardingProgressTracker({
 
   if (loading) {
     return (
-      <Card className={cn("w-full", className)}>
+      <Card className={cn('w-full', className)}>
         <CardContent className="p-8 flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <span className="ml-3 text-muted-foreground">Cargando progreso...</span>
@@ -216,19 +223,14 @@ export function OnboardingProgressTracker({
 
   if (error) {
     return (
-      <Card className={cn("w-full border-red-200", className)}>
+      <Card className={cn('w-full border-red-200', className)}>
         <CardContent className="p-8">
           <div className="flex items-start gap-3">
             <AlertCircle className="h-6 w-6 text-red-600 flex-shrink-0 mt-1" />
             <div>
               <h3 className="font-semibold text-red-900">Error al cargar progreso</h3>
               <p className="text-sm text-red-700 mt-1">{error}</p>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="mt-3"
-                onClick={loadProgress}
-              >
+              <Button variant="outline" size="sm" className="mt-3" onClick={loadProgress}>
                 Reintentar
               </Button>
             </div>
@@ -243,7 +245,7 @@ export function OnboardingProgressTracker({
   }
 
   return (
-    <Card className={cn("w-full", className)}>
+    <Card className={cn('w-full', className)}>
       <CardHeader className="border-b">
         <div className="flex items-center justify-between">
           <div>
@@ -256,7 +258,7 @@ export function OnboardingProgressTracker({
             {Math.round(progress.percentage)}%
           </Badge>
         </div>
-        
+
         <div className="mt-6">
           <Progress value={progress.percentage} className="h-3" />
           <div className="flex items-center justify-between mt-3 text-sm text-muted-foreground">
@@ -270,7 +272,7 @@ export function OnboardingProgressTracker({
           </div>
         </div>
       </CardHeader>
-      
+
       <CardContent className="p-6">
         <div className="space-y-3">
           <AnimatePresence>
@@ -285,10 +287,14 @@ export function OnboardingProgressTracker({
                 <div
                   className={cn(
                     'flex items-start gap-4 p-4 rounded-lg border-2 transition-all',
-                    task.taskId === currentTaskId && task.status !== 'completed' && 'border-primary bg-primary/5',
+                    task.taskId === currentTaskId &&
+                      task.status !== 'completed' &&
+                      'border-primary bg-primary/5',
                     task.status === 'completed' && 'border-green-200 bg-green-50/50 opacity-70',
                     task.status === 'skipped' && 'border-gray-200 bg-gray-50 opacity-60',
-                    task.status === 'pending' && task.taskId !== currentTaskId && 'border-gray-200 hover:border-gray-300'
+                    task.status === 'pending' &&
+                      task.taskId !== currentTaskId &&
+                      'border-gray-200 hover:border-gray-300'
                   )}
                 >
                   {/* Número de orden o icono de estado */}
@@ -296,14 +302,16 @@ export function OnboardingProgressTracker({
                     {task.status === 'completed' || task.status === 'skipped' ? (
                       getStatusIcon(task.status)
                     ) : (
-                      <span className={cn(
-                        task.taskId === currentTaskId ? 'text-primary' : 'text-gray-400'
-                      )}>
+                      <span
+                        className={cn(
+                          task.taskId === currentTaskId ? 'text-primary' : 'text-gray-400'
+                        )}
+                      >
                         {task.order + 1}
                       </span>
                     )}
                   </div>
-                  
+
                   {/* Contenido de la tarea */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-3">
@@ -311,13 +319,13 @@ export function OnboardingProgressTracker({
                         <h4 className="font-semibold text-base mb-1 flex items-center gap-2">
                           {task.title}
                           {task.isMandatory && (
-                            <Badge variant="destructive" className="text-xs">Obligatorio</Badge>
+                            <Badge variant="destructive" className="text-xs">
+                              Obligatorio
+                            </Badge>
                           )}
                         </h4>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          {task.description}
-                        </p>
-                        
+                        <p className="text-sm text-muted-foreground mb-2">{task.description}</p>
+
                         {/* Metadata de la tarea */}
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
@@ -333,7 +341,7 @@ export function OnboardingProgressTracker({
                           </span>
                         </div>
                       </div>
-                      
+
                       {/* Botones de acción */}
                       {task.status !== 'completed' && task.status !== 'skipped' && (
                         <div className="flex flex-col gap-2">
@@ -350,7 +358,7 @@ export function OnboardingProgressTracker({
                             {task.type === 'form' && 'Completar'}
                             <ArrowRight className="h-4 w-4 ml-2" />
                           </Button>
-                          
+
                           {!task.isMandatory && (
                             <Button
                               variant="ghost"
@@ -363,7 +371,7 @@ export function OnboardingProgressTracker({
                           )}
                         </div>
                       )}
-                      
+
                       {/* Estado completado */}
                       {task.status === 'completed' && (
                         <Badge variant="default" className="bg-green-600">
@@ -371,13 +379,9 @@ export function OnboardingProgressTracker({
                           Completado
                         </Badge>
                       )}
-                      
+
                       {/* Estado saltado */}
-                      {task.status === 'skipped' && (
-                        <Badge variant="secondary">
-                          Saltado
-                        </Badge>
-                      )}
+                      {task.status === 'skipped' && <Badge variant="secondary">Saltado</Badge>}
                     </div>
                   </div>
                 </div>
@@ -386,7 +390,7 @@ export function OnboardingProgressTracker({
           </AnimatePresence>
         </div>
       </CardContent>
-      
+
       {progress.percentage === 100 && (
         <CardFooter className="border-t bg-green-50">
           <div className="w-full text-center py-4">

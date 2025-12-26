@@ -1,7 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
@@ -30,16 +37,16 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
       'INMOVA automatiza todos tus procesos inmobiliarios',
       'Accede a 88 módulos especializados',
       'Inteligencia artificial incluida en toda la plataforma',
-      'Soporte 24/7 con chatbot inteligente'
+      'Soporte 24/7 con chatbot inteligente',
     ],
     tips: [
       'Este tour toma solo 3 minutos',
       'Puedes saltarlo y volver después desde Ayuda',
-      'Todos los módulos tienen tutoriales integrados'
+      'Todos los módulos tienen tutoriales integrados',
     ],
     icon: '🎉',
     estimatedTime: '30 seg',
-    videoUrl: 'https://www.youtube.com/embed/zm55Gdl5G1Q'
+    videoUrl: 'https://www.youtube.com/embed/zm55Gdl5G1Q',
   },
   {
     id: 'buildings',
@@ -49,17 +56,17 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
       'Crea edificios con información completa',
       'Sube fotos, planos y documentos',
       'Organiza por zonas y grupos',
-      'Vista en mapa georreferenciado'
+      'Vista en mapa georreferenciado',
     ],
     action: { label: 'Crear Primer Edificio', route: '/edificios/nuevo' },
     tips: [
       'Puedes importar edificios desde Excel',
       'Cada edificio puede tener unidades ilimitadas',
-      'Configura alertas de mantenimiento preventivo'
+      'Configura alertas de mantenimiento preventivo',
     ],
     icon: '🏛️',
     estimatedTime: '45 seg',
-    videoUrl: 'https://www.youtube.com/embed/zm55Gdl5G1Q'
+    videoUrl: 'https://www.youtube.com/embed/zm55Gdl5G1Q',
   },
   {
     id: 'units',
@@ -69,17 +76,17 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
       'Crea diferentes tipos de unidades',
       'Gestiona disponibilidad en tiempo real',
       'Configura precios dinámicos',
-      'Alquiler tradicional o por habitaciones'
+      'Alquiler tradicional o por habitaciones',
     ],
     action: { label: 'Ver Unidades', route: '/unidades' },
     tips: [
       'Las unidades vacías se destacan automáticamente',
       'Puedes clonar configuraciones para ahorrar tiempo',
-      'Sistema de pricing dinámico basado en temporada'
+      'Sistema de pricing dinámico basado en temporada',
     ],
     icon: '🏠',
     estimatedTime: '40 seg',
-    videoUrl: 'https://www.youtube.com/embed/zm55Gdl5G1Q'
+    videoUrl: 'https://www.youtube.com/embed/zm55Gdl5G1Q',
   },
   {
     id: 'tenants',
@@ -89,17 +96,17 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
       'Sistema de verificación automático',
       'Scoring de solvencia con IA',
       'Portal de autoservicio para inquilinos',
-      'Chat integrado y notificaciones'
+      'Chat integrado y notificaciones',
     ],
     action: { label: 'Gestionar Inquilinos', route: '/inquilinos' },
     tips: [
       'El screening reduce morosidad en 70%',
       'Inquilinos pueden pagar online desde su portal',
-      'Sistema de referencias automático'
+      'Sistema de referencias automático',
     ],
     icon: '👥',
     estimatedTime: '50 seg',
-    videoUrl: 'https://www.youtube.com/embed/zm55Gdl5G1Q'
+    videoUrl: 'https://www.youtube.com/embed/zm55Gdl5G1Q',
   },
   {
     id: 'automation',
@@ -109,17 +116,17 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
       'Recordatorios de pago automáticos',
       'Renovación de contratos sin intervención',
       'Gestión de morosidad automatizada',
-      'Reportes y análisis periódicos'
+      'Reportes y análisis periódicos',
     ],
     action: { label: 'Configurar Automatizaciones', route: '/automatizacion' },
     tips: [
       'Las automatizaciones ahorran 15 horas/semana',
       'IA predice morosidad con 85% de precisión',
-      'Workflows personalizables sin código'
+      'Workflows personalizables sin código',
     ],
     icon: '⚡',
     estimatedTime: '45 seg',
-    videoUrl: 'https://www.youtube.com/embed/zm55Gdl5G1Q'
+    videoUrl: 'https://www.youtube.com/embed/zm55Gdl5G1Q',
   },
   {
     id: 'dashboard',
@@ -129,17 +136,17 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
       'KPIs actualizados en tiempo real',
       'Análisis predictivo con IA',
       'Alertas proactivas de problemas',
-      'Módulo BI con 50+ reportes'
+      'Módulo BI con 50+ reportes',
     ],
     action: { label: 'Explorar Dashboard', route: '/dashboard' },
     tips: [
       'Dashboard personalizable a tus necesidades',
       'Exporta cualquier gráfico con un clic',
-      'Acceso móvil completo'
+      'Acceso móvil completo',
     ],
     icon: '📊',
     estimatedTime: '30 seg',
-    videoUrl: 'https://www.youtube.com/embed/zm55Gdl5G1Q'
+    videoUrl: 'https://www.youtube.com/embed/zm55Gdl5G1Q',
   },
   {
     id: 'complete',
@@ -149,16 +156,16 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
       'Tienes acceso a 88 módulos completos',
       'Soporte 24/7 con chatbot IA',
       'Base de conocimiento con 100+ artículos',
-      'Webinars mensuales gratuitos'
+      'Webinars mensuales gratuitos',
     ],
     tips: [
       'Usa el chatbot IA si tienes dudas (ícono abajo a la derecha)',
       'Cada módulo tiene ayuda contextual',
-      'Explora los 88 módulos desde el menú lateral'
+      'Explora los 88 módulos desde el menú lateral',
     ],
     icon: '🎖️',
-    estimatedTime: '30 seg'
-  }
+    estimatedTime: '30 seg',
+  },
 ];
 
 interface OnboardingTourEnhancedProps {
@@ -226,7 +233,7 @@ export function OnboardingTourEnhanced({ onComplete }: OnboardingTourEnhancedPro
             >
               <X className="h-4 w-4" />
             </Button>
-            
+
             <div className="flex items-start gap-2 sm:gap-4">
               <div className="text-4xl sm:text-6xl flex-shrink-0">{step.icon}</div>
               <div className="flex-1 min-w-0">
@@ -241,13 +248,13 @@ export function OnboardingTourEnhanced({ onComplete }: OnboardingTourEnhancedPro
                 </CardDescription>
               </div>
             </div>
-            
+
             <Progress value={progress} className="mt-3 sm:mt-4 h-2" />
             <p className="text-xs sm:text-sm text-gray-500 mt-2">
               Paso {currentStep + 1} de {ONBOARDING_STEPS.length}
             </p>
           </CardHeader>
-          
+
           <CardContent className="space-y-3 sm:space-y-4 px-4 sm:px-6">
             {/* Video Tutorial */}
             {step.videoUrl && (
@@ -306,7 +313,10 @@ export function OnboardingTourEnhanced({ onComplete }: OnboardingTourEnhancedPro
               </h4>
               <ul className="space-y-1.5">
                 {step.tips.map((tip, index) => (
-                  <li key={index} className="text-xs sm:text-sm text-blue-800 flex items-start gap-2">
+                  <li
+                    key={index}
+                    className="text-xs sm:text-sm text-blue-800 flex items-start gap-2"
+                  >
                     <span className="text-blue-600 flex-shrink-0">•</span>
                     <span className="flex-1">{tip}</span>
                   </li>
@@ -314,7 +324,7 @@ export function OnboardingTourEnhanced({ onComplete }: OnboardingTourEnhancedPro
               </ul>
             </div>
           </CardContent>
-          
+
           <CardFooter className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-0 pt-4 border-t px-4 sm:px-6">
             <Button
               variant="outline"
@@ -325,23 +335,29 @@ export function OnboardingTourEnhanced({ onComplete }: OnboardingTourEnhancedPro
               <ArrowLeft className="h-4 w-4 mr-2" />
               Anterior
             </Button>
-            
+
             <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               {currentStep < ONBOARDING_STEPS.length - 1 && (
                 <Button variant="ghost" onClick={handleSkip} className="w-full sm:w-auto text-sm">
                   Saltar tour
                 </Button>
               )}
-              
+
               {step.action && (
-                <Button onClick={handleAction} className="gradient-primary shadow-lg w-full sm:w-auto text-sm">
+                <Button
+                  onClick={handleAction}
+                  className="gradient-primary shadow-lg w-full sm:w-auto text-sm"
+                >
                   <span className="truncate">{step.action.label}</span>
                   <Zap className="h-4 w-4 ml-2 flex-shrink-0" />
                 </Button>
               )}
-              
+
               {!step.action && (
-                <Button onClick={handleNext} className="gradient-primary shadow-lg w-full sm:w-auto text-sm">
+                <Button
+                  onClick={handleNext}
+                  className="gradient-primary shadow-lg w-full sm:w-auto text-sm"
+                >
                   {currentStep === ONBOARDING_STEPS.length - 1 ? (
                     <>
                       <Check className="h-4 w-4 mr-2 flex-shrink-0" />

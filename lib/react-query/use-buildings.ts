@@ -36,7 +36,7 @@ export function useBuilding(buildingId: string) {
  */
 export function useCreateBuilding() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (data: Partial<Building>) => {
       const response = await fetch('/api/buildings', {
@@ -44,17 +44,17 @@ export function useCreateBuilding() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      
+
       if (!response.ok) throw new Error('Error al crear edificio');
       return response.json() as Promise<Building>;
     },
     onSuccess: (newBuilding) => {
       // Actualizar cache optimistamente
-      queryClient.setQueryData(
-        ['buildings', newBuilding.companyId],
-        (old: Building[] = []) => [...old, newBuilding]
-      );
-      
+      queryClient.setQueryData(['buildings', newBuilding.companyId], (old: Building[] = []) => [
+        ...old,
+        newBuilding,
+      ]);
+
       // Invalidar queries relacionadas
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
       queryClient.invalidateQueries({ queryKey: ['buildings'] });
@@ -67,7 +67,7 @@ export function useCreateBuilding() {
  */
 export function useUpdateBuilding() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<Building> }) => {
       const response = await fetch(`/api/buildings/${id}`, {
@@ -75,19 +75,17 @@ export function useUpdateBuilding() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      
+
       if (!response.ok) throw new Error('Error al actualizar edificio');
       return response.json() as Promise<Building>;
     },
     onSuccess: (updatedBuilding) => {
       // Actualizar cache del edificio individual
       queryClient.setQueryData(['building', updatedBuilding.id], updatedBuilding);
-      
+
       // Actualizar en la lista
-      queryClient.setQueryData(
-        ['buildings', updatedBuilding.companyId],
-        (old: Building[] = []) =>
-          old.map((b) => (b.id === updatedBuilding.id ? updatedBuilding : b))
+      queryClient.setQueryData(['buildings', updatedBuilding.companyId], (old: Building[] = []) =>
+        old.map((b) => (b.id === updatedBuilding.id ? updatedBuilding : b))
       );
     },
   });
@@ -98,23 +96,22 @@ export function useUpdateBuilding() {
  */
 export function useDeleteBuilding() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (id: string) => {
       const response = await fetch(`/api/buildings/${id}`, {
         method: 'DELETE',
       });
-      
+
       if (!response.ok) throw new Error('Error al eliminar edificio');
       return { id };
     },
     onSuccess: ({ id }) => {
       // Remover de todas las queries de buildings
-      queryClient.setQueriesData(
-        { queryKey: ['buildings'] },
-        (old: Building[] | undefined) => old?.filter((b) => b.id !== id)
+      queryClient.setQueriesData({ queryKey: ['buildings'] }, (old: Building[] | undefined) =>
+        old?.filter((b) => b.id !== id)
       );
-      
+
       // Invalidar queries relacionadas
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
     },
@@ -127,7 +124,7 @@ export function useDeleteBuilding() {
  */
 export function usePrefetchBuilding() {
   const queryClient = useQueryClient();
-  
+
   return (buildingId: string) => {
     queryClient.prefetchQuery({
       queryKey: ['building', buildingId],

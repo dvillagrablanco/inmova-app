@@ -23,10 +23,7 @@ export async function POST(request: NextRequest) {
     const { tenantId } = body;
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: 'Se requiere tenantId' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Se requiere tenantId' }, { status: 400 });
     }
 
     // Obtener datos del inquilino
@@ -38,10 +35,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!tenant) {
-      return NextResponse.json(
-        { error: 'Inquilino no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Inquilino no encontrado' }, { status: 404 });
     }
 
     // Sincronizar con Zucchetti (modo demo)
@@ -55,9 +49,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error al sincronizar cliente con Zucchetti:', error);
-    return NextResponse.json(
-      { error: 'Error al sincronizar cliente' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al sincronizar cliente' }, { status: 500 });
   }
 }

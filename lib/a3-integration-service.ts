@@ -1,16 +1,16 @@
 // @ts-nocheck
 /**
  * A3 Software Integration Service
- * 
+ *
  * Servicio de integración con A3 Software (Wolters Kluwer)
  * Sistema ERP y de gestión empresarial líder en España
- * 
+ *
  * Características:
  * - Gestión de clientes
  * - Emisión de facturas
  * - Registro de pagos
  * - Contabilidad analítica
- * 
+ *
  * Documentación API: https://www.wolterskluwer.com/es-es/solutions/a3software
  */
 
@@ -82,16 +82,16 @@ class A3IntegrationService {
       apiUrl: process.env.A3_API_URL || 'https://api.a3software.com/v1',
       companyId: process.env.A3_COMPANY_ID || '',
       username: process.env.A3_USERNAME || '',
-      password: process.env.A3_PASSWORD || ''
+      password: process.env.A3_PASSWORD || '',
     };
 
     this.client = axios.create({
       baseURL: this.config.apiUrl,
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-API-Key': this.config.apiKey
-      }
+        Accept: 'application/json',
+        'X-API-Key': this.config.apiKey,
+      },
     });
   }
 
@@ -114,7 +114,7 @@ class A3IntegrationService {
       const response = await this.client.post('/auth/login', {
         username: this.config.username,
         password: this.config.password,
-        companyId: this.config.companyId
+        companyId: this.config.companyId,
       });
 
       this.sessionToken = response.data.token;
@@ -154,7 +154,7 @@ class A3IntegrationService {
       provincia: customer.province,
       pais: customer.country || 'ES',
       formaPago: customer.paymentMethod || 'TRANSFERENCIA',
-      diasPago: customer.paymentDays || 30
+      diasPago: customer.paymentDays || 30,
     });
 
     return response.data;
@@ -177,7 +177,7 @@ class A3IntegrationService {
     await this.ensureAuthenticated();
 
     const response = await this.client.get('/customers/search', {
-      params: { nif: taxId }
+      params: { nif: taxId },
     });
 
     return response.data?.items?.[0] || null;
@@ -205,14 +205,14 @@ class A3IntegrationService {
       fecha: invoice.date,
       fechaVencimiento: invoice.dueDate,
       moneda: invoice.currency || 'EUR',
-      lineas: invoice.lines.map(line => ({
+      lineas: invoice.lines.map((line) => ({
         descripcion: line.description,
         cantidad: line.quantity,
         precioUnitario: line.unitPrice,
         tipoIVA: line.taxRate,
-        descuento: line.discount || 0
+        descuento: line.discount || 0,
       })),
-      observaciones: invoice.notes
+      observaciones: invoice.notes,
     });
 
     return response.data;
@@ -241,7 +241,7 @@ class A3IntegrationService {
       importe: payment.amount,
       formaPago: payment.paymentMethod,
       cuentaBancaria: payment.bankAccount,
-      referencia: payment.reference
+      referencia: payment.reference,
     });
 
     return response.data;
@@ -253,7 +253,7 @@ class A3IntegrationService {
   async syncTenantToCustomer(tenantId: string, companyId: string): Promise<any> {
     const tenant = await prisma.tenant.findUnique({
       where: { id: tenantId },
-      include: { units: { include: { building: true } } }
+      include: { units: { include: { building: true } } },
     });
 
     if (!tenant || tenant.companyId !== companyId) {
@@ -282,7 +282,7 @@ class A3IntegrationService {
       province: 'Madrid',
       country: 'ES',
       paymentMethod: 'TRANSFERENCIA',
-      paymentDays: 5
+      paymentDays: 5,
     };
 
     return await this.createCustomer(customer);
@@ -296,8 +296,8 @@ class A3IntegrationService {
       where: { id: contractId },
       include: {
         tenant: true,
-        unit: { include: { building: true } }
-      }
+        unit: { include: { building: true } },
+      },
     });
 
     if (!contract || contract.tenant.companyId !== companyId) {
@@ -310,7 +310,7 @@ class A3IntegrationService {
     // Crear factura
     const invoice: A3Invoice = {
       customerId: customer.id,
-      series: 'ALQ',  // Serie para alquileres
+      series: 'ALQ', // Serie para alquileres
       date: new Date().toISOString().split('T')[0],
       dueDate: new Date(new Date().setDate(contract.diaPago || 5)).toISOString().split('T')[0],
       currency: 'EUR',
@@ -319,11 +319,11 @@ class A3IntegrationService {
           description: `Renta mensual - ${contract.unit?.numero} (${contract.unit?.building?.nombre})`,
           quantity: 1,
           unitPrice: contract.rentaMensual,
-          taxRate: 0,  // Alquileres residenciales exentos de IVA en España
-          discount: 0
-        }
+          taxRate: 0, // Alquileres residenciales exentos de IVA en España
+          discount: 0,
+        },
       ],
-      notes: `Contrato: ${contractId}\nPeríodo: ${contract.fechaInicio.toLocaleDateString('es-ES')} - ${contract.fechaFin.toLocaleDateString('es-ES')}`
+      notes: `Contrato: ${contractId}\nPeríodo: ${contract.fechaInicio.toLocaleDateString('es-ES')} - ${contract.fechaFin.toLocaleDateString('es-ES')}`,
     };
 
     if (contract.deposito) {
@@ -332,7 +332,7 @@ class A3IntegrationService {
         quantity: 1,
         unitPrice: contract.deposito,
         taxRate: 0,
-        discount: 0
+        discount: 0,
       });
     }
 
@@ -349,10 +349,10 @@ class A3IntegrationService {
         contract: {
           include: {
             tenant: true,
-            unit: { include: { building: true } }
-          }
-        }
-      }
+            unit: { include: { building: true } },
+          },
+        },
+      },
     });
 
     if (!payment || payment.contract.tenant.companyId !== companyId) {
@@ -364,11 +364,12 @@ class A3IntegrationService {
 
     const a3Payment: A3Payment = {
       customerId: customer.id,
-      invoiceId: '',  // TODO: Implementar almacenamiento de a3InvoiceId en Payment
-      date: payment.fechaPago?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
+      invoiceId: '', // TODO: Implementar almacenamiento de a3InvoiceId en Payment
+      date:
+        payment.fechaPago?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
       amount: payment.monto,
       paymentMethod: this.mapPaymentMethod(payment.metodoPago),
-      reference: `INMOVA-${paymentId}`
+      reference: `INMOVA-${paymentId}`,
     };
 
     return await this.registerPayment(a3Payment);
@@ -379,10 +380,10 @@ class A3IntegrationService {
    */
   private mapPaymentMethod(method: string | null): string {
     const mapping: { [key: string]: string } = {
-      'transferencia': 'TRANSFERENCIA',
-      'tarjeta': 'TARJETA',
-      'efectivo': 'EFECTIVO',
-      'domiciliacion': 'DOMICILIACION'
+      transferencia: 'TRANSFERENCIA',
+      tarjeta: 'TARJETA',
+      efectivo: 'EFECTIVO',
+      domiciliacion: 'DOMICILIACION',
     };
 
     return mapping[method?.toLowerCase() || 'transferencia'] || 'TRANSFERENCIA';
@@ -396,7 +397,8 @@ class A3IntegrationService {
       if (!this.isConfigured()) {
         return {
           success: false,
-          message: 'A3 Software no configurado. Por favor, añade las credenciales en las variables de entorno.'
+          message:
+            'A3 Software no configurado. Por favor, añade las credenciales en las variables de entorno.',
         };
       }
 
@@ -407,12 +409,12 @@ class A3IntegrationService {
 
       return {
         success: true,
-        message: `Conectado exitosamente a A3 Software (${response.data.razonSocial || 'Cuenta activa'})`
+        message: `Conectado exitosamente a A3 Software (${response.data.razonSocial || 'Cuenta activa'})`,
       };
     } catch (error: any) {
       return {
         success: false,
-        message: `Error de conexión: ${error.response?.data?.message || error.message}`
+        message: `Error de conexión: ${error.response?.data?.message || error.message}`,
       };
     }
   }
