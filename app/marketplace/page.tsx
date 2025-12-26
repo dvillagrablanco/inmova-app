@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/layout/sidebar';
@@ -8,1322 +8,385 @@ import { Header } from '@/components/layout/header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
-import { toast } from 'sonner';
-import {
-  Home,
-  ArrowLeft,
-  Store,
-  FileText,
-  Briefcase,
-  Star,
-  Plus,
+  ShoppingBag,
   Search,
-  Calendar,
+  Star,
+  TrendingUp,
+  Users,
+  Wrench,
+  Sparkles,
+  Wifi,
+  Shield,
   DollarSign,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
-  Edit,
-  Trash2,
-  MoreVertical,
+  Calendar,
+  Heart,
+  Filter,
 } from 'lucide-react';
-import { usePermissions } from '@/lib/hooks/usePermissions';
-import { format } from 'date-fns';
-import logger, { logError } from '@/lib/logger';
+import { toast } from 'sonner';
+import logger from '@/lib/logger';
 
-interface Provider {
+interface Service {
   id: string;
-  nombre: string;
-  tipo: string;
-  rating?: number;
-}
-
-interface Building {
-  id: string;
-  nombre: string;
-}
-
-interface Unit {
-  id: string;
-  numero: string;
-  buildingId: string;
-}
-
-interface Quote {
-  id: string;
-  titulo: string;
-  descripcion: string;
-  servicioRequerido: string;
-  urgencia: string;
-  estado: string;
-  fechaSolicitud: string;
-  montoCotizado?: number;
-  provider: Provider;
-  building?: Building;
-  unit?: Unit;
-}
-
-interface Job {
-  id: string;
-  titulo: string;
-  descripcion: string;
-  estado: string;
-  fechaInicio: string;
-  fechaFin?: string;
-  montoTotal: number;
-  montoPagado: number;
-  provider: Provider;
-  building?: Building;
-  unit?: Unit;
-  reviews: any[];
-}
-
-interface Review {
-  id: string;
-  calificacion: number;
-  puntualidad?: number;
-  calidad?: number;
-  comunicacion?: number;
-  comentario?: string;
-  recomendaria: boolean;
-  createdAt: string;
-  provider: Provider;
-  job: Job;
-}
-
-interface Stats {
-  totalQuotes: number;
-  pendingQuotes: number;
-  activeJobs: number;
-  completedJobs: number;
-  totalReviews: number;
-  avgRating: number;
-  topProviders: any[];
-}
-
-export default function MarketplacePage() {
-  const { data: session, status } = useSession() || {};
-  const router = useRouter();
-  const { canCreate } = usePermissions();
-
-  const [quotes, setQuotes] = useState<Quote[]>([]);
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [providers, setProviders] = useState<Provider[]>([]);
-  const [buildings, setBuildings] = useState<Building[]>([]);
-  const [units, setUnits] = useState<Unit[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const [openQuoteDialog, setOpenQuoteDialog] = useState(false);
-  const [openJobDialog, setOpenJobDialog] = useState(false);
-  const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
-  const [editingJob, setEditingJob] = useState<Job | null>(null);
-  const [deletingItem, setDeletingItem] = useState<{
-    type: string;
+  name: string;
+  category: string;
+  provider: {
     id: string;
     name: string;
-  } | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
+    verified: boolean;
+    rating: number;
+    reviews: number;
+  };
+  description: string;
+  price: number;
+  priceType: 'fixed' | 'hourly' | 'monthly';
+  image: string;
+  featured: boolean;
+  tags: string[];
+}
 
-  const [quoteForm, setQuoteForm] = useState({
-    providerId: 'auto-suggest',
-    buildingId: 'no-building',
-    unitId: 'no-unit',
-    titulo: '',
-    descripcion: '',
-    servicioRequerido: '',
-    urgencia: 'media',
-  });
+interface MarketplaceStats {
+  totalServices: number;
+  totalBookings: number;
+  totalRevenue: number;
+  commissionRate: number;
+}
 
-  const [jobForm, setJobForm] = useState({
-    providerId: '',
-    quoteId: '',
-    buildingId: '',
-    unitId: '',
-    titulo: '',
-    descripcion: '',
-    fechaInicio: '',
-    montoTotal: '',
-    garantiaMeses: '',
-    notasTrabajo: '',
-  });
+const CATEGORIES = [
+  { id: 'cleaning', name: 'Limpieza', icon: Sparkles },
+  { id: 'maintenance', name: 'Reparaciones', icon: Wrench },
+  { id: 'internet', name: 'Internet & TV', icon: Wifi },
+  { id: 'insurance', name: 'Seguros', icon: Shield },
+  { id: 'other', name: 'Otros', icon: ShoppingBag },
+];
+
+export default function MarketplacePage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [services, setServices] = useState<Service[]>([]);
+  const [stats, setStats] = useState<MarketplaceStats | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [favorites, setFavorites] = useState<string[]>([]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');
     } else if (status === 'authenticated') {
-      fetchData();
+      loadMarketplaceData();
     }
   }, [status, router]);
 
-  const fetchData = async () => {
-    setLoading(true);
+  const loadMarketplaceData = async () => {
     try {
-      const [quotesRes, jobsRes, reviewsRes, statsRes, providersRes, buildingsRes, unitsRes] =
-        await Promise.all([
-          fetch('/api/marketplace/quotes'),
-          fetch('/api/marketplace/jobs'),
-          fetch('/api/marketplace/reviews'),
-          fetch('/api/marketplace/stats'),
-          fetch('/api/providers'),
-          fetch('/api/buildings'),
-          fetch('/api/units'),
-        ]);
-
-      const [
-        quotesData,
-        jobsData,
-        reviewsData,
-        statsData,
-        providersData,
-        buildingsData,
-        unitsData,
-      ] = await Promise.all([
-        quotesRes.json(),
-        jobsRes.json(),
-        reviewsRes.json(),
-        statsRes.json(),
-        providersRes.json(),
-        buildingsRes.json(),
-        unitsRes.json(),
+      setLoading(true);
+      const [servicesRes, statsRes] = await Promise.all([
+        fetch('/api/marketplace/services'),
+        fetch('/api/marketplace/stats'),
       ]);
 
-      setQuotes(quotesData);
-      setJobs(jobsData);
-      setReviews(reviewsData);
-      setStats(statsData);
-      setProviders(providersData);
-      setBuildings(buildingsData);
-      setUnits(unitsData);
+      if (servicesRes.ok) {
+        const data = await servicesRes.json();
+        setServices(data);
+      }
+
+      if (statsRes.ok) {
+        const data = await statsRes.json();
+        setStats(data);
+      }
     } catch (error) {
-      logger.error('Error fetching data:', error);
-      toast.error('Error al cargar los datos');
+      logger.error('Error loading marketplace data:', error);
+      toast.error('Error al cargar marketplace');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreateQuote = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      // Map special values to null
-      const formData = {
-        ...quoteForm,
-        providerId: quoteForm.providerId === 'auto-suggest' ? null : quoteForm.providerId,
-        buildingId: quoteForm.buildingId === 'no-building' ? null : quoteForm.buildingId,
-        unitId: quoteForm.unitId === 'no-unit' ? null : quoteForm.unitId,
-      };
+  const filteredServices = services.filter((service) => {
+    const matchesSearch = service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      service.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' || service.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
-      const res = await fetch('/api/marketplace/quotes', {
+  const handleBookService = async (serviceId: string) => {
+    try {
+      const response = await fetch('/api/marketplace/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ serviceId }),
       });
 
-      if (!res.ok) throw new Error('Error al crear cotización');
-
-      toast.success('Cotización creada exitosamente');
-      setOpenQuoteDialog(false);
-      setQuoteForm({
-        providerId: 'auto-suggest',
-        buildingId: 'no-building',
-        unitId: 'no-unit',
-        titulo: '',
-        descripcion: '',
-        servicioRequerido: '',
-        urgencia: 'media',
-      });
-      fetchData();
-    } catch (error) {
-      logger.error('Error creating quote:', error);
-      toast.error('Error al crear la cotización');
-    }
-  };
-
-  const handleCreateJob = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const res = await fetch('/api/marketplace/jobs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(jobForm),
-      });
-
-      if (!res.ok) throw new Error('Error al crear trabajo');
-
-      toast.success('Trabajo creado exitosamente');
-      setOpenJobDialog(false);
-      setJobForm({
-        providerId: '',
-        quoteId: '',
-        buildingId: '',
-        unitId: '',
-        titulo: '',
-        descripcion: '',
-        fechaInicio: '',
-        montoTotal: '',
-        garantiaMeses: '',
-        notasTrabajo: '',
-      });
-      fetchData();
-    } catch (error) {
-      logger.error('Error creating job:', error);
-      toast.error('Error al crear el trabajo');
-    }
-  };
-
-  const handleEditQuote = (quote: Quote) => {
-    setEditingQuote(quote);
-    setQuoteForm({
-      providerId: quote.provider.id,
-      buildingId: quote.building?.id || '',
-      unitId: quote.unit?.id || '',
-      titulo: quote.titulo,
-      descripcion: quote.descripcion,
-      servicioRequerido: quote.servicioRequerido,
-      urgencia: quote.urgencia,
-    });
-    setOpenQuoteDialog(true);
-  };
-
-  const handleUpdateQuote = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingQuote) return;
-
-    try {
-      const res = await fetch(`/api/marketplace/quotes/${editingQuote.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(quoteForm),
-      });
-
-      if (!res.ok) throw new Error('Error al actualizar cotización');
-
-      toast.success('Cotización actualizada exitosamente');
-      setOpenQuoteDialog(false);
-      setEditingQuote(null);
-      setQuoteForm({
-        providerId: '',
-        buildingId: '',
-        unitId: '',
-        titulo: '',
-        descripcion: '',
-        servicioRequerido: '',
-        urgencia: 'media',
-      });
-      fetchData();
-    } catch (error) {
-      logger.error('Error updating quote:', error);
-      toast.error('Error al actualizar la cotización');
-    }
-  };
-
-  const handleEditJob = (job: Job) => {
-    setEditingJob(job);
-    setJobForm({
-      providerId: job.provider.id,
-      quoteId: '',
-      buildingId: job.building?.id || '',
-      unitId: job.unit?.id || '',
-      titulo: job.titulo,
-      descripcion: job.descripcion,
-      fechaInicio: job.fechaInicio ? new Date(job.fechaInicio).toISOString().split('T')[0] : '',
-      montoTotal: job.montoTotal.toString(),
-      garantiaMeses: '',
-      notasTrabajo: '',
-    });
-    setOpenJobDialog(true);
-  };
-
-  const handleUpdateJob = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingJob) return;
-
-    try {
-      const res = await fetch(`/api/marketplace/jobs/${editingJob.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(jobForm),
-      });
-
-      if (!res.ok) throw new Error('Error al actualizar trabajo');
-
-      toast.success('Trabajo actualizado exitosamente');
-      setOpenJobDialog(false);
-      setEditingJob(null);
-      setJobForm({
-        providerId: '',
-        quoteId: '',
-        buildingId: '',
-        unitId: '',
-        titulo: '',
-        descripcion: '',
-        fechaInicio: '',
-        montoTotal: '',
-        garantiaMeses: '',
-        notasTrabajo: '',
-      });
-      fetchData();
-    } catch (error) {
-      logger.error('Error updating job:', error);
-      toast.error('Error al actualizar el trabajo');
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!deletingItem) return;
-
-    try {
-      const endpoint =
-        deletingItem.type === 'quote'
-          ? `/api/marketplace/quotes/${deletingItem.id}`
-          : deletingItem.type === 'job'
-            ? `/api/marketplace/jobs/${deletingItem.id}`
-            : `/api/marketplace/reviews/${deletingItem.id}`;
-
-      const res = await fetch(endpoint, {
-        method: 'DELETE',
-      });
-
-      if (!res.ok) throw new Error(`Error al eliminar ${deletingItem.type}`);
-
-      toast.success(
-        `${deletingItem.type === 'quote' ? 'Cotización' : deletingItem.type === 'job' ? 'Trabajo' : 'Reseña'} eliminado exitosamente`
-      );
-      setDeletingItem(null);
-      fetchData();
-    } catch (error) {
-      logger.error(`Error deleting ${deletingItem.type}:`, error);
-      toast.error(`Error al eliminar ${deletingItem.type}`);
-    }
-  };
-
-  const handleDialogClose = (open: boolean, type: 'quote' | 'job') => {
-    if (!open) {
-      if (type === 'quote') {
-        setEditingQuote(null);
-        setQuoteForm({
-          providerId: '',
-          buildingId: '',
-          unitId: '',
-          titulo: '',
-          descripcion: '',
-          servicioRequerido: '',
-          urgencia: 'media',
-        });
+      if (response.ok) {
+        toast.success('Servicio solicitado correctamente');
+        router.push('/marketplace/mis-reservas');
       } else {
-        setEditingJob(null);
-        setJobForm({
-          providerId: '',
-          quoteId: '',
-          buildingId: '',
-          unitId: '',
-          titulo: '',
-          descripcion: '',
-          fechaInicio: '',
-          montoTotal: '',
-          garantiaMeses: '',
-          notasTrabajo: '',
-        });
+        toast.error('Error al solicitar servicio');
       }
+    } catch (error) {
+      logger.error('Error booking service:', error);
+      toast.error('Error al solicitar servicio');
     }
-    if (type === 'quote') {
-      setOpenQuoteDialog(open);
+  };
+
+  const toggleFavorite = (serviceId: string) => {
+    if (favorites.includes(serviceId)) {
+      setFavorites(favorites.filter((id) => id !== serviceId));
     } else {
-      setOpenJobDialog(open);
+      setFavorites([...favorites, serviceId]);
     }
   };
 
-  const filteredQuotes = useMemo(() => {
-    return quotes.filter(
-      (quote) =>
-        quote.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        quote.descripcion.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        quote.provider.nombre.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [quotes, searchTerm]);
-
-  const filteredJobs = useMemo(() => {
-    return jobs.filter(
-      (job) =>
-        job.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.descripcion.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.provider.nombre.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [jobs, searchTerm]);
-
-  const getQuoteStatusBadge = (estado: string) => {
-    const variants: Record<string, string> = {
-      solicitada: 'bg-blue-100 text-blue-800',
-      en_revision: 'bg-yellow-100 text-yellow-800',
-      cotizada: 'bg-purple-100 text-purple-800',
-      aceptada: 'bg-green-100 text-green-800',
-      rechazada: 'bg-red-100 text-red-800',
-      expirada: 'bg-gray-100 text-gray-800',
-    };
-    return variants[estado] || 'bg-gray-100 text-gray-800';
+  const formatPrice = (price: number, type: string) => {
+    const formatted = `€${price}`;
+    if (type === 'hourly') return `${formatted}/hora`;
+    if (type === 'monthly') return `${formatted}/mes`;
+    return formatted;
   };
 
-  const getJobStatusBadge = (estado: string) => {
-    const variants: Record<string, string> = {
-      pendiente: 'bg-yellow-100 text-yellow-800',
-      en_progreso: 'bg-blue-100 text-blue-800',
-      completado: 'bg-green-100 text-green-800',
-      cancelado: 'bg-red-100 text-red-800',
-    };
-    return variants[estado] || 'bg-gray-100 text-gray-800';
-  };
-
-  if (loading) {
+  if (status === 'loading' || loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-sm text-muted-foreground">Cargando...</p>
+      <div className="flex h-screen overflow-hidden bg-gradient-bg">
+        <Sidebar />
+        <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
+          <Header />
+          <main className="flex-1 overflow-y-auto">
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                <p className="mt-4 text-muted-foreground">Cargando marketplace...</p>
+              </div>
+            </div>
+          </main>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-muted/30">
+    <div className="flex h-screen overflow-hidden bg-gradient-bg">
       <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
+      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
         <Header />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-          {/* Breadcrumbs y Botón Volver */}
-          <div className="mb-6 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push('/dashboard')}
-                className="gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Volver al Dashboard
-              </Button>
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/dashboard">
-                      <Home className="h-4 w-4" />
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>Marketplace</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
-            </div>
-          </div>
-
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Store className="h-6 w-6 text-primary" />
-              </div>
-              <h1 className="text-3xl font-bold">Marketplace de Servicios</h1>
-            </div>
-            <p className="text-muted-foreground">
-              Gestiona cotizaciones, trabajos y reseñas de proveedores de servicios
-            </p>
-          </div>
-
-          {/* KPIs */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Cotizaciones</CardTitle>
-                <FileText className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats?.totalQuotes || 0}</div>
-                <p className="text-xs text-muted-foreground">
-                  {stats?.pendingQuotes || 0} pendientes
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto space-y-6">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  Marketplace de Servicios
+                </h1>
+                <p className="text-muted-foreground mt-2">
+                  Contrata servicios verificados para tus propiedades e inquilinos
                 </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Trabajos Activos</CardTitle>
-                <Clock className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats?.activeJobs || 0}</div>
-                <p className="text-xs text-muted-foreground">En progreso</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Completados</CardTitle>
-                <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats?.completedJobs || 0}</div>
-                <p className="text-xs text-muted-foreground">Trabajos finalizados</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Rating Promedio</CardTitle>
-                <Star className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {stats?.avgRating ? stats.avgRating.toFixed(1) : '0.0'}
-                </div>
-                <p className="text-xs text-muted-foreground">{stats?.totalReviews || 0} reseñas</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Barra de búsqueda */}
-          <div className="mb-6">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Buscar cotizaciones, trabajos o proveedores..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+              </div>
+              <Button onClick={() => router.push('/marketplace/proveedor')}>
+                <Users className="h-4 w-4 mr-2" />
+                Ser Proveedor
+              </Button>
             </div>
-          </div>
 
-          {/* Tabs */}
-          <Tabs defaultValue="quotes" className="space-y-6">
-            <TabsList>
-              <TabsTrigger value="quotes" className="gap-2">
-                <FileText className="h-4 w-4" />
-                Cotizaciones
-              </TabsTrigger>
-              <TabsTrigger value="jobs" className="gap-2">
-                <Briefcase className="h-4 w-4" />
-                Trabajos
-              </TabsTrigger>
-              <TabsTrigger value="reviews" className="gap-2">
-                <Star className="h-4 w-4" />
-                Reseñas
-              </TabsTrigger>
-            </TabsList>
+            {/* Stats */}
+            {stats && (
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm font-medium">Servicios Disponibles</CardTitle>
+                      <ShoppingBag className="h-4 w-4 text-purple-600" />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stats.totalServices}</div>
+                  </CardContent>
+                </Card>
 
-            {/* Cotizaciones Tab */}
-            <TabsContent value="quotes" className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">Cotizaciones Solicitadas</h2>
-                {canCreate && (
-                  <Dialog
-                    open={openQuoteDialog}
-                    onOpenChange={(open) => handleDialogClose(open, 'quote')}
-                  >
-                    <DialogTrigger asChild>
-                      <Button className="gap-2">
-                        <Plus className="h-4 w-4" />
-                        Nueva Cotización
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle>
-                          {editingQuote ? 'Editar Cotización' : 'Solicitar Cotización'}
-                        </DialogTitle>
-                        <DialogDescription>
-                          Solicita una cotización de servicio a un proveedor
-                        </DialogDescription>
-                      </DialogHeader>
-                      <form
-                        onSubmit={editingQuote ? handleUpdateQuote : handleCreateQuote}
-                        className="space-y-4"
-                      >
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="titulo">Título *</Label>
-                            <Input
-                              id="titulo"
-                              required
-                              value={quoteForm.titulo}
-                              onChange={(e) =>
-                                setQuoteForm({ ...quoteForm, titulo: e.target.value })
-                              }
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="servicioRequerido">Tipo de Servicio *</Label>
-                            <Input
-                              id="servicioRequerido"
-                              required
-                              value={quoteForm.servicioRequerido}
-                              onChange={(e) =>
-                                setQuoteForm({
-                                  ...quoteForm,
-                                  servicioRequerido: e.target.value,
-                                })
-                              }
-                              placeholder="Ej: Plomería, Electricidad"
-                            />
-                          </div>
-                        </div>
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm font-medium">Reservas Totales</CardTitle>
+                      <Calendar className="h-4 w-4 text-blue-600" />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stats.totalBookings}</div>
+                  </CardContent>
+                </Card>
 
-                        <div className="space-y-2">
-                          <Label htmlFor="descripcion">Descripción *</Label>
-                          <Textarea
-                            id="descripcion"
-                            required
-                            value={quoteForm.descripcion}
-                            onChange={(e) =>
-                              setQuoteForm({ ...quoteForm, descripcion: e.target.value })
-                            }
-                            rows={4}
-                          />
-                        </div>
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm font-medium">Facturación</CardTitle>
+                      <DollarSign className="h-4 w-4 text-green-600" />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">€{stats.totalRevenue.toLocaleString()}</div>
+                  </CardContent>
+                </Card>
 
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="providerId">Proveedor (Opcional)</Label>
-                            <Select
-                              value={quoteForm.providerId}
-                              onValueChange={(value) =>
-                                setQuoteForm({ ...quoteForm, providerId: value })
-                              }
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Seleccionar proveedor" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="auto-suggest">Auto-sugerir</SelectItem>
-                                {providers.map((provider) => (
-                                  <SelectItem key={provider.id} value={provider.id}>
-                                    {provider.nombre} - {provider.tipo}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="urgencia">Urgencia</Label>
-                            <Select
-                              value={quoteForm.urgencia}
-                              onValueChange={(value) =>
-                                setQuoteForm({ ...quoteForm, urgencia: value })
-                              }
-                            >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="baja">Baja</SelectItem>
-                                <SelectItem value="media">Media</SelectItem>
-                                <SelectItem value="alta">Alta</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="buildingId">Edificio (Opcional)</Label>
-                            <Select
-                              value={quoteForm.buildingId}
-                              onValueChange={(value) =>
-                                setQuoteForm({ ...quoteForm, buildingId: value })
-                              }
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Seleccionar edificio" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="no-building">Ninguno</SelectItem>
-                                {buildings.map((building) => (
-                                  <SelectItem key={building.id} value={building.id}>
-                                    {building.nombre}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="unitId">Unidad (Opcional)</Label>
-                            <Select
-                              value={quoteForm.unitId}
-                              onValueChange={(value) =>
-                                setQuoteForm({ ...quoteForm, unitId: value })
-                              }
-                              disabled={!quoteForm.buildingId}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Seleccionar unidad" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="no-unit">Ninguna</SelectItem>
-                                {units
-                                  .filter((u) => u.buildingId === quoteForm.buildingId)
-                                  .map((unit) => (
-                                    <SelectItem key={unit.id} value={unit.id}>
-                                      {unit.numero}
-                                    </SelectItem>
-                                  ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-
-                        <div className="flex gap-2 justify-end">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setOpenQuoteDialog(false)}
-                          >
-                            Cancelar
-                          </Button>
-                          <Button type="submit">
-                            {editingQuote ? 'Actualizar Cotización' : 'Solicitar Cotización'}
-                          </Button>
-                        </div>
-                      </form>
-                    </DialogContent>
-                  </Dialog>
-                )}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm font-medium">Comisión</CardTitle>
+                      <TrendingUp className="h-4 w-4 text-orange-600" />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stats.commissionRate}%</div>
+                  </CardContent>
+                </Card>
               </div>
+            )}
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {filteredQuotes.length === 0 ? (
-                  <Card className="col-span-full">
-                    <CardContent className="flex flex-col items-center justify-center py-12">
-                      <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-                      <p className="text-muted-foreground text-center">
-                        No hay cotizaciones solicitadas
-                      </p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  filteredQuotes.map((quote) => (
-                    <Card key={quote.id}>
-                      <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <CardTitle className="text-lg">{quote.titulo}</CardTitle>
-                            <CardDescription className="mt-1">
-                              {quote.servicioRequerido}
-                            </CardDescription>
-                          </div>
-                          <Badge className={getQuoteStatusBadge(quote.estado)}>
-                            {quote.estado.replace('_', ' ')}
-                          </Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                          {quote.descripcion}
-                        </p>
-
-                        <div className="grid grid-cols-2 gap-2 text-sm">
-                          <div className="flex items-center gap-2">
-                            <Briefcase className="h-4 w-4 text-muted-foreground" />
-                            <span>{quote.provider.nombre}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                            <span>
-                              {quote.fechaSolicitud
-                                ? format(new Date(quote.fechaSolicitud), 'dd/MM/yyyy')
-                                : 'N/A'}
-                            </span>
-                          </div>
-                        </div>
-
-                        {quote.building && (
-                          <div className="flex items-center gap-2 text-sm bg-muted/50 p-2 rounded">
-                            <Home className="h-4 w-4 text-muted-foreground" />
-                            <span>
-                              {quote.building.nombre}
-                              {quote.unit && ` - Unidad ${quote.unit.numero}`}
-                            </span>
-                          </div>
-                        )}
-
-                        {quote.montoCotizado && (
-                          <div className="flex items-center gap-2 text-lg font-semibold text-green-600">
-                            <DollarSign className="h-5 w-5" />
-                            {quote.montoCotizado.toLocaleString('es-ES', {
-                              minimumFractionDigits: 2,
-                            })}
-                            €
-                          </div>
-                        )}
-
-                        <div className="flex items-center gap-2">
-                          <Badge
-                            variant="outline"
-                            className={
-                              quote.urgencia === 'alta'
-                                ? 'border-red-500 text-red-500'
-                                : quote.urgencia === 'media'
-                                  ? 'border-yellow-500 text-yellow-500'
-                                  : 'border-green-500 text-green-500'
-                            }
-                          >
-                            {quote.urgencia === 'alta'
-                              ? 'Urgente'
-                              : quote.urgencia === 'media'
-                                ? 'Media'
-                                : 'Baja'}
-                          </Badge>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
-                )}
-              </div>
-            </TabsContent>
-
-            {/* Trabajos Tab */}
-            <TabsContent value="jobs" className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">Trabajos</h2>
-                {canCreate && (
-                  <Dialog
-                    open={openJobDialog}
-                    onOpenChange={(open) => handleDialogClose(open, 'job')}
-                  >
-                    <DialogTrigger asChild>
-                      <Button className="gap-2">
-                        <Plus className="h-4 w-4" />
-                        Nuevo Trabajo
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle>
-                          {editingJob ? 'Editar Trabajo' : 'Registrar Trabajo'}
-                        </DialogTitle>
-                        <DialogDescription>Registra un nuevo trabajo de servicio</DialogDescription>
-                      </DialogHeader>
-                      <form
-                        onSubmit={editingJob ? handleUpdateJob : handleCreateJob}
-                        className="space-y-4"
-                      >
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="job-titulo">Título *</Label>
-                            <Input
-                              id="job-titulo"
-                              required
-                              value={jobForm.titulo}
-                              onChange={(e) => setJobForm({ ...jobForm, titulo: e.target.value })}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="job-providerId">Proveedor *</Label>
-                            <Select
-                              value={jobForm.providerId}
-                              onValueChange={(value) =>
-                                setJobForm({ ...jobForm, providerId: value })
-                              }
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Seleccionar" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {providers.map((provider) => (
-                                  <SelectItem key={provider.id} value={provider.id}>
-                                    {provider.nombre}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="job-descripcion">Descripción *</Label>
-                          <Textarea
-                            id="job-descripcion"
-                            required
-                            value={jobForm.descripcion}
-                            onChange={(e) =>
-                              setJobForm({ ...jobForm, descripcion: e.target.value })
-                            }
-                            rows={3}
-                          />
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="job-fechaInicio">Fecha Inicio *</Label>
-                            <Input
-                              id="job-fechaInicio"
-                              type="date"
-                              required
-                              value={jobForm.fechaInicio}
-                              onChange={(e) =>
-                                setJobForm({ ...jobForm, fechaInicio: e.target.value })
-                              }
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="job-montoTotal">Monto Total *</Label>
-                            <Input
-                              id="job-montoTotal"
-                              type="number"
-                              step="0.01"
-                              required
-                              value={jobForm.montoTotal}
-                              onChange={(e) =>
-                                setJobForm({ ...jobForm, montoTotal: e.target.value })
-                              }
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="job-garantia">Garantía (meses)</Label>
-                            <Input
-                              id="job-garantia"
-                              type="number"
-                              value={jobForm.garantiaMeses}
-                              onChange={(e) =>
-                                setJobForm({ ...jobForm, garantiaMeses: e.target.value })
-                              }
-                            />
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="job-notas">Notas del Trabajo</Label>
-                          <Textarea
-                            id="job-notas"
-                            value={jobForm.notasTrabajo}
-                            onChange={(e) =>
-                              setJobForm({ ...jobForm, notasTrabajo: e.target.value })
-                            }
-                            rows={2}
-                          />
-                        </div>
-
-                        <div className="flex gap-2 justify-end">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setOpenJobDialog(false)}
-                          >
-                            Cancelar
-                          </Button>
-                          <Button type="submit">
-                            {editingJob ? 'Actualizar Trabajo' : 'Crear Trabajo'}
-                          </Button>
-                        </div>
-                      </form>
-                    </DialogContent>
-                  </Dialog>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {filteredJobs.length === 0 ? (
-                  <Card className="col-span-full">
-                    <CardContent className="flex flex-col items-center justify-center py-12">
-                      <Briefcase className="h-12 w-12 text-muted-foreground mb-4" />
-                      <p className="text-muted-foreground text-center">
-                        No hay trabajos registrados
-                      </p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  filteredJobs.map((job) => (
-                    <Card key={job.id}>
-                      <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <CardTitle className="text-lg">{job.titulo}</CardTitle>
-                            <CardDescription className="mt-1">
-                              {job.provider.nombre}
-                            </CardDescription>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge className={getJobStatusBadge(job.estado)}>
-                              {job.estado.replace('_', ' ')}
-                            </Badge>
-                            {canCreate && (
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                                    <MoreVertical className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={() => handleEditJob(job)}>
-                                    <Edit className="mr-2 h-4 w-4" />
-                                    Editar
-                                  </DropdownMenuItem>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem
-                                    onClick={() =>
-                                      setDeletingItem({ type: 'job', id: job.id, name: job.titulo })
-                                    }
-                                    className="text-red-600"
-                                  >
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    Eliminar
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            )}
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                          {job.descripcion}
-                        </p>
-
-                        <div className="grid grid-cols-2 gap-2 text-sm">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                            <span>
-                              {job.fechaInicio
-                                ? format(new Date(job.fechaInicio), 'dd/MM/yyyy')
-                                : 'N/A'}
-                            </span>
-                          </div>
-                          {job.fechaFin && (
-                            <div className="flex items-center gap-2">
-                              <CheckCircle2 className="h-4 w-4 text-green-600" />
-                              <span>{format(new Date(job.fechaFin), 'dd/MM/yyyy')}</span>
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">Monto Total:</span>
-                            <span className="font-semibold">
-                              {job.montoTotal.toLocaleString('es-ES', {
-                                minimumFractionDigits: 2,
-                              })}
-                              €
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">Pagado:</span>
-                            <span className="font-semibold text-green-600">
-                              {job.montoPagado.toLocaleString('es-ES', {
-                                minimumFractionDigits: 2,
-                              })}
-                              €
-                            </span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div
-                              className="bg-green-600 h-2 rounded-full"
-                              style={{
-                                width: `${Math.min(
-                                  (job.montoPagado / job.montoTotal) * 100,
-                                  100
-                                )}%`,
-                              }}
-                            ></div>
-                          </div>
-                        </div>
-
-                        {job.building && (
-                          <div className="flex items-center gap-2 text-sm bg-muted/50 p-2 rounded">
-                            <Home className="h-4 w-4 text-muted-foreground" />
-                            <span>
-                              {job.building.nombre}
-                              {job.unit && ` - Unidad ${job.unit.numero}`}
-                            </span>
-                          </div>
-                        )}
-
-                        {job.reviews && job.reviews.length > 0 && (
-                          <div className="flex items-center gap-2 text-sm text-yellow-600">
-                            <Star className="h-4 w-4 fill-current" />
-                            <span>Reseña disponible</span>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))
-                )}
-              </div>
-            </TabsContent>
-
-            {/* Reseñas Tab */}
-            <TabsContent value="reviews" className="space-y-4">
-              <h2 className="text-xl font-semibold">Reseñas de Proveedores</h2>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {reviews.length === 0 ? (
-                  <Card className="col-span-full">
-                    <CardContent className="flex flex-col items-center justify-center py-12">
-                      <Star className="h-12 w-12 text-muted-foreground mb-4" />
-                      <p className="text-muted-foreground text-center">
-                        No hay reseñas registradas
-                      </p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  reviews.map((review) => (
-                    <Card key={review.id}>
-                      <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <CardTitle className="text-lg">{review.provider.nombre}</CardTitle>
-                            <CardDescription className="mt-1">{review.job.titulo}</CardDescription>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                            <span className="text-lg font-bold">
-                              {review.calificacion.toFixed(1)}
-                            </span>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        {review.comentario && (
-                          <p className="text-sm text-muted-foreground">"{review.comentario}"</p>
-                        )}
-
-                        <div className="grid grid-cols-2 gap-2">
-                          {review.puntualidad && (
-                            <div className="text-sm">
-                              <span className="text-muted-foreground">Puntualidad:</span>
-                              <span className="ml-2 font-medium">{review.puntualidad}/5</span>
-                            </div>
-                          )}
-                          {review.calidad && (
-                            <div className="text-sm">
-                              <span className="text-muted-foreground">Calidad:</span>
-                              <span className="ml-2 font-medium">{review.calidad}/5</span>
-                            </div>
-                          )}
-                          {review.comunicacion && (
-                            <div className="text-sm">
-                              <span className="text-muted-foreground">Comunicación:</span>
-                              <span className="ml-2 font-medium">{review.comunicacion}/5</span>
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          {review.recomendaria ? (
-                            <Badge className="bg-green-100 text-green-800">
-                              <CheckCircle2 className="h-3 w-3 mr-1" />
-                              Recomendado
-                            </Badge>
-                          ) : (
-                            <Badge className="bg-red-100 text-red-800">
-                              <AlertCircle className="h-3 w-3 mr-1" />
-                              No recomendado
-                            </Badge>
-                          )}
-                        </div>
-
-                        <div className="text-xs text-muted-foreground">
-                          {review.createdAt
-                            ? format(new Date(review.createdAt), "dd/MM/yyyy 'a las' HH:mm")
-                            : 'N/A'}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
-                )}
-              </div>
-            </TabsContent>
-          </Tabs>
-
-          {/* Top Proveedores */}
-          {stats?.topProviders && stats.topProviders.length > 0 && (
-            <Card className="mt-8">
-              <CardHeader>
-                <CardTitle>Mejores Proveedores</CardTitle>
-                <CardDescription>
-                  Proveedores con mejor calificación y más trabajos completados
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {stats.topProviders.map((provider: any, index: number) => (
-                    <div
-                      key={provider.id}
-                      className="flex items-center gap-4 p-4 border rounded-lg"
+            {/* Search & Filters */}
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Buscar servicios..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                  <div className="flex gap-2 overflow-x-auto pb-2">
+                    <Button
+                      variant={selectedCategory === 'all' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setSelectedCategory('all')}
                     >
-                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary font-bold">
-                        #{index + 1}
-                      </div>
+                      Todos
+                    </Button>
+                    {CATEGORIES.map((category) => {
+                      const Icon = category.icon;
+                      return (
+                        <Button
+                          key={category.id}
+                          variant={selectedCategory === category.id ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setSelectedCategory(category.id)}
+                        >
+                          <Icon className="h-3 w-3 mr-1" />
+                          {category.name}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Services Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredServices.map((service) => (
+                <Card key={service.id} className="hover:shadow-lg transition-shadow group">
+                  <div className="relative h-48 bg-gradient-to-br from-purple-100 to-pink-100 overflow-hidden">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <ShoppingBag className="h-16 w-16 text-purple-300" />
+                    </div>
+                    {service.featured && (
+                      <Badge className="absolute top-2 left-2 bg-yellow-500">
+                        <Star className="h-3 w-3 mr-1" />
+                        Destacado
+                      </Badge>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-2 right-2 bg-white/80 hover:bg-white"
+                      onClick={() => toggleFavorite(service.id)}
+                    >
+                      <Heart
+                        className={`h-4 w-4 ${
+                          favorites.includes(service.id) ? 'fill-red-500 text-red-500' : 'text-gray-600'
+                        }`}
+                      />
+                    </Button>
+                  </div>
+
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <h4 className="font-semibold">{provider.nombre}</h4>
-                        <p className="text-sm text-muted-foreground">{provider.tipo}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <div className="flex items-center gap-1">
-                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                            <span className="text-sm font-medium">
-                              {provider.stats.avgRating.toFixed(1)}
-                            </span>
-                          </div>
-                          <span className="text-xs text-muted-foreground">
-                            {provider.stats.completedJobs} trabajos
-                          </span>
-                        </div>
+                        <CardTitle className="text-lg">{service.name}</CardTitle>
+                        <CardDescription className="mt-1 line-clamp-2">
+                          {service.description}
+                        </CardDescription>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                  </CardHeader>
+
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
+                          <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
+                          <span className="font-semibold">{service.provider.rating}</span>
+                        </div>
+                        <span className="text-sm text-muted-foreground">
+                          ({service.provider.reviews} valoraciones)
+                        </span>
+                      </div>
+                      {service.provider.verified && (
+                        <Badge variant="outline" className="text-green-600 border-green-600">
+                          ✓ Verificado
+                        </Badge>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2 border-t">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Proveedor</p>
+                        <p className="font-medium">{service.provider.name}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-purple-600">
+                          {formatPrice(service.price, service.priceType)}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button
+                        className="flex-1"
+                        onClick={() => router.push(`/marketplace/servicios/${service.id}`)}
+                      >
+                        Ver Detalles
+                      </Button>
+                      <Button variant="outline" onClick={() => handleBookService(service.id)}>
+                        Contratar
+                      </Button>
+                    </div>
+
+                    <div className="flex gap-1 flex-wrap">
+                      {service.tags.slice(0, 3).map((tag, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {filteredServices.length === 0 && (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <ShoppingBag className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No se encontraron servicios</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Prueba con otra búsqueda o categoría
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </main>
       </div>
     </div>
