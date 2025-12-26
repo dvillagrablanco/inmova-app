@@ -11,9 +11,106 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   typescript: {
+    // Mantener en true para evitar timeouts en Vercel (ver IMPORTANTE_ANTES_DE_DESPLEGAR.md)
     ignoreBuildErrors: true,
   },
-  images: { unoptimized: true },
+  images: { 
+    unoptimized: true,
+    domains: [
+      'inmova-bucket.s3.amazonaws.com',
+      'inmova-bucket.s3.eu-west-1.amazonaws.com',
+      'lh3.googleusercontent.com',
+      'avatars.githubusercontent.com',
+    ],
+  },
+  
+  // Security Headers
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on'
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY'
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff'
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin'
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()'
+          }
+        ],
+      },
+      {
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, must-revalidate'
+          }
+        ],
+      },
+    ];
+  },
+  
+  // Redirects
+  async redirects() {
+    return [
+      {
+        source: '/home',
+        destination: '/',
+        permanent: true,
+      },
+    ];
+  },
+  
+  // Rewrites for API optimization
+  async rewrites() {
+    return {
+      beforeFiles: [],
+      afterFiles: [],
+      fallback: [],
+    };
+  },
+  
+  // Webpack optimizations
+  webpack: (config, { isServer }) => {
+    // Optimizaciones de bundle
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        crypto: false,
+      };
+    }
+    
+    return config;
+  },
+  
+  // Performance optimizations
+  swcMinify: true,
+  compress: true,
+  poweredByHeader: false,
+  
+  // Logging
+  logging: {
+    fetches: {
+      fullUrl: process.env.NODE_ENV === 'development',
+    },
+  },
 };
 
 module.exports = nextConfig;

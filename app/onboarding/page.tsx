@@ -32,7 +32,6 @@ import { motion } from 'framer-motion';
 export default function OnboardingPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Page tracking
   usePageTracking('/onboarding', 'Onboarding - INMOVA');
@@ -74,10 +73,10 @@ export default function OnboardingPage() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
-      <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
+      <Sidebar />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
+        <Header />
 
         <main className="flex-1 overflow-y-auto">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">

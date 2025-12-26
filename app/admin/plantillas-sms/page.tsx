@@ -38,7 +38,7 @@ import {
   Search,
   Filter,
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
 import {
   Dialog,

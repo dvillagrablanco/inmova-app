@@ -448,6 +448,37 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     }
   }, []);
 
+  // Prevenir scroll del body cuando el menú móvil está abierto
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      // Agregar clase para prevenir scroll
+      document.body.classList.add('sidebar-open');
+      
+      // Guardar el scroll actual
+      const scrollY = window.scrollY;
+      document.body.style.top = `-${scrollY}px`;
+      
+      return () => {
+        // Remover clase y restaurar scroll
+        document.body.classList.remove('sidebar-open');
+        document.body.style.top = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [isMobileMenuOpen]);
+
+  // Cerrar menú con tecla Escape
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isMobileMenuOpen) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isMobileMenuOpen]);
+
   // Guardar favoritos en localStorage
   const saveFavorites = (newFavorites: string[]) => {
     setFavorites(newFavorites);
@@ -582,32 +613,37 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
 
   return (
     <>
-      {/* Mobile menu button */}
+      {/* Mobile menu button - Fixed en la parte superior izquierda */}
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="lg:hidden fixed top-4 left-4 z-[70] p-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-xl shadow-2xl shadow-indigo-500/70 hover:shadow-indigo-600/90 hover:scale-110 active:scale-95 transition-all duration-200 border-2 border-white/30 backdrop-blur-md"
-        style={{ backgroundColor: 'rgba(79, 70, 229, 0.95)' }}
+        className="lg:hidden fixed top-3 left-3 z-[100] p-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-xl shadow-2xl hover:shadow-indigo-600/90 active:scale-95 transition-all duration-200 border-2 border-white/30 backdrop-blur-md touch-manipulation"
+        style={{ backgroundColor: 'rgba(79, 70, 229, 0.95)', minWidth: '52px', minHeight: '52px' }}
         aria-label={isMobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
       >
         {isMobileMenuOpen ? <X size={26} strokeWidth={2.5} /> : <Menu size={26} strokeWidth={2.5} />}
       </button>
 
-      {/* Overlay for mobile */}
+      {/* Overlay for mobile - Cubre toda la pantalla excepto el botón */}
       {isMobileMenuOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/60 z-[55]"
+          className="lg:hidden fixed inset-0 bg-black/70 z-[80] backdrop-blur-sm sidebar-overlay"
           onClick={() => setIsMobileMenuOpen(false)}
           aria-hidden="true"
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - Optimizado para móviles */}
       <aside
         className={cn(
-          'fixed top-0 left-0 z-[60] h-screen w-64 bg-black text-white transition-transform duration-300 ease-in-out overflow-hidden',
-          isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          'fixed top-0 left-0 z-[90] h-screen w-[85vw] max-w-[320px] sm:w-64 bg-black text-white transition-transform duration-300 ease-in-out overflow-hidden',
+          isMobileMenuOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'
         )}
         aria-label="Navegación principal"
+        style={{ 
+          maxHeight: '100vh',
+          touchAction: 'pan-y',
+          WebkitOverflowScrolling: 'touch'
+        }}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
@@ -646,8 +682,16 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
             )}
           </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-1 overflow-y-auto" data-sidebar-nav>
+          {/* Navigation - Mejorado para scroll en móviles */}
+          <nav 
+            className="flex-1 p-4 space-y-1 overflow-y-auto overscroll-contain" 
+            data-sidebar-nav
+            style={{ 
+              WebkitOverflowScrolling: 'touch',
+              scrollbarWidth: 'thin',
+              scrollbarColor: 'rgba(255, 255, 255, 0.3) transparent'
+            }}
+          >
             {/* Favorites Section */}
             {favoriteItems.length > 0 && !searchQuery && (
               <div className="mb-4">

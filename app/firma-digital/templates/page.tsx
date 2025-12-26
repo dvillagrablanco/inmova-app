@@ -93,7 +93,7 @@ export default function TemplatesPage() {
     return (
       <div className="flex h-screen">
         <Sidebar />
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col ml-0 lg:ml-64">
           <Header />
           <main className="flex-1 p-6">
             <LoadingState message="Cargando templates..." />
@@ -106,7 +106,7 @@ export default function TemplatesPage() {
   return (
     <div className="flex h-screen">
       <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
         <Header />
         <main className="flex-1 overflow-y-auto p-6 bg-gray-50 dark:bg-gray-900">
           {/* Header */}
