@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { authOptions } from '@/lib/auth-options';
 import { IntegrationManager, INTEGRATION_CATEGORIES } from '@/lib/integration-manager';
 
 /**
