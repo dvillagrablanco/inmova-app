@@ -325,340 +325,336 @@ function OrdenesTrabajoPage() {
   if (status === 'loading' || loading) {
     return (
       <AuthenticatedLayout>
-            <LoadingState message="Cargando órdenes de trabajo..." />
-          </AuthenticatedLayout>
+        <LoadingState message="Cargando órdenes de trabajo..." />
+      </AuthenticatedLayout>
     );
   }
 
   if (!session) return null;
 
   return (
-    <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto space-y-6">
-            {/* Botón Volver y Breadcrumbs */}
-            <div className="flex items-center gap-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push('/dashboard')}
-                className="gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Volver al Dashboard
+    <>
+      <AuthenticatedLayout>
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Botón Volver y Breadcrumbs */}
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/dashboard')}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Volver al Dashboard
+            </Button>
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/dashboard">
+                    <Home className="h-4 w-4" />
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Órdenes de Trabajo</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
+
+          {/* Header Section */}
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Órdenes de Trabajo</h1>
+              <p className="text-muted-foreground">Gestiona trabajos asignados a proveedores</p>
+            </div>
+            {canCreate && (
+              <Button onClick={() => handleOpenDialog()}>
+                <Plus className="mr-2 h-4 w-4" />
+                Nueva Orden
               </Button>
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/dashboard">
-                      <Home className="h-4 w-4" />
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>Órdenes de Trabajo</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
-            </div>
+            )}
+          </div>
 
-            {/* Header Section */}
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight">Órdenes de Trabajo</h1>
-                <p className="text-muted-foreground">Gestiona trabajos asignados a proveedores</p>
-              </div>
-              {canCreate && (
-                <Button onClick={() => handleOpenDialog()}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Nueva Orden
-                </Button>
-              )}
-            </div>
-
-            {/* Estadísticas */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Total</CardTitle>
-                  <ClipboardList className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.total}</div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Asignadas
-                  </CardTitle>
-                  <AlertCircle className="h-4 w-4 text-blue-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.asignadas}</div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    En Proceso
-                  </CardTitle>
-                  <Clock className="h-4 w-4 text-yellow-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.enProceso}</div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Completadas
-                  </CardTitle>
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.completadas}</div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Búsqueda y Filtros */}
+          {/* Estadísticas */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
-              <CardHeader>
-                <CardTitle>Buscar Órdenes</CardTitle>
-                <CardDescription>
-                  Filtra órdenes por título, proveedor, estado o tipo
-                </CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Total</CardTitle>
+                <ClipboardList className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Buscar por título, descripción, proveedor o edificio..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                  <Select value={estadoFilter} onValueChange={setEstadoFilter}>
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                      <SelectValue placeholder="Estado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos los estados</SelectItem>
-                      <SelectItem value="asignada">Asignada</SelectItem>
-                      <SelectItem value="en_progreso">En Progreso</SelectItem>
-                      <SelectItem value="completada">Completada</SelectItem>
-                      <SelectItem value="cancelada">Cancelada</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={tipoFilter} onValueChange={setTipoFilter}>
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                      <SelectValue placeholder="Tipo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos los tipos</SelectItem>
-                      <SelectItem value="instalacion">Instalación</SelectItem>
-                      <SelectItem value="reparacion">Reparación</SelectItem>
-                      <SelectItem value="mantenimiento">Mantenimiento</SelectItem>
-                      <SelectItem value="inspeccion">Inspección</SelectItem>
-                      <SelectItem value="limpieza">Limpieza</SelectItem>
-                      <SelectItem value="otro">Otro</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Filter Chips */}
-                <FilterChips
-                  filters={[
-                    ...(searchTerm
-                      ? [
-                          {
-                            id: 'search',
-                            label: 'Búsqueda',
-                            value: searchTerm,
-                          },
-                        ]
-                      : []),
-                    ...(estadoFilter !== 'all'
-                      ? [
-                          {
-                            id: 'estado',
-                            label: 'Estado',
-                            value: getEstadoLabel(estadoFilter),
-                          },
-                        ]
-                      : []),
-                    ...(tipoFilter !== 'all'
-                      ? [
-                          {
-                            id: 'tipo',
-                            label: 'Tipo',
-                            value: getTipoLabel(tipoFilter),
-                          },
-                        ]
-                      : []),
-                  ]}
-                  onRemove={(id) => {
-                    if (id === 'search') setSearchTerm('');
-                    else if (id === 'estado') setEstadoFilter('all');
-                    else if (id === 'tipo') setTipoFilter('all');
-                  }}
-                  onClearAll={() => {
-                    setSearchTerm('');
-                    setEstadoFilter('all');
-                    setTipoFilter('all');
-                  }}
-                />
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.total}</div>
               </CardContent>
             </Card>
 
-            {/* Lista de Órdenes */}
-            <div className="space-y-4">
-              {filteredOrdenes.length === 0 ? (
-                <EmptyState
-                  icon={<ClipboardList className="h-12 w-12" />}
-                  title={
-                    searchTerm || estadoFilter !== 'all' || tipoFilter !== 'all'
-                      ? 'No se encontraron órdenes'
-                      : 'No hay órdenes de trabajo'
-                  }
-                  description={
-                    searchTerm || estadoFilter !== 'all' || tipoFilter !== 'all'
-                      ? 'No se encontraron órdenes con los filtros aplicados. Intenta ajustar tu búsqueda.'
-                      : 'Comienza creando tu primera orden de trabajo para gestionar trabajos asignados a proveedores.'
-                  }
-                  action={
-                    canCreate && !searchTerm && estadoFilter === 'all' && tipoFilter === 'all'
-                      ? {
-                          label: 'Crear Primera Orden',
-                          onClick: () => handleOpenDialog(),
-                          icon: <Plus className="h-4 w-4" />,
-                        }
-                      : undefined
-                  }
-                />
-              ) : (
-                filteredOrdenes.map((orden) => (
-                  <Card key={orden.id} className="hover:shadow-lg transition-all duration-200">
-                    <CardContent className="p-4 sm:p-6">
-                      <div className="flex flex-col sm:flex-row gap-4">
-                        {/* Icono */}
-                        <div className="flex-shrink-0">
-                          <div className="p-3 bg-primary/10 rounded-lg">
-                            <ClipboardList className="h-6 w-6 text-primary" />
-                          </div>
-                        </div>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Asignadas
+                </CardTitle>
+                <AlertCircle className="h-4 w-4 text-blue-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.asignadas}</div>
+              </CardContent>
+            </Card>
 
-                        {/* Información Principal */}
-                        <div className="flex-1 space-y-3">
-                          {/* Título y Badges */}
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                            <h3 className="text-lg font-semibold break-words flex-1">
-                              {orden.titulo}
-                            </h3>
-                            <div className="flex gap-2">
-                              <Badge className={getEstadoBadgeVariant(orden.estado)}>
-                                {getEstadoLabel(orden.estado)}
-                              </Badge>
-                              <Badge variant="outline">{getTipoLabel(orden.tipo)}</Badge>
-                            </div>
-                          </div>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  En Proceso
+                </CardTitle>
+                <Clock className="h-4 w-4 text-yellow-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.enProceso}</div>
+              </CardContent>
+            </Card>
 
-                          {/* Descripción */}
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {orden.descripcion}
-                          </p>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Completadas
+                </CardTitle>
+                <CheckCircle className="h-4 w-4 text-green-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.completadas}</div>
+              </CardContent>
+            </Card>
+          </div>
 
-                          {/* Información del trabajo */}
-                          <div className="bg-muted/50 rounded-lg p-3 space-y-2">
-                            <div className="flex items-center gap-2 text-sm">
-                              <User className="h-4 w-4 text-primary" />
-                              <span className="font-medium">
-                                Proveedor: {orden.provider.nombre}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm">
-                              <Building2 className="h-4 w-4 text-primary" />
-                              <span className="font-medium">
-                                {orden.building.nombre}
-                                {orden.unit && ` - Unidad ${orden.unit.numero}`}
-                              </span>
-                            </div>
-                          </div>
+          {/* Búsqueda y Filtros */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Buscar Órdenes</CardTitle>
+              <CardDescription>Filtra órdenes por título, proveedor, estado o tipo</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar por título, descripción, proveedor o edificio..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <Select value={estadoFilter} onValueChange={setEstadoFilter}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Estado" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos los estados</SelectItem>
+                    <SelectItem value="asignada">Asignada</SelectItem>
+                    <SelectItem value="en_progreso">En Progreso</SelectItem>
+                    <SelectItem value="completada">Completada</SelectItem>
+                    <SelectItem value="cancelada">Cancelada</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={tipoFilter} onValueChange={setTipoFilter}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos los tipos</SelectItem>
+                    <SelectItem value="instalacion">Instalación</SelectItem>
+                    <SelectItem value="reparacion">Reparación</SelectItem>
+                    <SelectItem value="mantenimiento">Mantenimiento</SelectItem>
+                    <SelectItem value="inspeccion">Inspección</SelectItem>
+                    <SelectItem value="limpieza">Limpieza</SelectItem>
+                    <SelectItem value="otro">Otro</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-                          {/* Información Adicional */}
-                          <div className="grid grid-cols-2 gap-3 text-sm">
-                            {orden.fechaEstimada && (
-                              <div className="space-y-1">
-                                <div className="text-muted-foreground">Fecha Estimada</div>
-                                <div className="font-medium">
-                                  {new Date(orden.fechaEstimada).toLocaleDateString('es-ES')}
-                                </div>
-                              </div>
-                            )}
-                            {orden.costoTotal && (
-                              <div className="space-y-1">
-                                <div className="text-muted-foreground flex items-center gap-1">
-                                  <Euro className="h-3 w-3" />
-                                  Costo Total
-                                </div>
-                                <div className="font-bold text-lg">
-                                  €{orden.costoTotal.toLocaleString('es-ES')}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
+              {/* Filter Chips */}
+              <FilterChips
+                filters={[
+                  ...(searchTerm
+                    ? [
+                        {
+                          id: 'search',
+                          label: 'Búsqueda',
+                          value: searchTerm,
+                        },
+                      ]
+                    : []),
+                  ...(estadoFilter !== 'all'
+                    ? [
+                        {
+                          id: 'estado',
+                          label: 'Estado',
+                          value: getEstadoLabel(estadoFilter),
+                        },
+                      ]
+                    : []),
+                  ...(tipoFilter !== 'all'
+                    ? [
+                        {
+                          id: 'tipo',
+                          label: 'Tipo',
+                          value: getTipoLabel(tipoFilter),
+                        },
+                      ]
+                    : []),
+                ]}
+                onRemove={(id) => {
+                  if (id === 'search') setSearchTerm('');
+                  else if (id === 'estado') setEstadoFilter('all');
+                  else if (id === 'tipo') setTipoFilter('all');
+                }}
+                onClearAll={() => {
+                  setSearchTerm('');
+                  setEstadoFilter('all');
+                  setTipoFilter('all');
+                }}
+              />
+            </CardContent>
+          </Card>
 
-                        {/* Acciones */}
-                        <div className="flex sm:flex-col items-center gap-2 self-start">
-                          {canUpdate && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleOpenDialog(orden)}
-                              className="w-full sm:w-auto"
-                            >
-                              <Edit className="h-4 w-4 sm:mr-2" />
-                              <span className="hidden sm:inline">Editar</span>
-                            </Button>
-                          )}
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleOpenDialog(orden)}>
-                                <Eye className="h-4 w-4 mr-2" />
-                                Ver Detalles
-                              </DropdownMenuItem>
-                              {canDelete && (
-                                <DropdownMenuItem
-                                  onClick={() => handleDelete(orden.id)}
-                                  className="text-red-600"
-                                >
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Eliminar
-                                </DropdownMenuItem>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+          {/* Lista de Órdenes */}
+          <div className="space-y-4">
+            {filteredOrdenes.length === 0 ? (
+              <EmptyState
+                icon={<ClipboardList className="h-12 w-12" />}
+                title={
+                  searchTerm || estadoFilter !== 'all' || tipoFilter !== 'all'
+                    ? 'No se encontraron órdenes'
+                    : 'No hay órdenes de trabajo'
+                }
+                description={
+                  searchTerm || estadoFilter !== 'all' || tipoFilter !== 'all'
+                    ? 'No se encontraron órdenes con los filtros aplicados. Intenta ajustar tu búsqueda.'
+                    : 'Comienza creando tu primera orden de trabajo para gestionar trabajos asignados a proveedores.'
+                }
+                action={
+                  canCreate && !searchTerm && estadoFilter === 'all' && tipoFilter === 'all'
+                    ? {
+                        label: 'Crear Primera Orden',
+                        onClick: () => handleOpenDialog(),
+                        icon: <Plus className="h-4 w-4" />,
+                      }
+                    : undefined
+                }
+              />
+            ) : (
+              filteredOrdenes.map((orden) => (
+                <Card key={orden.id} className="hover:shadow-lg transition-all duration-200">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row gap-4">
+                      {/* Icono */}
+                      <div className="flex-shrink-0">
+                        <div className="p-3 bg-primary/10 rounded-lg">
+                          <ClipboardList className="h-6 w-6 text-primary" />
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
+
+                      {/* Información Principal */}
+                      <div className="flex-1 space-y-3">
+                        {/* Título y Badges */}
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                          <h3 className="text-lg font-semibold break-words flex-1">
+                            {orden.titulo}
+                          </h3>
+                          <div className="flex gap-2">
+                            <Badge className={getEstadoBadgeVariant(orden.estado)}>
+                              {getEstadoLabel(orden.estado)}
+                            </Badge>
+                            <Badge variant="outline">{getTipoLabel(orden.tipo)}</Badge>
+                          </div>
+                        </div>
+
+                        {/* Descripción */}
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {orden.descripcion}
+                        </p>
+
+                        {/* Información del trabajo */}
+                        <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+                          <div className="flex items-center gap-2 text-sm">
+                            <User className="h-4 w-4 text-primary" />
+                            <span className="font-medium">Proveedor: {orden.provider.nombre}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm">
+                            <Building2 className="h-4 w-4 text-primary" />
+                            <span className="font-medium">
+                              {orden.building.nombre}
+                              {orden.unit && ` - Unidad ${orden.unit.numero}`}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Información Adicional */}
+                        <div className="grid grid-cols-2 gap-3 text-sm">
+                          {orden.fechaEstimada && (
+                            <div className="space-y-1">
+                              <div className="text-muted-foreground">Fecha Estimada</div>
+                              <div className="font-medium">
+                                {new Date(orden.fechaEstimada).toLocaleDateString('es-ES')}
+                              </div>
+                            </div>
+                          )}
+                          {orden.costoTotal && (
+                            <div className="space-y-1">
+                              <div className="text-muted-foreground flex items-center gap-1">
+                                <Euro className="h-3 w-3" />
+                                Costo Total
+                              </div>
+                              <div className="font-bold text-lg">
+                                €{orden.costoTotal.toLocaleString('es-ES')}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Acciones */}
+                      <div className="flex sm:flex-col items-center gap-2 self-start">
+                        {canUpdate && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleOpenDialog(orden)}
+                            className="w-full sm:w-auto"
+                          >
+                            <Edit className="h-4 w-4 sm:mr-2" />
+                            <span className="hidden sm:inline">Editar</span>
+                          </Button>
+                        )}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleOpenDialog(orden)}>
+                              <Eye className="h-4 w-4 mr-2" />
+                              Ver Detalles
+                            </DropdownMenuItem>
+                            {canDelete && (
+                              <DropdownMenuItem
+                                onClick={() => handleDelete(orden.id)}
+                                className="text-red-600"
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Eliminar
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
-        </main>
-      </div>
+        </div>
+      </AuthenticatedLayout>
 
       {/* Dialog para Crear/Editar */}
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
@@ -856,7 +852,7 @@ function OrdenesTrabajoPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }
 

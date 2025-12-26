@@ -429,6 +429,7 @@ function MantenimientoPage() {
   // ========== RENDER PRINCIPAL ==========
   if (status === 'loading' || isLoading) {
     return (
+    <>
       <AuthenticatedLayout>
             <LoadingState message="Cargando mantenimiento..." />
           </AuthenticatedLayout>
@@ -438,7 +439,8 @@ function MantenimientoPage() {
   if (!session) return null;
 
   return (
-    <AuthenticatedLayout>
+    <>
+      <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Botón Volver y Breadcrumbs */}
             <div className="flex items-center gap-4">

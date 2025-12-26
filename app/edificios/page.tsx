@@ -343,6 +343,7 @@ function EdificiosPageContent() {
                 {filteredBuildings.map((building) => {
                   const tipoBadge = getTipoBadge(building.tipo);
                   return (
+    <>
                     <Card key={building.id} className="hover:shadow-lg transition-shadow">
                       <CardHeader>
                         <div className="flex items-start justify-between">
@@ -605,6 +606,7 @@ function EdificiosPageContent() {
             )}
       </div>
       </AuthenticatedLayout>
+    </>
 
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmationDialog
