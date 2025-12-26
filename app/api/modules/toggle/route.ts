@@ -18,9 +18,9 @@ export async function POST(req: NextRequest) {
     }
 
     const userRole = (session.user as any).role;
-    if (userRole !== 'administrador') {
+    if (userRole !== 'administrador' && userRole !== 'super_admin') {
       return NextResponse.json(
-        { error: 'Solo los administradores pueden modificar módulos' },
+        { error: 'Solo los administradores y superadministradores pueden modificar módulos' },
         { status: 403 }
       );
     }
