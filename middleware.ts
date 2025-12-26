@@ -1,137 +1,80 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-
 /**
- * Middleware de Next.js con protecciones de seguridad
- * - IP Whitelisting para rutas /admin
- * - Security Headers
- * - Rate limiting básico (implementado en Nginx)
+ * Middleware Global de Next.js
+ * Aplica seguridad, rate limiting y CSRF protection
  */
 
-// Obtener la IP real del cliente (considerando proxy de Cloudflare)
-function getClientIP(request: NextRequest): string {
-  // Cloudflare envía la IP real en CF-Connecting-IP
-  const cfIP = request.headers.get('CF-Connecting-IP');
-  if (cfIP) return cfIP;
+import { NextRequest, NextResponse } from 'next/server';
+import { rateLimitMiddleware } from './lib/rate-limiting';
+import { csrfProtectionMiddleware, addCsrfTokenToResponse } from './lib/csrf-protection';
 
-  // Fallback a X-Forwarded-For (puede contener múltiples IPs)
-  const forwardedFor = request.headers.get('X-Forwarded-For');
-  if (forwardedFor) {
-    return forwardedFor.split(',')[0].trim();
-  }
-
-  // Fallback a X-Real-IP
-  const realIP = request.headers.get('X-Real-IP');
-  if (realIP) return realIP;
-
-  // Último fallback (no debería usarse en producción detrás de proxy)
-  return request.ip || 'unknown';
-}
-
-// Verificar si una IP está en la lista blanca
-function isIPWhitelisted(ip: string): boolean {
-  // Lista blanca de IPs (configurable via variable de entorno)
-  // Formato: IP1,IP2,IP3 o CIDR (por simplicidad, usamos IPs exactas)
-  const whitelist = process.env.ADMIN_IP_WHITELIST?.split(',').map(i => i.trim()) || [];
-  
-  // Si la lista está vacía, permitir todas las IPs (modo permisivo durante configuración inicial)
-  if (whitelist.length === 0 || whitelist[0] === '') {
-    return true;
-  }
-
-  // Verificar si la IP está en la lista blanca
-  return whitelist.includes(ip);
-}
-
-// Logging de accesos a rutas /admin (para auditoría)
-function logAdminAccess(ip: string, path: string, allowed: boolean) {
-  const timestamp = new Date().toISOString();
-  const status = allowed ? '✅ ALLOWED' : '🚫 BLOCKED';
-  console.log(`[ADMIN ACCESS] ${timestamp} | ${status} | IP: ${ip} | Path: ${path}`);
-}
-
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Protección de IP Whitelisting para rutas /admin
-  if (pathname.startsWith('/admin')) {
-    const clientIP = getClientIP(request);
-    const isAllowed = isIPWhitelisted(clientIP);
-    
-    // Siempre loggear accesos a /admin para auditoría
-    logAdminAccess(clientIP, pathname, isAllowed);
+  // 1. Rate Limiting
+  const rateLimitResult = await rateLimitMiddleware(request);
+  if (rateLimitResult) {
+    return rateLimitResult; // Rate limit excedido
+  }
 
-    // Si no está permitido, bloquear acceso
-    if (!isAllowed) {
-      // Retornar 403 Forbidden con página custom
-      return new NextResponse(
-        JSON.stringify({
-          error: 'Access Denied',
-          message: 'Your IP address is not authorized to access this resource.',
-          ip: clientIP,
-          timestamp: new Date().toISOString(),
-        }),
-        {
-          status: 403,
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Content-Type-Options': 'nosniff',
-          },
-        }
-      );
+  // 2. CSRF Protection (solo para rutas API que modifican datos)
+  if (pathname.startsWith('/api/')) {
+    const csrfResult = await csrfProtectionMiddleware(request);
+    if (csrfResult) {
+      return csrfResult; // CSRF validation failed
     }
   }
 
-  // Protección similar para API /admin
-  if (pathname.startsWith('/api/admin')) {
-    const clientIP = getClientIP(request);
-    const isAllowed = isIPWhitelisted(clientIP);
-    
-    logAdminAccess(clientIP, pathname, isAllowed);
-
-    if (!isAllowed) {
-      return NextResponse.json(
-        {
-          error: 'Access Denied',
-          message: 'Your IP address is not authorized to access this API.',
-          ip: clientIP,
-          timestamp: new Date().toISOString(),
-        },
-        { 
-          status: 403,
-          headers: {
-            'X-Content-Type-Options': 'nosniff',
-          },
-        }
-      );
-    }
-  }
-
-  // Agregar security headers a todas las respuestas
+  // 3. Security Headers
   const response = NextResponse.next();
-  response.headers.set('X-Frame-Options', 'SAMEORIGIN');
+  
+  // Agregar headers de seguridad
+  response.headers.set('X-Frame-Options', 'DENY');
   response.headers.set('X-Content-Type-Options', 'nosniff');
-  response.headers.set('X-XSS-Protection', '1; mode=block');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  
+  // HSTS en producción
+  if (process.env.NODE_ENV === 'production') {
+    response.headers.set(
+      'Strict-Transport-Security',
+      'max-age=31536000; includeSubDomains; preload'
+    );
+  }
+  
+  // CSP (Content Security Policy)
+  response.headers.set(
+    'Content-Security-Policy',
+    [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com https://va.vercel-scripts.com",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: https: blob:",
+      "font-src 'self' data:",
+      "connect-src 'self' https://api.stripe.com https://vitals.vercel-insights.com",
+      "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join('; ')
+  );
+  
+  // Agregar CSRF token si es necesario
+  if (!pathname.startsWith('/_next') && !pathname.startsWith('/api/')) {
+    addCsrfTokenToResponse(response);
+  }
 
   return response;
 }
 
-// Configurar en qué rutas se ejecuta el middleware
+// Configurar qué rutas deben pasar por el middleware
 export const config = {
   matcher: [
     /*
-     * Ejecutar en:
-     * - /admin y /api/admin (protección IP)
-     * - Todas las demás rutas (security headers)
-     * Excepto:
-     * - _next/static (archivos estáticos)
-     * - _next/image (optimización de imágenes)
-     * - favicon.ico (favicon)
-     * - api/health (health check para monitoring)
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
      */
-    '/((?!_next/static|_next/image|favicon.ico).*)',
-    '/api/admin/:path*',
-    '/admin/:path*',
+    '/((?!_next/static|_next/image|favicon.ico|public).*)',
   ],
 };

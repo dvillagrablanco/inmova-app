@@ -1,123 +1,238 @@
-'use client';
+/**
+ * Empty State Component
+ * Estados vacíos mejorados con CTAs claros
+ */
 
 import { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
+import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { MessageCircle } from 'lucide-react';
-
-interface ActionButton {
-  label: string;
-  onClick: () => void;
-  icon?: ReactNode;
-  variant?: 'default' | 'secondary' | 'outline' | 'ghost';
-  wizard?: boolean; // Indica si abre un wizard guiado
-}
 
 interface EmptyStateProps {
-  icon: ReactNode;
+  icon?: LucideIcon;
   title: string;
   description: string;
-  action?: ActionButton; // Mantener retrocompatibilidad
-  actions?: ActionButton[]; // Múltiples acciones
-  illustration?: ReactNode; // Ilustración opcional
-  helpText?: string; // Texto de ayuda
-  chatSupport?: boolean; // Mostrar botón de chat
+  action?: {
+    label: string;
+    onClick: () => void;
+    variant?: 'default' | 'outline' | 'secondary';
+  };
+  secondaryAction?: {
+    label: string;
+    onClick: () => void;
+  };
+  children?: ReactNode;
   className?: string;
+  size?: 'sm' | 'md' | 'lg';
 }
 
-export function EmptyState({ 
-  icon, 
-  title, 
-  description, 
-  action, 
-  actions, 
-  illustration,
-  helpText,
-  chatSupport = false,
-  className 
+export function EmptyState({
+  icon: Icon,
+  title,
+  description,
+  action,
+  secondaryAction,
+  children,
+  className,
+  size = 'md',
 }: EmptyStateProps) {
-  // Si se proporciona 'action', usarla como única acción (retrocompatibilidad)
-  const allActions = actions || (action ? [action] : []);
-
-  const handleChatSupport = () => {
-    // Abrir chat de soporte (puede integrarse con chatbot existente)
-    if (typeof window !== 'undefined') {
-      window.location.href = '/chat';
-    }
+  const sizeClasses = {
+    sm: {
+      container: 'py-8',
+      icon: 'h-12 w-12 mb-3',
+      iconBg: 'h-16 w-16',
+      title: 'text-lg',
+      description: 'text-sm',
+    },
+    md: {
+      container: 'py-12',
+      icon: 'h-16 w-16 mb-4',
+      iconBg: 'h-20 w-20',
+      title: 'text-xl',
+      description: 'text-base',
+    },
+    lg: {
+      container: 'py-16',
+      icon: 'h-20 w-20 mb-6',
+      iconBg: 'h-24 w-24',
+      title: 'text-2xl',
+      description: 'text-lg',
+    },
   };
 
+  const sizes = sizeClasses[size];
+
   return (
-    <div className={cn("flex flex-col items-center justify-center py-12 px-4", className)}>
-      {/* Ilustración opcional */}
-      {illustration && (
-        <div className="mb-6 max-w-md w-full">
-          {illustration}
-        </div>
-      )}
-      
-      {/* Icono */}
-      <div className="mb-4 text-gray-400">
-        {typeof icon === 'string' ? (
-          <div className="text-6xl">{icon}</div>
-        ) : (
-          <div className="w-16 h-16 flex items-center justify-center">
-            {icon}
+    <div className={cn('flex items-center justify-center', sizes.container, className)}>
+      <div className="max-w-md w-full text-center space-y-4">
+        {/* Icon */}
+        {Icon && (
+          <div className="flex justify-center">
+            <div className={cn(
+              sizes.iconBg,
+              'rounded-full bg-gray-100 flex items-center justify-center'
+            )}>
+              <Icon className={cn(sizes.icon, 'text-gray-400')} />
+            </div>
+          </div>
+        )}
+
+        {/* Title */}
+        <h3 className={cn('font-semibold text-gray-900', sizes.title)}>
+          {title}
+        </h3>
+
+        {/* Description */}
+        <p className={cn('text-gray-600', sizes.description)}>
+          {description}
+        </p>
+
+        {/* Custom children */}
+        {children}
+
+        {/* Actions */}
+        {(action || secondaryAction) && (
+          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center pt-2">
+            {action && (
+              <Button
+                onClick={action.onClick}
+                variant={action.variant || 'default'}
+                size={size}
+              >
+                {action.label}
+              </Button>
+            )}
+            {secondaryAction && (
+              <Button
+                onClick={secondaryAction.onClick}
+                variant="outline"
+                size={size}
+              >
+                {secondaryAction.label}
+              </Button>
+            )}
           </div>
         )}
       </div>
-
-      {/* Título */}
-      <h3 className="text-xl font-semibold text-gray-900 mb-2 text-center">
-        {title}
-      </h3>
-
-      {/* Descripción */}
-      <p className="text-gray-600 text-center max-w-md mb-6">
-        {description}
-      </p>
-
-      {/* Acciones */}
-      {allActions.length > 0 && (
-        <div className="flex flex-wrap gap-3 justify-center mb-4">
-          {allActions.map((actionItem, index) => (
-            <Button
-              key={index}
-              onClick={actionItem.onClick}
-              variant={actionItem.variant || (index === 0 ? 'default' : 'outline')}
-              className={cn(
-                index === 0 && !actionItem.variant && "gradient-primary shadow-primary",
-                actionItem.wizard && "relative"
-              )}
-            >
-              {actionItem.icon && <span className="mr-2">{actionItem.icon}</span>}
-              {actionItem.label}
-              {actionItem.wizard && (
-                <span className="ml-2 text-xs bg-white/20 px-1.5 py-0.5 rounded">Asistente</span>
-              )}
-            </Button>
-          ))}
-        </div>
-      )}
-
-      {/* Texto de ayuda */}
-      {helpText && (
-        <p className="text-sm text-gray-500 text-center mt-4">
-          {helpText}
-        </p>
-      )}
-
-      {/* Chat support */}
-      {chatSupport && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleChatSupport}
-          className="mt-3 text-indigo-600 hover:text-indigo-700"
-        >
-          <MessageCircle className="h-4 w-4 mr-2" />
-          Hablar con soporte
-        </Button>
-      )}
     </div>
   );
 }
+
+/**
+ * Variantes pre-configuradas de Empty States
+ */
+
+import {
+  Building2,
+  Home,
+  UserPlus,
+  FileText,
+  DollarSign,
+  Search,
+  Inbox,
+  AlertCircle,
+} from 'lucide-react';
+
+export const EmptyStates = {
+  NoBuildings: (props: Partial<EmptyStateProps>) => (
+    <EmptyState
+      icon={Building2}
+      title="No tienes edificios"
+      description="Crea tu primer edificio para empezar a gestionar tus propiedades"
+      action={{
+        label: 'Crear edificio',
+        onClick: () => {},
+      }}
+      {...props}
+    />
+  ),
+
+  NoUnits: (props: Partial<EmptyStateProps>) => (
+    <EmptyState
+      icon={Home}
+      title="No hay unidades"
+      description="Agrega unidades (pisos, locales) a este edificio"
+      action={{
+        label: 'Agregar unidad',
+        onClick: () => {},
+      }}
+      {...props}
+    />
+  ),
+
+  NoTenants: (props: Partial<EmptyStateProps>) => (
+    <EmptyState
+      icon={UserPlus}
+      title="No hay inquilinos registrados"
+      description="Registra tus inquilinos para poder crear contratos de alquiler"
+      action={{
+        label: 'Registrar inquilino',
+        onClick: () => {},
+      }}
+      {...props}
+    />
+  ),
+
+  NoContracts: (props: Partial<EmptyStateProps>) => (
+    <EmptyState
+      icon={FileText}
+      title="No hay contratos"
+      description="Crea contratos de alquiler para gestionar tus arrendamientos"
+      action={{
+        label: 'Crear contrato',
+        onClick: () => {},
+      }}
+      secondaryAction={{
+        label: 'Ver tutorial',
+        onClick: () => {},
+      }}
+      {...props}
+    />
+  ),
+
+  NoPayments: (props: Partial<EmptyStateProps>) => (
+    <EmptyState
+      icon={DollarSign}
+      title="No hay pagos registrados"
+      description="Aquí aparecerán los pagos de tus inquilinos"
+      action={{
+        label: 'Registrar pago',
+        onClick: () => {},
+      }}
+      {...props}
+    />
+  ),
+
+  NoSearchResults: (props: Partial<EmptyStateProps>) => (
+    <EmptyState
+      icon={Search}
+      title="No se encontraron resultados"
+      description="Intenta con otros términos de búsqueda"
+      size="sm"
+      {...props}
+    />
+  ),
+
+  EmptyInbox: (props: Partial<EmptyStateProps>) => (
+    <EmptyState
+      icon={Inbox}
+      title="No tienes mensajes"
+      description="Cuando recibas notificaciones aparecerán aquí"
+      size="sm"
+      {...props}
+    />
+  ),
+
+  Error: (props: Partial<EmptyStateProps>) => (
+    <EmptyState
+      icon={AlertCircle}
+      title="Error al cargar los datos"
+      description="Ha ocurrido un error. Por favor, intenta de nuevo."
+      action={{
+        label: 'Reintentar',
+        onClick: () => window.location.reload(),
+      }}
+      {...props}
+    />
+  ),
+};
