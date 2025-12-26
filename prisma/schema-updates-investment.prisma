@@ -1,0 +1,278 @@
+// ============================================
+// SCHEMA UPDATES PARA SISTEMA DE ANÁLISIS DE INVERSIÓN
+// Añadir estos modelos al schema.prisma principal
+// ============================================
+
+model InvestmentAnalysis {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  propertyId String?
+  property   Property? @relation(fields: [propertyId], references: [id])
+  
+  name      String
+  assetType String // 'piso', 'local', 'garaje', 'trastero', 'edificio'
+  
+  // CAPEX
+  purchasePrice       Float
+  notaryAndRegistry   Float
+  transferTax         Float
+  agencyFees          Float
+  renovationCosts     Float
+  furnitureCosts      Float
+  initialLegalFees    Float
+  otherInitialCosts   Float
+  totalCapex          Float
+  
+  // Financiación
+  isFinanced          Boolean
+  loanAmount          Float?
+  interestRate        Float?
+  loanTerm            Int?
+  downPayment         Float?
+  loanToValue         Float?
+  
+  // OPEX
+  monthlyRent            Float
+  communityFees          Float
+  propertyTax            Float
+  insurance              Float
+  maintenanceRate        Float
+  propertyManagementFee  Float
+  vacancyRate            Float
+  totalAnnualOpex        Float
+  
+  // Impuestos
+  incomeTaxRate          Float
+  capitalGainsTaxRate    Float
+  wealthTaxApplicable    Boolean
+  
+  // Proyecciones
+  appreciationRate       Float
+  rentIncreaseRate       Float
+  inflationRate          Float
+  holdingPeriod          Int
+  
+  // Resultados
+  roi                    Float
+  cashOnCash             Float
+  capRate                Float
+  netCashFlow            Float
+  netOperatingIncome     Float
+  irr                    Float
+  paybackPeriod          Float
+  breakEvenOccupancy     Float
+  futurePropertyValue    Float
+  totalReturn            Float
+  
+  recommendation         String
+  riskFactors            Json
+  strengths              Json
+  
+  // Metadata
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relaciones
+  sharedWith     SharedAnalysis[]
+  documents      AnalysisDocument[]
+  rentRoll       RentRoll?
+  recommendations AIRecommendation[]
+  
+  @@index([userId])
+  @@index([propertyId])
+  @@index([createdAt])
+}
+
+model SharedAnalysis {
+  id          String   @id @default(cuid())
+  analysisId  String
+  analysis    InvestmentAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission  String   // 'view' | 'edit'
+  sharedAt    DateTime @default(now())
+  
+  @@unique([analysisId, userId])
+  @@index([userId])
+}
+
+model RentRoll {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  propertyId      String?
+  property        Property? @relation(fields: [propertyId], references: [id])
+  
+  analysisId      String?  @unique
+  analysis        InvestmentAnalysis? @relation(fields: [analysisId], references: [id])
+  
+  fileName        String
+  buildingName    String?
+  address         String?
+  
+  totalUnits      Int
+  occupiedUnits   Int
+  totalMonthlyRent Float
+  occupancyRate   Float
+  
+  units           Json     // Array de unidades
+  additionalInfo  Json?
+  
+  uploadedAt      DateTime @default(now())
+  processedAt     DateTime?
+  
+  @@index([userId])
+  @@index([propertyId])
+}
+
+model AnalysisDocument {
+  id          String   @id @default(cuid())
+  analysisId  String
+  analysis    InvestmentAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  documentType String  // 'notarial', 'cadastral', 'contract', 'other'
+  documentId   String?
+  fileName     String
+  fileUrl      String
+  fileSize     Int?
+  
+  uploadedAt   DateTime @default(now())
+  
+  @@index([analysisId])
+  @@index([userId])
+}
+
+model PropertyVerification {
+  id          String   @id @default(cuid())
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  verificationDate     DateTime
+  status               String // 'verified', 'pending', 'issues_found', 'not_verified'
+  
+  ownershipVerified    Boolean
+  noEncumbrances       Boolean
+  cadastralMatch       Boolean
+  urbanCompliance      Boolean
+  
+  issues               Json
+  documents            Json
+  
+  verifiedBy           String?
+  verifiedByUser       User?   @relation(fields: [verifiedBy], references: [id])
+  
+  createdAt            DateTime @default(now())
+  
+  @@index([propertyId])
+}
+
+model AIRecommendation {
+  id          String   @id @default(cuid())
+  analysisId  String
+  analysis    InvestmentAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  
+  type        String   // 'cost_reduction', 'income_increase', 'financing', 'operations', 'strategy', 'market'
+  priority    String   // 'critical', 'high', 'medium', 'low'
+  title       String
+  description String   @db.Text
+  potentialImpact String?
+  
+  implemented Boolean  @default(false)
+  implementedAt DateTime?
+  
+  generatedAt DateTime @default(now())
+  
+  @@index([analysisId])
+  @@index([priority])
+}
+
+model ImportedProperty {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  externalId      String
+  externalPortal  String   // 'idealista', 'pisos', 'fotocasa'
+  externalUrl     String
+  
+  propertyId      String?  @unique
+  property        Property? @relation(fields: [propertyId], references: [id])
+  
+  rawData         Json
+  
+  importedAt      DateTime @default(now())
+  lastSyncedAt    DateTime?
+  
+  @@unique([externalPortal, externalId])
+  @@index([userId])
+}
+
+model NotaryAppointment {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  notaryId        String
+  propertyId      String?
+  property        Property? @relation(fields: [propertyId], references: [id])
+  
+  appointmentDate DateTime
+  appointmentType String   // 'firma_compraventa', 'firma_hipoteca', 'consulta', 'cancelacion_hipoteca'
+  status          String   // 'pending_confirmation', 'confirmed', 'completed', 'cancelled'
+  
+  notes           String?  @db.Text
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([appointmentDate])
+}
+
+model CertificateRequest {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  propertyId      String
+  property        Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  certificateType String   // 'dominio', 'cargas', 'completo'
+  status          String   // 'pending', 'processing', 'ready', 'error'
+  
+  requestDate     DateTime @default(now())
+  completedAt     DateTime?
+  
+  downloadUrl     String?
+  errorMessage    String?
+  
+  @@index([userId])
+  @@index([status])
+}
+
+// Actualizar modelo Property existente con nuevas relaciones
+// Añadir estas líneas al modelo Property:
+//   analyses            InvestmentAnalysis[]
+//   rentRolls           RentRoll[]
+//   verifications       PropertyVerification[]
+//   importedProperty    ImportedProperty?
+//   notaryAppointments  NotaryAppointment[]
+//   certificateRequests CertificateRequest[]
+
+// Actualizar modelo User existente con nuevas relaciones
+// Añadir estas líneas al modelo User:
+//   investmentAnalyses  InvestmentAnalysis[]
+//   sharedAnalyses      SharedAnalysis[]
+//   rentRolls           RentRoll[]
+//   analysisDocuments   AnalysisDocument[]
+//   propertyVerifications PropertyVerification[]
+//   aiRecommendations   AIRecommendation[]
+//   importedProperties  ImportedProperty[]
+//   notaryAppointments  NotaryAppointment[]
+//   certificateRequests CertificateRequest[]
