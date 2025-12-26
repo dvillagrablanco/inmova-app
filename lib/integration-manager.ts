@@ -180,6 +180,33 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
       ]},
     ],
   },
+  {
+    id: 'gocardless',
+    name: 'GoCardless',
+    category: 'payment',
+    description: 'Domiciliaciones bancarias SEPA, BACS, ACH',
+    logo: '/integrations/gocardless.svg',
+    website: 'https://gocardless.com',
+    status: 'active',
+    credentialFields: [
+      { key: 'accessToken', label: 'Access Token', type: 'password', required: true, helpText: 'Token de API de GoCardless' },
+      { key: 'environment', label: 'Entorno', type: 'select', required: true, options: [
+        { value: 'sandbox', label: 'Sandbox (Pruebas)' },
+        { value: 'live', label: 'Live (Producción)' },
+      ]},
+    ],
+    settingsFields: [
+      { key: 'webhookSecret', label: 'Webhook Secret', type: 'text', helpText: 'Para verificar webhooks' },
+      { key: 'defaultScheme', label: 'Esquema por defecto', type: 'select', options: [
+        { value: 'sepa_core', label: 'SEPA Core (Europa)' },
+        { value: 'bacs', label: 'BACS (UK)' },
+        { value: 'ach', label: 'ACH (USA)' },
+        { value: 'autogiro', label: 'Autogiro (Suecia)' },
+        { value: 'becs', label: 'BECS (Australia)' },
+        { value: 'pad', label: 'PAD (Canadá)' },
+      ]},
+    ],
+  },
 
   // ========== COMUNICACIÓN ==========
   {
