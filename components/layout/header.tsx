@@ -43,7 +43,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-20 border-b bg-background shadow-sm">
-      <div className="flex h-14 items-center justify-between gap-2 px-3 md:gap-4 md:px-6 lg:ml-64">
+      <div className="flex h-14 items-center justify-between gap-2 pl-20 pr-3 md:gap-4 md:pl-3 md:pr-6 lg:ml-64 lg:pl-6">
         {/* Empresa Info - Oculta en móvil para ahorrar espacio */}
         <div className="hidden items-center gap-3 md:flex">
           <div className="flex items-center gap-2 rounded-lg bg-muted px-3 py-2">
