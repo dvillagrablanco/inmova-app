@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/pages/api/auth/[...nextauth]";
+import { authOptions } from "@/lib/auth-options";
 import prisma from "@/lib/prisma";
 
 // IDs de usuarios autorizados (socio fundador)
@@ -19,18 +19,20 @@ export async function GET(request: NextRequest) {
     }
 
     const userId = session.user.id;
+    const sessionRole = (session.user as any)?.role as string | undefined;
 
     // Verificar si es el socio fundador o superadmin
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { 
-        rol: true,
+        role: true,
         email: true
       }
     });
 
     const isSocio = SOCIO_FUNDADOR_IDS.includes(userId) || 
-                    user?.rol === "SUPER_ADMIN" ||
+                    sessionRole === "super_admin" ||
+                    user?.role === "super_admin" ||
                     user?.email?.includes("@socio-ewoorker.com"); // Ejemplo
 
     if (!isSocio) {
@@ -38,7 +40,7 @@ export async function GET(request: NextRequest) {
       await prisma.ewoorkerLogSocio.create({
         data: {
           userId,
-          userName: session.user.nombre || "Unknown",
+          userName: ((session.user as any)?.name as string | undefined) || "Unknown",
           userEmail: session.user.email || "",
           accion: "LOGIN",
           descripcion: "Intento de acceso no autorizado al panel del socio",
@@ -60,7 +62,7 @@ export async function GET(request: NextRequest) {
     await prisma.ewoorkerLogSocio.create({
       data: {
         userId,
-        userName: session.user.nombre || "Socio",
+        userName: ((session.user as any)?.name as string | undefined) || "Socio",
         userEmail: session.user.email || "",
         accion: "VER_METRICAS",
         descripcion: "Acceso al dashboard de métricas",
