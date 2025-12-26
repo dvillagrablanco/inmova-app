@@ -20,10 +20,11 @@ export const metadata: Metadata = {
     shortcut: '/favicon.svg',
   },
   manifest: '/manifest.json',
-  verification: {
-    other: {
-      'vercel-deployment': '220194',
-    },
+  // Versión dinámica basada en variables de entorno
+  other: {
+    'build-time': process.env.NEXT_PUBLIC_BUILD_TIME || new Date().toISOString(),
+    'vercel-deployment-id': process.env.VERCEL_DEPLOYMENT_ID || 'local',
+    'git-commit': process.env.VERCEL_GIT_COMMIT_SHA || 'unknown',
   },
 };
 
