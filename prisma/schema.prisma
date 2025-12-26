@@ -343,6 +343,13 @@ model User {
   emailLogs             EmailLog[]
   chatbotInteractions   ChatbotInteraction[]
   userCelebrations      UserCelebration[]
+  
+  // CRM Avanzado
+  ownedLeads            CRMLead[]       @relation("LeadOwner")
+  ownedDeals            Deal[]          @relation("DealOwner")
+  crmActivities         CRMActivity[]   @relation("ActivityPerformer")
+  assignedCRMTasks      CRMTask[]       @relation("TaskAssignee")
+  pomelliPosts          PomelliSocialPost[]
 
   @@index([email])
   @@index([companyId])
@@ -1363,6 +1370,17 @@ model Company {
   socialAnalytics       SocialAnalytics[]
   
   // 🔌 INTEGRATION MANAGEMENT CENTER
+  integrationConfigs    IntegrationConfig[]
+  integrationLogs       IntegrationLog[]
+  
+  // 📊 CRM AVANZADO
+  crmLeads              CRMLead[]
+  crmDeals              Deal[]
+  crmActivities         CRMActivity[]
+  crmTasks              CRMTask[]
+  crmPipelines          CRMPipeline[]
+  crmEmailTemplates     CRMEmailTemplate[]
+  linkedInScrapingJobs  LinkedInScrapingJob[]
   
   @@map("company")
 }
@@ -12873,3 +12891,336 @@ model PomelliSocialPost {
   @@index([publishedAt])
   @@map("pomelli_social_posts")
 }
+
+// ============================================================================
+// CRM AVANZADO - Sistema completo de gestión de ventas
+// ============================================================================
+
+enum CRMLeadSource {
+  linkedin
+  website
+  referral
+  cold_call
+  email_campaign
+  event
+  partner
+  organic
+  paid_ads
+  webinar
+}
+
+enum CRMLeadStatus {
+  new
+  contacted
+  qualified
+  negotiation
+  won
+  lost
+  nurturing
+  unresponsive
+}
+
+enum CRMLeadPriority {
+  low
+  medium
+  high
+  urgent
+}
+
+enum CompanySize {
+  solopreneur      // 1 persona
+  micro            // 2-10 empleados
+  small            // 11-50 empleados
+  medium           // 51-250 empleados
+  large            // 251-1000 empleados
+  enterprise       // 1000+ empleados
+}
+
+enum DealStage {
+  prospecting
+  qualification
+  proposal
+  negotiation
+  closed_won
+  closed_lost
+}
+
+model CRMLead {
+  id                String        @id @default(cuid())
+  companyId         String
+  
+  // Información Personal
+  firstName         String
+  lastName          String
+  email             String
+  phone             String?
+  jobTitle          String?
+  
+  // Información de la Empresa
+  companyName       String
+  companyWebsite    String?
+  companySize       CompanySize?
+  industry          String?
+  companyLinkedIn   String?
+  
+  // Ubicación
+  city              String?
+  region            String?
+  country           String        @default("ES")
+  
+  // Estado del Lead
+  status            CRMLeadStatus    @default(new)
+  source            CRMLeadSource    @default(website)
+  priority          CRMLeadPriority  @default(medium)
+  score             Int           @default(0) // Lead scoring 0-100
+  
+  // Asignación
+  ownerId           String?       // Usuario asignado
+  owner             User?         @relation("LeadOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  
+  // Fechas importantes
+  firstContactDate  DateTime?
+  lastContactDate   DateTime?
+  nextFollowUpDate  DateTime?
+  
+  // Información adicional
+  notes             String?       @db.Text
+  tags              String[]      @default([])
+  customFields      Json?         // Campos personalizados
+  
+  // LinkedIn Data
+  linkedInUrl       String?
+  linkedInProfile   Json?         // Datos completos del perfil
+  
+  // Engagement
+  emailsSent        Int           @default(0)
+  emailsOpened      Int           @default(0)
+  emailsClicked     Int           @default(0)
+  callsMade         Int           @default(0)
+  meetingsHeld      Int           @default(0)
+  
+  // Calificación
+  budget            Float?
+  authority         Boolean       @default(false) // Es decision maker?
+  need              String?       @db.Text
+  timeline          String?       // Cuándo necesita la solución
+  
+  // Metadata
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  convertedAt       DateTime?     // Cuando se convirtió en cliente
+  
+  company           Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  activities        CRMActivity[]
+  deals             Deal[]
+  tasks             CRMTask[]
+  
+  @@index([companyId])
+  @@index([email])
+  @@index([status])
+  @@index([ownerId])
+  @@index([score])
+  @@index([source])
+  @@index([createdAt])
+  @@map("crm_leads")
+}
+
+model Deal {
+  id                String      @id @default(cuid())
+  companyId         String
+  leadId            String?
+  
+  // Información del Deal
+  title             String
+  description       String?     @db.Text
+  value             Float       // Valor estimado
+  currency          String      @default("EUR")
+  
+  // Pipeline
+  stage             DealStage   @default(prospecting)
+  probability       Int         @default(10) // % de cerrar
+  
+  // Fechas
+  expectedCloseDate DateTime?
+  closedDate        DateTime?
+  
+  // Asignación
+  ownerId           String?
+  owner             User?       @relation("DealOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  
+  // Información adicional
+  lostReason        String?     @db.Text
+  competitorInfo    String?     @db.Text
+  notes             String?     @db.Text
+  
+  // Metadata
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  
+  company           Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  lead              CRMLead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  activities        CRMActivity[]
+  
+  @@index([companyId])
+  @@index([leadId])
+  @@index([ownerId])
+  @@index([stage])
+  @@index([expectedCloseDate])
+  @@map("crm_deals")
+}
+
+model CRMActivity {
+  id          String   @id @default(cuid())
+  companyId   String
+  leadId      String?
+  dealId      String?
+  
+  // Tipo de actividad
+  type        String   // email, call, meeting, note, task
+  subject     String
+  description String?  @db.Text
+  
+  // Resultado
+  outcome     String?  // successful, no_answer, follow_up_needed, etc.
+  
+  // Participantes
+  performedBy String?  // Usuario que realizó la actividad
+  user        User?    @relation("ActivityPerformer", fields: [performedBy], references: [id], onDelete: SetNull)
+  
+  // Datos específicos
+  duration    Int?     // Duración en minutos
+  metadata    Json?    // Datos adicionales (ej: email_id, call_recording_url)
+  
+  // Fechas
+  activityDate DateTime
+  createdAt   DateTime @default(now())
+  
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  lead        CRMLead? @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  deal        Deal?    @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  
+  @@index([companyId])
+  @@index([leadId])
+  @@index([dealId])
+  @@index([performedBy])
+  @@index([activityDate])
+  @@index([type])
+  @@map("crm_activities")
+}
+
+model CRMTask {
+  id          String    @id @default(cuid())
+  companyId   String
+  leadId      String?
+  
+  // Información de la tarea
+  title       String
+  description String?   @db.Text
+  type        String    // call, email, meeting, follow_up, demo, proposal
+  priority    CRMLeadPriority @default(medium)
+  
+  // Estado
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+  
+  // Asignación
+  assignedTo  String?
+  user        User?     @relation("TaskAssignee", fields: [assignedTo], references: [id], onDelete: SetNull)
+  
+  // Fechas
+  dueDate     DateTime
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Recordatorios
+  reminderSent Boolean  @default(false)
+  
+  company     Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  lead        CRMLead?  @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  
+  @@index([companyId])
+  @@index([leadId])
+  @@index([assignedTo])
+  @@index([dueDate])
+  @@index([completed])
+  @@map("crm_tasks")
+}
+
+model CRMPipeline {
+  id          String   @id @default(cuid())
+  companyId   String
+  
+  // Configuración del pipeline
+  name        String
+  stages      Json     // Array de stages personalizados
+  isDefault   Boolean  @default(false)
+  
+  // Metadata
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  @@index([companyId])
+  @@map("crm_pipelines")
+}
+
+model CRMEmailTemplate {
+  id          String   @id @default(cuid())
+  companyId   String
+  
+  // Template info
+  name        String
+  subject     String
+  body        String   @db.Text
+  category    String   // cold_outreach, follow_up, proposal, etc.
+  
+  // Personalización
+  variables   String[] @default([]) // [firstName, companyName, etc.]
+  
+  // Uso
+  timesUsed   Int      @default(0)
+  
+  // Metadata
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  @@index([companyId])
+  @@index([category])
+  @@map("crm_email_templates")
+}
+
+model LinkedInScrapingJob {
+  id              String   @id @default(cuid())
+  companyId       String
+  
+  // Job info
+  searchQuery     String   // Ej: "property manager madrid"
+  filters         Json     // Filtros aplicados
+  targetCount     Int      // Número objetivo de leads
+  
+  // Estado
+  status          String   // pending, running, completed, failed
+  progress        Int      @default(0)
+  leadsFound      Int      @default(0)
+  leadsImported   Int      @default(0)
+  
+  // Resultados
+  results         Json?    // Datos scrapeados
+  errorMessage    String?  @db.Text
+  
+  // Metadata
+  startedAt       DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime @default(now())
+  
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  @@index([companyId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("linkedin_scraping_jobs")
+}
+
