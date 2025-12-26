@@ -1,0 +1,4245 @@
+{
+  "timestamp": "2025-12-26T06:33:08.046Z",
+  "summary": {
+    "total": 534,
+    "errors": 36,
+    "warnings": 458,
+    "info": 40
+  },
+  "byCategory": {
+    "react": 453,
+    "code-quality": 5,
+    "todo": 40,
+    "import": 36
+  },
+  "issues": {
+    "errors": [
+      {
+        "file": "/app/api/docs.disabled/route.ts",
+        "line": 3,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/lib/swagger-config",
+        "snippet": "// import { getApiDocs } from '@/lib/swagger-config';"
+      },
+      {
+        "file": "/app/api/ewoorker/admin-socio/metricas/route.ts",
+        "line": 3,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/pages/api/auth/[...nextauth]",
+        "snippet": "import { authOptions } from \"@/pages/api/auth/[...nextauth]\";"
+      },
+      {
+        "file": "/app/api/ewoorker/compliance/documentos/route.ts",
+        "line": 3,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/pages/api/auth/[...nextauth]",
+        "snippet": "import { authOptions } from \"@/pages/api/auth/[...nextauth]\";"
+      },
+      {
+        "file": "/app/api/ewoorker/compliance/upload/route.ts",
+        "line": 3,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/pages/api/auth/[...nextauth]",
+        "snippet": "import { authOptions } from \"@/pages/api/auth/[...nextauth]\";"
+      },
+      {
+        "file": "/app/api/ewoorker/dashboard/stats/route.ts",
+        "line": 3,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/pages/api/auth/[...nextauth]",
+        "snippet": "import { authOptions } from \"@/pages/api/auth/[...nextauth]\";"
+      },
+      {
+        "file": "/app/api/ewoorker/obras/route.ts",
+        "line": 3,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/pages/api/auth/[...nextauth]",
+        "snippet": "import { authOptions } from \"@/pages/api/auth/[...nextauth]\";"
+      },
+      {
+        "file": "/app/api/ewoorker/pagos/plan/route.ts",
+        "line": 3,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/pages/api/auth/[...nextauth]",
+        "snippet": "import { authOptions } from \"@/pages/api/auth/[...nextauth]\";"
+      },
+      {
+        "file": "/app/api/ewoorker/pagos/route.ts",
+        "line": 3,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/pages/api/auth/[...nextauth]",
+        "snippet": "import { authOptions } from \"@/pages/api/auth/[...nextauth]\";"
+      },
+      {
+        "file": "/app/api/integrations/[integrationId]/logs/route.ts",
+        "line": 8,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/lib/auth",
+        "snippet": "import { authOptions } from '@/lib/auth';"
+      },
+      {
+        "file": "/app/api/integrations/[integrationId]/route.ts",
+        "line": 10,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/lib/auth",
+        "snippet": "import { authOptions } from '@/lib/auth';"
+      },
+      {
+        "file": "/app/api/integrations/[integrationId]/test/route.ts",
+        "line": 8,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/lib/auth",
+        "snippet": "import { authOptions } from '@/lib/auth';"
+      },
+      {
+        "file": "/app/api/integrations/catalog/route.ts",
+        "line": 8,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/lib/auth",
+        "snippet": "import { authOptions } from '@/lib/auth';"
+      },
+      {
+        "file": "/app/api/integrations/route.ts",
+        "line": 9,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/lib/auth",
+        "snippet": "import { authOptions } from '@/lib/auth';"
+      },
+      {
+        "file": "/app/api/pomelli/analytics/route.ts",
+        "line": 8,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/lib/auth",
+        "snippet": "import { authOptions } from '@/lib/auth';"
+      },
+      {
+        "file": "/app/api/pomelli/config/route.ts",
+        "line": 10,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/lib/auth",
+        "snippet": "import { authOptions } from '@/lib/auth';"
+      },
+      {
+        "file": "/app/api/pomelli/posts/[postId]/route.ts",
+        "line": 10,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/lib/auth",
+        "snippet": "import { authOptions } from '@/lib/auth';"
+      },
+      {
+        "file": "/app/api/pomelli/posts/route.ts",
+        "line": 9,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/lib/auth",
+        "snippet": "import { authOptions } from '@/lib/auth';"
+      },
+      {
+        "file": "/app/api/pomelli/profiles/connect/route.ts",
+        "line": 8,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/lib/auth",
+        "snippet": "import { authOptions } from '@/lib/auth';"
+      },
+      {
+        "file": "/app/api/docs.disabled/route.ts",
+        "line": 3,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/lib/swagger-config",
+        "snippet": "// import { getApiDocs } from '@/lib/swagger-config';"
+      },
+      {
+        "file": "/app/api/ewoorker/admin-socio/metricas/route.ts",
+        "line": 3,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/pages/api/auth/[...nextauth]",
+        "snippet": "import { authOptions } from \"@/pages/api/auth/[...nextauth]\";"
+      },
+      {
+        "file": "/app/api/ewoorker/compliance/documentos/route.ts",
+        "line": 3,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/pages/api/auth/[...nextauth]",
+        "snippet": "import { authOptions } from \"@/pages/api/auth/[...nextauth]\";"
+      },
+      {
+        "file": "/app/api/ewoorker/compliance/upload/route.ts",
+        "line": 3,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/pages/api/auth/[...nextauth]",
+        "snippet": "import { authOptions } from \"@/pages/api/auth/[...nextauth]\";"
+      },
+      {
+        "file": "/app/api/ewoorker/dashboard/stats/route.ts",
+        "line": 3,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/pages/api/auth/[...nextauth]",
+        "snippet": "import { authOptions } from \"@/pages/api/auth/[...nextauth]\";"
+      },
+      {
+        "file": "/app/api/ewoorker/obras/route.ts",
+        "line": 3,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/pages/api/auth/[...nextauth]",
+        "snippet": "import { authOptions } from \"@/pages/api/auth/[...nextauth]\";"
+      },
+      {
+        "file": "/app/api/ewoorker/pagos/plan/route.ts",
+        "line": 3,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/pages/api/auth/[...nextauth]",
+        "snippet": "import { authOptions } from \"@/pages/api/auth/[...nextauth]\";"
+      },
+      {
+        "file": "/app/api/ewoorker/pagos/route.ts",
+        "line": 3,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/pages/api/auth/[...nextauth]",
+        "snippet": "import { authOptions } from \"@/pages/api/auth/[...nextauth]\";"
+      },
+      {
+        "file": "/app/api/integrations/[integrationId]/logs/route.ts",
+        "line": 8,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/lib/auth",
+        "snippet": "import { authOptions } from '@/lib/auth';"
+      },
+      {
+        "file": "/app/api/integrations/[integrationId]/route.ts",
+        "line": 10,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/lib/auth",
+        "snippet": "import { authOptions } from '@/lib/auth';"
+      },
+      {
+        "file": "/app/api/integrations/[integrationId]/test/route.ts",
+        "line": 8,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/lib/auth",
+        "snippet": "import { authOptions } from '@/lib/auth';"
+      },
+      {
+        "file": "/app/api/integrations/catalog/route.ts",
+        "line": 8,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/lib/auth",
+        "snippet": "import { authOptions } from '@/lib/auth';"
+      },
+      {
+        "file": "/app/api/integrations/route.ts",
+        "line": 9,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/lib/auth",
+        "snippet": "import { authOptions } from '@/lib/auth';"
+      },
+      {
+        "file": "/app/api/pomelli/analytics/route.ts",
+        "line": 8,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/lib/auth",
+        "snippet": "import { authOptions } from '@/lib/auth';"
+      },
+      {
+        "file": "/app/api/pomelli/config/route.ts",
+        "line": 10,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/lib/auth",
+        "snippet": "import { authOptions } from '@/lib/auth';"
+      },
+      {
+        "file": "/app/api/pomelli/posts/[postId]/route.ts",
+        "line": 10,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/lib/auth",
+        "snippet": "import { authOptions } from '@/lib/auth';"
+      },
+      {
+        "file": "/app/api/pomelli/posts/route.ts",
+        "line": 9,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/lib/auth",
+        "snippet": "import { authOptions } from '@/lib/auth';"
+      },
+      {
+        "file": "/app/api/pomelli/profiles/connect/route.ts",
+        "line": 8,
+        "type": "error",
+        "category": "import",
+        "message": "Import posiblemente roto: @/lib/auth",
+        "snippet": "import { authOptions } from '@/lib/auth';"
+      }
+    ],
+    "warnings": [
+      {
+        "file": "/components/LandingChatbot.tsx",
+        "line": 262,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map(m => m.text);"
+      },
+      {
+        "file": "/components/MFASettings.tsx",
+        "type": "warning",
+        "category": "code-quality",
+        "message": "5 console.log() encontrados (podrían ser debug olvidados)"
+      },
+      {
+        "file": "/components/NotificationCenter.tsx",
+        "type": "warning",
+        "category": "code-quality",
+        "message": "4 console.log() encontrados (podrían ser debug olvidados)"
+      },
+      {
+        "file": "/components/NotificationCenter.tsx",
+        "line": 119,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "prev.map(n => (n.id === notificationId ? { ...n, isRead: true } : n))"
+      },
+      {
+        "file": "/components/NotificationCenter.tsx",
+        "line": 137,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));"
+      },
+      {
+        "file": "/components/adaptive/AdaptiveSidebar.tsx",
+        "line": 192,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{featuredModules.map(renderModuleLink)}"
+      },
+      {
+        "file": "/components/adaptive/AdaptiveSidebar.tsx",
+        "line": 211,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{regularModules.map(renderModuleLink)}"
+      },
+      {
+        "file": "/components/alerts/ProactiveAlertsSystem.tsx",
+        "line": 175,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "setAlerts(prev => prev.map(alert =>"
+      },
+      {
+        "file": "/components/alerts/ProactiveAlertsSystem.tsx",
+        "line": 293,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "filteredAlerts.map(alert => {"
+      },
+      {
+        "file": "/components/automation/AIAssistant.tsx",
+        "line": 127,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map((a, i) => `${i + 1}. ${a.title}\\n   ${a.excerpt}`)"
+      },
+      {
+        "file": "/components/automation/AIAssistant.tsx",
+        "line": 129,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "suggestions = articles.slice(0, 3).map(a => ({"
+      },
+      {
+        "file": "/components/automation/IntelligentSupportChatbot.tsx",
+        "line": 106,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const conversationHistory = messages.map(msg => ({"
+      },
+      {
+        "file": "/components/calculators/ProrationCalculator.tsx",
+        "line": 74,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "return rooms.map(room => ({"
+      },
+      {
+        "file": "/components/calculators/ProrationCalculator.tsx",
+        "line": 84,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "return rooms.map(room => {"
+      },
+      {
+        "file": "/components/calculators/ProrationCalculator.tsx",
+        "line": 103,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "return rooms.map(room => ({"
+      },
+      {
+        "file": "/components/calculators/ProrationCalculator.tsx",
+        "line": 113,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "return rooms.map(room => {"
+      },
+      {
+        "file": "/components/calculators/ProrationCalculator.tsx",
+        "line": 134,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "return rooms.map(room => ({"
+      },
+      {
+        "file": "/components/calculators/ProrationCalculator.tsx",
+        "line": 149,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "return rooms.map(room => {"
+      },
+      {
+        "file": "/components/calculators/ProrationCalculator.tsx",
+        "line": 171,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "return rooms.map(room => ({"
+      },
+      {
+        "file": "/components/calculators/ProrationCalculator.tsx",
+        "line": 197,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "setRooms(rooms.map(room =>"
+      },
+      {
+        "file": "/components/chat/ImprovedChatInterface.tsx",
+        "line": 94,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map((n) => n[0])"
+      },
+      {
+        "file": "/components/chat/ImprovedChatInterface.tsx",
+        "line": 242,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "messages.map((message, index) => {"
+      },
+      {
+        "file": "/components/chatbot/IntelligentChatbot.tsx",
+        "line": 130,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "history: messages.map(m => ({"
+      },
+      {
+        "file": "/components/layout/bottom-navigation.tsx",
+        "line": 64,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{mainNavItems.map((item) => {"
+      },
+      {
+        "file": "/components/mobile/BottomNavigation.tsx",
+        "line": 59,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{NAV_ITEMS.map((item) => {"
+      },
+      {
+        "file": "/components/mobile/MobileNavigation.tsx",
+        "line": 74,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{navItems.map((item) => {"
+      },
+      {
+        "file": "/components/mobile/MobileTable.tsx",
+        "line": 76,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{data.map((row, idx) => {"
+      },
+      {
+        "file": "/components/notifications/NotificationPanel.tsx",
+        "line": 71,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "prev.map((n) => ({ ...n, read: true }))"
+      },
+      {
+        "file": "/components/notifications/NotificationPanel.tsx",
+        "line": 85,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "prev.map((n) =>"
+      },
+      {
+        "file": "/components/onboarding/OnboardingChatbot.tsx",
+        "line": 101,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "conversationHistory: messages.map((m) => ({"
+      },
+      {
+        "file": "/components/onboarding/SetupProgressWidget.tsx",
+        "line": 59,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const updatedActions = actions.map(action => ({"
+      },
+      {
+        "file": "/components/onboarding/SetupProgressWidget.tsx",
+        "line": 70,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const updatedActions = actions.map(action => ({"
+      },
+      {
+        "file": "/components/onboarding/SetupProgressWidget.tsx",
+        "line": 93,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const updatedActions = setupActions.map(action =>"
+      },
+      {
+        "file": "/components/onboarding/SetupProgressWidget.tsx",
+        "line": 113,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "completedActions: updatedActions.filter(a => a.completed).map(a => a.id),"
+      },
+      {
+        "file": "/components/portal-inquilino/TenantOnboarding.tsx",
+        "type": "warning",
+        "category": "code-quality",
+        "message": "4 console.log() encontrados (podrían ser debug olvidados)"
+      },
+      {
+        "file": "/components/reports/ReportsScheduler.tsx",
+        "line": 130,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{scheduledReports.map((report) => {"
+      },
+      {
+        "file": "/components/ui/advanced-filters.tsx",
+        "line": 339,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{otherFilters.map((filter) => renderFilterInput(filter))}"
+      },
+      {
+        "file": "/components/ui/advanced-filters.tsx",
+        "line": 361,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{Object.entries(values).map(([key, value]) => {"
+      },
+      {
+        "file": "/components/ui/breadcrumb-auto.tsx",
+        "line": 64,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const items = segments.map((segment, index) => {"
+      },
+      {
+        "file": "/components/ui/global-search-enhanced.tsx",
+        "line": 58,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "return fuse.search(query).map((result) => result.item);"
+      },
+      {
+        "file": "/components/ui/mobile-filter-panel.tsx",
+        "line": 138,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{filter.options.map((option) => {"
+      },
+      {
+        "file": "/components/ui/multi-file-upload.tsx",
+        "line": 169,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "onFilesSelect(validatedFiles.map((f) => f.file));"
+      },
+      {
+        "file": "/components/ui/multi-file-upload.tsx",
+        "line": 188,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "prev.map((f) => (f.id === uploadedFile.id ? { ...f, status: 'uploading' as const"
+      },
+      {
+        "file": "/components/ui/multi-file-upload.tsx",
+        "line": 194,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "prev.map((f) => (f.id === uploadedFile.id ? { ...f, progress } : f))"
+      },
+      {
+        "file": "/components/ui/multi-file-upload.tsx",
+        "line": 200,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "prev.map((f) =>"
+      },
+      {
+        "file": "/components/ui/multi-file-upload.tsx",
+        "line": 211,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "prev.map((f) =>"
+      },
+      {
+        "file": "/components/ui/notification-center.tsx",
+        "line": 72,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "prev.map(n => (n.id === id ? { ...n, read: true } : n))"
+      },
+      {
+        "file": "/components/ui/notification-center.tsx",
+        "line": 87,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "setNotifications(prev => prev.map(n => ({ ...n, read: true })));"
+      },
+      {
+        "file": "/components/ui/responsive-data-table.tsx",
+        "line": 73,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "return new Set(columns.map((c) => c.key));"
+      },
+      {
+        "file": "/components/ui/responsive-data-table.tsx",
+        "line": 139,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const allColumns = new Set(columns.map((c) => c.key));"
+      },
+      {
+        "file": "/components/ui/share-buttons.tsx",
+        "line": 83,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const hashtagsStr = hashtags.map((tag) => `#${tag}`).join(' ');"
+      },
+      {
+        "file": "/components/ui/use-toast.ts",
+        "line": 85,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "toasts: state.toasts.map((t) =>"
+      },
+      {
+        "file": "/components/ui/use-toast.ts",
+        "line": 105,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "toasts: state.toasts.map((t) =>"
+      },
+      {
+        "file": "/components/ui/wizard.tsx",
+        "type": "warning",
+        "category": "code-quality",
+        "message": "4 console.log() encontrados (podrían ser debug olvidados)"
+      },
+      {
+        "file": "/components/ui/wizard.tsx",
+        "line": 239,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{visibleSteps.map((step, index) => {"
+      },
+      {
+        "file": "/components/wizards/RoomRentalWizard.tsx",
+        "line": 446,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{data.rooms.map((room: Room, roomIndex: number) => {"
+      },
+      {
+        "file": "/components/wizards/STRWizard.tsx",
+        "line": 227,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{selectedChannels.map((channelId) => {"
+      },
+      {
+        "file": "/components/wizards/WizardContainer.tsx",
+        "line": 106,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{state.completedSteps && Array.from({ length: totalSteps }).map((_, index) => {"
+      },
+      {
+        "file": "/app/(dashboard)/coliving/_components/EventosCalendario.tsx",
+        "line": 118,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "eventos.map((evento) => {"
+      },
+      {
+        "file": "/app/(dashboard)/coliving/_components/FeedSocial.tsx",
+        "line": 153,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map((n) => n[0])"
+      },
+      {
+        "file": "/app/(dashboard)/coliving/_components/MatchingPanel.tsx",
+        "line": 104,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map((n: string) => n[0])"
+      },
+      {
+        "file": "/app/(dashboard)/coliving/_components/PaqueteriaPanel.tsx",
+        "line": 117,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "paquetes.map((paquete) => {"
+      },
+      {
+        "file": "/app/(protected)/dashboard/integrations/page.tsx",
+        "type": "warning",
+        "category": "code-quality",
+        "message": "5 console.log() encontrados (podrían ser debug olvidados)"
+      },
+      {
+        "file": "/app/(protected)/dashboard/integrations/page.tsx",
+        "line": 375,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{Object.entries(catalog.categories).map(([key, label]: any) => {"
+      },
+      {
+        "file": "/app/(protected)/dashboard/integrations/page.tsx",
+        "line": 412,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "configuredProviders={integrations.map(i => i.provider)}"
+      },
+      {
+        "file": "/app/(protected)/dashboard/integrations/page.tsx",
+        "line": 579,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{Object.entries(catalog.categories).map(([categoryKey, categoryLabel]: any) => {"
+      },
+      {
+        "file": "/app/(protected)/str-advanced/channel-manager/page.tsx",
+        "line": 42,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "prev.map((ch) =>"
+      },
+      {
+        "file": "/app/admin/activity/page.tsx",
+        "line": 241,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map(([date, activities]) => {"
+      },
+      {
+        "file": "/app/admin/clientes/comparar/page.tsx",
+        "line": 217,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "values={companies.map((c) =>"
+      },
+      {
+        "file": "/app/admin/clientes/comparar/page.tsx",
+        "line": 225,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "values={companies.map((c) => c.contactoPrincipal || '-')}"
+      },
+      {
+        "file": "/app/admin/clientes/comparar/page.tsx",
+        "line": 229,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "values={companies.map((c) => c.emailContacto || '-')}"
+      },
+      {
+        "file": "/app/admin/clientes/comparar/page.tsx",
+        "line": 233,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "values={companies.map((c) =>"
+      },
+      {
+        "file": "/app/admin/clientes/comparar/page.tsx",
+        "line": 247,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "values={companies.map((c) => ("
+      },
+      {
+        "file": "/app/admin/clientes/comparar/page.tsx",
+        "line": 262,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "values={companies.map((c) => ("
+      },
+      {
+        "file": "/app/admin/clientes/comparar/page.tsx",
+        "line": 276,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "values={companies.map((c) => c.metrics.totalUnits)}"
+      },
+      {
+        "file": "/app/admin/clientes/comparar/page.tsx",
+        "line": 280,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "values={companies.map((c) => c.metrics.tenants)}"
+      },
+      {
+        "file": "/app/admin/clientes/comparar/page.tsx",
+        "line": 284,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "values={companies.map((c) => c.metrics.providers)}"
+      },
+      {
+        "file": "/app/admin/clientes/comparar/page.tsx",
+        "line": 286,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "<ComparisonRow label=\"Tareas\" values={companies.map((c) => c.metrics.tasks)} />"
+      },
+      {
+        "file": "/app/admin/clientes/comparar/page.tsx",
+        "line": 295,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "values={companies.map((c) => ("
+      },
+      {
+        "file": "/app/admin/clientes/comparar/page.tsx",
+        "line": 309,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "values={companies.map((c) => c.metrics.activeContracts)}"
+      },
+      {
+        "file": "/app/admin/clientes/comparar/page.tsx",
+        "line": 314,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "values={companies.map((c) => ("
+      },
+      {
+        "file": "/app/admin/clientes/comparar/page.tsx",
+        "line": 328,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "values={companies.map((c) => c.metrics.activeModules)}"
+      },
+      {
+        "file": "/app/admin/clientes/comparar/page.tsx",
+        "line": 333,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "values={companies.map((c) => c.metrics.recentActivity)}"
+      },
+      {
+        "file": "/app/admin/clientes/comparar/page.tsx",
+        "line": 342,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "values={companies.map((c) => c.roleDistribution['admin'] || 0)}"
+      },
+      {
+        "file": "/app/admin/clientes/comparar/page.tsx",
+        "line": 346,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "values={companies.map((c) => c.roleDistribution['propietario'] || 0)}"
+      },
+      {
+        "file": "/app/admin/clientes/comparar/page.tsx",
+        "line": 350,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "values={companies.map((c) => c.roleDistribution['gestor'] || 0)}"
+      },
+      {
+        "file": "/app/admin/clientes/comparar/page.tsx",
+        "line": 354,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "values={companies.map((c) =>"
+      },
+      {
+        "file": "/app/admin/clientes/comparar/page.tsx",
+        "line": 372,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "values={companies.map((c) => {"
+      },
+      {
+        "file": "/app/admin/clientes/page.tsx",
+        "line": 329,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const rows = filteredCompanies.map((c) => ["
+      },
+      {
+        "file": "/app/admin/clientes/page.tsx",
+        "line": 347,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "...rows.map((row) => row.map((cell) => `\"${cell}\"`).join(',')),"
+      },
+      {
+        "file": "/app/admin/clientes/page.tsx",
+        "line": 374,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "setSelectedCompanies(new Set(filteredCompanies.map((c) => c.id)));"
+      },
+      {
+        "file": "/app/admin/firma-digital/page.tsx",
+        "line": 191,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "documento.firmantes.map((f) => ({"
+      },
+      {
+        "file": "/app/admin/firma-digital/page.tsx",
+        "line": 279,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "firmantes: firmantes.map((f) => ({"
+      },
+      {
+        "file": "/app/admin/importar/page.tsx",
+        "line": 294,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{['select', 'validate', 'preview', 'import', 'results'].map((step, index) => {"
+      },
+      {
+        "file": "/app/admin/legal/page.tsx",
+        "line": 194,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map((v) => v.trim())"
+      },
+      {
+        "file": "/app/admin/legal/page.tsx",
+        "line": 201,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map((v) => v.trim())"
+      },
+      {
+        "file": "/app/admin/modulos/page.tsx",
+        "line": 374,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{Object.entries(CATEGORIAS).map(([key, cat]) => {"
+      },
+      {
+        "file": "/app/admin/modulos/page.tsx",
+        "line": 393,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{modulosCategoria.map((modulo) => {"
+      },
+      {
+        "file": "/app/admin/reportes-programados/page.tsx",
+        "line": 185,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map((email) => email.trim())"
+      },
+      {
+        "file": "/app/admin/usuarios/page.tsx",
+        "line": 127,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "setCompanies(data.map((c: any) => ({ id: c.id, nombre: c.nombre })));"
+      },
+      {
+        "file": "/app/analytics/page.tsx",
+        "line": 196,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const revenueData = trends.map((t) => ({"
+      },
+      {
+        "file": "/app/analytics/page.tsx",
+        "line": 202,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const occupancyData = trends.map((t) => ({"
+      },
+      {
+        "file": "/app/analytics/page.tsx",
+        "line": 472,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{recommendations.map((rec) => {"
+      },
+      {
+        "file": "/app/anuncios/page.tsx",
+        "line": 620,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "anunciosFiltrados.map((anuncio) => {"
+      },
+      {
+        "file": "/app/api/accounting/analytics/route.ts",
+        "line": 25,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const [year, month] = periodo.split('-').map(Number);"
+      },
+      {
+        "file": "/app/api/accounting/profit-loss/route.ts",
+        "line": 24,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const [year, month] = periodo.split('-').map(Number);"
+      },
+      {
+        "file": "/app/api/accounting/ratios/route.ts",
+        "line": 25,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const [year, month] = periodo.split('-').map(Number);"
+      },
+      {
+        "file": "/app/api/accounting/tax-summary/route.ts",
+        "line": 25,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const [year, month] = periodo.split('-').map(Number);"
+      },
+      {
+        "file": "/app/api/admin/backup/route.ts",
+        "line": 122,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map(async (file) => {"
+      },
+      {
+        "file": "/app/api/admin/companies/[id]/access/route.ts",
+        "line": 64,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "...primaryUsers.map(user => ({"
+      },
+      {
+        "file": "/app/api/admin/companies/[id]/access/route.ts",
+        "line": 73,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "...userAccess.map(access => ({"
+      },
+      {
+        "file": "/app/api/admin/companies/compare/route.ts",
+        "line": 79,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "companies.map(async (company) => {"
+      },
+      {
+        "file": "/app/api/admin/companies/route.ts",
+        "line": 188,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "data: modulosCodigos.map(codigo => ({"
+      },
+      {
+        "file": "/app/api/admin/dashboard-stats/route.ts",
+        "line": 263,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map((s) => s.subscriptionPlanId)"
+      },
+      {
+        "file": "/app/api/admin/dashboard-stats/route.ts",
+        "line": 278,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const planMap = new Map(plans.map((p) => [p.id, p.nombre]));"
+      },
+      {
+        "file": "/app/api/admin/dashboard-stats/route.ts",
+        "line": 280,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const subscriptionBreakdown = subscriptionStats.map((stat) => ({"
+      },
+      {
+        "file": "/app/api/admin/firma-digital/documentos/[id]/route.ts",
+        "line": 79,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "create: firmantes.map((firmante: any) => ({"
+      },
+      {
+        "file": "/app/api/admin/firma-digital/documentos/route.ts",
+        "line": 101,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "create: firmantes.map((firmante: any) => ({"
+      },
+      {
+        "file": "/app/api/admin/init-pricing/route.ts",
+        "line": 40,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map(f => f.text),"
+      },
+      {
+        "file": "/app/api/admin/init-pricing/route.ts",
+        "line": 158,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "response.plansSummary = allPlans.map(p => ({"
+      },
+      {
+        "file": "/app/api/admin/init-pricing/route.ts",
+        "line": 171,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "in: Object.values(PROMO_CAMPAIGNS).map(c => c.code)"
+      },
+      {
+        "file": "/app/api/admin/init-pricing/route.ts",
+        "line": 180,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "response.couponsSummary = allCoupons.map(c => ({"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 44,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const chatTenantIds = tenantChats.map(c => c.tenantId).filter(Boolean) as string"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 49,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const tenantMap = new Map(chatTenants.map(t => [t.id, t.nombreCompleto]));"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 50,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "notifications.push(...tenantChats.map(c => ({"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 73,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const contractIds = recentPayments.map(p => p.contractId);"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 79,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const contractMap = new Map<string, ContractData>(contracts.map(c => [c.id, c]))"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 83,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const unitIds = contracts.map(c => c.unitId);"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 91,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const validUnitIds = new Set(units.map(u => u.id));"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 99,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map(p => contractMap.get(p.contractId)?.tenantId)"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 104,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const paymentTenantMap = new Map(paymentTenants.map(t => [t.id, t.nombreCompleto"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 105,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "notifications.push(...filteredPayments.slice(0, 10).map(p => {"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 127,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "notifications.push(...completedOrders.map(o => ({"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 147,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "notifications.push(...pendingOrders.map(o => ({"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 165,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "notifications.push(...ownerNotifs.map(n => ({"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 183,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "notifications.push(...newLeads.map(l => ({"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 203,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "notifications.push(...converted.map(l => ({"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 223,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "notifications.push(...commissions.map(c => ({"
+      },
+      {
+        "file": "/app/api/admin/security-alerts/route.ts",
+        "line": 75,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map(([userId, data]: [string, any]) => ({"
+      },
+      {
+        "file": "/app/api/admin/security-alerts/route.ts",
+        "line": 88,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "...suspiciousActivity.map(a => ({"
+      },
+      {
+        "file": "/app/api/admin/security-alerts/route.ts",
+        "line": 93,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "...recentChanges.map(c => ({"
+      },
+      {
+        "file": "/app/api/admin/subscription/change-plan/route.ts",
+        "line": 78,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const currentModuleCodes = company.companyModules.map((m: any) => m.moduloCodigo"
+      },
+      {
+        "file": "/app/api/admin/subscription/change-plan/route.ts",
+        "line": 100,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "data: modulesToActivate.map((codigo) => ({"
+      },
+      {
+        "file": "/app/api/admin/tags/route.ts",
+        "line": 50,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const tagsWithCount = allTags.map((tag) => ({"
+      },
+      {
+        "file": "/app/api/admin/usage-metrics/route.ts",
+        "line": 69,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map(c => c.companyId as string);"
+      },
+      {
+        "file": "/app/api/admin/usage-metrics/route.ts",
+        "line": 84,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "companies.map(c => [c.id, c])"
+      },
+      {
+        "file": "/app/api/admin/usage-metrics/route.ts",
+        "line": 87,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const enrichedCompanyActivity = companyActivity.map(activity => ({"
+      },
+      {
+        "file": "/app/api/admin/usage-metrics/route.ts",
+        "line": 114,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map(u => u.userId as string);"
+      },
+      {
+        "file": "/app/api/admin/usage-metrics/route.ts",
+        "line": 131,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "users.map(u => [u.id, u])"
+      },
+      {
+        "file": "/app/api/admin/usage-metrics/route.ts",
+        "line": 134,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const enrichedUserActivity = userActivity.map(activity => ({"
+      },
+      {
+        "file": "/app/api/admin/usage-metrics/route.ts",
+        "line": 141,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "moduleUsage: moduleUsage.map(m => ({"
+      },
+      {
+        "file": "/app/api/agents/metrics/route.ts",
+        "line": 86,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map(m => m.agentType)"
+      },
+      {
+        "file": "/app/api/audit/reports/route.ts",
+        "line": 90,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "[...auditLogs.map((a) => a.userId), ...securityEvents.map((s) => s.userId)].filt"
+      },
+      {
+        "file": "/app/api/audit/stats/route.ts",
+        "line": 106,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "topActions: topActions.map((a) => ({"
+      },
+      {
+        "file": "/app/api/audit/stats/route.ts",
+        "line": 110,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "eventsBySeverity: eventsBySeverity.map((e) => ({"
+      },
+      {
+        "file": "/app/api/auth/mfa/regenerate-backup-codes/route.ts",
+        "line": 78,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const hashedBackupCodes = backupCodes.map((code) => hashBackupCode(code));"
+      },
+      {
+        "file": "/app/api/automation/run/route.ts",
+        "line": 78,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const adminIds = admins.map((a: { id: string }) => a.id);"
+      },
+      {
+        "file": "/app/api/b2b-billing/invoices/[id]/pdf/route.ts",
+        "line": 76,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "conceptos: (invoice.conceptos as any[]).map((concepto: any) => ({"
+      },
+      {
+        "file": "/app/api/bi/dashboard/route.ts",
+        "line": 119,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const ocupacion = buildings.map((building: any) => {"
+      },
+      {
+        "file": "/app/api/bi/dashboard/route.ts",
+        "line": 208,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "data: ingresos.map((item, index) => ({"
+      },
+      {
+        "file": "/app/api/bi/segments/route.ts",
+        "line": 55,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const tenantIds = (tenants as any[]).map(t => t.id);"
+      },
+      {
+        "file": "/app/api/buildings/route.ts",
+        "line": 52,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const buildingsWithMetrics = buildings.map(building => ({"
+      },
+      {
+        "file": "/app/api/buildings/route.ts",
+        "line": 89,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const errors = validationResult.error.errors.map(err => ({"
+      },
+      {
+        "file": "/app/api/chat/conversations/route.ts",
+        "line": 40,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "users.map(async (otherUser) => {"
+      },
+      {
+        "file": "/app/api/chat/messages/[userId]/route.ts",
+        "line": 75,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "messages: messages.map(m => ({"
+      },
+      {
+        "file": "/app/api/chatbot/messages/route.ts",
+        "line": 154,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map(msg => ({"
+      },
+      {
+        "file": "/app/api/company/business-models/route.ts",
+        "line": 35,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const businessModelInfo = Object.keys(BUSINESS_MODEL_MODULES).map(model => ({"
+      },
+      {
+        "file": "/app/api/contracts/route.ts",
+        "line": 77,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const contractsWithExpiration = contracts.map(contract => {"
+      },
+      {
+        "file": "/app/api/contracts/route.ts",
+        "line": 116,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const errors = validationResult.error.errors.map(err => ({"
+      },
+      {
+        "file": "/app/api/cron/onboarding-automation/route.ts",
+        "line": 49,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map((r: any) => r.reason?.message || 'Unknown error');"
+      },
+      {
+        "file": "/app/api/dashboard/owner/route.ts",
+        "line": 142,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "last6Months.map(async ({ month, startDate, endDate }) => {"
+      },
+      {
+        "file": "/app/api/dashboard/owner/route.ts",
+        "line": 214,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const occupancyByProperty = buildings.map(building => ({"
+      },
+      {
+        "file": "/app/api/dashboard/owner/route.ts",
+        "line": 354,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "upcomingExpirations: upcomingExpirations.map((c: any) => ({"
+      },
+      {
+        "file": "/app/api/dashboard/owner/route.ts",
+        "line": 361,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "vacantUnits: vacantUnits.map((u: any) => ({"
+      },
+      {
+        "file": "/app/api/documents/[id]/share/route.ts",
+        "line": 30,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "tenantIds.map((tenantId: string) =>"
+      },
+      {
+        "file": "/app/api/documents/[id]/share/route.ts",
+        "line": 50,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "tenantIds.map((tenantId: string) => {"
+      },
+      {
+        "file": "/app/api/documents/search/route.ts",
+        "line": 63,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const results = contracts.map((c: any) => ({"
+      },
+      {
+        "file": "/app/api/expenses/route.ts",
+        "line": 42,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const buildingIds = userBuildings.map(b => b.id);"
+      },
+      {
+        "file": "/app/api/export/route.ts",
+        "line": 59,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "data = buildings.map((b) => ({"
+      },
+      {
+        "file": "/app/api/export/route.ts",
+        "line": 88,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "data = units.map((u) => ({"
+      },
+      {
+        "file": "/app/api/export/route.ts",
+        "line": 111,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "data = tenants.map((t) => ({"
+      },
+      {
+        "file": "/app/api/export/route.ts",
+        "line": 137,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "data = contracts.map((c) => ({"
+      },
+      {
+        "file": "/app/api/export/route.ts",
+        "line": 163,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "data = payments.map((p) => ({"
+      },
+      {
+        "file": "/app/api/export/route.ts",
+        "line": 186,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "data = expenses.map((e) => ({"
+      },
+      {
+        "file": "/app/api/flipping/project-status/route.ts",
+        "line": 51,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const statusData = Array.from(statusMap.entries()).map(([status, data]) => ({"
+      },
+      {
+        "file": "/app/api/flipping/roi-analysis/route.ts",
+        "line": 27,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const roiData = projects.map((project: any) => {"
+      },
+      {
+        "file": "/app/api/inspections/route.ts",
+        "line": 38,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "inspections.map(async (inspection) => {"
+      },
+      {
+        "file": "/app/api/modules/company/route.ts",
+        "line": 26,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const enrichedModules = companyModules.map(cm => {"
+      },
+      {
+        "file": "/app/api/modules/route.ts",
+        "line": 186,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const activeModuleCodes = new Set(activeModules.map(m => m.moduloCodigo));"
+      },
+      {
+        "file": "/app/api/modules/route.ts",
+        "line": 189,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "let modules = MODULE_DEFINITIONS.map(def => ({"
+      },
+      {
+        "file": "/app/api/onboarding/chatbot/route.ts",
+        "line": 73,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map((t) => t.taskId);"
+      },
+      {
+        "file": "/app/api/open-banking/redsys/.disabled/accounts/route.ts",
+        "line": 91,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "accounts.map(async (account) => {"
+      },
+      {
+        "file": "/app/api/open-banking/redsys/.disabled/authorize/route.ts",
+        "line": 65,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "supportedBanks: Object.entries(BANK_NAMES).map(([id, name]) => ({ id, name }))"
+      },
+      {
+        "file": "/app/api/open-banking/redsys/.disabled/authorize/route.ts",
+        "line": 111,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const banks = Object.entries(BANK_NAMES).map(([id, name]) => ({"
+      },
+      {
+        "file": "/app/api/owners/route.ts",
+        "line": 52,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const ownersWithoutPassword = owners.map(owner => {"
+      },
+      {
+        "file": "/app/api/owners/route.ts",
+        "line": 159,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const assignments = buildingAssignments.map((assignment: any) => ({"
+      },
+      {
+        "file": "/app/api/payments/route.ts",
+        "line": 128,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const errors = validationResult.error.errors.map(err => ({"
+      },
+      {
+        "file": "/app/api/photos/route.ts",
+        "line": 122,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "imagenes.map(async (key, index) => ({"
+      },
+      {
+        "file": "/app/api/portal-inquilino/chat/conversations/route.ts",
+        "line": 51,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "conversations.map(async (conv) => {"
+      },
+      {
+        "file": "/app/api/portal-propietario/documents/route.ts",
+        "line": 43,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map(ob => ob.buildingId);"
+      },
+      {
+        "file": "/app/api/portal-propietario/documents/route.ts",
+        "line": 52,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const unitIds = units.map(u => u.id);"
+      },
+      {
+        "file": "/app/api/portal-propietario/documents/route.ts",
+        "line": 112,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const contractIds = contracts.map(c => c.id);"
+      },
+      {
+        "file": "/app/api/portal-propietario/maintenance/route.ts",
+        "line": 41,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map(ob => ob.buildingId);"
+      },
+      {
+        "file": "/app/api/portal-propietario/maintenance/route.ts",
+        "line": 50,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const unitIds = units.map(u => u.id);"
+      },
+      {
+        "file": "/app/api/providers/recommend/route.ts",
+        "line": 55,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const response = recommendations.map((rec) => ({"
+      },
+      {
+        "file": "/app/api/push/send/route.ts",
+        "line": 61,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "targetUserIds = users.map(u => u.id);"
+      },
+      {
+        "file": "/app/api/push/send/route.ts",
+        "line": 73,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "targetUserIds.map(userId =>"
+      },
+      {
+        "file": "/app/api/reports/route.ts",
+        "line": 101,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const reportesConMetricas = reportes.map((r: any) => {"
+      },
+      {
+        "file": "/app/api/reports/route.ts",
+        "line": 174,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const flujoCaja = flujoCajaData.map((item: any) => ({"
+      },
+      {
+        "file": "/app/api/reuniones/[id]/generar-acta/route.ts",
+        "line": 119,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "${asistentes.map((a: any) => `<div>• ${a.nombre || a.email || 'Sin nombre'}</div"
+      },
+      {
+        "file": "/app/api/reuniones/[id]/generar-acta/route.ts",
+        "line": 123,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "${ordenDia.map((item: any, index: number) => `"
+      },
+      {
+        "file": "/app/api/reuniones/[id]/generar-acta/route.ts",
+        "line": 132,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "${acuerdos.map((acuerdo: any, index: number) => `"
+      },
+      {
+        "file": "/app/api/room-rental/[unitId]/dashboard/route.ts",
+        "line": 88,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const roomsOverview = rooms.map((room: any) => {"
+      },
+      {
+        "file": "/app/api/room-rental/[unitId]/dashboard/route.ts",
+        "line": 115,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const recentPaymentsFormatted = recentPayments.map((p: any) => ({"
+      },
+      {
+        "file": "/app/api/room-rental/[unitId]/reports/route.ts",
+        "line": 25,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const [year, month] = monthParam.split('-').map(Number);"
+      },
+      {
+        "file": "/app/api/room-rental/[unitId]/reports/route.ts",
+        "line": 69,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const roomsData = rooms.map((room: any) => {"
+      },
+      {
+        "file": "/app/api/room-rental/[unitId]/reports/route.ts",
+        "line": 127,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const timeline = daysInPeriod.map(day => {"
+      },
+      {
+        "file": "/app/api/search/route.ts",
+        "line": 152,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "buildings: buildings.map((b: any) => ({ ...b, type: 'building' })),"
+      },
+      {
+        "file": "/app/api/search/route.ts",
+        "line": 153,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "units: units.map((u: any) => ({ ...u, type: 'unit' })),"
+      },
+      {
+        "file": "/app/api/search/route.ts",
+        "line": 154,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "tenants: tenants.map((t: any) => ({ ...t, type: 'tenant' })),"
+      },
+      {
+        "file": "/app/api/search/route.ts",
+        "line": 155,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "contracts: contracts.map((c: any) => ({ ...c, type: 'contract' })),"
+      },
+      {
+        "file": "/app/api/search/route.ts",
+        "line": 156,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "providers: providers.map((p: any) => ({ ...p, type: 'provider' })),"
+      },
+      {
+        "file": "/app/api/str/channel-performance/route.ts",
+        "line": 54,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const performance = Array.from(channelMap.entries()).map(([channel, data]) => ({"
+      },
+      {
+        "file": "/app/api/str/channels/[listingId]/status/route.ts",
+        "line": 46,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "channels.map(async (channel) => {"
+      },
+      {
+        "file": "/app/api/str/dashboard/route.ts",
+        "line": 184,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const bookingsByChannel = bookingsByChannelData.map(item => ({"
+      },
+      {
+        "file": "/app/api/str/dashboard/route.ts",
+        "line": 210,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const topListings = topListingsData.map(listing => ({"
+      },
+      {
+        "file": "/app/api/stripe/payment-methods/route.ts",
+        "line": 51,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "paymentMethods: paymentMethods.data.map((pm) => ({"
+      },
+      {
+        "file": "/app/api/suggestions/route.ts",
+        "line": 135,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "superAdmins.map((admin) =>"
+      },
+      {
+        "file": "/app/api/suggestions/stats/route.ts",
+        "line": 52,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "porEstado.map((e) => [e.estado, e._count])"
+      },
+      {
+        "file": "/app/api/suggestions/stats/route.ts",
+        "line": 55,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "porPrioridad.map((p) => [p.prioridad, p._count])"
+      },
+      {
+        "file": "/app/api/suggestions/stats/route.ts",
+        "line": 58,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "porCategoria.map((c) => [c.categoria, c._count])"
+      },
+      {
+        "file": "/app/api/support/categorize-ticket/route.ts",
+        "line": 78,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const relatedArticles = articles.slice(0, 3).map(article => ({"
+      },
+      {
+        "file": "/app/api/support/chatbot/route.ts",
+        "line": 367,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "relatedArticles: results.map(r => ({"
+      },
+      {
+        "file": "/app/api/support/knowledge-search/route.ts",
+        "line": 45,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map("
+      },
+      {
+        "file": "/app/api/support/knowledge-search/route.ts",
+        "line": 74,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "results: keywordResults.map((article, index) => ({"
+      },
+      {
+        "file": "/app/api/support/knowledge-search/route.ts",
+        "line": 89,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map((aiArticle: any) => {"
+      },
+      {
+        "file": "/app/api/support/knowledge-search/route.ts",
+        "line": 112,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "results: fallbackResults.slice(0, 5).map((article, index) => ({"
+      },
+      {
+        "file": "/app/api/support/tickets/analyze/route.ts",
+        "line": 67,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "...relevantArticles.map(a => `Artículo: ${a.title}\\n${a.excerpt}`),"
+      },
+      {
+        "file": "/app/api/support/tickets/analyze/route.ts",
+        "line": 68,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "...relevantFAQs.map(f => `FAQ: ${f.question}\\nRespuesta: ${f.answer}`)"
+      },
+      {
+        "file": "/app/api/support/tickets/analyze/route.ts",
+        "line": 117,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "relatedArticles: relevantArticles.slice(0, 3).map(a => ({"
+      },
+      {
+        "file": "/app/api/tenants/route.ts",
+        "line": 100,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const errors = validationResult.error.errors.map(err => ({"
+      },
+      {
+        "file": "/app/api/units/route.ts",
+        "line": 40,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const tipos = tipo.split(',').map(t => t.trim());"
+      },
+      {
+        "file": "/app/api/units/route.ts",
+        "line": 142,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const errors = validationResult.error.errors.map(err => ({"
+      },
+      {
+        "file": "/app/api/user/companies/route.ts",
+        "line": 62,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const companyIds = new Set(userAccess.map(access => access.companyId));"
+      },
+      {
+        "file": "/app/api/user/companies/route.ts",
+        "line": 64,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const companies = userAccess.map(access => ({"
+      },
+      {
+        "file": "/app/api/users/route.ts",
+        "line": 36,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const usersWithoutPasswords = users.map(({ password, ...user }) => user);"
+      },
+      {
+        "file": "/app/api/votaciones/[id]/votar/route.ts",
+        "line": 101,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const resultados = opciones.map((opcion) => {"
+      },
+      {
+        "file": "/app/asistente-ia/page.tsx",
+        "line": 108,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const conversationHistory = messages.map((m) => ({"
+      },
+      {
+        "file": "/app/calendario/page.tsx",
+        "line": 351,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "return eventos.map((evento) => ({"
+      },
+      {
+        "file": "/app/calendario/page.tsx",
+        "line": 566,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{TIPOS_EVENTO.map((tipo) => {"
+      },
+      {
+        "file": "/app/candidatos/page.tsx",
+        "line": 208,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map((n) => n[0])"
+      },
+      {
+        "file": "/app/construction/page.tsx",
+        "line": 236,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{filteredProjects.map((project) => {"
+      },
+      {
+        "file": "/app/contratos/page.tsx",
+        "line": 420,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{filteredContracts.map((contract) => {"
+      },
+      {
+        "file": "/app/crm/page.tsx",
+        "line": 529,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{ETAPAS_PIPELINE.map((etapa) => {"
+      },
+      {
+        "file": "/app/dashboard/community/components/AnnouncementsPanel.tsx",
+        "line": 259,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{announcements.map((announcement) => {"
+      },
+      {
+        "file": "/app/dashboard/components/InactiveModules.tsx",
+        "line": 137,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{modules.slice(0, 6).map((module) => {"
+      },
+      {
+        "file": "/app/dashboard/components/priority-alerts.tsx",
+        "line": 190,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{visibleAlerts.slice(0, 10).map((alert) => {"
+      },
+      {
+        "file": "/app/dashboard/page.tsx",
+        "line": 435,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{data.contractsExpiringSoon?.map((contract) => {"
+      },
+      {
+        "file": "/app/documentos/page.tsx",
+        "line": 569,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "filteredDocuments.map((doc) => {"
+      },
+      {
+        "file": "/app/firma-digital/page.tsx",
+        "line": 248,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const tiposDocumento = Array.from(new Set(documentos.map((d) => d.tipoDocumento)"
+      },
+      {
+        "file": "/app/firma-digital/page.tsx",
+        "line": 477,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "documentosFiltrados.map((doc) => {"
+      },
+      {
+        "file": "/app/firma-digital/page.tsx",
+        "line": 591,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{documentosFiltrados.map((doc) => {"
+      },
+      {
+        "file": "/app/garajes-trasteros/page.tsx",
+        "line": 322,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "data={filteredUnits.map((unit) => ({"
+      },
+      {
+        "file": "/app/inquilinos/InquilinosClientPage.tsx",
+        "line": 174,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map((n) => n[0])"
+      },
+      {
+        "file": "/app/inquilinos/page.tsx",
+        "line": 250,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map((n) => n[0])"
+      },
+      {
+        "file": "/app/inquilinos/page.tsx",
+        "line": 403,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{filteredTenants.map((tenant) => {"
+      },
+      {
+        "file": "/app/inquilinos/page.tsx",
+        "line": 477,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{filteredTenants.map((tenant) => {"
+      },
+      {
+        "file": "/app/inquilinos/page.tsx",
+        "line": 553,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{filteredTenants.map((tenant) => {"
+      },
+      {
+        "file": "/app/landing/modulos/coliving/page.tsx",
+        "line": 105,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "prev.map((h) =>"
+      },
+      {
+        "file": "/app/landing/modulos/coliving/page.tsx",
+        "line": 112,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const nuevoId = Math.max(...habitaciones.map((h) => h.id), 0) + 1;"
+      },
+      {
+        "file": "/app/mantenimiento/page.tsx",
+        "line": 923,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "filteredSchedules.map((schedule) => {"
+      },
+      {
+        "file": "/app/mantenimiento-preventivo/page.tsx",
+        "line": 347,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{filteredSchedules.map((schedule) => {"
+      },
+      {
+        "file": "/app/mantenimiento-pro/page.tsx",
+        "line": 293,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map((m) => ({"
+      },
+      {
+        "file": "/app/mantenimiento-pro/page.tsx",
+        "line": 303,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map((b) => ({"
+      },
+      {
+        "file": "/app/mantenimiento-pro/page.tsx",
+        "line": 437,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "predictions.map((pred) => {"
+      },
+      {
+        "file": "/app/notificaciones/page.tsx",
+        "line": 140,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } :"
+      },
+      {
+        "file": "/app/notificaciones/page.tsx",
+        "line": 156,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));"
+      },
+      {
+        "file": "/app/notificaciones/page.tsx",
+        "line": 193,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "Array.from(selectedNotifications).map((id) =>"
+      },
+      {
+        "file": "/app/notificaciones/page.tsx",
+        "line": 221,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "setSelectedNotifications(new Set(filteredNotifications.map((n) => n.id)));"
+      },
+      {
+        "file": "/app/open-banking/page.tsx",
+        "line": 236,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "...transacciones.map((t) =>"
+      },
+      {
+        "file": "/app/pagos/components/PaymentsDashboard.tsx",
+        "line": 115,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const rows = payments.map((p) => ["
+      },
+      {
+        "file": "/app/pagos/components/PaymentsDashboard.tsx",
+        "line": 128,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const csvContent = [headers.join(','), ...rows.map((row) => row.join(','))].join"
+      },
+      {
+        "file": "/app/pagos/page.tsx",
+        "line": 447,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{daysInMonth.map((day, index) => {"
+      },
+      {
+        "file": "/app/pagos/page.tsx",
+        "line": 501,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{filteredPayments.map((payment) => {"
+      },
+      {
+        "file": "/app/partners/commissions/page.tsx",
+        "line": 221,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{filteredComisiones.map((com: any) => {"
+      },
+      {
+        "file": "/app/partners/dashboard/page.tsx",
+        "line": 246,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{data.invitacionesRecientes.slice(0, 5).map((inv: any) => {"
+      },
+      {
+        "file": "/app/partners/invitations/page.tsx",
+        "line": 265,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{invitaciones.map((inv: any) => {"
+      },
+      {
+        "file": "/app/partners/layout.tsx",
+        "line": 55,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{menuItems.map((item) => {"
+      },
+      {
+        "file": "/app/portal-comercial/objetivos/page.tsx",
+        "line": 166,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{objetivosActivos.map((objetivo) => {"
+      },
+      {
+        "file": "/app/portal-comercial/objetivos/page.tsx",
+        "line": 375,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{objetivosHistoricos.map((objetivo) => {"
+      },
+      {
+        "file": "/app/portal-inquilino/dashboard/page.tsx",
+        "line": 317,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{data.payments.slice(0, 5).map((payment) => {"
+      },
+      {
+        "file": "/app/portal-inquilino/documentos/page.tsx",
+        "line": 305,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{filteredDocuments.map((doc) => {"
+      },
+      {
+        "file": "/app/portal-inquilino/documentos/page.tsx",
+        "line": 375,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{sharedDocuments.map((share) => {"
+      },
+      {
+        "file": "/app/portal-inquilino/perfil/page.tsx",
+        "line": 175,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map((n) => n[0])"
+      },
+      {
+        "file": "/app/portal-propietario/page.tsx",
+        "line": 133,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const buildingIds = ownerData.ownerBuildings.map((ob) => ob.building.id);"
+      },
+      {
+        "file": "/app/portal-propietario/page.tsx",
+        "line": 313,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const ocupacionPorPropiedad = buildings.map((building) => {"
+      },
+      {
+        "file": "/app/portal-propietario/page.tsx",
+        "line": 357,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map((n) => n[0])"
+      },
+      {
+        "file": "/app/portal-propietario/page.tsx",
+        "line": 719,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{buildings.map((building) => {"
+      },
+      {
+        "file": "/app/professional/page.tsx",
+        "line": 247,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{filteredProjects.map((project) => {"
+      },
+      {
+        "file": "/app/qa/checklist/page.tsx",
+        "line": 163,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const data = QA_CHECKLIST.map(cat => ({"
+      },
+      {
+        "file": "/app/qa/checklist/page.tsx",
+        "line": 165,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "items: cat.items.map(item => ({"
+      },
+      {
+        "file": "/app/qa/checklist/page.tsx",
+        "line": 263,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{QA_CHECKLIST.map((category) => {"
+      },
+      {
+        "file": "/app/qa/checklist/page.tsx",
+        "line": 285,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{category.items.map((item) => {"
+      },
+      {
+        "file": "/app/register/page.tsx",
+        "line": 304,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "options={Object.entries(businessVerticalLabels).map(([value, label]) => ({"
+      },
+      {
+        "file": "/app/reuniones/page_base.tsx",
+        "line": 628,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "votacionesFiltradas.map((votacion) => {"
+      },
+      {
+        "file": "/app/room-rental/[unitId]/proration/components/ProrationPreview.tsx",
+        "line": 61,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{preview.map((room, index) => {"
+      },
+      {
+        "file": "/app/room-rental/[unitId]/proration/page.tsx",
+        "line": 98,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const roomsData = rooms.map((room) => ({"
+      },
+      {
+        "file": "/app/room-rental/[unitId]/proration/page.tsx",
+        "line": 437,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{rooms.map((room: any, index: number) => {"
+      },
+      {
+        "file": "/app/room-rental/[unitId]/reports/page.tsx",
+        "line": 397,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{report.timeline.slice(0, 10).map((day) => {"
+      },
+      {
+        "file": "/app/sitemap.ts",
+        "line": 111,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const propertyRoutes: MetadataRoute.Sitemap = units.map((unit) => ({"
+      },
+      {
+        "file": "/app/sitemap.ts",
+        "line": 131,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const buildingRoutes: MetadataRoute.Sitemap = buildings.map((building) => ({"
+      },
+      {
+        "file": "/app/str/listings/[id]/channels/page.tsx",
+        "line": 381,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "{channels.map((channel) => {"
+      },
+      {
+        "file": "/app/visitas/page.tsx",
+        "line": 240,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "return visits.map((v) => parseISO(v.fechaVisita));"
+      },
+      {
+        "file": "/app/votaciones/page.tsx",
+        "line": 918,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "votacionesFiltradas.map((votacion) => {"
+      },
+      {
+        "file": "/app/workflows/WorkflowForm.tsx",
+        "line": 71,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "workflow?.actions?.map((a: any, idx: number) => ({"
+      },
+      {
+        "file": "/app/api/accounting/analytics/route.ts",
+        "line": 25,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const [year, month] = periodo.split('-').map(Number);"
+      },
+      {
+        "file": "/app/api/accounting/profit-loss/route.ts",
+        "line": 24,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const [year, month] = periodo.split('-').map(Number);"
+      },
+      {
+        "file": "/app/api/accounting/ratios/route.ts",
+        "line": 25,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const [year, month] = periodo.split('-').map(Number);"
+      },
+      {
+        "file": "/app/api/accounting/tax-summary/route.ts",
+        "line": 25,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const [year, month] = periodo.split('-').map(Number);"
+      },
+      {
+        "file": "/app/api/admin/backup/route.ts",
+        "line": 122,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map(async (file) => {"
+      },
+      {
+        "file": "/app/api/admin/companies/[id]/access/route.ts",
+        "line": 64,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "...primaryUsers.map(user => ({"
+      },
+      {
+        "file": "/app/api/admin/companies/[id]/access/route.ts",
+        "line": 73,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "...userAccess.map(access => ({"
+      },
+      {
+        "file": "/app/api/admin/companies/compare/route.ts",
+        "line": 79,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "companies.map(async (company) => {"
+      },
+      {
+        "file": "/app/api/admin/companies/route.ts",
+        "line": 188,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "data: modulosCodigos.map(codigo => ({"
+      },
+      {
+        "file": "/app/api/admin/dashboard-stats/route.ts",
+        "line": 263,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map((s) => s.subscriptionPlanId)"
+      },
+      {
+        "file": "/app/api/admin/dashboard-stats/route.ts",
+        "line": 278,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const planMap = new Map(plans.map((p) => [p.id, p.nombre]));"
+      },
+      {
+        "file": "/app/api/admin/dashboard-stats/route.ts",
+        "line": 280,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const subscriptionBreakdown = subscriptionStats.map((stat) => ({"
+      },
+      {
+        "file": "/app/api/admin/firma-digital/documentos/[id]/route.ts",
+        "line": 79,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "create: firmantes.map((firmante: any) => ({"
+      },
+      {
+        "file": "/app/api/admin/firma-digital/documentos/route.ts",
+        "line": 101,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "create: firmantes.map((firmante: any) => ({"
+      },
+      {
+        "file": "/app/api/admin/init-pricing/route.ts",
+        "line": 40,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map(f => f.text),"
+      },
+      {
+        "file": "/app/api/admin/init-pricing/route.ts",
+        "line": 158,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "response.plansSummary = allPlans.map(p => ({"
+      },
+      {
+        "file": "/app/api/admin/init-pricing/route.ts",
+        "line": 171,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "in: Object.values(PROMO_CAMPAIGNS).map(c => c.code)"
+      },
+      {
+        "file": "/app/api/admin/init-pricing/route.ts",
+        "line": 180,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "response.couponsSummary = allCoupons.map(c => ({"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 44,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const chatTenantIds = tenantChats.map(c => c.tenantId).filter(Boolean) as string"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 49,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const tenantMap = new Map(chatTenants.map(t => [t.id, t.nombreCompleto]));"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 50,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "notifications.push(...tenantChats.map(c => ({"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 73,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const contractIds = recentPayments.map(p => p.contractId);"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 79,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const contractMap = new Map<string, ContractData>(contracts.map(c => [c.id, c]))"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 83,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const unitIds = contracts.map(c => c.unitId);"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 91,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const validUnitIds = new Set(units.map(u => u.id));"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 99,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map(p => contractMap.get(p.contractId)?.tenantId)"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 104,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const paymentTenantMap = new Map(paymentTenants.map(t => [t.id, t.nombreCompleto"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 105,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "notifications.push(...filteredPayments.slice(0, 10).map(p => {"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 127,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "notifications.push(...completedOrders.map(o => ({"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 147,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "notifications.push(...pendingOrders.map(o => ({"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 165,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "notifications.push(...ownerNotifs.map(n => ({"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 183,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "notifications.push(...newLeads.map(l => ({"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 203,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "notifications.push(...converted.map(l => ({"
+      },
+      {
+        "file": "/app/api/admin/notifications/route.ts",
+        "line": 223,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "notifications.push(...commissions.map(c => ({"
+      },
+      {
+        "file": "/app/api/admin/security-alerts/route.ts",
+        "line": 75,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map(([userId, data]: [string, any]) => ({"
+      },
+      {
+        "file": "/app/api/admin/security-alerts/route.ts",
+        "line": 88,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "...suspiciousActivity.map(a => ({"
+      },
+      {
+        "file": "/app/api/admin/security-alerts/route.ts",
+        "line": 93,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "...recentChanges.map(c => ({"
+      },
+      {
+        "file": "/app/api/admin/subscription/change-plan/route.ts",
+        "line": 78,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const currentModuleCodes = company.companyModules.map((m: any) => m.moduloCodigo"
+      },
+      {
+        "file": "/app/api/admin/subscription/change-plan/route.ts",
+        "line": 100,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "data: modulesToActivate.map((codigo) => ({"
+      },
+      {
+        "file": "/app/api/admin/tags/route.ts",
+        "line": 50,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const tagsWithCount = allTags.map((tag) => ({"
+      },
+      {
+        "file": "/app/api/admin/usage-metrics/route.ts",
+        "line": 69,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map(c => c.companyId as string);"
+      },
+      {
+        "file": "/app/api/admin/usage-metrics/route.ts",
+        "line": 84,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "companies.map(c => [c.id, c])"
+      },
+      {
+        "file": "/app/api/admin/usage-metrics/route.ts",
+        "line": 87,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const enrichedCompanyActivity = companyActivity.map(activity => ({"
+      },
+      {
+        "file": "/app/api/admin/usage-metrics/route.ts",
+        "line": 114,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map(u => u.userId as string);"
+      },
+      {
+        "file": "/app/api/admin/usage-metrics/route.ts",
+        "line": 131,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "users.map(u => [u.id, u])"
+      },
+      {
+        "file": "/app/api/admin/usage-metrics/route.ts",
+        "line": 134,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const enrichedUserActivity = userActivity.map(activity => ({"
+      },
+      {
+        "file": "/app/api/admin/usage-metrics/route.ts",
+        "line": 141,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "moduleUsage: moduleUsage.map(m => ({"
+      },
+      {
+        "file": "/app/api/agents/metrics/route.ts",
+        "line": 86,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map(m => m.agentType)"
+      },
+      {
+        "file": "/app/api/audit/reports/route.ts",
+        "line": 90,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "[...auditLogs.map((a) => a.userId), ...securityEvents.map((s) => s.userId)].filt"
+      },
+      {
+        "file": "/app/api/audit/stats/route.ts",
+        "line": 106,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "topActions: topActions.map((a) => ({"
+      },
+      {
+        "file": "/app/api/audit/stats/route.ts",
+        "line": 110,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "eventsBySeverity: eventsBySeverity.map((e) => ({"
+      },
+      {
+        "file": "/app/api/auth/mfa/regenerate-backup-codes/route.ts",
+        "line": 78,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const hashedBackupCodes = backupCodes.map((code) => hashBackupCode(code));"
+      },
+      {
+        "file": "/app/api/automation/run/route.ts",
+        "line": 78,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const adminIds = admins.map((a: { id: string }) => a.id);"
+      },
+      {
+        "file": "/app/api/b2b-billing/invoices/[id]/pdf/route.ts",
+        "line": 76,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "conceptos: (invoice.conceptos as any[]).map((concepto: any) => ({"
+      },
+      {
+        "file": "/app/api/bi/dashboard/route.ts",
+        "line": 119,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const ocupacion = buildings.map((building: any) => {"
+      },
+      {
+        "file": "/app/api/bi/dashboard/route.ts",
+        "line": 208,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "data: ingresos.map((item, index) => ({"
+      },
+      {
+        "file": "/app/api/bi/segments/route.ts",
+        "line": 55,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const tenantIds = (tenants as any[]).map(t => t.id);"
+      },
+      {
+        "file": "/app/api/buildings/route.ts",
+        "line": 52,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const buildingsWithMetrics = buildings.map(building => ({"
+      },
+      {
+        "file": "/app/api/buildings/route.ts",
+        "line": 89,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const errors = validationResult.error.errors.map(err => ({"
+      },
+      {
+        "file": "/app/api/chat/conversations/route.ts",
+        "line": 40,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "users.map(async (otherUser) => {"
+      },
+      {
+        "file": "/app/api/chat/messages/[userId]/route.ts",
+        "line": 75,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "messages: messages.map(m => ({"
+      },
+      {
+        "file": "/app/api/chatbot/messages/route.ts",
+        "line": 154,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map(msg => ({"
+      },
+      {
+        "file": "/app/api/company/business-models/route.ts",
+        "line": 35,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const businessModelInfo = Object.keys(BUSINESS_MODEL_MODULES).map(model => ({"
+      },
+      {
+        "file": "/app/api/contracts/route.ts",
+        "line": 77,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const contractsWithExpiration = contracts.map(contract => {"
+      },
+      {
+        "file": "/app/api/contracts/route.ts",
+        "line": 116,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const errors = validationResult.error.errors.map(err => ({"
+      },
+      {
+        "file": "/app/api/cron/onboarding-automation/route.ts",
+        "line": 49,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map((r: any) => r.reason?.message || 'Unknown error');"
+      },
+      {
+        "file": "/app/api/dashboard/owner/route.ts",
+        "line": 142,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "last6Months.map(async ({ month, startDate, endDate }) => {"
+      },
+      {
+        "file": "/app/api/dashboard/owner/route.ts",
+        "line": 214,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const occupancyByProperty = buildings.map(building => ({"
+      },
+      {
+        "file": "/app/api/dashboard/owner/route.ts",
+        "line": 354,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "upcomingExpirations: upcomingExpirations.map((c: any) => ({"
+      },
+      {
+        "file": "/app/api/dashboard/owner/route.ts",
+        "line": 361,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "vacantUnits: vacantUnits.map((u: any) => ({"
+      },
+      {
+        "file": "/app/api/documents/[id]/share/route.ts",
+        "line": 30,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "tenantIds.map((tenantId: string) =>"
+      },
+      {
+        "file": "/app/api/documents/[id]/share/route.ts",
+        "line": 50,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "tenantIds.map((tenantId: string) => {"
+      },
+      {
+        "file": "/app/api/documents/search/route.ts",
+        "line": 63,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const results = contracts.map((c: any) => ({"
+      },
+      {
+        "file": "/app/api/expenses/route.ts",
+        "line": 42,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const buildingIds = userBuildings.map(b => b.id);"
+      },
+      {
+        "file": "/app/api/export/route.ts",
+        "line": 59,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "data = buildings.map((b) => ({"
+      },
+      {
+        "file": "/app/api/export/route.ts",
+        "line": 88,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "data = units.map((u) => ({"
+      },
+      {
+        "file": "/app/api/export/route.ts",
+        "line": 111,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "data = tenants.map((t) => ({"
+      },
+      {
+        "file": "/app/api/export/route.ts",
+        "line": 137,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "data = contracts.map((c) => ({"
+      },
+      {
+        "file": "/app/api/export/route.ts",
+        "line": 163,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "data = payments.map((p) => ({"
+      },
+      {
+        "file": "/app/api/export/route.ts",
+        "line": 186,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "data = expenses.map((e) => ({"
+      },
+      {
+        "file": "/app/api/flipping/project-status/route.ts",
+        "line": 51,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const statusData = Array.from(statusMap.entries()).map(([status, data]) => ({"
+      },
+      {
+        "file": "/app/api/flipping/roi-analysis/route.ts",
+        "line": 27,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const roiData = projects.map((project: any) => {"
+      },
+      {
+        "file": "/app/api/inspections/route.ts",
+        "line": 38,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "inspections.map(async (inspection) => {"
+      },
+      {
+        "file": "/app/api/modules/company/route.ts",
+        "line": 26,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const enrichedModules = companyModules.map(cm => {"
+      },
+      {
+        "file": "/app/api/modules/route.ts",
+        "line": 186,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const activeModuleCodes = new Set(activeModules.map(m => m.moduloCodigo));"
+      },
+      {
+        "file": "/app/api/modules/route.ts",
+        "line": 189,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "let modules = MODULE_DEFINITIONS.map(def => ({"
+      },
+      {
+        "file": "/app/api/onboarding/chatbot/route.ts",
+        "line": 73,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map((t) => t.taskId);"
+      },
+      {
+        "file": "/app/api/open-banking/redsys/.disabled/accounts/route.ts",
+        "line": 91,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "accounts.map(async (account) => {"
+      },
+      {
+        "file": "/app/api/open-banking/redsys/.disabled/authorize/route.ts",
+        "line": 65,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "supportedBanks: Object.entries(BANK_NAMES).map(([id, name]) => ({ id, name }))"
+      },
+      {
+        "file": "/app/api/open-banking/redsys/.disabled/authorize/route.ts",
+        "line": 111,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const banks = Object.entries(BANK_NAMES).map(([id, name]) => ({"
+      },
+      {
+        "file": "/app/api/owners/route.ts",
+        "line": 52,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const ownersWithoutPassword = owners.map(owner => {"
+      },
+      {
+        "file": "/app/api/owners/route.ts",
+        "line": 159,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const assignments = buildingAssignments.map((assignment: any) => ({"
+      },
+      {
+        "file": "/app/api/payments/route.ts",
+        "line": 128,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const errors = validationResult.error.errors.map(err => ({"
+      },
+      {
+        "file": "/app/api/photos/route.ts",
+        "line": 122,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "imagenes.map(async (key, index) => ({"
+      },
+      {
+        "file": "/app/api/portal-inquilino/chat/conversations/route.ts",
+        "line": 51,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "conversations.map(async (conv) => {"
+      },
+      {
+        "file": "/app/api/portal-propietario/documents/route.ts",
+        "line": 43,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map(ob => ob.buildingId);"
+      },
+      {
+        "file": "/app/api/portal-propietario/documents/route.ts",
+        "line": 52,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const unitIds = units.map(u => u.id);"
+      },
+      {
+        "file": "/app/api/portal-propietario/documents/route.ts",
+        "line": 112,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const contractIds = contracts.map(c => c.id);"
+      },
+      {
+        "file": "/app/api/portal-propietario/maintenance/route.ts",
+        "line": 41,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map(ob => ob.buildingId);"
+      },
+      {
+        "file": "/app/api/portal-propietario/maintenance/route.ts",
+        "line": 50,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const unitIds = units.map(u => u.id);"
+      },
+      {
+        "file": "/app/api/providers/recommend/route.ts",
+        "line": 55,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const response = recommendations.map((rec) => ({"
+      },
+      {
+        "file": "/app/api/push/send/route.ts",
+        "line": 61,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "targetUserIds = users.map(u => u.id);"
+      },
+      {
+        "file": "/app/api/push/send/route.ts",
+        "line": 73,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "targetUserIds.map(userId =>"
+      },
+      {
+        "file": "/app/api/reports/route.ts",
+        "line": 101,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const reportesConMetricas = reportes.map((r: any) => {"
+      },
+      {
+        "file": "/app/api/reports/route.ts",
+        "line": 174,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const flujoCaja = flujoCajaData.map((item: any) => ({"
+      },
+      {
+        "file": "/app/api/reuniones/[id]/generar-acta/route.ts",
+        "line": 119,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "${asistentes.map((a: any) => `<div>• ${a.nombre || a.email || 'Sin nombre'}</div"
+      },
+      {
+        "file": "/app/api/reuniones/[id]/generar-acta/route.ts",
+        "line": 123,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "${ordenDia.map((item: any, index: number) => `"
+      },
+      {
+        "file": "/app/api/reuniones/[id]/generar-acta/route.ts",
+        "line": 132,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "${acuerdos.map((acuerdo: any, index: number) => `"
+      },
+      {
+        "file": "/app/api/room-rental/[unitId]/dashboard/route.ts",
+        "line": 88,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const roomsOverview = rooms.map((room: any) => {"
+      },
+      {
+        "file": "/app/api/room-rental/[unitId]/dashboard/route.ts",
+        "line": 115,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const recentPaymentsFormatted = recentPayments.map((p: any) => ({"
+      },
+      {
+        "file": "/app/api/room-rental/[unitId]/reports/route.ts",
+        "line": 25,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const [year, month] = monthParam.split('-').map(Number);"
+      },
+      {
+        "file": "/app/api/room-rental/[unitId]/reports/route.ts",
+        "line": 69,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const roomsData = rooms.map((room: any) => {"
+      },
+      {
+        "file": "/app/api/room-rental/[unitId]/reports/route.ts",
+        "line": 127,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const timeline = daysInPeriod.map(day => {"
+      },
+      {
+        "file": "/app/api/search/route.ts",
+        "line": 152,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "buildings: buildings.map((b: any) => ({ ...b, type: 'building' })),"
+      },
+      {
+        "file": "/app/api/search/route.ts",
+        "line": 153,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "units: units.map((u: any) => ({ ...u, type: 'unit' })),"
+      },
+      {
+        "file": "/app/api/search/route.ts",
+        "line": 154,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "tenants: tenants.map((t: any) => ({ ...t, type: 'tenant' })),"
+      },
+      {
+        "file": "/app/api/search/route.ts",
+        "line": 155,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "contracts: contracts.map((c: any) => ({ ...c, type: 'contract' })),"
+      },
+      {
+        "file": "/app/api/search/route.ts",
+        "line": 156,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "providers: providers.map((p: any) => ({ ...p, type: 'provider' })),"
+      },
+      {
+        "file": "/app/api/str/channel-performance/route.ts",
+        "line": 54,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const performance = Array.from(channelMap.entries()).map(([channel, data]) => ({"
+      },
+      {
+        "file": "/app/api/str/channels/[listingId]/status/route.ts",
+        "line": 46,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "channels.map(async (channel) => {"
+      },
+      {
+        "file": "/app/api/str/dashboard/route.ts",
+        "line": 184,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const bookingsByChannel = bookingsByChannelData.map(item => ({"
+      },
+      {
+        "file": "/app/api/str/dashboard/route.ts",
+        "line": 210,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const topListings = topListingsData.map(listing => ({"
+      },
+      {
+        "file": "/app/api/stripe/payment-methods/route.ts",
+        "line": 51,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "paymentMethods: paymentMethods.data.map((pm) => ({"
+      },
+      {
+        "file": "/app/api/suggestions/route.ts",
+        "line": 135,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "superAdmins.map((admin) =>"
+      },
+      {
+        "file": "/app/api/suggestions/stats/route.ts",
+        "line": 52,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "porEstado.map((e) => [e.estado, e._count])"
+      },
+      {
+        "file": "/app/api/suggestions/stats/route.ts",
+        "line": 55,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "porPrioridad.map((p) => [p.prioridad, p._count])"
+      },
+      {
+        "file": "/app/api/suggestions/stats/route.ts",
+        "line": 58,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "porCategoria.map((c) => [c.categoria, c._count])"
+      },
+      {
+        "file": "/app/api/support/categorize-ticket/route.ts",
+        "line": 78,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const relatedArticles = articles.slice(0, 3).map(article => ({"
+      },
+      {
+        "file": "/app/api/support/chatbot/route.ts",
+        "line": 367,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "relatedArticles: results.map(r => ({"
+      },
+      {
+        "file": "/app/api/support/knowledge-search/route.ts",
+        "line": 45,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map("
+      },
+      {
+        "file": "/app/api/support/knowledge-search/route.ts",
+        "line": 74,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "results: keywordResults.map((article, index) => ({"
+      },
+      {
+        "file": "/app/api/support/knowledge-search/route.ts",
+        "line": 89,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": ".map((aiArticle: any) => {"
+      },
+      {
+        "file": "/app/api/support/knowledge-search/route.ts",
+        "line": 112,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "results: fallbackResults.slice(0, 5).map((article, index) => ({"
+      },
+      {
+        "file": "/app/api/support/tickets/analyze/route.ts",
+        "line": 67,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "...relevantArticles.map(a => `Artículo: ${a.title}\\n${a.excerpt}`),"
+      },
+      {
+        "file": "/app/api/support/tickets/analyze/route.ts",
+        "line": 68,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "...relevantFAQs.map(f => `FAQ: ${f.question}\\nRespuesta: ${f.answer}`)"
+      },
+      {
+        "file": "/app/api/support/tickets/analyze/route.ts",
+        "line": 117,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "relatedArticles: relevantArticles.slice(0, 3).map(a => ({"
+      },
+      {
+        "file": "/app/api/tenants/route.ts",
+        "line": 100,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const errors = validationResult.error.errors.map(err => ({"
+      },
+      {
+        "file": "/app/api/units/route.ts",
+        "line": 40,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const tipos = tipo.split(',').map(t => t.trim());"
+      },
+      {
+        "file": "/app/api/units/route.ts",
+        "line": 142,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const errors = validationResult.error.errors.map(err => ({"
+      },
+      {
+        "file": "/app/api/user/companies/route.ts",
+        "line": 62,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const companyIds = new Set(userAccess.map(access => access.companyId));"
+      },
+      {
+        "file": "/app/api/user/companies/route.ts",
+        "line": 64,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const companies = userAccess.map(access => ({"
+      },
+      {
+        "file": "/app/api/users/route.ts",
+        "line": 36,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const usersWithoutPasswords = users.map(({ password, ...user }) => user);"
+      },
+      {
+        "file": "/app/api/votaciones/[id]/votar/route.ts",
+        "line": 101,
+        "type": "warning",
+        "category": "react",
+        "message": "Posible .map() sin prop \"key\"",
+        "snippet": "const resultados = opciones.map((opcion) => {"
+      }
+    ],
+    "info": [
+      {
+        "file": "/components/onboarding/SetupProgressWidget.tsx",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "TODO:"
+      },
+      {
+        "file": "/app/api/admin/password-recovery/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "TODO:"
+      },
+      {
+        "file": "/app/api/auth-proveedor/forgot-password/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "TODO:"
+      },
+      {
+        "file": "/app/api/ewoorker/admin-socio/metricas/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "2 TODO/FIXME encontrados",
+        "snippet": "TODO:, TODO:"
+      },
+      {
+        "file": "/app/api/ewoorker/compliance/upload/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "TODO:"
+      },
+      {
+        "file": "/app/api/maintenance/[id]/photos/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "TODO:"
+      },
+      {
+        "file": "/app/api/open-banking/redsys/.disabled/accounts/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "todo:"
+      },
+      {
+        "file": "/app/api/open-banking/redsys/.disabled/authorize/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "todo:"
+      },
+      {
+        "file": "/app/api/open-banking/redsys/.disabled/callback/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "todo:"
+      },
+      {
+        "file": "/app/api/open-banking/redsys/.disabled/transactions/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "todo:"
+      },
+      {
+        "file": "/app/api/partners/calculate-commissions/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "TODO:"
+      },
+      {
+        "file": "/app/api/partners/invitations/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "TODO:"
+      },
+      {
+        "file": "/app/api/pomelli/config/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "2 TODO/FIXME encontrados",
+        "snippet": "TODO:, TODO:"
+      },
+      {
+        "file": "/app/api/portal-inquilino/password-reset/request/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "TODO:"
+      },
+      {
+        "file": "/app/api/portal-proveedor/invoices/[id]/submit/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "TODO:"
+      },
+      {
+        "file": "/app/api/portal-proveedor/work-orders/[id]/accept/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "TODO:"
+      },
+      {
+        "file": "/app/api/portal-proveedor/work-orders/[id]/reject/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "TODO:"
+      },
+      {
+        "file": "/app/api/renewals/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "TODO:"
+      },
+      {
+        "file": "/app/api/scheduled-reports/[id]/history/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "TODO:"
+      },
+      {
+        "file": "/app/comparativa/homming/page.tsx",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "TODO:"
+      },
+      {
+        "file": "/app/comunidades/page.tsx",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "TODO:"
+      },
+      {
+        "file": "/app/portal-propietario/page.tsx",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "TODO:"
+      },
+      {
+        "file": "/app/api/admin/password-recovery/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "TODO:"
+      },
+      {
+        "file": "/app/api/auth-proveedor/forgot-password/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "TODO:"
+      },
+      {
+        "file": "/app/api/ewoorker/admin-socio/metricas/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "2 TODO/FIXME encontrados",
+        "snippet": "TODO:, TODO:"
+      },
+      {
+        "file": "/app/api/ewoorker/compliance/upload/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "TODO:"
+      },
+      {
+        "file": "/app/api/maintenance/[id]/photos/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "TODO:"
+      },
+      {
+        "file": "/app/api/open-banking/redsys/.disabled/accounts/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "todo:"
+      },
+      {
+        "file": "/app/api/open-banking/redsys/.disabled/authorize/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "todo:"
+      },
+      {
+        "file": "/app/api/open-banking/redsys/.disabled/callback/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "todo:"
+      },
+      {
+        "file": "/app/api/open-banking/redsys/.disabled/transactions/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "todo:"
+      },
+      {
+        "file": "/app/api/partners/calculate-commissions/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "TODO:"
+      },
+      {
+        "file": "/app/api/partners/invitations/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "TODO:"
+      },
+      {
+        "file": "/app/api/pomelli/config/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "2 TODO/FIXME encontrados",
+        "snippet": "TODO:, TODO:"
+      },
+      {
+        "file": "/app/api/portal-inquilino/password-reset/request/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "TODO:"
+      },
+      {
+        "file": "/app/api/portal-proveedor/invoices/[id]/submit/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "TODO:"
+      },
+      {
+        "file": "/app/api/portal-proveedor/work-orders/[id]/accept/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "TODO:"
+      },
+      {
+        "file": "/app/api/portal-proveedor/work-orders/[id]/reject/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "TODO:"
+      },
+      {
+        "file": "/app/api/renewals/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "TODO:"
+      },
+      {
+        "file": "/app/api/scheduled-reports/[id]/history/route.ts",
+        "type": "info",
+        "category": "todo",
+        "message": "1 TODO/FIXME encontrados",
+        "snippet": "TODO:"
+      }
+    ]
+  }
+}

@@ -189,7 +189,11 @@ export function AdaptiveSidebar({
             </p>
           )}
           <nav className="space-y-1">
-            {featuredModules.map(renderModuleLink)}
+            {featuredModules.map((module) => (
+              <React.Fragment key={module.id}>
+                {renderModuleLink(module)}
+              </React.Fragment>
+            ))}
           </nav>
         </div>
       )}
@@ -208,7 +212,11 @@ export function AdaptiveSidebar({
             </p>
           )}
           <nav className="space-y-1">
-            {regularModules.map(renderModuleLink)}
+            {regularModules.map((module) => (
+              <React.Fragment key={module.id}>
+                {renderModuleLink(module)}
+              </React.Fragment>
+            ))}
           </nav>
         </div>
       )}
