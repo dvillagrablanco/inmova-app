@@ -44,7 +44,6 @@ export async function GET() {
       canEnableMFA: user.role === 'super_admin',
     });
   } catch (error: any) {
-    console.error('[MFA] Error getting status:', error);
     return NextResponse.json(
       { error: 'Error al obtener estado MFA' },
       { status: 500 }
