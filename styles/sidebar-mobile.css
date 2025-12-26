@@ -1,17 +1,48 @@
 /* Estilos específicos para el sidebar en móvil */
 
+/* Solución CSS pura con checkbox - NO DEPENDE DE JAVASCRIPT */
+
 /* Desktop - sidebar siempre visible */
 @media (min-width: 1024px) {
-  [data-mobile-sidebar] {
+  .mobile-sidebar {
     transform: translateX(0) !important;
   }
 
-  [data-mobile-overlay] {
+  .mobile-overlay {
     display: none !important;
   }
 
-  button[aria-label*='menú'] {
+  label[for='mobile-menu-toggle'] {
     display: none !important;
+  }
+
+  #mobile-menu-toggle {
+    display: none !important;
+  }
+}
+
+/* Mobile - controlar con checkbox */
+@media (max-width: 1023px) {
+  /* Cuando el checkbox está checked, abrir menú */
+  #mobile-menu-toggle:checked ~ .mobile-sidebar {
+    transform: translateX(0) !important;
+  }
+
+  #mobile-menu-toggle:checked ~ .mobile-overlay {
+    display: block !important;
+  }
+
+  #mobile-menu-toggle:checked ~ label[for='mobile-menu-toggle'] .menu-icon-open {
+    display: none;
+  }
+
+  #mobile-menu-toggle:checked ~ label[for='mobile-menu-toggle'] .menu-icon-close {
+    display: block !important;
+  }
+
+  /* Prevenir scroll cuando el menú está abierto */
+  #mobile-menu-toggle:checked ~ * {
+    overflow: hidden;
   }
 }
 

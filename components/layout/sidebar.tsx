@@ -988,8 +988,9 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
           href={item.href}
           prefetch={true}
           onClick={() => {
-            closeMobileMenu();
-            setIsMobileMenuOpen(false);
+            // Cerrar el menú usando el checkbox
+            const checkbox = document.getElementById('mobile-menu-toggle') as HTMLInputElement;
+            if (checkbox) checkbox.checked = false;
             onNavigate?.();
           }}
           data-tour={item.dataTour || undefined}
@@ -1025,39 +1026,35 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
 
   return (
     <>
+      {/* Checkbox invisible para controlar el menú */}
+      <input
+        type="checkbox"
+        id="mobile-menu-toggle"
+        className="hidden"
+        aria-label="Toggle mobile menu"
+      />
+
       {/* Mobile menu button - Fixed en la parte superior izquierda */}
-      <button
-        onClick={() => {
-          toggleMobileMenu();
-          setIsMobileMenuOpen(!isMobileMenuOpen);
-        }}
-        className="lg:hidden fixed top-3 left-3 z-[100] p-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-xl shadow-2xl hover:shadow-indigo-600/90 active:scale-95 transition-all duration-200 border-2 border-white/30 backdrop-blur-md touch-manipulation"
+      <label
+        htmlFor="mobile-menu-toggle"
+        className="lg:hidden fixed top-3 left-3 z-[100] p-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-xl shadow-2xl hover:shadow-indigo-600/90 active:scale-95 transition-all duration-200 border-2 border-white/30 backdrop-blur-md touch-manipulation cursor-pointer flex items-center justify-center"
         style={{ backgroundColor: 'rgba(79, 70, 229, 0.95)', minWidth: '52px', minHeight: '52px' }}
-        aria-label={isMobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
       >
-        {isMobileMenuOpen ? (
-          <X size={26} strokeWidth={2.5} />
-        ) : (
-          <Menu size={26} strokeWidth={2.5} />
-        )}
-      </button>
+        <Menu size={26} strokeWidth={2.5} className="menu-icon-open" />
+        <X size={26} strokeWidth={2.5} className="menu-icon-close hidden" />
+      </label>
 
       {/* Overlay for mobile - Cubre toda la pantalla excepto el botón */}
-      <div
-        data-mobile-overlay
-        className="lg:hidden fixed inset-0 bg-black/70 z-[80] backdrop-blur-sm sidebar-overlay"
+      <label
+        htmlFor="mobile-menu-toggle"
+        className="mobile-overlay lg:hidden fixed inset-0 bg-black/70 z-[80] backdrop-blur-sm"
         style={{ display: 'none' }}
-        onClick={() => {
-          closeMobileMenu();
-          setIsMobileMenuOpen(false);
-        }}
         aria-hidden="true"
       />
 
       {/* Sidebar - Optimizado para móviles */}
       <aside
-        data-mobile-sidebar
-        className="fixed top-0 left-0 z-[90] h-screen w-[85vw] max-w-[320px] sm:w-64 lg:w-64 bg-black text-white overflow-hidden lg:translate-x-0"
+        className="mobile-sidebar fixed top-0 left-0 z-[90] h-screen w-[85vw] max-w-[320px] sm:w-64 lg:w-64 bg-black text-white overflow-hidden"
         style={{
           transform: 'translateX(-100%)',
           transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
