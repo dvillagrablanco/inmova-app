@@ -78,15 +78,15 @@ export function HeroSection() {
             <div className="flex flex-wrap items-center justify-center gap-8 pt-8 text-sm text-gray-600">
               <div className="flex items-center gap-2">
                 <Building2 className="h-5 w-5 text-indigo-600" />
-                <span className="font-medium">500+ Empresas</span>
+                <span className="font-medium">€850M Mercado España</span>
               </div>
               <div className="flex items-center gap-2">
                 <Users className="h-5 w-5 text-violet-600" />
-                <span className="font-medium">10,000+ Propiedades</span>
+                <span className="font-medium">34 Tipos de Partners</span>
               </div>
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-pink-600" />
-                <span className="font-medium">98% Satisfacción</span>
+                <span className="font-medium">€150M Potencial 5 Años</span>
               </div>
             </div>
 
