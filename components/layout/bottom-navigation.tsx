@@ -26,9 +26,10 @@ interface NavItem {
   badge?: number;
 }
 
+// Navegación principal móvil - optimizada para las funcionalidades más usadas
 const mainNavItems: NavItem[] = [
-  { label: 'Inicio', icon: Home, href: '/home' },
-  { label: 'Edificios', icon: Building2, href: '/edificios' },
+  { label: 'Inicio', icon: Home, href: '/dashboard' },
+  { label: 'Propiedades', icon: Building2, href: '/edificios' },
   { label: 'Inquilinos', icon: Users, href: '/inquilinos' },
   { label: 'Pagos', icon: CreditCard, href: '/pagos' },
 ];
