@@ -1356,15 +1356,13 @@ model Company {
   ewoorkerPerfil        EwoorkerPerfilEmpresa?
   ewoorkerObras         EwoorkerObra[]
   
-  // 🚀 ZERO-TOUCH ONBOARDING
-  onboardingProgress    OnboardingProgress[]
-  onboardingTasks       OnboardingTask[]
-  
   // 📱 POMELLI SOCIAL MEDIA INTEGRATION
   pomelliConfig         PomelliConfig?
   socialProfiles        SocialProfile[]
-  socialPosts           SocialPost[]
+  pomelliSocialPosts    PomelliSocialPost[]
   socialAnalytics       SocialAnalytics[]
+  
+  // 🔌 INTEGRATION MANAGEMENT CENTER
   
   @@map("company")
 }
@@ -11523,86 +11521,6 @@ model ChatbotInteraction {
   @@map("chatbot_interactions")
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// ══════════════════════════════════════════════════════════════════════════════
-// 🚀 ZERO-TOUCH ONBOARDING - Sistema de activación automática
-// ══════════════════════════════════════════════════════════════════════════════
-
-model OnboardingProgress {
-  id               String   @id @default(cuid())
-  userId           String
-  companyId        String
-  vertical         String   @default("alquiler_tradicional") // BusinessVertical
-  currentStep      Int      @default(0)
-  totalSteps       Int      @default(8)
-  completedSteps   String[] @default([]) // Array de IDs de steps completados
-  skippedSteps     String[] @default([]) // Steps que el usuario saltó
-  
-  // Timing
-  startedAt        DateTime @default(now())
-  lastActivityAt   DateTime @default(now())
-  completedAt      DateTime?
-  
-  // Engagement
-  emailsSent       Int      @default(0)
-  emailsOpened     Int      @default(0)
-  emailsClicked    Int      @default(0)
-  chatbotMessages  Int      @default(0)
-  
-  // Abandono
-  abandonedAt      DateTime?
-  remindersSent    Int      @default(0)
-  
-  // Datos de ejemplo usados
-  usedExampleData  Boolean  @default(false)
-  exampleDataIds   String[] @default([]) // IDs de datos de ejemplo creados
-  
-  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  company          Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  
-  @@unique([userId, companyId])
-  @@index([userId])
-  @@index([companyId])
-  @@index([completedAt])
-  @@index([lastActivityAt])
-  @@index([abandonedAt])
-  @@map("onboarding_progress")
-}
-
-model OnboardingTask {
-  id               String   @id @default(cuid())
-  userId           String
-  companyId        String
-  taskId           String   // ID del step (ej: 'first_building')
-  taskTitle        String
-  
-  // Estado
-  status           String   @default("pending") // pending, in_progress, completed, skipped
-  startedAt        DateTime?
-  completedAt      DateTime?
-  skippedAt        DateTime?
-  
-  // Método de completado
-  completedBy      String?  // 'user' | 'auto' | 'example_data'
-  skipReason       String?  @db.Text
-  
-  // Tracking
-  timeSpentSeconds Int      @default(0)
-  attemptsCount    Int      @default(0)
-  helpRequested    Boolean  @default(false)
-  
-  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  company          Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  
-  @@unique([userId, companyId, taskId])
-  @@index([userId])
-  @@index([companyId])
-  @@index([status])
-  @@map("onboarding_tasks")
-}
 
 // ══════════════════════════════════════════════════════════════════════════════
 // 🏗️ EWOORKER - B2B MARKETPLACE PARA CONSTRUCCIÓN
@@ -12792,7 +12710,116 @@ model SocialProfile {
   @@map("social_profiles")
 }
 
-model SocialPost {
+
+model SocialAnalytics {
+  id            String   @id @default(cuid())
+  companyId     String
+  platform      String   // linkedin, instagram, x
+  
+  // Periodo
+  date          DateTime
+  periodType    String   // daily, weekly, monthly
+  
+  // Métricas
+  impressions   Int      @default(0)
+  reach         Int      @default(0)
+  likes         Int      @default(0)
+  comments      Int      @default(0)
+  shares        Int      @default(0)
+  clicks        Int      @default(0)
+  followers     Int      @default(0)
+  engagement    Float    @default(0)
+  
+  // Métricas calculadas
+  growthRate    Float    @default(0)
+  bestPostTime  String?  // Mejor hora para publicar
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  @@unique([companyId, platform, date, periodType])
+  @@index([companyId])
+  @@index([platform])
+  @@index([date])
+  @@map("social_analytics")
+}
+
+// ============================================================================
+// INTEGRATION MANAGEMENT CENTER (Centro de Control de Integraciones)
+// ============================================================================
+
+model IntegrationConfig {
+  id          String   @id @default(cuid())
+  companyId   String
+  
+  // Identificación
+  provider    String   // 'twilio', 'paypal', 'bizum', 'airbnb', 'booking', etc.
+  name        String
+  category    String   // 'payment', 'communication', 'channel_manager', 'accounting', etc.
+  
+  // Credenciales (encriptadas)
+  credentials Json     // Almacena las credenciales de forma segura
+  
+  // Configuración
+  settings    Json?    // Configuraciones adicionales
+  
+  // Estado
+  enabled     Boolean  @default(true)
+  isConfigured Boolean @default(false)
+  lastSyncAt  DateTime?
+  lastTestAt  DateTime?
+  testStatus  String?  // 'success', 'failed', 'pending'
+  
+  // Metadata
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?  // User ID que configuró
+  
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  logs        IntegrationLog[]
+  
+  @@unique([companyId, provider])
+  @@index([companyId])
+  @@index([provider])
+  @@index([category])
+  @@index([enabled])
+  @@map("integration_configs")
+}
+
+model IntegrationLog {
+  id            String   @id @default(cuid())
+  integrationId String
+  companyId     String
+  
+  // Evento
+  event         String   // 'test', 'sync', 'send', 'error', etc.
+  status        String   // 'success', 'failed', 'warning'
+  message       String?  @db.Text
+  
+  // Datos
+  requestData   Json?
+  responseData  Json?
+  errorDetails  Json?
+  
+  // Metadata
+  duration      Int?     // Duración en ms
+  createdAt     DateTime @default(now())
+  
+  integration   IntegrationConfig @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  @@index([integrationId])
+  @@index([companyId])
+  @@index([event])
+  @@index([status])
+  @@index([createdAt])
+  @@map("integration_logs")
+}
+
+
+model PomelliSocialPost {
   id              String   @id @default(cuid())
   companyId       String
   pomelliConfigId String
@@ -12844,40 +12871,5 @@ model SocialPost {
   @@index([status])
   @@index([scheduledAt])
   @@index([publishedAt])
-  @@map("social_posts")
-}
-
-model SocialAnalytics {
-  id            String   @id @default(cuid())
-  companyId     String
-  platform      String   // linkedin, instagram, x
-  
-  // Periodo
-  date          DateTime
-  periodType    String   // daily, weekly, monthly
-  
-  // Métricas
-  impressions   Int      @default(0)
-  reach         Int      @default(0)
-  likes         Int      @default(0)
-  comments      Int      @default(0)
-  shares        Int      @default(0)
-  clicks        Int      @default(0)
-  followers     Int      @default(0)
-  engagement    Float    @default(0)
-  
-  // Métricas calculadas
-  growthRate    Float    @default(0)
-  bestPostTime  String?  // Mejor hora para publicar
-  
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
-  company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  
-  @@unique([companyId, platform, date, periodType])
-  @@index([companyId])
-  @@index([platform])
-  @@index([date])
-  @@map("social_analytics")
+  @@map("pomelli_social_posts")
 }
