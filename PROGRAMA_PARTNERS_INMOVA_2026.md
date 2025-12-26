@@ -17,7 +17,52 @@
 
 ## 🏢 TIPOS DE PARTNERS
 
-### **1. AUTÓNOMOS INMOBILIARIOS** 🏠
+### **1. BANCOS** 🏦
+**Perfil:** Entidades bancarias, departamentos de banca privada, hipotecas
+
+**Por qué son partners ideales:**
+- Acceso a miles de clientes inversores
+- Buscan servicios complementarios a hipotecas
+- Pueden integrar INMOVA en su oferta de valor
+- Alta prescripción y confianza del cliente
+
+**Ejemplos:** Santander, BBVA, CaixaBank, Sabadell, Bankinter
+
+**Target:** 5 bancos (1,000 clientes cada uno = 5,000 clientes)
+
+---
+
+### **2. ASEGURADORAS** 🛡️
+**Perfil:** Compañías de seguros, seguros de hogar, seguros de alquiler
+
+**Por qué son partners ideales:**
+- Base de datos masiva de propietarios
+- Seguros de alquiler = nuestro target exacto
+- Buscan reducir siniestralidad con mejor gestión
+- Cross-selling natural
+
+**Ejemplos:** Mapfre, Allianz, AXA, Generali, Línea Directa
+
+**Target:** 5 aseguradoras (2,000 clientes cada una = 10,000 clientes)
+
+---
+
+### **3. MULTIFAMILY OFFICES** 💎
+**Perfil:** Family offices, gestoras de patrimonios familiares, UHNW
+
+**Por qué son partners ideales:**
+- Clientes HNW/UHNW con múltiples propiedades
+- Buscan profesionalización de gestión inmobiliaria
+- Ticket alto (Business/Enterprise)
+- Relaciones a largo plazo
+
+**Ejemplos:** Alter Patrimonium, March Family Office, Abante, Tressis
+
+**Target:** 20 family offices (20 familias cada uno = 400 clientes premium)
+
+---
+
+### **4. AUTÓNOMOS INMOBILIARIOS** 🏠
 **Perfil:** APIs, asesores independientes, consultores PropTech
 
 **Por qué son partners ideales:**
@@ -30,7 +75,7 @@
 
 ---
 
-### **2. INMOBILIARIAS Y GESTORAS** 🏢
+### **5. INMOBILIARIAS Y GESTORAS** 🏢
 **Perfil:** Agencias inmobiliarias, gestoras de alquiler, property managers
 
 **Por qué son partners ideales:**
@@ -43,7 +88,7 @@
 
 ---
 
-### **3. CENTROS DE ESTUDIOS (IE, ESADE, COMILLAS)** 🎓
+### **6. CENTROS DE ESTUDIOS (IE, ESADE, COMILLAS)** 🎓
 **Perfil:** Escuelas de negocio, MBA, másteres inmobiliarios
 
 **Por qué son partners ideales:**
@@ -56,7 +101,7 @@
 
 ---
 
-### **4. PLATAFORMAS SECTOR (ZONA 3, FOTOCASA PRO)** 🌐
+### **7. PLATAFORMAS SECTOR (ZONA 3, FOTOCASA PRO)** 🌐
 **Perfil:** Plataformas con audiencia de profesionales inmobiliarios
 
 **Por qué son partners ideales:**
@@ -69,7 +114,7 @@
 
 ---
 
-### **5. ASOCIACIONES Y COLEGIOS PROFESIONALES** 🏛️
+### **8. ASOCIACIONES Y COLEGIOS PROFESIONALES** 🏛️
 **Perfil:** Colegios de APIs, AEGI, asociaciones de inversores
 
 **Por qué son partners ideales:**
@@ -82,7 +127,7 @@
 
 ---
 
-### **6. ASESORES FISCALES Y GESTORÍAS** 💼
+### **9. ASESORES FISCALES Y GESTORÍAS** 💼
 **Perfil:** Asesores fiscales, gestorías que trabajan con inversores
 
 **Por qué son partners ideales:**
@@ -96,6 +141,101 @@
 ---
 
 ## 💰 MODELO DE COMISIONES POR TIPO DE PARTNER
+
+### **BANCOS** 🏦
+
+**Modelo Institucional B2B:**
+- Acuerdo marco anual: **€50,000-200,000/año**
+- Incluye: White-label, integración API, co-branding
+- Revenue share: **10% MRR** (menor % pero volumen alto)
+- Bonus por volumen: €100 extra por cada 100 clientes
+
+**Departamento Específico (Ej: Banca Privada):**
+- Comisión por referido: **€500** (cliente premium)
+- Recurrente: **10% MRR**
+
+**Ejemplo Santander Banca Privada:**
+- 1,000 clientes HNW en cartera
+- Conversión 5% = 50 clientes Business (€349/mes)
+- Captación: 50 × €500 = €25,000
+- Recurrente: 50 × €349 × 10% = **€1,745/mes** (€20,940/año)
+- **Total año 1: €45,940**
+- Con 5 bancos: **€229,700/año**
+
+**Beneficios para el Banco:**
+- Servicio de valor añadido para clientes hipotecas
+- Reducción de morosidad (mejor gestión)
+- Cross-selling hipotecas inversión
+- Diferenciación vs competencia
+
+---
+
+### **ASEGURADORAS** 🛡️
+
+**Modelo de Integración:**
+- Acuerdo marco: **€30,000-100,000/año**
+- Integración API (datos de siniestros ↔ INMOVA)
+- Revenue share: **12% MRR**
+- Bonus por reducción de siniestralidad
+
+**Reducción de Siniestralidad:**
+- Clientes con INMOVA tienen -25% siniestros (mejor mantenimiento)
+- Aseguradora ahorra €€€ en indemnizaciones
+- Gana-gana: Menor prima para cliente + Menor siniestralidad
+
+**Ejemplo Mapfre Seguros de Hogar:**
+- 500,000 pólizas de alquiler
+- Target: Propietarios con 3+ propiedades = 10,000 potenciales
+- Conversión 2% = 200 clientes Professional (€149/mes)
+- Captación: 200 × €300 = €60,000
+- Recurrente: 200 × €149 × 12% = **€3,576/mes** (€42,912/año)
+- **Total año 1: €102,912**
+- Con 5 aseguradoras: **€514,560/año**
+
+**Propuesta de Valor para Aseguradora:**
+- Reducir siniestralidad 25%
+- Aumentar retención de clientes
+- Upselling seguros adicionales
+- Datos de gestión en tiempo real
+
+---
+
+### **MULTIFAMILY OFFICES** 💎
+
+**Modelo Premium:**
+- Comisión de captación: **€2,000** por familia (cliente premium)
+- Comisión recurrente: **25% MRR** (mayor % por ticket alto)
+- Planes típicos: Business (€349) o Enterprise (custom)
+- White-label completo incluido
+
+**Servicios Adicionales:**
+- Onboarding dedicado por familia
+- Reporting personalizado para family office
+- Integración con su ERP/sistema
+- Account manager exclusivo
+
+**Ejemplo Alter Patrimonium:**
+- 100 familias en gestión
+- Promedio: 5 propiedades por familia
+- Target: 20 familias con 3+ propiedades
+- Conversión 50% = 10 familias Business (€349/mes)
+- Captación: 10 × €2,000 = €20,000
+- Recurrente: 10 × €349 × 25% = **€872/mes** (€10,464/año)
+- **Total año 1: €30,464**
+- Con 20 family offices: **€609,280/año**
+
+**Plus: Familias Enterprise (custom):**
+- 5 familias × €1,000/mes × 25% = **€1,250/mes** (€15,000/año)
+
+**Ingresos totales Family Offices: €624,280/año**
+
+**Propuesta de Valor para Family Office:**
+- Profesionalización de gestión inmobiliaria
+- Reporting consolidado para la familia
+- Transparencia y control total
+- Optimización fiscal (ESG, amortizaciones)
+
+---
 
 ### **AUTÓNOMOS INMOBILIARIOS**
 
@@ -521,27 +661,36 @@ Caso práctico real + Acceso estudiantes + Networking"
 
 ## 📊 PROYECCIÓN FINANCIERA
 
-### **ARR A TRAVÉS DE PARTNERS (AÑO 1)**
+### **ARR A TRAVÉS DE PARTNERS (AÑO 1) - ACTUALIZADO**
 
 | Tipo de Partner | Clientes | Ticket Promedio | MRR | ARR |
 |----------------|----------|----------------|-----|-----|
-| **Autónomos (100)** | 500 | €100 | €50,000 | €600,000 |
-| **Inmobiliarias (50)** | 500 | €149 | €74,500 | €894,000 |
-| **Centros (5)** | 100 | €149 | €14,900 | €178,800 |
-| **Plataformas (3)** | 300 | €149 | €44,700 | €536,400 |
-| **Asociaciones (10)** | 1,000 | €104 | €104,000 | €1,248,000 |
-| **Asesores (50)** | 250 | €149 | €37,250 | €447,000 |
-| **TOTAL** | **2,650** | - | **€325,350** | **€3,904,200** |
+| **🏦 Bancos (5)** | 5,000 | €149 | €745,000 | €8,940,000 |
+| **🛡️ Aseguradoras (5)** | 10,000 | €149 | €1,490,000 | €17,880,000 |
+| **💎 Family Offices (20)** | 400 | €500 | €200,000 | €2,400,000 |
+| **🏠 Autónomos (100)** | 500 | €100 | €50,000 | €600,000 |
+| **🏢 Inmobiliarias (50)** | 500 | €149 | €74,500 | €894,000 |
+| **🎓 Centros (5)** | 100 | €149 | €14,900 | €178,800 |
+| **🌐 Plataformas (3)** | 300 | €149 | €44,700 | €536,400 |
+| **🏛️ Asociaciones (10)** | 1,000 | €104 | €104,000 | €1,248,000 |
+| **💼 Asesores (50)** | 250 | €149 | €37,250 | €447,000 |
+| **TOTAL** | **18,050** | **€161** | **€2,760,350** | **€33,124,200** |
 
 **Comisiones a Pagar a Partners:**
-- Captación total: €500,000 (one-time)
-- Recurrente: 15-30% MRR = €60,000/mes = **€720,000/año**
-- **Total comisiones año 1: €1,220,000**
+- Acuerdos marco institucionales: €450,000/año (Bancos + Aseguradoras + Family Offices)
+- Captación individual: €850,000 (one-time)
+- Recurrente: 10-25% MRR promedio = €350,000/mes = **€4,200,000/año**
+- **Total comisiones año 1: €5,500,000**
 
 **ARR Neto para INMOVA:**
-- ARR bruto: €3,904,200
-- Comisiones: €1,220,000
-- **ARR neto: €2,684,200** (69% de retención)
+- ARR bruto: €33,124,200
+- Comisiones: €5,500,000
+- **ARR neto: €27,624,200** (83% de retención)
+
+**IMPACTO DE LOS 3 NUEVOS TIPOS:**
+- ARR adicional de Bancos + Aseguradoras + Family Offices: **€29,220,000**
+- Esto representa el **88% del ARR total de partners**
+- Multiplica por 8.5x el ARR original del programa
 
 ---
 
