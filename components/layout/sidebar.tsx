@@ -68,6 +68,7 @@ import { usePermissions } from '@/lib/hooks/usePermissions';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import logger, { logError } from '@/lib/logger';
+import { safeLocalStorage } from '@/lib/safe-storage';
 
 // Mapeo de rutas a códigos de módulos para sistema modular
 const ROUTE_TO_MODULE: Record<string, string> = {
@@ -112,7 +113,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/admin/configuracion': 'configuracion',
   '/admin/usuarios': 'usuarios',
   '/admin/modulos': 'configuracion',
-    '/admin/sales-team': 'admin_sales_team',
+  '/admin/sales-team': 'admin_sales_team',
   '/analytics': 'analytics',
   '/str/listings': 'str_listings',
   '/str-housekeeping': 'str_housekeeping',
@@ -209,154 +210,540 @@ const CORE_MODULES = [
   'api_docs',
   'configuracion', // Agregado para que siempre se muestre la configuración de empresa
   'usuarios', // Agregado para que siempre se muestre la gestión de usuarios
-    // Verticales - siempre visibles según rol
-    'flipping_projects',
-    'construction_projects',
-    'professional_projects',
-    'str_listings',
-    'str_bookings',
-    'str_channels',
-    'str_advanced',
-    'str_housekeeping',
-    'admin_fincas',
-    'admin_sales_team',
-    'admin_portales_externos',
+  // Verticales - siempre visibles según rol
+  'flipping_projects',
+  'construction_projects',
+  'professional_projects',
+  'str_listings',
+  'str_bookings',
+  'str_channels',
+  'str_advanced',
+  'str_housekeeping',
+  'admin_fincas',
+  'admin_sales_team',
+  'admin_portales_externos',
 ];
 
 // Navegación core - Funcionalidades principales
 const coreNavItems = [
-  { name: 'Inicio', href: '/home', icon: Home, roles: ['super_admin', 'administrador', 'gestor', 'operador'] },
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['super_admin', 'administrador', 'gestor', 'operador'], dataTour: 'dashboard-link' },
-  { name: 'Edificios', href: '/edificios', icon: Building2, roles: ['super_admin', 'administrador', 'gestor'], dataTour: 'edificios-menu' },
-  { name: 'Unidades', href: '/unidades', icon: Home, roles: ['super_admin', 'administrador', 'gestor'], dataTour: 'unidades-menu' },
-  { name: 'Garajes y Trasteros', href: '/garajes-trasteros', icon: Car, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Inquilinos', href: '/inquilinos', icon: Users, roles: ['super_admin', 'administrador', 'gestor'], dataTour: 'inquilinos-menu' },
-  { name: 'Contratos', href: '/contratos', icon: FileText, roles: ['super_admin', 'administrador', 'gestor'], dataTour: 'contratos-menu' },
-  { name: 'Pagos', href: '/pagos', icon: CreditCard, roles: ['super_admin', 'administrador', 'gestor'], dataTour: 'pagos-menu' },
-  { name: 'Mantenimiento', href: '/mantenimiento', icon: Wrench, roles: ['super_admin', 'administrador', 'gestor', 'operador'] },
-  { name: 'Calendario', href: '/calendario', icon: Calendar, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Chat', href: '/chat', icon: MessageSquare, roles: ['super_admin', 'administrador', 'gestor'] },
+  {
+    name: 'Inicio',
+    href: '/home',
+    icon: Home,
+    roles: ['super_admin', 'administrador', 'gestor', 'operador'],
+  },
+  {
+    name: 'Dashboard',
+    href: '/dashboard',
+    icon: LayoutDashboard,
+    roles: ['super_admin', 'administrador', 'gestor', 'operador'],
+    dataTour: 'dashboard-link',
+  },
+  {
+    name: 'Edificios',
+    href: '/edificios',
+    icon: Building2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'edificios-menu',
+  },
+  {
+    name: 'Unidades',
+    href: '/unidades',
+    icon: Home,
+    roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'unidades-menu',
+  },
+  {
+    name: 'Garajes y Trasteros',
+    href: '/garajes-trasteros',
+    icon: Car,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Inquilinos',
+    href: '/inquilinos',
+    icon: Users,
+    roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'inquilinos-menu',
+  },
+  {
+    name: 'Contratos',
+    href: '/contratos',
+    icon: FileText,
+    roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'contratos-menu',
+  },
+  {
+    name: 'Pagos',
+    href: '/pagos',
+    icon: CreditCard,
+    roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'pagos-menu',
+  },
+  {
+    name: 'Mantenimiento',
+    href: '/mantenimiento',
+    icon: Wrench,
+    roles: ['super_admin', 'administrador', 'gestor', 'operador'],
+  },
+  {
+    name: 'Calendario',
+    href: '/calendario',
+    icon: Calendar,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Chat',
+    href: '/chat',
+    icon: MessageSquare,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
 ];
 
 // Automatización y Soporte
 const automatizacionNavItems = [
-  { name: 'Automatización', href: '/automatizacion', icon: Zap, roles: ['super_admin', 'administrador', 'gestor', 'operador'] },
-  { name: 'Workflows', href: '/workflows', icon: Zap, roles: ['super_admin', 'administrador', 'gestor', 'operador'] },
-  { name: 'Redes Sociales', href: '/redes-sociales', icon: Share2, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Soporte', href: '/soporte', icon: HeadphonesIcon, roles: ['super_admin', 'administrador', 'gestor', 'operador'] },
-  { name: 'Base de Conocimientos', href: '/knowledge-base', icon: BookOpen, roles: ['super_admin', 'administrador', 'gestor', 'operador'] },
+  {
+    name: 'Automatización',
+    href: '/automatizacion',
+    icon: Zap,
+    roles: ['super_admin', 'administrador', 'gestor', 'operador'],
+  },
+  {
+    name: 'Workflows',
+    href: '/workflows',
+    icon: Zap,
+    roles: ['super_admin', 'administrador', 'gestor', 'operador'],
+  },
+  {
+    name: 'Redes Sociales',
+    href: '/redes-sociales',
+    icon: Share2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Soporte',
+    href: '/soporte',
+    icon: HeadphonesIcon,
+    roles: ['super_admin', 'administrador', 'gestor', 'operador'],
+  },
+  {
+    name: 'Base de Conocimientos',
+    href: '/knowledge-base',
+    icon: BookOpen,
+    roles: ['super_admin', 'administrador', 'gestor', 'operador'],
+  },
 ];
 
 // Módulos específicos de Operador
 const operadorNavItems = [
-  { name: 'Dashboard Operador', href: '/operador/dashboard', icon: LayoutDashboard, roles: ['operador'] },
-  { name: 'Órdenes del Día', href: '/operador/dashboard', icon: ClipboardList, roles: ['operador'] },
-  { name: 'Historial de Trabajos', href: '/operador/work-orders/history', icon: Clock, roles: ['operador'] },
-  { name: 'Historial Mantenimiento', href: '/operador/maintenance-history', icon: Wrench, roles: ['operador'] },
+  {
+    name: 'Dashboard Operador',
+    href: '/operador/dashboard',
+    icon: LayoutDashboard,
+    roles: ['operador'],
+  },
+  {
+    name: 'Órdenes del Día',
+    href: '/operador/dashboard',
+    icon: ClipboardList,
+    roles: ['operador'],
+  },
+  {
+    name: 'Historial de Trabajos',
+    href: '/operador/work-orders/history',
+    icon: Clock,
+    roles: ['operador'],
+  },
+  {
+    name: 'Historial Mantenimiento',
+    href: '/operador/maintenance-history',
+    icon: Wrench,
+    roles: ['operador'],
+  },
 ];
 
 // Módulos de Gestión Operativa
 const gestionNavItems = [
-  { name: 'Proveedores', href: '/proveedores', icon: Package, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Gastos', href: '/gastos', icon: Euro, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Tareas', href: '/tareas', icon: CheckSquare, roles: ['super_admin', 'administrador', 'gestor', 'operador'] },
-  { name: 'Incidencias', href: '/incidencias', icon: AlertCircle, roles: ['super_admin', 'administrador', 'gestor', 'operador'] },
-  { name: 'Candidatos', href: '/candidatos', icon: UserPlus, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Notificaciones', href: '/notificaciones', icon: Bell, roles: ['super_admin', 'administrador', 'gestor', 'operador'] },
-  { name: 'OCR Documentos', href: '/ocr', icon: Eye, roles: ['super_admin', 'administrador', 'gestor', 'operador'] },
-  { name: 'Sugerencias', href: '/sugerencias', icon: MessageCircle, roles: ['super_admin', 'administrador', 'gestor', 'operador'] },
+  {
+    name: 'Proveedores',
+    href: '/proveedores',
+    icon: Package,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Gastos',
+    href: '/gastos',
+    icon: Euro,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Tareas',
+    href: '/tareas',
+    icon: CheckSquare,
+    roles: ['super_admin', 'administrador', 'gestor', 'operador'],
+  },
+  {
+    name: 'Incidencias',
+    href: '/incidencias',
+    icon: AlertCircle,
+    roles: ['super_admin', 'administrador', 'gestor', 'operador'],
+  },
+  {
+    name: 'Candidatos',
+    href: '/candidatos',
+    icon: UserPlus,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Notificaciones',
+    href: '/notificaciones',
+    icon: Bell,
+    roles: ['super_admin', 'administrador', 'gestor', 'operador'],
+  },
+  {
+    name: 'OCR Documentos',
+    href: '/ocr',
+    icon: Eye,
+    roles: ['super_admin', 'administrador', 'gestor', 'operador'],
+  },
+  {
+    name: 'Sugerencias',
+    href: '/sugerencias',
+    icon: MessageCircle,
+    roles: ['super_admin', 'administrador', 'gestor', 'operador'],
+  },
 ];
 
 // Módulos avanzados
 const advancedNavItems = [
-  { name: 'Business Intelligence', href: '/bi', icon: FileBarChart, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Analytics', href: '/analytics', icon: BarChart2, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Reportes', href: '/reportes', icon: FileBarChart, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Documentos', href: '/documentos', icon: Folder, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Room Rental', href: '/room-rental', icon: Home, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'CRM', href: '/crm', icon: HeadphonesIcon, roles: ['super_admin', 'administrador', 'gestor'] },
+  {
+    name: 'Business Intelligence',
+    href: '/bi',
+    icon: FileBarChart,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Analytics',
+    href: '/analytics',
+    icon: BarChart2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Reportes',
+    href: '/reportes',
+    icon: FileBarChart,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Documentos',
+    href: '/documentos',
+    icon: Folder,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Room Rental',
+    href: '/room-rental',
+    icon: Home,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'CRM',
+    href: '/crm',
+    icon: HeadphonesIcon,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
 ];
 
 // Módulos Multi-Vertical
 const multiVerticalItems = [
-  { name: 'STR Dashboard', href: '/str', icon: Hotel, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Anuncios STR', href: '/str/listings', icon: Hotel, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Reservas STR', href: '/str/bookings', icon: Calendar, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Canales STR', href: '/str/channels', icon: BarChart2, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'STR Avanzado', href: '/str-advanced', icon: Sparkles, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Limpieza STR', href: '/str-housekeeping', icon: ClipboardList, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'House Flipping', href: '/flipping/projects', icon: TrendingUp, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Construcción', href: '/construction/projects', icon: HardHat, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Servicios Profesionales', href: '/professional/projects', icon: Briefcase, roles: ['super_admin', 'administrador', 'gestor'] },
+  {
+    name: 'STR Dashboard',
+    href: '/str',
+    icon: Hotel,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Anuncios STR',
+    href: '/str/listings',
+    icon: Hotel,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Reservas STR',
+    href: '/str/bookings',
+    icon: Calendar,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Canales STR',
+    href: '/str/channels',
+    icon: BarChart2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'STR Avanzado',
+    href: '/str-advanced',
+    icon: Sparkles,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Limpieza STR',
+    href: '/str-housekeeping',
+    icon: ClipboardList,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'House Flipping',
+    href: '/flipping/projects',
+    icon: TrendingUp,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Construcción',
+    href: '/construction/projects',
+    icon: HardHat,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Servicios Profesionales',
+    href: '/professional/projects',
+    icon: Briefcase,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
 ];
 
 // Módulos de Comunidad
 const comunidadItems = [
-  { name: 'Panel Comunidad', href: '/dashboard/community', icon: Users2, roles: ['super_admin', 'administrador', 'gestor', 'community_manager'] },
-  { name: 'Anuncios', href: '/anuncios', icon: Megaphone, roles: ['super_admin', 'administrador', 'gestor', 'community_manager'] },
-  { name: 'Votaciones', href: '/votaciones', icon: Vote, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Reuniones', href: '/reuniones', icon: Users2, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Reservas Espacios', href: '/reservas', icon: CalendarCheck, roles: ['super_admin', 'administrador', 'gestor', 'operador', 'community_manager'] },
+  {
+    name: 'Panel Comunidad',
+    href: '/dashboard/community',
+    icon: Users2,
+    roles: ['super_admin', 'administrador', 'gestor', 'community_manager'],
+  },
+  {
+    name: 'Anuncios',
+    href: '/anuncios',
+    icon: Megaphone,
+    roles: ['super_admin', 'administrador', 'gestor', 'community_manager'],
+  },
+  {
+    name: 'Votaciones',
+    href: '/votaciones',
+    icon: Vote,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Reuniones',
+    href: '/reuniones',
+    icon: Users2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Reservas Espacios',
+    href: '/reservas',
+    icon: CalendarCheck,
+    roles: ['super_admin', 'administrador', 'gestor', 'operador', 'community_manager'],
+  },
 ];
 
 // Administrador de Fincas
 const adminFincasItems = [
-  { name: 'Portal Admin Fincas', href: '/admin-fincas', icon: Building2, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Comunidades', href: '/admin-fincas/comunidades', icon: Building2, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Facturación', href: '/admin-fincas/facturas', icon: FileText, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Libro de Caja', href: '/admin-fincas/libro-caja', icon: Euro, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Informes', href: '/admin-fincas/informes', icon: BarChart2, roles: ['super_admin', 'administrador', 'gestor'] },
+  {
+    name: 'Portal Admin Fincas',
+    href: '/admin-fincas',
+    icon: Building2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Comunidades',
+    href: '/admin-fincas/comunidades',
+    icon: Building2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Facturación',
+    href: '/admin-fincas/facturas',
+    icon: FileText,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Libro de Caja',
+    href: '/admin-fincas/libro-caja',
+    icon: Euro,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Informes',
+    href: '/admin-fincas/informes',
+    icon: BarChart2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
 ];
 
 // Módulos Propiedades Avanzado
 const propiedadesAvanzadoItems = [
-  { name: 'Valoraciones', href: '/valoraciones', icon: Award, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Publicaciones', href: '/publicaciones', icon: Megaphone, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Screening', href: '/screening', icon: UserCheck, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Galerías', href: '/galerias', icon: Folder, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Certificaciones', href: '/certificaciones', icon: Award, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Seguros', href: '/seguros', icon: Shield, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Inspecciones', href: '/inspecciones', icon: ClipboardList, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Visitas', href: '/visitas', icon: CalendarCheck, roles: ['super_admin', 'administrador', 'gestor'] },
+  {
+    name: 'Valoraciones',
+    href: '/valoraciones',
+    icon: Award,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Publicaciones',
+    href: '/publicaciones',
+    icon: Megaphone,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Screening',
+    href: '/screening',
+    icon: UserCheck,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Galerías',
+    href: '/galerias',
+    icon: Folder,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Certificaciones',
+    href: '/certificaciones',
+    icon: Award,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Seguros',
+    href: '/seguros',
+    icon: Shield,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Inspecciones',
+    href: '/inspecciones',
+    icon: ClipboardList,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Visitas',
+    href: '/visitas',
+    icon: CalendarCheck,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
 ];
 
 // Módulos Servicios Profesionales
 const serviciosProfesionalesItems = [
-  { name: 'Órdenes Trabajo', href: '/ordenes-trabajo', icon: ClipboardList, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Firma Digital', href: '/firma-digital', icon: FileSignature, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Legal', href: '/legal', icon: Shield, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Open Banking', href: '/open-banking', icon: CreditCard, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'Marketplace', href: '/marketplace', icon: ShoppingCart, roles: ['super_admin', 'administrador', 'gestor'] },
-  { name: 'SMS', href: '/sms', icon: MessageCircle, roles: ['super_admin', 'administrador', 'gestor'] },
+  {
+    name: 'Órdenes Trabajo',
+    href: '/ordenes-trabajo',
+    icon: ClipboardList,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Firma Digital',
+    href: '/firma-digital',
+    icon: FileSignature,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Legal',
+    href: '/legal',
+    icon: Shield,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Open Banking',
+    href: '/open-banking',
+    icon: CreditCard,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Marketplace',
+    href: '/marketplace',
+    icon: ShoppingCart,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'SMS',
+    href: '/sms',
+    icon: MessageCircle,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
 ];
 
 // Admin
 const adminNavItems = [
   // Super Admin - Gestión de Plataforma
-  { name: 'Dashboard Admin', href: '/admin/dashboard', icon: LayoutDashboard, roles: ['super_admin'] },
+  {
+    name: 'Dashboard Admin',
+    href: '/admin/dashboard',
+    icon: LayoutDashboard,
+    roles: ['super_admin'],
+  },
   { name: 'Gestión de Clientes', href: '/admin/clientes', icon: Building2, roles: ['super_admin'] },
   { name: 'Planes y Facturación', href: '/admin/planes', icon: DollarSign, roles: ['super_admin'] },
-  { name: 'Facturación B2B', href: '/admin/facturacion-b2b', icon: FileText, roles: ['super_admin'] },
+  {
+    name: 'Facturación B2B',
+    href: '/admin/facturacion-b2b',
+    icon: FileText,
+    roles: ['super_admin'],
+  },
   { name: 'Actividad de Sistema', href: '/admin/activity', icon: Activity, roles: ['super_admin'] },
   { name: 'Alertas de Sistema', href: '/admin/alertas', icon: Bell, roles: ['super_admin'] },
-  { name: 'Salud del Sistema', href: '/admin/salud-sistema', icon: Activity, roles: ['super_admin'] },
+  {
+    name: 'Salud del Sistema',
+    href: '/admin/salud-sistema',
+    icon: Activity,
+    roles: ['super_admin'],
+  },
   { name: 'Métricas de Uso', href: '/admin/metricas-uso', icon: BarChart2, roles: ['super_admin'] },
   { name: 'Seguridad', href: '/admin/seguridad', icon: Shield, roles: ['super_admin'] },
-  { name: 'Portales Externos', href: '/admin/portales-externos', icon: Zap, roles: ['super_admin'] },
+  {
+    name: 'Portales Externos',
+    href: '/admin/portales-externos',
+    icon: Zap,
+    roles: ['super_admin'],
+  },
   { name: 'Documentación API', href: '/api-docs', icon: Code, roles: ['super_admin'] },
-  
+
   // Administrador - Gestión de Empresa
   { name: 'Configuración', href: '/admin/configuracion', icon: Settings, roles: ['administrador'] },
   { name: 'Usuarios', href: '/admin/usuarios', icon: Users, roles: ['administrador'] },
   { name: 'Módulos', href: '/admin/modulos', icon: Settings, roles: ['administrador'] },
-  { name: 'Personalización', href: '/admin/personalizacion', icon: Palette, roles: ['administrador'] },
-  { name: 'Aprobaciones', href: '/admin/aprobaciones', icon: CheckSquare, roles: ['administrador'] },
-  { name: 'Reportes Programados', href: '/admin/reportes-programados', icon: Clock, roles: ['administrador'] },
+  {
+    name: 'Personalización',
+    href: '/admin/personalizacion',
+    icon: Palette,
+    roles: ['administrador'],
+  },
+  {
+    name: 'Aprobaciones',
+    href: '/admin/aprobaciones',
+    icon: CheckSquare,
+    roles: ['administrador'],
+  },
+  {
+    name: 'Reportes Programados',
+    href: '/admin/reportes-programados',
+    icon: Clock,
+    roles: ['administrador'],
+  },
   { name: 'Importar Datos', href: '/admin/importar', icon: Upload, roles: ['administrador'] },
   { name: 'Marketplace', href: '/admin/marketplace', icon: ShoppingCart, roles: ['administrador'] },
   { name: 'Legal', href: '/admin/legal', icon: BookOpen, roles: ['administrador'] },
-  { name: 'Firma Digital', href: '/admin/firma-digital', icon: FileSignature, roles: ['administrador'] },
-  { name: 'Equipo Comercial Externo', href: '/admin/sales-team', icon: Users2, roles: ['super_admin'] },
+  {
+    name: 'Firma Digital',
+    href: '/admin/firma-digital',
+    icon: FileSignature,
+    roles: ['administrador'],
+  },
+  {
+    name: 'Equipo Comercial Externo',
+    href: '/admin/sales-team',
+    icon: Users2,
+    roles: ['super_admin'],
+  },
 ];
 
 interface SidebarProps {
@@ -388,33 +775,42 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     admin: true, // Expandida por defecto para mostrar Usuarios, Configuración, etc.
   });
 
-  // Cargar estado expandido desde localStorage
+  // Cargar estado expandido desde localStorage de forma segura
   useEffect(() => {
-    const storedExpanded = localStorage.getItem('sidebar_expanded_sections');
-    if (storedExpanded) {
-      try {
+    try {
+      const storedExpanded = safeLocalStorage.getItem('sidebar_expanded_sections');
+      if (storedExpanded) {
         setExpandedSections(JSON.parse(storedExpanded));
-      } catch (error) {
-        logger.error('Error loading expanded sections:', error);
       }
+    } catch (error) {
+      logger.error('Error loading expanded sections:', error);
+      // Continuar con estado por defecto
     }
   }, []);
 
-  // Persistir posición de scroll
+  // Persistir posición de scroll de forma segura
   useEffect(() => {
-    const sidebar = document.querySelector('[data-sidebar-nav]');
-    if (sidebar) {
-      const savedScroll = localStorage.getItem('sidebar_scroll_position');
-      if (savedScroll) {
-        sidebar.scrollTop = parseInt(savedScroll, 10);
+    try {
+      const sidebar = document.querySelector('[data-sidebar-nav]');
+      if (sidebar) {
+        const savedScroll = safeLocalStorage.getItem('sidebar_scroll_position');
+        if (savedScroll) {
+          sidebar.scrollTop = parseInt(savedScroll, 10);
+        }
+
+        const handleScroll = () => {
+          try {
+            safeLocalStorage.setItem('sidebar_scroll_position', sidebar.scrollTop.toString());
+          } catch (err) {
+            // Ignorar errores de storage
+          }
+        };
+
+        sidebar.addEventListener('scroll', handleScroll);
+        return () => sidebar.removeEventListener('scroll', handleScroll);
       }
-
-      const handleScroll = () => {
-        localStorage.setItem('sidebar_scroll_position', sidebar.scrollTop.toString());
-      };
-
-      sidebar.addEventListener('scroll', handleScroll);
-      return () => sidebar.removeEventListener('scroll', handleScroll);
+    } catch (error) {
+      logger.error('Error setting up scroll persistence:', error);
     }
   }, []);
 
@@ -436,15 +832,16 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     loadActiveModules();
   }, []);
 
-  // Cargar favoritos desde localStorage
+  // Cargar favoritos desde localStorage de forma segura
   useEffect(() => {
-    const storedFavorites = localStorage.getItem('sidebar_favorites');
-    if (storedFavorites) {
-      try {
+    try {
+      const storedFavorites = safeLocalStorage.getItem('sidebar_favorites');
+      if (storedFavorites) {
         setFavorites(JSON.parse(storedFavorites));
-      } catch (error) {
-        logger.error('Error loading favorites:', error);
       }
+    } catch (error) {
+      logger.error('Error loading favorites:', error);
+      // Continuar con favoritos vacíos
     }
   }, []);
 
@@ -453,11 +850,11 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     if (isMobileMenuOpen) {
       // Agregar clase para prevenir scroll
       document.body.classList.add('sidebar-open');
-      
+
       // Guardar el scroll actual
       const scrollY = window.scrollY;
       document.body.style.top = `-${scrollY}px`;
-      
+
       return () => {
         // Remover clase y restaurar scroll
         document.body.classList.remove('sidebar-open');
@@ -479,16 +876,21 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isMobileMenuOpen]);
 
-  // Guardar favoritos en localStorage
+  // Guardar favoritos en localStorage de forma segura
   const saveFavorites = (newFavorites: string[]) => {
     setFavorites(newFavorites);
-    localStorage.setItem('sidebar_favorites', JSON.stringify(newFavorites));
+    try {
+      safeLocalStorage.setItem('sidebar_favorites', JSON.stringify(newFavorites));
+    } catch (error) {
+      logger.error('Error saving favorites:', error);
+      // Los favoritos siguen funcionando en memoria
+    }
   };
 
   // Toggle favorito
   const toggleFavorite = (href: string) => {
     const newFavorites = favorites.includes(href)
-      ? favorites.filter(f => f !== href)
+      ? favorites.filter((f) => f !== href)
       : [...favorites, href];
     saveFavorites(newFavorites);
   };
@@ -496,27 +898,25 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   // Filtrar items según rol y módulos activos
   const filterItems = (items: any[]) => {
     if (!role || !modulesLoaded) return [];
-    
-    let filtered = items.filter(item => {
+
+    let filtered = items.filter((item) => {
       // Verificar permisos de rol
       if (!item.roles.includes(role)) return false;
-      
+
       // Verificar si el módulo está activo
       const moduleCode = ROUTE_TO_MODULE[item.href];
       if (!moduleCode) return true; // Si no hay mapeo, mostrar por defecto
-      
+
       // Los módulos core siempre se muestran (esCore: true)
       if (CORE_MODULES.includes(moduleCode)) return true;
-      
+
       return activeModules.includes(moduleCode);
     });
 
     // Aplicar búsqueda
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(item =>
-        item.name.toLowerCase().includes(query)
-      );
+      filtered = filtered.filter((item) => item.name.toLowerCase().includes(query));
     }
 
     return filtered;
@@ -539,24 +939,28 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     ...coreNavItems,
     ...automatizacionNavItems,
     ...operadorNavItems,
-    ...gestionNavItems, 
-    ...advancedNavItems, 
-    ...multiVerticalItems, 
+    ...gestionNavItems,
+    ...advancedNavItems,
+    ...multiVerticalItems,
     ...comunidadItems,
     ...adminFincasItems,
     ...propiedadesAvanzadoItems,
     ...serviciosProfesionalesItems,
-    ...adminNavItems
+    ...adminNavItems,
   ];
-  const favoriteItems = allItems.filter(item => 
-    favorites.includes(item.href) && 
-    filterItems([item]).length > 0 // Solo mostrar si el item es accesible
+  const favoriteItems = allItems.filter(
+    (item) => favorites.includes(item.href) && filterItems([item]).length > 0 // Solo mostrar si el item es accesible
   );
 
   const toggleSection = (section: string) => {
-    setExpandedSections(prev => {
+    setExpandedSections((prev) => {
       const newState = { ...prev, [section]: !prev[section] };
-      localStorage.setItem('sidebar_expanded_sections', JSON.stringify(newState));
+      try {
+        safeLocalStorage.setItem('sidebar_expanded_sections', JSON.stringify(newState));
+      } catch (error) {
+        logger.error('Error saving expanded sections:', error);
+        // Las secciones siguen funcionando en memoria
+      }
       return newState;
     });
   };
@@ -567,7 +971,13 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   };
 
   // Componente reutilizable para nav items con favoritos
-  const NavItem = ({ item, showFavoriteButton = true }: { item: any; showFavoriteButton?: boolean }) => {
+  const NavItem = ({
+    item,
+    showFavoriteButton = true,
+  }: {
+    item: any;
+    showFavoriteButton?: boolean;
+  }) => {
     const isActive = pathname?.startsWith(item.href) ?? false;
     const isFavorite = favorites.includes(item.href);
 
@@ -618,9 +1028,13 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         className="lg:hidden fixed top-3 left-3 z-[100] p-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-xl shadow-2xl hover:shadow-indigo-600/90 active:scale-95 transition-all duration-200 border-2 border-white/30 backdrop-blur-md touch-manipulation"
         style={{ backgroundColor: 'rgba(79, 70, 229, 0.95)', minWidth: '52px', minHeight: '52px' }}
-        aria-label={isMobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
+        aria-label={isMobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
       >
-        {isMobileMenuOpen ? <X size={26} strokeWidth={2.5} /> : <Menu size={26} strokeWidth={2.5} />}
+        {isMobileMenuOpen ? (
+          <X size={26} strokeWidth={2.5} />
+        ) : (
+          <Menu size={26} strokeWidth={2.5} />
+        )}
       </button>
 
       {/* Overlay for mobile - Cubre toda la pantalla excepto el botón */}
@@ -639,23 +1053,17 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
           isMobileMenuOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'
         )}
         aria-label="Navegación principal"
-        style={{ 
+        style={{
           maxHeight: '100vh',
           touchAction: 'pan-y',
-          WebkitOverflowScrolling: 'touch'
+          WebkitOverflowScrolling: 'touch',
         }}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="p-6 border-b border-gray-800">
             <div className="relative w-full h-12">
-              <Image
-                src={logo}
-                alt={appName}
-                fill
-                className="object-contain"
-                priority
-              />
+              <Image src={logo} alt={appName} fill className="object-contain" priority />
             </div>
             <p className="text-xs text-gray-400 mt-2 text-center">{appName}</p>
           </div>
@@ -663,7 +1071,10 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
           {/* Search Bar */}
           <div className="p-4 border-b border-gray-800">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                size={16}
+              />
               <Input
                 type="text"
                 placeholder="Buscar página..."
@@ -683,13 +1094,13 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
           </div>
 
           {/* Navigation - Mejorado para scroll en móviles */}
-          <nav 
-            className="flex-1 p-4 space-y-1 overflow-y-auto overscroll-contain" 
+          <nav
+            className="flex-1 p-4 space-y-1 overflow-y-auto overscroll-contain"
             data-sidebar-nav
-            style={{ 
+            style={{
               WebkitOverflowScrolling: 'touch',
               scrollbarWidth: 'thin',
-              scrollbarColor: 'rgba(255, 255, 255, 0.3) transparent'
+              scrollbarColor: 'rgba(255, 255, 255, 0.3) transparent',
             }}
           >
             {/* Favorites Section */}
@@ -703,7 +1114,11 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                     <Star size={14} fill="currentColor" className="text-yellow-400" />
                     <span>Favoritos</span>
                   </div>
-                  {expandedSections.favorites ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                  {expandedSections.favorites ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
                 </button>
                 {expandedSections.favorites && (
                   <div className="space-y-1 mt-1">
@@ -743,7 +1158,11 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
                   <span>Automatización</span>
-                  {expandedSections.automatizacion ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                  {expandedSections.automatizacion ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
                 </button>
                 {expandedSections.automatizacion && (
                   <div className="space-y-1 mt-1">
@@ -763,7 +1182,11 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
                   <span>Operador de Campo</span>
-                  {expandedSections.operador ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                  {expandedSections.operador ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
                 </button>
                 {expandedSections.operador && (
                   <div className="space-y-1 mt-1">
@@ -783,7 +1206,11 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
                   <span>Gestión Operativa</span>
-                  {expandedSections.gestion ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                  {expandedSections.gestion ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
                 </button>
                 {expandedSections.gestion && (
                   <div className="space-y-1 mt-1">
@@ -803,7 +1230,11 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
                   <span>Avanzado</span>
-                  {expandedSections.advanced ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                  {expandedSections.advanced ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
                 </button>
                 {expandedSections.advanced && (
                   <div className="space-y-1 mt-1">
@@ -823,7 +1254,11 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
                   <span>Multi-Vertical</span>
-                  {expandedSections.multivertical ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                  {expandedSections.multivertical ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
                 </button>
                 {expandedSections.multivertical && (
                   <div className="space-y-1 mt-1">
@@ -843,7 +1278,11 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
                   <span>Comunidad</span>
-                  {expandedSections.comunidad ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                  {expandedSections.comunidad ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
                 </button>
                 {expandedSections.comunidad && (
                   <div className="space-y-1 mt-1">
@@ -863,7 +1302,11 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
                   <span>Admin de Fincas</span>
-                  {expandedSections.adminFincas ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                  {expandedSections.adminFincas ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
                 </button>
                 {expandedSections.adminFincas && (
                   <div className="space-y-1 mt-1">
@@ -883,7 +1326,11 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
                   <span>Propiedades Avanzado</span>
-                  {expandedSections.propiedadesAvanzado ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                  {expandedSections.propiedadesAvanzado ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
                 </button>
                 {expandedSections.propiedadesAvanzado && (
                   <div className="space-y-1 mt-1">
@@ -903,7 +1350,11 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
                   <span>Servicios Profesionales</span>
-                  {expandedSections.serviciosProfesionales ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                  {expandedSections.serviciosProfesionales ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
                 </button>
                 {expandedSections.serviciosProfesionales && (
                   <div className="space-y-1 mt-1">
@@ -936,20 +1387,20 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
             )}
 
             {/* No results message */}
-            {searchQuery && 
-             filteredCoreItems.length === 0 && 
-             filteredGestionItems.length === 0 &&
-             filteredAdvancedItems.length === 0 && 
-             filteredMultiVerticalItems.length === 0 && 
-             filteredComunidadItems.length === 0 &&
-             filteredPropiedadesAvanzadoItems.length === 0 &&
-             filteredServiciosProfesionalesItems.length === 0 &&
-             filteredAdminItems.length === 0 && (
-              <div className="text-center py-8 text-gray-400">
-                <p className="text-sm">No se encontraron páginas</p>
-                <p className="text-xs mt-1">Intenta con otro término</p>
-              </div>
-            )}
+            {searchQuery &&
+              filteredCoreItems.length === 0 &&
+              filteredGestionItems.length === 0 &&
+              filteredAdvancedItems.length === 0 &&
+              filteredMultiVerticalItems.length === 0 &&
+              filteredComunidadItems.length === 0 &&
+              filteredPropiedadesAvanzadoItems.length === 0 &&
+              filteredServiciosProfesionalesItems.length === 0 &&
+              filteredAdminItems.length === 0 && (
+                <div className="text-center py-8 text-gray-400">
+                  <p className="text-sm">No se encontraron páginas</p>
+                  <p className="text-xs mt-1">Intenta con otro término</p>
+                </div>
+              )}
           </nav>
 
           {/* User Info & Logout */}
