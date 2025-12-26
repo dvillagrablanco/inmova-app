@@ -23,6 +23,15 @@ import {
   ExternalLink,
   ChevronRight,
   Activity,
+  CreditCard,
+  MessageSquare,
+  Home,
+  Calculator,
+  Share2,
+  FileSignature,
+  Building2,
+  BarChart3,
+  Database,
 } from 'lucide-react';
 
 // ============================================================================
@@ -54,6 +63,19 @@ interface Provider {
   credentialFields: any[];
 }
 
+// Iconos y colores por categoría
+const CATEGORY_CONFIG: Record<string, { icon: any; color: string; bgColor: string }> = {
+  payment: { icon: CreditCard, color: 'text-green-600', bgColor: 'bg-green-100' },
+  communication: { icon: MessageSquare, color: 'text-blue-600', bgColor: 'bg-blue-100' },
+  channel_manager: { icon: Home, color: 'text-purple-600', bgColor: 'bg-purple-100' },
+  accounting: { icon: Calculator, color: 'text-orange-600', bgColor: 'bg-orange-100' },
+  social_media: { icon: Share2, color: 'text-pink-600', bgColor: 'bg-pink-100' },
+  signature: { icon: FileSignature, color: 'text-indigo-600', bgColor: 'bg-indigo-100' },
+  banking: { icon: Building2, color: 'text-teal-600', bgColor: 'bg-teal-100' },
+  analytics: { icon: BarChart3, color: 'text-cyan-600', bgColor: 'bg-cyan-100' },
+  storage: { icon: Database, color: 'text-gray-600', bgColor: 'bg-gray-100' },
+};
+
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
@@ -69,6 +91,7 @@ export default function IntegrationsPage() {
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [configuring, setConfiguring] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'categories'>('categories');
 
   // ============================================================================
   // DATA LOADING
@@ -296,54 +319,81 @@ export default function IntegrationsPage() {
 
       {/* Tabs & Filters */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          {/* Tabs */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => setActiveTab('active')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                activeTab === 'active'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Mis Integraciones ({integrations.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('available')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                activeTab === 'available'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Disponibles ({catalog?.providers?.length || 0})
-            </button>
+        <div className="flex flex-col gap-4">
+          {/* Top Row: Tabs + Search */}
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            {/* Tabs */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setActiveTab('active')}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  activeTab === 'active'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Mis Integraciones ({integrations.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('available')}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  activeTab === 'available'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Explorar ({catalog?.providers?.length || 0})
+              </button>
+            </div>
+
+            {/* Search */}
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar integraciones..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
           </div>
 
-          {/* Search */}
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Buscar integraciones..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-
-          {/* Category Filter */}
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="all">Todas las categorías</option>
-            {catalog && Object.entries(catalog.categories).map(([key, label]: any) => (
-              <option key={key} value={key}>{label}</option>
-            ))}
-          </select>
+          {/* Category Pills - Solo visible en tab "Disponibles" */}
+          {activeTab === 'available' && catalog && (
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setCategoryFilter('all')}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  categoryFilter === 'all'
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Todas ({catalog.providers?.length || 0})
+              </button>
+              {Object.entries(catalog.categories).map(([key, label]: any) => {
+                const count = catalog.groupedByCategory?.[key]?.length || 0;
+                const config = CATEGORY_CONFIG[key] || { icon: Settings, color: 'text-gray-600', bgColor: 'bg-gray-100' };
+                const Icon = config.icon;
+                
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setCategoryFilter(key)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                      categoryFilter === key
+                        ? `${config.bgColor} ${config.color} shadow-md ring-2 ring-offset-1 ring-${config.color.split('-')[1]}-300`
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {label} ({count})
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
@@ -361,6 +411,8 @@ export default function IntegrationsPage() {
           providers={filteredProviders}
           configuredProviders={integrations.map(i => i.provider)}
           onConfigure={handleConfigureIntegration}
+          catalog={catalog}
+          categoryFilter={categoryFilter}
         />
       )}
 
@@ -496,70 +548,148 @@ function AvailableIntegrationsView({
   providers,
   configuredProviders,
   onConfigure,
+  catalog,
+  categoryFilter,
 }: {
   providers: Provider[];
   configuredProviders: string[];
   onConfigure: (provider: Provider) => void;
+  catalog: any;
+  categoryFilter: string;
 }) {
+  // Si hay filtro de categoría específico, mostrar grid normal
+  if (categoryFilter !== 'all') {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {providers.map((provider) => (
+          <IntegrationCard
+            key={provider.id}
+            provider={provider}
+            isConfigured={configuredProviders.includes(provider.id)}
+            onConfigure={onConfigure}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  // Mostrar por categorías
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-      {providers.map((provider) => {
-        const isConfigured = configuredProviders.includes(provider.id);
+    <div className="space-y-8">
+      {Object.entries(catalog.categories).map(([categoryKey, categoryLabel]: any) => {
+        const categoryProviders = catalog.groupedByCategory?.[categoryKey] || [];
+        
+        if (categoryProviders.length === 0) return null;
+
+        const config = CATEGORY_CONFIG[categoryKey] || { icon: Settings, color: 'text-gray-600', bgColor: 'bg-gray-100' };
+        const Icon = config.icon;
 
         return (
-          <div
-            key={provider.id}
-            className={`bg-white rounded-xl shadow-sm border-2 p-6 hover:shadow-md transition-all ${
-              isConfigured ? 'border-green-300' : 'border-gray-200'
-            }`}
-          >
-            <div className="flex items-start justify-between mb-4">
+          <div key={categoryKey} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            {/* Category Header */}
+            <div className={`${config.bgColor} px-6 py-4 border-b border-gray-200`}>
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
-                  <Zap className="h-6 w-6 text-white" />
+                <div className={`p-2 bg-white rounded-lg shadow-sm`}>
+                  <Icon className={`h-6 w-6 ${config.color}`} />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">{provider.name}</h3>
-                  {provider.status === 'beta' && (
-                    <span className="inline-block px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full">
-                      BETA
-                    </span>
-                  )}
+                  <h2 className="text-xl font-bold text-gray-900">{categoryLabel}</h2>
+                  <p className="text-sm text-gray-600">{categoryProviders.length} integraciones disponibles</p>
                 </div>
               </div>
-
-              {isConfigured && (
-                <CheckCircle className="h-5 w-5 text-green-600" />
-              )}
             </div>
 
-            <p className="text-sm text-gray-600 mb-4 min-h-[40px]">{provider.description}</p>
-
-            {provider.website && (
-              <a
-                href={provider.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 mb-4"
-              >
-                <ExternalLink className="h-4 w-4" />
-                Más información
-              </a>
-            )}
-
-            <button
-              onClick={() => onConfigure(provider)}
-              className={`w-full px-4 py-2 rounded-lg font-medium transition-colors ${
-                isConfigured
-                  ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
-            >
-              {isConfigured ? 'Reconfigurar' : 'Configurar'}
-            </button>
+            {/* Integrations Grid */}
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {categoryProviders.map((provider: Provider) => (
+                  <IntegrationCard
+                    key={provider.id}
+                    provider={provider}
+                    isConfigured={configuredProviders.includes(provider.id)}
+                    onConfigure={onConfigure}
+                    compact
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         );
       })}
+    </div>
+  );
+}
+
+// ============================================================================
+// INTEGRATION CARD COMPONENT
+// ============================================================================
+
+function IntegrationCard({
+  provider,
+  isConfigured,
+  onConfigure,
+  compact = false,
+}: {
+  provider: Provider;
+  isConfigured: boolean;
+  onConfigure: (provider: Provider) => void;
+  compact?: boolean;
+}) {
+  const config = CATEGORY_CONFIG[provider.category] || { icon: Settings, color: 'text-gray-600', bgColor: 'bg-gray-100' };
+  const Icon = config.icon;
+
+  return (
+    <div
+      className={`bg-white rounded-lg border-2 p-4 hover:shadow-md transition-all ${
+        isConfigured ? 'border-green-300 bg-green-50/30' : 'border-gray-200'
+      } ${compact ? '' : 'shadow-sm'}`}
+    >
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <div className={`p-1.5 ${config.bgColor} rounded-lg`}>
+            <Icon className={`h-5 w-5 ${config.color}`} />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900 text-sm">{provider.name}</h3>
+            {provider.status === 'beta' && (
+              <span className="inline-block px-1.5 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-medium rounded">
+                BETA
+              </span>
+            )}
+          </div>
+        </div>
+
+        {isConfigured && (
+          <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+        )}
+      </div>
+
+      <p className="text-xs text-gray-600 mb-3 line-clamp-2">{provider.description}</p>
+
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => onConfigure(provider)}
+          className={`flex-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+            isConfigured
+              ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              : 'bg-blue-600 text-white hover:bg-blue-700'
+          }`}
+        >
+          {isConfigured ? 'Reconfigurar' : 'Configurar'}
+        </button>
+        
+        {provider.website && (
+          <a
+            href={provider.website}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-1.5 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
+            title="Más información"
+          >
+            <ExternalLink className="h-4 w-4" />
+          </a>
+        )}
+      </div>
     </div>
   );
 }
