@@ -1,154 +1,234 @@
+/**
+ * CSRF Protection Implementation
+ * Protección contra ataques Cross-Site Request Forgery
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
-import crypto from 'crypto';
-import logger, { logError } from './logger';
+import { randomBytes, createHmac } from 'crypto';
 
-/**
- * Genera un token CSRF aleatorio
- */
-export function generateCSRFToken(): string {
-  return crypto.randomBytes(32).toString('hex');
-}
-
-/**
- * Verifica un token CSRF
- */
-export function verifyCSRFToken(token: string, expectedToken: string): boolean {
-  if (!token || !expectedToken) {
-    return false;
-  }
-
-  // Usar comparación de tiempo constante para prevenir timing attacks
-  return crypto.timingSafeEqual(Buffer.from(token), Buffer.from(expectedToken));
-}
-
-/**
- * Nombre de la cookie para el token CSRF
- */
-const CSRF_COOKIE_NAME = 'csrf_token';
+// Secret para firmar tokens CSRF (debe estar en .env en producción)
+const CSRF_SECRET = process.env.CSRF_SECRET || 'inmova-csrf-secret-change-in-production';
+const CSRF_TOKEN_LENGTH = 32;
+const CSRF_COOKIE_NAME = 'csrf-token';
 const CSRF_HEADER_NAME = 'x-csrf-token';
 
 /**
- * Configura el token CSRF en una cookie
+ * Genera un token CSRF seguro
  */
-export function setCSRFCookie(response: NextResponse, token: string): NextResponse {
-  response.cookies.set(CSRF_COOKIE_NAME, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    maxAge: 60 * 60 * 24, // 24 horas
-    path: '/',
-  });
-
-  return response;
+export function generateCsrfToken(): string {
+  const token = randomBytes(CSRF_TOKEN_LENGTH).toString('hex');
+  return token;
 }
 
 /**
- * Obtiene el token CSRF de la cookie
+ * Firma un token CSRF con HMAC
  */
-export function getCSRFTokenFromCookie(request: NextRequest): string | null {
+export function signCsrfToken(token: string): string {
+  const hmac = createHmac('sha256', CSRF_SECRET);
+  hmac.update(token);
+  return hmac.digest('hex');
+}
+
+/**
+ * Verifica que un token CSRF es válido
+ */
+export function verifyCsrfToken(token: string, signature: string): boolean {
+  const expectedSignature = signCsrfToken(token);
+  
+  // Comparación constante en tiempo para prevenir timing attacks
+  if (signature.length !== expectedSignature.length) {
+    return false;
+  }
+  
+  let result = 0;
+  for (let i = 0; i < signature.length; i++) {
+    result |= signature.charCodeAt(i) ^ expectedSignature.charCodeAt(i);
+  }
+  
+  return result === 0;
+}
+
+/**
+ * Obtiene el token CSRF de las cookies
+ */
+export function getCsrfTokenFromCookies(request: NextRequest): string | null {
   return request.cookies.get(CSRF_COOKIE_NAME)?.value || null;
 }
 
 /**
  * Obtiene el token CSRF del header o body
  */
-export function getCSRFTokenFromRequest(request: NextRequest): string | null {
+export function getCsrfTokenFromRequest(request: NextRequest): string | null {
   // Primero intentar del header
   const headerToken = request.headers.get(CSRF_HEADER_NAME);
-  if (headerToken) {
-    return headerToken;
-  }
-
-  // Luego intentar del body (para forms HTML tradicionales)
-  // Nota: esto requiere que el body ya esté parseado
+  if (headerToken) return headerToken;
+  
+  // Fallback: intentar del body (para forms HTML tradicionales)
+  // Nota: esto requiere parsear el body, que puede no estar disponible en middleware
   return null;
 }
 
 /**
- * Middleware de CSRF para API routes
+ * Valida el token CSRF de una petición
  */
-export async function validateCSRF(request: NextRequest): Promise<boolean> {
-  // Solo validar para métodos que modifican datos
-  const method = request.method.toUpperCase();
-  if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
-    return true; // GET, HEAD, OPTIONS no requieren CSRF
-  }
-
-  // Excepciones: rutas de autenticación
-  const pathname = request.nextUrl.pathname;
-  if (
-    pathname.startsWith('/api/auth/') ||
-    pathname.startsWith('/api/signup') ||
-    pathname.startsWith('/api/portal-inquilino/login')
-  ) {
-    return true;
-  }
-
-  const cookieToken = getCSRFTokenFromCookie(request);
-  const requestToken = getCSRFTokenFromRequest(request);
-
+export function validateCsrfToken(request: NextRequest): boolean {
+  const cookieToken = getCsrfTokenFromCookies(request);
+  const requestToken = getCsrfTokenFromRequest(request);
+  
   if (!cookieToken || !requestToken) {
-    logError(new Error('CSRF token missing'), {
-      path: pathname,
-      method,
-      hasCookie: !!cookieToken,
-      hasHeader: !!requestToken,
-    });
     return false;
   }
+  
+  // Verificar que los tokens coinciden
+  return cookieToken === requestToken;
+}
 
-  try {
-    const isValid = verifyCSRFToken(requestToken, cookieToken);
+/**
+ * Middleware de protección CSRF
+ */
+export async function csrfProtectionMiddleware(
+  request: NextRequest
+): Promise<NextResponse | null> {
+  const { pathname, method } = request.nextUrl;
+  
+  // Solo aplicar CSRF protection en métodos que modifican estado
+  const protectedMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];
+  if (!protectedMethods.includes(method)) {
+    return null; // No aplicar protección
+  }
+  
+  // Excluir rutas que no necesitan CSRF (webhooks, APIs públicas)
+  const excludedPaths = [
+    '/api/webhook',
+    '/api/stripe/webhook',
+    '/api/health',
+    '/api/auth/callback', // OAuth callbacks
+  ];
+  
+  if (excludedPaths.some(path => pathname.startsWith(path))) {
+    return null;
+  }
+  
+  // Validar token CSRF
+  if (!validateCsrfToken(request)) {
+    return NextResponse.json(
+      {
+        error: 'Invalid CSRF token',
+        message: 'CSRF validation failed. Please refresh the page and try again.',
+      },
+      {
+        status: 403,
+      }
+    );
+  }
+  
+  return null; // Token válido, continuar
+}
 
-    if (!isValid) {
-      logError(new Error('CSRF token mismatch'), {
-        path: pathname,
-        method,
-      });
+/**
+ * Agrega el token CSRF a la respuesta
+ */
+export function addCsrfTokenToResponse(response: NextResponse): NextResponse {
+  // Generar nuevo token si no existe
+  let token = response.cookies.get(CSRF_COOKIE_NAME)?.value;
+  
+  if (!token) {
+    token = generateCsrfToken();
+    
+    // Agregar cookie con el token
+    response.cookies.set(CSRF_COOKIE_NAME, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24, // 24 horas
+    });
+    
+    // Agregar header para que el cliente pueda leerlo
+    response.headers.set('X-CSRF-Token', token);
+  }
+  
+  return response;
+}
+
+/**
+ * Helper para aplicar protección CSRF en API routes
+ */
+export async function withCsrfProtection(
+  request: NextRequest,
+  handler: () => Promise<NextResponse>
+): Promise<NextResponse> {
+  // Validar CSRF token
+  const protectedMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];
+  
+  if (protectedMethods.includes(request.method)) {
+    if (!validateCsrfToken(request)) {
+      return NextResponse.json(
+        {
+          error: 'Invalid CSRF token',
+          message: 'CSRF validation failed.',
+        },
+        { status: 403 }
+      );
     }
-
-    return isValid;
-  } catch (error) {
-    logError(error instanceof Error ? error : new Error('CSRF validation error'), {
-      path: pathname,
-      method,
-    });
-    return false;
   }
+  
+  // Ejecutar handler
+  const response = await handler();
+  
+  // Agregar/renovar token CSRF en la respuesta
+  return addCsrfTokenToResponse(response);
 }
 
 /**
  * Hook para obtener el token CSRF en el cliente
+ * Este token debe ser incluido en todas las peticiones POST/PUT/PATCH/DELETE
  */
-export async function getCSRFToken(): Promise<string> {
-  try {
-    const response = await fetch('/api/csrf-token');
-    if (!response.ok) {
-      throw new Error('Failed to fetch CSRF token');
-    }
-    const data = await response.json();
-    return data.token;
-  } catch (error) {
-    logError(error instanceof Error ? error : new Error('Failed to get CSRF token'));
-    throw error;
+export function getCsrfToken(): string | null {
+  if (typeof document === 'undefined') return null;
+  
+  // Buscar en meta tag
+  const metaTag = document.querySelector('meta[name="csrf-token"]');
+  if (metaTag) {
+    return metaTag.getAttribute('content');
   }
+  
+  // Buscar en cookie
+  const cookies = document.cookie.split(';');
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=');
+    if (name === CSRF_COOKIE_NAME) {
+      return decodeURIComponent(value);
+    }
+  }
+  
+  return null;
 }
 
 /**
- * Helper para incluir el token CSRF en fetch requests
+ * Componente React para incluir el token CSRF en el HTML
  */
-export async function fetchWithCSRF(
+export function CsrfTokenMeta({ token }: { token: string }) {
+  return <meta name="csrf-token" content={token} />;
+}
+
+/**
+ * Fetch wrapper que incluye automáticamente el token CSRF
+ */
+export async function csrfFetch(
   url: string,
   options: RequestInit = {}
 ): Promise<Response> {
-  const token = await getCSRFToken();
-
-  const headers = new Headers(options.headers || {});
-  headers.set(CSRF_HEADER_NAME, token);
-
+  const token = getCsrfToken();
+  
+  const headers = new Headers(options.headers);
+  if (token) {
+    headers.set(CSRF_HEADER_NAME, token);
+  }
+  
   return fetch(url, {
     ...options,
     headers,
-    credentials: 'same-origin',
+    credentials: 'same-origin', // Importante para cookies
   });
 }

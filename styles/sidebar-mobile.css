@@ -1,0 +1,52 @@
+/* Estilos específicos para el sidebar en móvil */
+
+/* Asegurar que el sidebar sea scrolleable en móviles */
+@media (max-width: 1023px) {
+  /* Prevenir scroll del body cuando el sidebar está abierto */
+  body.sidebar-open {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100vh;
+  }
+
+  /* Optimizar scroll táctil del sidebar */
+  [data-sidebar-nav] {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    scroll-behavior: smooth;
+  }
+
+  /* Asegurar que el scrollbar sea visible pero sutil */
+  [data-sidebar-nav]::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  [data-sidebar-nav]::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  [data-sidebar-nav]::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+  }
+
+  [data-sidebar-nav]::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+  }
+}
+
+/* Mejorar la animación de entrada del sidebar */
+@media (prefers-reduced-motion: no-preference) {
+  aside[aria-label="Navegación principal"] {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/* Asegurar que el overlay no sea interactivo debajo del sidebar */
+@media (max-width: 1023px) {
+  .sidebar-overlay {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+}
