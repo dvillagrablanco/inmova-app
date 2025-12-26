@@ -8,6 +8,11 @@
   "env": {
     "NODE_ENV": "production"
   },
+  "build": {
+    "env": {
+      "NEXT_PUBLIC_BUILD_TIME": "@now"
+    }
+  },
   "functions": {
     "app/api/**/*": {
       "maxDuration": 60
@@ -44,6 +49,23 @@
         {
           "key": "Referrer-Policy",
           "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    },
+    {
+      "source": "/api/version",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, no-cache, must-revalidate, proxy-revalidate"
+        },
+        {
+          "key": "Pragma",
+          "value": "no-cache"
+        },
+        {
+          "key": "Expires",
+          "value": "0"
         }
       ]
     }
