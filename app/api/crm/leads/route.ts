@@ -1,140 +1,155 @@
-import { NextRequest, NextResponse } from 'next/server';
+/**
+ * API: /api/crm/leads
+ * 
+ * GET:  Listar leads con filtros
+ * POST: Crear nuevo lead
+ */
+
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
-import { calculateLeadScoring, calculateProbabilidadCierre } from '@/lib/crm-service';
-import logger, { logError } from '@/lib/logger';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { CRMService } from '@/lib/crm-service';
+import type { CRMLeadStatus, CRMLeadSource, CRMLeadPriority, CompanySize } from '@prisma/client';
 
-export const dynamic = 'force-dynamic';
-
-export async function GET(req: NextRequest) {
+export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    if (!session?.user?.id || !session.user.companyId) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
+    const { searchParams } = new URL(request.url);
 
-    if (!user) {
-      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
+    // Filtros
+    const filters: any = {};
+    
+    // Status (múltiple)
+    const statusParam = searchParams.get('status');
+    if (statusParam) {
+      filters.status = statusParam.split(',') as CRMLeadStatus[];
     }
 
-    const { searchParams } = new URL(req.url);
-    const estado = searchParams.get('estado');
-    const asignadoA = searchParams.get('asignadoA');
+    // Source (múltiple)
+    const sourceParam = searchParams.get('source');
+    if (sourceParam) {
+      filters.source = sourceParam.split(',') as CRMLeadSource[];
+    }
 
-    const where: any = {
-      companyId: user.companyId,
-    };
+    // Priority (múltiple)
+    const priorityParam = searchParams.get('priority');
+    if (priorityParam) {
+      filters.priority = priorityParam.split(',') as CRMLeadPriority[];
+    }
 
-    if (estado) where.estado = estado;
-    if (asignadoA) where.asignadoA = asignadoA;
+    // Owner
+    const ownerId = searchParams.get('ownerId');
+    if (ownerId) {
+      filters.ownerId = ownerId;
+    }
 
-    const leads = await prisma.lead.findMany({
-      where,
-      include: {
-        actividades: {
-          orderBy: { fecha: 'desc' },
-          take: 5,
-        },
-        asignadoUsuario: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
-      orderBy: [
-        { puntuacion: 'desc' },
-        { createdAt: 'desc' },
-      ],
-    });
+    // Tags
+    const tagsParam = searchParams.get('tags');
+    if (tagsParam) {
+      filters.tags = tagsParam.split(',');
+    }
 
-    return NextResponse.json(leads);
-  } catch (error) {
-    logger.error('Error fetching leads:', error);
+    // Score range
+    const minScore = searchParams.get('minScore');
+    if (minScore) {
+      filters.minScore = parseInt(minScore);
+    }
+
+    const maxScore = searchParams.get('maxScore');
+    if (maxScore) {
+      filters.maxScore = parseInt(maxScore);
+    }
+
+    // City (múltiple)
+    const cityParam = searchParams.get('city');
+    if (cityParam) {
+      filters.city = cityParam.split(',');
+    }
+
+    // Industry (múltiple)
+    const industryParam = searchParams.get('industry');
+    if (industryParam) {
+      filters.industry = industryParam.split(',');
+    }
+
+    // Company size (múltiple)
+    const companySizeParam = searchParams.get('companySize');
+    if (companySizeParam) {
+      filters.companySize = companySizeParam.split(',') as CompanySize[];
+    }
+
+    // Paginación
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '50');
+
+    const result = await CRMService.listLeads(
+      session.user.companyId,
+      filters,
+      page,
+      limit
+    );
+
+    return NextResponse.json(result);
+  } catch (error: any) {
+    console.error('Error listing leads:', error);
     return NextResponse.json(
-      { error: 'Error al obtener leads' },
+      { error: 'Error al listar leads', details: error.message },
       { status: 500 }
     );
   }
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    if (!session?.user?.id || !session.user.companyId) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
+    const body = await request.json();
 
-    if (!user) {
-      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
+    // Validación básica
+    if (!body.firstName || !body.lastName || !body.companyName) {
+      return NextResponse.json(
+        { error: 'Faltan campos requeridos: firstName, lastName, companyName' },
+        { status: 400 }
+      );
     }
 
-    const body = await req.json();
+    if (!body.email && !body.linkedInUrl) {
+      return NextResponse.json(
+        { error: 'Se requiere al menos email o linkedInUrl' },
+        { status: 400 }
+      );
+    }
 
-    // Calcular scoring inicial basado en datos del lead
-    const puntuacionInicial = calculateLeadScoring(body);
-    const probabilidadInicial = calculateProbabilidadCierre(body);
-
-    const lead = await prisma.lead.create({
-      data: {
-        companyId: user.companyId,
-        nombre: body.nombre || body.nombreCompleto?.split(' ')[0] || '',
-        apellidos: body.apellidos || body.nombreCompleto?.split(' ').slice(1).join(' ') || '',
-        email: body.email,
-        telefono: body.telefono,
-        empresa: body.empresa,
-        cargo: body.cargo,
-        direccion: body.direccion,
-        ciudad: body.ciudad,
-        codigoPostal: body.codigoPostal,
-        pais: body.pais || 'España',
-        fuente: body.fuente || 'formulario_contacto',
-        origenDetalle: body.origenDetalle,
-        paginaOrigen: body.paginaOrigen,
-        estado: body.estado || 'nuevo',
-        etapa: body.etapa || 'contacto_inicial',
-        puntuacion: puntuacionInicial,
-        temperatura: body.temperatura || 'frio',
-        tipoNegocio: body.tipoNegocio,
-        verticalesInteres: body.verticalesInteres || [],
-        numeroUnidades: body.numeroUnidades ? parseInt(body.numeroUnidades) : null,
-        presupuestoMensual: body.presupuestoMensual ? parseFloat(body.presupuestoMensual) : null,
-        urgencia: body.urgencia || 'media',
-        notas: body.notas,
-        probabilidadCierre: probabilidadInicial,
-        fechaEstimadaCierre: body.fechaEstimadaCierre ? new Date(body.fechaEstimadaCierre) : null,
-        asignadoA: body.asignadoA || user.id,
-        conversacionId: body.conversacionId,
-        mensajeInicial: body.mensajeInicial,
-        preguntasFrecuentes: body.preguntasFrecuentes || [],
-      },
-      include: {
-        actividades: true,
-        asignadoUsuario: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
+    const lead = await CRMService.createLead({
+      companyId: session.user.companyId,
+      ...body,
     });
 
+    // Log activity
+    await CRMService.logActivity(
+      session.user.companyId,
+      lead.id,
+      null,
+      'note',
+      'Lead creado',
+      `Lead creado manualmente por ${session.user.nombre || session.user.email}`,
+      undefined,
+      undefined,
+      session.user.id
+    );
+
     return NextResponse.json(lead, { status: 201 });
-  } catch (error) {
-    logger.error('Error creating lead:', error);
+  } catch (error: any) {
+    console.error('Error creating lead:', error);
     return NextResponse.json(
-      { error: 'Error al crear lead' },
+      { error: 'Error al crear lead', details: error.message },
       { status: 500 }
     );
   }

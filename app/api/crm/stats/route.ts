@@ -1,34 +1,34 @@
-import { NextRequest, NextResponse } from 'next/server';
+/**
+ * API: /api/crm/stats
+ * 
+ * GET: Obtener estadísticas del CRM
+ */
+
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
-import { getCRMStats } from '@/lib/crm-service';
-import logger, { logError } from '@/lib/logger';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { CRMService } from '@/lib/crm-service';
 
-export const dynamic = 'force-dynamic';
-
-export async function GET(req: NextRequest) {
+export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    if (!session?.user?.id || !session.user.companyId) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId'); // Opcional: filtrar por usuario
 
-    if (!user) {
-      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
-    }
-
-    const stats = await getCRMStats(user.companyId);
+    const stats = await CRMService.getStats(
+      session.user.companyId,
+      userId || undefined
+    );
 
     return NextResponse.json(stats);
-  } catch (error) {
-    logger.error('Error fetching CRM stats:', error);
+  } catch (error: any) {
+    console.error('Error getting CRM stats:', error);
     return NextResponse.json(
-      { error: 'Error al obtener estadísticas' },
+      { error: 'Error al obtener estadísticas', details: error.message },
       { status: 500 }
     );
   }
