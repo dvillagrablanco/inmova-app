@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import {
   FileText,
   Plus,
@@ -29,8 +30,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
+
 import logger, { logError } from '@/lib/logger';
 import { LoadingState } from '@/components/ui/loading-state';
 import { format } from 'date-fns';
@@ -91,24 +91,14 @@ export default function TemplatesPage() {
 
   if (loading || status === 'loading') {
     return (
-      <div className="flex h-screen">
-        <Sidebar />
-        <div className="flex-1 flex flex-col ml-0 lg:ml-64">
-          <Header />
-          <main className="flex-1 p-6">
+      <AuthenticatedLayout>
             <LoadingState message="Cargando templates..." />
-          </main>
-        </div>
-      </div>
+          </AuthenticatedLayout>
     );
   }
 
   return (
-    <div className="flex h-screen">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-6 bg-gray-50 dark:bg-gray-900">
+    <AuthenticatedLayout>
           {/* Header */}
           <div className="mb-6">
             <div className="flex items-center gap-4 mb-4">
@@ -220,8 +210,6 @@ export default function TemplatesPage() {
               ))}
             </div>
           )}
-        </main>
-      </div>
-    </div>
+        </AuthenticatedLayout>
   );
 }

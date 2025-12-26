@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -111,40 +111,24 @@ export default function STRDashboardPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="flex h-screen overflow-hidden bg-gradient-bg">
-        <Sidebar />
-        <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
-          <Header />
-          <main className="flex-1 overflow-y-auto">
+      <AuthenticatedLayout>
             <LoadingState message="Cargando dashboard STR..." />
-          </main>
-        </div>
-      </div>
+          </AuthenticatedLayout>
     );
   }
 
   if (!stats) {
     return (
-      <div className="flex h-screen overflow-hidden bg-gradient-bg">
-        <Sidebar />
-        <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
-          <Header />
-          <main className="flex-1 overflow-y-auto p-6">
+      <AuthenticatedLayout>
             <div className="text-center">
               <p className="text-gray-500">No hay datos disponibles</p>
             </div>
-          </main>
-        </div>
-      </div>
+          </AuthenticatedLayout>
     );
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gradient-bg">
-      <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto">
+    <AuthenticatedLayout>
           <div className="container mx-auto p-6 space-y-6">
             {/* Breadcrumb */}
             <Breadcrumb>
@@ -417,8 +401,6 @@ export default function STRDashboardPage() {
               </CardContent>
             </Card>
           </div>
-        </main>
-      </div>
-    </div>
+        </AuthenticatedLayout>
   );
 }

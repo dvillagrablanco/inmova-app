@@ -3,12 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { ArrowLeft, CheckCircle2, Clock, Euro, Home, XCircle } from 'lucide-react';
-import { Header } from '@/components/layout/header';
-import { Sidebar } from '@/components/layout/sidebar';
+
 import { Button } from '@/components/ui/button';
 import { BackButton } from '@/components/ui/back-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -192,11 +192,7 @@ export default function AprobacionesPage() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto bg-muted/30 p-4 md:p-6 lg:p-8">
+    <AuthenticatedLayout>
           {/* Header con Breadcrumbs */}
           <div className="mb-6 space-y-4">
             <Breadcrumb>
@@ -382,8 +378,6 @@ export default function AprobacionesPage() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
-        </main>
-      </div>
-    </div>
+        </AuthenticatedLayout>
   );
 }

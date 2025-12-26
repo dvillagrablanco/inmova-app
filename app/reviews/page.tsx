@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -154,11 +154,7 @@ export default function ReviewsPage() {
   }
 
   return (
-    <div className="flex h-screen bg-gradient-bg">
-      <Sidebar />
-      <div className="flex-1 ml-0 lg:ml-64 flex flex-col overflow-hidden">
-        <Header />
-        <main className="flex-1 overflow-y-auto bg-muted/30 p-4 md:p-6">
+    <AuthenticatedLayout>
           <div className="mb-4">
             <Button
               variant="ghost"
@@ -343,8 +339,6 @@ export default function ReviewsPage() {
               ))
             )}
           </div>
-        </main>
-      </div>
-    </div>
+        </AuthenticatedLayout>
   );
 }

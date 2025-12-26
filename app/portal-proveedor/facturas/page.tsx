@@ -1,8 +1,5 @@
 'use client';
 
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
-
 import { useState, useEffect } from 'react';
 import logger from '@/lib/logger';
 import { useRouter } from 'next/navigation';
@@ -28,6 +25,7 @@ import { FileText, Plus, Eye, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import toast from 'react-hot-toast';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 interface Invoice {
   id: string;
@@ -113,11 +111,7 @@ export default function FacturasPage() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gradient-bg">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+    <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto">
             <div className="mb-6">
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Facturas</h1>
@@ -280,8 +274,6 @@ export default function FacturasPage() {
               </CardContent>
             </Card>
           </div>
-        </main>
-      </div>
-    </div>
+        </AuthenticatedLayout>
   );
 }

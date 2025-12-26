@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -377,11 +377,7 @@ export default function ClientesAdminPage() {
 
   return (
     <ErrorBoundary>
-      <div className="flex h-screen bg-gray-50">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
-          <Header />
-          <main className="flex-1 overflow-y-auto p-6">
+      <AuthenticatedLayout>
             <div className="max-w-7xl mx-auto space-y-6">
               {/* Header */}
               <div className="flex items-center justify-between">
@@ -699,9 +695,7 @@ export default function ClientesAdminPage() {
                 </div>
               )}
             </div>
-          </main>
-        </div>
-      </div>
+          </AuthenticatedLayout>
 
       {/* Delete Dialog */}
       <ConfirmDialog

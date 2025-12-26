@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+
 import {
   Home,
   ArrowLeft,
@@ -72,11 +72,7 @@ export default function UnidadDetailPage() {
   if (!session || !unit) return null;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-muted/30">
-      <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto">
+    <AuthenticatedLayout>
           <div className="container mx-auto p-6 space-y-6">
             {/* Botón Volver y Breadcrumbs */}
             <div className="flex items-center gap-4 pt-4">
@@ -299,8 +295,6 @@ export default function UnidadDetailPage() {
               </div>
             )}
           </div>
-        </main>
-      </div>
-    </div>
+        </AuthenticatedLayout>
   );
 }

@@ -3,8 +3,8 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -250,11 +250,7 @@ export default function InspeccionesPage() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-muted/30">
-      <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+    <AuthenticatedLayout>
           {/* Header */}
           <div className="mb-6">
             <Button variant="ghost" onClick={() => router.push('/dashboard')} className="mb-4">
@@ -569,8 +565,6 @@ export default function InspeccionesPage() {
               ))
             )}
           </div>
-        </main>
-      </div>
-    </div>
+        </AuthenticatedLayout>
   );
 }

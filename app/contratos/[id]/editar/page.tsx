@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+
 import { Home as HomeIcon, ArrowLeft, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -171,26 +171,16 @@ export default function EditarContratoPage() {
 
   if (status === 'loading' || isFetching) {
     return (
-      <div className="flex h-screen bg-background">
-        <Sidebar />
-        <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
-          <Header />
-          <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+      <AuthenticatedLayout>
             <div className="max-w-4xl mx-auto">
               <p>Cargando...</p>
             </div>
-          </main>
-        </div>
-      </div>
+          </AuthenticatedLayout>
     );
   }
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+    <AuthenticatedLayout>
           <div className="max-w-4xl mx-auto space-y-6">
             {/* Breadcrumb */}
             <Breadcrumb>
@@ -383,8 +373,6 @@ export default function EditarContratoPage() {
               </Card>
             </form>
           </div>
-        </main>
-      </div>
-    </div>
+        </AuthenticatedLayout>
   );
 }

@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
+
 import {
   Building2,
   Plus,
@@ -49,6 +48,7 @@ import { StatusBadge } from '@/components/ui/status-badge';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import toast from 'react-hot-toast';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import logger, { logError } from '@/lib/logger';
 
 interface Building {
@@ -174,11 +174,7 @@ function EdificiosPageContent() {
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="flex h-screen bg-gradient-bg">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
-          <Header />
-          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+      <AuthenticatedLayout>
             <div className="max-w-7xl mx-auto">
               <Skeleton className="h-8 w-48 mb-6" />
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -187,9 +183,7 @@ function EdificiosPageContent() {
                 ))}
               </div>
             </div>
-          </main>
-        </div>
-      </div>
+          </AuthenticatedLayout>
     );
   }
 
@@ -206,11 +200,7 @@ function EdificiosPageContent() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-muted/30">
-      <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+    <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Botón Volver y Breadcrumbs */}
             <div className="flex items-center gap-4">

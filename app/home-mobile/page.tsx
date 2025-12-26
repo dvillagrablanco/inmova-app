@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
+
 import {
   Building2,
   Home,
@@ -24,6 +23,7 @@ import { MobileSheet } from '@/components/mobile/MobileSheet';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
 import toast from 'react-hot-toast';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 interface DashboardStats {
   totalEdificios: number;
@@ -261,11 +261,7 @@ export default function HomeMobilePage() {
   );
 
   return (
-    <div className="flex h-screen overflow-hidden bg-muted/30">
-      <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto">
+    <AuthenticatedLayout>
           <div className="container-mobile-first py-6">
             {isMobile ? (
               <PullToRefresh onRefresh={handleRefresh}>

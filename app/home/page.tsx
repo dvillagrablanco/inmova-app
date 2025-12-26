@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
+
 import { OnboardingTourEnhanced } from '@/components/OnboardingTourEnhanced';
 import { VerticalOnboardingTour } from '@/components/onboarding/VerticalOnboardingTour';
 import { SetupProgressWidget } from '@/components/onboarding/SetupProgressWidget';
@@ -50,6 +49,7 @@ import {
   HelpCircle,
 } from 'lucide-react';
 import Link from 'next/link';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import logger, { logError } from '@/lib/logger';
 
 // Mapeo de códigos de módulos a información visual
@@ -306,11 +306,7 @@ export default function HomePage() {
     <>
       {showOnboarding && <OnboardingTourEnhanced onComplete={handleOnboardingComplete} />}
       <VerticalOnboardingTour />
-      <div className="flex h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-        <Sidebar />
-        <div className="flex-1 flex flex-col ml-0 lg:ml-64">
-          <Header />
-          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+      <AuthenticatedLayout>
             <div className="max-w-7xl mx-auto space-y-8">
               {/* Welcome Section */}
               <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 p-8 text-white shadow-2xl">
@@ -487,9 +483,7 @@ export default function HomePage() {
 
             {/* Quick Access Menu */}
             <QuickAccessMenu />
-          </main>
-        </div>
-      </div>
+          </AuthenticatedLayout>
     </>
   );
 }

@@ -1,8 +1,5 @@
 'use client';
 
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
-
 import { useSession } from 'next-auth/react';
 import logger from '@/lib/logger';
 import { useRouter } from 'next/navigation';
@@ -11,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Building2, FileText, Euro, TrendingUp, AlertCircle, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 interface DashboardKPIs {
   totalCommunities: number;
@@ -68,11 +66,7 @@ export default function AdminFincasPage() {
       : 0;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gradient-bg">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+    <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto space-y-6">
             <div className="flex items-center justify-between">
               <div>
@@ -270,8 +264,6 @@ export default function AdminFincasPage() {
               </Link>
             </div>
           </div>
-        </main>
-      </div>
-    </div>
+        </AuthenticatedLayout>
   );
 }
