@@ -140,6 +140,341 @@
 
 ---
 
+### **10. PROMOTORAS Y CONSTRUCTORAS** 🏗️
+**Perfil:** Promotoras inmobiliarias, constructoras, developers
+
+**Por qué son partners ideales:**
+- Venden propiedades nuevas a inversores
+- Buscan servicios post-venta diferenciadores
+- Quieren mantener relación con clientes tras entrega
+- Pueden integrar INMOVA como "servicio incluido"
+
+**Ejemplos:** Aedas Homes, Neinor Homes, Vía Célere, Metrovacesa, constructoras locales
+
+**Target:** 100 promotoras (10 viviendas/año cada una = 1,000 clientes)
+
+---
+
+### **11. ARQUITECTOS Y ESTUDIOS DE ARQUITECTURA** 📐
+**Perfil:** Arquitectos, estudios de arquitectura, diseñadores
+
+**Por qué son partners ideales:**
+- Trabajan con propietarios en reformas
+- Relación de confianza con clientes
+- Buscan servicios complementarios
+- Pueden recomendar herramientas de gestión
+
+**Ejemplos:** Colegios de Arquitectos (COAM, etc.), estudios grandes y boutique
+
+**Target:** 200 arquitectos (3 clientes/año = 600 clientes)
+
+---
+
+### **12. EMPRESAS DE REFORMAS Y MANTENIMIENTO** 🔧
+**Perfil:** Empresas de reformas, mantenimiento, facility management
+
+**Por qué son partners ideales:**
+- Base de datos de propietarios
+- Contacto recurrente con clientes
+- Buscan fidelización
+- Pueden integrarse como proveedores en INMOVA
+
+**Ejemplos:** Reparalia, Reformas Barcelona, empresas locales
+
+**Target:** 150 empresas (5 clientes/año = 750 clientes)
+
+---
+
+### **13. NOTARÍAS** 📜
+**Perfil:** Notarías que hacen compraventas inmobiliarias
+
+**Por qué son partners ideales:**
+- Momento crítico: firma de compraventa
+- Ven 100% de transacciones inmobiliarias
+- Prescripción muy valiosa
+- Pueden recomendar en el momento de compra
+
+**Ejemplos:** Red de notarías en España (3,000 notarías)
+
+**Target:** 100 notarías (20 compraventas/año inversión = 2,000 clientes)
+
+---
+
+### **14. DESPACHOS DE ABOGADOS INMOBILIARIOS** ⚖️
+**Perfil:** Abogados especializados en inmobiliario, contencioso arrendaticio
+
+**Por qué son partners ideales:**
+- Atienden problemas de propietarios
+- Relación de confianza
+- Buscan prevenir litigios (INMOVA ayuda)
+- Pueden recomendar herramientas
+
+**Ejemplos:** Legalitas, Arag, despachos boutique
+
+**Target:** 200 despachos (3 clientes/año = 600 clientes)
+
+---
+
+### **15. REGISTRADORES DE LA PROPIEDAD** 🏛️
+**Perfil:** Registros de la Propiedad
+
+**Por qué son partners ideales:**
+- Ven todas las transacciones
+- Momento de inscripción = momento de compra
+- Prescripción institucional
+- Acuerdo con Colegio de Registradores
+
+**Target:** Acuerdo con Colegio de Registradores (acceso a compradores)
+
+---
+
+### **16. PLATAFORMAS DE CROWDFUNDING INMOBILIARIO** 💰
+**Perfil:** Housers, Urbanitae, Civislend, Casacrowd
+
+**Por qué son partners ideales:**
+- Inversores inmobiliarios (nuestro target perfecto)
+- Buscan servicios complementarios
+- Integración API posible
+- Cross-selling natural
+
+**Target:** 5 plataformas (500 inversores cada una = 2,500 clientes)
+
+---
+
+### **17. IDEALISTA Y FOTOCASA (Partnership Directo)** 📱
+**Perfil:** Portales inmobiliarios líderes
+
+**Por qué son partners ideales:**
+- 5M+ usuarios profesionales
+- Buscan monetizar audiencia
+- Cross-selling natural
+- Prescripción masiva
+
+**Target:** 2 portales (5,000 clientes cada uno = 10,000 clientes)
+
+---
+
+### **18. FRANQUICIAS INMOBILIARIAS** 🏢
+**Perfil:** RE/MAX, Century 21, Engel & Völkers, Keller Williams
+
+**Por qué son partners ideales:**
+- Red de oficinas (cientos)
+- Modelo de negocio replicable
+- Buscan herramientas para franquiciados
+- Acuerdo con central → roll-out automático
+
+**Target:** 3 franquicias × 200 oficinas = 600 oficinas × 5 clientes = 3,000 clientes
+
+---
+
+### **19. FONDOS DE INVERSIÓN INMOBILIARIOS (SOCIMIs)** 🏢
+**Perfil:** Merlin Properties, Colonial, Lar España, Árima
+
+**Por qué son partners ideales:**
+- Cientos/miles de propiedades
+- Necesitan profesionalizar gestión
+- Presupuesto alto
+- Plan Enterprise custom
+
+**Target:** 10 SOCIMIs (500 propiedades promedio = 5,000 propiedades)
+
+---
+
+### **20. BUSINESS ANGELS E INVERSORES** 👼
+**Perfil:** Redes de Business Angels (AEBAN, Mola.com, etc.)
+
+**Por qué son partners ideales:**
+- Inversores activos en inmobiliario
+- Networking
+- Prescripción entre pares
+- Descuento para miembros
+
+**Target:** 5 redes × 100 inversores = 500 clientes
+
+---
+
+### **21. EMPRESAS DE LIMPIEZA PROFESIONAL** 🧹
+**Perfil:** Helpling, Miplaceronline, empresas locales
+
+**Por qué son partners ideales:**
+- Base de datos de propietarios (especialmente STR)
+- Contacto recurrente
+- Buscan fidelización
+- Pueden aparecer en marketplace
+
+**Target:** 100 empresas × 10 clientes = 1,000 clientes
+
+---
+
+### **22. EMPRESAS DE MUDANZAS** 📦
+**Perfil:** Mudanzas Willy, Mudanzas García, empresas locales
+
+**Por qué son partners ideales:**
+- Momento de mudanza = momento clave
+- Contacto con inquilinos nuevos
+- Pueden recomendar a propietarios
+- Base de datos
+
+**Target:** 50 empresas × 20 mudanzas/año = 1,000 clientes
+
+---
+
+### **23. EMPRESAS DE DOMÓTICA Y SMART HOME** 🤖
+**Perfil:** Somfy, Simon, instaladores domótica
+
+**Por qué son partners ideales:**
+- Clientes quieren propiedades inteligentes
+- Integración natural con módulo IoT
+- Cross-selling
+- Partnership técnico
+
+**Target:** 50 empresas × 10 clientes = 500 clientes
+
+---
+
+### **24. UTILITIES (LUZ, GAS, AGUA, INTERNET)** ⚡
+**Perfil:** Endesa, Iberdrola, Naturgy, Movistar, Vodafone
+
+**Por qué son partners ideales:**
+- Base de datos masiva de propietarios
+- Buscan servicios de valor añadido
+- Cross-selling natural
+- Integración API para consumos
+
+**Target:** 3 utilities × 10,000 clientes = 30,000 clientes
+
+---
+
+### **25. MEDIOS DE COMUNICACIÓN DEL SECTOR** 📰
+**Perfil:** El Economista Inmobiliario, Cinco Días, Expansión, Idealista/news
+
+**Por qué son partners ideales:**
+- Audiencia cualificada
+- Publicidad nativa
+- Contenido patrocinado
+- Webinars conjuntos
+
+**Target:** 3 medios × 1,000 leads/año = 3,000 clientes
+
+---
+
+### **26. INFLUENCERS Y CREADORES DE CONTENIDO INMOBILIARIO** 📱
+**Perfil:** YouTubers, TikTokers, Instagramers de inversión inmobiliaria
+
+**Por qué son partners ideales:**
+- Audiencia comprometida
+- Prescripción auténtica
+- Reach masivo
+- Coste bajo
+
+**Target:** 20 influencers × 50 conversiones/año = 1,000 clientes
+
+---
+
+### **27. AGENCIAS DE MARKETING INMOBILIARIO** 🎨
+**Perfil:** Agencias especializadas en marketing inmobiliario
+
+**Por qué son partners ideales:**
+- Trabajan con promotoras e inmobiliarias
+- Buscan herramientas para sus clientes
+- White-label como servicio
+- Pueden revender
+
+**Target:** 30 agencias × 10 clientes = 300 clientes
+
+---
+
+### **28. EMPRESAS DE CERTIFICACIÓN ENERGÉTICA** 🌱
+**Perfil:** Certificadores energéticos, técnicos
+
+**Por qué son partners ideales:**
+- Obligatorio para venta/alquiler
+- Contacto con propietarios
+- Pueden recomendar gestión
+- Integración con módulo ESG
+
+**Target:** 100 certificadores × 20 clientes/año = 2,000 clientes
+
+---
+
+### **29. TASADORAS INMOBILIARIAS** 📈
+**Perfil:** Tinsa, Tecnitasa, Sociedad de Tasación
+
+**Por qué son partners ideales:**
+- Momento de tasación = momento de compra/venta
+- Datos de propiedades
+- Pueden recomendar gestión
+- Integración de valoraciones en INMOVA
+
+**Target:** 3 tasadoras × 1,000 tasaciones/año = 3,000 clientes
+
+---
+
+### **30. SOFTWARE HOUSES Y CONSULTORAS TECNOLÓGICAS** 💻
+**Perfil:** Accenture, Deloitte Digital, consultoras locales
+
+**Por qué son partners ideales:**
+- Clientes necesitan digitalización
+- Buscan soluciones sectoriales
+- Pueden revender INMOVA
+- Integraciones custom
+
+**Target:** 10 consultoras × 20 clientes = 200 clientes Enterprise
+
+---
+
+### **31. EMPRESAS DE SOFTWARE CONTABLE Y ERP** 📊
+**Perfil:** Sage, Holded, A3, Contasol
+
+**Por qué son partners ideales:**
+- Integración bidireccional
+- Clientes con propiedades necesitan INMOVA
+- Partnership técnico
+- Marketplace de integraciones
+
+**Target:** 5 ERPs × 500 clientes = 2,500 clientes
+
+---
+
+### **32. EMPRESAS DE HOME STAGING** 🎨
+**Perfil:** Empresas de home staging, interiorismo
+
+**Por qué son partners ideales:**
+- Trabajan con propietarios que venden/alquilan
+- Momento clave de transacción
+- Pueden recomendar gestión
+- Integración con Tours VR
+
+**Target:** 50 empresas × 10 clientes/año = 500 clientes
+
+---
+
+### **33. COWORKINGS Y ESPACIOS DE NETWORKING** 🤝
+**Perfil:** Impact Hub, Wayco, Utopicus, Talent Garden
+
+**Por qué son partners ideales:**
+- Miembros son emprendedores e inversores
+- Eventos y networking
+- Descuento para miembros
+- Partnership de contenido
+
+**Target:** 10 coworkings × 50 miembros = 500 clientes
+
+---
+
+### **34. PORTALES DE EMPLEO INMOBILIARIO** 💼
+**Perfil:** InfoJobs (sector inmobiliario), portales especializados
+
+**Por qué son partners ideales:**
+- Base de datos de profesionales del sector
+- Buscan formación y herramientas
+- Publicidad a profesionales
+- Descuento para candidatos
+
+**Target:** 2 portales × 500 profesionales = 1,000 clientes
+
+---
+
 ## 💰 MODELO DE COMISIONES POR TIPO DE PARTNER
 
 ### **BANCOS** 🏦

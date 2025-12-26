@@ -7,17 +7,22 @@ import { Badge } from '@/components/ui/badge';
 import { 
   TrendingUp, Users, DollarSign, Award, CheckCircle, ArrowRight,
   Building2, GraduationCap, Globe, Briefcase, FileText, BarChart3,
-  Zap, Star, Target, Rocket, Trophy, Shield, Landmark
+  Zap, Star, Target, Rocket, Trophy, Shield, Landmark, Construction,
+  Ruler, Wrench, ScrollText, Scale, Building, Coins, Home, TrendingDown,
+  Bitcoin, Lightbulb, Package, Smartphone, Plug, Newspaper, Video,
+  Palette, Leaf, LineChart, Laptop, Calculator, PaintBucket, Coffee, BriefcaseBusiness
 } from 'lucide-react';
 
 const partnerTypes = [
+  // PREMIUM PARTNERS (Top 3)
   {
-    icon: Building2,
+    icon: Landmark,
     title: 'Bancos',
     description: 'Entidades bancarias, banca privada, hipotecas',
     benefits: ['Acuerdo marco €50-200K/año', '10% revenue share', 'White-label + API'],
     highlight: 'Premium',
-    color: 'emerald'
+    color: 'emerald',
+    arr: '€8.9M'
   },
   {
     icon: Shield,
@@ -25,7 +30,8 @@ const partnerTypes = [
     description: 'Seguros de hogar, alquiler, impagos',
     benefits: ['Acuerdo €30-100K/año', '12% revenue', 'Reduce siniestralidad 25%'],
     highlight: 'Premium',
-    color: 'rose'
+    color: 'rose',
+    arr: '€17.9M'
   },
   {
     icon: Trophy,
@@ -33,49 +39,284 @@ const partnerTypes = [
     description: 'Family offices, gestoras patrimoniales UHNW',
     benefits: ['€2,000 por familia', '25% recurrente', 'Clientes premium'],
     highlight: 'Premium',
-    color: 'amber'
+    color: 'amber',
+    arr: '€2.4M'
   },
+  
+  // CADENA DE VALOR CONSTRUCCIÓN
+  {
+    icon: Construction,
+    title: 'Promotoras y Constructoras',
+    description: 'Developers, promotoras, constructoras',
+    benefits: ['€100 por vivienda vendida', 'Post-venta diferenciador', '10% revenue share'],
+    highlight: 'Top 5',
+    color: 'orange',
+    arr: '€1M'
+  },
+  {
+    icon: Ruler,
+    title: 'Arquitectos',
+    description: 'Estudios de arquitectura, diseñadores',
+    benefits: ['€200 captación', '15% recurrente', 'Bonus reformas'],
+    color: 'purple',
+    arr: '€389K'
+  },
+  {
+    icon: Wrench,
+    title: 'Empresas de Reformas',
+    description: 'Reformas, mantenimiento, facility management',
+    benefits: ['€150 captación', '12% recurrente', 'Aparecen en marketplace'],
+    color: 'gray',
+    arr: '€247K'
+  },
+  
+  // SERVICIOS LEGALES Y NOTARIALES
+  {
+    icon: ScrollText,
+    title: 'Notarías',
+    description: 'Notarías, compraventas inmobiliarias',
+    benefits: ['€300 por captación', 'Momento crítico', '10% recurrente'],
+    highlight: 'Top 5',
+    color: 'indigo',
+    arr: '€960K'
+  },
+  {
+    icon: Scale,
+    title: 'Abogados Inmobiliarios',
+    description: 'Despachos especializados, contencioso arrendaticio',
+    benefits: ['€200 captación', '15% recurrente', 'Prevención litigios'],
+    color: 'slate',
+    arr: '€389K'
+  },
+  {
+    icon: Building,
+    title: 'Registradores de la Propiedad',
+    description: 'Registros, Colegio de Registradores',
+    benefits: ['Acuerdo institucional', '5% revenue share', 'Volumen alto'],
+    color: 'zinc',
+    arr: '€500K'
+  },
+  
+  // PLATAFORMAS Y MARKETPLACES
+  {
+    icon: Coins,
+    title: 'Crowdfunding Inmobiliario',
+    description: 'Housers, Urbanitae, Civislend, Casacrowd',
+    benefits: ['20% revenue share', 'Integración API', 'Target perfecto'],
+    highlight: 'Top 5',
+    color: 'yellow',
+    arr: '€891K'
+  },
+  {
+    icon: Home,
+    title: 'Idealista y Fotocasa',
+    description: 'Portales inmobiliarios líderes',
+    benefits: ['Acuerdo €200K/año', '15% revenue share', '5M+ usuarios pro'],
+    highlight: 'Strategic',
+    color: 'blue',
+    arr: '€2.7M'
+  },
+  {
+    icon: TrendingDown,
+    title: 'Franquicias Inmobiliarias',
+    description: 'RE/MAX, Century 21, Engel & Völkers',
+    benefits: ['Acuerdo central', 'Roll-out automático', '20% revenue share'],
+    highlight: 'Strategic',
+    color: 'red',
+    arr: '€5.4M'
+  },
+  
+  // INVERSORES Y FONDOS
+  {
+    icon: Building2,
+    title: 'SOCIMIs y Fondos',
+    description: 'Merlin, Colonial, fondos inmobiliarios',
+    benefits: ['Plan Enterprise custom', '€50-200K/año', 'Cientos de propiedades'],
+    color: 'emerald',
+    arr: '€1M'
+  },
+  {
+    icon: Zap,
+    title: 'Business Angels',
+    description: 'Redes de inversores, AEBAN',
+    benefits: ['Acuerdo €10K/año', '€200 + 15% recurrente', 'Networking'],
+    color: 'violet',
+    arr: '€389K'
+  },
+  
+  // SERVICIOS AL HOGAR
+  {
+    icon: Lightbulb,
+    title: 'Empresas de Limpieza',
+    description: 'Helpling, empresas profesionales',
+    benefits: ['€100 captación', '10% recurrente', 'Marketplace'],
+    color: 'cyan',
+    arr: '€279K'
+  },
+  {
+    icon: Package,
+    title: 'Empresas de Mudanzas',
+    description: 'Mudanzas profesionales',
+    benefits: ['€100 captación', '10% recurrente', 'Momento clave'],
+    color: 'lime',
+    arr: '€279K'
+  },
+  {
+    icon: Smartphone,
+    title: 'Domótica y Smart Home',
+    description: 'Somfy, Simon, instaladores',
+    benefits: ['€200 captación', '15% recurrente', 'Integración IoT'],
+    color: 'fuchsia',
+    arr: '€233K'
+  },
+  {
+    icon: Plug,
+    title: 'Utilities (Luz, Gas, Internet)',
+    description: 'Endesa, Iberdrola, Movistar, Vodafone',
+    benefits: ['Acuerdo €150K/año', '8% revenue share', 'Base masiva'],
+    highlight: 'Strategic',
+    color: 'orange',
+    arr: '€4.3M'
+  },
+  
+  // MARKETING Y MEDIOS
+  {
+    icon: Newspaper,
+    title: 'Medios del Sector',
+    description: 'El Economista, Cinco Días, Expansión',
+    benefits: ['€50K/año contenido', '€100 por lead', 'Publicidad nativa'],
+    color: 'gray',
+    arr: '€587K'
+  },
+  {
+    icon: Video,
+    title: 'Influencers Inmobiliarios',
+    description: 'YouTubers, TikTokers, Instagramers',
+    benefits: ['€150 captación', '20% recurrente', 'Código descuento'],
+    highlight: 'Top 5',
+    color: 'pink',
+    arr: '€507K'
+  },
+  {
+    icon: Palette,
+    title: 'Agencias de Marketing',
+    description: 'Agencias especializadas inmobiliario',
+    benefits: ['€200 captación', '20% recurrente', 'White-label'],
+    color: 'rose',
+    arr: '€150K'
+  },
+  
+  // CERTIFICACIONES Y TASACIONES
+  {
+    icon: Leaf,
+    title: 'Certificadores Energéticos',
+    description: 'Certificación energética obligatoria',
+    benefits: ['€100 captación', 'Bonus ESG €50', 'Contacto natural'],
+    highlight: 'Top 5',
+    color: 'green',
+    arr: '€558K'
+  },
+  {
+    icon: LineChart,
+    title: 'Tasadoras Inmobiliarias',
+    description: 'Tinsa, Tecnitasa, Sociedad de Tasación',
+    benefits: ['Acuerdo €30K/año', '€200 + 10% recurrente', 'Integración valoraciones'],
+    color: 'blue',
+    arr: '€627K'
+  },
+  
+  // TECNOLOGÍA Y CONSULTORAS
+  {
+    icon: Laptop,
+    title: 'Consultoras Tecnológicas',
+    description: 'Accenture, Deloitte Digital, consultoras',
+    benefits: ['30% margen reventa', 'Enterprise custom', 'Integraciones'],
+    color: 'indigo',
+    arr: '€1.2M'
+  },
+  {
+    icon: Calculator,
+    title: 'Software ERP y Contable',
+    description: 'Sage, Holded, A3, Contasol',
+    benefits: ['€20K/año partnership', 'Integración bidireccional', '10% recurrente'],
+    color: 'slate',
+    arr: '€620K'
+  },
+  
+  // OTROS SERVICIOS
+  {
+    icon: PaintBucket,
+    title: 'Home Staging',
+    description: 'Interiorismo, home staging',
+    benefits: ['€150 captación', '15% recurrente', 'Bonus Tours VR'],
+    color: 'purple',
+    arr: '€209K'
+  },
+  {
+    icon: Coffee,
+    title: 'Coworkings',
+    description: 'Impact Hub, Wayco, Utopicus',
+    benefits: ['€10K/año acuerdo', '25% descuento miembros', 'Networking'],
+    color: 'amber',
+    arr: '€369K'
+  },
+  {
+    icon: BriefcaseBusiness,
+    title: 'Portales de Empleo',
+    description: 'InfoJobs sector inmobiliario',
+    benefits: ['€15K/año partnership', '€100 por lead', 'Profesionales sector'],
+    color: 'cyan',
+    arr: '€279K'
+  },
+  
+  // TIPOS ORIGINALES (mantenidos)
   {
     icon: Users,
     title: 'Autónomos Inmobiliarios',
     description: 'APIs, asesores y consultores inmobiliarios',
     benefits: ['€150-1,000 por captación', '15% recurrente', '€220/mes pasivo'],
-    color: 'blue'
+    color: 'blue',
+    arr: '€600K'
   },
   {
     icon: Building2,
     title: 'Inmobiliarias y Gestoras',
     description: 'Agencias y property managers',
     benefits: ['White-label disponible', '25% margen', '€596/mes con 20 clientes'],
-    color: 'indigo'
+    color: 'indigo',
+    arr: '€894K'
   },
   {
     icon: GraduationCap,
     title: 'Centros de Estudios',
     description: 'IE, ESADE, Comillas, universidades',
     benefits: ['€5,000-15,000/año licencia', 'Casos prácticos', 'Co-branding'],
-    color: 'purple'
+    color: 'purple',
+    arr: '€179K'
   },
   {
     icon: Globe,
     title: 'Plataformas Sector',
     description: 'Zona 3, comunidades PropTech',
     benefits: ['30% revenue share', 'Integración API', '€4,470/mes potencial'],
-    color: 'green'
+    color: 'green',
+    arr: '€536K'
   },
   {
     icon: FileText,
     title: 'Asociaciones Profesionales',
     description: 'Colegios de APIs, AEGI, asociaciones',
     benefits: ['30% descuento asociados', '€100 + 15% recurrente', '€1,560/mes'],
-    color: 'orange'
+    color: 'orange',
+    arr: '€1.2M'
   },
   {
     icon: Briefcase,
     title: 'Asesores Fiscales',
     description: 'Gestorías y asesores de inversores',
     benefits: ['€100-700 captación', '12% recurrente', 'Bonus ESG'],
-    color: 'cyan'
+    color: 'cyan',
+    arr: '€447K'
   }
 ];
 
@@ -112,10 +353,10 @@ const tiers = [
 ];
 
 const stats = [
-  { label: 'Partners Activos', value: '298', icon: Users },
-  { label: 'Clientes Referidos', value: '18,050', icon: Target },
-  { label: 'Comisiones Pagadas', value: '€5.5M', icon: DollarSign },
-  { label: 'ARR Partners', value: '€33.1M', icon: TrendingUp }
+  { label: 'Tipos de Partners', value: '34', icon: Users },
+  { label: 'Clientes Potenciales', value: '93,100', icon: Target },
+  { label: 'Comisiones Año 1', value: '€10.5M', icon: DollarSign },
+  { label: 'ARR Total Partners', value: '€56.9M', icon: TrendingUp }
 ];
 
 const testimonials = [
