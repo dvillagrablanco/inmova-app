@@ -451,19 +451,17 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   // Prevenir scroll del body cuando el menú móvil está abierto
   useEffect(() => {
     if (isMobileMenuOpen) {
+      // Agregar clase para prevenir scroll
+      document.body.classList.add('sidebar-open');
+      
       // Guardar el scroll actual
       const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
       document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-      document.body.style.overflowY = 'scroll'; // Mantener el espacio del scrollbar
       
       return () => {
-        // Restaurar el scroll
-        document.body.style.position = '';
+        // Remover clase y restaurar scroll
+        document.body.classList.remove('sidebar-open');
         document.body.style.top = '';
-        document.body.style.width = '';
-        document.body.style.overflowY = '';
         window.scrollTo(0, scrollY);
       };
     }
@@ -615,37 +613,36 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
 
   return (
     <>
-      {/* Mobile menu button - Posicionado para no interferir con el header */}
+      {/* Mobile menu button - Fixed en la parte superior izquierda */}
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="lg:hidden fixed top-16 left-4 z-[100] p-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-xl shadow-2xl shadow-indigo-500/70 hover:shadow-indigo-600/90 hover:scale-110 active:scale-95 transition-all duration-200 border-2 border-white/30 backdrop-blur-md touch-manipulation"
-        style={{ backgroundColor: 'rgba(79, 70, 229, 0.95)', minWidth: '56px', minHeight: '56px' }}
+        className="lg:hidden fixed top-3 left-3 z-[100] p-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-xl shadow-2xl hover:shadow-indigo-600/90 active:scale-95 transition-all duration-200 border-2 border-white/30 backdrop-blur-md touch-manipulation"
+        style={{ backgroundColor: 'rgba(79, 70, 229, 0.95)', minWidth: '52px', minHeight: '52px' }}
         aria-label={isMobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
       >
-        {isMobileMenuOpen ? <X size={28} strokeWidth={2.5} /> : <Menu size={28} strokeWidth={2.5} />}
+        {isMobileMenuOpen ? <X size={26} strokeWidth={2.5} /> : <Menu size={26} strokeWidth={2.5} />}
       </button>
 
       {/* Overlay for mobile - Cubre toda la pantalla excepto el botón */}
       {isMobileMenuOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/70 z-[80] backdrop-blur-sm"
+          className="lg:hidden fixed inset-0 bg-black/70 z-[80] backdrop-blur-sm sidebar-overlay"
           onClick={() => setIsMobileMenuOpen(false)}
           aria-hidden="true"
-          style={{ touchAction: 'auto' }}
         />
       )}
 
-      {/* Sidebar - Mejorado para móviles */}
+      {/* Sidebar - Optimizado para móviles */}
       <aside
         className={cn(
-          'fixed top-0 left-0 z-[90] h-full w-[280px] sm:w-64 bg-black text-white transition-transform duration-300 ease-in-out overflow-hidden',
+          'fixed top-0 left-0 z-[90] h-screen w-[85vw] max-w-[320px] sm:w-64 bg-black text-white transition-transform duration-300 ease-in-out overflow-hidden',
           isMobileMenuOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'
         )}
         aria-label="Navegación principal"
         style={{ 
-          maxHeight: '100vh', 
-          maxHeight: '100dvh',
-          touchAction: 'pan-y'
+          maxHeight: '100vh',
+          touchAction: 'pan-y',
+          WebkitOverflowScrolling: 'touch'
         }}
       >
         <div className="flex flex-col h-full">
