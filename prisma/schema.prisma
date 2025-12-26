@@ -353,6 +353,7 @@ model User {
   importedProperties    ImportedProperty[]
   notaryAppointments    NotaryAppointment[]
   certificateRequests   CertificateRequest[]
+  saleAnalyses          SaleAnalysis[]
 
   // CRM Avanzado - Comentado temporalmente
   // ownedLeads            CRMLead[]       @relation("LeadOwner")
@@ -669,6 +670,7 @@ model Unit {
   importedProperty    ImportedProperty?      @relation("UnitImportedProperty")
   notaryAppointments  NotaryAppointment[]    @relation("UnitNotaryAppointments")
   certificateRequests CertificateRequest[]   @relation("UnitCertificateRequests")
+  saleAnalyses        SaleAnalysis[]         @relation("UnitSaleAnalyses")
 
   @@unique([buildingId, numero])
   // Índices optimizados para consultas frecuentes
@@ -13167,4 +13169,73 @@ model CertificateRequest {
   @@index([userId])
   @@index([status])
   @@map("certificate_requests")
+}
+
+// ============================================
+// SISTEMA DE ANÁLISIS DE VENTA DE ACTIVOS
+// ============================================
+
+model SaleAnalysis {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  unitId String?
+  unit   Unit?   @relation("UnitSaleAnalyses", fields: [unitId], references: [id])
+
+  name      String
+  assetType String // 'piso', 'local', 'garaje', 'trastero', 'edificio'
+
+  // Inversión original
+  originalPurchasePrice Float
+  originalPurchaseDate  DateTime
+  totalCapexInvested    Float
+
+  // Situación actual
+  currentMarketValue Float
+  currentMonthlyRent Float
+  yearsHeld          Float
+
+  // Proyección de venta
+  proposedSalePrice Float
+  expectedSaleDate  DateTime
+
+  // Costos de venta
+  agencyCommission Float
+  notaryCosts      Float
+  capitalGainsTax  Float
+  mortgagePayoff   Float
+  otherSaleCosts   Float
+
+  // Históricos
+  totalRentCollected    Float
+  totalExpensesIncurred Float
+  mortgagePayments      Float
+  improvementsInvested  Float
+
+  // Resultados
+  grossProceeds         Float
+  totalSaleCosts        Float
+  netProceeds           Float
+  capitalGain           Float
+  capitalGainsTaxAmount Float
+  netCapitalGain        Float
+  totalInvestment       Float
+  totalReturn           Float
+  totalROI              Float
+  annualizedROI         Float
+  equityAtSale          Float
+  breakEvenSalePrice    Float
+
+  recommendation String
+  reasonsToSell  Json
+  reasonsToHold  Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([unitId])
+  @@index([createdAt])
+  @@map("sale_analyses")
 }

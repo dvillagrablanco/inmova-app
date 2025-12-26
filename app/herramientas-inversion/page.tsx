@@ -8,6 +8,7 @@ import {
   BarChart3,
   FileCheck,
   TrendingUp,
+  TrendingDown,
   ArrowRight,
   Sparkles,
 } from 'lucide-react';
@@ -35,7 +36,7 @@ export default function HerramientasInversionPage() {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-5">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -83,10 +84,65 @@ export default function HerramientasInversionPage() {
             <p className="text-xs text-muted-foreground">Idealista, Pisos, Notarios...</p>
           </CardContent>
         </Card>
+
+        <Card className="border-green-200 bg-green-50 dark:bg-green-950">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-green-700">
+              🆕 Análisis Venta
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-green-600">Nuevo</div>
+            <p className="text-xs text-green-700">Ciclo completo</p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Main Tools Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* 0. Analizador de VENTA - NUEVO */}
+        <Card className="border-2 border-green-500 relative overflow-hidden">
+          <div className="absolute top-2 right-2">
+            <Badge className="bg-green-500 text-white">NUEVO</Badge>
+          </div>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <TrendingDown className="h-8 w-8 text-green-600" />
+              <Sparkles className="h-5 w-5 text-green-500" />
+            </div>
+            <CardTitle className="mt-4">Análisis de Venta</CardTitle>
+            <CardDescription>
+              Determina el momento óptimo para vender y calcula el ROI total de tu inversión
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2 text-sm mb-4">
+              <li className="flex items-start gap-2">
+                <span className="text-green-600">✓</span>
+                <span>ROI total y anualizado</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-green-600">✓</span>
+                <span>Plusvalía neta (después impuestos)</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-green-600">✓</span>
+                <span>Análisis break-even</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-green-600">✓</span>
+                <span>Recomendación: vender vs mantener</span>
+              </li>
+            </ul>
+            <Link href="/analisis-venta">
+              <Button className="w-full bg-green-600 hover:bg-green-700">
+                Analizar Venta
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
         {/* 1. Analizador */}
         <Card className="border-2 border-primary">
           <CardHeader>
