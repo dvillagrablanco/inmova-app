@@ -1,0 +1,43 @@
+# Page snapshot
+
+```yaml
+- generic [active]:
+    - alert [ref=e1]
+    - dialog [ref=e4]:
+        - generic [ref=e5]:
+            - generic [ref=e6]:
+                - heading "Build Error" [level=1] [ref=e7]
+                - paragraph [ref=e8]: Failed to compile
+                - generic [ref=e9]:
+                    - text: Next.js (14.2.28) is outdated
+                    - link "(learn more)" [ref=e11] [cursor=pointer]:
+                        - /url: https://nextjs.org/docs/messages/version-staleness
+            - generic [ref=e12]:
+                - generic [ref=e13]:
+                    - link "./app/documentos/page.tsx" [ref=e14] [cursor=pointer]:
+                        - text: ./app/documentos/page.tsx
+                        - img [ref=e15]
+                    - generic [ref=e19]:
+                        - generic [ref=e20]: 'Error:'
+                        - text: x
+                        - generic [ref=e21]: 'Unexpected token `AuthenticatedLayout`. Expected jsx identifier ,-['
+                        - text: /workspace/app/documentos/page.tsx
+                        - generic [ref=e22]: :313:1]
+                        - text: '313'
+                        - generic [ref=e23]: '| if (!session) return null;'
+                        - text: '314'
+                        - generic [ref=e24]: '|'
+                        - text: '315'
+                        - generic [ref=e25]: '| return ('
+                        - text: '316'
+                        - generic [ref=e26]: '| <AuthenticatedLayout> :'
+                        - generic [ref=e27]: ^^^^^^^^^^^^^^^^^^^
+                        - text: '317'
+                        - generic [ref=e28]: '| <div className="max-w-7xl mx-auto space-y-6">'
+                        - text: '318'
+                        - generic [ref=e29]: '| {/* Botón Volver y Breadcrumbs */}'
+                        - text: '319'
+                        - generic [ref=e30]: '| <div className="flex items-center gap-4"> `---- Caused by: Syntax Error'
+                - contentinfo [ref=e31]:
+                    - paragraph [ref=e32]: This error occurred during the build process and can only be dismissed by fixing the error.
+```

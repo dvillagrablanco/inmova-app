@@ -112,17 +112,219 @@ export async function cachedDashboardStats(companyId: string) {
         });
       }
 
+      // Obtener gastos del mes actual
+      const expensesCurrentMonth = await prisma.expense.aggregate({
+        where: {
+          building: { companyId },
+          fecha: {
+            gte: startDate,
+            lte: endDate,
+          },
+        },
+        _sum: { monto: true },
+      });
+
+      const monthlyExpenses = Number(expensesCurrentMonth._sum.monto) || 0;
+      const netIncome = Number(monthlyIncome) - monthlyExpenses;
+      const netMargin = Number(monthlyIncome) > 0 ? (netIncome / Number(monthlyIncome)) * 100 : 0;
+
+      // Pagos pendientes con detalles
+      const pagosPendientesData = await prisma.payment.findMany({
+        where: {
+          contract: {
+            unit: { building: { companyId } },
+          },
+          estado: 'pendiente',
+        },
+        take: 5,
+        orderBy: { fechaVencimiento: 'asc' },
+        select: {
+          id: true,
+          monto: true,
+          fechaVencimiento: true,
+        },
+      });
+
+      // Contratos próximos a vencer (60 días)
+      const sixtyDaysFromNow = new Date();
+      sixtyDaysFromNow.setDate(sixtyDaysFromNow.getDate() + 60);
+
+      const contractsExpiringSoon = await prisma.contract.findMany({
+        where: {
+          unit: { building: { companyId } },
+          estado: 'activo',
+          fechaFin: {
+            lte: sixtyDaysFromNow,
+            gte: new Date(),
+          },
+        },
+        take: 5,
+        orderBy: { fechaFin: 'asc' },
+        include: {
+          unit: {
+            select: {
+              numero: true,
+              building: {
+                select: {
+                  nombre: true,
+                },
+              },
+            },
+          },
+          tenant: {
+            select: {
+              nombreCompleto: true,
+            },
+          },
+        },
+      });
+
+      // Solicitudes de mantenimiento activas
+      const maintenanceRequestsData = await prisma.maintenanceRequest.findMany({
+        where: {
+          unit: { building: { companyId } },
+          estado: { in: ['pendiente', 'en_progreso'] },
+        },
+        take: 5,
+        orderBy: { fechaSolicitud: 'desc' },
+        include: {
+          unit: {
+            select: {
+              numero: true,
+            },
+          },
+        },
+      });
+
+      // Unidades disponibles
+      const unidadesDisponibles = await prisma.unit.findMany({
+        where: {
+          building: { companyId },
+          estado: 'disponible',
+        },
+        take: 5,
+        orderBy: { rentaMensual: 'desc' },
+        include: {
+          building: {
+            select: {
+              nombre: true,
+            },
+          },
+        },
+      });
+
+      // Datos para gráfico de ocupación por tipo
+      const occupancyByType = await prisma.unit.groupBy({
+        by: ['tipo'],
+        where: {
+          building: { companyId },
+        },
+        _count: {
+          id: true,
+        },
+      });
+
+      const occupancyChartData = await Promise.all(
+        occupancyByType.map(async (typeGroup) => {
+          const ocupadas = await prisma.unit.count({
+            where: {
+              building: { companyId },
+              tipo: typeGroup.tipo,
+              estado: 'ocupada',
+            },
+          });
+
+          return {
+            name: typeGroup.tipo || 'Sin tipo',
+            ocupadas,
+            disponibles: typeGroup._count.id - ocupadas,
+            total: typeGroup._count.id,
+          };
+        })
+      );
+
+      // Datos para gráfico de gastos por categoría
+      const expensesByCategory = await prisma.expense.groupBy({
+        by: ['categoria'],
+        where: {
+          building: { companyId },
+          fecha: {
+            gte: startDate,
+            lte: endDate,
+          },
+        },
+        _sum: {
+          monto: true,
+        },
+      });
+
+      const expensesChartData = expensesByCategory.map((cat) => ({
+        name: cat.categoria || 'Otros',
+        value: Number(cat._sum.monto) || 0,
+      }));
+
+      // Calcular tasa de morosidad (pagos vencidos y pendientes)
+      const overduePayments = await prisma.payment.count({
+        where: {
+          contract: {
+            unit: { building: { companyId } },
+          },
+          estado: 'pendiente',
+          fechaVencimiento: {
+            lt: new Date(),
+          },
+        },
+      });
+
+      const totalPaymentsDue = await prisma.payment.count({
+        where: {
+          contract: {
+            unit: { building: { companyId } },
+          },
+          fechaVencimiento: {
+            lte: new Date(),
+          },
+        },
+      });
+
+      const tasaMorosidad = totalPaymentsDue > 0 ? (overduePayments / totalPaymentsDue) * 100 : 0;
+
       return {
         kpis: {
+          ingresosTotalesMensuales: Number(monthlyIncome),
           numeroPropiedades: totalBuildings,
-          numeroUnidades: totalUnits,
-          numeroInquilinos: totalTenants,
           tasaOcupacion: Number(occupancyRate.toFixed(2)),
-          ingresosMensuales: Number(monthlyIncome),
-          pagosPendientes: pendingPayments,
-          mantenimientosPendientes: pendingMaintenance,
+          tasaMorosidad: Number(tasaMorosidad.toFixed(2)),
+          ingresosNetos: Number(netIncome),
+          gastosTotales: Number(monthlyExpenses),
+          margenNeto: Number(netMargin.toFixed(2)),
         },
         monthlyIncome: monthlyIncome6,
+        occupancyChartData,
+        expensesChartData,
+        pagosPendientes: pagosPendientesData.map((p) => ({
+          id: p.id,
+          monto: Number(p.monto),
+          periodo: new Date(p.fechaVencimiento).toLocaleDateString('es-ES', {
+            month: 'short',
+            year: 'numeric',
+          }),
+          nivelRiesgo:
+            new Date(p.fechaVencimiento) < new Date()
+              ? 'alto'
+              : new Date(p.fechaVencimiento).getTime() - new Date().getTime() <
+                  7 * 24 * 60 * 60 * 1000
+                ? 'medio'
+                : 'bajo',
+        })),
+        contractsExpiringSoon,
+        maintenanceRequests: maintenanceRequestsData.map((r) => ({
+          id: r.id,
+          titulo: r.titulo,
+          prioridad: r.prioridad || 'media',
+          unit: r.unit,
+        })),
+        unidadesDisponibles,
       };
     },
     TTL_DASHBOARD
@@ -297,8 +499,10 @@ export async function cachedContracts(companyId: string) {
       const contractsWithExpiration = contracts.map((contract) => {
         const today = new Date();
         const fechaFin = new Date(contract.fechaFin);
-        const diasHastaVencimiento = Math.ceil((fechaFin.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-        
+        const diasHastaVencimiento = Math.ceil(
+          (fechaFin.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+        );
+
         return {
           ...contract,
           diasHastaVencimiento,
