@@ -14,29 +14,29 @@
                         - /url: https://nextjs.org/docs/messages/version-staleness
             - generic [ref=e12]:
                 - generic [ref=e13]:
-                    - link "./app/contratos/page.tsx" [ref=e14] [cursor=pointer]:
-                        - text: ./app/contratos/page.tsx
+                    - link "./app/documentos/page.tsx" [ref=e14] [cursor=pointer]:
+                        - text: ./app/documentos/page.tsx
                         - img [ref=e15]
                     - generic [ref=e19]:
                         - generic [ref=e20]: 'Error:'
                         - text: x
                         - generic [ref=e21]: 'Unexpected token `AuthenticatedLayout`. Expected jsx identifier ,-['
-                        - text: /workspace/app/contratos/page.tsx
-                        - generic [ref=e22]: :272:1]
-                        - text: '272'
-                        - generic [ref=e23]: '| };'
-                        - text: '273'
+                        - text: /workspace/app/documentos/page.tsx
+                        - generic [ref=e22]: :313:1]
+                        - text: '313'
+                        - generic [ref=e23]: '| if (!session) return null;'
+                        - text: '314'
                         - generic [ref=e24]: '|'
-                        - text: '274'
+                        - text: '315'
                         - generic [ref=e25]: '| return ('
-                        - text: '275'
+                        - text: '316'
                         - generic [ref=e26]: '| <AuthenticatedLayout> :'
                         - generic [ref=e27]: ^^^^^^^^^^^^^^^^^^^
-                        - text: '276'
+                        - text: '317'
                         - generic [ref=e28]: '| <div className="max-w-7xl mx-auto space-y-6">'
-                        - text: '277'
+                        - text: '318'
                         - generic [ref=e29]: '| {/* Botón Volver y Breadcrumbs */}'
-                        - text: '278'
+                        - text: '319'
                         - generic [ref=e30]: '| <div className="flex items-center gap-4"> `---- Caused by: Syntax Error'
                 - contentinfo [ref=e31]:
                     - paragraph [ref=e32]: This error occurred during the build process and can only be dismissed by fixing the error.

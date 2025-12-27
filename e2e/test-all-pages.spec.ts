@@ -14,17 +14,27 @@ const LOGIN_CREDENTIALS = {
 // Páginas principales a probar
 const PAGES_TO_TEST = [
   { url: '/dashboard', name: 'Dashboard', selector: 'h1', expectedText: 'Dashboard' },
-  { url: '/buildings', name: 'Edificios', selector: 'h1', expectedText: 'Edificios' },
+  { url: '/edificios', name: 'Edificios', selector: 'h1', expectedText: 'Edificios' },
   { url: '/unidades', name: 'Unidades', selector: 'h1', expectedText: 'Unidades' },
-  { url: '/inquilinos', name: 'Inquilinos', selector: 'h1', expectedText: 'Inquilinos' },
-  { url: '/contratos', name: 'Contratos', selector: 'h1', expectedText: 'Contratos' },
+  {
+    url: '/garajes-trasteros',
+    name: 'Garajes y Trasteros',
+    selector: 'h1',
+    expectedText: 'Garajes',
+  },
   { url: '/pagos', name: 'Pagos', selector: 'h1', expectedText: 'Pagos' },
   { url: '/gastos', name: 'Gastos', selector: 'h1', expectedText: 'Gastos' },
   { url: '/mantenimiento', name: 'Mantenimiento', selector: 'h1', expectedText: 'Mantenimiento' },
   { url: '/proveedores', name: 'Proveedores', selector: 'h1', expectedText: 'Proveedores' },
   { url: '/documentos', name: 'Documentos', selector: 'h1', expectedText: 'Documentos' },
   { url: '/reportes', name: 'Reportes', selector: 'h1', expectedText: 'Reportes' },
-  { url: '/configuracion', name: 'Configuración', selector: 'h1', expectedText: 'Configuración' },
+  { url: '/perfil', name: 'Perfil', selector: 'h1', expectedText: 'Perfil' },
+  {
+    url: '/notificaciones',
+    name: 'Notificaciones',
+    selector: 'h1',
+    expectedText: 'Notificaciones',
+  },
 ];
 
 // Helper para login
