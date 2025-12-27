@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     // }
     const now = new Date();
     const periodo = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    console.log(`Calculando comisiones para el periodo: ${periodo}`);
+    logger.info(`Calculando comisiones para el periodo: ${periodo}`);
     // Obtener todos los Partners activos
     const partners = await prisma.partner.findMany({
       where: {
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     for (const partner of partners) {
       const clientesActivos = partner.clientes.length;
       if (clientesActivos === 0) {
-        console.log(`Partner ${partner.nombre} no tiene clientes activos.`);
+        logger.info(`Partner ${partner.nombre} no tiene clientes activos.`);
         continue;
       }
       // Calcular porcentaje según escala
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
           },
         });
         if (existingCommission) {
-          console.log(`Comisión ya existe para ${cliente.company.nombre} en ${periodo}`);
+          logger.info(`Comisión ya existe para ${cliente.company.nombre} en ${periodo}`);
           continue;
         }
         // Calcular comisión

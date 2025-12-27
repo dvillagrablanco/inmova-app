@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
-  generateCSRFToken,
-  getCSRFTokenFromCookie,
-  setCSRFCookie,
+  generateCsrfToken as generateCSRFToken,
+  getCsrfTokenFromCookies as getCSRFTokenFromCookie,
+  setCsrfCookie as setCSRFCookie,
 } from '@/lib/csrf-protection';
 import logger from '@/lib/logger';
 
