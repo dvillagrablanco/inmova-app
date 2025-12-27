@@ -417,24 +417,24 @@ export default function ReportesProgramadosPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold gradient-text">Reportes Programados</h1>
-                <p className="text-gray-600 mt-1">Configura reportes automáticos por email</p>
-              </div>
-              <div className="flex gap-2">
-                <Button onClick={openTemplatesDialogHandler} variant="outline" className="gap-2">
-                  <FileText className="h-4 w-4" />
-                  Plantillas
-                </Button>
-                <Button onClick={openNewDialog} className="gap-2">
-                  <Plus className="h-4 w-4" />
-                  Nuevo Reporte
-                </Button>
-              </div>
-            </div>
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold gradient-text">Reportes Programados</h1>
+            <p className="text-gray-600 mt-1">Configura reportes automáticos por email</p>
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={openTemplatesDialogHandler} variant="outline" className="gap-2">
+              <FileText className="h-4 w-4" />
+              Plantillas
+            </Button>
+            <Button onClick={openNewDialog} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Nuevo Reporte
+            </Button>
+          </div>
+        </div>
 
             {/* Estadísticas Rápidas */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -693,8 +693,6 @@ export default function ReportesProgramadosPage() {
               </CardContent>
             </Card>
           </div>
-        </main>
-      </div>
 
       {/* Dialog Crear/Editar */}
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
@@ -1023,6 +1021,6 @@ export default function ReportesProgramadosPage() {
         confirmText="Enviar"
         loading={isSending}
       />
-    </div>
+    </AuthenticatedLayout>
   );
 }
