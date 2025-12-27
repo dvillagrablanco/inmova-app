@@ -369,6 +369,7 @@ function ContratosPageContent() {
               onClearAll={clearAllFilters}
             />
 
+        <main className="flex-1 overflow-y-auto">
             {/* Stats Summary */}
           <div className="grid gap-4 md:grid-cols-3">
               <Card>
@@ -418,12 +419,12 @@ function ContratosPageContent() {
                 return (
                   <Card key={contract.id} className="hover:shadow-md transition-shadow">
                     <CardContent className="pt-6">
-          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-          <div className="flex-1 space-y-4 min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                        <div className="flex-1 space-y-4 min-w-0">
                           {/* Header */}
-          <div className="flex items-start justify-between">
-          <div className="space-y-2 min-w-0 flex-1">
-          <div className="flex items-center gap-2 flex-wrap">
+                          <div className="flex items-start justify-between">
+                            <div className="space-y-2 min-w-0 flex-1">
+                              <div className="flex items-center gap-2 flex-wrap">
                                 <h3 className="text-base sm:text-lg font-semibold break-words">
                                   {contract.tenant.nombreCompleto}
                                 </h3>
@@ -436,7 +437,7 @@ function ContratosPageContent() {
                                 </Badge>
                                 <Badge variant={tipoBadge.variant}>{tipoBadge.label}</Badge>
                               </div>
-          <div className="flex items-start gap-2 text-sm bg-muted/50 p-2 rounded-md">
+                              <div className="flex items-start gap-2 text-sm bg-muted/50 p-2 rounded-md">
                                 <Home className="h-4 w-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
                                 <span className="break-words">
                                   {contract.unit.building.nombre} - Unidad {contract.unit.numero}
@@ -446,8 +447,8 @@ function ContratosPageContent() {
                           </div>
 
                           {/* Detalles */}
-          <div className="grid gap-4 sm:grid-cols-3">
-          <div className="space-y-1">
+                          <div className="grid gap-4 sm:grid-cols-3">
+                            <div className="space-y-1">
                               <p className="text-xs text-muted-foreground">Fecha Inicio</p>
                               <p className="text-sm font-medium">
                                 {format(new Date(contract.fechaInicio), 'dd MMM yyyy', {
@@ -455,9 +456,9 @@ function ContratosPageContent() {
                                 })}
                               </p>
                             </div>
-          <div className="space-y-1">
+                            <div className="space-y-1">
                               <p className="text-xs text-muted-foreground">Fecha Fin</p>
-          <div className="flex items-center gap-2 flex-wrap">
+                              <div className="flex items-center gap-2 flex-wrap">
                                 <p className="text-sm font-medium">
                                   {format(new Date(contract.fechaFin), 'dd MMM yyyy', {
                                     locale: es,
@@ -470,7 +471,7 @@ function ContratosPageContent() {
                                 )}
                               </div>
                             </div>
-          <div className="space-y-1">
+                            <div className="space-y-1">
                               <p className="text-xs text-muted-foreground">Monto Mensual</p>
                               <p className="text-base sm:text-lg font-bold text-green-600">
                                 €{contract.rentaMensual.toLocaleString()}
@@ -480,7 +481,7 @@ function ContratosPageContent() {
 
                           {/* Alertas */}
                           {isExpiringSoon && contract.estado.toLowerCase() === 'activo' && (
-          <div className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
+                            <div className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
                               <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
                               <p className="text-xs sm:text-sm text-red-600 font-medium">
                                 Vence en {daysUntilExpiry} días - Renovar pronto
@@ -577,8 +578,7 @@ function ContratosPageContent() {
             : 'Se eliminará el contrato y todos sus datos asociados.'
         }
       />
-    </div>
-  </AuthenticatedLayout>
+    </AuthenticatedLayout>
   );
 }
 
