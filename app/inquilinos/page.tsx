@@ -615,6 +615,7 @@ function InquilinosPageContent() {
               </Card>
             )}
           </div>
+
         </main>
       </div>
 
