@@ -5,6 +5,7 @@
 ```bash
 # 1. Autenticarte con Vercel
 vercel login
+# User ID: pAzq4g0vFjJlrK87sQhlw08I
 
 # 2. Desplegar
 ./deploy-to-vercel.sh

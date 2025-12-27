@@ -9,7 +9,7 @@ Este proyecto ahora tiene GitHub Actions configurado para desplegar automáticam
 ### 1. Obtener Credenciales de Vercel
 
 #### VERCEL_TOKEN
-1. Ve a https://vercel.com/account/tokens
+1. Ve a https://vercel.com/account/tokens (User ID: pAzq4g0vFjJlrK87sQhlw08I)
 2. Crea un nuevo token con nombre `github-actions-inmova`
 3. Copia el token generado
 

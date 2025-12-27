@@ -15,6 +15,8 @@ vercel login
 
 Esto abrirá tu navegador para autenticarte. Usa el email: `dvillagra@vidaroinversiones.com`
 
+**User ID**: `pAzq4g0vFjJlrK87sQhlw08I`
+
 ### 2. Desplegar en Preview (Ambiente de prueba)
 ```bash
 vercel
