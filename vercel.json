@@ -10,7 +10,6 @@
   },
   "build": {
     "env": {
-      "NEXT_PUBLIC_BUILD_TIME": "@now"
     }
   },
   "functions": {
