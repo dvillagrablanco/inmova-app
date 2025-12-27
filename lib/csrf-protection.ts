@@ -208,8 +208,10 @@ export function getCsrfToken(): string | null {
 /**
  * Componente React para incluir el token CSRF en el HTML
  */
+import React from 'react';
+
 export function CsrfTokenMeta({ token }: { token: string }) {
-  return <meta name="csrf-token" content={token} />;
+  return React.createElement('meta', { name: 'csrf-token', content: token });
 }
 
 /**

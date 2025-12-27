@@ -262,15 +262,15 @@ export default function HomeMobilePage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="container-mobile-first py-6">
-            {isMobile ? (
-              <PullToRefresh onRefresh={handleRefresh}>
-                {mainContent}
-              </PullToRefresh>
-            ) : (
-              mainContent
-            )}
-          </div>
+      <div className="container-mobile-first py-6">
+        {isMobile ? (
+          <PullToRefresh onRefresh={handleRefresh}>
+            {mainContent}
+          </PullToRefresh>
+        ) : (
+          mainContent
+        )}
+      </div>
         </main>
 
         {/* Mobile FAB for Quick Actions */}
