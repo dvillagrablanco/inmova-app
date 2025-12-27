@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
@@ -17,7 +17,7 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
     "test:all": "yarn test:ci && yarn test:e2e",
-    "_postinstall_disabled": "prisma generate",
+    "postinstall": "prisma generate",
     "analyze": "ANALYZE=true yarn build",
     "analyze:server": "ANALYZE=true BUNDLE_ANALYZE=server yarn build",
     "analyze:browser": "ANALYZE=true BUNDLE_ANALYZE=browser yarn build",
