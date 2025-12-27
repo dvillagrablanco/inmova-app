@@ -501,8 +501,6 @@ export default function AutomatizacionPage() {
         </Tabs>
       </div>
 
-      </div>
-
       {/* Create Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
         <DialogContent className="max-w-2xl">
