@@ -262,16 +262,16 @@ export default function HomeMobilePage() {
 
   return (
     <AuthenticatedLayout>
+      <main className="flex-1 overflow-y-auto">
         <div className="container-mobile-first py-6">
-            {isMobile ? (
-              <PullToRefresh onRefresh={handleRefresh}>
-                {mainContent}
-              </PullToRefresh>
-            ) : (
-              mainContent
-            )}
-          </div>
-        </main>
+          {isMobile ? (
+            <PullToRefresh onRefresh={handleRefresh}>
+              {mainContent}
+            </PullToRefresh>
+          ) : (
+            mainContent
+          )}
+        </div>
 
         {/* Mobile FAB for Quick Actions */}
         {isMobile && (
@@ -282,7 +282,7 @@ export default function HomeMobilePage() {
               onClose={() => setIsQuickActionsOpen(false)}
               title="Acciones Rápidas"
             >
-        <div className="space-y-3">
+              <div className="space-y-3">
                 {quickActions.map((action) => (
                   <Button
                     key={action.id}
@@ -293,7 +293,7 @@ export default function HomeMobilePage() {
                       setIsQuickActionsOpen(false);
                     }}
                   >
-        <div className={`p-2 rounded-lg ${action.color} text-white mr-3`}>
+                    <div className={`p-2 rounded-lg ${action.color} text-white mr-3`}>
                       {action.icon}
                     </div>
                     <span className="font-medium">{action.label}</span>
@@ -303,8 +303,7 @@ export default function HomeMobilePage() {
             </MobileSheet>
           </>
         )}
-      </div>
-    </div>
-  </AuthenticatedLayout>
+      </main>
+    </AuthenticatedLayout>
   );
 }
