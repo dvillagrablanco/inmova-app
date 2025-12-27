@@ -4,6 +4,13 @@ const path = require('path');
 const nextConfig = {
   distDir: process.env.NEXT_DIST_DIR || '.next',
   output: 'standalone',
+  
+  // Configuración para APIs dinámicas
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
