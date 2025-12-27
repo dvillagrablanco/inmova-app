@@ -500,7 +500,7 @@ export default function AutomatizacionPage() {
       </TabsContent>
         </Tabs>
       </div>
-        </main>
+
       </div>
 
       {/* Create Dialog */}
