@@ -604,9 +604,6 @@ function EdificiosPageContent() {
         )}
       </div>
 
-        </main>
-      </div>
-
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmationDialog
         open={deleteDialogOpen}
@@ -620,7 +617,7 @@ function EdificiosPageContent() {
         : undefined
         }
       />
-    </div>
+    </AuthenticatedLayout>
   );
 }
 

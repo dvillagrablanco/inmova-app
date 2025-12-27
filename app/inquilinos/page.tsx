@@ -616,9 +616,6 @@ function InquilinosPageContent() {
             )}
           </div>
 
-        </main>
-      </div>
-
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmationDialog
         open={deleteDialogOpen}
@@ -632,7 +629,7 @@ function InquilinosPageContent() {
             : undefined
         }
       />
-    </div>
+    </AuthenticatedLayout>
   );
 }
 

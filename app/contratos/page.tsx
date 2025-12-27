@@ -574,7 +574,7 @@ function ContratosPageContent() {
         : 'Se eliminará el contrato y todos sus datos asociados.'
         }
       />
-    </div>
+    </AuthenticatedLayout>
   );
 }
 

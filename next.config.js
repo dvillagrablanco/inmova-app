@@ -135,7 +135,8 @@ const nextConfig = {
   },
   
   // Performance optimizations
-  swcMinify: true,
+  // Deshabilitar solo minificación, pero mantener SWC para compilación
+  swcMinify: false,
   compress: true,
   poweredByHeader: false,
   
