@@ -56,3 +56,5 @@ Thumbs.db
 *.backup
 *.bak
 *.old
+.vercel
+.env*.local
