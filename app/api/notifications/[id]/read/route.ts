@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 /**
  * API: /api/notifications/[id]/read
  * Marcar una notificación como leída
- * 
+ *
  * PATCH: Marcar como leída
  */
 
@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { markAsRead } from '@/lib/notification-service';
+import logger from '@/lib/logger';
 
 interface RouteContext {
   params: {
@@ -22,18 +23,12 @@ interface RouteContext {
  * PATCH /api/notifications/[id]/read
  * Marca una notificación como leída
  */
-export async function PATCH(
-  request: NextRequest,
-  context: RouteContext
-) {
+export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const { id } = context.params;
@@ -51,10 +46,7 @@ export async function PATCH(
       notification: result.notification,
     });
   } catch (error) {
-    console.error('[API] Error in PATCH /api/notifications/[id]/read:', error);
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    );
+    logger.error('[API] Error in PATCH /api/notifications/[id]/read:', error);
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }

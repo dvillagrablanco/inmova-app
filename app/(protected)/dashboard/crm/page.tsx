@@ -1,6 +1,6 @@
 /**
  * 📊 CRM Dashboard - Dashboard Principal del CRM
- * 
+ *
  * Funcionalidades:
  * - KPIs principales (leads, deals, win rate)
  * - Pipeline visual con drag & drop
@@ -13,11 +13,11 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { 
-  Users, 
-  TrendingUp, 
-  DollarSign, 
-  Target, 
+import {
+  Users,
+  TrendingUp,
+  DollarSign,
+  Target,
   Plus,
   Filter,
   Download,
@@ -43,7 +43,7 @@ export default function CRMDashboard() {
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showScrapingModal, setShowScrapingModal] = useState(false);
-  
+
   // Filtros
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [sourceFilter, setSourceFilter] = useState<string[]>([]);
@@ -53,6 +53,7 @@ export default function CRMDashboard() {
   useEffect(() => {
     loadStats();
     loadLeads();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadStats = async () => {
@@ -70,12 +71,12 @@ export default function CRMDashboard() {
   const loadLeads = async () => {
     try {
       setLoading(true);
-      
+
       const params = new URLSearchParams();
       if (statusFilter.length > 0) params.append('status', statusFilter.join(','));
       if (sourceFilter.length > 0) params.append('source', sourceFilter.join(','));
       if (priorityFilter.length > 0) params.append('priority', priorityFilter.join(','));
-      
+
       const response = await fetch(`/api/crm/leads?${params.toString()}`);
       if (response.ok) {
         const data = await response.json();
@@ -91,6 +92,7 @@ export default function CRMDashboard() {
   // Recargar leads cuando cambien filtros
   useEffect(() => {
     loadLeads();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter, sourceFilter, priorityFilter]);
 
   const importTargetClients = async () => {
@@ -163,7 +165,7 @@ export default function CRMDashboard() {
             <h1 className="text-3xl font-bold text-gray-900">📊 CRM Dashboard</h1>
             <p className="text-gray-600 mt-1">Gestión de leads y pipeline de ventas</p>
           </div>
-          
+
           <div className="flex gap-3">
             <button
               onClick={() => setShowImportModal(true)}
@@ -172,7 +174,7 @@ export default function CRMDashboard() {
               <Upload className="h-5 w-5" />
               Importar
             </button>
-            
+
             <button
               onClick={() => setShowScrapingModal(true)}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -180,9 +182,9 @@ export default function CRMDashboard() {
               <Linkedin className="h-5 w-5" />
               LinkedIn Scraping
             </button>
-            
+
             <button
-              onClick={() => window.location.href = '/dashboard/crm/leads/new'}
+              onClick={() => (window.location.href = '/dashboard/crm/leads/new')}
               className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             >
               <Plus className="h-5 w-5" />
@@ -199,9 +201,7 @@ export default function CRMDashboard() {
                 <div>
                   <p className="text-sm text-gray-600">Total Leads</p>
                   <p className="text-3xl font-bold text-gray-900 mt-1">{stats.leads.total}</p>
-                  <p className="text-sm text-green-600 mt-1">
-                    {stats.leads.new} nuevos
-                  </p>
+                  <p className="text-sm text-green-600 mt-1">{stats.leads.new} nuevos</p>
                 </div>
                 <div className="p-3 bg-blue-100 rounded-lg">
                   <Users className="h-8 w-8 text-blue-600" />
@@ -214,9 +214,7 @@ export default function CRMDashboard() {
                 <div>
                   <p className="text-sm text-gray-600">Deals Activos</p>
                   <p className="text-3xl font-bold text-gray-900 mt-1">{stats.deals.open}</p>
-                  <p className="text-sm text-blue-600 mt-1">
-                    de {stats.deals.total} total
-                  </p>
+                  <p className="text-sm text-blue-600 mt-1">de {stats.deals.total} total</p>
                 </div>
                 <div className="p-3 bg-green-100 rounded-lg">
                   <Target className="h-8 w-8 text-green-600" />
@@ -246,9 +244,7 @@ export default function CRMDashboard() {
                 <div>
                   <p className="text-sm text-gray-600">Win Rate</p>
                   <p className="text-3xl font-bold text-gray-900 mt-1">{stats.leads.winRate}%</p>
-                  <p className="text-sm text-gray-600 mt-1">
-                    {stats.leads.won} ganados
-                  </p>
+                  <p className="text-sm text-gray-600 mt-1">{stats.leads.won} ganados</p>
                 </div>
                 <div className="p-3 bg-purple-100 rounded-lg">
                   <TrendingUp className="h-8 w-8 text-purple-600" />
@@ -265,11 +261,13 @@ export default function CRMDashboard() {
               <Filter className="h-5 w-5 text-gray-600" />
               <span className="text-sm font-medium text-gray-700">Filtros:</span>
             </div>
-            
+
             <select
               multiple
               value={statusFilter}
-              onChange={(e) => setStatusFilter(Array.from(e.target.selectedOptions, option => option.value))}
+              onChange={(e) =>
+                setStatusFilter(Array.from(e.target.selectedOptions, (option) => option.value))
+              }
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
             >
               <option value="new">Nuevo</option>
@@ -283,7 +281,9 @@ export default function CRMDashboard() {
             <select
               multiple
               value={priorityFilter}
-              onChange={(e) => setPriorityFilter(Array.from(e.target.selectedOptions, option => option.value))}
+              onChange={(e) =>
+                setPriorityFilter(Array.from(e.target.selectedOptions, (option) => option.value))
+              }
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
             >
               <option value="urgent">Urgente</option>
@@ -310,7 +310,7 @@ export default function CRMDashboard() {
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-xl font-bold text-gray-900">Leads Recientes</h2>
           </div>
-          
+
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
@@ -363,7 +363,9 @@ export default function CRMDashboard() {
                             <div className="text-sm font-medium text-gray-900">
                               {lead.firstName} {lead.lastName}
                             </div>
-                            <div className="text-sm text-gray-500">{lead.jobTitle || 'Sin cargo'}</div>
+                            <div className="text-sm text-gray-500">
+                              {lead.jobTitle || 'Sin cargo'}
+                            </div>
                           </div>
                         </div>
                       </td>
@@ -377,7 +379,9 @@ export default function CRMDashboard() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(lead.status)}`}>
+                        <span
+                          className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(lead.status)}`}
+                        >
                           {lead.status}
                         </span>
                       </td>
@@ -390,13 +394,19 @@ export default function CRMDashboard() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex flex-col gap-1">
                           {lead.email && (
-                            <a href={`mailto:${lead.email}`} className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                            <a
+                              href={`mailto:${lead.email}`}
+                              className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                            >
                               <Mail className="h-3 w-3" />
                               {lead.email}
                             </a>
                           )}
                           {lead.phone && (
-                            <a href={`tel:${lead.phone}`} className="text-sm text-gray-600 hover:text-gray-800 flex items-center gap-1">
+                            <a
+                              href={`tel:${lead.phone}`}
+                              className="text-sm text-gray-600 hover:text-gray-800 flex items-center gap-1"
+                            >
                               <Phone className="h-3 w-3" />
                               {lead.phone}
                             </a>
@@ -405,7 +415,7 @@ export default function CRMDashboard() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button
-                          onClick={() => window.location.href = `/dashboard/crm/leads/${lead.id}`}
+                          onClick={() => (window.location.href = `/dashboard/crm/leads/${lead.id}`)}
                           className="text-blue-600 hover:text-blue-900"
                         >
                           Ver
@@ -438,9 +448,7 @@ export default function CRMDashboard() {
           <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200">
             <FileSpreadsheet className="h-10 w-10 text-green-600 mb-3" />
             <h3 className="text-lg font-bold text-gray-900 mb-2">Importar CSV</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              Sube un archivo CSV con tus contactos
-            </p>
+            <p className="text-sm text-gray-600 mb-4">Sube un archivo CSV con tus contactos</p>
             <button
               onClick={() => setShowImportModal(true)}
               className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"

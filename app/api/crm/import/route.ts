@@ -2,9 +2,9 @@ export const dynamic = 'force-dynamic';
 
 /**
  * API: /api/crm/import
- * 
+ *
  * POST: Importar leads desde diferentes fuentes
- * 
+ *
  * Body:
  * {
  *   source: 'linkedin_job' | 'csv' | 'manual' | 'target_clients',
@@ -16,7 +16,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth-options';
 import { CRMLeadImporter } from '@/lib/crm-lead-importer';
 
 export async function POST(request: Request) {
@@ -56,10 +56,7 @@ export async function POST(request: Request) {
       case 'csv':
       case 'manual':
         if (!leads || !Array.isArray(leads)) {
-          return NextResponse.json(
-            { error: 'Se requiere array de leads' },
-            { status: 400 }
-          );
+          return NextResponse.json({ error: 'Se requiere array de leads' }, { status: 400 });
         }
         result = await CRMLeadImporter.importFromCSV(
           session.user.companyId,
@@ -74,10 +71,7 @@ export async function POST(request: Request) {
         break;
 
       default:
-        return NextResponse.json(
-          { error: 'Fuente de importación no válida' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Fuente de importación no válida' }, { status: 400 });
     }
 
     return NextResponse.json(result, { status: 200 });

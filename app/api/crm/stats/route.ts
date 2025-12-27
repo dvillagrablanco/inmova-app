@@ -2,13 +2,13 @@ export const dynamic = 'force-dynamic';
 
 /**
  * API: /api/crm/stats
- * 
+ *
  * GET: Obtener estadísticas del CRM
  */
 
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth-options';
 import { CRMService } from '@/lib/crm-service';
 
 export async function GET(request: Request) {
@@ -21,10 +21,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId'); // Opcional: filtrar por usuario
 
-    const stats = await CRMService.getStats(
-      session.user.companyId,
-      userId || undefined
-    );
+    const stats = await CRMService.getStats(session.user.companyId, userId || undefined);
 
     return NextResponse.json(stats);
   } catch (error: any) {

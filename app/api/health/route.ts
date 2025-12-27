@@ -2,17 +2,18 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import logger from '@/lib/logger';
 
 export async function GET() {
   try {
     // Test database connection
     await prisma.$queryRaw`SELECT 1`;
-    
+
     // Get basic system info
     const dbConnection = 'connected';
     const uptime = process.uptime();
     const memoryUsage = process.memoryUsage();
-    
+
     return NextResponse.json(
       {
         status: 'ok',
@@ -27,7 +28,7 @@ export async function GET() {
         },
         environment: process.env.NODE_ENV,
       },
-      { 
+      {
         status: 200,
         headers: {
           'Cache-Control': 'no-store, max-age=0',
@@ -35,8 +36,8 @@ export async function GET() {
       }
     );
   } catch (error) {
-    console.error('[Health Check] Error:', error);
-    
+    logger.error('[Health Check] Error:', error);
+
     return NextResponse.json(
       {
         status: 'error',
@@ -45,7 +46,7 @@ export async function GET() {
         error: error instanceof Error ? error.message : 'Unknown error',
         environment: process.env.NODE_ENV,
       },
-      { 
+      {
         status: 500,
         headers: {
           'Cache-Control': 'no-store, max-age=0',
