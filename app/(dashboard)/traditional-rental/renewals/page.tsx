@@ -3,6 +3,7 @@
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { TrendingUp, TrendingDown, AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 export default function RenewalsPage() {
   return (
