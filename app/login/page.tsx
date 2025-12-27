@@ -11,11 +11,13 @@ import { loginSchema, type LoginFormData } from '@/lib/form-schemas';
 import { AccessibleInputField } from '@/components/forms/AccessibleFormField';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { useState } from 'react';
+import { RateLimitError, isRateLimitError } from '@/components/ui/rate-limit-error';
 
 export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [rateLimitRetry, setRateLimitRetry] = useState<number>(0);
 
   const {
     register,
@@ -33,6 +35,7 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormData) => {
     setError('');
+    setRateLimitRetry(0);
     setIsLoading(true);
 
     try {
@@ -43,12 +46,24 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        setError('Credenciales inválidas. Por favor, verifica tu correo y contraseña.');
+        // Verificar si es un error de rate limit
+        const rateLimitCheck = isRateLimitError(result.error);
+        if (rateLimitCheck.isRateLimit) {
+          setRateLimitRetry(rateLimitCheck.retryAfter);
+        } else {
+          setError('Credenciales inválidas. Por favor, verifica tu correo y contraseña.');
+        }
       } else {
         router.push('/dashboard');
       }
-    } catch (err) {
-      setError('Error al iniciar sesión. Por favor, intenta de nuevo.');
+    } catch (err: any) {
+      // Verificar si es un error de rate limit
+      const rateLimitCheck = isRateLimitError(err);
+      if (rateLimitCheck.isRateLimit) {
+        setRateLimitRetry(rateLimitCheck.retryAfter);
+      } else {
+        setError('Error al iniciar sesión. Por favor, intenta de nuevo.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -108,7 +123,14 @@ export default function LoginPage() {
           <div className="bg-white rounded-2xl shadow-2xl p-8 animate-fade-in">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Iniciar Sesión</h2>
 
-            {error && (
+            {rateLimitRetry > 0 && (
+              <RateLimitError
+                retryAfter={rateLimitRetry}
+                onRetryReady={() => setRateLimitRetry(0)}
+              />
+            )}
+
+            {error && !rateLimitRetry && (
               <div
                 role="alert"
                 aria-live="assertive"
@@ -146,13 +168,17 @@ export default function LoginPage() {
 
               <Button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || rateLimitRetry > 0}
                 className="w-full gradient-primary text-white py-3 rounded-lg font-medium hover:opacity-90 transition-all shadow-primary disabled:opacity-50"
                 aria-busy={isLoading}
                 aria-live="polite"
               >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
-                {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+                {rateLimitRetry > 0
+                  ? `Espera ${rateLimitRetry}s`
+                  : isLoading
+                    ? 'Iniciando sesión...'
+                    : 'Iniciar Sesión'}
               </Button>
             </form>
 

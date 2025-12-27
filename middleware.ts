@@ -10,11 +10,18 @@ import { rateLimitMiddleware } from './lib/rate-limiting';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const { method } = request;
 
-  // 1. Rate Limiting
-  const rateLimitResult = await rateLimitMiddleware(request);
-  if (rateLimitResult) {
-    return rateLimitResult; // Rate limit excedido
+  // 1. Rate Limiting - Solo aplicar en API routes y POST de autenticación
+  // No limitar visualización de páginas (GET)
+  const shouldApplyRateLimit =
+    pathname.startsWith('/api/') || (method === 'POST' && pathname.includes('/auth'));
+
+  if (shouldApplyRateLimit) {
+    const rateLimitResult = await rateLimitMiddleware(request);
+    if (rateLimitResult) {
+      return rateLimitResult; // Rate limit excedido
+    }
   }
 
   // 2. CSRF Protection (solo para rutas API que modifican datos)
