@@ -126,135 +126,135 @@ export default function HomeMobilePage() {
       {/* Welcome Section */}
       <Card className="bg-gradient-to-r from-primary to-primary/80 text-white">
         <CardContent className="pt-6">
-          <h1 className="text-2xl font-bold mb-2">
+      <h1 className="text-2xl font-bold mb-2">
             ¡Hola, {session?.user?.name || 'Usuario'}!
-          </h1>
-          <p className="text-white/90">
-            Bienvenido a tu dashboard de gestión inmobiliaria
-          </p>
+      </h1>
+      <p className="text-white/90">
+      Bienvenido a tu dashboard de gestión inmobiliaria
+      </p>
         </CardContent>
       </Card>
 
       {/* Quick Stats Grid */}
       <div className="responsive-grid">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Edificios</CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalEdificios}</div>
-            <p className="text-xs text-muted-foreground">En cartera</p>
-          </CardContent>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardTitle className="text-sm font-medium">Edificios</CardTitle>
+      <Building2 className="h-4 w-4 text-muted-foreground" />
+      </CardHeader>
+      <CardContent>
+      <div className="text-2xl font-bold">{stats.totalEdificios}</div>
+      <p className="text-xs text-muted-foreground">En cartera</p>
+      </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Unidades</CardTitle>
-            <Home className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalUnidades}</div>
-            <p className="text-xs text-muted-foreground">Total disponibles</p>
-          </CardContent>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardTitle className="text-sm font-medium">Unidades</CardTitle>
+      <Home className="h-4 w-4 text-muted-foreground" />
+      </CardHeader>
+      <CardContent>
+      <div className="text-2xl font-bold">{stats.totalUnidades}</div>
+      <p className="text-xs text-muted-foreground">Total disponibles</p>
+      </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Ocupación</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.ocupacionPromedio}%</div>
-            <p className="text-xs text-muted-foreground">Promedio</p>
-          </CardContent>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardTitle className="text-sm font-medium">Ocupación</CardTitle>
+      <TrendingUp className="h-4 w-4 text-muted-foreground" />
+      </CardHeader>
+      <CardContent>
+      <div className="text-2xl font-bold">{stats.ocupacionPromedio}%</div>
+      <p className="text-xs text-muted-foreground">Promedio</p>
+      </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Ingresos</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardTitle className="text-sm font-medium">Ingresos</CardTitle>
+      <TrendingUp className="h-4 w-4 text-muted-foreground" />
+      </CardHeader>
+      <CardContent>
+      <div className="text-2xl font-bold">
               €{stats.ingresosMensuales.toLocaleString()}
-            </div>
-            <p className="text-xs text-muted-foreground">Mensuales</p>
-          </CardContent>
+      </div>
+      <p className="text-xs text-muted-foreground">Mensuales</p>
+      </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Contratos</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.contratosActivos}</div>
-            <p className="text-xs text-muted-foreground">Activos</p>
-          </CardContent>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardTitle className="text-sm font-medium">Contratos</CardTitle>
+      <FileText className="h-4 w-4 text-muted-foreground" />
+      </CardHeader>
+      <CardContent>
+      <div className="text-2xl font-bold">{stats.contratosActivos}</div>
+      <p className="text-xs text-muted-foreground">Activos</p>
+      </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Alertas</CardTitle>
-            <AlertCircle className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-destructive">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardTitle className="text-sm font-medium">Alertas</CardTitle>
+      <AlertCircle className="h-4 w-4 text-destructive" />
+      </CardHeader>
+      <CardContent>
+      <div className="text-2xl font-bold text-destructive">
               {stats.pagosVencidos}
-            </div>
-            <p className="text-xs text-muted-foreground">Pagos vencidos</p>
-          </CardContent>
+      </div>
+      <p className="text-xs text-muted-foreground">Pagos vencidos</p>
+      </CardContent>
         </Card>
       </div>
 
       {/* Quick Access Links */}
       <Card>
         <CardHeader>
-          <CardTitle>Acceso Rápido</CardTitle>
+      <CardTitle>Acceso Rápido</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-3">
-            <Link href="/edificios">
+      <div className="grid grid-cols-2 gap-3">
+      <Link href="/edificios">
               <div className="p-4 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors text-center cursor-pointer">
-                <Building2 className="h-8 w-8 mx-auto mb-2 text-blue-600" />
-                <p className="text-sm font-medium">Edificios</p>
+        <Building2 className="h-8 w-8 mx-auto mb-2 text-blue-600" />
+        <p className="text-sm font-medium">Edificios</p>
               </div>
-            </Link>
-            <Link href="/unidades">
+      </Link>
+      <Link href="/unidades">
               <div className="p-4 rounded-lg bg-green-50 hover:bg-green-100 transition-colors text-center cursor-pointer">
-                <Home className="h-8 w-8 mx-auto mb-2 text-green-600" />
-                <p className="text-sm font-medium">Unidades</p>
+        <Home className="h-8 w-8 mx-auto mb-2 text-green-600" />
+        <p className="text-sm font-medium">Unidades</p>
               </div>
-            </Link>
-            <Link href="/contratos">
+      </Link>
+      <Link href="/contratos">
               <div className="p-4 rounded-lg bg-purple-50 hover:bg-purple-100 transition-colors text-center cursor-pointer">
-                <FileText className="h-8 w-8 mx-auto mb-2 text-purple-600" />
-                <p className="text-sm font-medium">Contratos</p>
+        <FileText className="h-8 w-8 mx-auto mb-2 text-purple-600" />
+        <p className="text-sm font-medium">Contratos</p>
               </div>
-            </Link>
-            <Link href="/inquilinos">
+      </Link>
+      <Link href="/inquilinos">
               <div className="p-4 rounded-lg bg-orange-50 hover:bg-orange-100 transition-colors text-center cursor-pointer">
-                <Users className="h-8 w-8 mx-auto mb-2 text-orange-600" />
-                <p className="text-sm font-medium">Inquilinos</p>
+        <Users className="h-8 w-8 mx-auto mb-2 text-orange-600" />
+        <p className="text-sm font-medium">Inquilinos</p>
               </div>
-            </Link>
-          </div>
+      </Link>
+      </div>
         </CardContent>
       </Card>
 
       {/* Upcoming Events */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            Próximos Eventos
-          </CardTitle>
+      <CardTitle className="flex items-center gap-2">
+      <Calendar className="h-5 w-5" />
+      Próximos Eventos
+      </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">
-            No hay eventos próximos programados.
-          </p>
+      <p className="text-sm text-muted-foreground">
+      No hay eventos próximos programados.
+      </p>
         </CardContent>
       </Card>
     </div>
@@ -271,19 +271,18 @@ export default function HomeMobilePage() {
           mainContent
         )}
       </div>
-        </main>
 
         {/* Mobile FAB for Quick Actions */}
         {isMobile && (
-          <>
-            <MobileFAB onClick={() => setIsQuickActionsOpen(true)} label="Acciones rápidas" />
-            <MobileSheet
+      <>
+      <MobileFAB onClick={() => setIsQuickActionsOpen(true)} label="Acciones rápidas" />
+      <MobileSheet
               isOpen={isQuickActionsOpen}
               onClose={() => setIsQuickActionsOpen(false)}
               title="Acciones Rápidas"
             >
               <div className="space-y-3">
-                {quickActions.map((action) => (
+        {quickActions.map((action) => (
                   <Button
                     key={action.id}
                     variant="outline"
@@ -304,6 +303,6 @@ export default function HomeMobilePage() {
           </>
         )}
       </div>
-    </div>
+    </AuthenticatedLayout>
   );
 }

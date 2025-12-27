@@ -121,7 +121,7 @@ export default function FlippingDashboardPage() {
     return (
       <AuthenticatedLayout>
         <div className="flex items-center justify-center h-full">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
         </div>
       </AuthenticatedLayout>
     );
@@ -129,19 +129,15 @@ export default function FlippingDashboardPage() {
 
   return (
     <AuthenticatedLayout>
-      
-      
-        
-        <main className="flex-1 overflow-y-auto p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-        <div>
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
-        Dashboard House Flipping
-        </h1>
-        <p className="text-gray-600 mt-1">Gestión y análisis de proyectos de renovación</p>
-        </div>
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+              Dashboard House Flipping
+            </h1>
+            <p className="text-gray-600 mt-1">Gestión y análisis de proyectos de renovación</p>
+          </div>
         <div className="flex gap-2">
         <Button onClick={loadDashboardData} variant="outline">
         <TrendingUp className="h-4 w-4 mr-2" />
@@ -400,8 +396,6 @@ export default function FlippingDashboardPage() {
         </div>
         </TabsContent>
         </Tabs>
-      </div>
-        </main>
       </div>
     </AuthenticatedLayout>
   );

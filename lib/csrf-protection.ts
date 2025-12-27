@@ -1,10 +1,11 @@
 /**
  * CSRF Protection Implementation
  * Protección contra ataques Cross-Site Request Forgery
+ * 
+ * Compatible con Edge Runtime (usa Web Crypto API)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { randomBytes, createHmac } from 'crypto';
 
 // Secret para firmar tokens CSRF (debe estar en .env en producción)
 const CSRF_SECRET = process.env.CSRF_SECRET || 'inmova-csrf-secret-change-in-production';
@@ -13,27 +14,62 @@ const CSRF_COOKIE_NAME = 'csrf-token';
 const CSRF_HEADER_NAME = 'x-csrf-token';
 
 /**
- * Genera un token CSRF seguro
+ * Convierte un ArrayBuffer a string hexadecimal
  */
-export function generateCsrfToken(): string {
-  const token = randomBytes(CSRF_TOKEN_LENGTH).toString('hex');
-  return token;
+function bufferToHex(buffer: ArrayBuffer): string {
+  return Array.from(new Uint8Array(buffer))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
 }
 
 /**
- * Firma un token CSRF con HMAC
+ * Convierte un string a ArrayBuffer
  */
-export function signCsrfToken(token: string): string {
-  const hmac = createHmac('sha256', CSRF_SECRET);
-  hmac.update(token);
-  return hmac.digest('hex');
+function stringToBuffer(str: string): ArrayBuffer {
+  const encoder = new TextEncoder();
+  return encoder.encode(str);
+}
+
+/**
+ * Genera un token CSRF seguro usando Web Crypto API
+ */
+export function generateCsrfToken(): string {
+  const array = new Uint8Array(CSRF_TOKEN_LENGTH);
+  crypto.getRandomValues(array);
+  return bufferToHex(array.buffer);
+}
+
+/**
+ * Firma un token CSRF con HMAC usando Web Crypto API
+ */
+export async function signCsrfToken(token: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(CSRF_SECRET);
+  
+  // Importar la clave para HMAC
+  const key = await crypto.subtle.importKey(
+    'raw',
+    keyData,
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  
+  // Firmar el token
+  const signature = await crypto.subtle.sign(
+    'HMAC',
+    key,
+    stringToBuffer(token)
+  );
+  
+  return bufferToHex(signature);
 }
 
 /**
  * Verifica que un token CSRF es válido
  */
-export function verifyCsrfToken(token: string, signature: string): boolean {
-  const expectedSignature = signCsrfToken(token);
+export async function verifyCsrfToken(token: string, signature: string): Promise<boolean> {
+  const expectedSignature = await signCsrfToken(token);
   
   // Comparación constante en tiempo para prevenir timing attacks
   if (signature.length !== expectedSignature.length) {
@@ -71,7 +107,7 @@ export function getCsrfTokenFromRequest(request: NextRequest): string | null {
 /**
  * Valida el token CSRF de una petición
  */
-export function validateCsrfToken(request: NextRequest): boolean {
+export async function validateCsrfToken(request: NextRequest): Promise<boolean> {
   const cookieToken = getCsrfTokenFromCookies(request);
   const requestToken = getCsrfTokenFromRequest(request);
   
@@ -79,7 +115,7 @@ export function validateCsrfToken(request: NextRequest): boolean {
     return false;
   }
   
-  // Verificar que los tokens coinciden
+  // Verificar que los tokens coinciden (comparación simple para tokens no firmados)
   return cookieToken === requestToken;
 }
 
@@ -110,7 +146,8 @@ export async function csrfProtectionMiddleware(
   }
   
   // Validar token CSRF
-  if (!validateCsrfToken(request)) {
+  const isValid = await validateCsrfToken(request);
+  if (!isValid) {
     return NextResponse.json(
       {
         error: 'Invalid CSRF token',
@@ -162,7 +199,8 @@ export async function withCsrfProtection(
   const protectedMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];
   
   if (protectedMethods.includes(request.method)) {
-    if (!validateCsrfToken(request)) {
+    const isValid = await validateCsrfToken(request);
+    if (!isValid) {
       return NextResponse.json(
         {
           error: 'Invalid CSRF token',
