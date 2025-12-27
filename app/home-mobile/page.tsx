@@ -262,16 +262,16 @@ export default function HomeMobilePage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="container-mobile-first py-6">
-            {isMobile ? (
-              <PullToRefresh onRefresh={handleRefresh}>
-                {mainContent}
-              </PullToRefresh>
-            ) : (
-              mainContent
-            )}
-          </div>
-        </main>
+      <main className="flex-1 overflow-y-auto">
+        <div className="container-mobile-first py-6">
+          {isMobile ? (
+            <PullToRefresh onRefresh={handleRefresh}>
+              {mainContent}
+            </PullToRefresh>
+          ) : (
+            mainContent
+          )}
+        </div>
 
         {/* Mobile FAB for Quick Actions */}
         {isMobile && (
@@ -303,7 +303,7 @@ export default function HomeMobilePage() {
             </MobileSheet>
           </>
         )}
-      </div>
-    </div>
+      </main>
+    </AuthenticatedLayout>
   );
 }

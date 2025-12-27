@@ -124,17 +124,11 @@ export default function CuponesPage() {
     }
   }, [status]);
 
-  // Update active filters
   useEffect(() => {
     const filters: Array<{ id: string; label: string; value: string }> = [];
-
-    if (searchTerm) {
-      filters.push({ id: 'search', label: 'Búsqueda', value: searchTerm });
-    }
-    if (statusFilter !== 'all') {
+    if (searchTerm) filters.push({ id: 'search', label: 'Búsqueda', value: searchTerm });
+    if (statusFilter !== 'all')
       filters.push({ id: 'status', label: 'Estado', value: statusFilter });
-    }
-
     setActiveFilters(filters);
   }, [searchTerm, statusFilter]);
 
@@ -142,17 +136,18 @@ export default function CuponesPage() {
     try {
       setLoading(true);
       const params = new URLSearchParams();
-      if (statusFilter !== 'all') {
-        params.append('estado', statusFilter);
-      }
-
+      if (statusFilter !== 'all') params.append('status', statusFilter);
       const response = await fetch(`/api/coupons?${params.toString()}`);
       if (response.ok) {
         const data = await response.json();
         setCoupons(data);
+      } else {
+        toast.error('Error al cargar cupones');
       }
     } catch (error) {
-      logger.error('Error loading coupons:', error);
+      logError(error instanceof Error ? error : new Error('Error loading coupons'), {
+        context: 'loadCoupons',
+      });
       toast.error('Error al cargar cupones');
     } finally {
       setLoading(false);
@@ -161,25 +156,31 @@ export default function CuponesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
       const url = editingCoupon ? `/api/coupons/${editingCoupon.id}` : '/api/coupons';
       const method = editingCoupon ? 'PATCH' : 'POST';
 
+      const payload = {
+        codigo: formData.codigo,
+        tipo: formData.tipo,
+        valor: parseFloat(formData.valor),
+        descripcion: formData.descripcion || null,
+        usosMaximos: formData.usosMaximos ? parseInt(formData.usosMaximos) : null,
+        usosPorUsuario: formData.usosPorUsuario ? parseInt(formData.usosPorUsuario) : null,
+        montoMinimo: formData.montoMinimo ? parseFloat(formData.montoMinimo) : null,
+        fechaInicio: formData.fechaInicio,
+        fechaExpiracion: formData.fechaExpiracion,
+        aplicaATodos: formData.aplicaATodos,
+      };
+
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          valor: parseFloat(formData.valor),
-          usosMaximos: formData.usosMaximos ? parseInt(formData.usosMaximos) : null,
-          usosPorUsuario: formData.usosPorUsuario ? parseInt(formData.usosPorUsuario) : null,
-          montoMinimo: formData.montoMinimo ? parseFloat(formData.montoMinimo) : null,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
-        toast.success(editingCoupon ? 'Cupón actualizado' : 'Cupón creado exitosamente');
+        toast.success(editingCoupon ? 'Cupón actualizado' : 'Cupón creado correctamente');
         setOpenDialog(false);
         resetForm();
         loadCoupons();
@@ -188,7 +189,9 @@ export default function CuponesPage() {
         toast.error(error.message || 'Error al guardar cupón');
       }
     } catch (error) {
-      logger.error('Error:', error);
+      logError(error instanceof Error ? error : new Error('Error saving coupon'), {
+        context: 'handleSubmit',
+      });
       toast.error('Error al guardar cupón');
     }
   };
@@ -211,18 +214,21 @@ export default function CuponesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Estás seguro de eliminar este cupón?')) return;
+    if (!confirm('¿Está seguro de eliminar este cupón?')) return;
 
     try {
       const response = await fetch(`/api/coupons/${id}`, { method: 'DELETE' });
       if (response.ok) {
-        toast.success('Cupón eliminado');
+        toast.success('Cupón eliminado correctamente');
         loadCoupons();
       } else {
         toast.error('Error al eliminar cupón');
       }
     } catch (error) {
-      logger.error('Error:', error);
+      logError(error instanceof Error ? error : new Error('Error deleting coupon'), {
+        context: 'handleDelete',
+        couponId: id,
+      });
       toast.error('Error al eliminar cupón');
     }
   };
@@ -230,31 +236,28 @@ export default function CuponesPage() {
   const handleToggleStatus = async (coupon: Coupon) => {
     try {
       const action = coupon.activo ? 'deactivate' : 'reactivate';
-      const response = await fetch(`/api/coupons/${coupon.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action }),
+      const response = await fetch(`/api/coupons/${coupon.id}/${action}`, {
+        method: 'POST',
       });
 
       if (response.ok) {
-        toast.success(coupon.activo ? 'Cupón desactivado' : 'Cupón activado');
+        toast.success(
+          coupon.activo ? 'Cupón desactivado correctamente' : 'Cupón reactivado correctamente'
+        );
         loadCoupons();
       } else {
-        toast.error('Error al cambiar estado');
+        toast.error('Error al cambiar estado del cupón');
       }
     } catch (error) {
-      logger.error('Error:', error);
+      logError(error instanceof Error ? error : new Error('Error toggling coupon status'), {
+        context: 'handleToggleStatus',
+        couponId: coupon.id,
+      });
       toast.error('Error al cambiar estado');
     }
   };
 
-  const handleCopyCode = (code: string) => {
-    navigator.clipboard.writeText(code);
-    toast.success('Código copiado al portapapeles');
-  };
-
   const resetForm = () => {
-    setEditingCoupon(null);
     setFormData({
       codigo: '',
       tipo: 'PERCENTAGE',
@@ -267,6 +270,12 @@ export default function CuponesPage() {
       fechaExpiracion: '',
       aplicaATodos: true,
     });
+    setEditingCoupon(null);
+  };
+
+  const copyToClipboard = (code: string) => {
+    navigator.clipboard.writeText(code);
+    toast.success('Código copiado al portapapeles');
   };
 
   const clearFilter = (id: string) => {
@@ -283,480 +292,431 @@ export default function CuponesPage() {
     return coupons.filter((coupon) => {
       const matchesSearch =
         coupon.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (coupon.descripcion?.toLowerCase() || '').includes(searchTerm.toLowerCase());
-      const matchesStatus = statusFilter === 'all' || coupon.estado === statusFilter;
-
-      return matchesSearch && matchesStatus;
+        (coupon.descripcion?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
+      return matchesSearch;
     });
-  }, [coupons, searchTerm, statusFilter]);
+  }, [coupons, searchTerm]);
 
   const stats = useMemo(() => {
-    return {
-      total: coupons.length,
-      activos: coupons.filter((c) => c.activo && c.estado === 'activo').length,
-      expirados: coupons.filter((c) => c.estado === 'expirado').length,
-      agotados: coupons.filter((c) => c.estado === 'agotado').length,
-      totalUsos: coupons.reduce((sum, c) => sum + c.usosActuales, 0),
-    };
+    const activeCoupons = coupons.filter((c) => c.activo).length;
+    const totalUses = coupons.reduce((acc, c) => acc + c._count.usos, 0);
+    return { activeCoupons, totalCoupons: coupons.length, totalUses };
   }, [coupons]);
 
   if (loading) {
-    return <LoadingState message="Cargando cupones..." />;
+    return (
+      <AuthenticatedLayout>
+        <LoadingState message="Cargando cupones..." />
+      </AuthenticatedLayout>
+    );
   }
 
-  const hasResults = filteredCoupons.length > 0;
-  const hasNoData = coupons.length === 0;
+  if (!session) return null;
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto space-y-6">
-            {/* Breadcrumb */}
+      <main className="flex-1 overflow-y-auto p-6">
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Header */}
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/dashboard')}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Volver
+            </Button>
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/home">
+                  <BreadcrumbLink href="/dashboard">
                     <Home className="h-4 w-4" />
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Cupones de Descuento</BreadcrumbPage>
+                  <BreadcrumbPage>Cupones</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
+          </div>
 
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl shadow-lg">
-                  <Tag className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                    Cupones de Descuento
-                  </h1>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Gestiona códigos promocionales y descuentos
-                  </p>
-                </div>
-              </div>
-              {canCreate && (
-                <Dialog
-                  open={openDialog}
-                  onOpenChange={(open) => {
-                    setOpenDialog(open);
-                    if (!open) resetForm();
-                  }}
-                >
-                  <DialogTrigger asChild>
-                    <Button className="gradient-primary shadow-primary">
-                      <Plus className="h-4 w-4 sm:mr-2" />
-                      <span className="hidden sm:inline">Nuevo Cupón</span>
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle>
-                        {editingCoupon ? 'Editar Cupón' : 'Crear Nuevo Cupón'}
-                      </DialogTitle>
-                    </DialogHeader>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="codigo">Código *</Label>
-                          <Input
-                            id="codigo"
-                            value={formData.codigo}
-                            onChange={(e) =>
-                              setFormData({ ...formData, codigo: e.target.value.toUpperCase() })
-                            }
-                            placeholder="VERANO2024"
-                            required
-                            maxLength={50}
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="tipo">Tipo de Descuento *</Label>
-                          <Select
-                            value={formData.tipo}
-                            onValueChange={(value) =>
-                              setFormData({ ...formData, tipo: value as 'PERCENTAGE' | 'FIXED' })
-                            }
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="PERCENTAGE">Porcentaje (%)</SelectItem>
-                              <SelectItem value="FIXED">Cantidad Fija (€)</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="valor">Valor del Descuento *</Label>
-                          <div className="relative">
-                            <Input
-                              id="valor"
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              max={formData.tipo === 'PERCENTAGE' ? '100' : undefined}
-                              value={formData.valor}
-                              onChange={(e) => setFormData({ ...formData, valor: e.target.value })}
-                              required
-                              className="pr-8"
-                            />
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
-                              {formData.tipo === 'PERCENTAGE' ? '%' : '€'}
-                            </span>
-                          </div>
-                        </div>
-                        <div>
-                          <Label htmlFor="montoMinimo">Monto Mínimo de Compra</Label>
-                          <div className="relative">
-                            <Input
-                              id="montoMinimo"
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              value={formData.montoMinimo}
-                              onChange={(e) =>
-                                setFormData({ ...formData, montoMinimo: e.target.value })
-                              }
-                              placeholder="Sin mínimo"
-                              className="pr-8"
-                            />
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
-                              €
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
+          {/* Title & Actions */}
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">Cupones de Descuento</h1>
+              <p className="text-muted-foreground">Gestiona códigos promocionales</p>
+            </div>
+            {canCreate && (
+              <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+                <DialogTrigger asChild>
+                  <Button onClick={resetForm}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Nuevo Cupón
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>
+                      {editingCoupon ? 'Editar Cupón' : 'Crear Nuevo Cupón'}
+                    </DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="descripcion">Descripción</Label>
+                        <Label htmlFor="codigo">Código*</Label>
                         <Input
-                          id="descripcion"
-                          value={formData.descripcion}
+                          id="codigo"
+                          value={formData.codigo}
                           onChange={(e) =>
-                            setFormData({ ...formData, descripcion: e.target.value })
+                            setFormData({ ...formData, codigo: e.target.value.toUpperCase() })
                           }
-                          placeholder="Descuento de verano 2024"
+                          required
                         />
                       </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="usosMaximos">Usos Máximos Totales</Label>
-                          <Input
-                            id="usosMaximos"
-                            type="number"
-                            min="1"
-                            value={formData.usosMaximos}
-                            onChange={(e) =>
-                              setFormData({ ...formData, usosMaximos: e.target.value })
-                            }
-                            placeholder="Ilimitado"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="usosPorUsuario">Usos por Usuario</Label>
-                          <Input
-                            id="usosPorUsuario"
-                            type="number"
-                            min="1"
-                            value={formData.usosPorUsuario}
-                            onChange={(e) =>
-                              setFormData({ ...formData, usosPorUsuario: e.target.value })
-                            }
-                            placeholder="Ilimitado"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="fechaInicio">Fecha de Inicio *</Label>
-                          <Input
-                            id="fechaInicio"
-                            type="date"
-                            value={formData.fechaInicio}
-                            onChange={(e) =>
-                              setFormData({ ...formData, fechaInicio: e.target.value })
-                            }
-                            required
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="fechaExpiracion">Fecha de Expiración *</Label>
-                          <Input
-                            id="fechaExpiracion"
-                            type="date"
-                            value={formData.fechaExpiracion}
-                            onChange={(e) =>
-                              setFormData({ ...formData, fechaExpiracion: e.target.value })
-                            }
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex justify-end gap-2 pt-4 border-t">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => setOpenDialog(false)}
+                      <div>
+                        <Label htmlFor="tipo">Tipo*</Label>
+                        <Select
+                          value={formData.tipo}
+                          onValueChange={(value) =>
+                            setFormData({ ...formData, tipo: value as 'PERCENTAGE' | 'FIXED' })
+                          }
                         >
-                          Cancelar
-                        </Button>
-                        <Button type="submit" className="gradient-primary shadow-primary">
-                          {editingCoupon ? 'Actualizar' : 'Crear'} Cupón
-                        </Button>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="PERCENTAGE">Porcentaje</SelectItem>
+                            <SelectItem value="FIXED">Fijo</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
-                    </form>
-                  </DialogContent>
-                </Dialog>
-              )}
-            </div>
+                    </div>
 
-            {/* KPIs */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-gray-600">Total Cupones</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-gray-600">Activos</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-green-600">{stats.activos}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-gray-600">Expirados</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-gray-400">{stats.expirados}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-gray-600">Agotados</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-orange-600">{stats.agotados}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-gray-600">Total Usos</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-indigo-600">{stats.totalUsos}</div>
-                </CardContent>
-              </Card>
-            </div>
+                    <div>
+                      <Label htmlFor="valor">
+                        Valor* {formData.tipo === 'PERCENTAGE' ? '(%)' : '(€)'}
+                      </Label>
+                      <Input
+                        id="valor"
+                        type="number"
+                        step="0.01"
+                        value={formData.valor}
+                        onChange={(e) => setFormData({ ...formData, valor: e.target.value })}
+                        required
+                      />
+                    </div>
 
-            {/* Filters */}
+                    <div>
+                      <Label htmlFor="descripcion">Descripción</Label>
+                      <Input
+                        id="descripcion"
+                        value={formData.descripcion}
+                        onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="fechaInicio">Fecha Inicio*</Label>
+                        <Input
+                          id="fechaInicio"
+                          type="date"
+                          value={formData.fechaInicio}
+                          onChange={(e) =>
+                            setFormData({ ...formData, fechaInicio: e.target.value })
+                          }
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="fechaExpiracion">Fecha Expiración*</Label>
+                        <Input
+                          id="fechaExpiracion"
+                          type="date"
+                          value={formData.fechaExpiracion}
+                          onChange={(e) =>
+                            setFormData({ ...formData, fechaExpiracion: e.target.value })
+                          }
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <Label htmlFor="usosMaximos">Usos Máximos</Label>
+                        <Input
+                          id="usosMaximos"
+                          type="number"
+                          value={formData.usosMaximos}
+                          onChange={(e) =>
+                            setFormData({ ...formData, usosMaximos: e.target.value })
+                          }
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="usosPorUsuario">Usos por Usuario</Label>
+                        <Input
+                          id="usosPorUsuario"
+                          type="number"
+                          value={formData.usosPorUsuario}
+                          onChange={(e) =>
+                            setFormData({ ...formData, usosPorUsuario: e.target.value })
+                          }
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="montoMinimo">Monto Mínimo (€)</Label>
+                        <Input
+                          id="montoMinimo"
+                          type="number"
+                          step="0.01"
+                          value={formData.montoMinimo}
+                          onChange={(e) =>
+                            setFormData({ ...formData, montoMinimo: e.target.value })
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 pt-4">
+                      <Button type="submit">{editingCoupon ? 'Actualizar' : 'Crear'}</Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setOpenDialog(false);
+                          resetForm();
+                        }}
+                      >
+                        Cancelar
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card>
-              <CardContent className="p-4">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <Input
-                      placeholder="Buscar por código o descripción..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-full sm:w-48">
-                      <SelectValue placeholder="Estado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos los estados</SelectItem>
-                      <SelectItem value="activo">Activos</SelectItem>
-                      <SelectItem value="inactivo">Inactivos</SelectItem>
-                      <SelectItem value="expirado">Expirados</SelectItem>
-                      <SelectItem value="agotado">Agotados</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                {activeFilters.length > 0 && (
-                  <FilterChips
-                    filters={activeFilters}
-                    onRemove={clearFilter}
-                    onClearAll={clearAllFilters}
-                    className="mt-4"
-                  />
-                )}
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Cupones Activos</CardTitle>
+                <Tag className="h-4 w-4 text-green-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">{stats.activeCoupons}</div>
+                <p className="text-xs text-muted-foreground">de {stats.totalCoupons} totales</p>
               </CardContent>
             </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Usos Totales</CardTitle>
+                <TrendingUp className="h-4 w-4 text-blue-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-blue-600">{stats.totalUses}</div>
+                <p className="text-xs text-muted-foreground">aplicaciones</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Total Cupones</CardTitle>
+                <Tag className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.totalCoupons}</div>
+                <p className="text-xs text-muted-foreground">registrados</p>
+              </CardContent>
+            </Card>
+          </div>
 
-            {/* Coupons List or Empty State */}
-            {hasNoData ? (
-              <EmptyState
-                icon={<Tag className="h-16 w-16 text-gray-400" />}
-                title="No hay cupones creados"
-                description="Crea tu primer cupón de descuento para ofrecer promociones a tus clientes"
-                action={
-                  canCreate
-                    ? {
-                        label: 'Crear Primer Cupón',
-                        onClick: () => setOpenDialog(true),
-                        icon: <Plus className="h-4 w-4" />,
-                      }
-                    : undefined
-                }
+          {/* Search & Filter */}
+          <div className="flex gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por código o descripción..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
               />
-            ) : !hasResults ? (
-              <EmptyState
-                icon={<Search className="h-16 w-16 text-gray-400" />}
-                title="No se encontraron resultados"
-                description="Intenta ajustar los filtros de búsqueda"
-                action={{
-                  label: 'Limpiar búsqueda',
-                  onClick: clearAllFilters,
-                }}
-              />
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredCoupons.map((coupon) => (
-                  <Card key={coupon.id} className="hover:shadow-lg transition-shadow">
-                    <CardHeader className="p-4 sm:p-6">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <code className="text-lg font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded">
-                              {coupon.codigo}
-                            </code>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleCopyCode(coupon.codigo)}
-                            >
-                              <Copy className="h-4 w-4" />
-                            </Button>
-                          </div>
-                          {coupon.descripcion && (
-                            <p className="text-sm text-gray-600 mb-2">{coupon.descripcion}</p>
-                          )}
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <Badge variant={coupon.activo ? 'default' : 'secondary'}>
-                              {coupon.estado}
-                            </Badge>
-                            <Badge variant="outline" className="flex items-center gap-1">
-                              {coupon.tipo === 'PERCENTAGE' ? (
-                                <>
-                                  <Percent className="h-3 w-3" /> {coupon.valor}%
-                                </>
-                              ) : (
-                                <>
-                                  <Euro className="h-3 w-3" /> {coupon.valor}€
-                                </>
-                              )}
-                            </Badge>
-                          </div>
+            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="active">Activos</SelectItem>
+                <SelectItem value="inactive">Inactivos</SelectItem>
+                <SelectItem value="expired">Expirados</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {activeFilters.length > 0 && (
+            <FilterChips
+              filters={activeFilters}
+              onRemove={clearFilter}
+              onClearAll={clearAllFilters}
+            />
+          )}
+
+          {/* Coupons List */}
+          {filteredCoupons.length === 0 ? (
+            <EmptyState
+              icon={<Tag className="h-16 w-16 text-gray-400" />}
+              title="No hay cupones"
+              description={
+                searchTerm
+                  ? `No se encontraron cupones con "${searchTerm}"`
+                  : 'Crea tu primer cupón de descuento'
+              }
+              action={
+                canCreate && !searchTerm
+                  ? {
+                      label: 'Crear Primer Cupón',
+                      onClick: () => {
+                        resetForm();
+                        setOpenDialog(true);
+                      },
+                      icon: <Plus className="h-4 w-4" />,
+                    }
+                  : undefined
+              }
+            />
+          ) : (
+            <div className="grid gap-4">
+              {filteredCoupons.map((coupon) => (
+                <Card key={coupon.id}>
+                  <CardContent className="pt-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 space-y-3">
+                        <div className="flex items-center gap-3">
+                          <Badge
+                            variant="outline"
+                            className="text-lg font-mono px-3 py-1 cursor-pointer"
+                            onClick={() => copyToClipboard(coupon.codigo)}
+                          >
+                            <Copy className="h-3 w-3 mr-2" />
+                            {coupon.codigo}
+                          </Badge>
+                          <Badge variant={coupon.activo ? 'default' : 'secondary'}>
+                            {coupon.activo ? (
+                              <>
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Activo
+                              </>
+                            ) : (
+                              <>
+                                <XCircle className="h-3 w-3 mr-1" />
+                                Inactivo
+                              </>
+                            )}
+                          </Badge>
+                          <Badge variant="outline">
+                            {coupon.tipo === 'PERCENTAGE' ? (
+                              <>
+                                <Percent className="h-3 w-3 mr-1" />
+                                {coupon.valor}%
+                              </>
+                            ) : (
+                              <>
+                                <Euro className="h-3 w-3 mr-1" />€{coupon.valor}
+                              </>
+                            )}
+                          </Badge>
                         </div>
-                        {(canUpdate || canDelete) && (
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              {canUpdate && (
-                                <>
-                                  <DropdownMenuItem onClick={() => handleEdit(coupon)}>
-                                    <Edit className="h-4 w-4 mr-2" />
-                                    Editar
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => handleToggleStatus(coupon)}>
-                                    {coupon.activo ? (
-                                      <>
-                                        <XCircle className="h-4 w-4 mr-2" /> Desactivar
-                                      </>
-                                    ) : (
-                                      <>
-                                        <CheckCircle className="h-4 w-4 mr-2" /> Activar
-                                      </>
-                                    )}
-                                  </DropdownMenuItem>
-                                </>
-                              )}
-                              {canDelete && (
-                                <DropdownMenuItem
-                                  onClick={() => handleDelete(coupon.id)}
-                                  className="text-red-600"
-                                >
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Eliminar
-                                </DropdownMenuItem>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+
+                        {coupon.descripcion && (
+                          <p className="text-sm text-muted-foreground">{coupon.descripcion}</p>
                         )}
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3 text-sm">
-                        <div className="flex items-center justify-between">
-                          <span className="text-gray-600">Usos:</span>
-                          <span className="font-medium">
-                            {coupon.usosActuales}{' '}
-                            {coupon.usosMaximos ? `/ ${coupon.usosMaximos}` : ''}
-                          </span>
-                        </div>
-                        {coupon.montoMinimo && (
-                          <div className="flex items-center justify-between">
-                            <span className="text-gray-600">Compra mínima:</span>
-                            <span className="font-medium">{coupon.montoMinimo}€</span>
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <p className="text-muted-foreground">Inicio</p>
+                            <p className="font-medium">
+                              {format(new Date(coupon.fechaInicio), 'dd MMM yyyy', { locale: es })}
+                            </p>
                           </div>
-                        )}
-                        <div className="flex items-center justify-between">
-                          <span className="text-gray-600">Vigencia:</span>
-                          <div className="text-right">
-                            <div className="font-medium">
-                              {format(new Date(coupon.fechaInicio), 'dd MMM', { locale: es })}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              hasta{' '}
+                          <div>
+                            <p className="text-muted-foreground">Expiración</p>
+                            <p className="font-medium">
                               {format(new Date(coupon.fechaExpiracion), 'dd MMM yyyy', {
                                 locale: es,
                               })}
-                            </div>
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Usos</p>
+                            <p className="font-medium">
+                              {coupon._count.usos}
+                              {coupon.usosMaximos ? ` / ${coupon.usosMaximos}` : ''}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Monto Mínimo</p>
+                            <p className="font-medium">
+                              {coupon.montoMinimo ? `€${coupon.montoMinimo}` : 'Sin mínimo'}
+                            </p>
                           </div>
                         </div>
-                        {coupon._count.usos > 0 && (
-                          <div className="pt-3 border-t">
-                            <div className="flex items-center gap-1 text-indigo-600">
-                              <TrendingUp className="h-4 w-4" />
-                              <span className="font-medium">
-                                {coupon._count.usos} usos registrados
-                              </span>
-                            </div>
-                          </div>
-                        )}
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </div>
-        </main>
-      </div>
-    </div>
+
+                      {(canUpdate || canDelete) && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {canUpdate && (
+                              <>
+                                <DropdownMenuItem onClick={() => handleEdit(coupon)}>
+                                  <Edit className="h-4 w-4 mr-2" />
+                                  Editar
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleToggleStatus(coupon)}>
+                                  {coupon.activo ? (
+                                    <>
+                                      <XCircle className="h-4 w-4 mr-2" />
+                                      Desactivar
+                                    </>
+                                  ) : (
+                                    <>
+                                      <CheckCircle className="h-4 w-4 mr-2" />
+                                      Activar
+                                    </>
+                                  )}
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                            {canDelete && (
+                              <DropdownMenuItem
+                                onClick={() => handleDelete(coupon.id)}
+                                className="text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Eliminar
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      </main>
+    </AuthenticatedLayout>
   );
 }

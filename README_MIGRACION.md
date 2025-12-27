@@ -1,372 +1,338 @@
-# Guía de Migración de Datos - Grupo Vidaro Inversiones
+# 📚 Índice de Migración al Servidor INMOVA-DEPLOYMENT
 
-## 📋 Estructura Creada
+## 🎯 Información General
 
-Se ha creado exitosamente la siguiente estructura en el sistema INMOVA:
-
-### 🏢 Jerarquía de Empresas
-```
-Grupo Vidaro Inversiones (Matriz)
-├── Rovida
-└── Viroda Inversiones
-```
-
-### 👥 Usuarios Creados
-
-| Empresa | Email | Rol | Función |
-|---------|-------|-----|---------|
-| Grupo Vidaro Inversiones | admin@grupovidaro.com | Administrador | Gestión completa del grupo |
-| Grupo Vidaro Inversiones | director.financiero@grupovidaro.com | Director Financiero | Supervisión financiera y reportes |
-| Rovida | admin@rovida.com | Administrador | Gestión completa de Rovida |
-| Rovida | operador@rovida.com | Operador | Operaciones diarias |
-| Viroda Inversiones | admin@virodainversiones.com | Administrador | Gestión completa de Viroda |
-| Viroda Inversiones | propietario@virodainversiones.com | Propietario | Consulta y seguimiento |
-
-**Contraseña temporal para todos los usuarios:** `vidaro2025`
-
-⚠️ **IMPORTANTE:** Se recomienda cambiar las contraseñas en el primer acceso.
+**Servidor:** `inmova-deployment`  
+**Fingerprint SSH:** `55:0e:12:f9:8f:a3:b0:4b:04:7e:fe:de:00:3f:53:78`  
+**Clave:** `hhk8JqPEpJ3C`  
+**Fecha de preparación:** 26 de Diciembre, 2025
 
 ---
 
-## 📊 Información Requerida para la Migración
+## 📖 Documentación Disponible
 
-### 1️⃣ EDIFICIOS / PROPIEDADES
+### 🚀 Para empezar AHORA
 
-#### Información Básica
-- **Nombre del edificio** (obligatorio)
-- **Tipo de propiedad**: Residencial, Comercial, Mixto, Edificio completo, Local comercial, Nave industrial, Oficina, Almacén
-- **Dirección completa** (obligatorio)
-  - Calle y número
-  - Código postal
-  - Ciudad
-  - País
-- **Coordenadas GPS** (opcional pero recomendado)
+| Documento | Descripción | Tiempo |
+|-----------|-------------|--------|
+| **[INICIO_RAPIDO_MIGRACION.md](./INICIO_RAPIDO_MIGRACION.md)** | ⚡ Guía de inicio rápido (3 pasos) | 5 min |
+| **[COMANDOS_MIGRACION_RAPIDA.md](./COMANDOS_MIGRACION_RAPIDA.md)** | 📋 Comandos esenciales | 2 min |
 
-#### Características
-- **Año de construcción**
-- **Número total de plantas**
-- **Superficie total construida (m²)**
-- **Estado de conservación**: Excelente, Bueno, Regular, Necesita reforma, En reforma
-- **Ascensor**: Sí/No
-- **Garaje/Parking**: Sí/No
-- **Trastero**: Sí/No
-- **Jardín/Zona común**: Sí/No
-- **Piscina**: Sí/No
+### 📚 Documentación Completa
 
-#### Documentación
-- **IBI (Impuesto de Bienes Inmuebles)** - monto anual
-- **Referencia catastral**
-- **Gastos de comunidad** (si aplica)
-- **Certificado energético** (si existe)
+| Documento | Descripción |
+|-----------|-------------|
+| **[GUIA_MIGRACION_SERVIDOR_INMOVA.md](./GUIA_MIGRACION_SERVIDOR_INMOVA.md)** | 📖 Guía completa paso a paso con todas las fases |
+| **[SERVIDOR_MIGRACION_SSH.md](./SERVIDOR_MIGRACION_SSH.md)** | 🔐 Configuración SSH y seguridad |
 
-**Formato recomendado:** CSV con las siguientes columnas:
-```
-nombre,tipo,direccion,codigoPostal,ciudad,pais,anoConst</s>truccion,plantas,superficie,estadoConservacion,ascensor,garage,trastero,jardin,piscina,ibi,referenciaCatastral
-```
+### 🔧 Scripts Disponibles
+
+| Script | Propósito |
+|--------|-----------|
+| `scripts/check-pre-migracion.sh` | ✅ Verificar que todo está listo |
+| `scripts/backup-pre-migracion.sh` | 💾 Crear backup completo |
+| `scripts/migracion-servidor.sh` | 🚀 Ejecutar migración |
+| `scripts/verificacion-post-migracion.sh` | 🔍 Verificar instalación |
+
+### 📁 Archivos de Configuración
+
+| Archivo | Descripción |
+|---------|-------------|
+| `.env.servidor.inmova-deployment` | 🔐 Plantilla de variables de entorno |
+| `.env.production` | 🔧 Variables de producción (crear) |
 
 ---
 
-### 2️⃣ UNIDADES / ESPACIOS
+## ⚡ Inicio Rápido (3 Pasos)
 
-#### Información Básica
-- **Número/Identificador de la unidad** (obligatorio - ej: 1A, Local 3, Oficina 205)
-- **Edificio al que pertenece** (obligatorio)
-- **Tipo de unidad**: Piso, Ático, Bajo, Dúplex, Estudio, Local, Oficina, Parking, Trastero, Habitación
-- **Estado**: Disponible, Ocupada, En reforma, Reservada
+### 1️⃣ Verificar Preparación
 
-#### Características
-- **Superficie útil (m²)** (obligatorio)
-- **Número de habitaciones**
-- **Número de baños**
-- **Orientación**: Norte, Sur, Este, Oeste, Noreste, Noroeste, Sureste, Suroeste
-- **Planta**
-- **Con balcón/terraza**: Sí/No
-- **Amueblado**: Sí/No/Parcialmente
-
-#### Económico
-- **Renta mensual objetivo (€)** (obligatorio si está en alquiler)
-- **Valor estimado de la propiedad (€)**
-- **IBI específico** (si está individualizado)
-
-**Formato recomendado:** CSV con las siguientes columnas:
+```bash
+./scripts/check-pre-migracion.sh
 ```
-edificioNombre,numero,tipo,estado,superficie,habitaciones,banos,orientacion,planta,balcon,amueblado,rentaMensual,valorEstimado
+
+### 2️⃣ Configurar y Migrar
+
+```bash
+# Configurar IP del servidor
+export SERVER_IP="xxx.xxx.xxx.xxx"
+
+# Crear .env.production desde plantilla
+cp .env.servidor.inmova-deployment .env.production
+nano .env.production  # Editar variables
+
+# Crear backup
+./scripts/backup-pre-migracion.sh
+
+# Ejecutar migración
+./scripts/migracion-servidor.sh
+```
+
+### 3️⃣ Verificar
+
+```bash
+./scripts/verificacion-post-migracion.sh
 ```
 
 ---
 
-### 3️⃣ INQUILINOS / TENANTES
+## 🎯 ¿Qué Documento Leer?
 
-#### Datos Personales
-- **Nombre completo** (obligatorio)
-- **DNI/NIE/Pasaporte** (obligatorio)
-- **Fecha de nacimiento**
-- **Nacionalidad**
+### Si quieres migrar YA:
+👉 **[INICIO_RAPIDO_MIGRACION.md](./INICIO_RAPIDO_MIGRACION.md)**
 
-#### Contacto
-- **Email** (obligatorio)
-- **Teléfono móvil** (obligatorio)
-- **Teléfono alternativo** (opcional)
+### Si necesitas comandos específicos:
+👉 **[COMANDOS_MIGRACION_RAPIDA.md](./COMANDOS_MIGRACION_RAPIDA.md)**
 
-#### Dirección
-- **Dirección actual** (obligatorio)
+### Si quieres entender todo el proceso:
+👉 **[GUIA_MIGRACION_SERVIDOR_INMOVA.md](./GUIA_MIGRACION_SERVIDOR_INMOVA.md)**
 
-#### Información Financiera
-- **Ocupación/Profesión**
-- **Ingresos mensuales netos**
-- **Empresa donde trabaja**
-
-#### Documentación Disponible
-- ¿Tiene contrato de trabajo?
-- ¿Tiene nóminas de los últimos 3 meses?
-- ¿Tiene declaración de la renta?
-- ¿Tiene aval bancario?
-
-**Formato recomendado:** CSV con las siguientes columnas:
-```
-nombre,apellidos,dni,fechaNacimiento,nacionalidad,email,telefono,telefonoAlt,direccion,ocupacion,ingresosMensuales,empresa,contratoTrabajo,nominas,declaracion,aval
-```
+### Si tienes problemas con SSH:
+👉 **[SERVIDOR_MIGRACION_SSH.md](./SERVIDOR_MIGRACION_SSH.md)**
 
 ---
 
-### 4️⃣ CONTRATOS DE ALQUILER
+## 📋 Checklist General
 
-#### Información Básica
-- **Unidad/Espacio** (obligatorio - número o identificador)
-- **Inquilino** (obligatorio - DNI o email)
-- **Fecha de inicio** (obligatorio)
-- **Fecha de fin** (obligatorio)
-- **Tipo de contrato**: Vivienda habitual, Temporal, Vacacional, Comercial, Trastero, Parking
+### ✅ Antes de Empezar
 
-#### Condiciones Económicas
-- **Renta mensual (€)** (obligatorio)
-- **Día de pago del mes** (ej: 1, 5, 10)
-- **Depósito/Fianza (€)**
-- **Incremento anual (%)** - IPC u otro
+- [ ] Leído **INICIO_RAPIDO_MIGRACION.md**
+- [ ] Ejecutado `./scripts/check-pre-migracion.sh` exitosamente
+- [ ] Clave SSH configurada (`~/.ssh/inmova_deployment_key`)
+- [ ] IP del servidor disponible
+- [ ] `.env.production` configurado (todas las variables)
+- [ ] Backup local realizado
 
-#### Servicios Incluidos
-- **¿Gastos de comunidad incluidos?**: Sí/No
-- **¿Agua incluida?**: Sí/No
-- **¿Gas incluido?**: Sí/No
-- **¿Electricidad incluida?**: Sí/No
-- **¿Internet incluido?**: Sí/No
+### ✅ Durante la Migración
 
-#### Estado
-- **Estado actual**: Activo, Finalizado, Cancelado, Pendiente de firma
+- [ ] Script `migracion-servidor.sh` ejecutado
+- [ ] Todos los servicios instalados
+- [ ] Base de datos creada
+- [ ] Aplicación compilada
+- [ ] PM2 ejecutándose
 
-**Formato recomendado:** CSV con las siguientes columnas:
-```
-unidadNumero,inquilinoEmail,fechaInicio,fechaFin,tipoContrato,rentaMensual,diaPago,deposito,incrementoAnual,gastosIncluidos,aguaIncluida,gasIncluido,electricidadIncluida,internetIncluido,estado
-```
+### ✅ Después de Migrar
+
+- [ ] Script `verificacion-post-migracion.sh` pasado
+- [ ] Aplicación accesible en navegador
+- [ ] Login funcionando
+- [ ] Sin errores en logs
+- [ ] Certificado SSL instalado (opcional)
+- [ ] Dominio configurado (opcional)
+- [ ] Backups automáticos configurados
 
 ---
 
-### 5️⃣ PAGOS / HISTORIAL FINANCIERO
+## 🛠️ Scripts Detallados
 
-#### Información de Pago
-- **Contrato asociado** (obligatorio - unidad + inquilino)
-- **Mes y año del pago** (obligatorio - ej: 2024-01)
-- **Monto total (€)** (obligatorio)
-- **Monto de renta (€)**
-- **Monto de gastos adicionales (€)** (si aplica)
+### `check-pre-migracion.sh`
 
-#### Estado
-- **Estado del pago**: Pendiente, Pagado, Vencido, Parcialmente pagado
-- **Fecha de vencimiento**
-- **Fecha de pago real** (si ya se pagó)
-- **Método de pago**: Transferencia, Efectivo, Domiciliación, Tarjeta, Otro
+**Propósito:** Verificar que todo está listo antes de migrar
 
-#### Observaciones
-- **Notas** (opcional - ej: "Pago retrasado por problemas bancarios")
+**Verifica:**
+- ✅ Herramientas necesarias (SSH, rsync, curl, etc.)
+- ✅ Variables de entorno configuradas
+- ✅ Clave SSH existe y tiene permisos correctos
+- ✅ Archivos del proyecto presentes
+- ✅ `.env.production` sin placeholders
+- ✅ Conectividad al servidor
+- ✅ Espacio en disco suficiente
 
-**Formato recomendado:** CSV con las siguientes columnas:
-```
-contratoUnidad,contratoInquilino,mesPago,monto,montoRenta,montogastosAdicionales,estado,fechaVencimiento,fechaPago,metodoPago,notas
+**Uso:**
+```bash
+./scripts/check-pre-migracion.sh
 ```
 
 ---
 
-### 6️⃣ PROVEEDORES / SERVICIOS
+### `backup-pre-migracion.sh`
 
-#### Información Básica
-- **Nombre de la empresa** (obligatorio)
-- **CIF/NIF** (obligatorio)
-- **Tipo de servicio**: Fontanería, Electricidad, Limpieza, Jardinería, Mantenimiento, Cerrajería, Pintura, Climatización, Otro
+**Propósito:** Crear backup completo antes de migrar
 
-#### Contacto
-- **Persona de contacto**
-- **Email** (obligatorio)
-- **Teléfono** (obligatorio)
+**Respalda:**
+- 💾 Base de datos (PostgreSQL dump)
+- 🔐 Variables de entorno (.env*)
+- ⚙️ Archivos de configuración
+- 📜 Scripts
+- ✅ Checksums para verificación
 
-#### Financiero
-- **Tarifa por hora (€)** (si aplica)
-- **Valoración** (1-5 estrellas - opcional)
+**Resultado:**
+- Directorio: `backups/migracion_[FECHA]/`
+- Archivo comprimido: `backups/migracion_[FECHA].tar.gz`
 
-**Formato recomendado:** CSV con las siguientes columnas:
-```
-nombreEmpresa,cif,tipoServicio,personaContacto,email,telefono,tarifaHora,valoracion
-```
-
----
-
-### 7️⃣ GASTOS / FACTURAS (Opcional pero recomendado)
-
-#### Información Básica
-- **Edificio asociado** (obligatorio)
-- **Categoría**: IBI, Comunidad, Mantenimiento, Seguro, Reparación, Suministro (agua, luz, gas), Administrativo, Legal, Otro
-- **Descripción** (obligatorio)
-
-#### Económico
-- **Monto (€)** (obligatorio)
-- **Fecha del gasto** (obligatorio)
-- **Proveedor** (opcional)
-
-#### Comprobante
-- **Número de factura** (opcional)
-- **¿Está pagado?**: Sí/No
-
-**Formato recomendado:** CSV con las siguientes columnas:
-```
-edificioNombre,categoria,descripcion,monto,fechaGasto,proveedor,numeroFactura,pagado
+**Uso:**
+```bash
+./scripts/backup-pre-migracion.sh
 ```
 
 ---
 
-### 8️⃣ DOCUMENTOS IMPORTANTES (Opcional)
+### `migracion-servidor.sh`
 
-Si tienen documentación digitalizada, es útil proporcionarla:
+**Propósito:** Ejecutar migración completa al servidor
 
-- **Contratos de alquiler** (PDF)
-- **Escrituras de propiedad** (PDF)
-- **Certificados energéticos** (PDF)
-- **Pólizas de seguro** (PDF)
-- **Facturas de IBI** (PDF)
-- **Licencias de actividad** (PDF - para locales comerciales)
+**Proceso (12 pasos):**
+1. Verificar conectividad SSH
+2. Preparar servidor (instalar dependencias)
+3. Crear estructura de directorios
+4. Transferir archivos
+5. Configurar variables de entorno
+6. Instalar dependencias Node.js
+7. Configurar PostgreSQL
+8. Ejecutar migraciones Prisma
+9. Compilar aplicación
+10. Configurar PM2
+11. Configurar Nginx
+12. Configurar firewall
 
-**Formato:** Archivos organizados en carpetas:
+**Tiempo estimado:** 15-30 minutos
+
+**Uso:**
+```bash
+export SERVER_IP="xxx.xxx.xxx.xxx"
+./scripts/migracion-servidor.sh
 ```
-Documentos/
-├── Edificio_1/
-│   ├── Contratos/
-│   ├── Escrituras/
-│   └── Facturas/
-├── Edificio_2/
-│   └── ...
+
+---
+
+### `verificacion-post-migracion.sh`
+
+**Propósito:** Verificar que todo funciona correctamente
+
+**Verifica:**
+- ✅ Conectividad SSH
+- ✅ Servicios (Node.js, PostgreSQL, Nginx, Redis, PM2)
+- ✅ Aplicación ejecutándose
+- ✅ Base de datos operativa
+- ✅ Archivos en su lugar
+- ✅ Conectividad HTTP/HTTPS
+- ✅ Logs sin errores críticos
+- ✅ Firewall configurado
+- ✅ Recursos del sistema (CPU, RAM, Disco)
+
+**Uso:**
+```bash
+export SERVER_IP="xxx.xxx.xxx.xxx"
+./scripts/verificacion-post-migracion.sh
 ```
 
 ---
 
-## 🔄 Proceso de Importación
+## 🔐 Variables de Entorno Críticas
 
-### Paso 1: Preparación de Datos
-1. Solicitar a la empresa los datos en los formatos CSV indicados
-2. Revisar que todos los campos obligatorios estén completos
-3. Validar que las fechas estén en formato correcto (YYYY-MM-DD)
-4. Verificar que los emails sean válidos
-5. Confirmar que los números de teléfono incluyan prefijo (+34 para España)
+Estas variables **DEBEN** ser configuradas en `.env.production`:
 
-### Paso 2: Validación
-1. Cargar los archivos CSV en el sistema usando la página de importación (`/admin/importar`)
-2. El sistema validará automáticamente:
-   - Formato de campos
-   - Campos obligatorios
-   - Duplicados
-   - Relaciones entre entidades (ej: que el edificio exista antes de crear unidades)
-3. Revisar los mensajes de **errores** y **advertencias**
-4. Corregir los datos según sea necesario
+```bash
+# Generar con: openssl rand -base64 32
+NEXTAUTH_SECRET=[OBLIGATORIO]
+ENCRYPTION_KEY=[OBLIGATORIO]
+MFA_ENCRYPTION_KEY=[OBLIGATORIO]
 
-### Paso 3: Vista Previa
-- El sistema mostrará una vista previa de cómo se importarán los datos
-- Revisar que todo esté correcto antes de confirmar
+# URL del servidor (actualizar con IP o dominio)
+NEXTAUTH_URL=http://[IP_O_DOMINIO]
+NEXT_PUBLIC_BASE_URL=http://[IP_O_DOMINIO]
 
-### Paso 4: Importación
-- Confirmar la importación
-- El sistema procesará los datos y mostrará un resumen con:
-  - Registros importados exitosamente
-  - Registros con errores
-  - Detalle de errores específicos
+# Base de datos
+DATABASE_URL=postgresql://inmova_user:password@localhost:5432/inmova_production
 
-### Paso 5: Verificación Post-Importación
-1. Revisar que todos los edificios, unidades, inquilinos y contratos se hayan importado correctamente
-2. Verificar las relaciones entre entidades
-3. Confirmar que los montos y fechas sean correctos
-4. Realizar ajustes manuales si es necesario
+# AWS S3
+AWS_BUCKET_NAME=[OBLIGATORIO]
+AWS_ACCESS_KEY_ID=[OBLIGATORIO]
+AWS_SECRET_ACCESS_KEY=[OBLIGATORIO]
+
+# Stripe (PRODUCCIÓN)
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_PUBLISHABLE_KEY=pk_live_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
+
+# Push Notifications (generar con: npx web-push generate-vapid-keys)
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=[OBLIGATORIO]
+VAPID_PRIVATE_KEY=[OBLIGATORIO]
+```
 
 ---
 
-## 📞 Soporte
+## 🆘 Soporte
 
-Si tienen dudas durante el proceso de preparación o migración de datos:
+### Problemas Comunes
 
-- **Email:** support@inmova.com
-- **Teléfono:** [Por definir]
-- **Portal de soporte:** [URL de soporte]
+| Problema | Solución |
+|----------|----------|
+| No puedo conectar por SSH | Ver **[SERVIDOR_MIGRACION_SSH.md](./SERVIDOR_MIGRACION_SSH.md)** |
+| Variables sin configurar | Ver `.env.servidor.inmova-deployment` |
+| Script falla | Los scripts son idempotentes, ejecutar de nuevo |
+| Error 502 | Ver logs: `pm2 logs` y `systemctl status nginx` |
+| Base de datos no conecta | Ver **[GUIA_MIGRACION_SERVIDOR_INMOVA.md](./GUIA_MIGRACION_SERVIDOR_INMOVA.md)** sección Troubleshooting |
 
----
+### Comandos de Debug
 
-## ✅ Checklist de Migración
+```bash
+# Ver logs de la aplicación
+ssh inmova-deployment "pm2 logs inmova-production --lines 100"
 
-### Pre-Migración
-- [ ] Inventario completo de propiedades
-- [ ] Lista de inquilinos activos
-- [ ] Contratos vigentes recopilados
-- [ ] Historial de pagos de los últimos 12 meses
-- [ ] Lista de proveedores habituales
-- [ ] Facturas y gastos del año en curso
+# Ver estado del servidor
+ssh inmova-deployment "pm2 status && systemctl status nginx && systemctl status postgresql"
 
-### Durante la Migración
-- [ ] Archivos CSV preparados según plantillas
-- [ ] Validación inicial completada
-- [ ] Corrección de errores realizada
-- [ ] Vista previa revisada
-- [ ] Importación ejecutada
-
-### Post-Migración
-- [ ] Verificación de datos importados
-- [ ] Pruebas con usuarios finales
-- [ ] Documentación compartida con el equipo
-- [ ] Capacitación a usuarios clave
-- [ ] Ajustes finales realizados
+# Ejecutar verificación completa
+./scripts/verificacion-post-migracion.sh
+```
 
 ---
 
-## 📄 Plantillas de Importación
+## 📞 Información de Contacto
 
-### Descargar Plantillas CSV
+### Servidor
+- **Nombre:** inmova-deployment
+- **Fingerprint:** 55:0e:12:f9:8f:a3:b0:4b:04:7e:fe:de:00:3f:53:78
+- **Documentación:** [SERVIDOR_MIGRACION_SSH.md](./SERVIDOR_MIGRACION_SSH.md)
 
-El sistema proporciona plantillas CSV predefinidas con el formato correcto. Para descargarlas:
-
-1. Acceder a `/admin/importar` con el usuario Super Administrador
-2. Seleccionar el tipo de datos a importar (Edificios, Unidades, Inquilinos, etc.)
-3. Click en "Descargar Plantilla CSV"
-4. Llenar la plantilla con los datos de la empresa
-5. Guardar y subir al sistema
-
----
-
-## 🎯 Recomendaciones
-
-1. **Empezar por lo básico:** Importar primero edificios, luego unidades, luego inquilinos, y finalmente contratos
-2. **Hacer pruebas pequeñas:** Importar un edificio completo antes de importar todo
-3. **Mantener copias de seguridad:** Guardar los archivos CSV originales
-4. **Documentar particularidades:** Si hay algo especial en la gestión de alguna propiedad, anotarlo
-5. **Validar números:** Verificar que los montos de renta, depósitos, etc. sean correctos
-6. **Fechas coherentes:** Asegurar que las fechas de contratos y pagos sean lógicas
+### Rutas en el Servidor
+- **Aplicación:** `/var/www/inmova`
+- **Logs PM2:** `/var/log/inmova/`
+- **Logs Nginx:** `/var/log/nginx/`
+- **Backups:** `/var/www/inmova/backups/`
 
 ---
 
-## 📈 Próximos Pasos
+## 📊 Estructura del Proyecto
 
-Una vez completada la migración de datos:
-
-1. **Configuración de módulos adicionales** según las necesidades de cada empresa
-2. **Personalización de informes** y dashboards
-3. **Capacitación completa** a los usuarios
-4. **Establecimiento de flujos de trabajo** para operaciones diarias
-5. **Configuración de notificaciones y alertas** automáticas
+```
+/workspace/
+├── scripts/
+│   ├── check-pre-migracion.sh          # ✅ Verificar preparación
+│   ├── backup-pre-migracion.sh         # 💾 Crear backup
+│   ├── migracion-servidor.sh           # 🚀 Ejecutar migración
+│   └── verificacion-post-migracion.sh  # 🔍 Verificar instalación
+│
+├── .env.servidor.inmova-deployment     # 📝 Plantilla de variables
+├── .env.production                     # 🔧 Variables de producción (crear)
+│
+├── README_MIGRACION.md                 # 📚 Este archivo (índice)
+├── INICIO_RAPIDO_MIGRACION.md          # ⚡ Guía rápida
+├── COMANDOS_MIGRACION_RAPIDA.md        # 📋 Comandos esenciales
+├── GUIA_MIGRACION_SERVIDOR_INMOVA.md   # 📖 Guía completa
+└── SERVIDOR_MIGRACION_SSH.md           # 🔐 Configuración SSH
+```
 
 ---
 
-**Fecha de creación de la estructura:** 1 de diciembre de 2025  
-**Versión del documento:** 1.0  
-**Sistema:** INMOVA - Plataforma de Gestión Inmobiliaria
+## 🎉 ¡Comienza Ahora!
+
+```bash
+# 1. Verificar que estás listo
+./scripts/check-pre-migracion.sh
+
+# 2. Si todo está OK, procede con:
+#    - INICIO_RAPIDO_MIGRACION.md (para migración rápida)
+#    - GUIA_MIGRACION_SERVIDOR_INMOVA.md (para proceso detallado)
+```
+
+---
+
+**¡Todo está listo para la migración!** 🚀
+
+---
+
+**Última actualización:** 26/12/2025  
+**Versión:** 1.0  
+**Preparado para:** Servidor inmova-deployment

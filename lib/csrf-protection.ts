@@ -207,10 +207,12 @@ export function getCsrfToken(): string | null {
 
 /**
  * Componente React para incluir el token CSRF en el HTML
+ * NOTA: Este componente está comentado porque contiene JSX en un archivo .ts
+ * Si necesitas usar este componente, muévelo a un archivo .tsx
  */
-export function CsrfTokenMeta({ token }: { token: string }) {
-  return <meta name="csrf-token" content={token} />;
-}
+// export function CsrfTokenMeta({ token }: { token: string }) {
+//   return <meta name="csrf-token" content={token} />;
+// }
 
 /**
  * Fetch wrapper que incluye automáticamente el token CSRF

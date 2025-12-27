@@ -1,611 +1,118 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
-
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
+import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import {
-  Home,
-  ArrowLeft,
-  Shield,
-  AlertTriangle,
-  CheckCircle,
-  Plus,
-  Search,
-  Phone,
-  Mail,
-  Euro,
-  Calendar,
-  Upload,
-  FileText,
-  Download,
-  Trash2,
-  Loader2,
-} from 'lucide-react';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
-import logger, { logError } from '@/lib/logger';
+import { Shield, Plus, Search, AlertTriangle } from 'lucide-react';
 
 export default function SegurosPage() {
-  const { data: session, status } = useSession() || {};
   const router = useRouter();
-  const [seguros, setSeguros] = useState<any[]>([]);
-  const [buildings, setBuildings] = useState<any[]>([]);
-  const [units, setUnits] = useState<any[]>([]);
+  const { data: session, status } = useSession();
   const [loading, setLoading] = useState(true);
-  const [openNew, setOpenNew] = useState(false);
+  const [seguros, setSeguros] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedSeguro, setSelectedSeguro] = useState<any>(null);
-  const [openDocuments, setOpenDocuments] = useState(false);
-  const [uploading, setUploading] = useState(false);
-
-  const [newSeguro, setNewSeguro] = useState({
-    numeroPoliza: '',
-    tipo: 'incendio',
-    aseguradora: '',
-    nombreAsegurado: '',
-    telefonoAseguradora: '',
-    emailAseguradora: '',
-    cobertura: '',
-    sumaAsegurada: '',
-    franquicia: '',
-    fechaInicio: '',
-    fechaVencimiento: '',
-    primaMensual: '',
-    primaAnual: '',
-    buildingId: '',
-    unitId: '',
-  });
 
   useEffect(() => {
-    if (status === 'unauthenticated') router.push('/login');
-    else if (status === 'authenticated') fetchData();
-  }, [status]);
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const [segurosRes, buildingsRes, unitsRes] = await Promise.all([
-        fetch('/api/seguros'),
-        fetch('/api/buildings'),
-        fetch('/api/units'),
-      ]);
-      if (segurosRes.ok) setSeguros(await segurosRes.json());
-      if (buildingsRes.ok) setBuildings(await buildingsRes.json());
-      if (unitsRes.ok) setUnits(await unitsRes.json());
-    } catch (error) {
-      logger.error('Error:', error);
-      toast.error('Error al cargar datos');
-    } finally {
-      setLoading(false);
+    if (status === 'unauthenticated') {
+      router.push('/login');
     }
-  };
+  }, [status, router]);
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !selectedSeguro) return;
-
-    try {
-      setUploading(true);
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const response = await fetch(`/api/seguros/${selectedSeguro.id}/documents`, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (response.ok) {
-        toast.success('Documento subido exitosamente');
-        // Refresh seguros list
-        fetchData();
-        // Update selected seguro
-        const updatedSeguros = await fetch('/api/seguros');
-        if (updatedSeguros.ok) {
-          const data = await updatedSeguros.json();
-          const updated = data.find((s: any) => s.id === selectedSeguro.id);
-          if (updated) setSelectedSeguro(updated);
-        }
-      } else {
-        toast.error('Error al subir el documento');
-      }
-    } catch (error) {
-      logger.error('Error:', error);
-      toast.error('Error al subir el documento');
-    } finally {
-      setUploading(false);
-      // Reset file input
-      e.target.value = '';
+  useEffect(() => {
+    if (session) {
+      fetch('/api/seguros')
+        .then((res) => res.json())
+        .then(setSeguros)
+        .catch(() => toast.error('Error al cargar seguros'))
+        .finally(() => setLoading(false));
     }
-  };
-
-  const handleDeleteDocument = async (documentUrl: string) => {
-    if (!selectedSeguro || !confirm('¿Estás seguro de que deseas eliminar este documento?')) return;
-
-    try {
-      const response = await fetch(
-        `/api/seguros/${selectedSeguro.id}/documents?url=${encodeURIComponent(documentUrl)}`,
-        { method: 'DELETE' }
-      );
-
-      if (response.ok) {
-        toast.success('Documento eliminado exitosamente');
-        fetchData();
-        // Update selected seguro
-        const updatedSeguros = await fetch('/api/seguros');
-        if (updatedSeguros.ok) {
-          const data = await updatedSeguros.json();
-          const updated = data.find((s: any) => s.id === selectedSeguro.id);
-          if (updated) setSelectedSeguro(updated);
-        }
-      } else {
-        toast.error('Error al eliminar el documento');
-      }
-    } catch (error) {
-      logger.error('Error:', error);
-      toast.error('Error al eliminar el documento');
-    }
-  };
-
-  const handleCreate = async () => {
-    try {
-      const response = await fetch('/api/seguros', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...newSeguro,
-          sumaAsegurada: newSeguro.sumaAsegurada ? parseFloat(newSeguro.sumaAsegurada) : null,
-          franquicia: newSeguro.franquicia ? parseFloat(newSeguro.franquicia) : null,
-          primaMensual: newSeguro.primaMensual ? parseFloat(newSeguro.primaMensual) : null,
-          primaAnual: newSeguro.primaAnual ? parseFloat(newSeguro.primaAnual) : null,
-          fechaInicio: new Date(newSeguro.fechaInicio),
-          fechaVencimiento: new Date(newSeguro.fechaVencimiento),
-          buildingId: newSeguro.buildingId || null,
-          unitId: newSeguro.unitId || null,
-        }),
-      });
-      if (response.ok) {
-        toast.success('Seguro creado exitosamente');
-        setOpenNew(false);
-        fetchData();
-      } else {
-        toast.error('Error al crear seguro');
-      }
-    } catch (error) {
-      logger.error('Error:', error);
-      toast.error('Error al crear seguro');
-    }
-  };
-
-  const totalSeguros = seguros.length;
-  const activos = seguros.filter((s) => s.estado === 'activa').length;
-  const porVencer = seguros.filter((s) => {
-    if (s.estado !== 'activa') return false;
-    const vencimiento = new Date(s.fechaVencimiento);
-    const hoy = new Date();
-    const diasRestantes = Math.ceil(
-      (vencimiento.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24)
-    );
-    return diasRestantes <= 30 && diasRestantes >= 0;
-  }).length;
-
-  const filteredSeguros = seguros.filter(
-    (s) =>
-      s.numeroPoliza?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.aseguradora?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  }, [session]);
 
   if (status === 'loading' || loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Cargando...</p>
-        </div>
-      </div>
+      <AuthenticatedLayout>
+        <main className="flex-1 overflow-y-auto p-6">
+          <div className="text-center py-12">Cargando...</div>
+        </main>
+      </AuthenticatedLayout>
     );
   }
 
+  const filteredSeguros = seguros.filter((s) =>
+    s.tipo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    s.proveedor?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto space-y-6">
-            <div className="flex items-center justify-between">
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/dashboard">
-                      <Home className="h-4 w-4" />
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>Seguros</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
-              <Button variant="outline" size="sm" onClick={() => router.push('/dashboard')}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Volver
-              </Button>
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold">Gestión de Seguros</h1>
-              <p className="text-muted-foreground">Controla pólizas y coberturas</p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total</CardTitle>
-                  <Shield className="h-4 w-4 text-muted-foreground" />
+      <main className="flex-1 overflow-y-auto p-6">
+        <div className="max-w-7xl mx-auto space-y-6">
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold flex items-center gap-2">
+              <Shield className="h-6 w-6" />
+              Seguros
+            </h1>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Nuevo Seguro
+            </Button>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Search className="h-5 w-5" />
+                Buscar Seguros
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Input
+                placeholder="Buscar por tipo o proveedor..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </CardContent>
+          </Card>
+
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {filteredSeguros.map((seguro) => (
+              <Card key={seguro.id}>
+                <CardHeader>
+                  <CardTitle className="text-lg">{seguro.tipo}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{totalSeguros}</div>
-                  <p className="text-xs text-muted-foreground">Pólizas registradas</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Activas</CardTitle>
-                  <CheckCircle className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{activos}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Por Vencer</CardTitle>
-                  <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-orange-600">{porVencer}</div>
-                  <p className="text-xs text-muted-foreground">Próximos 30 días</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Suma Asegurada</CardTitle>
-                  <Euro className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    €
-                    {(seguros.reduce((acc, s) => acc + (s.sumaAsegurada || 0), 0) / 1000).toFixed(
-                      0
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">{seguro.proveedor}</p>
+                    <Badge variant={seguro.activo ? 'default' : 'secondary'}>
+                      {seguro.activo ? 'Activo' : 'Inactivo'}
+                    </Badge>
+                    {seguro.vencimiento && new Date(seguro.vencimiento) < new Date() && (
+                      <div className="flex items-center gap-1 text-amber-600">
+                        <AlertTriangle className="h-4 w-4" />
+                        <span className="text-xs">Vencido</span>
+                      </div>
                     )}
-                    K
                   </div>
                 </CardContent>
               </Card>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input
-                  placeholder="Buscar..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <Button onClick={() => setOpenNew(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Nuevo Seguro
-              </Button>
-            </div>
-            <div className="grid grid-cols-1 gap-4">
-              {filteredSeguros.map((seguro) => (
-                <Card key={seguro.id}>
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-lg">{seguro.aseguradora}</CardTitle>
-                        <CardDescription>Póliza: {seguro.numeroPoliza}</CardDescription>
-                      </div>
-                      <Badge variant={seguro.estado === 'activa' ? 'default' : 'secondary'}>
-                        {seguro.estado}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                      <div>
-                        <p className="text-xs text-muted-foreground">Tipo</p>
-                        <p className="text-sm font-medium">{seguro.tipo.replace('_', ' ')}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Vencimiento</p>
-                        <p className="text-sm font-medium">
-                          {format(new Date(seguro.fechaVencimiento), 'dd/MM/yyyy', { locale: es })}
-                        </p>
-                      </div>
-                      {seguro.sumaAsegurada && (
-                        <div>
-                          <p className="text-xs text-muted-foreground">Suma Asegurada</p>
-                          <p className="text-sm font-medium">
-                            €{seguro.sumaAsegurada.toLocaleString()}
-                          </p>
-                        </div>
-                      )}
-                      {seguro.primaAnual && (
-                        <div>
-                          <p className="text-xs text-muted-foreground">Prima Anual</p>
-                          <p className="text-sm font-medium">
-                            €{seguro.primaAnual.toLocaleString()}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                    {(seguro.building || seguro.unit) && (
-                      <div className="mt-3 p-2 bg-muted rounded-md text-sm">
-                        {seguro.building && <span>{seguro.building.nombre}</span>}
-                        {seguro.unit && <span> - Unidad {seguro.unit.numero}</span>}
-                      </div>
-                    )}
-                    <div className="mt-3 flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setSelectedSeguro(seguro);
-                          setOpenDocuments(true);
-                        }}
-                      >
-                        <FileText className="h-4 w-4 mr-2" />
-                        Documentos ({(seguro.documentosAdjuntos as any)?.length || 0})
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </main>
-      </div>
-      <Dialog open={openNew} onOpenChange={setOpenNew}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Nuevo Seguro</DialogTitle>
-            <DialogDescription>Registra una nueva póliza de seguro</DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Número Póliza *</Label>
-                <Input
-                  value={newSeguro.numeroPoliza}
-                  onChange={(e) => setNewSeguro({ ...newSeguro, numeroPoliza: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label>Tipo *</Label>
-                <Select
-                  value={newSeguro.tipo}
-                  onValueChange={(v) => setNewSeguro({ ...newSeguro, tipo: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="incendio">Incendio</SelectItem>
-                    <SelectItem value="robo">Robo</SelectItem>
-                    <SelectItem value="responsabilidad_civil">Responsabilidad Civil</SelectItem>
-                    <SelectItem value="vida">Vida</SelectItem>
-                    <SelectItem value="hogar">Hogar</SelectItem>
-                    <SelectItem value="comunidad">Comunidad</SelectItem>
-                    <SelectItem value="impago_alquiler">Impago Alquiler</SelectItem>
-                    <SelectItem value="otro">Otro</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div>
-              <Label>Aseguradora *</Label>
-              <Input
-                value={newSeguro.aseguradora}
-                onChange={(e) => setNewSeguro({ ...newSeguro, aseguradora: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label>Nombre Asegurado *</Label>
-              <Input
-                value={newSeguro.nombreAsegurado}
-                onChange={(e) => setNewSeguro({ ...newSeguro, nombreAsegurado: e.target.value })}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Fecha Inicio *</Label>
-                <Input
-                  type="date"
-                  value={newSeguro.fechaInicio}
-                  onChange={(e) => setNewSeguro({ ...newSeguro, fechaInicio: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label>Fecha Vencimiento *</Label>
-                <Input
-                  type="date"
-                  value={newSeguro.fechaVencimiento}
-                  onChange={(e) => setNewSeguro({ ...newSeguro, fechaVencimiento: e.target.value })}
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Prima Anual (€)</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={newSeguro.primaAnual}
-                  onChange={(e) => setNewSeguro({ ...newSeguro, primaAnual: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label>Suma Asegurada (€)</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={newSeguro.sumaAsegurada}
-                  onChange={(e) => setNewSeguro({ ...newSeguro, sumaAsegurada: e.target.value })}
-                />
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenNew(false)}>
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleCreate}
-              disabled={
-                !newSeguro.numeroPoliza ||
-                !newSeguro.aseguradora ||
-                !newSeguro.nombreAsegurado ||
-                !newSeguro.fechaInicio ||
-                !newSeguro.fechaVencimiento
-              }
-            >
-              Crear
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog para gestionar documentos */}
-      <Dialog open={openDocuments} onOpenChange={setOpenDocuments}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Gestión de Documentos</DialogTitle>
-            <DialogDescription>
-              {selectedSeguro?.aseguradora} - Póliza {selectedSeguro?.numeroPoliza}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            {/* Upload section */}
-            <div className="border-2 border-dashed rounded-lg p-4">
-              <Label htmlFor="file-upload" className="cursor-pointer block">
-                <div className="flex flex-col items-center justify-center text-center">
-                  {uploading ? (
-                    <>
-                      <Loader2 className="h-10 w-10 animate-spin text-primary mb-2" />
-                      <p className="text-sm text-muted-foreground">Subiendo documento...</p>
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="h-10 w-10 text-muted-foreground mb-2" />
-                      <p className="text-sm font-medium">Haz clic para subir un documento</p>
-                      <p className="text-xs text-muted-foreground">
-                        PDF, DOC, DOCX, JPG, PNG (máx. 10MB)
-                      </p>
-                    </>
-                  )}
-                </div>
-                <Input
-                  id="file-upload"
-                  type="file"
-                  className="hidden"
-                  onChange={handleFileUpload}
-                  disabled={uploading}
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                />
-              </Label>
-            </div>
-
-            {/* Documents list */}
-            <div>
-              <h4 className="text-sm font-medium mb-3">Documentos Adjuntos</h4>
-              {(selectedSeguro?.documentosAdjuntos as any)?.length > 0 ? (
-                <div className="space-y-2">
-                  {((selectedSeguro?.documentosAdjuntos as any) || []).map(
-                    (doc: any, index: number) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
-                      >
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <FileText className="h-5 w-5 text-primary flex-shrink-0" />
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium truncate">{doc.filename}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {new Date(doc.uploadedAt).toLocaleDateString('es-ES', {
-                                day: '2-digit',
-                                month: 'short',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                              {doc.size && ` • ${(doc.size / 1024).toFixed(0)} KB`}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => window.open(doc.url, '_blank')}
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleDeleteDocument(doc.url)}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <FileText className="h-12 w-12 mx-auto mb-2 opacity-20" />
-                  <p className="text-sm">No hay documentos adjuntos</p>
-                </div>
-              )}
-            </div>
+            ))}
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenDocuments(false)}>
-              Cerrar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+          {filteredSeguros.length === 0 && (
+            <Card>
+              <CardContent className="text-center py-12">
+                <p className="text-muted-foreground">No se encontraron seguros</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </main>
+    </AuthenticatedLayout>
   );
 }

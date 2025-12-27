@@ -1,5 +1,6 @@
 'use client';
 
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { TrendingUp, TrendingDown, AlertCircle, CheckCircle } from 'lucide-react';

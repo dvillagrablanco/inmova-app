@@ -1,0 +1,69 @@
+
+> build
+> next build
+
+  ▲ Next.js 14.2.28
+  - Environments: .env.production
+  - Experiments (use with caution):
+    · outputFileTracingRoot
+
+   Creating an optimized production build ...
+Failed to compile.
+
+./app/api/ewoorker/compliance/upload/route.ts
+Module not found: Can't resolve '@/pages/api/auth/[...nextauth]'
+
+https://nextjs.org/docs/messages/module-not-found
+
+./app/api/ewoorker/dashboard/stats/route.ts
+Module not found: Can't resolve '@/pages/api/auth/[...nextauth]'
+
+https://nextjs.org/docs/messages/module-not-found
+
+./app/api/ewoorker/pagos/plan/route.ts
+Module not found: Can't resolve '@/pages/api/auth/[...nextauth]'
+
+https://nextjs.org/docs/messages/module-not-found
+
+./app/automatizacion/page.tsx
+Error: 
+  [31mx[0m Unexpected token `AuthenticatedLayout`. Expected jsx identifier
+     ,-[[36;1;4m/workspace/app/automatizacion/page.tsx[0m:270:1]
+ [2m270[0m |   }
+ [2m271[0m | 
+ [2m272[0m |   return (
+ [2m273[0m |     <AuthenticatedLayout>
+     : [31;1m     ^^^^^^^^^^^^^^^^^^^[0m
+ [2m274[0m |           <div className="max-w-7xl mx-auto space-y-6">
+ [2m275[0m |             {/* Header */}
+ [2m276[0m |             <div className="flex items-center justify-between">
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./app/automatizacion/page.tsx
+
+./app/certificaciones/page.tsx
+Error: 
+  [31mx[0m Unexpected token `AuthenticatedLayout`. Expected jsx identifier
+     ,-[[36;1;4m/workspace/app/certificaciones/page.tsx[0m:236:1]
+ [2m236[0m |   };
+ [2m237[0m | 
+ [2m238[0m |   return (
+ [2m239[0m |     <AuthenticatedLayout>
+     : [31;1m     ^^^^^^^^^^^^^^^^^^^[0m
+ [2m240[0m |           <div className="max-w-7xl mx-auto space-y-6">
+ [2m241[0m |             <div className="flex items-center justify-between">
+ [2m242[0m |               <Breadcrumb>
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./app/certificaciones/page.tsx
+
+
+> Build failed because of webpack errors

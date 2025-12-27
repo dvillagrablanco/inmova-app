@@ -4,198 +4,92 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Building2, DoorOpen, Users, Euro, TrendingUp, Plus, Eye, BarChart3 } from 'lucide-react';
+import { toast } from 'sonner';
+import { Building, Plus, Bed } from 'lucide-react';
 
-import { ErrorBoundary } from '@/components/ui/error-boundary';
-import logger, { logError } from '@/lib/logger';
-
-function RoomRentalPage() {
+export default function RoomRentalPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
-  const [units, setUnits] = useState<any[]>([]);
-  const [analytics, setAnalytics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [units, setUnits] = useState<any[]>([]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');
-      return;
-    }
-
-    if (status === 'authenticated') {
-      loadData();
     }
   }, [status, router]);
 
-  async function loadData() {
-    try {
-      setLoading(true);
-      const [unitsRes, analyticsRes] = await Promise.all([
-        fetch('/api/units?tipo=vivienda'),
-        fetch('/api/room-rental/analytics'),
-      ]);
-
-      if (unitsRes.ok) setUnits(await unitsRes.json());
-      if (analyticsRes.ok) setAnalytics(await analyticsRes.json());
-    } catch (error) {
-      logger.error('Error loading data:', error);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (session) {
+      fetch('/api/units/room-rental')
+        .then((res) => res.json())
+        .then(setUnits)
+        .catch(() => toast.error('Error al cargar unidades'))
+        .finally(() => setLoading(false));
     }
-  }
+  }, [session]);
 
   if (loading) {
     return (
       <AuthenticatedLayout>
-            <div className="text-center py-12">Cargando...</div>
-          </main>
-        </div>
-      </div>
+        <main className="flex-1 overflow-y-auto p-6">
+          <div className="text-center py-12">Cargando...</div>
+        </main>
+      </AuthenticatedLayout>
     );
   }
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto">
-            {/* Header */}
-            <div className="mb-6">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Alquiler por Habitaciones</h1>
-              <p className="text-gray-600">
-                Gestiona habitaciones, contratos y prorrateo de suministros
-              </p>
-            </div>
+      <main className="flex-1 overflow-y-auto p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold">Alquiler por Habitaciones</h1>
+            <Button onClick={() => router.push('/room-rental/new')}>
+              <Plus className="h-4 w-4 mr-2" />
+              Nueva Unidad
+            </Button>
+          </div>
 
-            {/* Analytics KPIs */}
-            {analytics && (
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium text-gray-600">
-                      Tasa Ocupación
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-green-600">
-                      {analytics.occupancyRate}%
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {units.map((unit) => (
+              <Card key={unit.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => router.push(`/room-rental/${unit.id}`)}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Building className="h-5 w-5" />
+                    {unit.building?.nombre || 'Sin nombre'} - {unit.numero}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Bed className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm">{unit.rooms?.length || 0} habitaciones</span>
                     </div>
-                  </CardContent>
-                </Card>
+                    <Badge variant={unit.active ? 'default' : 'secondary'}>
+                      {unit.active ? 'Activo' : 'Inactivo'}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
 
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium text-gray-600">
-                      Ingresos Totales
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-blue-600">
-                      €{analytics.totalRevenue.toLocaleString()}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium text-gray-600">
-                      Precio Promedio
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-purple-600">
-                      €{analytics.averageRoomPrice.toFixed(0)}/mes
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium text-gray-600">
-                      Estancia Promedio
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-orange-600">
-                      {analytics.averageStayDuration.toFixed(0)} días
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-
-            {/* Lista de Unidades con Habitaciones */}
+          {units.length === 0 && (
             <Card>
-              <CardHeader>
-                <CardTitle>Unidades con Habitaciones</CardTitle>
-                <CardDescription>
-                  Selecciona una unidad para gestionar sus habitaciones
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {units.map((unit) => (
-                    <Card
-                      key={unit.id}
-                      className="hover:shadow-md transition-shadow cursor-pointer"
-                      onClick={() => router.push(`/room-rental/${unit.id}`)}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between mb-3">
-                          <div>
-                            <h3 className="font-semibold text-lg">{unit.building?.nombre}</h3>
-                            <p className="text-sm text-gray-600">Unidad {unit.numero}</p>
-                          </div>
-                          <Building2 className="h-8 w-8 text-blue-500" />
-                        </div>
-
-                        <div className="space-y-2 text-sm">
-                          <div className="flex items-center justify-between">
-                            <span className="text-gray-600">Superficie:</span>
-                            <span className="font-medium">{unit.superficie}m²</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-gray-600">Estado:</span>
-                            <Badge variant={unit.estado === 'disponible' ? 'default' : 'secondary'}>
-                              {unit.estado}
-                            </Badge>
-                          </div>
-                        </div>
-
-                        <Button className="w-full mt-4" size="sm">
-                          <Eye className="mr-2 h-4 w-4" />
-                          Ver Habitaciones
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
-
-                  {units.length === 0 && (
-                    <div className="col-span-full text-center py-12 text-gray-500">
-                      <DoorOpen className="mx-auto h-12 w-12 mb-4 text-gray-400" />
-                      <p>No hay unidades disponibles para alquiler por habitaciones</p>
-                      <Button className="mt-4" onClick={() => router.push('/unidades/nuevo')}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Crear Nueva Unidad
-                      </Button>
-                    </div>
-                  )}
-                </div>
+              <CardContent className="text-center py-12">
+                <p className="text-muted-foreground">No hay unidades configuradas para alquiler por habitaciones</p>
+                <Button variant="outline" className="mt-4" onClick={() => router.push('/room-rental/new')}>
+                  Crear primera unidad
+                </Button>
               </CardContent>
             </Card>
-          </div>
-        </main>
-      </div>
-    </div>
-  );
-}
-
-export default function RoomRentalPageWithErrorBoundary() {
-  return (
-    <ErrorBoundary>
-      <RoomRentalPage />
-    </ErrorBoundary>
+          )}
+        </div>
+      </main>
+    </AuthenticatedLayout>
   );
 }
