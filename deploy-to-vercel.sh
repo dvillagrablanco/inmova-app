@@ -1,95 +1,190 @@
 #!/bin/bash
 
-# Script mejorado para deployment en Vercel
-# Autor: INMOVA Team
-# Fecha: $(date +%Y-%m-%d)
+# =====================================================
+# Script de Deployment a Vercel - INMOVA
+# =====================================================
 
-set -e  # Exit on error
+set -e  # Salir si hay algún error
 
-# Colors
+echo "🚀 Iniciando deployment a Vercel..."
+echo ""
+
+# Colores para output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}"
-echo "================================="
-echo "  INMOVA - Vercel Deployment"
-echo "================================="
-echo -e "${NC}"
-
-# Check if we're in the right directory
-if [ ! -f "nextjs_space/package.json" ]; then
-    echo -e "${RED}Error: Execute este script desde la raíz del proyecto${NC}"
-    exit 1
-fi
-
-# Check if vercel CLI is installed
-if ! command -v vercel &> /dev/null && ! command -v npx &> /dev/null; then
-    echo -e "${RED}Error: Ni 'vercel' ni 'npx' están disponibles${NC}"
-    echo "Instala Vercel CLI con: npm install -g vercel"
-    exit 1
-fi
-
-# Use vercel or npx vercel
-if command -v vercel &> /dev/null; then
-    VERCEL_CMD="vercel"
+# =====================================================
+# 1. Verificar que Vercel CLI está instalado
+# =====================================================
+echo "📦 Verificando Vercel CLI..."
+if ! command -v vercel &> /dev/null; then
+    echo -e "${RED}❌ Vercel CLI no está instalado${NC}"
+    echo "Instalando Vercel CLI..."
+    npm install -g vercel@latest
+    echo -e "${GREEN}✅ Vercel CLI instalado${NC}"
 else
-    VERCEL_CMD="npx vercel"
+    echo -e "${GREEN}✅ Vercel CLI encontrado: $(vercel --version)${NC}"
 fi
-
-echo -e "${YELLOW}Usando comando: $VERCEL_CMD${NC}"
 echo ""
 
-# Move to nextjs_space directory
-cd nextjs_space
-
-echo -e "${GREEN}➤ Paso 1: Verificando autenticación...${NC}"
-if $VERCEL_CMD whoami &> /dev/null; then
-    USER=$($VERCEL_CMD whoami)
-    echo -e "${GREEN}✔ Autenticado como: $USER${NC}"
+# =====================================================
+# 2. Verificar autenticación
+# =====================================================
+echo "🔐 Verificando autenticación con Vercel..."
+if ! vercel whoami &> /dev/null; then
+    echo -e "${YELLOW}⚠️  No estás autenticado${NC}"
+    echo "Por favor, autentica con tu cuenta de Vercel..."
+    vercel login
+    echo ""
 else
-    echo -e "${YELLOW}⚠ No estás autenticado${NC}"
-    echo "Por favor, ejecuta: $VERCEL_CMD login"
-    echo "Email: dvillagra@vidaroinversiones.com"
+    echo -e "${GREEN}✅ Autenticado como: $(vercel whoami)${NC}"
+fi
+echo ""
+
+# =====================================================
+# 3. Verificar que estamos en el directorio correcto
+# =====================================================
+echo "📂 Verificando directorio del proyecto..."
+if [ ! -f "package.json" ]; then
+    echo -e "${RED}❌ No se encontró package.json${NC}"
+    echo "Asegúrate de ejecutar este script desde la raíz del proyecto"
+    exit 1
+fi
+echo -e "${GREEN}✅ Directorio correcto${NC}"
+echo ""
+
+# =====================================================
+# 4. Verificar configuración de Vercel
+# =====================================================
+echo "⚙️  Verificando configuración..."
+if [ ! -f "vercel.json" ]; then
+    echo -e "${YELLOW}⚠️  No se encontró vercel.json${NC}"
+    echo "El proyecto se desplegará con configuración por defecto"
+else
+    echo -e "${GREEN}✅ vercel.json encontrado${NC}"
+fi
+echo ""
+
+# =====================================================
+# 5. Mostrar resumen pre-deployment
+# =====================================================
+echo -e "${BLUE}═══════════════════════════════════════${NC}"
+echo -e "${BLUE}        RESUMEN PRE-DEPLOYMENT${NC}"
+echo -e "${BLUE}═══════════════════════════════════════${NC}"
+echo "📦 Proyecto: INMOVA"
+echo "🏗️  Framework: Next.js"
+echo "📌 Node.js: $(node --version)"
+echo "📦 Package Manager: yarn"
+echo "🌐 Usuario Vercel: $(vercel whoami)"
+echo -e "${BLUE}═══════════════════════════════════════${NC}"
+echo ""
+
+# =====================================================
+# 6. Preguntar tipo de deployment
+# =====================================================
+echo "🎯 ¿Qué tipo de deployment deseas realizar?"
+echo "   1) Preview (ambiente de prueba)"
+echo "   2) Production (producción)"
+echo ""
+read -p "Selecciona una opción (1 o 2): " DEPLOY_TYPE
+echo ""
+
+# =====================================================
+# 7. Limpiar cache (opcional)
+# =====================================================
+read -p "¿Deseas limpiar la cache antes de desplegar? (y/N): " CLEAN_CACHE
+if [[ $CLEAN_CACHE =~ ^[Yy]$ ]]; then
+    echo "🧹 Limpiando cache..."
+    rm -rf .next node_modules/.cache
+    echo -e "${GREEN}✅ Cache limpiada${NC}"
+fi
+echo ""
+
+# =====================================================
+# 8. Instalar dependencias
+# =====================================================
+echo "📦 Instalando dependencias..."
+yarn install --frozen-lockfile
+echo -e "${GREEN}✅ Dependencias instaladas${NC}"
+echo ""
+
+# =====================================================
+# 9. Generar Prisma Client
+# =====================================================
+echo "🔧 Generando Prisma Client..."
+yarn prisma generate
+echo -e "${GREEN}✅ Prisma Client generado${NC}"
+echo ""
+
+# =====================================================
+# 10. Desplegar según tipo seleccionado
+# =====================================================
+if [ "$DEPLOY_TYPE" = "1" ]; then
+    echo -e "${YELLOW}🚀 Desplegando a PREVIEW...${NC}"
+    echo ""
+    vercel
+    echo ""
+    echo -e "${GREEN}✅ Deployment PREVIEW completado${NC}"
+    echo ""
+    echo "🔗 Tu aplicación está disponible en la URL mostrada arriba"
+    echo "📝 Este deployment es para pruebas y no afecta producción"
+    
+elif [ "$DEPLOY_TYPE" = "2" ]; then
+    echo -e "${RED}⚠️  IMPORTANTE: Estás a punto de desplegar a PRODUCCIÓN${NC}"
+    echo ""
+    read -p "¿Estás seguro? (y/N): " CONFIRM_PROD
+    
+    if [[ $CONFIRM_PROD =~ ^[Yy]$ ]]; then
+        echo -e "${YELLOW}🚀 Desplegando a PRODUCTION...${NC}"
+        echo ""
+        vercel --prod
+        echo ""
+        echo -e "${GREEN}✅ Deployment PRODUCTION completado${NC}"
+        echo ""
+        echo "🎉 Tu aplicación está en producción"
+        echo "🔗 Verifica que todo funciona correctamente"
+    else
+        echo -e "${YELLOW}❌ Deployment cancelado${NC}"
+        exit 0
+    fi
+else
+    echo -e "${RED}❌ Opción inválida${NC}"
     exit 1
 fi
 
+# =====================================================
+# 11. Post-deployment checklist
+# =====================================================
 echo ""
-echo -e "${GREEN}➤ Paso 2: Vinculando proyecto (si es necesario)...${NC}"
-if [ ! -d ".vercel" ]; then
-    echo -e "${YELLOW}No se encontró vinculación con Vercel${NC}"
-    echo "Ejecutando: $VERCEL_CMD link"
-    $VERCEL_CMD link
-else
-    echo -e "${GREEN}✔ Proyecto ya vinculado${NC}"
-fi
-
+echo -e "${BLUE}═══════════════════════════════════════${NC}"
+echo -e "${BLUE}     POST-DEPLOYMENT CHECKLIST${NC}"
+echo -e "${BLUE}═══════════════════════════════════════${NC}"
 echo ""
-echo -e "${GREEN}➤ Paso 3: Desplegando a producción...${NC}"
-echo -e "${YELLOW}Esto puede tardar varios minutos...${NC}"
+echo "Por favor, verifica lo siguiente:"
+echo ""
+echo "  [ ] La página principal carga correctamente"
+echo "  [ ] El login funciona"
+echo "  [ ] El dashboard muestra datos"
+echo "  [ ] Las imágenes cargan desde S3"
+echo "  [ ] No hay errores en la consola"
+echo "  [ ] Los APIs responden correctamente"
+echo ""
+echo -e "${BLUE}═══════════════════════════════════════${NC}"
+echo ""
 
-# Deploy to production
-if $VERCEL_CMD --prod; then
-    echo ""
-    echo -e "${GREEN}=================================${NC}"
-    echo -e "${GREEN}✔ ¡Deployment exitoso!${NC}"
-    echo -e "${GREEN}=================================${NC}"
-    echo ""
-    echo "Tu aplicación está desplegada en:"
-    echo -e "${BLUE}https://inmova.app${NC}"
-    echo ""
-    echo "Panel de control de Vercel:"
-    echo -e "${BLUE}https://vercel.com/dashboard${NC}"
-    echo ""
-else
-    echo ""
-    echo -e "${RED}=================================${NC}"
-    echo -e "${RED}✖ Error en el deployment${NC}"
-    echo -e "${RED}=================================${NC}"
-    echo ""
-    echo "Por favor revisa los logs arriba para más detalles."
-    echo "También puedes revisar en: https://vercel.com/dashboard"
-    exit 1
-fi
+# =====================================================
+# 12. Comandos útiles
+# =====================================================
+echo "📚 Comandos útiles:"
+echo ""
+echo "   vercel logs                    - Ver logs en tiempo real"
+echo "   vercel list                    - Ver lista de deployments"
+echo "   vercel inspect <url>           - Ver detalles del deployment"
+echo "   vercel rollback                - Volver a versión anterior"
+echo "   vercel env ls                  - Ver variables de entorno"
+echo ""
+echo -e "${GREEN}🎉 Deployment completado exitosamente${NC}"
+echo ""
