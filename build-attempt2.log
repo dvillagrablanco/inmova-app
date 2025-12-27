@@ -1,0 +1,114 @@
+
+> build
+> next build
+
+  ▲ Next.js 14.2.28
+  - Environments: .env.production
+  - Experiments (use with caution):
+    · outputFileTracingRoot
+
+   Creating an optimized production build ...
+Failed to compile.
+
+./app/contratos/page.tsx
+Error: 
+  [31mx[0m Unexpected token `AuthenticatedLayout`. Expected jsx identifier
+     ,-[[36;1;4m/workspace/app/contratos/page.tsx[0m:272:1]
+ [2m272[0m |   };
+ [2m273[0m | 
+ [2m274[0m |   return (
+ [2m275[0m |     <AuthenticatedLayout>
+     : [31;1m     ^^^^^^^^^^^^^^^^^^^[0m
+ [2m276[0m |           <div className="max-w-7xl mx-auto space-y-6">
+ [2m277[0m |             {/* Botón Volver y Breadcrumbs */}
+ [2m278[0m |             <div className="flex items-center gap-4">
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./app/contratos/page.tsx
+
+./app/cupones/page.tsx
+Error: 
+  [31mx[0m Unexpected token `AuthenticatedLayout`. Expected jsx identifier
+     ,-[[36;1;4m/workspace/app/cupones/page.tsx[0m:308:1]
+ [2m308[0m |   const hasNoData = coupons.length === 0;
+ [2m309[0m | 
+ [2m310[0m |   return (
+ [2m311[0m |     <AuthenticatedLayout>
+     : [31;1m     ^^^^^^^^^^^^^^^^^^^[0m
+ [2m312[0m |           <div className="max-w-7xl mx-auto space-y-6">
+ [2m313[0m |             {/* Breadcrumb */}
+ [2m314[0m |             <Breadcrumb>
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./app/cupones/page.tsx
+
+./app/documentos/page.tsx
+Error: 
+  [31mx[0m Unexpected token `AuthenticatedLayout`. Expected jsx identifier
+     ,-[[36;1;4m/workspace/app/documentos/page.tsx[0m:313:1]
+ [2m313[0m |   if (!session) return null;
+ [2m314[0m | 
+ [2m315[0m |   return (
+ [2m316[0m |     <AuthenticatedLayout>
+     : [31;1m     ^^^^^^^^^^^^^^^^^^^[0m
+ [2m317[0m |           <div className="max-w-7xl mx-auto space-y-6">
+ [2m318[0m |             {/* Botón Volver y Breadcrumbs */}
+ [2m319[0m |             <div className="flex items-center gap-4">
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./app/documentos/page.tsx
+
+./app/edificios/page.tsx
+Error: 
+  [31mx[0m Unexpected token `AuthenticatedLayout`. Expected jsx identifier
+     ,-[[36;1;4m/workspace/app/edificios/page.tsx[0m:200:1]
+ [2m200[0m |   };
+ [2m201[0m | 
+ [2m202[0m |   return (
+ [2m203[0m |     <AuthenticatedLayout>
+     : [31;1m     ^^^^^^^^^^^^^^^^^^^[0m
+ [2m204[0m |           <div className="max-w-7xl mx-auto space-y-6">
+ [2m205[0m |             {/* Botón Volver y Breadcrumbs */}
+ [2m206[0m |             <div className="flex items-center gap-4">
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./app/edificios/page.tsx
+
+./app/flipping/dashboard/page.tsx
+Error: 
+  [31mx[0m Unexpected token `AuthenticatedLayout`. Expected jsx identifier
+     ,-[[36;1;4m/workspace/app/flipping/dashboard/page.tsx[0m:119:1]
+ [2m119[0m | 
+ [2m120[0m |   if (loading) {
+ [2m121[0m |     return (
+ [2m122[0m |       <AuthenticatedLayout>
+     : [31;1m       ^^^^^^^^^^^^^^^^^^^[0m
+ [2m123[0m |         
+ [2m124[0m |         
+ [2m125[0m |           
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./app/flipping/dashboard/page.tsx
+
+
+> Build failed because of webpack errors
