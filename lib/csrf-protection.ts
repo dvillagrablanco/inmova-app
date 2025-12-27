@@ -34,17 +34,17 @@ export function signCsrfToken(token: string): string {
  */
 export function verifyCsrfToken(token: string, signature: string): boolean {
   const expectedSignature = signCsrfToken(token);
-  
+
   // Comparación constante en tiempo para prevenir timing attacks
   if (signature.length !== expectedSignature.length) {
     return false;
   }
-  
+
   let result = 0;
   for (let i = 0; i < signature.length; i++) {
     result |= signature.charCodeAt(i) ^ expectedSignature.charCodeAt(i);
   }
-  
+
   return result === 0;
 }
 
@@ -62,7 +62,7 @@ export function getCsrfTokenFromRequest(request: NextRequest): string | null {
   // Primero intentar del header
   const headerToken = request.headers.get(CSRF_HEADER_NAME);
   if (headerToken) return headerToken;
-  
+
   // Fallback: intentar del body (para forms HTML tradicionales)
   // Nota: esto requiere parsear el body, que puede no estar disponible en middleware
   return null;
@@ -74,11 +74,11 @@ export function getCsrfTokenFromRequest(request: NextRequest): string | null {
 export function validateCsrfToken(request: NextRequest): boolean {
   const cookieToken = getCsrfTokenFromCookies(request);
   const requestToken = getCsrfTokenFromRequest(request);
-  
+
   if (!cookieToken || !requestToken) {
     return false;
   }
-  
+
   // Verificar que los tokens coinciden
   return cookieToken === requestToken;
 }
@@ -86,17 +86,15 @@ export function validateCsrfToken(request: NextRequest): boolean {
 /**
  * Middleware de protección CSRF
  */
-export async function csrfProtectionMiddleware(
-  request: NextRequest
-): Promise<NextResponse | null> {
+export async function csrfProtectionMiddleware(request: NextRequest): Promise<NextResponse | null> {
   const { pathname, method } = request.nextUrl;
-  
+
   // Solo aplicar CSRF protection en métodos que modifican estado
   const protectedMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];
   if (!protectedMethods.includes(method)) {
     return null; // No aplicar protección
   }
-  
+
   // Excluir rutas que no necesitan CSRF (webhooks, APIs públicas)
   const excludedPaths = [
     '/api/webhook',
@@ -104,11 +102,11 @@ export async function csrfProtectionMiddleware(
     '/api/health',
     '/api/auth/callback', // OAuth callbacks
   ];
-  
-  if (excludedPaths.some(path => pathname.startsWith(path))) {
+
+  if (excludedPaths.some((path) => pathname.startsWith(path))) {
     return null;
   }
-  
+
   // Validar token CSRF
   if (!validateCsrfToken(request)) {
     return NextResponse.json(
@@ -121,7 +119,7 @@ export async function csrfProtectionMiddleware(
       }
     );
   }
-  
+
   return null; // Token válido, continuar
 }
 
@@ -131,10 +129,10 @@ export async function csrfProtectionMiddleware(
 export function addCsrfTokenToResponse(response: NextResponse): NextResponse {
   // Generar nuevo token si no existe
   let token = response.cookies.get(CSRF_COOKIE_NAME)?.value;
-  
+
   if (!token) {
     token = generateCsrfToken();
-    
+
     // Agregar cookie con el token
     response.cookies.set(CSRF_COOKIE_NAME, token, {
       httpOnly: true,
@@ -143,11 +141,11 @@ export function addCsrfTokenToResponse(response: NextResponse): NextResponse {
       path: '/',
       maxAge: 60 * 60 * 24, // 24 horas
     });
-    
+
     // Agregar header para que el cliente pueda leerlo
     response.headers.set('X-CSRF-Token', token);
   }
-  
+
   return response;
 }
 
@@ -160,7 +158,7 @@ export async function withCsrfProtection(
 ): Promise<NextResponse> {
   // Validar CSRF token
   const protectedMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];
-  
+
   if (protectedMethods.includes(request.method)) {
     if (!validateCsrfToken(request)) {
       return NextResponse.json(
@@ -172,10 +170,10 @@ export async function withCsrfProtection(
       );
     }
   }
-  
+
   // Ejecutar handler
   const response = await handler();
-  
+
   // Agregar/renovar token CSRF en la respuesta
   return addCsrfTokenToResponse(response);
 }
@@ -186,13 +184,13 @@ export async function withCsrfProtection(
  */
 export function getCsrfToken(): string | null {
   if (typeof document === 'undefined') return null;
-  
+
   // Buscar en meta tag
   const metaTag = document.querySelector('meta[name="csrf-token"]');
   if (metaTag) {
     return metaTag.getAttribute('content');
   }
-  
+
   // Buscar en cookie
   const cookies = document.cookie.split(';');
   for (const cookie of cookies) {
@@ -201,31 +199,29 @@ export function getCsrfToken(): string | null {
       return decodeURIComponent(value);
     }
   }
-  
+
   return null;
 }
 
 /**
  * Componente React para incluir el token CSRF en el HTML
+ * TODO: Mover a un archivo .tsx
  */
-export function CsrfTokenMeta({ token }: { token: string }) {
+/* export function CsrfTokenMeta({ token }: { token: string }) {
   return <meta name="csrf-token" content={token} />;
-}
+} */
 
 /**
  * Fetch wrapper que incluye automáticamente el token CSRF
  */
-export async function csrfFetch(
-  url: string,
-  options: RequestInit = {}
-): Promise<Response> {
+export async function csrfFetch(url: string, options: RequestInit = {}): Promise<Response> {
   const token = getCsrfToken();
-  
+
   const headers = new Headers(options.headers);
   if (token) {
     headers.set(CSRF_HEADER_NAME, token);
   }
-  
+
   return fetch(url, {
     ...options,
     headers,
