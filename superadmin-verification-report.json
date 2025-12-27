@@ -1,0 +1,18 @@
+{
+  "timestamp": "2025-12-27T23:29:02.944Z",
+  "user": "superadmin@inmova.com",
+  "baseUrl": "https://workspace-inmova.vercel.app",
+  "summary": {
+    "total": 1,
+    "success": 0,
+    "errors": 1,
+    "warnings": 0
+  },
+  "results": [
+    {
+      "page": "Error Fatal",
+      "status": "error",
+      "message": "❌ Error fatal: locator.fill: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('input[type=\"password\"], input[name=\"password\"]').first()\n"
+    }
+  ]
+}
